@@ -141,7 +141,10 @@ export default function Home() {
                 </ul>
                 <div className="pt-4 space-y-2">
                   <Button className="w-full bg-orange-500 hover:bg-orange-600" asChild>
-                    <Link href="https://github.com/PerkOS-xyz/Spark">View Spark on GitHub</Link>
+                    <Link href="https://spark.perkos.xyz">Launch Spark App</Link>
+                  </Button>
+                  <Button variant="outline" className="w-full border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white" asChild>
+                    <Link href="https://github.com/PerkOS-xyz/Spark">View on GitHub</Link>
                   </Button>
                   <p className="text-xs text-center text-muted-foreground">
                     For community managers, creators, Web3 projects
@@ -192,7 +195,10 @@ export default function Home() {
                 </ul>
                 <div className="pt-4 space-y-2">
                   <Button className="w-full bg-blue-500 hover:bg-blue-600" asChild>
-                    <Link href="https://github.com/PerkOS-xyz/Stack">View Stack on GitHub</Link>
+                    <Link href="https://stack.perkos.xyz">Launch Stack App</Link>
+                  </Button>
+                  <Button variant="outline" className="w-full border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white" asChild>
+                    <Link href="https://github.com/PerkOS-xyz/Stack">View on GitHub</Link>
                   </Button>
                   <p className="text-xs text-center text-muted-foreground">
                     For developers, enterprises, blockchain startups
