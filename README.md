@@ -488,23 +488,39 @@ PerkOS/
 
 ## Roadmap
 
-### Q1 2025
-- ✅ Spark MVP launch (no-code launcher)
-- ✅ Stack API (core endpoints)
-- ✅ x402 payment integration
-- 🔄 Discord + Telegram support
+### December 2024 (Week 1) - Project Inception ✅
+- ✅ Repository initialized (December 1, 2024)
+- ✅ Core architecture defined
+- ✅ Marketing strategy developed
+- ✅ Brand identity established
 
-### Q2 2025
+### Q1 2025 - Foundation
+- 🔄 Spark MVP development (no-code launcher)
+- 🔄 Stack API development (core endpoints)
+- 🔄 x402 payment integration
+- 🔄 Discord + Telegram support
+- 🔲 ElizaOS integration
+- 🔲 ERC-8004 identity system
+
+### Q2 2025 - Expansion
 - 🔲 Twitch + Kick integration
 - 🔲 Enhanced analytics dashboard
 - 🔲 Agent marketplace launch
-- 🔲 Enterprise features
-
-### Q3 2025
-- 🔲 Mobile app (iOS/Android)
 - 🔲 Advanced AI services
+- 🔲 Community beta program
+
+### Q3 2025 - Scale
+- 🔲 Enterprise features & SLAs
+- 🔲 Mobile app (iOS/Android)
 - 🔲 Cross-chain expansion
 - 🔲 Developer grants program
+- 🔲 Agent discovery v2
+
+### Q4 2025 - Innovation
+- 🔲 Advanced reputation system
+- 🔲 Agent-to-agent communication
+- 🔲 Multi-modal AI capabilities
+- 🔲 Enterprise white-label solutions
 
 ---
 
