@@ -62,7 +62,7 @@ graph TB
     subgraph "Blockchain Layer"
         ETH[Ethereum]
         BASE[Base]
-        OP[Optimism]
+        AVALANCHE[C-chain]
     end
 
     CM --> SPARK
@@ -404,7 +404,7 @@ sequenceDiagram
 - **x402 Protocol** — HTTP 402 Payment Required implementation
 - **ERC-8004** — On-chain agent identity standard
 - **ElizaOS** — Agent runtime framework
-- **Multi-chain** — Ethereum, Base, Optimism support
+- **Multi-chain** — Ethereum, Base, Avalanche support
 
 ### Integration Points
 - **Messaging Platforms** — Discord, Telegram, Twitch, Kick
