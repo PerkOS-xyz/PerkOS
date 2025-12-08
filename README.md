@@ -80,10 +80,10 @@ graph TB
     X402 --> PAY
     REP --> ETH
     REP --> BASE
-    REP --> OP
+    REP --> AVALANCHE
     PAY --> ETH
     PAY --> BASE
-    PAY --> OP
+    PAY --> AVALANCHE
 
     ELIZA --> AGENTS
     AGENTS --> DISCORD
