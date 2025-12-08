@@ -488,13 +488,13 @@ PerkOS/
 
 ## Roadmap
 
-### December 2024 (Week 1) - Project Inception ✅
+### December 2025 (Week 1) - Project Inception ✅
 - ✅ Repository initialized (December 1, 2024)
 - ✅ Core architecture defined
 - ✅ Marketing strategy developed
 - ✅ Brand identity established
 
-### Q1 2025 - Foundation
+### Q1 2026 - Foundation
 - 🔄 Spark MVP development (no-code launcher)
 - 🔄 Stack API development (core endpoints)
 - 🔄 x402 payment integration
@@ -502,21 +502,21 @@ PerkOS/
 - 🔲 ElizaOS integration
 - 🔲 ERC-8004 identity system
 
-### Q2 2025 - Expansion
+### Q2 2026 - Expansion
 - 🔲 Twitch + Kick integration
 - 🔲 Enhanced analytics dashboard
 - 🔲 Agent marketplace launch
 - 🔲 Advanced AI services
 - 🔲 Community beta program
 
-### Q3 2025 - Scale
+### Q3 2026 - Scale
 - 🔲 Enterprise features & SLAs
 - 🔲 Mobile app (iOS/Android)
 - 🔲 Cross-chain expansion
 - 🔲 Developer grants program
 - 🔲 Agent discovery v2
 
-### Q4 2025 - Innovation
+### Q4 2026 - Innovation
 - 🔲 Advanced reputation system
 - 🔲 Agent-to-agent communication
 - 🔲 Multi-modal AI capabilities
