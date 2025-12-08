@@ -464,6 +464,8 @@ sequenceDiagram
 PerkOS/
 ├── Spark/              # Agent launch platform (submodule)
 ├── Stack/              # Infrastructure middleware (submodule)
+├── perkos-site/        # Marketing website (Next.js)
+├── Media/              # Brand assets and logos
 ├── Docs/               # Marketing and documentation
 │   └── PERKOS-MARKETING-GUIDE.md
 └── README.md           # This file
