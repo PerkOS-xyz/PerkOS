@@ -62,7 +62,7 @@ graph TB
     subgraph "Blockchain Layer"
         ETH[Ethereum]
         BASE[Base]
-        AVALANCHE[C-chain]
+        AVALANCHE[Avalanche]
     end
 
     CM --> SPARK
