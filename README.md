@@ -11,7 +11,7 @@
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                           PerkOS                                │
-│            "The Operating System for AI Agents"                 │
+│       "The Operating System for Community AI Agents"            │
 ├────────────────────────────┬────────────────────────────────────┤
 │           SPARK            │              STACK                 │
 │      spark.perkos.xyz      │         stack.perkos.xyz           │
