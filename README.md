@@ -12,17 +12,9 @@
 
 **PerkOS** is a complete infrastructure platform for the agentic economy, providing everything needed to launch, manage, and monetize AI agents across multiple platforms. Built on Web3-native technologies, PerkOS combines no-code simplicity with production-ready infrastructure.
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                           PerkOS                                │
-│       "The Operating System for Community AI Agents"            │
-├────────────────────────────┬────────────────────────────────────┤
-│           SPARK            │              STACK                 │
-│      spark.perkos.xyz      │         stack.perkos.xyz           │
-│  "Ignite your community"   │  "The infrastructure behind        │
-│                            │         the spark"                 │
-└────────────────────────────┴────────────────────────────────────┘
-```
+<p align="center">
+  <img src="Media/marketing.png" alt="PerkOS Platform Overview" style="max-height: 512px;" />
+</p>
 
 ---
 
