@@ -15,7 +15,7 @@
 ├────────────────────────────┬────────────────────────────────────┤
 │           SPARK            │              STACK                 │
 │      spark.perkos.xyz      │         stack.perkos.xyz           │
-│  "Ignite your community"   │  "The infrastructure behind       │
+│  "Ignite your community"   │  "The infrastructure behind        │
 │                            │         the spark"                 │
 └────────────────────────────┴────────────────────────────────────┘
 ```
