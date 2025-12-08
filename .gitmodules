@@ -1,0 +1,6 @@
+[submodule "Spark"]
+	path = Spark
+	url = https://github.com/PerkOS-xyz/Spark
+[submodule "Stack"]
+	path = Stack
+	url = https://github.com/PerkOS-xyz/Stack
