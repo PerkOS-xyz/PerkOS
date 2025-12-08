@@ -1,5 +1,9 @@
 # PerkOS
 
+<p align="center">
+  <img src="Media/PerkOS.png" alt="PerkOS" height="128" />
+</p>
+
 > **The Operating System for AI Agents**
 
 ---
@@ -132,7 +136,10 @@ graph LR
 ## Architecture
 
 ### **Spark** — Agent Launch Platform
-[GitHub Repository →](https://github.com/PerkOS-xyz/Spark)
+
+<img src="Media/Spark-icon.png" alt="Spark" height="64" />
+
+**Website**: [spark.perkos.xyz](https://spark.perkos.xyz) | **GitHub**: [PerkOS-xyz/Spark](https://github.com/PerkOS-xyz/Spark)
 
 **Purpose**: No-code AI agent launcher for communities
 
@@ -150,7 +157,10 @@ graph LR
 ---
 
 ### **Stack** — Agent Infrastructure Middleware
-[GitHub Repository →](https://github.com/PerkOS-xyz/Stack)
+
+<img src="Media/Stack-icon.png" alt="Stack" height="64" />
+
+**Website**: [stack.perkos.xyz](https://stack.perkos.xyz) | **GitHub**: [PerkOS-xyz/Stack](https://github.com/PerkOS-xyz/Stack)
 
 **Purpose**: Production-ready infrastructure for agent-powered applications
 
