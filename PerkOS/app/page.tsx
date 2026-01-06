@@ -522,29 +522,102 @@ export default function Home() {
                   />
                   <CardTitle className="text-2xl">Spark Pricing</CardTitle>
                 </div>
-                <CardDescription>Pay-per-use micropayments via x402</CardDescription>
+                <CardDescription>Credit-based AI agent platform</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Sentiment Analysis</span>
-                    <span className="font-mono">$0.001/call</span>
+                {/* Token Usage Costs */}
+                <div className="space-y-1.5 pb-3 border-b border-white/10">
+                  <p className="text-xs font-semibold text-perkos-pink uppercase tracking-wide mb-2">Token Usage (1 credit ≈ $0.001)</p>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Standard AI (GPT-4o-mini)</span>
+                    <span className="font-mono">5 credits</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Content Moderation</span>
-                    <span className="font-mono">$0.002/call</span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Advanced AI (GPT-4o/Claude)</span>
+                    <span className="font-mono">15 credits</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Image Generation</span>
-                    <span className="font-mono">$0.02/image</span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Premium AI (GPT-4/Opus)</span>
+                    <span className="font-mono">50 credits</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Analytics Report</span>
-                    <span className="font-mono">$0.10/report</span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Image Generation</span>
+                    <span className="font-mono">50 credits</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Memory Storage</span>
+                    <span className="font-mono">1 credit/MB/day</span>
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground pt-2">
-                  Fund your wallet with USDC. Set budgets. Stay in control.
+
+                {/* Monthly Tiers */}
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold text-perkos-orange uppercase tracking-wide mb-2">Monthly Plans</p>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <div className="font-semibold">Free</div>
+                      <div className="text-xs text-muted-foreground">1,000 credits • 1 connector</div>
+                    </div>
+                    <span className="font-mono font-bold">$0</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <div className="font-semibold">Starter</div>
+                      <div className="text-xs text-muted-foreground">15,000 credits • 2 connectors</div>
+                    </div>
+                    <span className="font-mono font-bold">$9</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <div className="font-semibold">Pro</div>
+                      <div className="text-xs text-muted-foreground">75,000 credits • all connectors</div>
+                    </div>
+                    <span className="font-mono font-bold">$29</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <div className="font-semibold">Scale</div>
+                      <div className="text-xs text-muted-foreground">300,000 credits • priority support</div>
+                    </div>
+                    <span className="font-mono font-bold">$99</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <div className="font-semibold">Enterprise</div>
+                      <div className="text-xs text-muted-foreground">Unlimited • SLA • dedicated support</div>
+                    </div>
+                    <span className="font-mono font-bold">Custom</span>
+                  </div>
+                </div>
+
+                {/* Connector Add-ons */}
+                <div className="space-y-1.5 pt-2 border-t border-white/10">
+                  <p className="text-xs font-semibold text-perkos-peach uppercase tracking-wide mb-2">Connector Add-ons</p>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Discord</span>
+                      <span className="font-mono">$5/mo</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Telegram</span>
+                      <span className="font-mono">$5/mo</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">X (Twitter)</span>
+                      <span className="font-mono">$10/mo</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Farcaster</span>
+                      <span className="font-mono">$5/mo</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground pt-1">
+                    Pro & Scale include all connectors
+                  </p>
+                </div>
+
+                <p className="text-xs text-muted-foreground pt-2 border-t border-white/10">
+                  Pay with USDC • Buy extra credits anytime • ~75% gross margin
                 </p>
               </CardContent>
             </Card>
@@ -569,34 +642,41 @@ export default function Home() {
                   <div className="flex justify-between items-center">
                     <div>
                       <div className="font-semibold">Free</div>
-                      <div className="text-sm text-muted-foreground">10,000 calls/month</div>
+                      <div className="text-sm text-muted-foreground">1,000 calls/month</div>
                     </div>
                     <span className="font-mono font-bold">$0</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <div>
+                      <div className="font-semibold">Starter</div>
+                      <div className="text-sm text-muted-foreground">50,000 calls/month</div>
+                    </div>
+                    <span className="font-mono font-bold">$5</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div>
                       <div className="font-semibold">Pro</div>
-                      <div className="text-sm text-muted-foreground">100,000 calls/month</div>
+                      <div className="text-sm text-muted-foreground">500,000 calls/month</div>
                     </div>
                     <span className="font-mono font-bold">$49</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <div>
                       <div className="font-semibold">Scale</div>
-                      <div className="text-sm text-muted-foreground">1M calls/month</div>
+                      <div className="text-sm text-muted-foreground">5M calls/month</div>
                     </div>
                     <span className="font-mono font-bold">$299</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <div>
                       <div className="font-semibold">Enterprise</div>
-                      <div className="text-sm text-muted-foreground">Unlimited + SLA</div>
+                      <div className="text-sm text-muted-foreground">10M+ calls + SLA</div>
                     </div>
                     <span className="font-mono font-bold">Custom</span>
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground pt-2">
-                  x402 services billed separately at published rates
+                  L2 transaction fees paid by users • ~80% gross margin
                 </p>
               </CardContent>
             </Card>
