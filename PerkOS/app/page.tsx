@@ -541,10 +541,6 @@ export default function Home() {
                     <span className="font-mono">50 credits</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Image Generation</span>
-                    <span className="font-mono">50 credits</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Memory Storage</span>
                     <span className="font-mono">1 credit/MB/day</span>
                   </div>
@@ -635,47 +631,71 @@ export default function Home() {
                   />
                   <CardTitle className="text-2xl">Stack Pricing</CardTitle>
                 </div>
-                <CardDescription>API usage tiers for developers</CardDescription>
+                <CardDescription>x402 Facilitator API for developers</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* API Endpoints */}
+                <div className="space-y-1.5 pb-3 border-b border-white/10">
+                  <p className="text-xs font-semibold text-perkos-purple uppercase tracking-wide mb-2">API Endpoints Included</p>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Payment Verify</span>
+                    <span className="font-mono text-xs">/v2/x402/verify</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Payment Settle</span>
+                    <span className="font-mono text-xs">/v2/x402/settle</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Dynamic Pricing</span>
+                    <span className="font-mono text-xs">/v2/pricing/*</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Agent Registry</span>
+                    <span className="font-mono text-xs">/v2/agents/*</span>
+                  </div>
+                </div>
+
+                {/* Monthly Tiers */}
                 <div className="space-y-2">
+                  <p className="text-xs font-semibold text-perkos-coral uppercase tracking-wide mb-2">Monthly Plans</p>
                   <div className="flex justify-between items-center">
                     <div>
                       <div className="font-semibold">Free</div>
-                      <div className="text-sm text-muted-foreground">1,000 calls/month</div>
+                      <div className="text-xs text-muted-foreground">1,000 calls • 1 network</div>
                     </div>
                     <span className="font-mono font-bold">$0</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <div>
                       <div className="font-semibold">Starter</div>
-                      <div className="text-sm text-muted-foreground">50,000 calls/month</div>
+                      <div className="text-xs text-muted-foreground">50,000 calls • 3 networks</div>
                     </div>
                     <span className="font-mono font-bold">$5</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <div>
                       <div className="font-semibold">Pro</div>
-                      <div className="text-sm text-muted-foreground">500,000 calls/month</div>
+                      <div className="text-xs text-muted-foreground">500,000 calls • all networks</div>
                     </div>
                     <span className="font-mono font-bold">$49</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <div>
                       <div className="font-semibold">Scale</div>
-                      <div className="text-sm text-muted-foreground">5M calls/month</div>
+                      <div className="text-xs text-muted-foreground">5M calls • priority routing</div>
                     </div>
                     <span className="font-mono font-bold">$299</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <div>
                       <div className="font-semibold">Enterprise</div>
-                      <div className="text-sm text-muted-foreground">10M+ calls + SLA</div>
+                      <div className="text-xs text-muted-foreground">Unlimited • SLA • dedicated infra</div>
                     </div>
                     <span className="font-mono font-bold">Custom</span>
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground pt-2">
+
+                <p className="text-xs text-muted-foreground pt-2 border-t border-white/10">
                   L2 transaction fees paid by users • ~80% gross margin
                 </p>
               </CardContent>
@@ -731,13 +751,13 @@ export default function Home() {
 
               <div className="flex gap-4 pt-4">
                 <Button variant="outline" size="sm" asChild>
-                  <Link href="https://twitter.com/PerkOS_xyz">Twitter</Link>
+                  <Link href="https://x.com/perk_os">X</Link>
+                </Button>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="https://farcaster.xyz/perkos">Farcaster</Link>
                 </Button>
                 <Button variant="outline" size="sm" asChild>
                   <Link href="https://github.com/PerkOS-xyz">GitHub</Link>
-                </Button>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="#">Discord</Link>
                 </Button>
               </div>
             </div>
@@ -849,13 +869,18 @@ export default function Home() {
               <h3 className="font-semibold mb-4">Community</h3>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <Link href="#" className="text-muted-foreground hover:text-foreground">
-                    Discord
+                  <Link href="https://x.com/perk_os" className="text-muted-foreground hover:text-foreground">
+                    X (Twitter)
                   </Link>
                 </li>
                 <li>
-                  <Link href="https://twitter.com/PerkOS_xyz" className="text-muted-foreground hover:text-foreground">
-                    Twitter
+                  <Link href="https://farcaster.xyz/perkos" className="text-muted-foreground hover:text-foreground">
+                    Farcaster
+                  </Link>
+                </li>
+                <li>
+                  <Link href="https://github.com/PerkOS-xyz" className="text-muted-foreground hover:text-foreground">
+                    GitHub
                   </Link>
                 </li>
               </ul>
@@ -871,11 +896,6 @@ export default function Home() {
                 <li>
                   <Link href="mailto:contact@perkos.xyz" className="text-muted-foreground hover:text-foreground">
                     contact@perkos.xyz
-                  </Link>
-                </li>
-                <li>
-                  <Link href="mailto:partner@perkos.xyz" className="text-muted-foreground hover:text-foreground">
-                    partner@perkos.xyz
                   </Link>
                 </li>
               </ul>
