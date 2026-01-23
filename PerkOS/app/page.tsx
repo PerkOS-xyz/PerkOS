@@ -5,11 +5,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ContactForm } from "@/components/contact-form";
 import { CHAIN_DATA } from "@/components/chain-icons";
 import { ContributorsCarousel, Contributor } from "@/components/contributors-carousel";
+import { Header } from "@/components/header";
 
 async function getContributors(): Promise<Contributor[]> {
   try {
     const response = await fetch("https://stack.perkos.xyz/api/contributors", {
-      next: { revalidate: 3600 }, // Revalidate every hour
+      cache: "no-store", // Always fetch fresh data
     });
     if (!response.ok) return [];
     const data = await response.json();
@@ -24,45 +25,7 @@ export default async function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
-      <header className="border-b sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto max-w-7xl flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2">
-            <Image
-              src="/images/PerkOS-icon.png"
-              alt="PerkOS"
-              width={40}
-              height={40}
-              className="rounded-lg"
-            />
-            <span className="text-lg sm:text-xl font-bold">PerkOS</span>
-          </div>
-          <nav className="hidden md:flex gap-4 lg:gap-6">
-            <Link href="#spark" className="text-sm font-medium hover:underline transition-colors">
-              Spark
-            </Link>
-            <Link href="#stack" className="text-sm font-medium hover:underline transition-colors">
-              Stack
-            </Link>
-            <Link href="#features" className="text-sm font-medium hover:underline transition-colors">
-              Features
-            </Link>
-            <Link href="#pricing" className="text-sm font-medium hover:underline transition-colors">
-              Pricing
-            </Link>
-            <Link href="#contact" className="text-sm font-medium hover:underline transition-colors">
-              Contact
-            </Link>
-          </nav>
-          <div className="flex gap-2">
-            <Button variant="ghost" size="sm" className="hidden sm:inline-flex" asChild>
-              <Link href="https://github.com/PerkOS-xyz/PerkOS">GitHub</Link>
-            </Button>
-            <Button size="sm" asChild>
-              <Link href="#get-started">Get Started</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className="py-12 sm:py-20 md:py-32 bg-gradient-to-b from-background to-muted">

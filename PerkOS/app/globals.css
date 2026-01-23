@@ -323,3 +323,35 @@ html {
 .contributor-card:hover {
   filter: drop-shadow(0 0 30px rgba(235, 27, 105, 0.15));
 }
+
+/* Header gradient animation */
+@keyframes gradient-x {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: gradient-x 8s ease infinite;
+}
+
+/* Header nav item entrance animation */
+@keyframes nav-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.nav-item {
+  animation: nav-fade-in 0.5s ease forwards;
+}

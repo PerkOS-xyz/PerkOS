@@ -15,7 +15,7 @@ export interface Contributor {
   description: string | null;
   link: string;
   avatarUrl: string;
-  socials: Social[];
+  socialLinks: Social[];
   walletAddress: string;
   displayAddress: string;
   hasSponsorWallet: boolean;
@@ -168,7 +168,7 @@ const ContributorCard = ({ contributor }: { contributor: Contributor }) => {
 
           {/* Social links */}
           <div className="mt-4 flex justify-center gap-2">
-            {contributor.socials.slice(0, 4).map((social, idx) => (
+            {contributor.socialLinks.slice(0, 4).map((social, idx) => (
               <Link
                 key={idx}
                 href={social.url}
