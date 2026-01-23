@@ -92,6 +92,12 @@ const ContributorCard = ({ contributor }: { contributor: Contributor }) => {
           boxShadow: `0 0 20px ${colors.glow}, inset 0 0 60px rgba(255,255,255,0.03)`,
         }}
       >
+        {/* Background image with 92% transparency (8% visible) */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-[0.08] pointer-events-none"
+          style={{ backgroundImage: 'url(/card-background.png)' }}
+        />
+
         {/* Holographic shine effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
         <div className="absolute inset-0 holographic-shine opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
