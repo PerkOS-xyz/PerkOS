@@ -17,9 +17,14 @@
   --perkos-darker: #1B1833;
   --perkos-darkest: #0E0716;
 
+  /* Aura Brand Color */
+  --perkos-cyan: #06B6D4;
+  --perkos-teal: #14B8A6;
+
   /* Gradient */
   --perkos-gradient: linear-gradient(135deg, #FD8F50 0%, #EB1B69 100%);
   --perkos-gradient-reverse: linear-gradient(135deg, #EB1B69 0%, #FD8F50 100%);
+  --perkos-gradient-aura: linear-gradient(135deg, #06B6D4 0%, #14B8A6 100%);
 }
 
 @theme inline {
@@ -68,6 +73,8 @@
   --color-perkos-peach: var(--perkos-peach);
   --color-perkos-purple: var(--perkos-purple);
   --color-perkos-magenta: var(--perkos-magenta);
+  --color-perkos-cyan: var(--perkos-cyan);
+  --color-perkos-teal: var(--perkos-teal);
 }
 
 /* Dark theme as default (like thirdweb) */
@@ -160,6 +167,52 @@
 
 .glow-orange {
   box-shadow: 0 0 40px rgba(253, 143, 80, 0.3);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 40px rgba(6, 182, 212, 0.3);
+}
+
+.glow-purple {
+  box-shadow: 0 0 40px rgba(118, 67, 123, 0.3);
+}
+
+/* Aura gradient background */
+.bg-perkos-gradient-aura {
+  background: var(--perkos-gradient-aura);
+}
+
+/* Product card specific hover states */
+.product-card-spark:hover {
+  border-color: var(--perkos-pink) !important;
+  box-shadow: 0 0 40px rgba(235, 27, 105, 0.2), 0 0 80px rgba(235, 27, 105, 0.1);
+}
+
+.product-card-aura:hover {
+  border-color: var(--perkos-cyan) !important;
+  box-shadow: 0 0 40px rgba(6, 182, 212, 0.2), 0 0 80px rgba(6, 182, 212, 0.1);
+}
+
+.product-card-stack:hover {
+  border-color: var(--perkos-purple) !important;
+  box-shadow: 0 0 40px rgba(118, 67, 123, 0.2), 0 0 80px rgba(118, 67, 123, 0.1);
+}
+
+/* Ecosystem connection lines */
+.ecosystem-line {
+  position: absolute;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  height: 1px;
+}
+
+/* Product badge */
+.product-badge {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-weight: 600;
 }
 
 /* Card hover effects */
