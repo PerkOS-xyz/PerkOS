@@ -17,17 +17,29 @@ export const metadata: Metadata = {
   description: "Build, deploy, and monetize AI agents across multiple platforms. Web3-native infrastructure with x402 payments, ERC-8004 identity, and agent discovery. Spark ignites. Stack powers.",
   keywords: ["AI agents", "Web3", "x402", "ERC-8004", "agent infrastructure", "Discord bot", "Telegram bot", "micropayments"],
   authors: [{ name: "PerkOS" }],
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.ico",
+  },
+  metadataBase: new URL("https://perkos.xyz"),
+  robots: {
+    index: true,
+    follow: true,
+  },
   openGraph: {
     title: "PerkOS - The Operating System for AI Agents",
     description: "Spark ignites. Stack powers. The complete infrastructure for the agentic economy.",
     type: "website",
     url: "https://perkos.xyz",
+    siteName: "PerkOS",
   },
   twitter: {
     card: "summary_large_image",
     title: "PerkOS - The Operating System for AI Agents",
     description: "Build, deploy, and monetize AI agents with Spark and Stack",
     creator: "@PerkOS_xyz",
+    site: "@PerkOS_xyz",
   },
 };
 
