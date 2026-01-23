@@ -70,6 +70,15 @@ export function AvalancheIcon({ className = "w-10 h-10" }: { className?: string 
   );
 }
 
+export function UnichainIcon({ className = "w-10 h-10" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 105 105" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="105" height="105" rx="20" fill="#F50DB4"/>
+      <path d="M93.9991 51.7099C71.5049 51.7099 53.2892 33.4758 53.2892 11H51.71V51.7099H11V53.2891C33.4942 53.2891 51.71 71.5232 51.71 93.9991H53.2892V53.2891H93.9991V51.7099Z" fill="white"/>
+    </svg>
+  );
+}
+
 // Chain data with icons
 export const CHAIN_DATA = [
   { name: "Ethereum", Icon: EthereumIcon, color: "#627EEA" },
@@ -79,4 +88,5 @@ export const CHAIN_DATA = [
   { name: "Polygon", Icon: PolygonIcon, color: "#8247E5" },
   { name: "Celo", Icon: CeloIcon, color: "#FCFF52" },
   { name: "Avalanche", Icon: AvalancheIcon, color: "#E84142" },
+  { name: "Unichain", Icon: UnichainIcon, color: "#F50DB4" },
 ] as const;
