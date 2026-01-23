@@ -151,122 +151,265 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Two Product Showcase */}
-      <section className="py-12 sm:py-16 md:py-20 border-t">
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 px-4">
-              Spark ignites. Stack powers.
+      {/* Product Ecosystem Showcase */}
+      <section className="py-16 sm:py-20 md:py-28 border-t relative overflow-hidden">
+        {/* Ambient background effects */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-perkos-purple/8 rounded-full blur-3xl" />
+          <div className="absolute top-1/2 right-1/4 w-96 h-96 bg-perkos-pink/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/3 w-96 h-96 bg-perkos-cyan/5 rounded-full blur-3xl" />
+        </div>
+
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Section Header */}
+          <div className="text-center mb-16 sm:mb-20">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 mb-6">
+              <span className="w-2 h-2 rounded-full bg-perkos-purple animate-pulse" />
+              <span className="text-xs font-medium tracking-wider uppercase text-white/70">The PerkOS Ecosystem</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 px-4 tracking-tight">
+              <span className="text-perkos-purple">Stack</span> powers. <span className="text-perkos-orange">Spark</span> ignites. <span className="text-perkos-cyan">Aura</span> serves.
             </h2>
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
-              Two products working together to power the agentic economy
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
+              One infrastructure. Endless possibilities. Built for the agentic economy.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-6xl mx-auto">
-            {/* Spark Card */}
-            <Card className="relative overflow-hidden border-2 hover:border-perkos-pink transition-colors card-hover" id="spark">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-perkos-pink/20 to-transparent rounded-bl-full" />
-              <CardHeader>
-                <div className="flex items-center gap-3 mb-4">
-                  <Image
-                    src="/images/Spark-icon.png"
-                    alt="Spark"
-                    width={60}
-                    height={60}
-                    className="rounded-lg"
-                  />
-                  <div>
-                    <CardTitle className="text-2xl">Spark</CardTitle>
-                    <CardDescription className="text-base">No-code AI agent launcher</CardDescription>
+          {/* Products Grid - Stack First Layout */}
+          <div className="max-w-6xl mx-auto">
+            {/* Hero Row - Stack (Main Infrastructure Product) */}
+            <Card className="relative overflow-hidden border-2 border-perkos-purple/30 bg-gradient-to-br from-perkos-purple/[0.08] via-white/[0.02] to-transparent backdrop-blur-sm transition-all duration-500 product-card-stack group mb-6 sm:mb-8" id="stack">
+              {/* Enhanced decorative elements for hero status */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-perkos-purple/50 to-transparent" />
+              <div className="absolute top-0 left-1/4 w-48 h-48 bg-gradient-to-br from-perkos-purple/20 to-transparent rounded-full blur-2xl" />
+              <div className="absolute top-0 right-1/4 w-48 h-48 bg-gradient-to-bl from-perkos-magenta/15 to-transparent rounded-full blur-2xl" />
+              <div className="absolute bottom-0 left-0 w-40 h-40 bg-gradient-to-tr from-perkos-purple/10 to-transparent rounded-tr-full" />
+              <div className="absolute bottom-0 right-0 w-40 h-40 bg-gradient-to-tl from-perkos-magenta/10 to-transparent rounded-tl-full" />
+
+              <CardHeader className="pb-4">
+                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-2">
+                  <div className="flex items-center gap-5">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-perkos-purple/40 rounded-2xl blur-2xl group-hover:blur-3xl transition-all scale-150" />
+                      <Image
+                        src="/images/Stack-icon.png"
+                        alt="Stack"
+                        width={72}
+                        height={72}
+                        className="rounded-2xl relative z-10"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-3 mb-1">
+                        <CardTitle className="text-3xl sm:text-4xl font-bold tracking-tight">Stack</CardTitle>
+                        <span className="product-badge bg-perkos-purple/20 text-perkos-purple border border-perkos-purple/30">Core Infrastructure</span>
+                      </div>
+                      <CardDescription className="text-base text-perkos-purple font-medium">The x402 facilitator powering the agentic economy</CardDescription>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="product-badge bg-white/5 text-white/70 border border-white/10">10 npm packages</span>
+                    <span className="product-badge bg-white/5 text-white/70 border border-white/10">7 networks</span>
+                    <span className="product-badge bg-white/5 text-white/70 border border-white/10">Production-ready</span>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  Launch intelligent AI agents with personality in minutes. No coding required.
-                  Perfect for community managers, creators, and Web3 projects.
+
+              <CardContent className="space-y-6">
+                <p className="text-muted-foreground leading-relaxed max-w-4xl">
+                  Complete infrastructure for agent-powered applications. Stack provides the x402 facilitator, payment verification,
+                  settlement services, and agent registry that powers Spark, Aura, and your applications. Multi-chain by default.
                 </p>
-                <ul className="space-y-2">
-                  <li className="flex items-start gap-2">
-                    <span className="text-perkos-orange">⚡</span>
-                    <span>5-minute setup, deploy across platforms instantly</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-perkos-orange">🎨</span>
-                    <span>Visual character & personality editor</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-perkos-orange">🔌</span>
-                    <span>Discord, Telegram, Twitch, Kick support</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-perkos-orange">💰</span>
-                    <span>Built-in x402 micropayments — pay only for what you use</span>
-                  </li>
-                </ul>
-                <div className="pt-4 space-y-2">
-                  <Button className="w-full bg-perkos-gradient hover:opacity-90" asChild>
-                    <Link href="https://spark.perkos.xyz">Launch Spark App</Link>
+
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 py-2">
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.02] border border-white/5">
+                    <span className="text-perkos-purple text-xl">🔌</span>
+                    <div>
+                      <div className="font-medium text-sm text-white/90">REST API</div>
+                      <div className="text-xs text-white/50">Agent management</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.02] border border-white/5">
+                    <span className="text-perkos-purple text-xl">💳</span>
+                    <div>
+                      <div className="font-medium text-sm text-white/90">x402 Facilitator</div>
+                      <div className="text-xs text-white/50">Instant micropayments</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.02] border border-white/5">
+                    <span className="text-perkos-purple text-xl">🔍</span>
+                    <div>
+                      <div className="font-medium text-sm text-white/90">Discovery</div>
+                      <div className="text-xs text-white/50">Agent registry</div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.02] border border-white/5">
+                    <span className="text-perkos-purple text-xl">🆔</span>
+                    <div>
+                      <div className="font-medium text-sm text-white/90">ERC-8004</div>
+                      <div className="text-xs text-white/50">On-chain identity</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-2 flex flex-col sm:flex-row gap-3">
+                  <Button className="flex-1 bg-perkos-purple hover:bg-perkos-magenta font-semibold h-11" asChild>
+                    <Link href="https://stack.perkos.xyz">Launch Stack App</Link>
                   </Button>
-                  <Button variant="outline" className="w-full border-perkos-pink text-perkos-pink hover:bg-perkos-pink hover:text-white" asChild>
-                    <Link href="https://github.com/PerkOS-xyz/Spark">View on GitHub</Link>
+                  <Button variant="outline" className="flex-1 border-perkos-purple/50 text-perkos-purple hover:bg-perkos-purple hover:text-white h-11" asChild>
+                    <Link href="https://github.com/PerkOS-xyz/Stack">View on GitHub</Link>
+                  </Button>
+                  <Button variant="outline" className="flex-1 border-white/20 text-white/70 hover:bg-white/10 hover:text-white h-11" asChild>
+                    <Link href="https://www.npmjs.com/org/perkos">npm Packages</Link>
                   </Button>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Stack Card */}
-            <Card className="relative overflow-hidden border-2 hover:border-perkos-purple transition-colors card-hover" id="stack">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-perkos-purple/20 to-transparent rounded-bl-full" />
-              <CardHeader>
-                <div className="flex items-center gap-3 mb-4">
-                  <Image
-                    src="/images/Stack-icon.png"
-                    alt="Stack"
-                    width={60}
-                    height={60}
-                    className="rounded-lg"
-                  />
-                  <div>
-                    <CardTitle className="text-2xl">Stack</CardTitle>
-                    <CardDescription className="text-base">Production middleware for developers</CardDescription>
+            {/* Connection indicator */}
+            <div className="hidden lg:flex justify-center items-center py-4 relative">
+              <div className="flex items-center gap-4">
+                <div className="h-px w-32 bg-gradient-to-r from-transparent via-perkos-purple/40 to-perkos-pink/30" />
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-perkos-purple/10 border border-perkos-purple/20">
+                  <svg className="w-4 h-4 text-perkos-purple" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" /></svg>
+                  <span className="text-xs font-medium text-perkos-purple/80">Powers</span>
+                </div>
+                <div className="h-px w-32 bg-gradient-to-r from-perkos-cyan/30 via-perkos-purple/40 to-transparent" />
+              </div>
+            </div>
+
+            {/* Bottom Row - Spark and Aura (Built on Stack) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+              {/* Spark Card */}
+              <Card className="relative overflow-hidden border border-white/10 bg-gradient-to-br from-white/[0.03] to-transparent backdrop-blur-sm transition-all duration-500 product-card-spark group" id="spark">
+                <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-perkos-pink/20 via-perkos-coral/10 to-transparent rounded-bl-[100px] transition-all duration-500 group-hover:w-48 group-hover:h-48" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-perkos-orange/10 to-transparent rounded-tr-full" />
+
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-perkos-pink/30 rounded-xl blur-xl group-hover:blur-2xl transition-all" />
+                        <Image
+                          src="/images/Spark-icon.png"
+                          alt="Spark"
+                          width={56}
+                          height={56}
+                          className="rounded-xl relative z-10"
+                        />
+                      </div>
+                      <div>
+                        <CardTitle className="text-2xl font-bold tracking-tight">Spark</CardTitle>
+                        <CardDescription className="text-sm text-perkos-orange font-medium">No-code AI agent launcher</CardDescription>
+                      </div>
+                    </div>
+                    <span className="product-badge bg-perkos-pink/20 text-perkos-pink border border-perkos-pink/30">For Creators</span>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  Complete infrastructure for agent-powered applications. 10 npm packages,
-                  7 networks, production-ready APIs.
-                </p>
-                <ul className="space-y-2">
-                  <li className="flex items-start gap-2">
-                    <span className="text-perkos-purple">🔌</span>
-                    <span>Complete REST API for agent management</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-perkos-purple">💳</span>
-                    <span>x402 Facilitator for instant micropayments</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-perkos-purple">🔍</span>
-                    <span>Discovery service & agent registry</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-perkos-purple">🆔</span>
-                    <span>ERC-8004 on-chain identity & reputation</span>
-                  </li>
-                </ul>
-                <div className="pt-4 space-y-2">
-                  <Button className="w-full bg-perkos-purple hover:bg-perkos-magenta" asChild>
-                    <Link href="https://stack.perkos.xyz">Launch Stack App</Link>
-                  </Button>
-                  <Button variant="outline" className="w-full border-perkos-purple text-perkos-purple hover:bg-perkos-purple hover:text-white" asChild>
-                    <Link href="https://github.com/PerkOS-xyz/Stack">View on GitHub</Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                </CardHeader>
+
+                <CardContent className="space-y-5">
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    Launch intelligent AI agents with personality in minutes. No coding required.
+                    Perfect for community managers, creators, and Web3 projects.
+                  </p>
+
+                  <ul className="space-y-2.5">
+                    <li className="flex items-start gap-3 text-sm">
+                      <span className="text-perkos-orange text-base">⚡</span>
+                      <span className="text-white/80">5-minute setup, deploy across platforms instantly</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-sm">
+                      <span className="text-perkos-orange text-base">🎨</span>
+                      <span className="text-white/80">Visual character & personality editor</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-sm">
+                      <span className="text-perkos-orange text-base">🔌</span>
+                      <span className="text-white/80">Discord, Telegram, Twitch, Kick support</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-sm">
+                      <span className="text-perkos-orange text-base">💰</span>
+                      <span className="text-white/80">Built-in x402 micropayments</span>
+                    </li>
+                  </ul>
+
+                  <div className="pt-3 flex gap-3">
+                    <Button className="flex-1 bg-perkos-gradient hover:opacity-90 font-semibold" asChild>
+                      <Link href="https://spark.perkos.xyz">Launch Spark</Link>
+                    </Button>
+                    <Button variant="outline" size="icon" className="border-perkos-pink/50 text-perkos-pink hover:bg-perkos-pink hover:text-white" asChild>
+                      <Link href="https://github.com/PerkOS-xyz/Spark">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Aura Card */}
+              <Card className="relative overflow-hidden border border-white/10 bg-gradient-to-br from-white/[0.03] to-transparent backdrop-blur-sm transition-all duration-500 product-card-aura group" id="aura">
+                <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-perkos-cyan/20 via-perkos-teal/10 to-transparent rounded-bl-[100px] transition-all duration-500 group-hover:w-48 group-hover:h-48" />
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-perkos-cyan/10 to-transparent rounded-tr-full" />
+
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-perkos-cyan/30 rounded-xl blur-xl group-hover:blur-2xl transition-all" />
+                        <Image
+                          src="/images/Aura-icon.png"
+                          alt="Aura"
+                          width={56}
+                          height={56}
+                          className="rounded-xl relative z-10"
+                        />
+                      </div>
+                      <div>
+                        <CardTitle className="text-2xl font-bold tracking-tight">Aura</CardTitle>
+                        <CardDescription className="text-sm text-perkos-cyan font-medium">AI Vendor Service with x402</CardDescription>
+                      </div>
+                    </div>
+                    <span className="product-badge bg-perkos-cyan/20 text-perkos-cyan border border-perkos-cyan/30">20 APIs</span>
+                  </div>
+                </CardHeader>
+
+                <CardContent className="space-y-5">
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    20 AI endpoints for vision, NLP, business tools, and developer utilities.
+                    Powered by GPT-4o, DALL-E 3, and Whisper with instant micropayments.
+                  </p>
+
+                  <ul className="space-y-2.5">
+                    <li className="flex items-start gap-3 text-sm">
+                      <span className="text-perkos-cyan text-base">🖼️</span>
+                      <span className="text-white/80">Vision: Image analysis, generation, OCR</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-sm">
+                      <span className="text-perkos-cyan text-base">🌐</span>
+                      <span className="text-white/80">NLP: Translation, summarization, sentiment</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-sm">
+                      <span className="text-perkos-cyan text-base">💻</span>
+                      <span className="text-white/80">Developer: Code generation, review, SQL</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-sm">
+                      <span className="text-perkos-cyan text-base">💳</span>
+                      <span className="text-white/80">x402 v2 micropayments — pay per API call</span>
+                    </li>
+                  </ul>
+
+                  <div className="pt-3 flex gap-3">
+                    <Button className="flex-1 bg-perkos-gradient-aura hover:opacity-90 font-semibold text-white" asChild>
+                      <Link href="https://aura.perkos.xyz">Try Aura API</Link>
+                    </Button>
+                    <Button variant="outline" size="icon" className="border-perkos-cyan/50 text-perkos-cyan hover:bg-perkos-cyan hover:text-white" asChild>
+                      <Link href="https://github.com/PerkOS-xyz/PerkOS-Aura">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </section>
