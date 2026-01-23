@@ -4,8 +4,23 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ContactForm } from "@/components/contact-form";
 import { CHAIN_DATA } from "@/components/chain-icons";
+import { ContributorsCarousel, Contributor } from "@/components/contributors-carousel";
 
-export default function Home() {
+async function getContributors(): Promise<Contributor[]> {
+  try {
+    const response = await fetch("https://stack.perkos.xyz/api/contributors", {
+      next: { revalidate: 3600 }, // Revalidate every hour
+    });
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.contributors || [];
+  } catch {
+    return [];
+  }
+}
+
+export default async function Home() {
+  const contributors = await getContributors();
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
@@ -413,6 +428,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Contributors Carousel */}
+      <ContributorsCarousel contributors={contributors} />
 
       {/* How It Works Section */}
       <section className="py-12 sm:py-16 md:py-20 border-t bg-muted/50">

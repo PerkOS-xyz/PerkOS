@@ -271,3 +271,55 @@ html {
     transparent
   );
 }
+
+/* Slower marquee for contributor cards */
+@keyframes marquee-slow {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee-slow {
+  animation: marquee-slow 60s linear infinite;
+}
+
+.animate-marquee-slow:hover {
+  animation-play-state: paused;
+}
+
+/* Contributor card holographic effect */
+.holographic-shine {
+  background: linear-gradient(
+    125deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(235, 27, 105, 0.1) 35%,
+    rgba(6, 182, 212, 0.1) 45%,
+    rgba(118, 67, 123, 0.1) 55%,
+    rgba(253, 143, 80, 0.1) 65%,
+    rgba(255, 255, 255, 0.05) 75%,
+    transparent 100%
+  );
+  background-size: 400% 400%;
+  animation: holographic-move 8s ease infinite;
+}
+
+@keyframes holographic-move {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Contributor card hover glow */
+.contributor-card:hover {
+  filter: drop-shadow(0 0 30px rgba(235, 27, 105, 0.15));
+}
