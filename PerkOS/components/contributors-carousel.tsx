@@ -218,8 +218,8 @@ export function ContributorsCarousel({ contributors }: ContributorsCarouselProps
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-perkos-cyan/5 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative z-10">
-        <div className="text-center mb-10 px-4">
+      <div className="relative z-10 container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 mb-4">
             <span className="w-2 h-2 rounded-full bg-perkos-pink animate-pulse" />
             <span className="text-xs font-medium tracking-wider uppercase text-white/70">Contributors</span>
