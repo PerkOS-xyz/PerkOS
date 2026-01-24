@@ -109,6 +109,9 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* Contributors Carousel */}
+      <ContributorsCarousel contributors={contributors} />
+
       {/* Value Props Section */}
       <section className="py-12 sm:py-16 border-t bg-muted/50">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -391,9 +394,6 @@ export default async function Home() {
           </div>
         </div>
       </section>
-
-      {/* Contributors Carousel */}
-      <ContributorsCarousel contributors={contributors} />
 
       {/* How It Works Section */}
       <section className="py-12 sm:py-16 md:py-20 border-t bg-muted/50">
