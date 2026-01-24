@@ -286,7 +286,10 @@ export default async function Home() {
                         <CardDescription className="text-sm text-perkos-orange font-medium">No-code AI agent launcher</CardDescription>
                       </div>
                     </div>
-                    <span className="product-badge bg-perkos-pink/20 text-perkos-pink border border-perkos-pink/30">For Creators</span>
+                    <div className="flex flex-col items-end gap-2">
+                      <span className="product-badge bg-perkos-pink/20 text-perkos-pink border border-perkos-pink/30">For Creators</span>
+                      <span className="product-badge bg-perkos-orange/20 text-perkos-orange border border-perkos-orange/30 animate-pulse">Coming Soon</span>
+                    </div>
                   </div>
                 </CardHeader>
 
@@ -316,8 +319,8 @@ export default async function Home() {
                   </ul>
 
                   <div className="pt-3 flex gap-3">
-                    <Button className="flex-1 bg-perkos-gradient hover:opacity-90 font-semibold" asChild>
-                      <Link href="https://spark.perkos.xyz">Launch Spark</Link>
+                    <Button className="flex-1 bg-perkos-gradient/50 font-semibold cursor-not-allowed" disabled>
+                      Launch Spark
                     </Button>
                     <Button variant="outline" size="icon" className="border-perkos-pink/50 text-perkos-pink hover:bg-perkos-pink hover:text-white" asChild>
                       <Link href="https://github.com/PerkOS-xyz/Spark">

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 interface Social {
   type: string;
@@ -81,11 +82,11 @@ const getTypeColor = (type: string) => {
   }
 };
 
-const ContributorCard = ({ contributor }: { contributor: Contributor }) => {
+const ContributorCard = ({ contributor, className = "" }: { contributor: Contributor; className?: string }) => {
   const colors = getTypeColor(contributor.type);
 
   return (
-    <div className="contributor-card group shrink-0 mx-3">
+    <div className={`contributor-card group shrink-0 ${className}`}>
       <div
         className={`relative w-[280px] h-[360px] rounded-2xl overflow-hidden border-2 ${colors.border} bg-gradient-to-br ${colors.bg} backdrop-blur-sm transition-all duration-500 hover:scale-[1.02]`}
         style={{
@@ -201,6 +202,170 @@ const ContributorCard = ({ contributor }: { contributor: Contributor }) => {
   );
 };
 
+// Mobile Carousel Component with auto-advance and swipe
+function MobileCarousel({ contributors }: { contributors: Contributor[] }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [direction, setDirection] = useState<'left' | 'right'>('right');
+  const [isPaused, setIsPaused] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+
+  const goToNext = useCallback(() => {
+    if (isAnimating) return;
+    setDirection('right');
+    setIsAnimating(true);
+    setCurrentIndex((prev) => (prev + 1) % contributors.length);
+  }, [isAnimating, contributors.length]);
+
+  const goToPrev = useCallback(() => {
+    if (isAnimating) return;
+    setDirection('left');
+    setIsAnimating(true);
+    setCurrentIndex((prev) => (prev - 1 + contributors.length) % contributors.length);
+  }, [isAnimating, contributors.length]);
+
+  const goToIndex = useCallback((index: number) => {
+    if (isAnimating || index === currentIndex) return;
+    setDirection(index > currentIndex ? 'right' : 'left');
+    setIsAnimating(true);
+    setCurrentIndex(index);
+  }, [isAnimating, currentIndex]);
+
+  // Auto-advance every 4 seconds
+  useEffect(() => {
+    if (isPaused) return;
+    const timer = setInterval(goToNext, 4000);
+    return () => clearInterval(timer);
+  }, [goToNext, isPaused]);
+
+  // Reset animation state
+  useEffect(() => {
+    const timer = setTimeout(() => setIsAnimating(false), 500);
+    return () => clearTimeout(timer);
+  }, [currentIndex]);
+
+  // Touch handlers for swipe
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    setIsPaused(true);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) {
+      setIsPaused(false);
+      return;
+    }
+
+    const diff = touchStartX.current - touchEndX.current;
+    const threshold = 50;
+
+    if (Math.abs(diff) > threshold) {
+      if (diff > 0) {
+        goToNext();
+      } else {
+        goToPrev();
+      }
+    }
+
+    touchStartX.current = null;
+    touchEndX.current = null;
+
+    // Resume auto-play after 3 seconds of no interaction
+    setTimeout(() => setIsPaused(false), 3000);
+  };
+
+  const currentContributor = contributors[currentIndex];
+  const colors = getTypeColor(currentContributor.type);
+
+  return (
+    <div
+      className="relative"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Card container with perspective */}
+      <div className="relative h-[400px] flex items-center justify-center overflow-hidden">
+        {/* Animated glow behind card */}
+        <div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none transition-all duration-700"
+          style={{
+            background: `radial-gradient(ellipse at center, ${colors.glow} 0%, transparent 70%)`,
+            opacity: 0.3,
+          }}
+        />
+
+        {/* Card with slide animation */}
+        <div
+          className={`transform transition-all duration-500 ease-out ${
+            isAnimating
+              ? direction === 'right'
+                ? 'animate-slide-in-right'
+                : 'animate-slide-in-left'
+              : ''
+          }`}
+          style={{
+            perspective: '1000px',
+          }}
+        >
+          <ContributorCard
+            contributor={currentContributor}
+            className="mx-auto"
+          />
+        </div>
+
+        {/* Navigation arrows */}
+        <button
+          onClick={goToPrev}
+          className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-all duration-300 backdrop-blur-sm z-10"
+          aria-label="Previous contributor"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <button
+          onClick={goToNext}
+          className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-all duration-300 backdrop-blur-sm z-10"
+          aria-label="Next contributor"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Dot indicators */}
+      <div className="flex justify-center gap-2 mt-6">
+        {contributors.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => goToIndex(idx)}
+            className={`transition-all duration-300 rounded-full ${
+              idx === currentIndex
+                ? 'w-8 h-2 bg-perkos-pink'
+                : 'w-2 h-2 bg-white/20 hover:bg-white/40'
+            }`}
+            aria-label={`Go to contributor ${idx + 1}`}
+          />
+        ))}
+      </div>
+
+      {/* Counter */}
+      <div className="text-center mt-4 text-sm text-white/40">
+        <span className="text-white/70 font-medium">{currentIndex + 1}</span>
+        <span className="mx-1">/</span>
+        <span>{contributors.length}</span>
+      </div>
+    </div>
+  );
+}
+
 interface ContributorsCarouselProps {
   contributors: Contributor[];
 }
@@ -230,15 +395,21 @@ export function ContributorsCarousel({ contributors }: ContributorsCarouselProps
           </p>
         </div>
 
-        <div className="relative marquee-fade">
+        {/* Mobile: Single card carousel */}
+        <div className="md:hidden">
+          <MobileCarousel contributors={contributors} />
+        </div>
+
+        {/* Desktop: Marquee animation */}
+        <div className="hidden md:block relative marquee-fade">
           <div className="flex animate-marquee-slow">
             {/* First set */}
             {contributors.map((contributor) => (
-              <ContributorCard key={`first-${contributor.id}`} contributor={contributor} />
+              <ContributorCard key={`first-${contributor.id}`} contributor={contributor} className="mx-3" />
             ))}
             {/* Duplicate set for seamless loop */}
             {contributors.map((contributor) => (
-              <ContributorCard key={`second-${contributor.id}`} contributor={contributor} />
+              <ContributorCard key={`second-${contributor.id}`} contributor={contributor} className="mx-3" />
             ))}
           </div>
         </div>
