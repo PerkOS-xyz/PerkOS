@@ -73,38 +73,40 @@ export default async function Home() {
 
       {/* Supported Networks Carousel */}
       <section className="py-12 sm:py-16 border-t overflow-hidden">
-        <div className="text-center mb-8 px-4">
-          <h2 className="text-xl sm:text-2xl font-bold mb-2">Supported Networks</h2>
-          <p className="text-sm text-muted-foreground">Multi-chain by default</p>
-        </div>
-        <div className="relative marquee-fade">
-          <div className="flex animate-marquee">
-            {/* First set of chains */}
-            {CHAIN_DATA.map((chain, idx) => (
-              <div
-                key={`first-${idx}`}
-                className="flex items-center gap-3 px-8 py-4 mx-4 bg-gradient-to-r rounded-xl border border-white/5 hover:border-perkos-pink/30 transition-colors shrink-0"
-                style={{ background: `linear-gradient(135deg, rgba(27, 24, 51, 0.8), rgba(14, 7, 22, 0.8))` }}
-              >
-                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center p-1.5">
-                  <chain.Icon className="w-full h-full" />
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8">
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">Supported Networks</h2>
+            <p className="text-sm text-muted-foreground">Multi-chain by default</p>
+          </div>
+          <div className="relative marquee-fade">
+            <div className="flex animate-marquee">
+              {/* First set of chains */}
+              {CHAIN_DATA.map((chain, idx) => (
+                <div
+                  key={`first-${idx}`}
+                  className="flex items-center gap-3 px-8 py-4 mx-4 bg-gradient-to-r rounded-xl border border-white/5 hover:border-perkos-pink/30 transition-colors shrink-0"
+                  style={{ background: `linear-gradient(135deg, rgba(27, 24, 51, 0.8), rgba(14, 7, 22, 0.8))` }}
+                >
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center p-1.5">
+                    <chain.Icon className="w-full h-full" />
+                  </div>
+                  <span className="font-medium text-white/90">{chain.name}</span>
                 </div>
-                <span className="font-medium text-white/90">{chain.name}</span>
-              </div>
-            ))}
-            {/* Duplicate set for seamless loop */}
-            {CHAIN_DATA.map((chain, idx) => (
-              <div
-                key={`second-${idx}`}
-                className="flex items-center gap-3 px-8 py-4 mx-4 bg-gradient-to-r rounded-xl border border-white/5 hover:border-perkos-pink/30 transition-colors shrink-0"
-                style={{ background: `linear-gradient(135deg, rgba(27, 24, 51, 0.8), rgba(14, 7, 22, 0.8))` }}
-              >
-                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center p-1.5">
-                  <chain.Icon className="w-full h-full" />
+              ))}
+              {/* Duplicate set for seamless loop */}
+              {CHAIN_DATA.map((chain, idx) => (
+                <div
+                  key={`second-${idx}`}
+                  className="flex items-center gap-3 px-8 py-4 mx-4 bg-gradient-to-r rounded-xl border border-white/5 hover:border-perkos-pink/30 transition-colors shrink-0"
+                  style={{ background: `linear-gradient(135deg, rgba(27, 24, 51, 0.8), rgba(14, 7, 22, 0.8))` }}
+                >
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center p-1.5">
+                    <chain.Icon className="w-full h-full" />
+                  </div>
+                  <span className="font-medium text-white/90">{chain.name}</span>
                 </div>
-                <span className="font-medium text-white/90">{chain.name}</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
