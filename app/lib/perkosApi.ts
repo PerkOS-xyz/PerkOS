@@ -66,6 +66,14 @@ export type Task = {
   updatedAt?: string;
 };
 
+/**
+ * @deprecated Project group chat messages no longer live in Firestore.
+ * The new chat layer uses the `Conversation` model in `conversationsApi.ts`
+ * and stores message bodies on the host agent's filesystem (C-hybrid
+ * privacy model). These types and the related read/write helpers remain
+ * for compatibility while the UI still references them; new code should
+ * use `Conversation` + the chat WebSocket client.
+ */
 export type ChatMessage = {
   id?: string;
   from: "agent" | "user";
@@ -74,6 +82,12 @@ export type ChatMessage = {
   createdAt?: string;
 };
 
+/**
+ * @deprecated See `ChatMessage` deprecation note. `messages` will become an
+ * empty array once the UI migrates to the conversation-based chat layer;
+ * callers should subscribe via `useConversations` / `useConversation`
+ * instead.
+ */
 export type ProjectDetail = {
   project: Project;
   tasks: Task[];

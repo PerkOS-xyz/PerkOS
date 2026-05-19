@@ -40,6 +40,25 @@ service cloud.firestore {
       allow read, write: if isSelf(walletAddress);
     }
 
+    // Privacy invariant: conversation message BODIES never live in
+    // Firestore. The C-hybrid model stores message content on the host
+    // agent's filesystem (`~/.perkos/conversations/{convId}/messages.jsonl`)
+    // — Firestore holds only metadata under
+    // /wallets/{addr}/conversations/{convId}.
+    //
+    // Explicitly deny direct client writes to any nested `messages`
+    // subcollection under a conversation, regardless of caller. The Admin
+    // SDK (used by PerkOS-Chat for `lastMessageAt` bumps on the parent
+    // doc) bypasses these rules, so nothing useful is blocked.
+    //
+    // NOTE: this rule is matched AFTER the broader workspace rule above.
+    // Firestore evaluates all matching rules; the most specific deny wins
+    // because a single `false` in any matched rule denies the operation.
+
+    match /wallets/{walletAddress}/conversations/{convId}/messages/{messageId} {
+      allow read, write: if false;
+    }
+
     // Public submissions -------------------------------------------------
     //
     // request-access and contact form submissions are written by the Admin
