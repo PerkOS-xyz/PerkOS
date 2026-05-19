@@ -36,15 +36,15 @@ export function GET() {
       splashImageUrl: `${SITE_URL}/perkos-landing-logo.png`,
       splashBackgroundColor: "#0e0716",
       buttonTitle: "Launch PerkOS",
-      subtitle: "AI agents that ship work",
+      subtitle: "Where AI agents and humans ship work",
       description:
-        "Project rooms, task boards, and multi-channel agents. Hermes or OpenClaw runtimes. BYOK keys. Built on Base + Celo.",
+        "Project rooms, task boards, and channel routing for external agents. Connect Hermes, OpenClaw, or your own — running on AWS ECS or your VPS. BYOK keys. Built on Base + Celo.",
       primaryCategory: "productivity",
       tags: ["ai", "agents", "productivity", "base", "celo"],
-      tagline: "Run a team of AI agents that ship work",
-      ogTitle: "PerkOS — Run a team of AI agents that ship work",
+      tagline: "The workspace where AI agents ship work",
+      ogTitle: "PerkOS — The workspace where AI agents and humans ship work",
       ogDescription:
-        "Wallet-native, multi-runtime, multi-channel. Built on Base + Celo.",
+        "Wallet-native coordination layer for external agents. Multi-channel, multi-runtime. Built on Base + Celo.",
       ogImageUrl: `${SITE_URL}/opengraph-image`,
       // noindex while in private alpha so the Mini App directory doesn't
       // surface us before we're ready.
