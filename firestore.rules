@@ -1,0 +1,63 @@
+rules_version = '2';
+
+// Deploy with:
+//   cd MiniApp && firebase deploy --only firestore:rules
+//
+// The Admin SDK (server scripts, Cloud Functions) bypasses all rules — these
+// are only enforced for direct client SDK requests.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helpers ------------------------------------------------------------
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Wallet auth flow mints custom tokens with uid = walletAddress.toLowerCase()
+    function isSelf(walletAddress) {
+      return isSignedIn() && request.auth.uid == walletAddress;
+    }
+
+    // Alpha-access allowlist --------------------------------------------
+    //
+    // A wallet holder can read their own allowlist doc to discover whether
+    // they're approved. Writes are admin-only (the seed script + future
+    // request-access workflow uses Admin SDK and bypasses rules).
+
+    match /allowlist/{walletAddress} {
+      allow read: if isSelf(walletAddress);
+      allow write: if false;
+    }
+
+    // Per-wallet workspace ----------------------------------------------
+    //
+    // /wallets/{addr}/** is owned by the wallet holder. Reads + writes
+    // require the request to come from a session whose uid matches.
+
+    match /wallets/{walletAddress}/{document=**} {
+      allow read, write: if isSelf(walletAddress);
+    }
+
+    // Public submissions -------------------------------------------------
+    //
+    // request-access and contact form submissions are written by the Admin
+    // SDK (Next.js API routes use admin creds), so we lock direct client
+    // access entirely.
+
+    match /access_requests/{id} {
+      allow read, write: if false;
+    }
+
+    match /contact_messages/{id} {
+      allow read, write: if false;
+    }
+
+    // Default deny -------------------------------------------------------
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
