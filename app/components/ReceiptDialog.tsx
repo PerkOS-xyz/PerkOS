@@ -26,6 +26,7 @@ import { useChatClient } from "../lib/useChatClient";
 import type { Conversation } from "../lib/conversationsApi";
 import {
   createReceipt,
+  setReceiptAnchor,
   stableStringify,
   type Receipt,
   type ReceiptManifest,
@@ -135,8 +136,14 @@ export function ReceiptDialog({
   // Once the anchor tx mines, decode the event and reconcile against the
   // signed manifest. Mismatches are surfaced as warnings — the on-chain
   // record exists but doesn't agree with the off-chain claim.
+  //
+  // On a clean match we also persist the anchor record onto the Firestore
+  // receipt doc so the panel survives a page reload. Firestore rules only
+  // allow this once per receipt (single-write `anchor` field); failure is
+  // surfaced as a non-fatal warning — the on-chain tx itself is the
+  // authoritative record either way.
   useEffect(() => {
-    if (!txReceipt || !receipt || !ANCHOR_ADDRESS) return;
+    if (!txReceipt || !receipt || !ANCHOR_ADDRESS || !ANCHOR_CHAIN_ID) return;
     const decoded = findAnchoredEvent(txReceipt.logs, ANCHOR_ADDRESS);
     if (!decoded) {
       setAnchorError("Anchor tx mined but the ReceiptAnchored event was not found.");
@@ -150,7 +157,23 @@ export function ReceiptDialog({
           ? "On-chain anchor commits a DIFFERENT wallet than the signed manifest."
           : "On-chain anchor commits a DIFFERENT transcript hash than the signed manifest.",
       );
+      setAnchorState({
+        txHash: txReceipt.transactionHash,
+        blockNumber: txReceipt.blockNumber,
+        receiptId: decoded.receiptId,
+        anchoredAt: decoded.anchoredAt,
+      });
+      setStage("anchored");
+      return;
     }
+    const anchorRecord: NonNullable<Receipt["anchor"]> = {
+      chainId: ANCHOR_CHAIN_ID,
+      contractAddress: ANCHOR_ADDRESS,
+      receiptId: decoded.receiptId,
+      txHash: txReceipt.transactionHash,
+      blockNumber: Number(txReceipt.blockNumber),
+      anchoredAt: new Date(Number(decoded.anchoredAt) * 1000).toISOString(),
+    };
     setAnchorState({
       txHash: txReceipt.transactionHash,
       blockNumber: txReceipt.blockNumber,
@@ -158,7 +181,17 @@ export function ReceiptDialog({
       anchoredAt: decoded.anchoredAt,
     });
     setStage("anchored");
-  }, [txReceipt, receipt]);
+    setReceipt({ ...receipt, anchor: anchorRecord });
+    setReceiptAnchor(walletAddress, receipt.id, anchorRecord).catch((err) => {
+      // The on-chain tx is the authoritative record; Firestore is convenience.
+      // Surface the failure but don't roll back the UI state.
+      setAnchorError(
+        `On-chain anchor confirmed, but failed to persist to Firestore: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+    });
+  }, [txReceipt, receipt, walletAddress]);
 
   async function anchorOnChain() {
     if (!receipt || !ANCHOR_ADDRESS || !ANCHOR_CHAIN_ID) return;
