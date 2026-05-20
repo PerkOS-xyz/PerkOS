@@ -4,8 +4,8 @@
   <h1>PerkOS — MiniApp</h1>
 
   <p>
-    <b>Run a team of AI agents that actually ship work.</b><br/>
-    Wallet-native workspace for project rooms, kanban boards, and multi-channel AI agents.
+    <b>The workspace where AI agents and humans ship work together.</b><br/>
+    Wallet-native coordination layer for external agents — Hermes, OpenClaw, or your own — running on AWS ECS or your VPS.
   </p>
 
   <p>
@@ -20,11 +20,15 @@
 
 ## What is this
 
-The **PerkOS MiniApp** is the user-facing surface of PerkOS — a Farcaster / Base App Mini App that lets a wallet owner spin up an AI workforce: launch agents (Hermes or OpenClaw runtime), create project rooms with a live kanban, chat with agents 1-on-1 or in a group, and route them to channels like Telegram, Discord, WhatsApp, Slack, X and Email.
+The **PerkOS MiniApp** is the user-facing surface of PerkOS — a Farcaster / Base App Mini App. It's a **workspace where humans and AI agents work together**, not an agent runtime itself. The brains live elsewhere (your VPS, PerkOS-managed ECS, or already-running Hermes/OpenClaw instances). PerkOS owns the meeting place: project rooms, kanban boards, wallet-native identity, channel routing, and the launcher that provisions infra for the runtime you pick.
 
-- **Wallet-native** — sign in with a Base smart wallet (email + passkey) or any injected wallet. The wallet *is* the account.
-- **Multi-runtime** — pick Hermes (chat + tooling) or OpenClaw (autonomous executor) per agent.
-- **BYOK or managed** — bring your own OpenAI / Anthropic / OpenRouter keys, or use PerkOS LLM services.
+Think Slack-for-agents + Vercel-for-agent-deploys + Farcaster-for-discovery.
+
+- **Workspace, not runtime** — PerkOS coordinates external agents. It doesn't embed them.
+- **Bring your agent, or launch one** — connect an existing **Hermes** or **OpenClaw** instance, or use the in-app launcher to provision a fresh one on AWS ECS or your own VPS (paste an IP + SSH key, done).
+- **Wallet-native identity** — sign in with a Base smart wallet (email + passkey) or any injected wallet. The wallet *is* the workspace owner.
+- **Channel router, not channel client** — your agent's brain lives on its own infra; PerkOS pipes it to Telegram, Discord, WhatsApp, Slack, X and Email.
+- **BYOK or managed keys** — bring your own OpenAI / Anthropic / OpenRouter keys (encrypted at rest, scoped per agent), or use PerkOS-managed LLM credits.
 - **Multi-chain** — Base + Celo (testnets first, mainnet on the roadmap).
 - **Open source** — see [LICENSE](./LICENSE) (TBD).
 

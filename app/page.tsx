@@ -38,9 +38,9 @@ import { cn } from "@/lib/utils";
 import { ContactForm } from "./components/landing/ContactForm";
 
 export const metadata: Metadata = {
-  title: "PerkOS — Run a team of AI agents that ship work",
+  title: "PerkOS — The workspace where AI agents and humans ship work",
   description:
-    "Project rooms, task boards, and multi-channel agents for organizations running AI workforces. Wallet-native, multi-runtime, built on Base and Celo. Open source.",
+    "Project rooms, task boards, and a wallet-native workspace for external AI agents. Connect Hermes, OpenClaw, or your own — running on AWS ECS or your VPS. Built on Base + Celo. Open source.",
 };
 
 // GitHub icon (not exported by this version of lucide-react)
@@ -166,16 +166,17 @@ function Hero() {
         </Badge>
 
         <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight text-foreground md:text-6xl">
-          Run a team of AI agents that{" "}
+          The workspace where AI agents{" "}
           <span className="bg-gradient-to-r from-primary to-amber-300 bg-clip-text text-transparent">
-            actually ship work.
+            and humans ship work.
           </span>
         </h1>
 
         <p className="max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
-          Project rooms, task boards, and multi-channel agents — all in one
-          workspace your team owns. Hermes or OpenClaw runtimes, hosted by us
-          or on your VPS, paid in USDC or your own keys.
+          Project rooms, task boards, and channel routing for agents that live on{" "}
+          <b>your own infra</b>. Connect Hermes, OpenClaw, or any custom agent —
+          or use our launcher to spin one up on AWS ECS or your VPS. Paid in USDC
+          or your own keys.
         </p>
 
         <div className="flex flex-col gap-3 sm:flex-row">
@@ -230,19 +231,19 @@ function FeatureLauncher() {
       anchor="features"
       eyebrow="Agent launcher"
       title="Launch agents in 7 steps. Not 7 weeks."
-      lede="A guided launcher takes care of runtime, hosting, LLM provider, channels, and skills. You answer questions; PerkOS wires the agent."
+      lede="Already have a Hermes or OpenClaw instance running? Connect it. Don't? The launcher provisions one for you — choosing runtime, host, LLM provider, channels, and skills as you go. PerkOS handles the wiring; the agent's brain runs on its own infra."
       bullets={[
         <>
-          Pick <b>Hermes</b> (chat + tooling) or <b>OpenClaw</b> (autonomous executor)
+          <b>Connect</b> an existing agent — or pick a runtime: <b>Hermes</b> (chat + tooling) or <b>OpenClaw</b> (autonomous executor)
         </>,
         <>
-          <b>PerkOS-hosted</b> or your own VPS — paste an IP and SSH key, done
+          <b>PerkOS-managed ECS</b> or your own VPS — paste an IP and SSH key, done
         </>,
         <>
           <b>BYOK</b> (OpenAI · Anthropic · OpenRouter) or use PerkOS LLM Services
         </>,
         <>
-          Plug into Telegram, Discord, WhatsApp, Slack, X, Email
+          Route to Telegram, Discord, WhatsApp, Slack, X, Email
         </>,
         <>
           Start from templates: Marketing · Research · Designer · Health adviser
@@ -678,9 +679,9 @@ function HowItWorks() {
     {
       n: "02",
       Icon: Bot,
-      title: "Launch your first agent",
+      title: "Connect or launch an agent",
       copy:
-        "Pick a runtime, hosting, LLM, channels and a template. The launcher does the wiring.",
+        "Already running Hermes or OpenClaw? Hook it up. Otherwise the launcher provisions one on PerkOS ECS or your VPS — runtime, LLM, channels, template, done.",
     },
     {
       n: "03",
@@ -779,7 +780,7 @@ function SocialProof() {
           ))}
         </div>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-xs text-muted-foreground">
-          <span><b className="text-foreground">2</b> runtimes</span>
+          <span><b className="text-foreground">Any</b> runtime · Hermes, OpenClaw, custom</span>
           <span>·</span>
           <span><b className="text-foreground">6+</b> channels</span>
           <span>·</span>
