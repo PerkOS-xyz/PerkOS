@@ -10,6 +10,32 @@
 
 export type ChatIdentity = `user:${string}` | `agent:${string}`;
 
+/**
+ * One tool invocation made by an agent while producing a reply. Renders
+ * as an inline pill below the message text and expands to reveal the
+ * input/output on click. The shape is intentionally permissive (`input`
+ * and `output` are `unknown`) so the agent runtime can pass through
+ * structured payloads without the chat layer schema-locking them.
+ */
+export interface ChatToolCall {
+  /** Opaque id supplied by the agent, used for deduplication / streaming updates. */
+  id: string;
+  /** Tool name (e.g. "Bash", "Read", "websearch"). */
+  name: string;
+  /** Lifecycle state. */
+  status: "pending" | "running" | "ok" | "error";
+  /** Optional one-line summary the agent renders inline ("ls -la"). */
+  summary?: string;
+  /** Tool input — JSON-serializable, displayed in the expanded view. */
+  input?: unknown;
+  /** Tool output — JSON-serializable or a string. */
+  output?: unknown;
+  /** Failure message when status === "error". */
+  error?: string;
+  /** Approximate cost in ms (for the badge in the expanded view). */
+  durationMs?: number;
+}
+
 export interface ChatMessage {
   id: string;
   convId: string;
@@ -18,6 +44,8 @@ export interface ChatMessage {
   /** ISO 8601 */
   timestamp: string;
   replyTo?: string | null;
+  /** Inline tool invocations the agent made while producing this reply. */
+  toolCalls?: ChatToolCall[];
 }
 
 export type ChatClientStatus =
@@ -298,6 +326,7 @@ export class ChatClient {
         text: String(frame.text),
         timestamp: String(frame.timestamp),
         replyTo: (frame.replyTo as string | null | undefined) ?? null,
+        toolCalls: normalizeToolCalls(frame.toolCalls),
       };
       const set = this.messageListeners.get(msg.convId);
       if (set) for (const fn of set) fn(msg);
@@ -431,7 +460,45 @@ function normalizeMessage(raw: Record<string, unknown>, fallbackConvId: string):
     text: String(raw.text ?? ""),
     timestamp: String(raw.timestamp ?? new Date().toISOString()),
     replyTo: (raw.replyTo as string | null | undefined) ?? null,
+    toolCalls: normalizeToolCalls(raw.toolCalls),
   };
+}
+
+/**
+ * Defensive coercion of an arbitrary wire shape into a typed
+ * ChatToolCall[]. Returns undefined when the input isn't a non-empty
+ * array — keeps `toolCalls` absent on messages that don't carry any,
+ * so callers can use the natural truthiness check.
+ */
+function normalizeToolCalls(raw: unknown): ChatToolCall[] | undefined {
+  if (!Array.isArray(raw) || raw.length === 0) return undefined;
+  const out: ChatToolCall[] = [];
+  for (const entry of raw) {
+    if (!entry || typeof entry !== "object") continue;
+    const c = entry as Record<string, unknown>;
+    if (typeof c.id !== "string" || typeof c.name !== "string") continue;
+    const status =
+      c.status === "pending" ||
+      c.status === "running" ||
+      c.status === "ok" ||
+      c.status === "error"
+        ? c.status
+        : "ok";
+    out.push({
+      id: c.id,
+      name: c.name,
+      status,
+      summary: typeof c.summary === "string" ? c.summary : undefined,
+      input: c.input,
+      output: c.output,
+      error: typeof c.error === "string" ? c.error : undefined,
+      durationMs:
+        typeof c.durationMs === "number" && Number.isFinite(c.durationMs)
+          ? c.durationMs
+          : undefined,
+    });
+  }
+  return out.length ? out : undefined;
 }
 
 function errMsg(err: unknown): string {
