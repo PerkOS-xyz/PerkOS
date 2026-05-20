@@ -12,6 +12,7 @@ import {
 } from "react";
 
 import { firebaseAuth } from "./firebase";
+import { getMessages as cacheGet, putMessages as cachePut } from "./chatCache";
 import {
   ChatClient,
   type ChatClientStatus,
@@ -92,10 +93,12 @@ export function useChatClientStatus(): { status: ChatClientStatus; detail?: stri
  * an internal buffer of messages received via WS for this conv; combine
  * with `useChatHistory` for the older page.
  *
- * Duplicates (same id) are coalesced.
+ * Every received message is also persisted to the local IndexedDB cache so
+ * scroll-back works offline. Duplicates (same id) are coalesced.
  */
 export function useConversationLiveMessages(convId: string | null | undefined): ChatMessage[] {
   const client = useChatClient();
+  const wallet = client?.getSessionWallet() ?? null;
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   // Use a ref to keep set of seen IDs without re-rendering.
   const seenRef = useRef<Set<string>>(new Set());
@@ -108,15 +111,26 @@ export function useConversationLiveMessages(convId: string | null | undefined): 
       if (seenRef.current.has(msg.id)) return;
       seenRef.current.add(msg.id);
       setMessages((prev) => insertChronological(prev, msg));
+      if (wallet) {
+        void cachePut(wallet, convId, [msg]).catch(() => {});
+      }
     });
-  }, [client, convId]);
+  }, [client, convId, wallet]);
 
   return messages;
 }
 
 /**
- * One-shot history fetch. Re-fires when `convId` changes. Returns the
- * accumulated history, a loader for older pages, and the loading state.
+ * One-shot history fetch with IndexedDB-backed cache hydration.
+ *
+ * Behavior:
+ * 1. On mount, immediately hydrate from local cache so the user sees the
+ *    last conversation state even if the WS is still authing.
+ * 2. Once the WS is connected, request the live history page from the
+ *    server (which proxies to the host agent's jsonl).
+ * 3. If the server returns HOST_OFFLINE, set `hostOffline` and keep the
+ *    cached view. The UI surfaces a banner.
+ * 4. Every server-returned message is persisted to cache (id-keyed upsert).
  */
 export function useChatHistory(convId: string | null | undefined): {
   history: ChatMessage[];
@@ -124,14 +138,19 @@ export function useChatHistory(convId: string | null | undefined): {
   loadingMore: boolean;
   hasMore: boolean;
   error: Error | null;
+  hostOffline: boolean;
+  fromCache: boolean;
   loadOlder: () => Promise<void>;
 } {
   const client = useChatClient();
+  const wallet = client?.getSessionWallet() ?? null;
   const [history, setHistory] = useState<ChatMessage[]>([]);
   const [loadingInitial, setLoadingInitial] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [hostOffline, setHostOffline] = useState(false);
+  const [fromCache, setFromCache] = useState(false);
   const seenRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -139,11 +158,29 @@ export function useChatHistory(convId: string | null | undefined): {
     setHistory([]);
     setHasMore(false);
     setError(null);
+    setHostOffline(false);
+    setFromCache(false);
     if (!client || !convId) return;
 
     let cancelled = false;
+
     (async () => {
-      // Wait for the connection if it's still authing.
+      // 1. Hydrate from cache first (best-effort).
+      if (wallet) {
+        try {
+          const cached = await cacheGet(wallet, convId, { limit: 50 });
+          if (!cancelled && cached.messages.length > 0) {
+            for (const m of cached.messages) seenRef.current.add(m.id);
+            setHistory(cached.messages.map(stripCachedMeta));
+            setHasMore(cached.hasMore);
+            setFromCache(true);
+          }
+        } catch {
+          /* ignore cache errors */
+        }
+      }
+
+      // 2. Wait for the WS to settle.
       if (client.getStatus() !== "connected") {
         await new Promise<void>((resolve) => {
           const unsub = client.onStatus((s) => {
@@ -155,6 +192,8 @@ export function useChatHistory(convId: string | null | undefined): {
         });
       }
       if (cancelled) return;
+
+      // 3. Fetch live history.
       setLoadingInitial(true);
       try {
         const page = await client.history({ convId });
@@ -162,8 +201,20 @@ export function useChatHistory(convId: string | null | undefined): {
         for (const m of page.messages) seenRef.current.add(m.id);
         setHistory(page.messages);
         setHasMore(page.hasMore);
+        setHostOffline(false);
+        setFromCache(false);
+        if (wallet) {
+          void cachePut(wallet, convId, page.messages).catch(() => {});
+        }
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err : new Error(String(err)));
+        if (cancelled) return;
+        const msg = err instanceof Error ? err.message : String(err);
+        if (/HOST_OFFLINE/i.test(msg)) {
+          setHostOffline(true);
+          // Keep showing the cached view.
+        } else {
+          setError(err instanceof Error ? err : new Error(msg));
+        }
       } finally {
         if (!cancelled) setLoadingInitial(false);
       }
@@ -171,29 +222,70 @@ export function useChatHistory(convId: string | null | undefined): {
     return () => {
       cancelled = true;
     };
-  }, [client, convId]);
+  }, [client, convId, wallet]);
 
   const loadOlder = useCallback(async () => {
     if (!client || !convId || loadingMore || !hasMore || history.length === 0) return;
     setLoadingMore(true);
+    const before = history[0].timestamp;
     try {
-      const before = history[0].timestamp;
       const page = await client.history({ convId, before });
       const fresh = page.messages.filter((m) => !seenRef.current.has(m.id));
       for (const m of fresh) seenRef.current.add(m.id);
       if (fresh.length > 0) setHistory((prev) => [...fresh, ...prev]);
       setHasMore(page.hasMore);
+      setHostOffline(false);
+      if (wallet) {
+        void cachePut(wallet, convId, page.messages).catch(() => {});
+      }
     } catch (err) {
-      setError(err instanceof Error ? err : new Error(String(err)));
+      const msg = err instanceof Error ? err.message : String(err);
+      if (/HOST_OFFLINE/i.test(msg)) {
+        setHostOffline(true);
+        // Try cache as a fallback.
+        if (wallet) {
+          try {
+            const cached = await cacheGet(wallet, convId, { before, limit: 50 });
+            const fresh = cached.messages
+              .map(stripCachedMeta)
+              .filter((m) => !seenRef.current.has(m.id));
+            for (const m of fresh) seenRef.current.add(m.id);
+            if (fresh.length > 0) setHistory((prev) => [...fresh, ...prev]);
+            setHasMore(cached.hasMore);
+          } catch {
+            /* ignore */
+          }
+        }
+      } else {
+        setError(err instanceof Error ? err : new Error(msg));
+      }
     } finally {
       setLoadingMore(false);
     }
-  }, [client, convId, history, hasMore, loadingMore]);
+  }, [client, convId, history, hasMore, loadingMore, wallet]);
 
   return useMemo(
-    () => ({ history, loadingInitial, loadingMore, hasMore, error, loadOlder }),
-    [history, loadingInitial, loadingMore, hasMore, error, loadOlder],
+    () => ({ history, loadingInitial, loadingMore, hasMore, error, hostOffline, fromCache, loadOlder }),
+    [history, loadingInitial, loadingMore, hasMore, error, hostOffline, fromCache, loadOlder],
   );
+}
+
+function stripCachedMeta(c: {
+  id: string;
+  convId: string;
+  from: string;
+  text: string;
+  timestamp: string;
+  replyTo: string | null;
+}): ChatMessage {
+  return {
+    id: c.id,
+    convId: c.convId,
+    from: c.from as ChatMessage["from"],
+    text: c.text,
+    timestamp: c.timestamp,
+    replyTo: c.replyTo,
+  };
 }
 
 function insertChronological(list: ChatMessage[], msg: ChatMessage): ChatMessage[] {
