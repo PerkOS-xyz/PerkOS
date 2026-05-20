@@ -74,8 +74,23 @@ export type Receipt = {
   signature: ReceiptSignature;
   /** Set by serverTimestamp on write. */
   createdAt?: string;
-  /** Reserved for v2 — txhash + chainId once on-chain anchoring lands. */
-  anchor?: { chainId: number; txHash: string; blockNumber?: number };
+  /**
+   * On-chain anchor record (Base / Base Sepolia). Persisted when the
+   * caller broadcasts `PerkosReceiptAnchor.anchor()` and the tx mines.
+   * Off-chain verifiers should cross-check `receiptId` + `transcriptHash`
+   * against the on-chain `ReceiptAnchored` event before trusting the
+   * anchor. See `receiptAnchor.ts` for the helpers.
+   */
+  anchor?: {
+    chainId: number;
+    contractAddress: string;
+    /** 32-byte hex id passed to anchor(); recoverable via receiptIdFromManifest. */
+    receiptId: string;
+    txHash: string;
+    blockNumber?: number;
+    /** block.timestamp at the time of anchoring, ISO. */
+    anchoredAt?: string;
+  };
 };
 
 function tsToIso(value: unknown): string | undefined {
