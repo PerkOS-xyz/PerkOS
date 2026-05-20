@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   useEffect,
@@ -52,22 +51,11 @@ function genId() {
   return Math.random().toString(36).slice(2, 10);
 }
 
-function formatRecordingTime(seconds: number): string {
-  const mm = Math.floor(seconds / 60)
-    .toString()
-    .padStart(2, "0");
-  const ss = (seconds % 60).toString().padStart(2, "0");
-  return `${mm}:${ss}`;
-}
-
 export function ChatbotPanel() {
   const { open, setOpen, messages, appendMessage, resetConversation } = useChatbot();
   const router = useRouter();
   const { address, isConnected } = useConnection();
   const [draft, setDraft] = useState("");
-  const [recording, setRecording] = useState(false);
-  const [recordSeconds, setRecordSeconds] = useState(0);
-  const [recordError, setRecordError] = useState<string | null>(null);
 
   // Dictation (Web Speech API). Appends transcribed phrases to the draft.
   const speech = useSpeechToText({
@@ -81,10 +69,6 @@ export function ChatbotPanel() {
     },
   });
   const scrollRef = useRef<HTMLDivElement>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const timerRef = useRef<number | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
 
   const isEmpty = messages.length === 0;
 
@@ -141,106 +125,6 @@ export function ChatbotPanel() {
     setOpen(false);
     router.push(href);
   }
-
-  function cleanupStream() {
-    if (timerRef.current) {
-      window.clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((t) => t.stop());
-      streamRef.current = null;
-    }
-    mediaRecorderRef.current = null;
-    chunksRef.current = [];
-  }
-
-  async function startRecording() {
-    setRecordError(null);
-    if (
-      typeof window === "undefined" ||
-      !navigator.mediaDevices?.getUserMedia ||
-      typeof MediaRecorder === "undefined"
-    ) {
-      setRecordError("Voice recording isn't supported on this device.");
-      return;
-    }
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-      const mr = new MediaRecorder(stream);
-      chunksRef.current = [];
-      mr.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data);
-      };
-      mr.start();
-      mediaRecorderRef.current = mr;
-      setRecording(true);
-      setRecordSeconds(0);
-      timerRef.current = window.setInterval(
-        () => setRecordSeconds((s) => s + 1),
-        1000
-      );
-    } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : "Microphone permission was denied.";
-      setRecordError(message);
-      cleanupStream();
-      setRecording(false);
-    }
-  }
-
-  function stopRecordingAndSend() {
-    const mr = mediaRecorderRef.current;
-    if (!mr) return;
-    const duration = recordSeconds;
-    mr.onstop = () => {
-      const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-      // Backend has no audio endpoint yet, so we surface the recording as a
-      // text message and log the blob so the developer can wire it later.
-      if (typeof window !== "undefined") {
-        // eslint-disable-next-line no-console
-        console.info(
-          "[PerkOS Agent] Voice note captured",
-          { duration, sizeBytes: blob.size, type: blob.type }
-        );
-      }
-      send(`🎤 Voice note · ${formatRecordingTime(duration)}`);
-      cleanupStream();
-      setRecording(false);
-      setRecordSeconds(0);
-    };
-    mr.stop();
-  }
-
-  function cancelRecording() {
-    const mr = mediaRecorderRef.current;
-    if (mr) {
-      mr.onstop = null;
-      try {
-        mr.stop();
-      } catch {
-        // ignore
-      }
-    }
-    cleanupStream();
-    setRecording(false);
-    setRecordSeconds(0);
-  }
-
-  useEffect(() => {
-    return () => {
-      cleanupStream();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (!open && recording) cancelRecording();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
 
   const lastAgentIndex = useMemo(() => {
     for (let i = messages.length - 1; i >= 0; i--) {
@@ -299,95 +183,64 @@ export function ChatbotPanel() {
         </div>
 
         <div className="border-t border-border bg-card/95 px-5 py-3">
-          {recordError ? (
+          {speech.error ? (
             <p className="mb-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
-              {recordError}
+              Dictation: {speech.error}
             </p>
           ) : null}
 
-          {recording ? (
-            <div className="flex items-center gap-3 rounded-lg border border-primary bg-primary/10 px-3 py-2">
+          <form onSubmit={onSubmit}>
+            <div className="flex items-end gap-2 rounded-lg border border-input bg-background px-3 py-2 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
               <button
                 type="button"
-                onClick={cancelRecording}
-                aria-label="Cancel recording"
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+                aria-label="Attach"
+                disabled
+                className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-muted-foreground/60"
+                title="Attachments coming soon"
               >
-                <X className="h-4 w-4" />
+                <Plus className="h-4 w-4" />
               </button>
-              <div className="flex flex-1 items-center gap-2">
-                <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-destructive" />
-                <span className="text-sm font-medium text-foreground">
-                  Recording…
-                </span>
-                <span className="font-mono text-xs text-muted-foreground">
-                  {formatRecordingTime(recordSeconds)}
-                </span>
-              </div>
-              <Button
-                type="button"
-                size="icon"
-                onClick={stopRecordingAndSend}
-                className="h-8 w-8 rounded-full"
-                aria-label="Stop and send"
-              >
-                <ArrowUp className="h-4 w-4" />
-              </Button>
-            </div>
-          ) : (
-            <form onSubmit={onSubmit}>
-              <div className="flex items-end gap-2 rounded-lg border border-input bg-background px-3 py-2 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
-                <button
+              <textarea
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={onKey}
+                placeholder={speech.listening ? (speech.interimText || "Listening…") : "Write a message…"}
+                rows={1}
+                className="flex-1 resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+              />
+              {speech.supported && draft.trim().length === 0 ? (
+                <Button
                   type="button"
-                  aria-label="Attach"
-                  disabled
-                  className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-muted-foreground/60"
-                  title="Attachments coming soon"
+                  size="icon"
+                  variant="ghost"
+                  onClick={speech.toggle}
+                  disabled={mutation.isPending}
+                  className={cn(
+                    "h-8 w-8 rounded-full text-muted-foreground hover:text-primary",
+                    speech.listening && "animate-pulse text-primary",
+                  )}
+                  aria-label={speech.listening ? "Stop dictation" : "Dictate"}
+                  title={speech.listening ? "Stop dictation" : "Dictate with microphone"}
                 >
-                  <Plus className="h-4 w-4" />
-                </button>
-                <textarea
-                  value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
-                  onKeyDown={onKey}
-                  placeholder="Write a message…"
-                  rows={1}
-                  className="flex-1 resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
-                />
-                {speech.supported && draft.trim().length === 0 ? (
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    onClick={speech.toggle}
-                    disabled={mutation.isPending}
-                    className={cn(
-                      "h-8 w-8 rounded-full text-muted-foreground hover:text-primary",
-                      speech.listening && "animate-pulse text-primary",
-                    )}
-                    aria-label={speech.listening ? "Stop dictation" : "Dictate"}
-                    title={speech.listening ? "Stop dictation" : "Dictate with microphone"}
-                  >
-                    <Mic className="h-4 w-4" />
-                  </Button>
-                ) : (
-                  <Button
-                    type="submit"
-                    size="icon"
-                    disabled={mutation.isPending}
-                    className="h-8 w-8 rounded-full"
-                    aria-label="Send"
-                  >
-                    {mutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <ArrowUp className="h-4 w-4" />
-                    )}
-                  </Button>
-                )}
-              </div>
-            </form>
-          )}
+                  <Mic className="h-4 w-4" />
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  size="icon"
+                  disabled={mutation.isPending}
+                  className="h-8 w-8 rounded-full"
+                  aria-label="Send"
+                >
+                  {mutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ArrowUp className="h-4 w-4" />
+                  )}
+                </Button>
+              )}
+            </div>
+          </form>
         </div>
       </div>
     </>
