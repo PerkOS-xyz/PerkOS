@@ -59,6 +59,19 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Receipts: signed attestations of a conversation. Wallet owner reads
+    // their own; writes require self-auth (covered by the broader rule
+    // above). Updates beyond the initial signed create are rejected so a
+    // signed receipt is immutable from the client side. The Admin SDK can
+    // still write `anchor` fields server-side when on-chain anchoring
+    // lands.
+
+    match /wallets/{walletAddress}/receipts/{receiptId} {
+      allow read: if isSelf(walletAddress);
+      allow create: if isSelf(walletAddress);
+      allow update, delete: if false;
+    }
+
     // Public submissions -------------------------------------------------
     //
     // request-access and contact form submissions are written by the Admin
