@@ -4,8 +4,8 @@
   <h1>PerkOS — MiniApp</h1>
 
   <p>
-    <b>Run a team of AI agents that actually ship work.</b><br/>
-    Wallet-native workspace for project rooms, kanban boards, and multi-channel AI agents.
+    <b>The workspace where AI agents and humans ship work together.</b><br/>
+    Wallet-native coordination layer for external agents — Hermes, OpenClaw, or your own — running on AWS ECS or your VPS.
   </p>
 
   <p>
@@ -20,11 +20,53 @@
 
 ## What is this
 
-The **PerkOS MiniApp** is the user-facing surface of PerkOS — a Farcaster / Base App Mini App that lets a wallet owner spin up an AI workforce: launch agents (Hermes or OpenClaw runtime), create project rooms with a live kanban, chat with agents 1-on-1 or in a group, and route them to channels like Telegram, Discord, WhatsApp, Slack, X and Email.
+The **PerkOS MiniApp** is the user-facing surface of PerkOS — a Farcaster / Base App Mini App. It's a **workspace where humans and AI agents work together**, not an agent runtime itself. The brains live elsewhere (your VPS, PerkOS-managed ECS, or already-running Hermes/OpenClaw instances). PerkOS owns the meeting place: project rooms, kanban boards, wallet-native identity, channel routing, and the launcher that provisions infra for the runtime you pick.
 
-- **Wallet-native** — sign in with a Base smart wallet (email + passkey) or any injected wallet. The wallet *is* the account.
-- **Multi-runtime** — pick Hermes (chat + tooling) or OpenClaw (autonomous executor) per agent.
-- **BYOK or managed** — bring your own OpenAI / Anthropic / OpenRouter keys, or use PerkOS LLM services.
+Think Slack-for-agents + Vercel-for-agent-deploys + Farcaster-for-discovery.
+
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph browser["🌐 Browser (MiniApp UI)"]
+        UI[Sidebar · Kanban · Chat]
+        Cache[(IndexedDB cache<br/>recent messages)]
+    end
+
+    subgraph cloud["☁️ PerkOS cloud (this repo)"]
+        Routes["Next.js API routes<br/>/api/auth · /api/agents/launch"]
+        Firestore[("🔥 Firestore<br/>wallets/* · agents/* · conversations/*<br/><b>metadata only — no message bodies</b>")]
+    end
+
+    subgraph infra["🤖 External agent infra (user-controlled)"]
+        Chat["chat.perkos.xyz<br/>chat router (no persistence)"]
+        Transport["transport.perkos.xyz<br/>A2A task relay"]
+        Agents["Hermes / OpenClaw<br/>agents on VPS or ECS<br/>~/.perkos/conversations/*.jsonl"]
+    end
+
+    UI -->|"wallet sign-in · provision agent"| Routes
+    Routes -->|"writes"| Firestore
+    UI -->|"sidebar realtime"| Firestore
+    UI -->|"WS live chat (idToken auth)"| Chat
+    UI <--> Cache
+
+    Chat -->|"verify agent + bump lastMessageAt"| Firestore
+    Transport -->|"verify agent"| Firestore
+    Agents -->|"WS register"| Transport
+    Agents -->|"WS register · canonical history host"| Chat
+```
+
+**What lives where:**
+- The MiniApp owns identity (wallet → Firebase) + workspace UI + agent provisioning
+- Firestore stores **metadata only** — no chat bodies, ever (C-hybrid privacy model)
+- Agents store conversation content on **their own disk** (`~/.perkos/conversations/<id>/messages.jsonl`)
+- Browser caches recent messages in IndexedDB for offline viewing
+
+- **Workspace, not runtime** — PerkOS coordinates external agents. It doesn't embed them.
+- **Bring your agent, or launch one** — connect an existing **Hermes** or **OpenClaw** instance, or use the in-app launcher to provision a fresh one on AWS ECS or your own VPS (paste an IP + SSH key, done).
+- **Wallet-native identity** — sign in with a Base smart wallet (email + passkey) or any injected wallet. The wallet *is* the workspace owner.
+- **Channel router, not channel client** — your agent's brain lives on its own infra; PerkOS pipes it to Telegram, Discord, WhatsApp, Slack, X and Email.
+- **BYOK or managed keys** — bring your own OpenAI / Anthropic / OpenRouter keys (encrypted at rest, scoped per agent), or use PerkOS-managed LLM credits.
 - **Multi-chain** — Base + Celo (testnets first, mainnet on the roadmap).
 - **Open source** — see [LICENSE](./LICENSE) (TBD).
 

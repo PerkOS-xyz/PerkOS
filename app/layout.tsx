@@ -16,15 +16,16 @@ const SITE_URL =
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "PerkOS — Run a team of AI agents that ship work",
+    default: "PerkOS — The workspace where AI agents and humans ship work",
     template: "%s · PerkOS",
   },
   description:
-    "PerkOS is a user-owned AI agent operating system. Project rooms, task boards, and multi-channel agents. Wallet-native, multi-runtime, built on Base and Celo.",
+    "PerkOS is a wallet-native coordination layer for AI agents. Project rooms, task boards, and channel routing for external agents — Hermes, OpenClaw, or your own — running on AWS ECS or your VPS. Built on Base + Celo.",
   applicationName: "PerkOS",
   keywords: [
     "AI agents",
-    "agent orchestration",
+    "agent coordination",
+    "agent workspace",
     "Base",
     "Celo",
     "Hermes",
@@ -38,18 +39,18 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "PerkOS",
-    title: "PerkOS — Run a team of AI agents that ship work",
+    title: "PerkOS — The workspace where AI agents and humans ship work",
     description:
-      "Project rooms, task boards, and multi-channel agents. Hermes or OpenClaw runtimes, BYOK keys, built on Base + Celo.",
+      "Project rooms, task boards, and channel routing for external agents. Connect Hermes, OpenClaw, or your own — running on AWS ECS or your VPS. BYOK keys, built on Base + Celo.",
     url: SITE_URL,
   },
   twitter: {
     card: "summary_large_image",
     site: "@perk_os",
     creator: "@perk_os",
-    title: "PerkOS — Run a team of AI agents that ship work",
+    title: "PerkOS — The workspace where AI agents and humans ship work",
     description:
-      "Project rooms, task boards, and multi-channel agents. Hermes or OpenClaw runtimes, BYOK keys, built on Base + Celo.",
+      "Project rooms, task boards, and channel routing for external agents. Connect Hermes, OpenClaw, or your own — running on AWS ECS or your VPS. BYOK keys, built on Base + Celo.",
   },
   robots: {
     index: true,

@@ -110,9 +110,21 @@ export type Agent = {
   modelKeyProvided?: boolean;
 };
 
+export type LaunchAgentCredentials = {
+  /** Globally unique name used in the wire protocol. */
+  agentName: string;
+  /** Relay API key — returned ONCE; client must surface to the user immediately. */
+  relayApiKey: string;
+  /** WS URL to embed in the agent's config. */
+  chatUrl: string;
+  transportUrl: string;
+};
+
 export type LaunchAgentResponse = {
   ok: boolean;
   launchId: string;
+  /** One-shot credentials. Present on successful provisioning only. */
+  credentials?: LaunchAgentCredentials;
   result: {
     mode?: string;
     status?: string;
