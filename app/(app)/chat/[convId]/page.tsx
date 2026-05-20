@@ -19,6 +19,7 @@ import {
   type OptimisticMessage,
 } from "../../../components/ConversationMessages";
 import { ConversationComposer } from "../../../components/ConversationComposer";
+import { OfflineBanner } from "../../../components/OfflineBanner";
 
 export default function ConversationPage() {
   const params = useParams<{ convId: string }>();
@@ -33,8 +34,16 @@ export default function ConversationPage() {
   const { status } = useChatClientStatus();
   const client = useChatClient();
   const live = useConversationLiveMessages(convId);
-  const { history, loadingInitial, loadingMore, hasMore, loadOlder, error: historyError } =
-    useChatHistory(convId);
+  const {
+    history,
+    loadingInitial,
+    loadingMore,
+    hasMore,
+    loadOlder,
+    error: historyError,
+    hostOffline,
+    fromCache,
+  } = useChatHistory(convId);
 
   // Optimistic local messages — added immediately when the user hits send,
   // dropped when the server echoes them back (matching id).
@@ -126,6 +135,12 @@ export default function ConversationPage() {
         conversation={conversation}
         walletAddress={address}
       />
+      {hostOffline ? (
+        <OfflineBanner
+          historyHost={conversation.historyHost}
+          fromCache={fromCache}
+        />
+      ) : null}
       <ConversationMessages
         history={historyTyped}
         live={liveTyped}
