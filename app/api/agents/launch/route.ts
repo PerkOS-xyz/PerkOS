@@ -1,25 +1,22 @@
 /**
  * POST /api/agents/launch
  *
- * Replaces the legacy `/agent-launches` REST endpoint. Writes the agent doc
- * to /wallets/{addr}/agents/{id} via Admin SDK so we can:
- *   - skip client-side Firestore rules (admin bypasses them)
- *   - hold the BYOK modelKey in a separate /agent_secrets/{addr}/{id} doc
- *     that the client never sees
+ * Provisions a new agent record:
+ *   - /wallets/{addr}/agents/{id}     ← user-scoped view (existing)
+ *   - /agents/{name}                  ← global registry consumed by
+ *                                       PerkOS-Chat for WS auth
+ *   - /agent_secrets/{addr}/agents/{id}  ← BYOK model key (server-only)
+ *
+ * The generated `relayApiKey` is returned in the response **only once**.
+ * The client should surface it in a one-shot reveal modal — after that
+ * the key is server-side only and can't be re-fetched.
  *
  * Real infra provisioning (Hermes / OpenClaw runtimes on ECS or similar)
  * lives behind this endpoint when wired up. For now we mark new agents as
  * `ready` immediately so the UI flow completes end-to-end.
- *
- * Request shape:
- *   {
- *     walletAddress: string,
- *     runtime: "Hermes" | "OpenClaw",
- *     name: string,
- *     plugins?: string[],
- *     modelKey?: string   // BYOK; stored in /agent_secrets, never returned
- *   }
  */
+
+import { randomBytes } from "node:crypto";
 
 import { NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
@@ -34,12 +31,23 @@ type LaunchBody = {
   modelKey?: string;
 };
 
+const AGENT_NAME_PATTERN = /^[a-zA-Z0-9_-]{2,32}$/;
+
 async function requireAuth(request: Request): Promise<string> {
   const header = request.headers.get("authorization") ?? "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : null;
   if (!token) throw new Error("Missing Authorization bearer token.");
   const decoded = await adminAuth().verifyIdToken(token);
   return decoded.uid.toLowerCase();
+}
+
+/** Convert the user-facing runtime label to the wire-protocol value. */
+function runtimeKind(label: "Hermes" | "OpenClaw"): "hermes-api" | "openclaw" {
+  return label === "Hermes" ? "hermes-api" : "openclaw";
+}
+
+function newRelayApiKey(): string {
+  return `rk_${randomBytes(32).toString("hex")}`;
 }
 
 export async function POST(request: Request) {
@@ -79,9 +87,12 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
-  if (!name || name.length < 2) {
+  if (!name || !AGENT_NAME_PATTERN.test(name)) {
     return NextResponse.json(
-      { error: "name is required (min 2 chars)." },
+      {
+        error:
+          "name must be 2-32 chars, only letters / digits / underscore / dash.",
+      },
       { status: 400 }
     );
   }
@@ -90,27 +101,72 @@ export async function POST(request: Request) {
   const modelKey = body.modelKey?.trim() || null;
 
   const db = adminDb();
+  const relayApiKey = newRelayApiKey();
 
-  // 1. Reserve the agent doc id
+  // /agents/{name} is the global registry — names must be globally unique.
+  // Use a Firestore transaction to atomically check-and-create so two
+  // concurrent launches can't both win the same name.
+  const globalRef = db.collection("agents").doc(name);
   const agentRef = db
     .collection("wallets")
     .doc(walletAddress)
     .collection("agents")
     .doc();
 
-  await agentRef.set({
-    name,
-    runtime,
-    status: "ready",
-    walletAddress,
-    plugins,
-    modelKeyProvided: Boolean(modelKey),
-    createdAt: FieldValue.serverTimestamp(),
-    updatedAt: FieldValue.serverTimestamp(),
-  });
+  try {
+    await db.runTransaction(async (tx) => {
+      const existing = await tx.get(globalRef);
+      if (existing.exists) {
+        const err = new Error("AGENT_NAME_TAKEN");
+        err.name = "AgentNameTakenError";
+        throw err;
+      }
 
-  // 2. Stash the BYOK key in a separate collection the client can never read.
-  //    /agent_secrets is locked down by rules; only admin SDK touches it.
+      // Per-wallet record (the existing schema; unchanged shape for the UI).
+      tx.set(agentRef, {
+        name,
+        runtime,
+        status: "ready",
+        walletAddress,
+        plugins,
+        modelKeyProvided: Boolean(modelKey),
+        createdAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+
+      // Global registry doc consumed by PerkOS-Chat (and Transport in the
+      // future) to verify WS auth on agent connections.
+      tx.set(globalRef, {
+        name,
+        relayApiKey,
+        walletAddress,
+        agentId: agentRef.id,
+        runtime: runtimeKind(runtime),
+        status: "active",
+        scopes: ["chat:send", "chat:history", "tasks:receive"],
+        plugins,
+        createdAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+    });
+  } catch (err) {
+    if (err instanceof Error && err.name === "AgentNameTakenError") {
+      return NextResponse.json(
+        {
+          error: `Agent name "${name}" is already taken. Pick another.`,
+          code: "AGENT_NAME_TAKEN",
+        },
+        { status: 409 }
+      );
+    }
+    const msg = err instanceof Error ? err.message : String(err);
+    return NextResponse.json(
+      { error: `Failed to provision agent: ${msg}` },
+      { status: 500 }
+    );
+  }
+
+  // BYOK key — separate collection the client never reads.
   if (modelKey) {
     await db
       .collection("agent_secrets")
@@ -126,6 +182,19 @@ export async function POST(request: Request) {
   return NextResponse.json({
     ok: true,
     launchId: agentRef.id,
+    /**
+     * The relayApiKey is returned exactly once — the client must show it to
+     * the user immediately (one-shot reveal modal). After this response the
+     * key is server-only.
+     */
+    credentials: {
+      agentName: name,
+      relayApiKey,
+      chatUrl:
+        process.env.NEXT_PUBLIC_PERKOS_CHAT_URL ?? "wss://chat.perkos.xyz/chat",
+      transportUrl:
+        process.env.NEXT_PUBLIC_PERKOS_TRANSPORT_URL ?? "wss://transport.perkos.xyz/a2a",
+    },
     result: {
       mode: modelKey ? "byok" : "perkos",
       status: "ready",
