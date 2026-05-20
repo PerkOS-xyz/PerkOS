@@ -36,6 +36,7 @@ import {
 } from "firebase/firestore";
 
 import { firebaseDb } from "./firebase";
+import { validateSwarm, type SwarmDefinition } from "./swarm";
 
 export type Project = {
   id?: string;
@@ -46,6 +47,11 @@ export type Project = {
   tasks: number;
   budget: string;
   agentIds?: string[];
+  /**
+   * Optional swarm definition: declarative roster of agents + roles for
+   * this project's chat room. Set/exported via the swarm.yaml flow.
+   */
+  swarm?: SwarmDefinition;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -162,6 +168,14 @@ const projectConverter: FirestoreDataConverter<Project> = {
   },
   fromFirestore(snap) {
     const data = snap.data();
+    // Defensively validate the persisted swarm; surface only if it still
+    // matches the current schema. Older projects without a swarm field
+    // are unchanged.
+    let swarm: SwarmDefinition | undefined;
+    if (data.swarm && typeof data.swarm === "object") {
+      const v = validateSwarm(data.swarm);
+      if (v.ok) swarm = v.swarm;
+    }
     return {
       id: snap.id,
       name: (data.name as string) ?? "",
@@ -171,6 +185,7 @@ const projectConverter: FirestoreDataConverter<Project> = {
       tasks: (data.tasks as number) ?? 0,
       budget: (data.budget as string) ?? "0 USDC",
       agentIds: (data.agentIds as string[] | undefined) ?? [],
+      swarm,
       createdAt: tsToIso(data.createdAt),
       updatedAt: tsToIso(data.updatedAt),
     };
@@ -449,6 +464,39 @@ export async function updateProject(input: {
     throw new Error("Project not found after update.");
   }
   return { project: fresh.data() };
+}
+
+/**
+ * Save (or clear) the swarm definition for a project.
+ *
+ * Validates the input first — callers can pass an unvalidated object
+ * (e.g. straight from YAML parse) and we'll throw on bad shape rather
+ * than persist garbage. Pass `null` to remove the swarm.
+ */
+export async function setProjectSwarm(input: {
+  walletAddress: string;
+  projectId: string;
+  swarm: SwarmDefinition | null;
+}): Promise<void> {
+  const ref = projectDoc(input.walletAddress, input.projectId);
+  if (input.swarm === null) {
+    await updateDoc(ref, {
+      swarm: null,
+      updatedAt: serverTimestamp(),
+    });
+    return;
+  }
+  const validation = validateSwarm(input.swarm);
+  if (!validation.ok) {
+    const summary = validation.errors
+      .map((e) => `${e.path || "(root)"}: ${e.message}`)
+      .join("; ");
+    throw new Error(`Invalid swarm: ${summary}`);
+  }
+  await updateDoc(ref, {
+    swarm: validation.swarm,
+    updatedAt: serverTimestamp(),
+  });
 }
 
 export async function deleteProject(input: {
