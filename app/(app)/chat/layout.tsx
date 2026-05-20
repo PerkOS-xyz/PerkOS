@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { cn } from "@/lib/utils";
 
 import { ConversationSidebar } from "../../components/ConversationSidebar";
+import { ChatClientProvider } from "../../lib/useChatClient";
 
 /**
  * Two-pane chat layout:
@@ -34,6 +35,7 @@ export default function ChatLayout({ children }: { children: ReactNode }) {
   const onNew = undefined;
 
   return (
+    <ChatClientProvider>
     <div className="-mx-4 -mt-4 flex h-[calc(100dvh-4rem)] md:-mx-8">
       {/* Desktop sidebar */}
       <div className="hidden md:flex md:w-64 md:shrink-0 md:flex-col">
@@ -81,5 +83,6 @@ export default function ChatLayout({ children }: { children: ReactNode }) {
         {children}
       </main>
     </div>
+    </ChatClientProvider>
   );
 }
