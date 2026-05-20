@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { cn } from "@/lib/utils";
 
 import { ConversationSidebar } from "../../components/ConversationSidebar";
+import { NewConversationDialog } from "../../components/NewConversationDialog";
 import { ChatClientProvider } from "../../lib/useChatClient";
 
 /**
@@ -30,9 +31,12 @@ import { ChatClientProvider } from "../../lib/useChatClient";
 export default function ChatLayout({ children }: { children: ReactNode }) {
   const { address } = useConnection();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [newOpen, setNewOpen] = useState(false);
 
-  // TODO(#16): wire the "New conversation" picker here once it lands.
-  const onNew = undefined;
+  const onNew = () => {
+    setNewOpen(true);
+    setMobileOpen(false); // close the mobile sheet behind the dialog
+  };
 
   return (
     <ChatClientProvider>
@@ -82,6 +86,12 @@ export default function ChatLayout({ children }: { children: ReactNode }) {
       >
         {children}
       </main>
+
+      <NewConversationDialog
+        open={newOpen}
+        onOpenChange={setNewOpen}
+        walletAddress={address}
+      />
     </div>
     </ChatClientProvider>
   );
