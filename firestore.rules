@@ -60,16 +60,26 @@ service cloud.firestore {
     }
 
     // Receipts: signed attestations of a conversation. Wallet owner reads
-    // their own; writes require self-auth (covered by the broader rule
-    // above). Updates beyond the initial signed create are rejected so a
-    // signed receipt is immutable from the client side. The Admin SDK can
-    // still write `anchor` fields server-side when on-chain anchoring
-    // lands.
+    // and creates their own. The signed manifest + signature are immutable
+    // after creation. The single permitted client-side update path is the
+    // wallet attaching an on-chain anchor record AFTER signing — and only
+    // once, no overwrites. Anything else (including a second anchor) is
+    // rejected. Deletes are blocked entirely.
 
     match /wallets/{walletAddress}/receipts/{receiptId} {
       allow read: if isSelf(walletAddress);
       allow create: if isSelf(walletAddress);
-      allow update, delete: if false;
+
+      allow update: if isSelf(walletAddress)
+        && !('anchor' in resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['anchor'])
+        && request.resource.data.anchor is map
+        && request.resource.data.anchor.chainId is int
+        && request.resource.data.anchor.contractAddress is string
+        && request.resource.data.anchor.receiptId is string
+        && request.resource.data.anchor.txHash is string;
+
+      allow delete: if false;
     }
 
     // Public submissions -------------------------------------------------
