@@ -1,0 +1,22 @@
+app.perkos.xyz {
+  encode gzip zstd
+
+  reverse_proxy perkos-miniapp:3000 {
+    header_up Host {host}
+    header_up X-Real-IP {remote}
+    header_up X-Forwarded-For {remote}
+  }
+
+  log {
+    output file /var/log/caddy/app.perkos.xyz.log
+    format console
+  }
+}
+
+# When ready to promote testing app.perkos.xyz to the production
+# perkos.xyz, add a second block — Caddy auto-issues a new cert.
+#
+# perkos.xyz {
+#   encode gzip zstd
+#   reverse_proxy perkos-miniapp:3000
+# }
