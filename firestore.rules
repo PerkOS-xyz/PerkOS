@@ -73,6 +73,19 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Global agent registry ---------------------------------------------
+    //
+    // /agents/{agentName} contains the relayApiKey that lets that agent
+    // authenticate against chat.perkos.xyz. Only the Admin SDK (the
+    // MiniApp's /api/agents/launch endpoint and PerkOS-Chat's verifier)
+    // may touch these docs. Browser clients NEVER read the registry —
+    // exposing relayApiKey to a malicious wallet would let it impersonate
+    // any registered agent.
+
+    match /agents/{agentName} {
+      allow read, write: if false;
+    }
+
     // Default deny -------------------------------------------------------
 
     match /{document=**} {

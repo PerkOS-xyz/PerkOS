@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
 import { toast } from "sonner";
@@ -45,7 +45,12 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
-import { launchAgent, type AgentRuntime } from "../../../lib/perkosApi";
+import {
+  launchAgent,
+  type AgentRuntime,
+  type LaunchAgentCredentials,
+} from "../../../lib/perkosApi";
+import { AgentKeyRevealDialog } from "../../../components/AgentKeyRevealDialog";
 import { useOnboarding } from "../../../lib/onboardingState";
 import { useFormDraft } from "../../../lib/useFormDraft";
 import {
@@ -161,6 +166,9 @@ export default function AgentLauncherPage() {
   const { markAgentRegistered } = useOnboarding();
   const fromOnboarding = searchParams.get("from") === "onboarding";
 
+  const [issuedCredentials, setIssuedCredentials] =
+    useState<LaunchAgentCredentials | null>(null);
+
   const [state, setState, clearDraft] = useFormDraft<State>(
     "agent.new.v1",
     {
@@ -203,13 +211,20 @@ export default function AgentLauncherPage() {
         modelKey: state.llmMode === "byok" ? state.apiKey : undefined,
       });
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ["wallet-agents", address] });
       if (fromOnboarding) markAgentRegistered();
       toast.success("Agent launched", {
         description: `${state.agentName.trim() || pickedTemplate?.name || "Your agent"} is ready.`,
       });
       clearDraft();
+      // If the server returned credentials (new agents always do; legacy
+      // path doesn't), defer the redirect — surface the one-shot reveal
+      // modal first. The modal's "Done" handler does the redirect.
+      if (response?.credentials) {
+        setIssuedCredentials(response.credentials);
+        return;
+      }
       router.replace(fromOnboarding ? "/dashboard" : "/agents");
     },
     onError: (err: Error) => {
@@ -369,6 +384,15 @@ export default function AgentLauncherPage() {
           </Button>
         )}
       </div>
+
+      <AgentKeyRevealDialog
+        open={!!issuedCredentials}
+        credentials={issuedCredentials}
+        onClose={() => {
+          setIssuedCredentials(null);
+          router.replace(fromOnboarding ? "/dashboard" : "/agents");
+        }}
+      />
     </div>
   );
 }
