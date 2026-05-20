@@ -29,6 +29,7 @@ import {
   getDoc,
   onSnapshot,
   orderBy,
+  updateDoc,
   query,
   serverTimestamp,
   setDoc,
@@ -179,6 +180,26 @@ export async function getReceipt(
 ): Promise<Receipt | null> {
   const snap = await getDoc(receiptDoc(walletAddress, receiptId));
   return snap.exists() ? snap.data() : null;
+}
+
+/**
+ * Attach an on-chain anchor record to an existing receipt.
+ *
+ * Firestore rules permit this exactly once per receipt — the
+ * `anchor` field cannot already be set, and the only field that may
+ * change on this update is `anchor` itself. The signed manifest and
+ * signature stay immutable. Calling this on a receipt that's already
+ * anchored will be rejected by the rules.
+ */
+export async function setReceiptAnchor(
+  walletAddress: string,
+  receiptId: string,
+  anchor: NonNullable<Receipt["anchor"]>,
+): Promise<void> {
+  // Plain `updateDoc` so the converter's `toFirestore` is not invoked
+  // (which would re-write the whole document and trip the
+  // affectedKeys()=['anchor'] rule check).
+  await updateDoc(receiptDoc(walletAddress, receiptId), { anchor });
 }
 
 /** Realtime subscription to all receipts for the wallet (newest first). */
