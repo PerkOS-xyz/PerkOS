@@ -97,6 +97,13 @@ const SLASH_COMMANDS: SlashCommand[] = [
   },
 ];
 
+// Speech-to-text uses the shared hook. The existing voice-note machinery
+// (MediaRecorder + audio blob capture) remains in place but the visible
+// Mic button now triggers dictation, which the user actually finds useful
+// (the voice-note path only produced a text marker and was never wired
+// to a real audio handler in callers).
+import { useSpeechToText } from "../lib/useSpeechToText";
+
 function matchCommands(input: string): SlashCommand[] {
   if (!input.startsWith("/")) return [];
   const query = input.slice(1).toLowerCase().split(/\s+/)[0] ?? "";
@@ -129,6 +136,16 @@ export function ChatComposer({
   const [recordSeconds, setRecordSeconds] = useState(0);
   const [recordError, setRecordError] = useState<string | null>(null);
   const [slashIndex, setSlashIndex] = useState(0);
+
+  // Dictation (Web Speech API). Appends transcribed phrases to the input.
+  const speech = useSpeechToText({
+    onFinal: (chunk) => {
+      const cleaned = chunk.trim();
+      if (!cleaned) return;
+      const sep = !value || /[.,;:!?\s]$/.test(value) ? "" : " ";
+      onChange(`${value}${sep}${cleaned}`);
+    },
+  });
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -393,16 +410,19 @@ export function ChatComposer({
               disabled={disabled}
               className="flex-1 resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
             />
-            {value.trim().length === 0 ? (
+            {speech.supported && value.trim().length === 0 ? (
               <Button
                 type="button"
                 size="icon"
                 variant="ghost"
-                onClick={startRecording}
+                onClick={speech.toggle}
                 disabled={disabled || sending}
-                className="h-8 w-8 rounded-full text-muted-foreground hover:text-primary"
-                aria-label="Record voice note"
-                title="Record voice note"
+                className={cn(
+                  "h-8 w-8 rounded-full text-muted-foreground hover:text-primary",
+                  speech.listening && "animate-pulse text-primary",
+                )}
+                aria-label={speech.listening ? "Stop dictation" : "Dictate"}
+                title={speech.listening ? "Stop dictation" : "Dictate with microphone"}
               >
                 <Mic className="h-4 w-4" />
               </Button>

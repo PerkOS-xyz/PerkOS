@@ -1,11 +1,13 @@
 "use client";
 
-import { Send } from "lucide-react";
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { Mic, MicOff, Send } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+
+import { useSpeechToText } from "../lib/useSpeechToText";
 
 type Props = {
   /**
@@ -31,6 +33,20 @@ export function ConversationComposer({
   const [value, setValue] = useState("");
   const ref = useRef<HTMLTextAreaElement | null>(null);
 
+  // Append speech-recognized phrases to the textarea. We use a ref so the
+  // hook's onFinal callback doesn't capture a stale setter.
+  const appendTranscript = useCallback((chunk: string) => {
+    const cleaned = chunk.trim();
+    if (!cleaned) return;
+    setValue((prev) => {
+      if (!prev) return cleaned;
+      const sep = /[.,;:!?\s]$/.test(prev) ? "" : " ";
+      return `${prev}${sep}${cleaned}`;
+    });
+  }, []);
+
+  const speech = useSpeechToText({ onFinal: appendTranscript });
+
   // Grow up to 8 rows.
   useEffect(() => {
     const el = ref.current;
@@ -42,6 +58,7 @@ export function ConversationComposer({
   function submit() {
     const text = value.trim();
     if (!text || disabled) return;
+    if (speech.listening) speech.stop();
     onSend(text);
     setValue("");
   }
@@ -54,6 +71,11 @@ export function ConversationComposer({
   }
 
   const tooLong = value.length > MAX_LENGTH;
+  const placeholder = speech.listening
+    ? speech.interimText || "Listening… speak now"
+    : disabled
+    ? disabledReason || "Cannot send right now"
+    : "Write a message…";
 
   return (
     <form
@@ -68,11 +90,7 @@ export function ConversationComposer({
             value={value}
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={onKeyDown}
-            placeholder={
-              disabled
-                ? disabledReason || "Cannot send right now"
-                : "Write a message…"
-            }
+            placeholder={placeholder}
             disabled={disabled}
             autoFocus={autoFocus}
             maxLength={MAX_LENGTH + 200}
@@ -81,6 +99,7 @@ export function ConversationComposer({
             className={cn(
               "min-h-[40px] resize-none py-2 pr-12 text-sm",
               tooLong && "border-destructive focus-visible:border-destructive",
+              speech.listening && "border-primary/60 focus-visible:border-primary/60",
             )}
           />
           {value.length > MAX_LENGTH - 200 ? (
@@ -94,6 +113,27 @@ export function ConversationComposer({
             </span>
           ) : null}
         </div>
+        {speech.supported ? (
+          <Button
+            type="button"
+            variant={speech.listening ? "default" : "outline"}
+            size="sm"
+            disabled={disabled}
+            aria-label={speech.listening ? "Stop dictation" : "Start dictation"}
+            title={speech.listening ? "Stop dictation" : "Dictate with microphone"}
+            onClick={speech.toggle}
+            className={cn(
+              "h-9 w-9 p-0",
+              speech.listening && "animate-pulse",
+            )}
+          >
+            {speech.listening ? (
+              <MicOff className="h-3.5 w-3.5" />
+            ) : (
+              <Mic className="h-3.5 w-3.5" />
+            )}
+          </Button>
+        ) : null}
         <Button
           type="submit"
           size="sm"
@@ -104,7 +144,11 @@ export function ConversationComposer({
           <Send className="h-3.5 w-3.5" />
         </Button>
       </div>
-      {disabled && disabledReason ? (
+      {speech.error ? (
+        <p className="mx-auto mt-1 max-w-3xl px-1 text-[11px] text-destructive">
+          Dictation error: {speech.error}
+        </p>
+      ) : disabled && disabledReason ? (
         <p className="mx-auto mt-1 max-w-3xl px-1 text-[11px] text-muted-foreground">
           {disabledReason}
         </p>

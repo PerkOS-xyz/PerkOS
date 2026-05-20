@@ -1,6 +1,6 @@
 "use client";
 
-import { Bot, Circle, Hash, MessageSquare, Pencil } from "lucide-react";
+import { Bot, Circle, FileSignature, Hash, MessageSquare, Pencil } from "lucide-react";
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 
 import { updateConversation, type Conversation } from "../lib/conversationsApi";
 import { useChatClientStatus } from "../lib/useChatClient";
+import { ReceiptDialog } from "./ReceiptDialog";
 
 type Props = {
   conversation: Conversation;
@@ -26,6 +27,7 @@ type Props = {
 
 export function ConversationHeader({ conversation, walletAddress }: Props) {
   const [renameOpen, setRenameOpen] = useState(false);
+  const [receiptOpen, setReceiptOpen] = useState(false);
   const KindIcon = conversation.kind === "channel" ? Hash : MessageSquare;
   const { status } = useChatClientStatus();
 
@@ -60,6 +62,17 @@ export function ConversationHeader({ conversation, walletAddress }: Props) {
           type="button"
           variant="ghost"
           size="sm"
+          aria-label="Generate signed receipt"
+          title="Generate signed receipt"
+          onClick={() => setReceiptOpen(true)}
+          className="h-7 w-7 p-0"
+        >
+          <FileSignature className="h-3.5 w-3.5" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
           aria-label="Rename conversation"
           onClick={() => setRenameOpen(true)}
           className="h-7 w-7 p-0"
@@ -71,6 +84,12 @@ export function ConversationHeader({ conversation, walletAddress }: Props) {
       <RenameDialog
         open={renameOpen}
         onOpenChange={setRenameOpen}
+        conversation={conversation}
+        walletAddress={walletAddress}
+      />
+      <ReceiptDialog
+        open={receiptOpen}
+        onOpenChange={setReceiptOpen}
         conversation={conversation}
         walletAddress={walletAddress}
       />

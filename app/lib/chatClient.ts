@@ -44,6 +44,23 @@ interface PendingHistory {
   timer: ReturnType<typeof setTimeout>;
 }
 
+export interface ReceiptSummary {
+  convId: string;
+  hostAgent: string;
+  transcriptHash: string;
+  hashAlgo: "sha256";
+  messageCount: number;
+  firstMessageAt: string | null;
+  lastMessageAt: string | null;
+  generatedAt: string;
+}
+
+interface PendingReceipt {
+  resolve: (summary: ReceiptSummary) => void;
+  reject: (err: Error) => void;
+  timer: ReturnType<typeof setTimeout>;
+}
+
 export class ChatClient {
   private ws: WebSocket | null = null;
   private url: string;
@@ -55,6 +72,7 @@ export class ChatClient {
   /** sender-side ack listener for a specific outbound message id. */
   private ackListeners = new Map<string, AckListener>();
   private pendingHistory = new Map<string, PendingHistory>();
+  private pendingReceipts = new Map<string, PendingReceipt>();
   private reconnectMs = MIN_RECONNECT_MS;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
@@ -99,12 +117,17 @@ export class ChatClient {
     }
     this.setStatus("idle");
     this.currentSession = null;
-    // Reject pending history queries.
+    // Reject pending requests (history + receipts).
     for (const p of this.pendingHistory.values()) {
       clearTimeout(p.timer);
       p.reject(new Error("client stopped"));
     }
     this.pendingHistory.clear();
+    for (const p of this.pendingReceipts.values()) {
+      clearTimeout(p.timer);
+      p.reject(new Error("client stopped"));
+    }
+    this.pendingReceipts.clear();
     this.ackListeners.clear();
   }
 
@@ -170,6 +193,25 @@ export class ChatClient {
         before: input.before ?? null,
         limit: input.limit ?? 50,
       });
+    });
+  }
+
+  /**
+   * Ask the conversation's historyHost agent to compute a tamper-evident
+   * hash of the local jsonl + metadata. The result is the input to the
+   * wallet-signing step in receiptsApi.
+   *
+   * Rejects on timeout or HOST_OFFLINE / NOT_FOUND / NO_HOST server errors.
+   */
+  requestReceipt(input: { convId: string }): Promise<ReceiptSummary> {
+    return new Promise((resolve, reject) => {
+      const id = makeId();
+      const timer = setTimeout(() => {
+        this.pendingReceipts.delete(id);
+        reject(new Error("receipt request timed out"));
+      }, HISTORY_TIMEOUT_MS);
+      this.pendingReceipts.set(id, { resolve, reject, timer });
+      this.sendFrame({ type: "receipt_request", id, convId: input.convId });
     });
   }
 
@@ -290,31 +332,54 @@ export class ChatClient {
       return;
     }
 
-    if (type === "history_pending") {
-      // server acknowledged the request; we still wait for history_chunk
+    if (type === "history_pending" || type === "receipt_pending") {
+      // server acknowledged the request; we wait for the chunk/response
+      return;
+    }
+
+    if (type === "receipt_response") {
+      const id = String(frame.id);
+      const pending = this.pendingReceipts.get(id);
+      if (!pending) return;
+      this.pendingReceipts.delete(id);
+      clearTimeout(pending.timer);
+      pending.resolve({
+        convId: String(frame.convId),
+        hostAgent: String(frame.hostAgent ?? "agent:unknown"),
+        transcriptHash: String(frame.transcriptHash ?? ""),
+        hashAlgo: "sha256",
+        messageCount: Number(frame.messageCount ?? 0),
+        firstMessageAt: (frame.firstMessageAt as string | null) ?? null,
+        lastMessageAt: (frame.lastMessageAt as string | null) ?? null,
+        generatedAt: String(frame.generatedAt ?? new Date().toISOString()),
+      });
       return;
     }
 
     if (type === "error") {
       const code = String(frame.code ?? "");
       const message = String(frame.message ?? "");
-      // If the error is in response to a known pending history, reject it.
-      // We try by message-id correlation when the server echoes the id.
       const id = String(frame.id ?? "");
+      // Reject correlated pending requests
       if (id && this.pendingHistory.has(id)) {
         const pending = this.pendingHistory.get(id)!;
         this.pendingHistory.delete(id);
         clearTimeout(pending.timer);
         pending.reject(new Error(`${code}: ${message}`));
       }
-      // Otherwise surface via status if it's serious.
+      if (id && this.pendingReceipts.has(id)) {
+        const pending = this.pendingReceipts.get(id)!;
+        this.pendingReceipts.delete(id);
+        clearTimeout(pending.timer);
+        pending.reject(new Error(`${code}: ${message}`));
+      }
       if (code === "HOST_OFFLINE" || code === "NOT_FOUND") {
         this.setStatus(this.status, `${code}: ${message}`);
       }
       return;
     }
 
-    if (type === "pong" || type === "history_pending") return;
+    if (type === "pong") return;
   }
 
   private sendFrame(frame: Record<string, unknown>): void {

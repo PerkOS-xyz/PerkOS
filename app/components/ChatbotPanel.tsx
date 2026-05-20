@@ -31,6 +31,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { assistantChat } from "../lib/perkosApi";
+import { useSpeechToText } from "../lib/useSpeechToText";
 import { useChatbot, type ChatBubble } from "./ChatbotProvider";
 import { Markdown } from "./Markdown";
 
@@ -67,6 +68,18 @@ export function ChatbotPanel() {
   const [recording, setRecording] = useState(false);
   const [recordSeconds, setRecordSeconds] = useState(0);
   const [recordError, setRecordError] = useState<string | null>(null);
+
+  // Dictation (Web Speech API). Appends transcribed phrases to the draft.
+  const speech = useSpeechToText({
+    onFinal: (chunk) => {
+      const cleaned = chunk.trim();
+      if (!cleaned) return;
+      setDraft((prev) => {
+        const sep = !prev || /[.,;:!?\s]$/.test(prev) ? "" : " ";
+        return `${prev}${sep}${cleaned}`;
+      });
+    },
+  });
   const scrollRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -341,16 +354,19 @@ export function ChatbotPanel() {
                   rows={1}
                   className="flex-1 resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
                 />
-                {draft.trim().length === 0 ? (
+                {speech.supported && draft.trim().length === 0 ? (
                   <Button
                     type="button"
                     size="icon"
                     variant="ghost"
-                    onClick={startRecording}
+                    onClick={speech.toggle}
                     disabled={mutation.isPending}
-                    className="h-8 w-8 rounded-full text-muted-foreground hover:text-primary"
-                    aria-label="Record voice note"
-                    title="Record voice note"
+                    className={cn(
+                      "h-8 w-8 rounded-full text-muted-foreground hover:text-primary",
+                      speech.listening && "animate-pulse text-primary",
+                    )}
+                    aria-label={speech.listening ? "Stop dictation" : "Dictate"}
+                    title={speech.listening ? "Stop dictation" : "Dictate with microphone"}
                   >
                     <Mic className="h-4 w-4" />
                   </Button>
