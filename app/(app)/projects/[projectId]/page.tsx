@@ -27,11 +27,13 @@ import { Bot, Plus } from "lucide-react";
 import { ChatComposer } from "../../../components/ChatComposer";
 import { Markdown } from "../../../components/Markdown";
 import { KanbanBoard } from "../../../components/KanbanBoard";
+import { ConductorBoard } from "../../../components/ConductorBoard";
+import type { SwarmDefinition } from "../../../lib/swarm";
 import { EmptyState } from "../../../components/EmptyState";
 import { formatAddress } from "../../../lib/format";
 import { useProjectMessages } from "../../../lib/useProjectMessages";
 
-type Tab = "tasks" | "agents" | "chat";
+type Tab = "tasks" | "conductor" | "agents" | "chat";
 
 type PageProps = {
   params: Promise<{ projectId: string }>;
@@ -43,13 +45,22 @@ export default function ProjectDetailPage({ params }: PageProps) {
   const { address, isConnected } = useConnection();
   const initialTab = (searchParams.get("tab") as Tab) || "tasks";
   const [tab, setTab] = useState<Tab>(
-    initialTab === "agents" || initialTab === "chat" ? initialTab : "tasks"
+    initialTab === "agents" ||
+      initialTab === "chat" ||
+      initialTab === "conductor"
+      ? initialTab
+      : "tasks"
   );
 
   // Keep tab in sync if user lands via a deep link.
   useEffect(() => {
     const next = searchParams.get("tab");
-    if (next === "tasks" || next === "agents" || next === "chat") {
+    if (
+      next === "tasks" ||
+      next === "conductor" ||
+      next === "agents" ||
+      next === "chat"
+    ) {
       setTab(next);
     }
   }, [searchParams]);
@@ -79,6 +90,13 @@ export default function ProjectDetailPage({ params }: PageProps) {
           <Tabs current={tab} onChange={setTab} />
           {tab === "tasks" ? (
             <TasksTab tasks={data.tasks} projectId={projectId} />
+          ) : null}
+          {tab === "conductor" ? (
+            <ConductorTab
+              tasks={data.tasks}
+              swarm={data.project.swarm}
+              projectId={projectId}
+            />
           ) : null}
           {tab === "agents" ? <AgentsTab detail={data} /> : null}
           {tab === "chat" ? (
@@ -205,6 +223,7 @@ function Tabs({
 }) {
   const items: { id: Tab; label: string }[] = [
     { id: "tasks", label: "Tasks" },
+    { id: "conductor", label: "Conductor" },
     { id: "agents", label: "Agents" },
     { id: "chat", label: "Project chat" },
   ];
@@ -306,6 +325,40 @@ function TasksTab({
       <p className="text-[10px] text-muted-foreground">
         Drag-and-drop is local for now. Backend sync coming with the next
         release.
+      </p>
+    </div>
+  );
+}
+
+function ConductorTab({
+  tasks,
+  swarm,
+  projectId,
+}: {
+  tasks: Task[];
+  swarm?: SwarmDefinition;
+  projectId: string;
+}) {
+  return (
+    <div className="flex flex-col gap-3">
+      <ConductorBoard
+        tasks={tasks}
+        swarm={swarm}
+        projectId={projectId}
+        onMove={(taskId, nextStatus) => {
+          // Local-only for now — same posture as TasksTab. Wire to a real
+          // PATCH once the conductor view's drag actions are committed.
+          // eslint-disable-next-line no-console
+          console.info("[Conductor] move", {
+            projectId,
+            taskId,
+            nextStatus: KANBAN_TO_BACKEND[nextStatus],
+          });
+        }}
+      />
+      <p className="text-[10px] text-muted-foreground">
+        Roster surfaces the active workers and their in-progress load. Drag-
+        and-drop is local for now.
       </p>
     </div>
   );
