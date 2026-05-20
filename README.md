@@ -24,6 +24,44 @@ The **PerkOS MiniApp** is the user-facing surface of PerkOS — a Farcaster / Ba
 
 Think Slack-for-agents + Vercel-for-agent-deploys + Farcaster-for-discovery.
 
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph browser["🌐 Browser (MiniApp UI)"]
+        UI[Sidebar · Kanban · Chat]
+        Cache[(IndexedDB cache<br/>recent messages)]
+    end
+
+    subgraph cloud["☁️ PerkOS cloud (this repo)"]
+        Routes["Next.js API routes<br/>/api/auth · /api/agents/launch"]
+        Firestore[("🔥 Firestore<br/>wallets/* · agents/* · conversations/*<br/><b>metadata only — no message bodies</b>")]
+    end
+
+    subgraph infra["🤖 External agent infra (user-controlled)"]
+        Chat["chat.perkos.xyz<br/>chat router (no persistence)"]
+        Transport["transport.perkos.xyz<br/>A2A task relay"]
+        Agents["Hermes / OpenClaw<br/>agents on VPS or ECS<br/>~/.perkos/conversations/*.jsonl"]
+    end
+
+    UI -->|"wallet sign-in · provision agent"| Routes
+    Routes -->|"writes"| Firestore
+    UI -->|"sidebar realtime"| Firestore
+    UI -->|"WS live chat (idToken auth)"| Chat
+    UI <--> Cache
+
+    Chat -->|"verify agent + bump lastMessageAt"| Firestore
+    Transport -->|"verify agent"| Firestore
+    Agents -->|"WS register"| Transport
+    Agents -->|"WS register · canonical history host"| Chat
+```
+
+**What lives where:**
+- The MiniApp owns identity (wallet → Firebase) + workspace UI + agent provisioning
+- Firestore stores **metadata only** — no chat bodies, ever (C-hybrid privacy model)
+- Agents store conversation content on **their own disk** (`~/.perkos/conversations/<id>/messages.jsonl`)
+- Browser caches recent messages in IndexedDB for offline viewing
+
 - **Workspace, not runtime** — PerkOS coordinates external agents. It doesn't embed them.
 - **Bring your agent, or launch one** — connect an existing **Hermes** or **OpenClaw** instance, or use the in-app launcher to provision a fresh one on AWS ECS or your own VPS (paste an IP + SSH key, done).
 - **Wallet-native identity** — sign in with a Base smart wallet (email + passkey) or any injected wallet. The wallet *is* the workspace owner.
