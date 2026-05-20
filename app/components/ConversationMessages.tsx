@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 
 import type { ChatMessage } from "../lib/chatClient";
 import { Markdown } from "./Markdown";
+import { ToolPill } from "./ToolPill";
 
 export type OptimisticMessage = ChatMessage & {
   /** Local-only marker for messages this client just sent. */
@@ -178,6 +179,13 @@ function MessageRow({
         )}
       >
         <Markdown>{message.text}</Markdown>
+        {message.toolCalls && message.toolCalls.length > 0 ? (
+          <div className="mt-2 flex flex-col gap-1.5">
+            {message.toolCalls.map((call) => (
+              <ToolPill key={call.id} call={call} />
+            ))}
+          </div>
+        ) : null}
       </div>
       <span className="px-1 font-mono text-[9px] text-muted-foreground/70">
         {formatTime(message.timestamp)}

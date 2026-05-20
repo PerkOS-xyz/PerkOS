@@ -225,4 +225,59 @@ describe("ChatClient message routing", () => {
     expect(received).toEqual(["hello"]);
     client.stop();
   });
+
+  it("threads toolCalls through chat_message frames and drops malformed entries", async () => {
+    const client = new ChatClient({
+      url: "ws://test/chat",
+      getToken: async () => "token",
+    });
+    client.start();
+    await new Promise((r) => setTimeout(r, 5));
+    activeFake!.push({ type: "auth_ok", session: { walletAddress: "0xabc" } });
+
+    const seen: Array<{ id: string; toolCalls?: unknown }> = [];
+    client.onMessage("c1", (msg) => seen.push({ id: msg.id, toolCalls: msg.toolCalls }));
+
+    activeFake!.push({
+      type: "chat_message",
+      id: "tc1",
+      convId: "c1",
+      from: "agent:apollo",
+      text: "ran ls",
+      timestamp: "2026-05-20T10:00:00.000Z",
+      toolCalls: [
+        { id: "a", name: "Bash", status: "ok", summary: "ls", durationMs: 12 },
+        { id: "b", name: "Read", status: "not-a-real-status" }, // status falls back to "ok"
+        { name: "MissingId", status: "ok" }, // dropped
+        "not-an-object", // dropped
+      ],
+    });
+    activeFake!.push({
+      type: "chat_message",
+      id: "tc2",
+      convId: "c1",
+      from: "agent:apollo",
+      text: "no tools",
+      timestamp: "2026-05-20T10:01:00.000Z",
+      toolCalls: [], // empty array normalizes to undefined
+    });
+    activeFake!.push({
+      type: "chat_message",
+      id: "tc3",
+      convId: "c1",
+      from: "agent:apollo",
+      text: "no field",
+      timestamp: "2026-05-20T10:02:00.000Z",
+    });
+
+    expect(seen).toHaveLength(3);
+    const tc1 = seen[0].toolCalls as Array<{ id: string; status: string; durationMs?: number }>;
+    expect(tc1).toHaveLength(2);
+    expect(tc1[0]).toMatchObject({ id: "a", status: "ok", durationMs: 12 });
+    expect(tc1[1]).toMatchObject({ id: "b", status: "ok" });
+
+    expect(seen[1].toolCalls).toBeUndefined();
+    expect(seen[2].toolCalls).toBeUndefined();
+    client.stop();
+  });
 });
