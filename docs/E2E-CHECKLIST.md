@@ -7,6 +7,12 @@ debugging the swap, not the UI.
 Time budget: ~30 min for the happy path, ~60 min if you also do the edge
 cases.
 
+> **Chat flow** lives in [CHAT-E2E.md](./CHAT-E2E.md) — separate checklist
+> that exercises the conversation sidebar, WS client, cache, and the
+> 3-agent demo. Run after this one is green and the
+> [demo provisioning](https://github.com/PerkOS-xyz/PerkOS-A2A/blob/main/docs/demo-setup.md)
+> has been completed.
+
 ## Setup
 
 ```bash
