@@ -7,13 +7,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
 import { ArrowRight, Bot, Folder, Plus, Sparkles } from "lucide-react";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -29,7 +22,6 @@ import {
   SearchInput,
   matchesQuery,
 } from "../../components/SearchInput";
-import { EmptyState } from "../../components/EmptyState";
 
 function initials(name: string): string {
   return name
@@ -70,7 +62,7 @@ export default function ChatHubPage() {
   const showSearch = allAgents.length + allProjects.length > 3;
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
         <h1 className="text-3xl font-medium text-foreground">Chat</h1>
         <p className="text-sm text-muted-foreground">
@@ -89,30 +81,9 @@ export default function ChatHubPage() {
         />
       ) : null}
 
-      <Section
-        title="Your agents"
-        description="One-on-one chat with each agent you've registered."
-        actionHref="/agents/new"
-        actionLabel="Register agent"
-      >
-        {agentsQuery.isLoading ? (
-          <SkeletonList rows={2} />
-        ) : agents.length === 0 ? (
-          <EmptyState
-            icon={Bot}
-            title="No agents to chat with"
-            description="Launch your first agent and start a 1-on-1 conversation."
-            actions={[{ label: "Launch agent", href: "/agents/new", icon: Plus }]}
-          />
-        ) : (
-          <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
-            {agents.map((a) => (
-              <AgentChatRow key={a.id} agent={a} />
-            ))}
-          </ul>
-        )}
-      </Section>
-
+      {/* Project channels first — the seed project always exists on first
+          load, so this row immediately reduces the "nothing here" feeling
+          before the always-empty agents section. */}
       <Section
         title="Project channels"
         description="Group chat with the humans and agents assigned to each project."
@@ -122,11 +93,9 @@ export default function ChatHubPage() {
         {projectsQuery.isLoading ? (
           <SkeletonList rows={2} />
         ) : projects.length === 0 ? (
-          <EmptyState
-            icon={Folder}
-            title="No project channels yet"
-            description="Project chats appear here once you create a project."
-            actions={[{ label: "Create project", href: "/projects/new", icon: Plus }]}
+          <InlineEmptyRow
+            href="/projects/new"
+            label="Create your first project channel to chat with assigned agents"
           />
         ) : (
           <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
@@ -136,45 +105,86 @@ export default function ChatHubPage() {
           </ul>
         )}
       </Section>
+
+      <Section
+        title="Your agents"
+        description="One-on-one chat with each agent you've registered."
+        actionHref="/agents/new"
+        actionLabel="Register agent"
+      >
+        {agentsQuery.isLoading ? (
+          <SkeletonList rows={2} />
+        ) : agents.length === 0 ? (
+          <InlineEmptyRow
+            href="/agents/new"
+            label="Register your first agent to start a 1-on-1 conversation"
+          />
+        ) : (
+          <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
+            {agents.map((a) => (
+              <AgentChatRow key={a.id} agent={a} />
+            ))}
+          </ul>
+        )}
+      </Section>
     </div>
   );
 }
 
-function PerkOSAgentRow({ onOpen }: { onOpen: () => void }) {
+/**
+ * Single-row inline empty state for in-page sections — keeps the same
+ * visual weight as a populated row instead of stamping a full-page
+ * EmptyState (with its py-12 + icon + headline + description) into a
+ * sub-section, which leaves a giant void on first load.
+ */
+function InlineEmptyRow({ href, label }: { href: string; label: string }) {
   return (
-    <Card className="border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Sparkles className="h-4 w-4 text-primary" />
+    <Link
+      href={href}
+      className="flex items-center gap-3 rounded-md border border-dashed border-border bg-card/40 px-4 py-3 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+    >
+      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+        <Plus className="h-4 w-4" />
+      </div>
+      <span className="flex-1">{label}</span>
+      <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+    </Link>
+  );
+}
+
+function PerkOSAgentRow({ onOpen }: { onOpen: () => void }) {
+  // Single-row banner that matches AgentChatRow + ProjectChannelRow height
+  // so the chat landing page reads as a uniform list of entities you can
+  // talk to — instead of one big featured Card sitting above two
+  // smaller sections. The floating ChatbotTrigger is iconic-only, so we
+  // keep this row as the place that names + explains the assistant.
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="glow-card flex w-full items-center gap-3 rounded-md border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent px-4 py-3 text-left transition-colors hover:border-primary/50"
+    >
+      <div className="relative shrink-0">
+        <div className="grid h-10 w-10 place-items-center rounded-full bg-primary/85">
+          <Image src="/avatar.png" alt="" width={24} height={24} />
+        </div>
+        <span
+          className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-card"
+          aria-hidden
+        />
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <span className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+          <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden />
           PerkOS Agent
-        </CardTitle>
-        <CardDescription>
-          Your guide. Ask about the platform, navigate flows, and spin up
-          projects or agents from a single conversation.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <button
-          type="button"
-          onClick={onOpen}
-          className="inline-flex items-center gap-3 rounded-md border border-border bg-card px-4 py-3 transition-colors hover:border-primary/40"
-        >
-          <div className="relative">
-            <div className="grid h-9 w-9 place-items-center rounded-full bg-primary/85">
-              <Image
-                src="/avatar.png"
-                alt=""
-                width={24}
-                height={24}
-              />
-            </div>
-            <span className="absolute -bottom-0.5 -right-0.5 grid h-2.5 w-2.5 place-items-center rounded-full bg-emerald-400 ring-2 ring-card" />
-          </div>
-          <span className="text-sm text-foreground">Open PerkOS Agent</span>
-          <ArrowRight className="h-4 w-4 text-muted-foreground" />
-        </button>
-      </CardContent>
-    </Card>
+        </span>
+        <span className="hidden truncate text-xs text-muted-foreground sm:block">
+          Your guide — ask about the platform, navigate flows, spin up
+          projects or agents from one conversation.
+        </span>
+      </div>
+      <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+    </button>
   );
 }
 
@@ -194,9 +204,11 @@ function Section({
   return (
     <section className="flex flex-col gap-3">
       <div className="flex items-start justify-between gap-3">
-        <div className="flex flex-col">
+        <div className="flex min-w-0 flex-col">
           <h2 className="text-base font-medium text-foreground">{title}</h2>
-          <p className="text-xs text-muted-foreground">{description}</p>
+          <p className="hidden text-xs text-muted-foreground sm:block">
+            {description}
+          </p>
         </div>
         <Link
           href={actionHref}

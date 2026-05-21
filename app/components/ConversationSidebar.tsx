@@ -39,8 +39,10 @@ export function ConversationSidebar({ walletAddress, onNew, className }: Props) 
 
   // Active set (un-archived).
   const active = useConversations(walletAddress, { archived: false });
-  // Archived set (lazy — fetch only when expanded).
-  const archived = useConversations(showArchived ? walletAddress : null, { archived: true });
+  // Archived set — eager-fetched (one extra subscription per wallet) so we
+  // can hide the entire collapsible when zero, instead of leaving an
+  // empty "ARCHIVED" header in the sidebar on every fresh workspace.
+  const archived = useConversations(walletAddress, { archived: true });
 
   const { pinned, recent } = useMemo(() => {
     const list = active.conversations.filter((c) => matchesSearch(c, search));
@@ -145,8 +147,10 @@ export function ConversationSidebar({ walletAddress, onNew, className }: Props) 
           </div>
         )}
 
-        {/* Archived (collapsible) */}
-        {walletAddress ? (
+        {/* Archived (collapsible) — only rendered when there is at least
+            one archived conversation, so the sidebar doesn't show an
+            empty "ARCHIVED" header on a fresh workspace. */}
+        {walletAddress && archived.conversations.length > 0 ? (
           <div className="mt-3 border-t border-border pt-3">
             <button
               type="button"
