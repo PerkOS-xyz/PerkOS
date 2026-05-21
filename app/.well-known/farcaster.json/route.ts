@@ -23,29 +23,39 @@ export function GET() {
     accountAssociation: {
       // TODO: replace with the signed payload from
       // https://farcaster.xyz/~/developers/mini-apps/manifest
-      header: "",
-      payload: "",
-      signature: "",
+      header: "eyJmaWQiOjIxMDY3MSwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDIxNDA3YjkzZTcyQ2Q5RkUxMkI0ZmMyZmM0NzRDNjE0ZUZkYmFERmMifQ",
+      payload: "eyJkb21haW4iOiJhcHAucGVya29zLnh5eiJ9",
+      signature: "kCY+WxmZvR8nOZ30luXMJbv+ll1gyT+Sr1axxoOC58FnBESI0OAaw+jMI+WseMyncWcm9yniIDUSPMhjczWJPhw="
+
     },
     frame: {
       version: "1",
       name: "PerkOS",
-      iconUrl: `${SITE_URL}/agent.svg`,
+      iconUrl: `${SITE_URL}/logo.png`,
       homeUrl: SITE_URL,
-      imageUrl: `${SITE_URL}/opengraph-image`,
+      // imageUrl is the 3:2 banner shown in feed embeds + the Mini App
+      // directory preview card. heroImageUrl is the wider 1.91:1 hero.
+      imageUrl: `${SITE_URL}/banner.png`,
+      heroImageUrl: `${SITE_URL}/banner.png`,
       splashImageUrl: `${SITE_URL}/perkos-landing-logo.png`,
       splashBackgroundColor: "#0e0716",
       buttonTitle: "Launch PerkOS",
-      subtitle: "Where AI agents and humans ship work",
+      // Farcaster manifest constraints:
+      //   subtitle, tagline, ogTitle  ≤ 30 chars
+      //   description                 ≤ 170 chars
+      //   ogDescription               ≤ 100 chars
+      //   No special chars in description / ogDescription:
+      //     @  #  $  %  ^  &  *  +  =  /  \  |  ~  «  »
+      subtitle: "AI agents ship with your team",
       description:
-        "Project rooms, task boards, and channel routing for external agents. Connect Hermes, OpenClaw, or your own — running on AWS ECS or your VPS. BYOK keys. Built on Base + Celo.",
+        "Project rooms, task boards, and channel routing for external agents. Connect Hermes, OpenClaw, or your own. Built on Base and Celo.",
       primaryCategory: "productivity",
       tags: ["ai", "agents", "productivity", "base", "celo"],
-      tagline: "The workspace where AI agents ship work",
-      ogTitle: "PerkOS — The workspace where AI agents and humans ship work",
+      tagline: "Agents and humans ship work",
+      ogTitle: "PerkOS: agents ship work",
       ogDescription:
-        "Wallet-native coordination layer for external agents. Multi-channel, multi-runtime. Built on Base + Celo.",
-      ogImageUrl: `${SITE_URL}/opengraph-image`,
+        "Wallet-native coordination for external agents. Built on Base and Celo.",
+      ogImageUrl: `${SITE_URL}/banner.png`,
       // noindex while in private alpha so the Mini App directory doesn't
       // surface us before we're ready.
       noindex: true,
