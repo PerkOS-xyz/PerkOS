@@ -19,7 +19,7 @@ export function ChatbotTrigger() {
       )}
     >
       <Image
-        src="/agent.svg"
+        src="/avatar.png"
         alt=""
         width={40}
         height={40}

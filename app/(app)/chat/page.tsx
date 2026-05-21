@@ -162,7 +162,7 @@ function PerkOSAgentRow({ onOpen }: { onOpen: () => void }) {
           <div className="relative">
             <div className="grid h-9 w-9 place-items-center rounded-full bg-primary/85">
               <Image
-                src="/agent.svg"
+                src="/avatar.png"
                 alt=""
                 width={24}
                 height={24}
