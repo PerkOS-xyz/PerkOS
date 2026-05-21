@@ -407,23 +407,24 @@ function TaskCard({ task, projectId }: { task: Task; projectId: string }) {
     </>
   );
 
+  // TaskCard is rendered inside KanbanBoard's renderCard callback, which
+  // already wraps each card in an <li> (via DraggableCard). Wrapping again
+  // here used to produce <li><li>…</li></li> and a hydration error. The
+  // outer element is now a <div> with `group` so the row-action buttons
+  // can react to its hover state via group-hover.
   if (!task.id) {
-    return (
-      <li>
-        <div className={cardClass}>{inner}</div>
-      </li>
-    );
+    return <div className={cardClass}>{inner}</div>;
   }
 
   return (
-    <li className="relative">
+    <div className="group relative">
       <Link
         href={`/projects/${encodeURIComponent(projectId)}/tasks/${encodeURIComponent(task.id)}`}
         className={cardClass}
       >
         {inner}
       </Link>
-      <div className="absolute right-2 top-2 flex items-center gap-0.5 opacity-0 transition-opacity focus-within:opacity-100 [li:hover_&]:opacity-100">
+      <div className="absolute right-2 top-2 flex items-center gap-0.5 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
         <button
           type="button"
           onClick={(e) => {
@@ -470,7 +471,7 @@ function TaskCard({ task, projectId }: { task: Task; projectId: string }) {
         pending={deleteMutation.isPending}
         onConfirm={() => deleteMutation.mutate()}
       />
-    </li>
+    </div>
   );
 }
 
