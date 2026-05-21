@@ -100,9 +100,11 @@ const PLUGINS: Plugin[] = [
   { id: "browser", label: "Headless browser", description: "Navigate sites and capture content." },
 ];
 
-// PerkOS ECS infra is being provisioned. Flip to true once the AWS cluster +
-// task definitions + entry-point Docker images are live.
-const ECS_AVAILABLE = false;
+// PerkOS infra (AWS ECS Fargate, us-east-1) is wired end-to-end:
+// admin curates which ECR image tags users can pick; /api/agents/launch
+// provisions the task on the perkos-agents cluster. Flip back to false
+// only if we need to put new sign-ups on a waitlist again.
+const ECS_AVAILABLE = true;
 
 type State = {
   step: number;
