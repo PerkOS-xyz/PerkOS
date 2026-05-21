@@ -27,7 +27,7 @@ export type AccessDecision =
   | { allowed: false; reason: "not-allowlisted" };
 
 export function getEnvAllowlist(): string[] {
-  const raw = process.env.PERKOS_WHITELIST ?? process.env.NEXT_PUBLIC_PERKOS_WHITELIST ?? "";
+  const raw = process.env.PERKOS_WHITELIST ?? "";
   return raw
     .split(",")
     .map((s) => s.trim().toLowerCase())
