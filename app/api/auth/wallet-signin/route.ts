@@ -21,6 +21,7 @@ import { createPublicClient, http, type Address, type Hex } from "viem";
 import { base, baseSepolia } from "viem/chains";
 
 import { adminAuth, adminDb } from "../../../lib/firebaseAdmin";
+import { checkWalletAccess } from "../../../lib/accessControl";
 
 // We try Base mainnet first, then Base Sepolia, in case the smart wallet only
 // exists on testnet during alpha.
@@ -110,8 +111,10 @@ export async function POST(request: Request) {
   }
 
   // 3. Allowlist check -------------------------------------------------
-  const allowSnap = await db.collection("allowlist").doc(address).get();
-  if (!allowSnap.exists) {
+  // Order: public-mode → env allowlist → Firestore allowlist.
+  // Managed via /admin/access.
+  const access = await checkWalletAccess(address);
+  if (!access.allowed) {
     return NextResponse.json(
       { error: "Wallet not on the alpha allowlist." },
       { status: 403 }
