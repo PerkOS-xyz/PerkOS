@@ -22,6 +22,7 @@ import { NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 
 import { adminAuth, adminDb } from "../../../lib/firebaseAdmin";
+import { provisionEcsAgent } from "../../../lib/ecsProvision";
 
 type LaunchBody = {
   walletAddress?: string;
@@ -29,6 +30,9 @@ type LaunchBody = {
   name?: string;
   plugins?: string[];
   modelKey?: string;
+  /** ECR image tag pinned by the admin. Required for ECS provisioning;
+   *  null/undefined means VPS or Local deploy → skip the AWS path. */
+  imageTag?: string | null;
 };
 
 const AGENT_NAME_PATTERN = /^[a-zA-Z0-9_-]{2,32}$/;
@@ -179,6 +183,51 @@ export async function POST(request: Request) {
       });
   }
 
+  // ECS provisioning happens only when the wizard sent an imageTag (i.e.
+  // deployMode === "perkos-ecs"). For VPS / Local we stop after the
+  // Firestore registration — the user installs the runtime themselves.
+  //
+  // Provisioning failures are recorded on the agent doc but don't fail the
+  // launch response. The user keeps their agent registration + relayApiKey;
+  // they can retry the provisioning step from the agents page (TODO: wire
+  // a "Retry provisioning" affordance once it ships).
+  let ecsResult: Awaited<ReturnType<typeof provisionEcsAgent>> | null = null;
+  let ecsError: string | null = null;
+  if (body.imageTag && typeof body.imageTag === "string") {
+    try {
+      ecsResult = await provisionEcsAgent({
+        walletAddress,
+        agentName: name,
+        runtime,
+        imageTag: body.imageTag,
+        llmSource: modelKey ? "byok" : "perkos",
+        byokApiKey: modelKey ?? undefined,
+        agentId: agentRef.id,
+      });
+      await agentRef.set(
+        {
+          ecs: {
+            serviceArn: ecsResult.serviceArn,
+            taskDefinitionArn: ecsResult.taskDefinitionArn,
+            imageUri: ecsResult.imageUri,
+            provisionedAt: FieldValue.serverTimestamp(),
+          },
+          status: "provisioning",
+        },
+        { merge: true }
+      );
+    } catch (err) {
+      ecsError = err instanceof Error ? err.message : String(err);
+      await agentRef.set(
+        {
+          ecs: { lastError: ecsError, lastErrorAt: FieldValue.serverTimestamp() },
+          status: "provision-failed",
+        },
+        { merge: true }
+      );
+    }
+  }
+
   return NextResponse.json({
     ok: true,
     launchId: agentRef.id,
@@ -197,16 +246,33 @@ export async function POST(request: Request) {
     },
     result: {
       mode: modelKey ? "byok" : "perkos",
-      status: "ready",
+      status: ecsError
+        ? "provision-failed"
+        : ecsResult
+          ? "provisioning"
+          : "ready",
       agent: {
         id: agentRef.id,
         name,
         runtime,
-        status: "ready",
+        status: ecsError
+          ? "provision-failed"
+          : ecsResult
+            ? "provisioning"
+            : "ready",
         walletAddress,
         plugins,
         modelKeyProvided: Boolean(modelKey),
       },
+      ecs: ecsResult
+        ? {
+            serviceArn: ecsResult.serviceArn,
+            taskDefinitionArn: ecsResult.taskDefinitionArn,
+            imageUri: ecsResult.imageUri,
+          }
+        : ecsError
+          ? { error: ecsError }
+          : null,
     },
   });
 }
