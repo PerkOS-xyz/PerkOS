@@ -323,7 +323,7 @@ function GreetingBanner({ address }: { address?: string }) {
         <div className="relative">
           <div className="grid h-12 w-12 place-items-center rounded-full bg-primary/75">
             <Image
-              src="/agent.svg"
+              src="/avatar.png"
               alt=""
               width={32}
               height={32}

@@ -565,7 +565,7 @@ function ChatbotMockup() {
       <div className="flex items-center justify-between border-b border-border px-5 py-3">
         <div className="flex items-center gap-2">
           <div className="relative">
-            <Image src="/agent.svg" alt="" width={28} height={28} />
+            <Image src="/avatar.png" alt="" width={28} height={28} />
             <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-400 ring-2 ring-card" />
           </div>
           <div className="flex flex-col leading-tight">
@@ -577,7 +577,7 @@ function ChatbotMockup() {
       <div className="space-y-3 px-5 py-4">
         <div className="flex items-start gap-2">
           <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary/15">
-            <Image src="/agent.svg" alt="" width={18} height={18} />
+            <Image src="/avatar.png" alt="" width={18} height={18} />
           </div>
           <p className="text-sm leading-relaxed text-foreground">
             Hi, how can I help you today?

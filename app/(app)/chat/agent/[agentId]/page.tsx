@@ -291,7 +291,7 @@ function EmptyConversation({ agent }: { agent: Agent }) {
           {initials(agent.name)}
         </div>
         <Image
-          src="/agent.svg"
+          src="/avatar.png"
           alt=""
           width={20}
           height={20}

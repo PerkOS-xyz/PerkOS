@@ -175,4 +175,27 @@ body {
       0 0 48px -12px rgba(236, 27, 105, 0.45),
       inset 0 1px 0 0 rgba(236, 27, 105, 0.2);
   }
+  /*
+   * Menu-bar icon glow: a soft pink halo around the icon container +
+   * a neon drop-shadow on the SVG stroke itself. Used on the active
+   * nav item in MobileBottomNav (and any future icon-rail nav).
+   * Inspired by the bottom navigation in the futuristic Mini App
+   * mockup the user shared.
+   */
+  .glow-icon-active {
+    box-shadow:
+      0 0 0 1px rgba(236, 27, 105, 0.25),
+      0 0 18px -2px rgba(236, 27, 105, 0.55);
+  }
+  .glow-icon-active svg {
+    filter: drop-shadow(0 0 4px rgba(236, 27, 105, 0.7));
+  }
+  /* Subtle hover halo for inactive icons — keeps the rail responsive
+     without the loudness of the active state. */
+  .glow-icon-hover:hover {
+    box-shadow: 0 0 12px -2px rgba(236, 27, 105, 0.35);
+  }
+  .glow-icon-hover:hover svg {
+    filter: drop-shadow(0 0 3px rgba(236, 27, 105, 0.5));
+  }
 }

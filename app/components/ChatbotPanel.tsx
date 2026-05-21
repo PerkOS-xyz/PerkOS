@@ -263,7 +263,7 @@ function Header({
       <div className="flex items-center gap-2">
         <div className="relative">
           <Image
-            src="/agent.svg"
+            src="/avatar.png"
             alt=""
             width={28}
             height={28}
@@ -312,7 +312,7 @@ function EmptyState({ onAction }: { onAction: (href: string) => void }) {
       <div className="flex items-start gap-3">
         <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-primary/85">
           <Image
-            src="/agent.svg"
+            src="/avatar.png"
             alt=""
             width={36}
             height={36}

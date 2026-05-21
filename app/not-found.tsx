@@ -13,7 +13,7 @@ export default function NotFound() {
     >
       <div className="flex max-w-md flex-col items-center gap-6 rounded-lg border border-[#530922] bg-[#0e0716] p-8 text-center shadow-[0_0_5px_rgba(236,27,105,0.3)]">
         <Image
-          src="/agent.svg"
+          src="/avatar.png"
           alt=""
           width={72}
           height={72}
