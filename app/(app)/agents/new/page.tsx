@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
 import { toast } from "sonner";
 import {
   Cloud,
   Server,
+  Laptop,
   KeyRound,
   Sparkles,
   MessageSquare,
@@ -16,16 +17,13 @@ import {
   Hash,
   Bot,
   Layers,
-  Megaphone,
-  FlaskConical,
-  PaintBucket,
-  HeartPulse,
   Rocket,
   ArrowLeft,
   ArrowRight,
   Check,
   Plus,
   Loader2,
+  FileCode,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -58,10 +56,18 @@ import {
   sshPublicKeySchema,
   validateApiKey,
 } from "../../../lib/validators";
+import { AGENT_PRESETS, findPreset } from "../../../lib/agentPresets";
+import {
+  buildConfigPreview,
+  byokProviderOptions,
+  type LLMSource,
+} from "../../../lib/agentConfigPreview";
 
-type Hosting = "perkos" | "self";
-type LLMMode = "perkos" | "byok";
-type ApiProvider = "openai" | "anthropic" | "openrouter";
+// ---------------------------------------------------------------------------
+// Types + constants
+// ---------------------------------------------------------------------------
+
+type DeployMode = "perkos-ecs" | "vps" | "local";
 
 type Channel = {
   id: string;
@@ -79,49 +85,6 @@ const CHANNELS: Channel[] = [
   { id: "email", label: "Email", icon: MessageSquare, runtimes: ["Hermes", "OpenClaw"] },
 ];
 
-type Template = {
-  id: string;
-  name: string;
-  description: string;
-  icon: typeof Megaphone;
-  plugins: string[];
-};
-
-const TEMPLATES: Template[] = [
-  {
-    id: "marketing",
-    name: "Marketing Agent",
-    description:
-      "Drafts campaigns, schedules posts, monitors engagement, and reports on KPIs.",
-    icon: Megaphone,
-    plugins: ["copywriter", "scheduler", "analytics"],
-  },
-  {
-    id: "research",
-    name: "Research Agent",
-    description:
-      "Pulls academic papers, summarizes findings, and produces literature reviews.",
-    icon: FlaskConical,
-    plugins: ["arxiv", "summarizer", "citations"],
-  },
-  {
-    id: "designer",
-    name: "Designer Agent",
-    description:
-      "Generates moodboards, drafts visual concepts, and proposes design systems.",
-    icon: PaintBucket,
-    plugins: ["figma-bridge", "image-gen", "palette"],
-  },
-  {
-    id: "health",
-    name: "Health Adviser Agent",
-    description:
-      "Tracks habits, surfaces wellbeing tips, and integrates with health data sources.",
-    icon: HeartPulse,
-    plugins: ["fitbit", "nutrition-db", "wellness-coach"],
-  },
-];
-
 type Plugin = { id: string; label: string; description: string };
 
 const PLUGINS: Plugin[] = [
@@ -135,28 +98,37 @@ const PLUGINS: Plugin[] = [
   { id: "browser", label: "Headless browser", description: "Navigate sites and capture content." },
 ];
 
-const PROVIDERS: { id: ApiProvider; label: string }[] = [
-  { id: "openai", label: "OpenAI" },
-  { id: "anthropic", label: "Anthropic" },
-  { id: "openrouter", label: "OpenRouter" },
-];
+// PerkOS ECS infra is being provisioned. Flip to true once the AWS cluster +
+// task definitions + entry-point Docker images are live.
+const ECS_AVAILABLE = false;
 
 type State = {
   step: number;
-  agentType: AgentRuntime | null;
-  hosting: Hosting | null;
-  selfHostedIp: string;
-  selfHostedSshKey: string;
-  llmMode: LLMMode | null;
-  apiProvider: ApiProvider;
-  apiKey: string;
-  channels: string[];
-  templateId: string | null;
-  plugins: string[];
+  // Step 1 — persona
+  personaId: string | null;
   agentName: string;
+  systemPromptOverride: string;
+  // Step 2 — runtime
+  runtime: AgentRuntime | null;
+  // Step 3 — deploy mode
+  deployMode: DeployMode | null;
+  vpsIp: string;
+  vpsSshKey: string;
+  // Step 4 — LLM
+  llmSource: LLMSource | null;
+  byokProvider: string;
+  byokModel: string;
+  byokApiKey: string;
+  // Step 5 — plugins + channels
+  channels: string[];
+  plugins: string[];
 };
 
-const TOTAL_STEPS = 7;
+const TOTAL_STEPS = 6;
+
+// ---------------------------------------------------------------------------
+// Page
+// ---------------------------------------------------------------------------
 
 export default function AgentLauncherPage() {
   const router = useRouter();
@@ -170,57 +142,74 @@ export default function AgentLauncherPage() {
     useState<LaunchAgentCredentials | null>(null);
 
   const [state, setState, clearDraft] = useFormDraft<State>(
-    "agent.new.v1",
+    "agent.new.v2",
     {
       step: 1,
-      agentType: null,
-      hosting: null,
-      selfHostedIp: "",
-      selfHostedSshKey: "",
-      llmMode: null,
-      apiProvider: "openai",
-      apiKey: "",
-      channels: [],
-      templateId: null,
-      plugins: [],
+      personaId: null,
       agentName: "",
+      systemPromptOverride: "",
+      runtime: null,
+      deployMode: null,
+      vpsIp: "",
+      vpsSshKey: "",
+      llmSource: null,
+      byokProvider: "",
+      byokModel: "",
+      byokApiKey: "",
+      channels: [],
+      plugins: [],
     }
   );
 
   const update = (patch: Partial<State>) => setState((s) => ({ ...s, ...patch }));
+
+  const preset = useMemo(() => findPreset(state.personaId), [state.personaId]);
+
+  // When the user picks a runtime, seed a sensible default BYOK provider.
+  useEffect(() => {
+    if (state.runtime && !state.byokProvider) {
+      const opts = byokProviderOptions(state.runtime);
+      if (opts.length > 0) update({ byokProvider: opts[0].id, byokModel: opts[0].defaultModel });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.runtime]);
+
+  // Pre-fill recommended plugins from the preset when picked.
+  useEffect(() => {
+    if (preset && state.plugins.length === 0 && preset.recommendedPlugins.length > 0) {
+      update({ plugins: preset.recommendedPlugins });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preset?.id]);
 
   const mutation = useMutation({
     mutationFn: async () => {
       if (!isConnected || !address) {
         throw new Error("Connect a wallet before launching an agent.");
       }
-      if (!state.agentType) throw new Error("Pick an agent type.");
-      const finalName = state.agentName.trim() || pickedTemplate?.name || "Untitled agent";
+      if (!state.runtime) throw new Error("Pick a runtime.");
+      const finalName = state.agentName.trim() || preset?.name || "Untitled agent";
       const finalPlugins = Array.from(
         new Set([
-          ...(pickedTemplate?.plugins ?? []),
           ...state.plugins,
           ...state.channels.map((c) => `channel:${c}`),
         ])
       );
       return launchAgent({
         walletAddress: address,
-        runtime: state.agentType,
+        runtime: state.runtime,
         name: finalName,
         plugins: finalPlugins,
-        modelKey: state.llmMode === "byok" ? state.apiKey : undefined,
+        modelKey: state.llmSource === "byok" ? state.byokApiKey : undefined,
       });
     },
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ["wallet-agents", address] });
       if (fromOnboarding) markAgentRegistered();
       toast.success("Agent launched", {
-        description: `${state.agentName.trim() || pickedTemplate?.name || "Your agent"} is ready.`,
+        description: `${state.agentName.trim() || preset?.name || "Your agent"} is ready.`,
       });
       clearDraft();
-      // If the server returned credentials (new agents always do; legacy
-      // path doesn't), defer the redirect — surface the one-shot reveal
-      // modal first. The modal's "Done" handler does the redirect.
       if (response?.credentials) {
         setIssuedCredentials(response.credentials);
         return;
@@ -232,57 +221,58 @@ export default function AgentLauncherPage() {
     },
   });
 
-  const pickedTemplate = useMemo(
-    () => TEMPLATES.find((t) => t.id === state.templateId) ?? null,
-    [state.templateId]
-  );
-
   const ipError = useMemo(() => {
-    if (state.hosting !== "self") return undefined;
-    if (state.selfHostedIp.trim().length === 0) return undefined;
-    const parsed = ipv4Schema.safeParse(state.selfHostedIp);
+    if (state.deployMode !== "vps") return undefined;
+    if (state.vpsIp.trim().length === 0) return undefined;
+    const parsed = ipv4Schema.safeParse(state.vpsIp);
     return parsed.success ? undefined : parsed.error.issues[0]?.message;
-  }, [state.hosting, state.selfHostedIp]);
+  }, [state.deployMode, state.vpsIp]);
 
   const sshError = useMemo(() => {
-    if (state.hosting !== "self") return undefined;
-    if (state.selfHostedSshKey.trim().length === 0) return undefined;
-    const parsed = sshPublicKeySchema.safeParse(state.selfHostedSshKey);
+    if (state.deployMode !== "vps") return undefined;
+    if (state.vpsSshKey.trim().length === 0) return undefined;
+    const parsed = sshPublicKeySchema.safeParse(state.vpsSshKey);
     return parsed.success ? undefined : parsed.error.issues[0]?.message;
-  }, [state.hosting, state.selfHostedSshKey]);
+  }, [state.deployMode, state.vpsSshKey]);
 
   const apiKeyError = useMemo(() => {
-    if (state.llmMode !== "byok") return undefined;
-    if (state.apiKey.trim().length === 0) return undefined;
-    return validateApiKey(state.apiProvider, state.apiKey) ?? undefined;
-  }, [state.llmMode, state.apiProvider, state.apiKey]);
+    if (state.llmSource !== "byok") return undefined;
+    if (state.byokApiKey.trim().length === 0) return undefined;
+    // Reuse provider-specific validator; falls back to a generic check for
+    // ollama / openrouter / etc.
+    const provider = state.byokProvider;
+    if (provider === "openai" || provider === "anthropic" || provider === "openrouter") {
+      return validateApiKey(provider, state.byokApiKey) ?? undefined;
+    }
+    return undefined;
+  }, [state.llmSource, state.byokProvider, state.byokApiKey]);
 
   const canAdvance = useMemo(() => {
     switch (state.step) {
       case 1:
-        return state.agentType !== null;
+        return state.personaId !== null;
       case 2:
-        if (state.hosting === "perkos") return true;
-        if (state.hosting === "self")
+        return state.runtime !== null;
+      case 3:
+        if (state.deployMode === "local") return true;
+        if (state.deployMode === "perkos-ecs") return ECS_AVAILABLE;
+        if (state.deployMode === "vps")
           return (
-            state.selfHostedIp.trim().length > 0 &&
-            state.selfHostedSshKey.trim().length > 0 &&
+            state.vpsIp.trim().length > 0 &&
+            state.vpsSshKey.trim().length > 0 &&
             !ipError &&
             !sshError
           );
         return false;
-      case 3:
-        if (state.llmMode === "perkos") return true;
-        if (state.llmMode === "byok")
-          return state.apiKey.trim().length > 0 && !apiKeyError;
-        return false;
       case 4:
-        return true;
+        if (state.llmSource === "perkos") return true;
+        if (state.llmSource === "skip") return true;
+        if (state.llmSource === "byok")
+          return state.byokApiKey.trim().length > 0 && !apiKeyError;
+        return false;
       case 5:
-        return state.templateId !== null;
+        return true; // plugins + channels are optional
       case 6:
-        return true;
-      case 7:
         return !mutation.isPending && !mutation.isSuccess;
       default:
         return false;
@@ -292,8 +282,8 @@ export default function AgentLauncherPage() {
   const nextStep = () => update({ step: Math.min(state.step + 1, TOTAL_STEPS) });
   const prevStep = () => update({ step: Math.max(state.step - 1, 1) });
 
-  const filteredChannels = state.agentType
-    ? CHANNELS.filter((c) => c.runtimes.includes(state.agentType!))
+  const filteredChannels = state.runtime
+    ? CHANNELS.filter((c) => c.runtimes.includes(state.runtime!))
     : CHANNELS;
 
   return (
@@ -316,40 +306,27 @@ export default function AgentLauncherPage() {
       <Stepper current={state.step} total={TOTAL_STEPS} />
 
       <div className="mt-2">
-        {state.step === 1 && (
-          <Step1AgentType state={state} onChange={update} />
-        )}
-        {state.step === 2 && (
-          <Step2Hosting
+        {state.step === 1 && <Step1Persona state={state} onChange={update} />}
+        {state.step === 2 && <Step2Runtime state={state} onChange={update} />}
+        {state.step === 3 && (
+          <Step3Deploy
             state={state}
             onChange={update}
             ipError={ipError}
             sshError={sshError}
           />
         )}
-        {state.step === 3 && (
-          <Step3LLM
-            state={state}
-            onChange={update}
-            apiKeyError={apiKeyError}
-          />
-        )}
         {state.step === 4 && (
-          <Step4Channels state={state} onChange={update} channels={filteredChannels} />
+          <Step4LLM state={state} onChange={update} apiKeyError={apiKeyError} />
         )}
         {state.step === 5 && (
-          <Step5Template state={state} onChange={update} />
-        )}
-        {state.step === 6 && (
-          <Step6Plugins state={state} onChange={update} />
-        )}
-        {state.step === 7 && (
-          <Step7Summary
+          <Step5Plugins
             state={state}
-            template={pickedTemplate}
             onChange={update}
+            channels={filteredChannels}
           />
         )}
+        {state.step === 6 && <Step6Review state={state} onChange={update} />}
       </div>
 
       <Separator />
@@ -397,6 +374,10 @@ export default function AgentLauncherPage() {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Steps
+// ---------------------------------------------------------------------------
+
 function Stepper({ current, total }: { current: number; total: number }) {
   return (
     <div className="flex w-full items-center gap-2">
@@ -437,7 +418,98 @@ type StepProps = {
   onChange: (patch: Partial<State>) => void;
 };
 
-function Step1AgentType({ state, onChange }: StepProps) {
+function Step1Persona({ state, onChange }: StepProps) {
+  const preset = findPreset(state.personaId);
+  return (
+    <div className="flex flex-col gap-4">
+      <StepHeader
+        title="Pick a persona"
+        description="Seeds a name, system prompt, and recommended skill set. Everything is editable later."
+      />
+
+      <div className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
+        {AGENT_PRESETS.map((p) => {
+          const selected = state.personaId === p.id;
+          return (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() =>
+                onChange({
+                  personaId: p.id,
+                  agentName: state.agentName || p.name,
+                  systemPromptOverride: "",
+                })
+              }
+              className={cn(
+                "flex flex-col items-start gap-1 rounded-lg border px-3 py-3 text-left transition-colors",
+                selected
+                  ? "border-primary bg-primary/10 shadow-[0_0_12px_rgba(236,27,105,0.18)]"
+                  : "border-border bg-card hover:border-primary/40"
+              )}
+            >
+              <div className="flex w-full items-center justify-between gap-2">
+                <span className="text-2xl leading-none">{p.emoji}</span>
+                {selected ? <Check className="h-3.5 w-3.5 text-primary" /> : null}
+              </div>
+              <span className="text-sm font-medium text-foreground">{p.name}</span>
+              <span className="text-[11px] leading-tight text-muted-foreground">
+                {p.blurb}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {preset ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Agent name + prompt</CardTitle>
+            <CardDescription>
+              Tweak the preset's defaults if you want.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="agent-name">Agent name</Label>
+              <Input
+                id="agent-name"
+                value={state.agentName}
+                onChange={(e) => onChange({ agentName: e.target.value })}
+                placeholder={preset.name}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="system-prompt">System prompt</Label>
+              <Textarea
+                id="system-prompt"
+                value={state.systemPromptOverride || preset.systemPrompt}
+                onChange={(e) =>
+                  onChange({ systemPromptOverride: e.target.value })
+                }
+                rows={5}
+                className="font-mono text-xs"
+                placeholder="You are a …"
+              />
+              {state.systemPromptOverride &&
+              state.systemPromptOverride !== preset.systemPrompt ? (
+                <button
+                  type="button"
+                  className="self-start text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                  onClick={() => onChange({ systemPromptOverride: "" })}
+                >
+                  Reset to the {preset.name} default
+                </button>
+              ) : null}
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
+    </div>
+  );
+}
+
+function Step2Runtime({ state, onChange }: StepProps) {
   const options: {
     value: AgentRuntime;
     title: string;
@@ -469,26 +541,26 @@ function Step1AgentType({ state, onChange }: StepProps) {
   return (
     <div className="flex flex-col gap-4">
       <StepHeader
-        title="Choose an agent type"
-        description="Pick the runtime that will execute your agent's workloads."
+        title="Choose a runtime"
+        description="Both work with PerkOS-Transport, swarm coordination, and the Council. Pick the one your agent will be most native to."
       />
       <RadioGroup
-        value={state.agentType ?? ""}
-        onValueChange={(v) => onChange({ agentType: v as AgentRuntime })}
+        value={state.runtime ?? ""}
+        onValueChange={(v) => onChange({ runtime: v as AgentRuntime })}
         className="grid grid-cols-1 gap-3 md:grid-cols-2"
       >
         {options.map((opt) => (
           <SelectableCard
             key={opt.value}
-            selected={state.agentType === opt.value}
-            onClick={() => onChange({ agentType: opt.value })}
+            selected={state.runtime === opt.value}
+            onClick={() => onChange({ runtime: opt.value })}
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex flex-col gap-1">
                 <span className="text-base font-medium text-foreground">{opt.title}</span>
                 <p className="text-sm text-muted-foreground">{opt.summary}</p>
               </div>
-              <RadioGroupItem value={opt.value} id={`agent-${opt.value}`} />
+              <RadioGroupItem value={opt.value} id={`runtime-${opt.value}`} />
             </div>
             <ul className="mt-3 flex flex-col gap-1.5 text-xs text-muted-foreground">
               {opt.bullets.map((b) => (
@@ -505,7 +577,7 @@ function Step1AgentType({ state, onChange }: StepProps) {
   );
 }
 
-function Step2Hosting({
+function Step3Deploy({
   state,
   onChange,
   ipError,
@@ -515,56 +587,100 @@ function Step2Hosting({
     <div className="flex flex-col gap-4">
       <StepHeader
         title="Where should this agent run?"
-        description="PerkOS manages the infra, or you bring your own VPS for full control."
+        description="Pick a deploy mode. You can move the agent later — only the credential changes."
       />
       <RadioGroup
-        value={state.hosting ?? ""}
-        onValueChange={(v) => onChange({ hosting: v as Hosting })}
-        className="grid grid-cols-1 gap-3 md:grid-cols-2"
+        value={state.deployMode ?? ""}
+        onValueChange={(v) => onChange({ deployMode: v as DeployMode })}
+        className="flex flex-col gap-3"
       >
         <SelectableCard
-          selected={state.hosting === "perkos"}
-          onClick={() => onChange({ hosting: "perkos" })}
+          selected={state.deployMode === "perkos-ecs"}
+          onClick={() =>
+            ECS_AVAILABLE && onChange({ deployMode: "perkos-ecs" })
+          }
+          disabled={!ECS_AVAILABLE}
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
                 <Cloud className="h-4 w-4 text-primary" />
-                <span className="text-base font-medium text-foreground">PerkOS hosted</span>
+                <span className="text-base font-medium text-foreground">
+                  PerkOS infra (AWS ECS)
+                </span>
+                {!ECS_AVAILABLE ? (
+                  <Badge
+                    variant="secondary"
+                    className="border-amber-500/40 bg-amber-500/15 text-amber-300"
+                  >
+                    Coming soon
+                  </Badge>
+                ) : null}
+                <Badge variant="secondary" className="border-primary/30 bg-primary/10 text-primary">
+                  Recommended
+                </Badge>
               </div>
               <p className="text-sm text-muted-foreground">
-                Spin up the agent on PerkOS's managed runtime. Zero infra setup.
+                PerkOS provisions a Fargate task for your agent. From{" "}
+                <span className="font-medium text-foreground">$29/mo</span>{" "}
+                billed via x402 on Base. Status flips to "ready" once the
+                container is healthy (~30s).
               </p>
             </div>
-            <RadioGroupItem value="perkos" id="hosting-perkos" />
+            <RadioGroupItem value="perkos-ecs" id="deploy-ecs" disabled={!ECS_AVAILABLE} />
           </div>
         </SelectableCard>
 
         <SelectableCard
-          selected={state.hosting === "self"}
-          onClick={() => onChange({ hosting: "self" })}
+          selected={state.deployMode === "vps"}
+          onClick={() => onChange({ deployMode: "vps" })}
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
                 <Server className="h-4 w-4 text-primary" />
-                <span className="text-base font-medium text-foreground">Self-hosted</span>
+                <span className="text-base font-medium text-foreground">
+                  Run on a VPS I own
+                </span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Deploy on your own VPS. You provide the IP and SSH public key.
+                Paste an SSH endpoint + key. PerkOS pushes the install script
+                and watches the bridge come online.
               </p>
             </div>
-            <RadioGroupItem value="self" id="hosting-self" />
+            <RadioGroupItem value="vps" id="deploy-vps" />
+          </div>
+        </SelectableCard>
+
+        <SelectableCard
+          selected={state.deployMode === "local"}
+          onClick={() => onChange({ deployMode: "local" })}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <Laptop className="h-4 w-4 text-primary" />
+                <span className="text-base font-medium text-foreground">
+                  Run on my machine
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                PerkOS issues a relay credential. Paste it into your local
+                OpenClaw or Hermes config and restart. No infra required.
+              </p>
+            </div>
+            <RadioGroupItem value="local" id="deploy-local" />
           </div>
         </SelectableCard>
       </RadioGroup>
 
-      {state.hosting === "self" ? (
+      {state.deployMode === "vps" ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">VPS access</CardTitle>
             <CardDescription>
-              We use this to provision the runtime container on your machine.
+              We use this to push the install script. Public key only — we
+              never read or store your private key.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
@@ -572,8 +688,8 @@ function Step2Hosting({
               <Label htmlFor="vps-ip">Public IP address</Label>
               <Input
                 id="vps-ip"
-                value={state.selfHostedIp}
-                onChange={(e) => onChange({ selfHostedIp: e.target.value })}
+                value={state.vpsIp}
+                onChange={(e) => onChange({ vpsIp: e.target.value })}
                 placeholder="203.0.113.42"
                 inputMode="numeric"
                 aria-invalid={Boolean(ipError)}
@@ -589,8 +705,8 @@ function Step2Hosting({
               <Label htmlFor="vps-ssh">SSH public key</Label>
               <Textarea
                 id="vps-ssh"
-                value={state.selfHostedSshKey}
-                onChange={(e) => onChange({ selfHostedSshKey: e.target.value })}
+                value={state.vpsSshKey}
+                onChange={(e) => onChange({ vpsSshKey: e.target.value })}
                 placeholder="ssh-ed25519 AAAA…"
                 rows={4}
                 className="font-mono text-xs"
@@ -602,9 +718,6 @@ function Step2Hosting({
                   {sshError}
                 </p>
               ) : null}
-              <p className="text-xs text-muted-foreground">
-                We never read or store private keys. Paste the public half only.
-              </p>
             </div>
           </CardContent>
         </Card>
@@ -613,36 +726,45 @@ function Step2Hosting({
   );
 }
 
-function Step3LLM({
+function Step4LLM({
   state,
   onChange,
   apiKeyError,
 }: StepProps & { apiKeyError?: string }) {
+  const providerOpts = state.runtime ? byokProviderOptions(state.runtime) : [];
   return (
     <div className="flex flex-col gap-4">
       <StepHeader
-        title="Which LLM provider?"
-        description="Use PerkOS-managed inference or bring your own API key."
+        title="LLM source"
+        description="Pick how the agent reaches its model. Each runtime gets a config block in its native shape — preview on the review step."
       />
       <RadioGroup
-        value={state.llmMode ?? ""}
-        onValueChange={(v) => onChange({ llmMode: v as LLMMode })}
-        className="grid grid-cols-1 gap-3 md:grid-cols-2"
+        value={state.llmSource ?? ""}
+        onValueChange={(v) => onChange({ llmSource: v as LLMSource })}
+        className="flex flex-col gap-3"
       >
         <SelectableCard
-          selected={state.llmMode === "perkos"}
-          onClick={() => onChange({ llmMode: "perkos" })}
+          selected={state.llmSource === "perkos"}
+          onClick={() => onChange({ llmSource: "perkos" })}
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-primary" />
                 <span className="text-base font-medium text-foreground">
-                  PerkOS LLM Services
+                  PerkOS LLM service
                 </span>
+                <Badge variant="secondary" className="border-emerald-500/40 bg-emerald-500/15 text-emerald-300">
+                  Included in your plan
+                </Badge>
               </div>
               <p className="text-sm text-muted-foreground">
-                Managed inference. Routed across providers, billed in your workspace.
+                Managed Ollama-compatible gateway at{" "}
+                <code className="rounded bg-muted px-1 font-mono text-[11px]">
+                  api.llm.perkos.xyz
+                </code>{" "}
+                — kimi-k2.6:cloud + qwen 7B/14B. No key needed; we issue one
+                scoped to your agent.
               </p>
             </div>
             <RadioGroupItem value="perkos" id="llm-perkos" />
@@ -650,46 +772,81 @@ function Step3LLM({
         </SelectableCard>
 
         <SelectableCard
-          selected={state.llmMode === "byok"}
-          onClick={() => onChange({ llmMode: "byok" })}
+          selected={state.llmSource === "byok"}
+          onClick={() => onChange({ llmSource: "byok" })}
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
                 <KeyRound className="h-4 w-4 text-primary" />
                 <span className="text-base font-medium text-foreground">
-                  Bring your own key
+                  Bring your own key (BYOK)
                 </span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Use your OpenAI, Anthropic or OpenRouter API key directly.
+                Use your own provider key. We forward it to the agent runtime
+                — never log or proxy your traffic.
               </p>
             </div>
             <RadioGroupItem value="byok" id="llm-byok" />
           </div>
         </SelectableCard>
+
+        <SelectableCard
+          selected={state.llmSource === "skip"}
+          onClick={() => onChange({ llmSource: "skip" })}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <FileCode className="h-4 w-4 text-primary" />
+                <span className="text-base font-medium text-foreground">
+                  Configure later
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Agent boots without an LLM source. Useful for testing
+                transport + tool calls only.
+              </p>
+            </div>
+            <RadioGroupItem value="skip" id="llm-skip" />
+          </div>
+        </SelectableCard>
       </RadioGroup>
 
-      {state.llmMode === "byok" ? (
+      {state.llmSource === "byok" && state.runtime ? (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">API credentials</CardTitle>
+            <CardTitle className="text-base">
+              {state.runtime === "OpenClaw"
+                ? "OpenClaw provider settings"
+                : "Hermes provider settings"}
+            </CardTitle>
             <CardDescription>
-              We forward this key to your agent runtime. Keep it secret.
+              {state.runtime === "OpenClaw"
+                ? "Fields map 1:1 to a block under models.providers.* in openclaw.json."
+                : "Fields map to provider.* + secrets.* in your Hermes profile's config.yaml."}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="api-provider">Provider</Label>
+              <Label htmlFor="byok-provider">Provider</Label>
               <Select
-                value={state.apiProvider}
-                onValueChange={(v) => onChange({ apiProvider: v as ApiProvider })}
+                value={state.byokProvider}
+                onValueChange={(v) => {
+                  const id = v ?? "";
+                  const opt = providerOpts.find((p) => p.id === id);
+                  onChange({
+                    byokProvider: id,
+                    byokModel: opt?.defaultModel ?? "",
+                  });
+                }}
               >
-                <SelectTrigger id="api-provider">
+                <SelectTrigger id="byok-provider">
                   <SelectValue placeholder="Pick a provider" />
                 </SelectTrigger>
                 <SelectContent>
-                  {PROVIDERS.map((p) => (
+                  {providerOpts.map((p) => (
                     <SelectItem key={p.id} value={p.id}>
                       {p.label}
                     </SelectItem>
@@ -698,18 +855,28 @@ function Step3LLM({
               </Select>
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="api-key">API key</Label>
+              <Label htmlFor="byok-model">Default model</Label>
               <Input
-                id="api-key"
-                value={state.apiKey}
-                onChange={(e) => onChange({ apiKey: e.target.value })}
+                id="byok-model"
+                value={state.byokModel}
+                onChange={(e) => onChange({ byokModel: e.target.value })}
+                placeholder="claude-sonnet-4-5"
+                className="font-mono text-xs"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="byok-key">API key</Label>
+              <Input
+                id="byok-key"
+                value={state.byokApiKey}
+                onChange={(e) => onChange({ byokApiKey: e.target.value })}
                 placeholder="sk-…"
                 type="password"
                 aria-invalid={Boolean(apiKeyError)}
-                aria-describedby={apiKeyError ? "api-key-error" : undefined}
+                aria-describedby={apiKeyError ? "byok-key-error" : undefined}
               />
               {apiKeyError ? (
-                <p id="api-key-error" className="text-xs text-destructive">
+                <p id="byok-key-error" className="text-xs text-destructive">
                   {apiKeyError}
                 </p>
               ) : null}
@@ -721,12 +888,18 @@ function Step3LLM({
   );
 }
 
-function Step4Channels({
+function Step5Plugins({
   state,
   onChange,
   channels,
 }: StepProps & { channels: Channel[] }) {
-  const toggle = (id: string) => {
+  const togglePlugin = (id: string) => {
+    const next = state.plugins.includes(id)
+      ? state.plugins.filter((p) => p !== id)
+      : [...state.plugins, id];
+    onChange({ plugins: next });
+  };
+  const toggleChannel = (id: string) => {
     const next = state.channels.includes(id)
       ? state.channels.filter((c) => c !== id)
       : [...state.channels, id];
@@ -734,223 +907,221 @@ function Step4Channels({
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <StepHeader
-        title="How should users reach this agent?"
-        description="In addition to inside PerkOS, the agent can speak through external channels. Optional — pick any."
+        title="Plugins + channels"
+        description="Optional. The preset already recommends a few — add more or fewer as you see fit."
       />
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-        {channels.map((c) => {
-          const Icon = c.icon;
-          const active = state.channels.includes(c.id);
-          return (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => toggle(c.id)}
-              className={cn(
-                "flex flex-col items-start gap-2 rounded-lg border p-4 text-left transition-colors",
-                active
-                  ? "border-primary bg-primary/10"
-                  : "border-border bg-card hover:border-primary/40"
-              )}
-            >
-              <div className="flex w-full items-start justify-between">
-                <Icon className="h-5 w-5 text-primary" />
-                {active ? <Check className="h-4 w-4 text-primary" /> : null}
-              </div>
-              <span className="text-sm font-medium text-foreground">{c.label}</span>
-            </button>
-          );
-        })}
+
+      <div className="flex flex-col gap-3">
+        <h3 className="text-sm font-medium text-foreground">Capabilities</h3>
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+          {PLUGINS.map((p) => {
+            const active = state.plugins.includes(p.id);
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => togglePlugin(p.id)}
+                className={cn(
+                  "flex items-start justify-between gap-3 rounded-lg border p-3 text-left transition-colors",
+                  active
+                    ? "border-primary bg-primary/10"
+                    : "border-border bg-card hover:border-primary/40"
+                )}
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className={cn(
+                      "grid h-8 w-8 shrink-0 place-items-center rounded-md",
+                      active ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
+                    )}
+                  >
+                    <Layers className="h-4 w-4" />
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-sm font-medium text-foreground">{p.label}</span>
+                    <span className="text-xs text-muted-foreground">{p.description}</span>
+                  </div>
+                </div>
+                {active ? (
+                  <Check className="h-4 w-4 text-primary" />
+                ) : (
+                  <Plus className="h-4 w-4 text-muted-foreground" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <h3 className="text-sm font-medium text-foreground">External channels</h3>
+        <p className="text-xs text-muted-foreground">
+          Where users can also reach this agent, in addition to inside PerkOS.
+        </p>
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+          {channels.map((c) => {
+            const Icon = c.icon;
+            const active = state.channels.includes(c.id);
+            return (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => toggleChannel(c.id)}
+                className={cn(
+                  "flex flex-col items-start gap-2 rounded-lg border p-3 text-left transition-colors",
+                  active
+                    ? "border-primary bg-primary/10"
+                    : "border-border bg-card hover:border-primary/40"
+                )}
+              >
+                <div className="flex w-full items-start justify-between">
+                  <Icon className="h-4 w-4 text-primary" />
+                  {active ? <Check className="h-3.5 w-3.5 text-primary" /> : null}
+                </div>
+                <span className="text-sm font-medium text-foreground">{c.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
 }
 
-function Step5Template({ state, onChange }: StepProps) {
-  return (
-    <div className="flex flex-col gap-4">
-      <StepHeader
-        title="Start from a template"
-        description="Templates ship with a curated set of skills and prompts. You can change everything later."
-      />
-      <RadioGroup
-        value={state.templateId ?? ""}
-        onValueChange={(v) => onChange({ templateId: v })}
-        className="grid grid-cols-1 gap-3 md:grid-cols-2"
-      >
-        {TEMPLATES.map((t) => {
-          const Icon = t.icon;
-          const selected = state.templateId === t.id;
-          return (
-            <SelectableCard
-              key={t.id}
-              selected={selected}
-              onClick={() => onChange({ templateId: t.id })}
-            >
-              <div className="flex items-start gap-3">
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-primary/15 text-primary">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <div className="flex flex-1 flex-col gap-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-base font-medium text-foreground">{t.name}</span>
-                    <RadioGroupItem value={t.id} id={`tpl-${t.id}`} />
-                  </div>
-                  <p className="text-sm text-muted-foreground">{t.description}</p>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {t.plugins.map((p) => (
-                      <Badge key={p} variant="secondary" className="text-xs">
-                        {p}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </SelectableCard>
-          );
-        })}
-      </RadioGroup>
-    </div>
-  );
-}
-
-function Step6Plugins({ state, onChange }: StepProps) {
-  const toggle = (id: string) => {
-    const next = state.plugins.includes(id)
-      ? state.plugins.filter((p) => p !== id)
-      : [...state.plugins, id];
-    onChange({ plugins: next });
-  };
+function Step6Review({ state, onChange }: StepProps) {
+  const preset = findPreset(state.personaId);
+  const finalName = state.agentName.trim() || preset?.name || "Untitled agent";
+  const preview = state.runtime
+    ? buildConfigPreview({
+        runtime: state.runtime,
+        agentName: finalName,
+        llmSource: state.llmSource ?? "skip",
+        byokProvider: state.byokProvider,
+        modelId: state.byokModel,
+      })
+    : null;
 
   return (
     <div className="flex flex-col gap-4">
       <StepHeader
-        title="Add plugins"
-        description="Extra capabilities from the PerkOS marketplace. Skip if the template covers what you need."
+        title="Review + launch"
+        description="What we'll write to disk (or to your ECS task) when you click Launch."
       />
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        {PLUGINS.map((p) => {
-          const active = state.plugins.includes(p.id);
-          return (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => toggle(p.id)}
-              className={cn(
-                "flex items-start justify-between gap-3 rounded-lg border p-4 text-left transition-colors",
-                active
-                  ? "border-primary bg-primary/10"
-                  : "border-border bg-card hover:border-primary/40"
-              )}
-            >
-              <div className="flex items-start gap-3">
-                <div
-                  className={cn(
-                    "grid h-8 w-8 shrink-0 place-items-center rounded-md",
-                    active ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
-                  )}
-                >
-                  <Layers className="h-4 w-4" />
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-medium text-foreground">{p.label}</span>
-                  <span className="text-xs text-muted-foreground">{p.description}</span>
-                </div>
-              </div>
-              {active ? <Check className="h-4 w-4 text-primary" /> : <Plus className="h-4 w-4 text-muted-foreground" />}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function Step7Summary({
-  state,
-  template,
-  onChange,
-}: StepProps & { template: Template | null }) {
-  return (
-    <div className="flex flex-col gap-4">
-      <StepHeader
-        title="Review and launch"
-        description="One last check before sending the agent to the runtime."
-      />
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Name your agent</CardTitle>
-          <CardDescription>
-            Defaults to the template name. You can rename it later.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="agent-name">Agent name</Label>
-            <Input
-              id="agent-name"
-              value={state.agentName}
-              onChange={(e) => onChange({ agentName: e.target.value })}
-              placeholder={template?.name ?? "Untitled agent"}
-            />
-          </div>
-        </CardContent>
-      </Card>
 
       <Card>
         <CardContent className="flex flex-col gap-3 p-5">
-          <SummaryRow label="Runtime" value={state.agentType ?? "—"} icon={Bot} />
+          <SummaryRow label="Persona" value={preset?.name ?? "—"} icon={Sparkles} />
+          <SummaryRow label="Agent name" value={finalName} icon={Bot} />
+          <SummaryRow label="Runtime" value={state.runtime ?? "—"} icon={Bot} />
           <SummaryRow
-            label="Hosting"
+            label="Deploy"
             value={
-              state.hosting === "self"
-                ? `Self-hosted (${state.selfHostedIp || "no IP yet"})`
-                : "PerkOS hosted"
+              state.deployMode === "perkos-ecs"
+                ? "PerkOS infra (AWS ECS)"
+                : state.deployMode === "vps"
+                  ? `VPS · ${state.vpsIp || "no IP yet"}`
+                  : state.deployMode === "local"
+                    ? "Local machine"
+                    : "—"
             }
-            icon={state.hosting === "self" ? Server : Cloud}
+            icon={
+              state.deployMode === "perkos-ecs"
+                ? Cloud
+                : state.deployMode === "vps"
+                  ? Server
+                  : Laptop
+            }
           />
           <SummaryRow
             label="LLM"
             value={
-              state.llmMode === "byok"
-                ? `BYOK · ${PROVIDERS.find((p) => p.id === state.apiProvider)?.label}`
-                : "PerkOS LLM Services"
+              state.llmSource === "perkos"
+                ? "PerkOS LLM service"
+                : state.llmSource === "byok"
+                  ? `BYOK · ${state.byokProvider} · ${state.byokModel}`
+                  : "Configure later"
             }
-            icon={state.llmMode === "byok" ? KeyRound : Sparkles}
+            icon={
+              state.llmSource === "byok"
+                ? KeyRound
+                : state.llmSource === "perkos"
+                  ? Sparkles
+                  : FileCode
+            }
+          />
+          <SummaryRow
+            label="Plugins"
+            value={
+              state.plugins.length === 0
+                ? "None"
+                : `${state.plugins.length} plugin${state.plugins.length === 1 ? "" : "s"}`
+            }
+            icon={Layers}
           />
           <SummaryRow
             label="Channels"
             value={
               state.channels.length === 0
                 ? "PerkOS only"
-                : state.channels
-                    .map((id) => CHANNELS.find((c) => c.id === id)?.label ?? id)
-                    .join(", ")
+                : state.channels.join(", ")
             }
             icon={MessageSquare}
           />
-          <SummaryRow
-            label="Template"
-            value={template?.name ?? "—"}
-            icon={template?.icon ?? Sparkles}
-          />
-          <SummaryRow
-            label="Plugins"
-            value={
-              state.plugins.length === 0
-                ? "Template defaults only"
-                : `${state.plugins.length} extra plugin${state.plugins.length === 1 ? "" : "s"}`
-            }
-            icon={Layers}
-          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <FileCode className="h-4 w-4 text-primary" />
+            Config preview
+            <Badge variant="secondary" className="font-mono text-[10px]">
+              {preview?.language ?? "—"}
+            </Badge>
+          </CardTitle>
+          <CardDescription>
+            This is the literal block that will be written to{" "}
+            <code className="rounded bg-muted px-1 font-mono text-[11px]">
+              {preview?.configPath ?? "—"}
+            </code>{" "}
+            on the agent host.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <pre className="max-h-72 overflow-auto rounded-md border border-border bg-muted/50 p-3 font-mono text-[11px] leading-relaxed text-foreground">
+            {preview?.content ?? ""}
+          </pre>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Rename or skip</CardTitle>
+          <CardDescription>
+            Pre-filled from the persona; tweak here for one-off launches.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="agent-name-review">Agent name</Label>
+            <Input
+              id="agent-name-review"
+              value={state.agentName}
+              onChange={(e) => onChange({ agentName: e.target.value })}
+              placeholder={preset?.name ?? "Untitled agent"}
+            />
+          </div>
         </CardContent>
       </Card>
     </div>
   );
 }
+
+// ---------------------------------------------------------------------------
+// Shared bits
+// ---------------------------------------------------------------------------
 
 function SummaryRow({
   label,
@@ -965,7 +1136,7 @@ function SummaryRow({
     <div className="flex items-start justify-between gap-4 text-sm">
       <div className="flex items-center gap-2 text-muted-foreground">
         <Icon className="h-4 w-4" />
-        <span className="uppercase tracking-wide text-xs">{label}</span>
+        <span className="text-xs uppercase tracking-wide">{label}</span>
       </div>
       <span className="max-w-[60%] text-right text-foreground">{value}</span>
     </div>
@@ -985,20 +1156,24 @@ function SelectableCard({
   selected,
   onClick,
   children,
+  disabled,
 }: {
   selected: boolean;
   onClick: () => void;
   children: React.ReactNode;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       className={cn(
         "flex flex-col rounded-lg border p-4 text-left transition-colors",
         selected
           ? "border-primary bg-primary/10 shadow-[0_0_12px_rgba(236,27,105,0.18)]"
-          : "border-border bg-card hover:border-primary/40"
+          : "border-border bg-card hover:border-primary/40",
+        disabled && "cursor-not-allowed opacity-60 hover:border-border"
       )}
     >
       {children}
