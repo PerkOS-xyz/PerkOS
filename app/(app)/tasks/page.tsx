@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
-import { Plus, Folder, ListTodo, X } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { Plus, Folder, ListTodo, X, ChevronDown } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -38,6 +38,9 @@ export default function TasksPage() {
   //   "done"   → Done
   // Anything else is ignored. The dashboard's StatCards send these.
   const statusFilter = searchParams.get("status");
+  // Project filter via ?project=<projectId>. Set by the project picker
+  // next to the search bar; cleared by the project filter pill ×.
+  const projectFilter = searchParams.get("project");
 
   const projectsQuery = useQuery({
     queryKey: ["wallet-projects", address],
@@ -78,9 +81,15 @@ export default function TasksPage() {
     return out;
   }, [projectDetails]);
 
+  // Project filter from the URL. Applied first so the status / text
+  // filters compose on top.
+  const projectFiltered = projectFilter
+    ? allTasks.filter((t) => t.projectId === projectFilter)
+    : allTasks;
+
   // Status filter from the URL — applied before the text-search filter so
   // the empty-state copy can refer to the correct slice.
-  const statusFiltered = allTasks.filter(({ task }) => {
+  const statusFiltered = projectFiltered.filter(({ task }) => {
     if (statusFilter === "active") {
       return task.status === "In progress" || task.status === "Review";
     }
@@ -141,22 +150,39 @@ export default function TasksPage() {
       </header>
 
       {allTasks.length > 0 ? (
-        <SearchInput
-          value={query}
-          onChange={setQuery}
-          placeholder="Search tasks by name, agent, project, or status…"
-        />
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="flex-1">
+            <SearchInput
+              value={query}
+              onChange={setQuery}
+              placeholder="Search tasks by name, agent, project, or status…"
+            />
+          </div>
+          <ProjectFilter
+            projects={projects}
+            selected={projectFilter}
+            statusFilter={statusFilter}
+          />
+        </div>
       ) : null}
 
-      {statusFilter ? (
-        <Link
-          href="/tasks"
-          className="inline-flex w-fit items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs text-primary hover:bg-primary/15"
-          aria-label="Clear status filter"
-        >
-          status: {statusFilter === "active" ? "in progress" : statusFilter}
-          <X className="h-3 w-3" aria-hidden />
-        </Link>
+      {(statusFilter || projectFilter) ? (
+        <div className="flex flex-wrap items-center gap-2">
+          {statusFilter ? (
+            <FilterPill
+              label={`status: ${statusFilter === "active" ? "in progress" : statusFilter}`}
+              clearHref={buildTasksHref({ project: projectFilter })}
+            />
+          ) : null}
+          {projectFilter ? (
+            <FilterPill
+              label={`project: ${
+                projects.find((p) => p.id === projectFilter)?.name ?? projectFilter
+              }`}
+              clearHref={buildTasksHref({ status: statusFilter })}
+            />
+          ) : null}
+        </div>
       ) : null}
 
       {projectsQuery.isLoading ? (
@@ -192,7 +218,7 @@ export default function TasksPage() {
             renderCard={({ item }) => (
               <Link
                 href={`/projects/${encodeURIComponent(item.projectId)}/tasks/${encodeURIComponent(item.id)}`}
-                className="flex flex-col gap-2 rounded-md border border-border bg-card px-4 py-3 transition-colors hover:border-primary/40"
+                className="glow-card flex flex-col gap-2 rounded-md border border-primary/25 bg-card px-4 py-3 transition-colors hover:border-primary/50"
               >
                 <div className="flex items-start justify-between gap-2">
                   <span className="pl-4 text-sm text-foreground">{item.task.name}</span>
@@ -214,6 +240,93 @@ export default function TasksPage() {
           </p>
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * Build a /tasks URL keeping the filters you pass in and dropping
+ * everything else. Used by the FilterPill ×-buttons to clear one
+ * filter at a time without losing the rest.
+ */
+function buildTasksHref({
+  status,
+  project,
+}: {
+  status?: string | null;
+  project?: string | null;
+}): string {
+  const params = new URLSearchParams();
+  if (status) params.set("status", status);
+  if (project) params.set("project", project);
+  const qs = params.toString();
+  return qs ? `/tasks?${qs}` : "/tasks";
+}
+
+function FilterPill({
+  label,
+  clearHref,
+}: {
+  label: string;
+  clearHref: string;
+}) {
+  return (
+    <Link
+      href={clearHref}
+      className="inline-flex w-fit items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs text-primary hover:bg-primary/15"
+      aria-label={`Clear ${label}`}
+    >
+      {label}
+      <X className="h-3 w-3" aria-hidden />
+    </Link>
+  );
+}
+
+/**
+ * Project picker that sits next to the search bar. Re-uses the URL as
+ * state so refreshes + back-button navigation keep the selection, and
+ * so deep links from elsewhere (dashboard, conductor) compose.
+ */
+function ProjectFilter({
+  projects,
+  selected,
+  statusFilter,
+}: {
+  projects: Project[];
+  selected: string | null;
+  statusFilter: string | null;
+}) {
+  const router = useRouter();
+  return (
+    <div className="relative shrink-0">
+      <Folder
+        className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+        aria-hidden
+      />
+      <select
+        aria-label="Filter tasks by project"
+        value={selected ?? ""}
+        onChange={(e) => {
+          router.push(
+            buildTasksHref({
+              status: statusFilter,
+              project: e.target.value || null,
+            }),
+          );
+        }}
+        className="h-10 w-full appearance-none rounded-md border border-input bg-card pl-9 pr-8 text-sm text-foreground transition-colors hover:border-primary/40 focus:border-primary focus:outline-none sm:w-56"
+      >
+        <option value="">All projects</option>
+        {projects.map((p) => (
+          <option key={p.id ?? p.name} value={p.id ?? ""}>
+            {p.name}
+          </option>
+        ))}
+      </select>
+      <ChevronDown
+        className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+        aria-hidden
+      />
     </div>
   );
 }
