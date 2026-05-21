@@ -67,30 +67,36 @@ const STAT_CARDS: {
   label: string;
   hint: string;
   Icon: typeof Briefcase;
+  /** Where clicking the card lands. Includes the appropriate ?status= filter. */
+  href: string;
 }[] = [
   {
     key: "activeProjects",
     label: "Active projects",
     hint: "in progress",
     Icon: Briefcase,
+    href: "/projects?status=active",
   },
   {
     key: "registeredAgents",
     label: "Registered agents",
     hint: "on your roster",
     Icon: Bot,
+    href: "/agents",
   },
   {
     key: "activeTasks",
     label: "Active tasks",
     hint: "in flight",
     Icon: Clock,
+    href: "/tasks?status=active",
   },
   {
     key: "completedTasks",
     label: "Completed tasks",
     hint: "shipped",
     Icon: CheckCircle2,
+    href: "/tasks?status=done",
   },
 ];
 
@@ -142,13 +148,14 @@ export default function DashboardPage() {
         ) : null}
 
         <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          {STAT_CARDS.map(({ key, label, hint, Icon }) => (
+          {STAT_CARDS.map(({ key, label, hint, Icon, href }) => (
             <StatCard
               key={key}
               label={label}
               value={isLoading ? "—" : stats[key]}
               hint={hint}
               Icon={Icon}
+              href={href}
             />
           ))}
         </section>
@@ -325,8 +332,8 @@ function GreetingBanner({ address }: { address?: string }) {
             <Image
               src="/avatar.png"
               alt=""
-              width={32}
-              height={32}
+              width={45}
+              height={45}
             />
           </div>
           <span className="absolute -bottom-0.5 -right-0.5 grid h-3 w-3 place-items-center rounded-full bg-emerald-400 ring-2 ring-background" />
@@ -380,14 +387,21 @@ function StatCard({
   value,
   hint,
   Icon,
+  href,
 }: {
   label: string;
   value: number | string;
   hint: string;
   Icon: typeof Briefcase;
+  href?: string;
 }) {
-  return (
-    <div className="glow-card flex flex-col gap-2 rounded-md border border-primary/20 bg-gradient-to-br from-primary/8 to-transparent p-4">
+  const content = (
+    <div
+      className={cn(
+        "glow-card flex flex-col gap-2 rounded-md border border-primary/20 bg-gradient-to-br from-primary/8 to-transparent p-4",
+        href && "cursor-pointer hover:border-primary/40",
+      )}
+    >
       <div className="flex items-center justify-between">
         <span className="text-xs uppercase tracking-wide text-muted-foreground">
           {label}
@@ -402,6 +416,19 @@ function StatCard({
       </div>
     </div>
   );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className="block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        aria-label={`${label}: ${value} ${hint}`}
+      >
+        {content}
+      </Link>
+    );
+  }
+  return content;
 }
 
 function SectionHeader({

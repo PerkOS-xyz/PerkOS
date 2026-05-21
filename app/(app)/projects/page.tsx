@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
-import { Folder, Plus } from "lucide-react";
+import { Folder, Plus, X } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { getWalletProjects, type Project } from "../../lib/perkosApi";
 import {
   SearchInput,
@@ -15,6 +16,10 @@ import { EmptyState } from "../../components/EmptyState";
 export default function ProjectsPage() {
   const { address, isConnected } = useConnection();
   const [query, setQuery] = useState("");
+  const searchParams = useSearchParams();
+  // Status filter via ?status=. Currently "active" is the only value the
+  // dashboard sends; other values silently pass through.
+  const statusFilter = searchParams.get("status");
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["wallet-projects", address],
@@ -23,7 +28,11 @@ export default function ProjectsPage() {
   });
 
   const allProjects = data?.projects ?? [];
-  const projects = allProjects.filter((p) =>
+  const statusFiltered =
+    statusFilter === "active"
+      ? allProjects.filter((p) => (p.status ?? "").toLowerCase() === "active")
+      : allProjects;
+  const projects = statusFiltered.filter((p) =>
     matchesQuery(query, [p.name, p.goal, p.status])
   );
   const hasProjects = allProjects.length > 0;
@@ -49,6 +58,17 @@ export default function ProjectsPage() {
           onChange={setQuery}
           placeholder="Search projects by name, goal, or status…"
         />
+      ) : null}
+
+      {statusFilter ? (
+        <Link
+          href="/projects"
+          className="inline-flex w-fit items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs text-primary hover:bg-primary/15"
+          aria-label="Clear status filter"
+        >
+          status: {statusFilter}
+          <X className="h-3 w-3" aria-hidden />
+        </Link>
       ) : null}
 
       {isLoading ? <SkeletonCards /> : null}

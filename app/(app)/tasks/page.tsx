@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
-import { Plus, Folder, ListTodo } from "lucide-react";
+import { Plus, Folder, ListTodo, X } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -31,6 +32,12 @@ type EnrichedTask = {
 export default function TasksPage() {
   const { address, isConnected } = useConnection();
   const [query, setQuery] = useState("");
+  const searchParams = useSearchParams();
+  // Status filter via ?status=. Values:
+  //   "active" → In progress + Review
+  //   "done"   → Done
+  // Anything else is ignored. The dashboard's StatCards send these.
+  const statusFilter = searchParams.get("status");
 
   const projectsQuery = useQuery({
     queryKey: ["wallet-projects", address],
@@ -71,8 +78,20 @@ export default function TasksPage() {
     return out;
   }, [projectDetails]);
 
+  // Status filter from the URL — applied before the text-search filter so
+  // the empty-state copy can refer to the correct slice.
+  const statusFiltered = allTasks.filter(({ task }) => {
+    if (statusFilter === "active") {
+      return task.status === "In progress" || task.status === "Review";
+    }
+    if (statusFilter === "done") {
+      return task.status === "Done";
+    }
+    return true;
+  });
+
   // Filter by search query (name, agent, project name, status, priority).
-  const filteredTasks = allTasks.filter(({ task, projectName }) =>
+  const filteredTasks = statusFiltered.filter(({ task, projectName }) =>
     matchesQuery(query, [
       task.name,
       task.agent,
@@ -127,6 +146,17 @@ export default function TasksPage() {
           onChange={setQuery}
           placeholder="Search tasks by name, agent, project, or status…"
         />
+      ) : null}
+
+      {statusFilter ? (
+        <Link
+          href="/tasks"
+          className="inline-flex w-fit items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs text-primary hover:bg-primary/15"
+          aria-label="Clear status filter"
+        >
+          status: {statusFilter === "active" ? "in progress" : statusFilter}
+          <X className="h-3 w-3" aria-hidden />
+        </Link>
       ) : null}
 
       {projectsQuery.isLoading ? (
