@@ -35,6 +35,11 @@ services:
       # Server-only allowlist (comma-separated 0x… wallets). Bootstraps
       # the gate alongside Firestore /allowlist + config/access.publicMode.
       PERKOS_WHITELIST: ${PERKOS_WHITELIST:-}
+      # AWS — used by /api/agents/launch when wizard picks PerkOS infra
+      # (ECS Fargate provisioning + Secrets Manager).
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY: ${AWS_ACCESS_KEY:-}
+      AWS_SECRET: ${AWS_SECRET:-}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/"]
       interval: 30s
