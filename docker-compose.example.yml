@@ -17,7 +17,6 @@ services:
         NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID}
         NEXT_PUBLIC_FIREBASE_APP_ID: ${NEXT_PUBLIC_FIREBASE_APP_ID}
         NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: ${NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID}
-        NEXT_PUBLIC_PERKOS_WHITELIST: ${NEXT_PUBLIC_PERKOS_WHITELIST}
         NEXT_PUBLIC_RECEIPT_ANCHOR_ADDRESS: ${NEXT_PUBLIC_RECEIPT_ANCHOR_ADDRESS:-}
         NEXT_PUBLIC_RECEIPT_ANCHOR_CHAIN_ID: ${NEXT_PUBLIC_RECEIPT_ANCHOR_CHAIN_ID:-}
     container_name: perkos-miniapp
@@ -33,6 +32,9 @@ services:
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-sonnet-4-5}
+      # Server-only allowlist (comma-separated 0x… wallets). Bootstraps
+      # the gate alongside Firestore /allowlist + config/access.publicMode.
+      PERKOS_WHITELIST: ${PERKOS_WHITELIST:-}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/"]
       interval: 30s

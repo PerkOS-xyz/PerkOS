@@ -42,7 +42,7 @@ function parseArgs(argv: string[]): Args {
   }
 
   if (wallets.length === 0) {
-    wallets = (process.env.NEXT_PUBLIC_PERKOS_WHITELIST ?? "")
+    wallets = (process.env.PERKOS_WHITELIST ?? "")
       .split(",")
       .map((w) => w.trim())
       .filter(Boolean);
@@ -60,7 +60,7 @@ async function main() {
 
   if (wallets.length === 0) {
     console.error(
-      "No wallets to seed. Set NEXT_PUBLIC_PERKOS_WHITELIST or pass --wallets=0xabc,0xdef"
+      "No wallets to seed. Set PERKOS_WHITELIST or pass --wallets=0xabc,0xdef"
     );
     process.exit(1);
   }
@@ -90,7 +90,7 @@ async function main() {
       ref,
       {
         walletAddress: address,
-        source: process.env.NEXT_PUBLIC_PERKOS_WHITELIST
+        source: process.env.PERKOS_WHITELIST
           ? "env-migration"
           : "manual-cli",
         note: note ?? null,
