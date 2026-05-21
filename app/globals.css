@@ -142,3 +142,37 @@ body {
     @apply font-sans;
   }
 }
+
+@layer utilities {
+  /*
+   * Subtle primary-tinted glow used on dashboard surfaces (stat cards,
+   * agents panel). Inspired by the futuristic Mini App mockup but
+   * deliberately restrained — a soft outer shadow + a top edge highlight,
+   * not the over-saturated cyberpunk look of the reference.
+   *
+   * Pairs well with `border-primary/30 bg-card/60`.
+   */
+  .glow-card {
+    box-shadow:
+      0 0 0 1px rgba(236, 27, 105, 0.05),
+      0 0 24px -8px rgba(236, 27, 105, 0.25),
+      inset 0 1px 0 0 rgba(236, 27, 105, 0.12);
+    transition: box-shadow 200ms ease-out;
+  }
+  .glow-card:hover {
+    box-shadow:
+      0 0 0 1px rgba(236, 27, 105, 0.1),
+      0 0 32px -8px rgba(236, 27, 105, 0.35),
+      inset 0 1px 0 0 rgba(236, 27, 105, 0.18);
+  }
+  /*
+   * Stronger variant for hero/emphasis surfaces (the workspace banner,
+   * featured cards). Larger radius + warmer pink core.
+   */
+  .glow-hero {
+    box-shadow:
+      0 0 0 1px rgba(236, 27, 105, 0.15),
+      0 0 48px -12px rgba(236, 27, 105, 0.45),
+      inset 0 1px 0 0 rgba(236, 27, 105, 0.2);
+  }
+}
