@@ -113,6 +113,14 @@ function DetailHeader({ detail }: { detail: ProjectDetail }) {
   const inProgress = tasks.filter((t) => t.status === "In progress").length;
   const done = tasks.filter((t) => t.status === "Done").length;
 
+  // Principal agent: first explicit project assignment, otherwise the first
+  // agent that appears on the project's tasks. Falls back to null when
+  // the project has nobody assigned (shows a "no agent" pill in the header).
+  const primaryAgent =
+    project.agentIds?.[0] ??
+    tasks.map((t) => t.agent).find((name) => name && name !== "App Agent") ??
+    null;
+
   const router = useRouter();
   const queryClient = useQueryClient();
   const { address } = useConnection();
@@ -141,8 +149,20 @@ function DetailHeader({ detail }: { detail: ProjectDetail }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <h1 className="text-3xl font-medium text-[#ececff]">{project.name}</h1>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <PrimaryAgentAvatar name={primaryAgent} />
+          <div className="flex flex-col">
+            <h1 className="text-3xl font-medium text-[#ececff]">
+              {project.name}
+            </h1>
+            <span className="text-xs text-muted-foreground">
+              {primaryAgent
+                ? `Lead: ${primaryAgent}`
+                : "No primary agent assigned"}
+            </span>
+          </div>
+        </div>
         <div className="flex items-center gap-3">
           <span className="text-xs text-[#7975a8]">
             {project.budget || "0 USDC"}
@@ -199,6 +219,38 @@ function DetailHeader({ detail }: { detail: ProjectDetail }) {
           walletAddress={address}
         />
       ) : null}
+    </div>
+  );
+}
+
+function PrimaryAgentAvatar({ name }: { name: string | null }) {
+  if (!name) {
+    return (
+      <div
+        className="grid h-14 w-14 shrink-0 place-items-center rounded-full border border-dashed border-border bg-card/40 text-muted-foreground"
+        aria-label="No primary agent assigned"
+        title="No primary agent assigned"
+      >
+        <Bot className="h-6 w-6" aria-hidden />
+      </div>
+    );
+  }
+  const initial = name.slice(0, 1).toUpperCase();
+  // Stable hue per agent name so the avatar tint persists across renders
+  // without needing a per-agent color stored in Firestore.
+  const seed = name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const hue = seed % 360;
+  return (
+    <div
+      className="grid h-14 w-14 shrink-0 place-items-center rounded-full border border-primary/50 font-mono text-xl font-medium text-foreground"
+      style={{
+        background: `radial-gradient(circle at 30% 30%, hsla(${hue}, 70%, 60%, 0.45), hsla(${hue}, 70%, 35%, 0.2))`,
+        boxShadow: `0 0 18px -2px hsla(${hue}, 80%, 55%, 0.55)`,
+      }}
+      aria-label={`Primary agent: ${name}`}
+      title={`Primary agent: ${name}`}
+    >
+      {initial}
     </div>
   );
 }
