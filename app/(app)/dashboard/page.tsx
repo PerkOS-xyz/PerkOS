@@ -395,18 +395,22 @@ function StatCard({
   Icon: typeof Briefcase;
   href?: string;
 }) {
+  // h-full + justify-between makes every card stretch to the height of the
+  // tallest sibling and pins the value+hint row to the bottom — so a
+  // 2-line label (e.g. "REGISTERED AGENTS" wrapping at md breakpoints)
+  // doesn't push that card taller than its neighbours.
   const content = (
     <div
       className={cn(
-        "glow-card flex flex-col gap-2 rounded-md border border-primary/20 bg-gradient-to-br from-primary/8 to-transparent p-4",
+        "glow-card flex h-full flex-col justify-between gap-2 rounded-md border border-primary/20 bg-gradient-to-br from-primary/8 to-transparent p-4",
         href && "cursor-pointer hover:border-primary/40",
       )}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-2">
         <span className="text-xs uppercase tracking-wide text-muted-foreground">
           {label}
         </span>
-        <Icon className="h-4 w-4 text-primary" />
+        <Icon className="h-4 w-4 shrink-0 text-primary" />
       </div>
       <div className="flex items-baseline gap-2">
         <span className="text-3xl font-semibold leading-none text-foreground">
@@ -421,7 +425,7 @@ function StatCard({
     return (
       <Link
         href={href}
-        className="block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="block h-full rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         aria-label={`${label}: ${value} ${hint}`}
       >
         {content}
