@@ -36,8 +36,10 @@ export function MobileBottomNav() {
           >
             <span
               className={cn(
-                "grid h-9 w-9 place-items-center rounded-lg transition-colors",
-                active && "bg-primary/15"
+                "grid h-9 w-9 place-items-center rounded-lg transition-all duration-200",
+                active
+                  ? "bg-primary/15 glow-icon-active"
+                  : "glow-icon-hover"
               )}
             >
               <Icon className="h-4 w-4" />
