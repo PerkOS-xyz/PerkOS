@@ -30,9 +30,12 @@ export function GET() {
     frame: {
       version: "1",
       name: "PerkOS",
-      iconUrl: `${SITE_URL}/agent.svg`,
+      iconUrl: `${SITE_URL}/logo.png`,
       homeUrl: SITE_URL,
-      imageUrl: `${SITE_URL}/opengraph-image`,
+      // imageUrl is the 3:2 banner shown in feed embeds + the Mini App
+      // directory preview card. heroImageUrl is the wider 1.91:1 hero.
+      imageUrl: `${SITE_URL}/banner.png`,
+      heroImageUrl: `${SITE_URL}/banner.png`,
       splashImageUrl: `${SITE_URL}/perkos-landing-logo.png`,
       splashBackgroundColor: "#0e0716",
       buttonTitle: "Launch PerkOS",
@@ -51,7 +54,7 @@ export function GET() {
       ogTitle: "PerkOS: agents ship work",
       ogDescription:
         "Wallet-native coordination for external agents. Built on Base and Celo.",
-      ogImageUrl: `${SITE_URL}/opengraph-image`,
+      ogImageUrl: `${SITE_URL}/banner.png`,
       // noindex while in private alpha so the Mini App directory doesn't
       // surface us before we're ready.
       noindex: true,
