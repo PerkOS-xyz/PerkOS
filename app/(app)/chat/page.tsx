@@ -61,8 +61,16 @@ export default function ChatHubPage() {
 
   const showSearch = allAgents.length + allProjects.length > 3;
 
+  // The chat layout cancels the (app) layout's px-5/md:px-8 with negative
+  // margins so the sidebar can touch the left edge. Conversation pages
+  // need that to render edge-to-edge, but this landing page (cards over
+  // a wide pane) does not — restore matching padding + cap with a
+  // max-width so the content reads at the same scale as Dashboard /
+  // Projects / Tasks instead of stretching to the right edge of the
+  // viewport.
   return (
-    <div className="flex flex-col gap-6">
+    <div className="h-full overflow-y-auto p-5 md:p-8">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <header className="flex flex-col gap-1">
         <h1 className="text-3xl font-medium text-foreground">Chat</h1>
         <p className="text-sm text-muted-foreground">
@@ -127,6 +135,7 @@ export default function ChatHubPage() {
           </ul>
         )}
       </Section>
+      </div>
     </div>
   );
 }
