@@ -103,23 +103,54 @@ function CreateProjectButton() {
 }
 
 function ProjectCard({ project }: { project: Project }) {
+  // Take the first letter of each significant word for the avatar
+  // (max 2 chars). "DeFi Research" → "DR", "Welcome to PerkOS" → "WP".
+  const initials = project.name
+    .split(/\s+/)
+    .filter((w) => w.length > 1 || /[A-Z]/.test(w))
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("") || project.name.slice(0, 2).toUpperCase();
+
+  // Stable hue per project so each card has its own avatar tint without
+  // needing per-project config. Hashes the id (or name fallback) into 0-360.
+  const seed = (project.id ?? project.name)
+    .split("")
+    .reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const hue = seed % 360;
+
   return (
     <li>
       <Link
         href={`/projects/${encodeURIComponent(project.id ?? "")}`}
-        className="flex items-start justify-between gap-4 rounded-md border border-[#1b1833] bg-[#0e0716] px-4 py-3 transition-colors hover:border-[#530922]"
+        className="glow-card flex items-center gap-3 rounded-lg border border-primary/25 bg-card/60 px-3 py-3 transition-colors hover:border-primary/50"
       >
-        <div className="flex flex-col gap-1">
+        {/* Project avatar: tinted circle with initials. Glow halo on hover. */}
+        <div
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-primary/40 font-mono text-sm font-medium text-foreground transition-shadow"
+          style={{
+            background: `radial-gradient(circle at 30% 30%, hsla(${hue}, 70%, 60%, 0.35), hsla(${hue}, 70%, 35%, 0.15))`,
+            boxShadow: `0 0 14px -2px hsla(${hue}, 80%, 55%, 0.45)`,
+          }}
+          aria-hidden
+        >
+          {initials}
+        </div>
+
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <div className="flex items-center gap-2">
-            <span className="text-base text-[#ececff]">{project.name}</span>
-            <StatusBadge status={project.status} />
+            <span className="truncate text-sm font-medium text-foreground">
+              {project.name}
+            </span>
           </div>
-          <p className="text-xs text-[#7975a8]">
+          <p className="text-[11px] text-muted-foreground">
             {project.agents} agent{project.agents === 1 ? "" : "s"}
-            <span className="px-2">·</span>
+            <span className="px-1.5">·</span>
             {project.tasks} task{project.tasks === 1 ? "" : "s"}
           </p>
         </div>
+
+        <StatusBadge status={project.status} />
         <ChevronRightIcon />
       </Link>
     </li>

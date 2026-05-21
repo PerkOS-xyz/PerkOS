@@ -26,6 +26,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  increment,
   orderBy,
   query,
   serverTimestamp,
@@ -419,6 +420,20 @@ export async function getWalletProject(input: {
     ),
   ]);
 
+  // Self-heal the denormalized task counter for projects created before
+  // createProjectTasks / deleteTask started keeping it in sync. Cheap
+  // because we already paid for tasksSnap above; fire-and-forget so the
+  // page render isn't blocked.
+  const actualTaskCount = tasksSnap.size;
+  if (project.tasks !== actualTaskCount) {
+    updateDoc(projectDoc(input.walletAddress, input.projectId), {
+      tasks: actualTaskCount,
+    }).catch(() => {
+      // Healing is best-effort. A failure (e.g. rules tightening) is fine.
+    });
+    project.tasks = actualTaskCount;
+  }
+
   return {
     project,
     tasks: tasksSnap.docs.map((d) => d.data()),
@@ -550,6 +565,15 @@ export async function createProjectTasks(input: {
     });
     created.push({ ...payload, id: ref.id });
   }
+  // Keep the denormalized counter on the project doc in sync — the
+  // /projects list reads `project.tasks` directly (not the subcollection
+  // size), so without this the card always shows "0 tasks".
+  if (created.length > 0) {
+    await updateDoc(projectDoc(input.walletAddress, input.projectId), {
+      tasks: increment(created.length),
+      updatedAt: serverTimestamp(),
+    });
+  }
   return { tasks: created };
 }
 
@@ -583,6 +607,15 @@ export async function deleteTask(input: {
   taskId: string;
 }): Promise<void> {
   await deleteDoc(taskDoc(input.walletAddress, input.projectId, input.taskId));
+  // Mirror the increment in createProjectTasks so the project's task
+  // count stays in sync with the subcollection.
+  await updateDoc(projectDoc(input.walletAddress, input.projectId), {
+    tasks: increment(-1),
+    updatedAt: serverTimestamp(),
+  }).catch(() => {
+    // If the project doc disappeared (e.g. cascade delete in flight),
+    // swallow — there's nothing to keep in sync with.
+  });
 }
 
 // ---------------------------------------------------------------------------
