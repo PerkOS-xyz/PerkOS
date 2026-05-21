@@ -824,6 +824,9 @@ export async function launchAgent(input: {
   name: string;
   plugins?: string[];
   modelKey?: string;
+  /** When provisioning on PerkOS infra (ECS), the specific image tag the
+   *  admin has approved. Ignored for VPS / Local deploys. */
+  imageTag?: string | null;
 }): Promise<LaunchAgentResponse> {
   const { authedFetch } = await import("./apiClient");
   const response = await authedFetch("/api/agents/launch", {
@@ -834,6 +837,7 @@ export async function launchAgent(input: {
       name: input.name,
       plugins: input.plugins ?? [],
       modelKey: input.modelKey,
+      imageTag: input.imageTag ?? undefined,
     }),
   });
   const payload = await parseJson(response);
