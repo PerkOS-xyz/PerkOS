@@ -84,7 +84,7 @@ export const metadata: Metadata = {
     // Base App registration id — links this URL to the PerkOS entry in
     // the Base App directory. Rendered as <meta name="base:app_id" …>
     // in every page (root layout = site-wide).
-    "base:app_id": "6a0f13e104010f6b416f34da",
+    "base:app_id": "6a0f183304010f6b416f34e1",
   },
 };
 
