@@ -21,14 +21,21 @@ const SITE_URL =
 export function GET() {
   return NextResponse.json({
     accountAssociation: {
-      // TODO: replace with the signed payload from
-      // https://farcaster.xyz/~/developers/mini-apps/manifest
+      // Signed via https://farcaster.xyz/~/developers/mini-apps/manifest
+      // using the custody address that controls app.perkos.xyz.
       header: "eyJmaWQiOjIxMDY3MSwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDIxNDA3YjkzZTcyQ2Q5RkUxMkI0ZmMyZmM0NzRDNjE0ZUZkYmFERmMifQ",
       payload: "eyJkb21haW4iOiJhcHAucGVya29zLnh5eiJ9",
-      signature: "kCY+WxmZvR8nOZ30luXMJbv+ll1gyT+Sr1axxoOC58FnBESI0OAaw+jMI+WseMyncWcm9yniIDUSPMhjczWJPhw="
-
+      signature: "kCY+WxmZvR8nOZ30luXMJbv+ll1gyT+Sr1axxoOC58FnBESI0OAaw+jMI+WseMyncWcm9yniIDUSPMhjczWJPhw=",
     },
-    frame: {
+    // Base App listing. The owner address is the wallet that proved
+    // ownership of the subdomain (same as the `key` decoded from
+    // accountAssociation.header above). Base uses this for app attribution.
+    baseBuilder: {
+      ownerAddress: "0x21407b93e72Cd9FE12B4fc2fc474C614eFdbaDFc",
+    },
+    // Modern Mini App key. The older `frame` key was accepted historically
+    // but Base App + the current Farcaster validator prefer `miniapp`.
+    miniapp: {
       version: "1",
       name: "PerkOS",
       iconUrl: `${SITE_URL}/logo.png`,
@@ -57,7 +64,7 @@ export function GET() {
         "Wallet-native coordination for external agents. Built on Base and Celo.",
       ogImageUrl: `${SITE_URL}/banner.png`,
       // noindex while in private alpha so the Mini App directory doesn't
-      // surface us before we're ready.
+      // surface us before we're ready. Flip to false to be discoverable.
       noindex: true,
     },
   });
