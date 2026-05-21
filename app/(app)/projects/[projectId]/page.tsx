@@ -205,7 +205,7 @@ function DetailHeader({ detail }: { detail: ProjectDetail }) {
 
 function StatTile({ label, value }: { label: string; value: number }) {
   return (
-    <div className="flex flex-col gap-1 rounded-md border border-[#530922] bg-[#0e0716] px-4 py-3">
+    <div className="glow-card flex flex-col gap-1 rounded-md border border-primary/30 bg-[#0e0716] px-4 py-3">
       <span className="text-xs uppercase tracking-wide text-[#7975a8]">
         {label}
       </span>
@@ -393,7 +393,7 @@ function TaskCard({ task, projectId }: { task: Task; projectId: string }) {
   });
 
   const cardClass =
-    "relative flex flex-col gap-2 rounded-md border border-[#1b1833] bg-[#0e0716] px-4 py-3 transition-colors hover:border-[#530922]";
+    "glow-card relative flex flex-col gap-2 rounded-md border border-primary/25 bg-[#0e0716] px-4 py-3 transition-colors hover:border-primary/50";
 
   const inner = (
     <>
