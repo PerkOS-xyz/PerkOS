@@ -39,6 +39,7 @@ import {
 } from "../../lib/perkosApi";
 import { useOnboarding } from "../../lib/onboardingState";
 import { formatAddress } from "../../lib/format";
+import { ActiveAgentsPanel } from "../../components/ActiveAgentsPanel";
 
 const QUICK_ACTIONS = [
   {
@@ -151,6 +152,11 @@ export default function DashboardPage() {
             />
           ))}
         </section>
+
+        <ActiveAgentsPanel
+          agents={data?.agents ?? []}
+          isLoading={isLoading}
+        />
 
         {showStarter && address ? <StarterCallout address={address} /> : null}
 
@@ -352,7 +358,7 @@ function WorkspaceCard({
   ownerAddress?: string;
 }) {
   return (
-    <div className="flex flex-col gap-1 rounded-md border border-border bg-card p-4">
+    <div className="glow-hero flex flex-col gap-1 rounded-md border border-primary/30 bg-card p-4">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-foreground">{name}</span>
         <Badge variant="secondary" className="border-border">
@@ -381,7 +387,7 @@ function StatCard({
   Icon: typeof Briefcase;
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded-md border border-primary/20 bg-gradient-to-br from-primary/8 to-transparent p-4">
+    <div className="glow-card flex flex-col gap-2 rounded-md border border-primary/20 bg-gradient-to-br from-primary/8 to-transparent p-4">
       <div className="flex items-center justify-between">
         <span className="text-xs uppercase tracking-wide text-muted-foreground">
           {label}

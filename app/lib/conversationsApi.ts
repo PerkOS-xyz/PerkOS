@@ -258,7 +258,13 @@ export async function updateConversation(input: UpdateConversationInput): Promis
   if (typeof input.archived === "boolean") patch.archived = input.archived;
   if (input.historyHost) patch.historyHost = input.historyHost;
 
-  await updateDoc(conversationDoc(input.walletAddress, input.convId), patch);
+  // Firestore v12's typed updateDoc expects PartialWithFieldValue<T>; the
+  // dynamic patch shape we build here is intentionally loose, so cast to
+  // the typed Conversation partial that the typed reference expects.
+  await updateDoc(
+    conversationDoc(input.walletAddress, input.convId),
+    patch as Partial<Conversation>,
+  );
 }
 
 export async function deleteConversation(

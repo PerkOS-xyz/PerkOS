@@ -342,6 +342,7 @@ export type Overview = {
   stats: OverviewStats;
   projects: Project[];
   tasks: Task[];
+  agents: Agent[];
 };
 
 /**
@@ -358,6 +359,7 @@ export async function getWalletOverview(
   ]);
 
   const projects = projectsSnap.docs.map((d) => d.data());
+  const agents = agentsSnap.docs.map((d) => d.data());
 
   // Pull recent tasks across all projects. Limited fan-out for now.
   const taskBundles = await Promise.all(
@@ -381,7 +383,7 @@ export async function getWalletOverview(
     completedTasks: tasks.filter((t) => t.status === "Done").length,
   };
 
-  return { stats, projects, tasks: tasks.slice(0, 25) };
+  return { stats, projects, tasks: tasks.slice(0, 25), agents };
 }
 
 // ---------------------------------------------------------------------------
