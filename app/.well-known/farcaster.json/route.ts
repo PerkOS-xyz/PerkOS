@@ -23,9 +23,10 @@ export function GET() {
     accountAssociation: {
       // TODO: replace with the signed payload from
       // https://farcaster.xyz/~/developers/mini-apps/manifest
-      header: "",
-      payload: "",
-      signature: "",
+      header: "eyJmaWQiOjIxMDY3MSwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDIxNDA3YjkzZTcyQ2Q5RkUxMkI0ZmMyZmM0NzRDNjE0ZUZkYmFERmMifQ",
+      payload: "eyJkb21haW4iOiJhcHAucGVya29zLnh5eiJ9",
+      signature: "kCY+WxmZvR8nOZ30luXMJbv+ll1gyT+Sr1axxoOC58FnBESI0OAaw+jMI+WseMyncWcm9yniIDUSPMhjczWJPhw="
+
     },
     frame: {
       version: "1",
