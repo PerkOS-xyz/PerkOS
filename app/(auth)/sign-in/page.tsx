@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { useConnect, useConnection, useDisconnect } from "wagmi";
 import { formatAddress } from "../../lib/format";
 import { useWalletSession } from "../../lib/useWalletSession";
+import { useIsInMiniApp } from "../../lib/useIsInMiniApp";
 import { AccessGate } from "../../components/AccessGate";
 
 export default function SignInPage() {
@@ -15,6 +16,7 @@ export default function SignInPage() {
   const { status, address } = useConnection();
   const { disconnect } = useDisconnect();
   const session = useWalletSession();
+  const isInMiniApp = useIsInMiniApp();
 
   const baseAccountConnector = connectors.find((c) => c.id === "baseAccount");
   const injectedConnector = connectors.find((c) => c.id === "injected");
@@ -78,6 +80,20 @@ export default function SignInPage() {
               Use a different account
             </button>
           </div>
+        ) : isInMiniApp === null ? (
+          // Still resolving whether we're inside a Mini App host. Render
+          // a neutral placeholder so we never flash the browser-mode
+          // connect buttons inside Farcaster / Base App.
+          <p className="text-center text-xs text-[#7975a8]">
+            Loading…
+          </p>
+        ) : isInMiniApp ? (
+          // Inside Farcaster / Base App — AutoConnect is running. The
+          // moment the wallet is injected, this view rerenders with
+          // `isConnected = true` and the "Continue as 0x…" button shows.
+          <p className="text-center text-xs text-[#7975a8]">
+            Connecting your wallet…
+          </p>
         ) : (
           <div className="flex w-full flex-col gap-4">
             <button

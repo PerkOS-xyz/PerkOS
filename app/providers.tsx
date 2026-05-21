@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { wagmiConfig } from "./lib/wagmi";
 import { OnboardingProvider } from "./lib/onboardingState";
+import { AutoConnect } from "./components/AutoConnect";
 
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
@@ -13,6 +14,7 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
+        <AutoConnect />
         <OnboardingProvider>{children}</OnboardingProvider>
         <Toaster richColors closeButton />
       </QueryClientProvider>
