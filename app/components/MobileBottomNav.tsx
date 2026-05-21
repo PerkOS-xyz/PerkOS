@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Folder, ListTodo, Bot } from "lucide-react";
+import { Home, Folder, ListTodo, Bot, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { href: "/dashboard", label: "Home", Icon: Home },
   { href: "/projects", label: "Projects", Icon: Folder },
   { href: "/tasks", label: "Tasks", Icon: ListTodo },
+  { href: "/chat", label: "Chat", Icon: MessageCircle },
   { href: "/agents", label: "Agents", Icon: Bot },
 ];
 
