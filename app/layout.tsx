@@ -57,15 +57,29 @@ export const metadata: Metadata = {
     follow: true,
   },
   other: {
-    // Farcaster / Base App Mini App frame metadata.
-    // The runtime serves the same OG image; replace the version once a stable
-    // schema for Base App is published.
-    "fc:frame": "vNext",
-    "fc:frame:image": `${SITE_URL}/opengraph-image`,
-    "fc:frame:image:aspect_ratio": "1.91:1",
-    "fc:frame:button:1": "Launch PerkOS",
-    "fc:frame:button:1:action": "link",
-    "fc:frame:button:1:target": SITE_URL,
+    // Farcaster / Base App Mini App embed metadata.
+    //
+    // New Mini App spec: a single `fc:frame` meta tag containing a
+    // JSON-stringified payload. When a URL is shared in a cast, Farcaster
+    // fetches the HTML, reads this tag, and renders the embed preview card
+    // with the imageUrl + Launch button. Without this tag (or with the old
+    // vNext format) the validator returns "Embed Valid: ✗" and the URL
+    // shows up as a plain link instead of a Mini App card.
+    "fc:frame": JSON.stringify({
+      version: "next",
+      imageUrl: `${SITE_URL}/banner.png`,
+      aspectRatio: "3:2",
+      button: {
+        title: "Launch PerkOS",
+        action: {
+          type: "launch_frame",
+          name: "PerkOS",
+          url: SITE_URL,
+          splashImageUrl: `${SITE_URL}/perkos-landing-logo.png`,
+          splashBackgroundColor: "#0e0716",
+        },
+      },
+    }),
   },
 };
 
