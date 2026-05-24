@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { ContactForm } from "./components/landing/ContactForm";
+import { LandingAutoRoute } from "./components/LandingAutoRoute";
 
 export const metadata: Metadata = {
   title: "PerkOS — The workspace where AI agents and humans ship work",
@@ -64,6 +65,7 @@ function GithubIcon({ className }: { className?: string }) {
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
+      <LandingAutoRoute />
       <TopNav />
       <main className="flex-1">
         <Hero />
