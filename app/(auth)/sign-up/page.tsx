@@ -9,10 +9,13 @@ import { useConnect, useConnection } from "wagmi";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Mail, Wallet } from "lucide-react";
 
+import { useIsInMiniApp } from "../../lib/useIsInMiniApp";
+
 export default function SignUpPage() {
   const router = useRouter();
   const { connectors, connect, isPending } = useConnect();
   const { status, address } = useConnection();
+  const isInMiniApp = useIsInMiniApp();
 
   const baseAccountConnector = connectors.find((c) => c.id === "baseAccount");
   const injectedConnector = connectors.find((c) => c.id === "injected");
@@ -20,13 +23,40 @@ export default function SignUpPage() {
   const isConnected = status === "connected";
   const isReconnecting = status === "reconnecting";
 
-  // If the user lands here already connected (e.g., reconnecting), send them
-  // straight to the onboarding flow.
+  // Inside Farcaster / Base App, the host already connected the wallet.
+  // Showing the "choose your sign-up method" buttons is meaningless —
+  // forward to /continue, which reads the resolved wallet session and
+  // dispatches to /dashboard or the request-access form.
+  //
+  // Also: if the user lands here already connected (e.g., reconnecting
+  // in a browser tab), send them straight to the onboarding flow.
   useEffect(() => {
+    if (isInMiniApp === true) {
+      router.replace("/continue");
+      return;
+    }
     if (isConnected && address) {
       router.replace("/onboarding/welcome");
     }
-  }, [isConnected, address, router]);
+  }, [isInMiniApp, isConnected, address, router]);
+
+  // While we don't yet know if we're in a Mini App host, OR while we know
+  // we are and the redirect is in flight, render a splash so we never
+  // flash the sign-up buttons to a Mini App user.
+  if (isInMiniApp === null || isInMiniApp === true) {
+    return (
+      <div className="flex flex-col items-center gap-3 text-center">
+        <Image
+          src="/perkos-header.png"
+          alt="PerkOS"
+          width={140}
+          height={32}
+          priority
+        />
+        <p className="text-sm text-[#7975a8]">Opening PerkOS…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex w-[329px] flex-col gap-8 rounded-lg border border-[#530922] bg-[#0e0716] p-10 shadow-[0_0_5px_rgba(236,27,105,0.3)] md:w-[616px] md:gap-14">
