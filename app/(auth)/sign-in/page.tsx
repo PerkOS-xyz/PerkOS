@@ -12,7 +12,7 @@ import { AccessGate } from "../../components/AccessGate";
 
 export default function SignInPage() {
   const router = useRouter();
-  const { connectors, connect, isPending, error } = useConnect();
+  const { connectors, connect, isPending, error, reset } = useConnect();
   const { status, address } = useConnection();
   const { disconnect } = useDisconnect();
   const session = useWalletSession();
@@ -24,12 +24,31 @@ export default function SignInPage() {
   const isConnected = status === "connected";
   const isReconnecting = status === "reconnecting";
 
+  // wagmi half-hydrated state — a `current` connector UID is set in the
+  // store but `useConnection` doesn't have an address. Manifests as a
+  // pinned "Connector already connected." error under the sign-in
+  // buttons (most common when reopening inside Base App). Clearing the
+  // wagmi state via `disconnect()` is the standard escape hatch.
+  const isStuckOnStaleConnector =
+    error?.name === "ConnectorAlreadyConnectedError" ||
+    error?.message?.toLowerCase().includes("already connected") === true;
+
   // Once the user has both wagmi + Firebase, send them on.
   useEffect(() => {
     if (session.status === "signed-in") {
       router.replace("/onboarding/welcome");
     }
   }, [session.status, router]);
+
+  // Auto-recover from the half-hydrated wagmi state. Disconnect clears
+  // the stale `current` connector UID in the store and reset() clears
+  // useConnect's lingering error. AutoConnect's effect re-runs after
+  // this and re-attempts the host-aware connect cleanly.
+  useEffect(() => {
+    if (!isStuckOnStaleConnector) return;
+    disconnect();
+    reset();
+  }, [isStuckOnStaleConnector, disconnect, reset]);
 
   // Wallet connected but Firebase rejected the allowlist → request access UI.
   if (session.status === "not-allowlisted" && address) {
@@ -94,6 +113,15 @@ export default function SignInPage() {
           <p className="text-center text-xs text-[#7975a8]">
             Connecting your wallet…
           </p>
+        ) : isReconnecting || isStuckOnStaleConnector ? (
+          // wagmi is rehydrating its store (or we just kicked it via
+          // disconnect()+reset() to break out of the half-hydrated
+          // trap). Don't render the buttons yet — the moment hydration
+          // finishes we'll either flip to "Continue as 0x…" or, if
+          // there is no persisted session, to the buttons below.
+          <p className="text-center text-xs text-[#7975a8]">
+            Restoring your session…
+          </p>
         ) : (
           <div className="flex w-full flex-col gap-4">
             <button
@@ -129,7 +157,7 @@ export default function SignInPage() {
           </div>
         )}
 
-        {error ? (
+        {error && !isStuckOnStaleConnector ? (
           <p className="px-2 text-center text-xs text-[#ec1b69]">{error.message}</p>
         ) : null}
         {session.error ? (
