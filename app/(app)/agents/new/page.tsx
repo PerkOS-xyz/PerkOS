@@ -63,6 +63,7 @@ import {
   type LLMSource,
 } from "../../../lib/agentConfigPreview";
 import { fetchActiveRuntimes, type RuntimeImage } from "../../../lib/runtimeImages";
+import { fetchEcsAccess } from "../../../lib/ecsAccess";
 import { useQuery } from "@tanstack/react-query";
 
 // ---------------------------------------------------------------------------
@@ -100,11 +101,12 @@ const PLUGINS: Plugin[] = [
   { id: "browser", label: "Headless browser", description: "Navigate sites and capture content." },
 ];
 
-// PerkOS infra (AWS ECS Fargate, us-east-1) is wired end-to-end:
-// admin curates which ECR image tags users can pick; /api/agents/launch
-// provisions the task on the perkos-agents cluster. Flip back to false
-// only if we need to put new sign-ups on a waitlist again.
-const ECS_AVAILABLE = true;
+// Per-user access to "PerkOS infra (AWS ECS)" is decided by
+// /api/access/ecs-check, which reads /ecs_allowlist + super-admins. The
+// wizard hydrates the flag via fetchEcsAccess() below and propagates it
+// to Step 3. The card shows "Coming soon" for wallets that aren't on the
+// list, which today is everyone except super-admins + manually allowed
+// design partners. Public access opens with billing (x402 monthly).
 
 type State = {
   step: number;
@@ -148,6 +150,17 @@ export default function AgentLauncherPage() {
 
   const [issuedCredentials, setIssuedCredentials] =
     useState<LaunchAgentCredentials | null>(null);
+
+  // Resolve ECS access for the signed-in user. While loading, treat as
+  // disallowed so the wizard never optimistically shows ECS as available
+  // and then snaps it away. Refetch on window focus so an admin granting
+  // access in another tab unblocks the wizard without a hard refresh.
+  const ecsAccessQuery = useQuery({
+    queryKey: ["access", "ecs"],
+    queryFn: fetchEcsAccess,
+    staleTime: 60_000,
+  });
+  const ecsAllowed = ecsAccessQuery.data?.allowed === true;
 
   const [state, setState, clearDraft] = useFormDraft<State>(
     "agent.new.v2",
@@ -267,7 +280,7 @@ export default function AgentLauncherPage() {
         return state.runtime !== null;
       case 3:
         if (state.deployMode === "local") return true;
-        if (state.deployMode === "perkos-ecs") return ECS_AVAILABLE;
+        if (state.deployMode === "perkos-ecs") return ecsAllowed;
         if (state.deployMode === "vps")
           return (
             state.vpsIp.trim().length > 0 &&
@@ -289,7 +302,7 @@ export default function AgentLauncherPage() {
       default:
         return false;
     }
-  }, [state, mutation.isPending, mutation.isSuccess, ipError, sshError, apiKeyError]);
+  }, [state, mutation.isPending, mutation.isSuccess, ipError, sshError, apiKeyError, ecsAllowed]);
 
   const nextStep = () => update({ step: Math.min(state.step + 1, TOTAL_STEPS) });
   const prevStep = () => update({ step: Math.max(state.step - 1, 1) });
@@ -326,6 +339,7 @@ export default function AgentLauncherPage() {
             onChange={update}
             ipError={ipError}
             sshError={sshError}
+            ecsAllowed={ecsAllowed}
           />
         )}
         {state.step === 4 && (
@@ -643,7 +657,8 @@ function Step3Deploy({
   onChange,
   ipError,
   sshError,
-}: StepProps & { ipError?: string; sshError?: string }) {
+  ecsAllowed,
+}: StepProps & { ipError?: string; sshError?: string; ecsAllowed: boolean }) {
   return (
     <div className="flex flex-col gap-4">
       <StepHeader
@@ -658,9 +673,9 @@ function Step3Deploy({
         <SelectableCard
           selected={state.deployMode === "perkos-ecs"}
           onClick={() =>
-            ECS_AVAILABLE && onChange({ deployMode: "perkos-ecs" })
+            ecsAllowed && onChange({ deployMode: "perkos-ecs" })
           }
-          disabled={!ECS_AVAILABLE}
+          disabled={!ecsAllowed}
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-1">
@@ -669,7 +684,7 @@ function Step3Deploy({
                 <span className="text-base font-medium text-foreground">
                   PerkOS infra (AWS ECS)
                 </span>
-                {!ECS_AVAILABLE ? (
+                {!ecsAllowed ? (
                   <Badge
                     variant="secondary"
                     className="border-amber-500/40 bg-amber-500/15 text-amber-300"
@@ -687,8 +702,15 @@ function Step3Deploy({
                 billed via x402 on Base. Status flips to "ready" once the
                 container is healthy (~30s).
               </p>
+              {!ecsAllowed ? (
+                <p className="text-xs text-muted-foreground">
+                  Currently invite-only while we test. Pick VPS or Local for
+                  now, or contact an admin to be added to the early access
+                  list.
+                </p>
+              ) : null}
             </div>
-            <RadioGroupItem value="perkos-ecs" id="deploy-ecs" disabled={!ECS_AVAILABLE} />
+            <RadioGroupItem value="perkos-ecs" id="deploy-ecs" disabled={!ecsAllowed} />
           </div>
         </SelectableCard>
 
