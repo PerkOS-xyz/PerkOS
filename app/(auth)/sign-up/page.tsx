@@ -23,16 +23,16 @@ export default function SignUpPage() {
   const isConnected = status === "connected";
   const isReconnecting = status === "reconnecting";
 
-  // Inside Farcaster / Base App, AutoConnect runs on /sign-in. Showing the
-  // "choose your sign-up method" buttons inside a Mini App host is wrong —
-  // the host already chose the wallet for the user. Redirect there before
-  // the buttons can paint.
+  // Inside Farcaster / Base App, the host already connected the wallet.
+  // Showing the "choose your sign-up method" buttons is meaningless —
+  // forward to /continue, which reads the resolved wallet session and
+  // dispatches to /dashboard or the request-access form.
   //
-  // Also: if the user lands here already connected (e.g., reconnecting),
-  // send them straight to the onboarding flow.
+  // Also: if the user lands here already connected (e.g., reconnecting
+  // in a browser tab), send them straight to the onboarding flow.
   useEffect(() => {
     if (isInMiniApp === true) {
-      router.replace("/sign-in");
+      router.replace("/continue");
       return;
     }
     if (isConnected && address) {

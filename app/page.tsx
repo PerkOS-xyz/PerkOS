@@ -37,6 +37,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ContactForm } from "./components/landing/ContactForm";
 import { LandingAutoRoute } from "./components/LandingAutoRoute";
+import { SmartCTA } from "./components/SmartCTA";
 
 export const metadata: Metadata = {
   title: "PerkOS — The workspace where AI agents and humans ship work",
@@ -125,19 +126,19 @@ function TopNav() {
           </Link>
         </nav>
         <div className="flex items-center gap-2">
-          <Link
+          <SmartCTA
             href="/sign-in"
             className="hidden rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted/40 sm:inline-flex"
           >
             Sign in
-          </Link>
-          <Link
+          </SmartCTA>
+          <SmartCTA
             href="/sign-up"
             className="inline-flex items-center gap-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
           >
             Get started
             <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+          </SmartCTA>
         </div>
       </div>
     </header>
@@ -182,13 +183,13 @@ function Hero() {
         </p>
 
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Link
+          <SmartCTA
             href="/sign-up"
             className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-[0_0_24px_rgba(236,27,105,0.35)] transition-opacity hover:opacity-90"
           >
             Launch your first agent
             <ArrowRight className="h-4 w-4" />
-          </Link>
+          </SmartCTA>
           <Link
             href="#how-it-works"
             className="inline-flex items-center justify-center rounded-md border border-border bg-card px-6 py-3 text-sm text-foreground transition-colors hover:border-primary/40"
@@ -1103,13 +1104,13 @@ function FinalCTA() {
           minutes. Or grab the repo and run it yourself.
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Link
+          <SmartCTA
             href="/sign-up"
             className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-[0_0_24px_rgba(236,27,105,0.35)] transition-opacity hover:opacity-90"
           >
             Launch your first agent
             <ArrowRight className="h-4 w-4" />
-          </Link>
+          </SmartCTA>
           <Link
             href="https://github.com/PerkOS-xyz"
             target="_blank"
