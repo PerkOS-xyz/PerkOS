@@ -4,57 +4,38 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-import { useIsInMiniApp } from "../lib/useIsInMiniApp";
 import { useWalletSession } from "../lib/useWalletSession";
 
 /**
- * Sends the visitor straight into the app whenever the marketing landing
- * isn't the right destination:
+ * Sends already-signed-in browser users straight to /dashboard so
+ * returning users don't have to re-read the marketing pitch.
  *
- *   - Inside Farcaster / Base App / any Mini App host → /sign-in. The
- *     wallet auto-connects there and the sign-in page forwards onward
- *     once the Firebase session is ready. Showing the long marketing
- *     pitch on every relaunch was the bug we're fixing — Base App users
- *     reopening the app could not get past the landing.
- *
- *   - Already-signed-in browser users → /dashboard. Returning users with
- *     a live wagmi + Firebase session don't need to re-read the pitch.
+ * Mini App visitors are intentionally NOT redirected from here — they
+ * see the landing and use the CTAs (which `<SmartCTA />` rewrites to
+ * /continue) to enter the app. Routing them away from the landing
+ * automatically would skip the pitch on every relaunch, and would also
+ * collide with the dispatch logic in /continue.
  *
  * Bots and first-time browser visitors see the SSR'd marketing landing
  * unchanged — this component renders nothing in that case so it never
  * blocks SEO crawlers from indexing the page.
- *
- * The full-screen overlay is mounted only when we know we're inside a
- * Mini App host or while a redirect is in flight; otherwise we don't
- * cover the landing, to avoid flashing a splash to first-time visitors.
  */
 export function LandingAutoRoute() {
   const router = useRouter();
-  const isInMiniApp = useIsInMiniApp();
   const session = useWalletSession();
   const redirected = useRef(false);
   const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
     if (redirected.current) return;
-    if (isInMiniApp === null) return; // SDK still resolving — wait.
+    if (session.status !== "signed-in") return;
 
-    if (isInMiniApp) {
-      redirected.current = true;
-      setRedirecting(true);
-      router.replace("/sign-in");
-      return;
-    }
+    redirected.current = true;
+    setRedirecting(true);
+    router.replace("/dashboard");
+  }, [session.status, router]);
 
-    if (session.status === "signed-in") {
-      redirected.current = true;
-      setRedirecting(true);
-      router.replace("/dashboard");
-    }
-  }, [isInMiniApp, session.status, router]);
-
-  const showOverlay = isInMiniApp === true || redirecting;
-  if (!showOverlay) return null;
+  if (!redirecting) return null;
 
   return (
     <div
