@@ -467,12 +467,13 @@ function Step1Persona({ state, onChange }: StepProps) {
         description="Choose the agent you want to work with. Each persona ships with a name, a soul, and a recommended skill set — all editable later."
       />
 
-      {/* Avatar grid — 3 cols mobile, 4 md, 5 lg. Each tile is a square
-       *  portrait + name label. Selected = primary ring + checkmark. */}
+      {/* Avatar grid — 2 cols mobile, 3 md, 4 lg. Each tile is a square
+       *  portrait + name label. Selected = primary ring + checkmark.
+       *  Two cols on mobile so the cinematic portrait detail reads. */}
       <div
         role="radiogroup"
         aria-label="Choose an agent persona"
-        className="grid grid-cols-3 gap-2 sm:gap-3 md:grid-cols-4 lg:grid-cols-5"
+        className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4"
       >
         {AGENT_PRESETS.map((p) => {
           const selected = state.personaId === p.id;
@@ -503,7 +504,7 @@ function Step1Persona({ state, onChange }: StepProps) {
                     src={p.avatar}
                     alt={`${p.name} — ${p.blurb}`}
                     fill
-                    sizes="(min-width: 1024px) 18vw, (min-width: 768px) 23vw, 31vw"
+                    sizes="(min-width: 1024px) 22vw, (min-width: 768px) 30vw, 48vw"
                     className="object-cover"
                   />
                 ) : (
