@@ -22,8 +22,7 @@ import { NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 
 import { adminAuth, adminDb } from "../../../lib/firebaseAdmin";
-import { provisionEcsAgent } from "../../../lib/ecsProvision";
-import { registerLlmAgent } from "../../../lib/llmAgentRegistry";
+import { createJob } from "../../../lib/provisionJobs";
 
 type LaunchBody = {
   walletAddress?: string;
@@ -188,86 +187,35 @@ export async function POST(request: Request) {
   // deployMode === "perkos-ecs"). For VPS / Local we stop after the
   // Firestore registration — the user installs the runtime themselves.
   //
-  // Provisioning failures are recorded on the agent doc but don't fail the
-  // launch response. The user keeps their agent registration + relayApiKey;
-  // they can retry the provisioning step from the agents page (TODO: wire
-  // a "Retry provisioning" affordance once it ships).
-  let ecsResult: Awaited<ReturnType<typeof provisionEcsAgent>> | null = null;
-  let ecsError: string | null = null;
+  // Provisioning runs asynchronously on the worker (see
+  // app/worker/provisioner.ts). We enqueue a job into /provision_jobs
+  // and return immediately so the wizard can subscribe to the job
+  // status + log stream via Firestore realtime listeners.
+  //
+  // BYOK keys live in the agent_secrets collection (written above);
+  // the worker reads them from there when it picks the job up. We
+  // don't ship the plaintext key through the job doc — the worker
+  // re-fetches it from agent_secrets inside its own privileged
+  // context.
+  let jobId: string | null = null;
   if (body.imageTag && typeof body.imageTag === "string") {
-    // PerkOS-mode (no BYOK): mint a per-agent Bearer key against the
-    // shared LLM gateway. We do this BEFORE provisioning so the ECS
-    // task starts with the secret already populated in Secrets Manager.
-    // Registration failures don't abort the launch — the agent still
-    // boots (the wizard already promised it would), but its LLM calls
-    // will 401 until we re-provision. The failure is recorded on the
-    // agent doc so the admin UI can surface it.
-    let perkosLlmApiKey: string | undefined;
-    if (!modelKey) {
-      try {
-        const registered = await registerLlmAgent(name);
-        perkosLlmApiKey = registered.key;
-        await agentRef.set(
-          {
-            llmRegistration: {
-              status: "ok",
-              last4: registered.last4,
-              registeredAt: FieldValue.serverTimestamp(),
-            },
-          },
-          { merge: true },
-        );
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        console.warn(
-          `[launch] LLM gateway registration failed for ${name}: ${message}`,
-        );
-        await agentRef.set(
-          {
-            llmRegistration: {
-              status: "failed",
-              error: message.slice(0, 500),
-              attemptedAt: FieldValue.serverTimestamp(),
-            },
-          },
-          { merge: true },
-        );
-      }
-    }
-
-    try {
-      ecsResult = await provisionEcsAgent({
-        walletAddress,
-        agentName: name,
+    jobId = await createJob({
+      walletAddress,
+      agentId: agentRef.id,
+      agentName: name,
+      input: {
         runtime,
         imageTag: body.imageTag,
         llmSource: modelKey ? "byok" : "perkos",
-        byokApiKey: modelKey ?? undefined,
-        perkosLlmApiKey,
-        agentId: agentRef.id,
-      });
-      await agentRef.set(
-        {
-          ecs: {
-            serviceArn: ecsResult.serviceArn,
-            taskDefinitionArn: ecsResult.taskDefinitionArn,
-            imageUri: ecsResult.imageUri,
-            provisionedAt: FieldValue.serverTimestamp(),
-          },
-          status: "provisioning",
-        },
-        { merge: true }
-      );
-    } catch (err) {
-      ecsError = err instanceof Error ? err.message : String(err);
-      await agentRef.set(
-        {
-          ecs: { lastError: ecsError, lastErrorAt: FieldValue.serverTimestamp() },
-          status: "provision-failed",
-        },
-        { merge: true }
-      );
-    }
+      },
+    });
+    await agentRef.set(
+      {
+        status: "provisioning",
+        provisionJobId: jobId,
+      },
+      { merge: true },
+    );
   }
 
   return NextResponse.json({
@@ -288,33 +236,19 @@ export async function POST(request: Request) {
     },
     result: {
       mode: modelKey ? "byok" : "perkos",
-      status: ecsError
-        ? "provision-failed"
-        : ecsResult
-          ? "provisioning"
-          : "ready",
+      // When jobId is set the agent is asynchronously provisioning;
+      // when null (VPS / Local), we're already done.
+      status: jobId ? "provisioning" : "ready",
+      jobId,
       agent: {
         id: agentRef.id,
         name,
         runtime,
-        status: ecsError
-          ? "provision-failed"
-          : ecsResult
-            ? "provisioning"
-            : "ready",
+        status: jobId ? "provisioning" : "ready",
         walletAddress,
         plugins,
         modelKeyProvided: Boolean(modelKey),
       },
-      ecs: ecsResult
-        ? {
-            serviceArn: ecsResult.serviceArn,
-            taskDefinitionArn: ecsResult.taskDefinitionArn,
-            imageUri: ecsResult.imageUri,
-          }
-        : ecsError
-          ? { error: ecsError }
-          : null,
     },
   });
 }

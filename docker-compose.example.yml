@@ -51,6 +51,34 @@ services:
       timeout: 5s
       retries: 3
 
+  # Provisioning worker — separate process that pulls
+  # /provision_jobs entries from Firestore, runs the LLM gateway
+  # register + ECS provision flow, and writes status + log entries
+  # back. Uses the same image as the miniapp service but with a
+  # different command. No public port — talks outbound only.
+  miniapp-worker:
+    image: perkos-miniapp-miniapp
+    container_name: perkos-miniapp-worker
+    restart: unless-stopped
+    networks:
+      - perkos-knowledge_default
+    depends_on:
+      - miniapp
+    command: ["tsx", "/app/app/worker/provisioner.ts"]
+    environment:
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
+      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY: ${AWS_ACCESS_KEY:-}
+      AWS_SECRET: ${AWS_SECRET:-}
+      PERKOS_LLM_GATEWAY_URL: ${PERKOS_LLM_GATEWAY_URL:-https://api.llm.perkos.xyz}
+      PERKOS_LLM_ADMIN_TOKEN: ${PERKOS_LLM_ADMIN_TOKEN:-}
+      # Each worker advertises an id in its log lines + as the
+      # `claimedBy` field on jobs it holds. Defaults to the container
+      # hostname when unset.
+      WORKER_INSTANCE_ID: ${WORKER_INSTANCE_ID:-}
+
 networks:
   perkos-knowledge_default:
     external: true

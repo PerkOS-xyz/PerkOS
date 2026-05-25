@@ -53,6 +53,17 @@ COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY --from=build /app/public ./public
 
+# Provisioning worker — a separate process that doesn't run as part of
+# the Next.js server. We ship the TypeScript source + tsx so the same
+# image can be started with `tsx app/worker/provisioner.ts` (used by
+# the miniapp-worker docker-compose service). The standalone build's
+# node_modules already contains firebase-admin + @aws-sdk because the
+# API routes import them, so the worker resolves its deps from there.
+RUN npm install -g tsx@4
+COPY --from=build /app/app/worker ./app/worker
+COPY --from=build /app/app/lib ./app/lib
+COPY --from=build /app/tsconfig.json ./tsconfig.json
+
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \

@@ -109,6 +109,29 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Provisioning jobs --------------------------------------------------
+    //
+    // /provision_jobs/{jobId} is written by /api/agents/launch (Admin SDK)
+    // and updated by the worker (Admin SDK). The owner wallet reads it
+    // via Firestore client SDK to render the "Provisioning…" UI with
+    // live log tail.
+    //
+    // /provision_jobs/{jobId}/log/* is an append-only audit trail of the
+    // worker's progress. Read-only for the owner; never writeable from
+    // the client.
+
+    match /provision_jobs/{jobId} {
+      allow read: if request.auth != null
+                  && request.auth.uid == resource.data.walletAddress;
+      allow write: if false;
+
+      match /log/{entryId} {
+        allow read: if request.auth != null
+                    && request.auth.uid == get(/databases/$(database)/documents/provision_jobs/$(jobId)).data.walletAddress;
+        allow write: if false;
+      }
+    }
+
     // Default deny -------------------------------------------------------
 
     match /{document=**} {
