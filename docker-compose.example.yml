@@ -40,6 +40,11 @@ services:
       AWS_REGION: ${AWS_REGION:-us-east-1}
       AWS_ACCESS_KEY: ${AWS_ACCESS_KEY:-}
       AWS_SECRET: ${AWS_SECRET:-}
+      # PerkOS LLM gateway — admin token used by /api/agents/launch to
+      # mint per-agent Bearer keys at provisioning time. Must match
+      # ADMIN_TOKEN on the gateway VPS (/opt/Perkos-llm/.env).
+      PERKOS_LLM_GATEWAY_URL: ${PERKOS_LLM_GATEWAY_URL:-https://api.llm.perkos.xyz}
+      PERKOS_LLM_ADMIN_TOKEN: ${PERKOS_LLM_ADMIN_TOKEN:-}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/"]
       interval: 30s

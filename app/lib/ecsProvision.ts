@@ -105,8 +105,14 @@ export type ProvisionInput = {
   imageTag: string;
   /** "perkos" | "byok" | "skip" — informs whether we stash a BYOK key. */
   llmSource: "perkos" | "byok" | "skip";
-  /** Required when llmSource === "byok". */
+  /** Required when llmSource === "byok" — the user's own LLM provider key
+   *  (OpenAI / Anthropic / OpenRouter). Stashed at .../llm-key. */
   byokApiKey?: string;
+  /** When llmSource === "perkos", the per-agent key minted via
+   *  registerLlmAgent() against api.llm.perkos.xyz. Stashed at
+   *  .../perkos-llm-key. The runtime authenticates with this when it
+   *  calls the PerkOS LLM gateway. */
+  perkosLlmApiKey?: string;
   /** Agent ID issued by /api/agents/launch (firestore agents/{name} doc). */
   agentId: string;
 };
@@ -159,15 +165,19 @@ function serviceNameFor(walletAddress: string, agentName: string): string {
 }
 
 /**
- * Stash the BYOK API key in Secrets Manager. Returns the ARN that the
- * task definition will reference. No-op for non-BYOK flows.
+ * Stash a Secrets Manager secret for a wallet/agent pair. Returns the ARN
+ * that the task definition will reference. `kind` namespaces the secret
+ * under the agent (e.g. `llm-key` for BYOK, `perkos-llm-key` for the
+ * gateway-minted Bearer key) so a single agent can have both.
  */
-async function ensureLlmSecret(
+async function ensureAgentSecret(
   walletAddress: string,
   agentName: string,
-  apiKey: string
+  kind: "llm-key" | "perkos-llm-key",
+  apiKey: string,
+  description: string,
 ): Promise<string> {
-  const name = `perkos-agents/${walletAddress.toLowerCase()}/${agentName.toLowerCase()}/llm-key`;
+  const name = `perkos-agents/${walletAddress.toLowerCase()}/${agentName.toLowerCase()}/${kind}`;
   try {
     const existing = await sm().send(new DescribeSecretCommand({ SecretId: name }));
     // Refresh on every provision so rotation works.
@@ -183,7 +193,7 @@ async function ensureLlmSecret(
       new CreateSecretCommand({
         Name: name,
         SecretString: apiKey,
-        Description: `PerkOS LLM key for ${walletAddress.toLowerCase()} / ${agentName}`,
+        Description: description,
       })
     );
     if (!created.ARN) throw new Error("Secrets Manager create returned no ARN.");
@@ -210,9 +220,31 @@ export async function provisionEcsAgent(
     { name: "PERKOS_LLM_DEFAULT_MODEL", value: "kimi-k2.6:cloud" },
   ];
 
+  // Resolve which key the runtime should send as Authorization: Bearer
+  // to the LLM endpoint. Exactly one wins:
+  //
+  //   - byok mode → user's own provider key, stashed at .../llm-key
+  //   - perkos mode → key minted from api.llm.perkos.xyz, stashed at
+  //     .../perkos-llm-key (requires PerkOS-App to have called
+  //     registerLlmAgent() upstream and passed the result here)
+  //   - skip → no key; the runtime will run without LLM access
   let secretArn: string | null = null;
   if (input.llmSource === "byok" && input.byokApiKey) {
-    secretArn = await ensureLlmSecret(wallet, input.agentName, input.byokApiKey);
+    secretArn = await ensureAgentSecret(
+      wallet,
+      input.agentName,
+      "llm-key",
+      input.byokApiKey,
+      `BYOK LLM key for ${wallet} / ${input.agentName}`,
+    );
+  } else if (input.llmSource === "perkos" && input.perkosLlmApiKey) {
+    secretArn = await ensureAgentSecret(
+      wallet,
+      input.agentName,
+      "perkos-llm-key",
+      input.perkosLlmApiKey,
+      `PerkOS LLM gateway key for ${wallet} / ${input.agentName}`,
+    );
   }
 
   // Task definition: runtime container + perkos-a2a sidecar.
