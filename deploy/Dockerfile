@@ -59,7 +59,13 @@ COPY --from=build /app/public ./public
 # the miniapp-worker docker-compose service). The standalone build's
 # node_modules already contains firebase-admin + @aws-sdk because the
 # API routes import them, so the worker resolves its deps from there.
-RUN npm install -g tsx@4
+#
+# `server-only` is stripped by Next.js's standalone trace (it's a
+# build-time marker), but the worker imports lib files that still
+# `import "server-only"` for the API-route safety net. Install it
+# locally so the resolution succeeds at runtime.
+RUN npm install -g tsx@4 \
+ && npm install --omit=dev --no-save --no-audit --no-fund --prefix /app server-only
 COPY --from=build /app/app/worker ./app/worker
 COPY --from=build /app/app/lib ./app/lib
 COPY --from=build /app/tsconfig.json ./tsconfig.json
