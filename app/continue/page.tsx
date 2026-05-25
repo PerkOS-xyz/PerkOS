@@ -23,14 +23,17 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { AccessGate } from "../components/AccessGate";
 import { useWalletSession } from "../lib/useWalletSession";
 
+const LOADING_TIMEOUT_MS = 10_000;
+
 export default function ContinuePage() {
   const router = useRouter();
   const session = useWalletSession();
+  const [timedOut, setTimedOut] = useState(false);
 
   useEffect(() => {
     if (session.status === "signed-in") {
@@ -44,6 +47,22 @@ export default function ContinuePage() {
       router.replace("/sign-in");
     }
   }, [session.status, router]);
+
+  // Escape hatch: if the session never resolves (Coinbase Wallet RN
+  // can leave wagmi pinned in "reconnecting" indefinitely when the
+  // host doesn't surface the wallet prompt), bounce to /sign-in
+  // after 10s so the user isn't stranded on the splash forever.
+  useEffect(() => {
+    if (session.status !== "loading") return;
+    const t = window.setTimeout(() => setTimedOut(true), LOADING_TIMEOUT_MS);
+    return () => window.clearTimeout(t);
+  }, [session.status]);
+
+  useEffect(() => {
+    if (timedOut && session.status === "loading") {
+      router.replace("/sign-in");
+    }
+  }, [timedOut, session.status, router]);
 
   if (session.status === "not-allowlisted" && session.address) {
     return (
