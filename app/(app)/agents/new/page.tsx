@@ -53,7 +53,6 @@ import {
 } from "../../../lib/perkosApi";
 import { AgentKeyRevealDialog } from "../../../components/AgentKeyRevealDialog";
 import { useOnboarding } from "../../../lib/onboardingState";
-import { useFormDraft } from "../../../lib/useFormDraft";
 import {
   ipv4Schema,
   sshPublicKeySchema,
@@ -170,26 +169,29 @@ export default function AgentLauncherPage() {
   });
   const ecsAllowed = ecsAccessQuery.data?.allowed === true;
 
-  const [state, setState, clearDraft] = useFormDraft<State>(
-    "agent.new.v2",
-    {
-      step: 1,
-      personaId: null,
-      agentName: "",
-      systemPromptOverride: "",
-      runtime: null,
-      imageTag: null,
-      deployMode: null,
-      vpsIp: "",
-      vpsSshKey: "",
-      llmSource: null,
-      byokProvider: "",
-      byokModel: "",
-      byokApiKey: "",
-      channels: [],
-      plugins: [],
-    }
-  );
+  // Wizard state is intentionally NOT persisted to localStorage. Earlier
+  // we used useFormDraft here, but it created a confusing UX after the
+  // two-state Step-1 refactor: returning to /agents/new would drop the
+  // user into the detail view of their last-picked persona without the
+  // picker grid visible, instead of letting them start fresh. Each visit
+  // begins with a clean wizard at Step 1.
+  const [state, setState] = useState<State>({
+    step: 1,
+    personaId: null,
+    agentName: "",
+    systemPromptOverride: "",
+    runtime: null,
+    imageTag: null,
+    deployMode: null,
+    vpsIp: "",
+    vpsSshKey: "",
+    llmSource: null,
+    byokProvider: "",
+    byokModel: "",
+    byokApiKey: "",
+    channels: [],
+    plugins: [],
+  });
 
   const update = (patch: Partial<State>) => setState((s) => ({ ...s, ...patch }));
 
@@ -242,7 +244,6 @@ export default function AgentLauncherPage() {
       toast.success("Agent launched", {
         description: `${state.agentName.trim() || preset?.name || "Your agent"} is ready.`,
       });
-      clearDraft();
       if (response?.credentials) {
         setIssuedCredentials(response.credentials);
         return;
@@ -455,6 +456,7 @@ type StepProps = {
 function Step1Persona({ state, onChange }: StepProps) {
   const preset = findPreset(state.personaId);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showPrompt, setShowPrompt] = useState(false);
   // Default prompt = full SOUL.md rendered from preset, with the user's
   // chosen agent name baked into the header. The override (textarea
   // content the user has typed) wins if non-empty.
@@ -511,6 +513,11 @@ function Step1Persona({ state, onChange }: StepProps) {
           <p className="-mt-1 text-center text-xs text-muted-foreground">
             {preset.blurb}
           </p>
+          {preset.soul.identity ? (
+            <p className="max-w-md text-center text-sm italic leading-relaxed text-foreground/80">
+              {preset.soul.identity}
+            </p>
+          ) : null}
         </div>
 
         {/* Form */}
@@ -527,32 +534,61 @@ function Step1Persona({ state, onChange }: StepProps) {
           />
         </div>
 
+        {/* System prompt — collapsed by default so the Continue button
+         *  stays in view and users don't get lost in the markdown. Edit
+         *  indicator surfaces when the user has typed an override so they
+         *  can find their work without having to expand to check. */}
         <div className="flex flex-col gap-2">
-          <Label htmlFor="system-prompt" className="text-xs text-muted-foreground">
-            System prompt{" "}
-            <span className="opacity-70">
-              · becomes SOUL.md / IDENTITY.md inside the runtime container
-            </span>
-          </Label>
-          <Textarea
-            id="system-prompt"
-            value={state.systemPromptOverride || defaultPrompt}
-            onChange={(e) =>
-              onChange({ systemPromptOverride: e.target.value })
-            }
-            rows={5}
-            className="font-mono text-xs"
-            placeholder="You are a …"
-          />
-          {state.systemPromptOverride &&
-          state.systemPromptOverride !== defaultPrompt ? (
-            <button
-              type="button"
-              className="self-start text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-              onClick={() => onChange({ systemPromptOverride: "" })}
-            >
-              Reset to the {preset.name} default
-            </button>
+          <button
+            type="button"
+            onClick={() => setShowPrompt((v) => !v)}
+            className="flex items-center gap-1.5 self-start text-xs font-medium text-primary hover:underline"
+          >
+            {showPrompt ? (
+              <ChevronUp className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5" />
+            )}
+            {showPrompt ? "Hide" : "Show"} system prompt
+            {state.systemPromptOverride &&
+            state.systemPromptOverride !== defaultPrompt ? (
+              <span className="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] text-primary">
+                edited
+              </span>
+            ) : null}
+          </button>
+          {showPrompt ? (
+            <>
+              <Label
+                htmlFor="system-prompt"
+                className="sr-only"
+              >
+                System prompt
+              </Label>
+              <p className="text-[11px] text-muted-foreground">
+                Becomes SOUL.md / IDENTITY.md inside the runtime container.
+              </p>
+              <Textarea
+                id="system-prompt"
+                value={state.systemPromptOverride || defaultPrompt}
+                onChange={(e) =>
+                  onChange({ systemPromptOverride: e.target.value })
+                }
+                rows={5}
+                className="font-mono text-xs"
+                placeholder="You are a …"
+              />
+              {state.systemPromptOverride &&
+              state.systemPromptOverride !== defaultPrompt ? (
+                <button
+                  type="button"
+                  className="self-start text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+                  onClick={() => onChange({ systemPromptOverride: "" })}
+                >
+                  Reset to the {preset.name} default
+                </button>
+              ) : null}
+            </>
           ) : null}
         </div>
 
@@ -582,8 +618,8 @@ function Step1Persona({ state, onChange }: StepProps) {
   return (
     <div className="flex flex-col gap-4">
       <StepHeader
-        title="Pick a persona"
-        description="Choose the agent you want to work with. Each persona ships with a name, a soul, and a recommended skill set — all editable later."
+        title="Pick your Agent"
+        description="Choose the agent you want to work with. Each one ships with a name, a soul, and a recommended skill set — all editable later."
       />
 
       <div
