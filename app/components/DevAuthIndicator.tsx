@@ -21,7 +21,7 @@
  */
 
 import { useEffect, useState } from "react";
-import { useAccount, useConnectors, type Connector } from "wagmi";
+import { useAccount, useConnect, useConnectors, type Connector } from "wagmi";
 
 import { useIsInMiniApp } from "../lib/useIsInMiniApp";
 import { useWalletSession } from "../lib/useWalletSession";
@@ -48,6 +48,7 @@ export function DevAuthIndicator() {
   const { isConnected } = useAccount();
   const session = useWalletSession();
   const connectors = useConnectors();
+  const { isPending: isConnectPending, error: connectError } = useConnect();
   const [ua, setUa] = useState<string>("");
 
   useEffect(() => {
@@ -96,6 +97,19 @@ export function DevAuthIndicator() {
       <span className="text-white/70">
         conn: {connectors.map(shortId).join(", ") || "—"}
       </span>
+      {isConnectPending ? (
+        <span className="text-amber-300">connecting…</span>
+      ) : null}
+      {connectError ? (
+        <span
+          className="text-rose-300"
+          title={(connectError as Error).message}
+        >
+          err:{" "}
+          {(connectError as Error).name ||
+            (connectError as Error).message.slice(0, 30)}
+        </span>
+      ) : null}
       {ua ? <span className="truncate text-white/60">{ua}</span> : null}
     </div>
   );
