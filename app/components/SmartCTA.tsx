@@ -29,7 +29,14 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type MouseEvent, type ReactNode } from "react";
-import { useAccount, useConnect, useConnectors, type Connector } from "wagmi";
+import {
+  useAccount,
+  useConnect,
+  useConnectors,
+  useDisconnect,
+  useReconnect,
+  type Connector,
+} from "wagmi";
 import { toast } from "sonner";
 
 import { useIsInMiniApp } from "../lib/useIsInMiniApp";
@@ -56,6 +63,8 @@ export function SmartCTA({ href, className, children }: Props) {
   const isInMiniApp = useIsInMiniApp();
   const { isConnected } = useAccount();
   const { connectAsync } = useConnect();
+  const { reconnectAsync } = useReconnect();
+  const { disconnect } = useDisconnect();
   const connectors = useConnectors();
   const [busy, setBusy] = useState(false);
 
@@ -88,12 +97,35 @@ export function SmartCTA({ href, className, children }: Props) {
         await connectAsync({ connector: coinbaseConnector });
         router.push("/continue");
       } catch (err) {
+        const message = err instanceof Error ? err.message : "Unknown error";
+        const isAlreadyConnected =
+          err instanceof Error &&
+          (err.name === "ConnectorAlreadyConnectedError" ||
+            message.toLowerCase().includes("already connected"));
+
+        // Half-hydrated wagmi trap: the store has a `current`
+        // connector UID set but useAccount hasn't hydrated. Try
+        // reconnectAsync to finish the hydration; if THAT also
+        // fails, force-clear the state via disconnect() so the next
+        // click is a fresh connect.
+        if (isAlreadyConnected) {
+          try {
+            await reconnectAsync({ connectors: [coinbaseConnector] });
+            router.push("/continue");
+            return;
+          } catch {
+            disconnect();
+            toast("Wallet state refreshed", {
+              description: "Tap the button again to connect.",
+            });
+            return;
+          }
+        }
+
         // Stay on landing — sign-up would be confusing (wallet IS
         // available, user just declined or the wallet errored). Split
         // friendly toast for user rejection vs surfacing the real
-        // error for everything else so we can diagnose host-specific
-        // failures (Coinbase Wallet RN in-app browser quirks, etc).
-        const message = err instanceof Error ? err.message : "Unknown error";
+        // error for everything else.
         const isUserReject = /reject|denied|cancel|abort|dismiss/i.test(
           message,
         );
