@@ -7,28 +7,47 @@
  * App / Farcaster flows.
  *
  * Shows:
- *   - miniapp:  result of sdk.isInMiniApp() — null while resolving,
- *               then true (miniapp embed) or false (regular browser
- *               or in-app browser)
- *   - wallet :  wagmi's isConnected
- *   - session:  useWalletSession status (signed-in / not-allowlisted /
- *               syncing / signed-out / loading / error)
- *   - ua     :  last 32 chars of the user-agent string, so we can tell
- *               Base App's in-app browser apart from regular Safari
+ *   - miniapp:    sdk.isInMiniApp() — null while resolving, then yes/no.
+ *   - wallet :    wagmi isConnected.
+ *   - session:    useWalletSession status.
+ *   - cbWallet:   yes/no — is Coinbase Smart Wallet present via EIP-6963
+ *                 (this is the signal that distinguishes Base App's
+ *                 in-app browser from plain Safari).
+ *   - conn   :    short list of wagmi connector ids the page currently
+ *                 sees. Includes anything wagmi discovered via EIP-6963.
+ *   - ua     :    last 36 chars of navigator.userAgent.
  *
  * Remove or gate behind an env flag once the alpha auth flow stabilises.
  */
 
 import { useEffect, useState } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useConnectors, type Connector } from "wagmi";
 
 import { useIsInMiniApp } from "../lib/useIsInMiniApp";
 import { useWalletSession } from "../lib/useWalletSession";
+
+const COINBASE_WALLET_RDNS = "com.coinbase.wallet";
+
+function rdnsOf(connector: Connector): string | undefined {
+  const c = connector as Connector & {
+    rdns?: string;
+    info?: { rdns?: string };
+  };
+  return c.rdns ?? c.info?.rdns;
+}
+
+function shortId(connector: Connector): string {
+  // EIP-6963 connector ids are full rdns strings ("com.coinbase.wallet")
+  // — trim them so the badge stays readable on mobile.
+  const id = connector.id;
+  return id.length > 20 ? id.slice(0, 18) + "…" : id;
+}
 
 export function DevAuthIndicator() {
   const isInMiniApp = useIsInMiniApp();
   const { isConnected } = useAccount();
   const session = useWalletSession();
+  const connectors = useConnectors();
   const [ua, setUa] = useState<string>("");
 
   useEffect(() => {
@@ -37,6 +56,10 @@ export function DevAuthIndicator() {
       setUa(full.length > 36 ? `…${full.slice(-36)}` : full);
     }
   }, []);
+
+  const hasCoinbaseWallet = connectors.some(
+    (c) => c.id === COINBASE_WALLET_RDNS || rdnsOf(c) === COINBASE_WALLET_RDNS,
+  );
 
   const miniappLabel =
     isInMiniApp === null ? "?" : isInMiniApp ? "yes" : "no";
@@ -49,7 +72,7 @@ export function DevAuthIndicator() {
 
   return (
     <div
-      className="pointer-events-none fixed right-2 top-2 z-[100] flex flex-col items-end gap-0.5 rounded-md border border-primary/30 bg-black/70 px-2 py-1.5 font-mono text-[10px] leading-tight text-white shadow-lg backdrop-blur-sm"
+      className="pointer-events-none fixed right-2 top-2 z-[100] flex max-w-[220px] flex-col items-end gap-0.5 rounded-md border border-primary/30 bg-black/70 px-2 py-1.5 font-mono text-[10px] leading-tight text-white shadow-lg backdrop-blur-sm"
       aria-hidden
     >
       <span>
@@ -64,7 +87,16 @@ export function DevAuthIndicator() {
       <span>
         session: <span className="text-primary">{session.status}</span>
       </span>
-      {ua ? <span className="max-w-[180px] truncate text-white/60">{ua}</span> : null}
+      <span>
+        cbWallet:{" "}
+        <span className={hasCoinbaseWallet ? "text-emerald-300" : "text-rose-300"}>
+          {hasCoinbaseWallet ? "yes" : "no"}
+        </span>
+      </span>
+      <span className="text-white/70">
+        conn: {connectors.map(shortId).join(", ") || "—"}
+      </span>
+      {ua ? <span className="truncate text-white/60">{ua}</span> : null}
     </div>
   );
 }

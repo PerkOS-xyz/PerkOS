@@ -1,52 +1,63 @@
 "use client";
 
 /**
- * Auto-connect the right wallet when running inside a Mini App host.
+ * Auto-connect the right wallet based on where we are loaded.
  *
- * The Farcaster Mini App SDK exposes:
- *   - `sdk.isInMiniApp()` → boolean: are we inside any Mini App host?
- *   - `sdk.context.client.clientFid` → number: which host (Warpcast, Base
- *     App, etc.) is running us.
+ * Three host contexts we care about:
  *
- * In a plain browser tab `isInMiniApp` is false and we do nothing — the
- * user uses the sign-in page's "Connect" buttons as before.
+ *   1. Farcaster Mini App host (Warpcast / Farcaster app, clientFid 9152)
+ *      → farcasterMiniApp connector. Picks up the user's pre-authorized
+ *      Farcaster wallet.
  *
- * Inside a host:
- *   - Farcaster (clientFid 9152) → use the farcasterMiniApp connector,
- *     which picks up the user's pre-authorized Farcaster wallet.
- *   - Base App (clientFid 309857) → use baseAccount, which picks up the
- *     user's Base smart wallet.
- *   - Unknown host → try Farcaster first, then Base.
+ *   2. Base App Mini App host (clientFid 309857)
+ *      → baseAccount connector. Picks up the user's Base smart wallet.
  *
- * This runs once per session. If the user disconnects manually we
- * respect that and don't fight them on the next render.
+ *   3. Base App's in-app browser (NOT a Mini App host — sdk.isInMiniApp()
+ *      returns false) — but the host injects the user's Coinbase Smart
+ *      Wallet as an EIP-6963 provider. wagmi v3 auto-discovers EIP-6963
+ *      providers and exposes them as connectors. We look for the one
+ *      whose rdns is "com.coinbase.wallet" and connect through it so
+ *      the user doesn't see the manual sign-up buttons.
+ *
+ * Anywhere else (plain Safari without a Coinbase provider) we do
+ * nothing and the user uses the /sign-up | /sign-in connect buttons.
  *
  * Recovery from the "Connector already connected" trap
  * ----------------------------------------------------
  * wagmi v3 throws `ConnectorAlreadyConnectedError` from `connect()` when
- * the wagmi store has a `current` connector UID set, but `useAccount`
- * still reports `isConnected: false`. This happens after the host
- * restores a webview session: wagmi's persisted state is half-hydrated
- * — connector remembered, account not yet rehydrated — and our regular
- * `connect()` call races against the rehydration.
- *
- * Symptom (Base App, second open): sign-in page shows the buttons with
- * the error "Connector already connected." pinned underneath them. The
- * user is fully stuck.
- *
- * Fix: wait until `isReconnecting` is false before deciding anything,
- * use `connectAsync` so we can catch the error, and on that specific
- * error call `reconnectAsync` to finish the hydration cleanly instead
- * of surfacing the error to the UI.
+ * the store's `current` connector UID is set but `useAccount` hasn't
+ * hydrated the address yet (happens after a host restores a webview
+ * session). We catch it and call reconnectAsync to finish the hydration
+ * cleanly instead of surfacing the error.
  */
 
 import { useEffect, useRef } from "react";
-import { useAccount, useConnect, useConnectors, useReconnect } from "wagmi";
+import {
+  useAccount,
+  useConnect,
+  useConnectors,
+  useReconnect,
+  type Connector,
+} from "wagmi";
 import { sdk } from "@farcaster/miniapp-sdk";
 
 // Public host IDs. Stable per host app.
 const FARCASTER_CLIENT_FID = 9152;
 const BASE_APP_CLIENT_FID = 309857;
+const COINBASE_WALLET_RDNS = "com.coinbase.wallet";
+
+/**
+ * EIP-6963 providers are exposed by wagmi v3 either as a top-level
+ * `rdns` on the connector or inside a nested `info.rdns`. Check both
+ * so we are resilient to minor wagmi-version differences.
+ */
+function rdnsOf(connector: Connector): string | undefined {
+  const c = connector as Connector & {
+    rdns?: string;
+    info?: { rdns?: string };
+  };
+  return c.rdns ?? c.info?.rdns;
+}
 
 export function AutoConnect() {
   const { isConnected, isConnecting, isReconnecting } = useAccount();
@@ -64,26 +75,37 @@ export function AutoConnect() {
     (async () => {
       try {
         const inMiniApp = await sdk.isInMiniApp();
-        if (cancelled || !inMiniApp) return;
-
-        const context = await sdk.context;
         if (cancelled) return;
 
-        const clientFid = context?.client?.clientFid;
-
-        const findConnector = (id: string) =>
+        const findById = (id: string) =>
           connectors.find((c) => c.id === id);
+        const findByRdns = (rdns: string) =>
+          connectors.find((c) => c.id === rdns || rdnsOf(c) === rdns);
 
-        let connector;
-        if (clientFid === FARCASTER_CLIENT_FID) {
-          connector = findConnector("farcasterMiniApp");
-        } else if (clientFid === BASE_APP_CLIENT_FID) {
-          connector = findConnector("baseAccount");
+        let connector: Connector | undefined;
+
+        if (inMiniApp) {
+          const context = await sdk.context;
+          if (cancelled) return;
+
+          const clientFid = context?.client?.clientFid;
+
+          if (clientFid === FARCASTER_CLIENT_FID) {
+            connector = findById("farcasterMiniApp");
+          } else if (clientFid === BASE_APP_CLIENT_FID) {
+            connector = findById("baseAccount");
+          } else {
+            // Unknown host — try Farcaster first since the SDK runs there.
+            connector =
+              findById("farcasterMiniApp") ?? findById("baseAccount");
+          }
         } else {
-          // Unknown host — try Farcaster first since the SDK runs there,
-          // then fall back to Base.
-          connector =
-            findConnector("farcasterMiniApp") ?? findConnector("baseAccount");
+          // Base App's in-app browser: EIP-6963 announces Coinbase
+          // Smart Wallet. The announce event arrives asynchronously
+          // after page load, which is why we depend on `connectors` in
+          // useEffect — when wagmi registers the discovered provider
+          // the effect re-runs and we find it here.
+          connector = findByRdns(COINBASE_WALLET_RDNS);
         }
 
         if (!connector) return;
@@ -95,8 +117,7 @@ export function AutoConnect() {
         } catch (err) {
           // wagmi's persisted `current` connector matches us but
           // `useAccount` hasn't been hydrated yet — finish the hydration
-          // via reconnect instead of letting the error bubble to the
-          // sign-in UI.
+          // via reconnect instead of letting the error bubble to the UI.
           if (
             err instanceof Error &&
             (err.name === "ConnectorAlreadyConnectedError" ||
@@ -109,13 +130,11 @@ export function AutoConnect() {
               // sign-in screen; useConnect.error will surface there.
             }
           }
-          // Other errors swallowed silently — non-MiniApp users won't
+          // Other errors swallowed silently — non-host users won't
           // reach this branch anyway.
         }
       } catch {
-        // Detecting the host can throw if the SDK is unreachable (e.g.
-        // someone embeds the app in a non-mini-app iframe). Treat as
-        // "not in a mini app" — the user will see the sign-in screen.
+        // Detecting the host can throw if the SDK is unreachable.
       }
     })();
 
