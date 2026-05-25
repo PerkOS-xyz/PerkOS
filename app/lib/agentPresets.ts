@@ -163,11 +163,14 @@ export type AgentPreset = {
   blurb: string;
   /** Short emoji fallback used when no avatar art is present. */
   emoji: string;
-  /** Path under /public to the persona's portrait avatar.
-   *  Empty for "blank" (renders the emoji fallback instead). */
+  /** Path under /public to the persona's portrait avatar. */
   avatar: string;
+  /** "cover" (default) for cinematic portrait fills; "contain" for
+   *  brand marks / logos that need centered + padded rendering. */
+  avatarFit?: "cover" | "contain";
   /** Long-form identity. Rendered via renderSoulMd() to produce the
-   *  system prompt the runtime ships to disk. Empty for "blank". */
+   *  system prompt the runtime ships to disk. Empty for the custom
+   *  persona, which has no preset soul. */
   soul: SoulFields;
   /** Recommended plugin ids — wizard pre-selects these on step 5. */
   recommendedPlugins: string[];
@@ -185,17 +188,6 @@ const EMPTY_SOUL: SoulFields = {
 };
 
 export const AGENT_PRESETS: AgentPreset[] = [
-  {
-    id: "blank",
-    name: "Blank agent",
-    blurb: "Empty identity. Configure everything yourself.",
-    emoji: "⚪",
-    avatar: "",
-    soul: EMPTY_SOUL,
-    recommendedPlugins: [],
-  },
-
-  // -------------------------------------------------------------------
   {
     id: "builder",
     name: "Builder",
@@ -1521,6 +1513,21 @@ export const AGENT_PRESETS: AgentPreset[] = [
         "'Culture fit' used as a hand-wave instead of a defined competency.",
       ],
     },
+  },
+
+  // -------------------------------------------------------------------
+  // Custom persona — no preset soul, no portrait. Shown last so the
+  // user lands on the curated personas first; the PerkOS logo signals
+  // "this is the blank-canvas option."
+  {
+    id: "custom",
+    name: "Custom Agent",
+    blurb: "Start from scratch. You write the soul yourself.",
+    emoji: "",
+    avatar: "/logo.png",
+    avatarFit: "contain",
+    soul: EMPTY_SOUL,
+    recommendedPlugins: [],
   },
 ];
 

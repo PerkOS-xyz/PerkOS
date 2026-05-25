@@ -460,6 +460,125 @@ function Step1Persona({ state, onChange }: StepProps) {
   // content the user has typed) wins if non-empty.
   const defaultPrompt = preset ? presetSystemPrompt(preset, state.agentName) : "";
 
+  // Two-state flow per the UX research: picker (grid) OR detail (focused
+  // hero + form), never both. Picking a persona is the most emotionally
+  // weighty action in the wizard, so the chosen avatar gets the screen.
+  if (preset) {
+    return (
+      <div className="flex flex-col gap-5">
+        {/* "Change persona" affordance — 44px tap target, only escape
+         *  back to the grid. Clears soul-prompt override so re-picking
+         *  starts fresh; keeps any agent-name the user typed. */}
+        <button
+          type="button"
+          onClick={() => {
+            setShowAdvanced(false);
+            onChange({ personaId: null, systemPromptOverride: "" });
+          }}
+          className="inline-flex min-h-11 -ml-2 items-center gap-1.5 self-start px-2 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Change persona
+        </button>
+
+        {/* Hero — large 240px avatar centered, name as bold label. */}
+        <div className="flex flex-col items-center gap-3">
+          <div
+            className={cn(
+              "relative h-60 w-60 overflow-hidden rounded-2xl bg-muted/30 ring-4 ring-primary shadow-[0_0_28px_rgba(236,27,105,0.28)]",
+              preset.avatarFit === "contain" && "p-8"
+            )}
+          >
+            {preset.avatar ? (
+              <Image
+                src={preset.avatar}
+                alt={`${preset.name} portrait`}
+                fill
+                sizes="240px"
+                className={
+                  preset.avatarFit === "contain"
+                    ? "object-contain p-4"
+                    : "object-cover"
+                }
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-7xl">
+                {preset.emoji}
+              </div>
+            )}
+          </div>
+          <p className="text-xl font-semibold text-foreground">{preset.name}</p>
+          <p className="-mt-1 text-center text-xs text-muted-foreground">
+            {preset.blurb}
+          </p>
+        </div>
+
+        {/* Form */}
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="agent-name" className="text-xs text-muted-foreground">
+            Agent name
+          </Label>
+          <Input
+            id="agent-name"
+            value={state.agentName}
+            onChange={(e) => onChange({ agentName: e.target.value })}
+            placeholder={preset.name}
+            className="h-10"
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="system-prompt" className="text-xs text-muted-foreground">
+            System prompt{" "}
+            <span className="opacity-70">
+              · becomes SOUL.md / IDENTITY.md inside the runtime container
+            </span>
+          </Label>
+          <Textarea
+            id="system-prompt"
+            value={state.systemPromptOverride || defaultPrompt}
+            onChange={(e) =>
+              onChange({ systemPromptOverride: e.target.value })
+            }
+            rows={5}
+            className="font-mono text-xs"
+            placeholder="You are a …"
+          />
+          {state.systemPromptOverride &&
+          state.systemPromptOverride !== defaultPrompt ? (
+            <button
+              type="button"
+              className="self-start text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+              onClick={() => onChange({ systemPromptOverride: "" })}
+            >
+              Reset to the {preset.name} default
+            </button>
+          ) : null}
+        </div>
+
+        {preset.id !== "custom" ? (
+          <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              onClick={() => setShowAdvanced((v) => !v)}
+              className="flex items-center gap-1.5 self-start text-xs font-medium text-primary hover:underline"
+            >
+              {showAdvanced ? (
+                <ChevronUp className="h-3.5 w-3.5" />
+              ) : (
+                <ChevronDown className="h-3.5 w-3.5" />
+              )}
+              Advanced — {showAdvanced ? "hide" : "view"} full soul
+            </button>
+            {showAdvanced ? <SoulDetailCard soul={preset.soul} /> : null}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
+  // Picker state — 2 cols mobile / 3 md / 4 lg so the cinematic portrait
+  // detail reads (3 cols at 412px was too small to see persona character).
   return (
     <div className="flex flex-col gap-4">
       <StepHeader
@@ -467,149 +586,55 @@ function Step1Persona({ state, onChange }: StepProps) {
         description="Choose the agent you want to work with. Each persona ships with a name, a soul, and a recommended skill set — all editable later."
       />
 
-      {/* Avatar grid — 3 cols mobile, 4 md, 5 lg. Each tile is a square
-       *  portrait + name label. Selected = primary ring + checkmark. */}
       <div
         role="radiogroup"
         aria-label="Choose an agent persona"
-        className="grid grid-cols-3 gap-2 sm:gap-3 md:grid-cols-4 lg:grid-cols-5"
+        className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4"
       >
-        {AGENT_PRESETS.map((p) => {
-          const selected = state.personaId === p.id;
-          return (
-            <button
-              key={p.id}
-              role="radio"
-              aria-checked={selected}
-              type="button"
-              onClick={() =>
-                onChange({
-                  personaId: p.id,
-                  agentName: state.agentName || p.name,
-                  systemPromptOverride: "",
-                })
-              }
-              className={cn(
-                "group relative flex flex-col overflow-hidden rounded-xl border bg-card transition-colors",
-                "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
-                selected
-                  ? "border-primary shadow-[0_0_18px_rgba(236,27,105,0.28)] ring-2 ring-primary"
-                  : "border-border hover:border-primary/40"
-              )}
-            >
-              <div className="relative aspect-square w-full bg-muted/20">
-                {p.avatar ? (
-                  <Image
-                    src={p.avatar}
-                    alt={`${p.name} — ${p.blurb}`}
-                    fill
-                    sizes="(min-width: 1024px) 18vw, (min-width: 768px) 23vw, 31vw"
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-4xl">
-                    {p.emoji}
-                  </div>
-                )}
-                {selected ? (
-                  <span className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground shadow">
-                    <Check className="h-3 w-3" />
-                  </span>
-                ) : null}
-              </div>
-              <span className="w-full truncate px-2 py-1.5 text-center text-xs font-medium text-foreground">
-                {p.name}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Post-selection panel: small 64px avatar anchor + form fields.
-       *  Per UX research, the selected avatar stays visible but small so
-       *  the form takes focus and the user keeps the visual thread. */}
-      {preset ? (
-        <Card>
-          <CardContent className="flex flex-col gap-4 p-4 md:p-5">
-            <div className="flex items-center gap-3">
-              <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-muted/30">
-                {preset.avatar ? (
-                  <Image
-                    src={preset.avatar}
-                    alt={`${preset.name} portrait`}
-                    fill
-                    sizes="64px"
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-2xl">
-                    {preset.emoji}
-                  </div>
-                )}
-              </div>
-              <div className="flex flex-1 flex-col gap-1">
-                <Label htmlFor="agent-name" className="text-xs text-muted-foreground">
-                  Agent name
-                </Label>
-                <Input
-                  id="agent-name"
-                  value={state.agentName}
-                  onChange={(e) => onChange({ agentName: e.target.value })}
-                  placeholder={preset.name}
-                  className="h-9"
+        {AGENT_PRESETS.map((p) => (
+          <button
+            key={p.id}
+            role="radio"
+            aria-checked={false}
+            type="button"
+            onClick={() =>
+              onChange({
+                personaId: p.id,
+                agentName: state.agentName || p.name,
+                systemPromptOverride: "",
+              })
+            }
+            className={cn(
+              "group relative flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-colors",
+              "hover:border-primary/40",
+              "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            )}
+          >
+            <div className="relative aspect-square w-full bg-muted/20">
+              {p.avatar ? (
+                <Image
+                  src={p.avatar}
+                  alt={`${p.name} — ${p.blurb}`}
+                  fill
+                  sizes="(min-width: 1024px) 22vw, (min-width: 768px) 30vw, 48vw"
+                  className={
+                    p.avatarFit === "contain"
+                      ? "object-contain p-6"
+                      : "object-cover"
+                  }
                 />
-              </div>
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-4xl">
+                  {p.emoji}
+                </div>
+              )}
             </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="system-prompt" className="text-xs text-muted-foreground">
-                System prompt{" "}
-                <span className="opacity-70">
-                  · becomes SOUL.md / IDENTITY.md inside the runtime container
-                </span>
-              </Label>
-              <Textarea
-                id="system-prompt"
-                value={state.systemPromptOverride || defaultPrompt}
-                onChange={(e) =>
-                  onChange({ systemPromptOverride: e.target.value })
-                }
-                rows={5}
-                className="font-mono text-xs"
-                placeholder="You are a …"
-              />
-              {state.systemPromptOverride &&
-              state.systemPromptOverride !== defaultPrompt ? (
-                <button
-                  type="button"
-                  className="self-start text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-                  onClick={() => onChange({ systemPromptOverride: "" })}
-                >
-                  Reset to the {preset.name} default
-                </button>
-              ) : null}
-            </div>
-
-            {preset.id !== "blank" ? (
-              <div className="flex flex-col gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowAdvanced((v) => !v)}
-                  className="flex items-center gap-1.5 self-start text-xs font-medium text-primary hover:underline"
-                >
-                  {showAdvanced ? (
-                    <ChevronUp className="h-3.5 w-3.5" />
-                  ) : (
-                    <ChevronDown className="h-3.5 w-3.5" />
-                  )}
-                  Advanced — {showAdvanced ? "hide" : "view"} full soul
-                </button>
-                {showAdvanced ? <SoulDetailCard soul={preset.soul} /> : null}
-              </div>
-            ) : null}
-          </CardContent>
-        </Card>
-      ) : null}
+            <span className="w-full truncate px-2 py-1.5 text-center text-xs font-medium text-foreground">
+              {p.name}
+            </span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
