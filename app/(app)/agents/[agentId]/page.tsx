@@ -550,10 +550,19 @@ function ActionsPanel({ agent }: { agent: Agent }) {
       if (!address) throw new Error("Connect a wallet.");
       return deleteAgent({ walletAddress: address, agentId: agent.id });
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["wallet-agents", address] });
+      // The DELETE handler tore down ECS + Secrets + LLM key + Firestore. If
+      // any best-effort step had a non-fatal hiccup, surface it so the user
+      // can ping support — but the agent IS gone from their view either way.
+      const hasWarnings = result.warnings.length > 0;
+      if (hasWarnings) {
+        console.warn("[deleteAgent] warnings:", result.warnings);
+      }
       toast.success("Agent deleted", {
-        description: `${agent.name} was removed from your team.`,
+        description: hasWarnings
+          ? `${agent.name} was removed. Some cleanup tasks reported warnings (see console).`
+          : `${agent.name} was removed from your team.`,
       });
       router.replace("/agents");
     },
@@ -587,7 +596,7 @@ function ActionsPanel({ agent }: { agent: Agent }) {
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         title={`Delete ${agent.name}?`}
-        description="This removes the agent from your team. Conversations and tasks it was assigned to will lose this assignment."
+        description="Tears down the running container, revokes its LLM key, and clears its records. Billing stops immediately. Conversations and tasks it was assigned to keep their history but lose this assignment. This can't be undone."
         confirmLabel="Delete agent"
         destructive
         pending={deleteMutation.isPending}
