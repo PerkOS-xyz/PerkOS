@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -463,15 +464,23 @@ function Step1Persona({ state, onChange }: StepProps) {
     <div className="flex flex-col gap-4">
       <StepHeader
         title="Pick a persona"
-        description="Seeds a name, a soul, and a recommended skill set. Everything is editable later."
+        description="Choose the agent you want to work with. Each persona ships with a name, a soul, and a recommended skill set — all editable later."
       />
 
-      <div className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
+      {/* Avatar grid — 3 cols mobile, 4 md, 5 lg. Each tile is a square
+       *  portrait + name label. Selected = primary ring + checkmark. */}
+      <div
+        role="radiogroup"
+        aria-label="Choose an agent persona"
+        className="grid grid-cols-3 gap-2 sm:gap-3 md:grid-cols-4 lg:grid-cols-5"
+      >
         {AGENT_PRESETS.map((p) => {
           const selected = state.personaId === p.id;
           return (
             <button
               key={p.id}
+              role="radio"
+              aria-checked={selected}
               type="button"
               onClick={() =>
                 onChange({
@@ -481,54 +490,91 @@ function Step1Persona({ state, onChange }: StepProps) {
                 })
               }
               className={cn(
-                "flex flex-col items-start gap-1 rounded-lg border px-3 py-3 text-left transition-colors",
+                "group relative flex flex-col overflow-hidden rounded-xl border bg-card transition-colors",
+                "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
                 selected
-                  ? "border-primary bg-primary/10 shadow-[0_0_12px_rgba(236,27,105,0.18)]"
-                  : "border-border bg-card hover:border-primary/40"
+                  ? "border-primary shadow-[0_0_18px_rgba(236,27,105,0.28)] ring-2 ring-primary"
+                  : "border-border hover:border-primary/40"
               )}
             >
-              <div className="flex w-full items-center justify-between gap-2">
-                <span className="text-2xl leading-none">{p.emoji}</span>
-                {selected ? <Check className="h-3.5 w-3.5 text-primary" /> : null}
+              <div className="relative aspect-square w-full bg-muted/20">
+                {p.avatar ? (
+                  <Image
+                    src={p.avatar}
+                    alt={`${p.name} — ${p.blurb}`}
+                    fill
+                    sizes="(min-width: 1024px) 18vw, (min-width: 768px) 23vw, 31vw"
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-4xl">
+                    {p.emoji}
+                  </div>
+                )}
+                {selected ? (
+                  <span className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground shadow">
+                    <Check className="h-3 w-3" />
+                  </span>
+                ) : null}
               </div>
-              <span className="text-sm font-medium text-foreground">{p.name}</span>
-              <span className="text-[11px] leading-tight text-muted-foreground">
-                {p.blurb}
+              <span className="w-full truncate px-2 py-1.5 text-center text-xs font-medium text-foreground">
+                {p.name}
               </span>
             </button>
           );
         })}
       </div>
 
+      {/* Post-selection panel: small 64px avatar anchor + form fields.
+       *  Per UX research, the selected avatar stays visible but small so
+       *  the form takes focus and the user keeps the visual thread. */}
       {preset ? (
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Agent name + soul</CardTitle>
-            <CardDescription>
-              The soul becomes <code className="font-mono text-[11px]">SOUL.md</code>{" "}
-              (Hermes) or <code className="font-mono text-[11px]">IDENTITY.md</code>{" "}
-              (OpenClaw) inside the runtime container.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="agent-name">Agent name</Label>
-              <Input
-                id="agent-name"
-                value={state.agentName}
-                onChange={(e) => onChange({ agentName: e.target.value })}
-                placeholder={preset.name}
-              />
+          <CardContent className="flex flex-col gap-4 p-4 md:p-5">
+            <div className="flex items-center gap-3">
+              <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-muted/30">
+                {preset.avatar ? (
+                  <Image
+                    src={preset.avatar}
+                    alt={`${preset.name} portrait`}
+                    fill
+                    sizes="64px"
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-2xl">
+                    {preset.emoji}
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-1 flex-col gap-1">
+                <Label htmlFor="agent-name" className="text-xs text-muted-foreground">
+                  Agent name
+                </Label>
+                <Input
+                  id="agent-name"
+                  value={state.agentName}
+                  onChange={(e) => onChange({ agentName: e.target.value })}
+                  placeholder={preset.name}
+                  className="h-9"
+                />
+              </div>
             </div>
+
             <div className="flex flex-col gap-2">
-              <Label htmlFor="system-prompt">System prompt</Label>
+              <Label htmlFor="system-prompt" className="text-xs text-muted-foreground">
+                System prompt{" "}
+                <span className="opacity-70">
+                  · becomes SOUL.md / IDENTITY.md inside the runtime container
+                </span>
+              </Label>
               <Textarea
                 id="system-prompt"
                 value={state.systemPromptOverride || defaultPrompt}
                 onChange={(e) =>
                   onChange({ systemPromptOverride: e.target.value })
                 }
-                rows={6}
+                rows={5}
                 className="font-mono text-xs"
                 placeholder="You are a …"
               />
