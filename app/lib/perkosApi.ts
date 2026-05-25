@@ -672,8 +672,22 @@ export async function updateAgent(input: {
 export async function deleteAgent(input: {
   walletAddress: string;
   agentId: string;
-}): Promise<void> {
-  await deleteDoc(agentDoc(input.walletAddress, input.agentId));
+}): Promise<{ warnings: string[] }> {
+  // Routes through the server so we can tear down the ECS service + Secrets
+  // + LLM gateway key + Firestore docs atomically. A client-side Firestore
+  // delete would orphan the billable AWS resources.
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/agents/${encodeURIComponent(input.agentId)}`,
+    { method: "DELETE" },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) {
+    throw new Error(apiError(payload, "Couldn't delete agent."));
+  }
+  return {
+    warnings: Array.isArray(payload.warnings) ? (payload.warnings as string[]) : [],
+  };
 }
 
 // ---------------------------------------------------------------------------
