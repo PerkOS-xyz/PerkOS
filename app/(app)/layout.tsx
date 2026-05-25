@@ -155,7 +155,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             </Sheet>
           </header>
 
-          <div id="main-content" className="p-5 pb-24 md:p-8 md:pb-8">
+          <div id="main-content" className="p-5 pb-44 md:p-8 md:pb-8">
             {children}
           </div>
         </main>
