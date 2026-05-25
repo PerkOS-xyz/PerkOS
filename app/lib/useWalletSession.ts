@@ -8,6 +8,21 @@ import { firebaseAuth } from "./firebase";
 import { signInWithWallet } from "./walletAuth";
 import { useFirebaseUser } from "./useFirebaseUser";
 
+/**
+ * Module-level mutex shared by every useWalletSession() consumer in
+ * the app. The hook is called from at least four places at once
+ * during a typical flow (landing's LandingAutoRoute, /continue, the
+ * (app) layout guard, /sign-in), and each call is an independent React
+ * instance with its own state. Without a shared promise, each instance
+ * fires its own signInWithWallet → MetaMask receives multiple
+ * personal_sign requests with different nonces queued up.
+ *
+ * `pendingSignIn` holds the in-flight Promise so all instances await
+ * the same one and their reactive state (firebaseUser, syncing) picks
+ * up the result via the existing useFirebaseUser subscription.
+ */
+let pendingSignIn: Promise<unknown> | null = null;
+
 export type WalletSessionStatus =
   /** waiting for wagmi or Firebase to settle */
   | "loading"
@@ -59,14 +74,37 @@ export function useWalletSession(): Result {
 
   const runSignIn = useCallback(async () => {
     if (!address || !normalizedAddress) return;
+
+    // If another hook instance is already running the sign-in, join
+    // its Promise instead of starting our own. Only the first caller
+    // shows the wallet's signature prompt; everyone else just awaits
+    // the result and lets useFirebaseUser propagate the success.
+    if (pendingSignIn) {
+      setSyncing(true);
+      try {
+        await pendingSignIn;
+      } catch {
+        // The owning instance handled the error and set its own denial
+        // state; ours is in the same render tree so it will rerender
+        // alongside it. Nothing extra to do here.
+      } finally {
+        setSyncing(false);
+      }
+      return;
+    }
+
     setSyncing(true);
     setDenial(null);
     setErrorMessage(undefined);
+
+    const promise = signInWithWallet({
+      address,
+      signMessage: (message) => signMessageAsync({ message }),
+    });
+    pendingSignIn = promise;
+
     try {
-      await signInWithWallet({
-        address,
-        signMessage: (message) => signMessageAsync({ message }),
-      });
+      await promise;
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Sign-in failed.";
       if (msg.toLowerCase().includes("allowlist")) {
@@ -76,6 +114,10 @@ export function useWalletSession(): Result {
         setErrorMessage(msg);
       }
     } finally {
+      // Only clear the mutex if we're still the owner — a follow-up
+      // call could have already swapped in a new promise after we
+      // resolved (e.g. wallet disconnect + reconnect).
+      if (pendingSignIn === promise) pendingSignIn = null;
       setSyncing(false);
     }
   }, [address, normalizedAddress, signMessageAsync]);
