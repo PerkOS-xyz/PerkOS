@@ -60,8 +60,10 @@ export function DevAuthIndicator() {
 
   useEffect(() => {
     if (typeof navigator !== "undefined") {
-      const full = navigator.userAgent;
-      setUa(full.length > 36 ? `…${full.slice(-36)}` : full);
+      // Keep the full UA so we can spot the Base App / Coinbase
+      // Wallet signature when debugging context detection. The
+      // expanded badge wraps long strings, so length isn't an issue.
+      setUa(navigator.userAgent);
     }
     if (typeof window !== "undefined") {
       try {
@@ -165,7 +167,11 @@ export function DevAuthIndicator() {
             (connectError as Error).message.slice(0, 30)}
         </span>
       ) : null}
-      {ua ? <span className="truncate text-white/60">{ua}</span> : null}
+      {ua ? (
+        <span className="break-all text-[9px] leading-tight text-white/60">
+          {ua}
+        </span>
+      ) : null}
     </div>
   );
 }

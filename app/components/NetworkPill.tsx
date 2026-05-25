@@ -26,7 +26,14 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useAccount, useChainId, useReadContract, useSwitchChain } from "wagmi";
+import {
+  useAccount,
+  useChainId,
+  useConnectors,
+  useReadContract,
+  useSwitchChain,
+  type Connector,
+} from "wagmi";
 import { erc20Abi } from "viem";
 import { base, celo } from "wagmi/chains";
 import { sdk } from "@farcaster/miniapp-sdk";
@@ -49,6 +56,58 @@ import {
 } from "../lib/tokenAddresses";
 
 const BASE_APP_CLIENT_FID = 309857;
+const COINBASE_WALLET_RDNS = "com.coinbase.wallet";
+
+function rdnsOf(connector: Connector): string | undefined {
+  const c = connector as Connector & {
+    rdns?: string;
+    info?: { rdns?: string };
+  };
+  return c.rdns ?? c.info?.rdns;
+}
+
+/**
+ * Heuristic for "we are in a Coinbase-flavoured context where the
+ * wallet is pinned to Base mainnet" — i.e. Base App miniapp host OR
+ * Base App's in-app browser OR Coinbase Wallet's in-app browser.
+ *
+ * Signals (any → treat as Base-only):
+ *   - sdk.context.client.clientFid === 309857 (miniapp host) → exact
+ *   - userAgent contains "CoinbaseBrowser" or "CoinbaseWallet" → exact
+ *   - we're on mobile AND the ONLY EIP-6963 provider announced is
+ *     com.coinbase.wallet — strong signal of a Coinbase-issued
+ *     webview that injected just its own wallet. Desktop users with
+ *     Coinbase Wallet extension typically have other extensions too
+ *     (MetaMask, Phantom, …) so they won't trip this.
+ */
+function detectBaseContext(opts: {
+  inMiniApp: boolean;
+  miniappClientFid: number | undefined;
+  userAgent: string;
+  connectors: readonly Connector[];
+}): boolean {
+  if (opts.miniappClientFid === BASE_APP_CLIENT_FID) return true;
+
+  const uaSignals = /CoinbaseBrowser|CoinbaseWallet/i;
+  if (uaSignals.test(opts.userAgent)) return true;
+
+  if (opts.inMiniApp) return false; // miniapp but not Base App → Farcaster
+
+  // EIP-6963 discovered providers only — exclude wagmi's static
+  // connectors (farcasterMiniApp, baseAccount, injected) which are
+  // always present regardless of host.
+  const discovered = opts.connectors.filter((c) => rdnsOf(c) !== undefined);
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(opts.userAgent);
+  if (
+    isMobile &&
+    discovered.length > 0 &&
+    discovered.every((c) => rdnsOf(c) === COINBASE_WALLET_RDNS)
+  ) {
+    return true;
+  }
+
+  return false;
+}
 
 type NetworkOption = {
   id: SupportedChainId;
@@ -90,30 +149,46 @@ export function NetworkPill() {
   const { address, isConnected } = useAccount();
   const activeChainId = useChainId();
   const { switchChainAsync, isPending: isSwitching } = useSwitchChain();
+  const connectors = useConnectors();
   const [isInBaseApp, setIsInBaseApp] = useState<boolean>(false);
 
-  // Detect Base App miniapp host once on mount. We don't reuse
-  // useIsInMiniApp() because we need clientFid specificity (a
-  // Farcaster host should NOT collapse to the static pill).
+  // Decide whether we're in a "Base-only" context (miniapp host,
+  // in-app browser, or Coinbase Wallet webview). When true the pill
+  // collapses to a static Base-only display — the wallet is pinned
+  // to Base and offering Celo would just fail on switch.
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      const userAgent =
+        typeof navigator !== "undefined" ? navigator.userAgent : "";
+
+      let inMiniApp = false;
+      let clientFid: number | undefined;
+
       try {
-        const inMiniApp = await sdk.isInMiniApp();
-        if (cancelled || !inMiniApp) return;
-        const context = await sdk.context;
+        inMiniApp = await sdk.isInMiniApp();
         if (cancelled) return;
-        if (context?.client?.clientFid === BASE_APP_CLIENT_FID) {
-          setIsInBaseApp(true);
+        if (inMiniApp) {
+          const context = await sdk.context;
+          if (cancelled) return;
+          clientFid = context?.client?.clientFid;
         }
       } catch {
-        // Not in a miniapp host — leave default (interactive pill).
+        // SDK unreachable — fall through with the empty defaults.
       }
+
+      const isBaseContext = detectBaseContext({
+        inMiniApp,
+        miniappClientFid: clientFid,
+        userAgent,
+        connectors,
+      });
+      if (!cancelled) setIsInBaseApp(isBaseContext);
     })();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [connectors]);
 
   // The chain whose balance + logo we display. We honour wagmi's
   // active chain when it's one we support; otherwise pin to Base.

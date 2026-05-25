@@ -30,6 +30,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type MouseEvent, type ReactNode } from "react";
 import { useAccount, useConnect, useConnectors, type Connector } from "wagmi";
+import { toast } from "sonner";
 
 import { useIsInMiniApp } from "../lib/useIsInMiniApp";
 
@@ -87,9 +88,13 @@ export function SmartCTA({ href, className, children }: Props) {
         await connectAsync({ connector: coinbaseConnector });
         router.push("/continue");
       } catch {
-        // User dismissed the wallet prompt, or the connect was denied.
-        // Let them choose a method on the original href.
-        router.push(href);
+        // User dismissed the wallet prompt. Stay on the landing — the
+        // sign-up form would be confusing (their wallet IS available,
+        // they just declined to authorise this site this time). A
+        // toast nudges them to tap the CTA again when ready.
+        toast("Wallet connection cancelled", {
+          description: "Tap the button again when you're ready.",
+        });
       } finally {
         setBusy(false);
       }
