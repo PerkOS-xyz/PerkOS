@@ -72,6 +72,7 @@ import {
 } from "../../../lib/agentConfigPreview";
 import { fetchActiveRuntimes, type RuntimeImage } from "../../../lib/runtimeImages";
 import { fetchEcsAccess } from "../../../lib/ecsAccess";
+import { fetchLlmAccess } from "../../../lib/llmAccess";
 import { useQuery } from "@tanstack/react-query";
 
 // ---------------------------------------------------------------------------
@@ -169,6 +170,16 @@ export default function AgentLauncherPage() {
     staleTime: 60_000,
   });
   const ecsAllowed = ecsAccessQuery.data?.allowed === true;
+
+  // Same pattern for the "PerkOS LLM service" gate in Step 4. Until
+  // billing lands, only allowlisted wallets see it as a selectable option;
+  // everyone else gets the "Coming soon" badge + a disabled card.
+  const llmAccessQuery = useQuery({
+    queryKey: ["access", "llm"],
+    queryFn: fetchLlmAccess,
+    staleTime: 60_000,
+  });
+  const llmAllowed = llmAccessQuery.data?.allowed === true;
 
   // Wizard state is intentionally NOT persisted to localStorage. Earlier
   // we used useFormDraft here, but it created a confusing UX after the
@@ -300,7 +311,7 @@ export default function AgentLauncherPage() {
           );
         return false;
       case 4:
-        if (state.llmSource === "perkos") return true;
+        if (state.llmSource === "perkos") return llmAllowed;
         if (state.llmSource === "skip") return true;
         if (state.llmSource === "byok")
           return state.byokApiKey.trim().length > 0 && !apiKeyError;
@@ -312,7 +323,7 @@ export default function AgentLauncherPage() {
       default:
         return false;
     }
-  }, [state, mutation.isPending, mutation.isSuccess, ipError, sshError, apiKeyError, ecsAllowed]);
+  }, [state, mutation.isPending, mutation.isSuccess, ipError, sshError, apiKeyError, ecsAllowed, llmAllowed]);
 
   const nextStep = () => update({ step: Math.min(state.step + 1, TOTAL_STEPS) });
   const prevStep = () => update({ step: Math.max(state.step - 1, 1) });
@@ -353,7 +364,12 @@ export default function AgentLauncherPage() {
           />
         )}
         {state.step === 4 && (
-          <Step4LLM state={state} onChange={update} apiKeyError={apiKeyError} />
+          <Step4LLM
+            state={state}
+            onChange={update}
+            apiKeyError={apiKeyError}
+            llmAllowed={llmAllowed}
+          />
         )}
         {state.step === 5 && (
           <Step5Plugins
@@ -1112,7 +1128,8 @@ function Step4LLM({
   state,
   onChange,
   apiKeyError,
-}: StepProps & { apiKeyError?: string }) {
+  llmAllowed,
+}: StepProps & { apiKeyError?: string; llmAllowed: boolean }) {
   const providerOpts = state.runtime ? byokProviderOptions(state.runtime) : [];
   return (
     <div className="flex flex-col gap-4">
@@ -1127,7 +1144,8 @@ function Step4LLM({
       >
         <SelectableCard
           selected={state.llmSource === "perkos"}
-          onClick={() => onChange({ llmSource: "perkos" })}
+          onClick={() => llmAllowed && onChange({ llmSource: "perkos" })}
+          disabled={!llmAllowed}
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-1">
@@ -1136,9 +1154,14 @@ function Step4LLM({
                 <span className="text-base font-medium text-foreground">
                   PerkOS LLM service
                 </span>
-                <Badge variant="secondary" className="border-emerald-500/40 bg-emerald-500/15 text-emerald-300">
-                  Included in your plan
-                </Badge>
+                {!llmAllowed ? (
+                  <Badge
+                    variant="secondary"
+                    className="border-amber-500/40 bg-amber-500/15 text-amber-300"
+                  >
+                    Coming soon
+                  </Badge>
+                ) : null}
               </div>
               <p className="text-sm text-muted-foreground">
                 Managed Ollama-compatible gateway at{" "}
@@ -1148,8 +1171,19 @@ function Step4LLM({
                 — kimi-k2.6:cloud + qwen 7B/14B. No key needed; we issue one
                 scoped to your agent.
               </p>
+              {!llmAllowed ? (
+                <p className="text-xs text-muted-foreground">
+                  Currently invite-only while we test. Pick BYOK or
+                  &ldquo;Configure later&rdquo; for now, or contact an admin to
+                  be added to the early access list.
+                </p>
+              ) : null}
             </div>
-            <RadioGroupItem value="perkos" id="llm-perkos" />
+            <RadioGroupItem
+              value="perkos"
+              id="llm-perkos"
+              disabled={!llmAllowed}
+            />
           </div>
         </SelectableCard>
 
