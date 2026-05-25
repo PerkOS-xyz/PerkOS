@@ -5,7 +5,8 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useConnection } from "wagmi";
+import { useChainId, useConnection } from "wagmi";
+import { base, celo } from "wagmi/chains";
 import { toast } from "sonner";
 import {
   Cloud,
@@ -945,6 +946,17 @@ function Step3Deploy({
   sshError,
   ecsAllowed,
 }: StepProps & { ipError?: string; sshError?: string; ecsAllowed: boolean }) {
+  // Auto-detect the chain so the ECS card shows the right network name
+  // (Base / Celo today, more later). Falls back to "your connected chain"
+  // when wagmi reports an unsupported id so the copy never lies.
+  const chainId = useChainId();
+  const networkName =
+    chainId === base.id
+      ? "Base"
+      : chainId === celo.id
+        ? "Celo"
+        : null;
+
   return (
     <div className="flex flex-col gap-4">
       <StepHeader
@@ -985,8 +997,9 @@ function Step3Deploy({
               <p className="text-sm text-muted-foreground">
                 PerkOS provisions a Fargate task for your agent. From{" "}
                 <span className="font-medium text-foreground">$29/mo</span>{" "}
-                billed via x402 on Base. Status flips to "ready" once the
-                container is healthy (~30s).
+                billed via x402{networkName ? ` on ${networkName}` : ""}.
+                Status flips to &ldquo;ready&rdquo; once the container is
+                healthy (~30s).
               </p>
               {!ecsAllowed ? (
                 <p className="text-xs text-muted-foreground">
