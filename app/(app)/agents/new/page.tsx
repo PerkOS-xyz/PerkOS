@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
 import { toast } from "sonner";
@@ -24,6 +24,8 @@ import {
   Plus,
   Loader2,
   FileCode,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -56,7 +58,12 @@ import {
   sshPublicKeySchema,
   validateApiKey,
 } from "../../../lib/validators";
-import { AGENT_PRESETS, findPreset } from "../../../lib/agentPresets";
+import {
+  AGENT_PRESETS,
+  findPreset,
+  presetSystemPrompt,
+  type SoulFields,
+} from "../../../lib/agentPresets";
 import {
   buildConfigPreview,
   byokProviderOptions,
@@ -446,11 +453,17 @@ type StepProps = {
 
 function Step1Persona({ state, onChange }: StepProps) {
   const preset = findPreset(state.personaId);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  // Default prompt = full SOUL.md rendered from preset, with the user's
+  // chosen agent name baked into the header. The override (textarea
+  // content the user has typed) wins if non-empty.
+  const defaultPrompt = preset ? presetSystemPrompt(preset, state.agentName) : "";
+
   return (
     <div className="flex flex-col gap-4">
       <StepHeader
         title="Pick a persona"
-        description="Seeds a name, system prompt, and recommended skill set. Everything is editable later."
+        description="Seeds a name, a soul, and a recommended skill set. Everything is editable later."
       />
 
       <div className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
@@ -490,9 +503,11 @@ function Step1Persona({ state, onChange }: StepProps) {
       {preset ? (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Agent name + prompt</CardTitle>
+            <CardTitle className="text-base">Agent name + soul</CardTitle>
             <CardDescription>
-              Tweak the preset's defaults if you want.
+              The soul becomes <code className="font-mono text-[11px]">SOUL.md</code>{" "}
+              (Hermes) or <code className="font-mono text-[11px]">IDENTITY.md</code>{" "}
+              (OpenClaw) inside the runtime container.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
@@ -509,16 +524,16 @@ function Step1Persona({ state, onChange }: StepProps) {
               <Label htmlFor="system-prompt">System prompt</Label>
               <Textarea
                 id="system-prompt"
-                value={state.systemPromptOverride || preset.systemPrompt}
+                value={state.systemPromptOverride || defaultPrompt}
                 onChange={(e) =>
                   onChange({ systemPromptOverride: e.target.value })
                 }
-                rows={5}
+                rows={6}
                 className="font-mono text-xs"
                 placeholder="You are a …"
               />
               {state.systemPromptOverride &&
-              state.systemPromptOverride !== preset.systemPrompt ? (
+              state.systemPromptOverride !== defaultPrompt ? (
                 <button
                   type="button"
                   className="self-start text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
@@ -528,9 +543,173 @@ function Step1Persona({ state, onChange }: StepProps) {
                 </button>
               ) : null}
             </div>
+
+            {preset.id !== "blank" ? (
+              <div className="flex flex-col gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowAdvanced((v) => !v)}
+                  className="flex items-center gap-1.5 self-start text-xs font-medium text-primary hover:underline"
+                >
+                  {showAdvanced ? (
+                    <ChevronUp className="h-3.5 w-3.5" />
+                  ) : (
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  )}
+                  Advanced — {showAdvanced ? "hide" : "view"} full soul
+                </button>
+                {showAdvanced ? <SoulDetailCard soul={preset.soul} /> : null}
+              </div>
+            ) : null}
           </CardContent>
         </Card>
       ) : null}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// SoulDetailCard — expanded view of a preset's SoulFields, shown when the
+// user clicks "Advanced" in Step 1. Read-only; the underlying SOUL.md is
+// edited via the system-prompt textarea above.
+// ---------------------------------------------------------------------------
+
+function SoulDetailCard({ soul }: { soul: SoulFields }) {
+  return (
+    <div className="flex flex-col gap-3 rounded-lg border border-border bg-muted/20 p-4">
+      {soul.identity ? (
+        <SoulSection title="Identity">
+          <p className="text-sm italic text-foreground">{soul.identity}</p>
+        </SoulSection>
+      ) : null}
+
+      {soul.coreTruths.length > 0 ? (
+        <SoulSection title="Core Truths">
+          <ul className="flex flex-col gap-1.5 text-sm text-muted-foreground">
+            {soul.coreTruths.map((t) => (
+              <li key={t.principle}>
+                <span className="font-medium text-foreground">{t.principle}.</span>{" "}
+                {t.explanation}
+              </li>
+            ))}
+          </ul>
+        </SoulSection>
+      ) : null}
+
+      {soul.worldview.length > 0 ? (
+        <SoulSection title="Worldview">
+          <div className="flex flex-col gap-2">
+            {soul.worldview.map((w) => (
+              <div key={w.domain}>
+                <p className="text-xs font-medium uppercase tracking-wide text-foreground">
+                  {w.domain}
+                </p>
+                <ul className="ml-4 list-disc text-sm text-muted-foreground">
+                  {w.opinions.map((o, i) => (
+                    <li key={i}>{o}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </SoulSection>
+      ) : null}
+
+      {soul.voice.length > 0 ? (
+        <SoulSection title="Communication Style">
+          <ul className="ml-4 list-disc text-sm text-muted-foreground">
+            {soul.voice.map((v, i) => (
+              <li key={i}>{v}</li>
+            ))}
+          </ul>
+        </SoulSection>
+      ) : null}
+
+      {soul.expertise.primary ||
+      soul.expertise.fluentIn.length > 0 ||
+      soul.expertise.defersOn.length > 0 ? (
+        <SoulSection title="Expertise">
+          <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+            {soul.expertise.primary ? (
+              <p>
+                <span className="font-medium text-foreground">Primary:</span>{" "}
+                {soul.expertise.primary}
+              </p>
+            ) : null}
+            {soul.expertise.fluentIn.length > 0 ? (
+              <p>
+                <span className="font-medium text-foreground">Fluent in:</span>{" "}
+                {soul.expertise.fluentIn.join(", ")}
+              </p>
+            ) : null}
+            {soul.expertise.defersOn.length > 0 ? (
+              <p>
+                <span className="font-medium text-foreground">Defers on:</span>{" "}
+                {soul.expertise.defersOn.join(", ")}
+              </p>
+            ) : null}
+          </div>
+        </SoulSection>
+      ) : null}
+
+      {soul.boundaries.length > 0 ? (
+        <SoulSection title="Boundaries">
+          <ul className="ml-4 list-disc text-sm text-muted-foreground">
+            {soul.boundaries.map((b, i) => (
+              <li key={i}>{b}</li>
+            ))}
+          </ul>
+        </SoulSection>
+      ) : null}
+
+      {soul.memoryPolicy.remember.length > 0 ||
+      soul.memoryPolicy.dontRemember.length > 0 ? (
+        <SoulSection title="Memory Policy">
+          <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+            {soul.memoryPolicy.remember.length > 0 ? (
+              <p>
+                <span className="font-medium text-foreground">Remember:</span>{" "}
+                {soul.memoryPolicy.remember.join("; ")}.
+              </p>
+            ) : null}
+            {soul.memoryPolicy.dontRemember.length > 0 ? (
+              <p>
+                <span className="font-medium text-foreground">
+                  Don&apos;t remember:
+                </span>{" "}
+                {soul.memoryPolicy.dontRemember.join("; ")}.
+              </p>
+            ) : null}
+          </div>
+        </SoulSection>
+      ) : null}
+
+      {soul.petPeeves.length > 0 ? (
+        <SoulSection title="Pet Peeves">
+          <ul className="ml-4 list-disc text-sm text-muted-foreground">
+            {soul.petPeeves.map((p, i) => (
+              <li key={i}>{p}</li>
+            ))}
+          </ul>
+        </SoulSection>
+      ) : null}
+    </div>
+  );
+}
+
+function SoulSection({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <h4 className="text-xs font-semibold uppercase tracking-wide text-primary">
+        {title}
+      </h4>
+      {children}
     </div>
   );
 }
