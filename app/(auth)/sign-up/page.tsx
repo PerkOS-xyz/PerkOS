@@ -23,27 +23,23 @@ export default function SignUpPage() {
   const isConnected = status === "connected";
   const isReconnecting = status === "reconnecting";
 
-  // Inside Farcaster / Base App, the host already connected the wallet.
-  // Showing the "choose your sign-up method" buttons is meaningless —
-  // forward to /continue, which reads the resolved wallet session and
-  // dispatches to /dashboard or the request-access form.
-  //
-  // Also: if the user lands here already connected (e.g., reconnecting
-  // in a browser tab), send them straight to the onboarding flow.
+  // /sign-up is only meaningful when there is no wallet to connect.
+  // If we're inside a Mini App host (wallet about to auto-connect) or
+  // wagmi already has a connected wallet (Base App in-app browser with
+  // a persisted session, normal browser tab with a prior session, etc.),
+  // skip the choose-your-method buttons and let /continue dispatch to
+  // /dashboard or the request-access form based on session status.
   useEffect(() => {
-    if (isInMiniApp === true) {
+    if (isInMiniApp === true || (isConnected && address)) {
       router.replace("/continue");
-      return;
-    }
-    if (isConnected && address) {
-      router.replace("/onboarding/welcome");
     }
   }, [isInMiniApp, isConnected, address, router]);
 
-  // While we don't yet know if we're in a Mini App host, OR while we know
-  // we are and the redirect is in flight, render a splash so we never
-  // flash the sign-up buttons to a Mini App user.
-  if (isInMiniApp === null || isInMiniApp === true) {
+  // While we don't yet know if we're in a Mini App host, OR while we
+  // know we are, OR while wagmi has a connected wallet (and we're about
+  // to redirect to /continue), render a splash so the buttons never
+  // flash to someone who shouldn't see them.
+  if (isInMiniApp === null || isInMiniApp === true || (isConnected && address)) {
     return (
       <div className="flex flex-col items-center gap-3 text-center">
         <Image

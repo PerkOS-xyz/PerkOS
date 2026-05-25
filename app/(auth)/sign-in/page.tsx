@@ -33,16 +33,17 @@ export default function SignInPage() {
     error?.name === "ConnectorAlreadyConnectedError" ||
     error?.message?.toLowerCase().includes("already connected") === true;
 
-  // Mini App users who land here directly (e.g. via a cached URL the
-  // host reopened to) shouldn't see the manual connect buttons — the
-  // wallet is already connected by AutoConnect. /continue reads the
-  // resolved session and dispatches to /dashboard or the request-access
-  // form. Browser users keep the buttons.
+  // Skip the manual connect-method buttons when there's no point
+  // showing them — i.e. inside a Mini App host (wallet about to
+  // auto-connect) OR when wagmi already has a connected wallet
+  // (in-app browser with a persisted session, normal tab with a
+  // prior session, etc.). /continue dispatches to /dashboard or
+  // the AccessGate. Browser users with no wallet keep the buttons.
   useEffect(() => {
-    if (isInMiniApp === true) {
+    if (isInMiniApp === true || (isConnected && address)) {
       router.replace("/continue");
     }
-  }, [isInMiniApp, router]);
+  }, [isInMiniApp, isConnected, address, router]);
 
   // Once the user has both wagmi + Firebase, send them on.
   useEffect(() => {

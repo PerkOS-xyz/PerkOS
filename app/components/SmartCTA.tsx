@@ -1,42 +1,113 @@
 "use client";
 
 /**
- * Landing-page CTA wrapper that routes Mini App users to /continue —
- * the dispatcher that reads the connected wallet's session and sends
- * them to /dashboard or the request-access form — while keeping the
- * regular sign-in / sign-up routes for browser users.
+ * Landing-page CTA wrapper that does the right thing for every host
+ * we might be loaded inside:
  *
- * Why this exists: inside Base App / Farcaster the wallet is already
- * connected, so the "choose your sign-up method" buttons on /sign-up
- * (and equivalent on /sign-in) are noise. Anyone who clicks "Get
- * started" or "Sign in" from the landing should skip straight to the
- * post-auth dispatcher.
+ *   1. wagmi already isConnected, or sdk.isInMiniApp() === true
+ *      → route to /continue. The dispatcher there will read the
+ *        session and forward to /dashboard or the AccessGate.
  *
- * SSR safety: the hook starts at `null` on both server and first
- * client render, so `effectiveHref` matches across the hydration
- * boundary. It only swaps to /continue after the SDK resolves, which
- * happens after hydration.
+ *   2. Coinbase Smart Wallet is announced via EIP-6963 but wagmi has
+ *      not connected yet (typical for Base App's in-app browser —
+ *      auto-connect from a useEffect gets silently denied because the
+ *      wallet requires a user gesture for eth_requestAccounts). On
+ *      click we call connectAsync({ connector: coinbase }) ourselves,
+ *      which IS a user gesture, then route to /continue. Shows a
+ *      "Connecting…" label on the button while the prompt is up.
+ *
+ *   3. No wallet signal at all (plain browser) → follow the original
+ *      href to /sign-up or /sign-in so the user can pick a method.
+ *
+ * Why we keep AutoConnect for the EIP-6963 case too: when the wallet
+ * has already authorised app.perkos.xyz in a previous session, wagmi
+ * rehydrates silently without needing a user click, and isConnected
+ * flips before the user even taps anything. The click-time connect is
+ * the fallback for the first-time authorisation.
  */
 
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { useState, type MouseEvent, type ReactNode } from "react";
+import { useAccount, useConnect, useConnectors, type Connector } from "wagmi";
 
 import { useIsInMiniApp } from "../lib/useIsInMiniApp";
 
+const COINBASE_WALLET_RDNS = "com.coinbase.wallet";
+
+function rdnsOf(connector: Connector): string | undefined {
+  const c = connector as Connector & {
+    rdns?: string;
+    info?: { rdns?: string };
+  };
+  return c.rdns ?? c.info?.rdns;
+}
+
 type Props = {
-  /** Destination for non-MiniApp visitors. Usually /sign-up or /sign-in. */
+  /** Destination for visitors with no wallet signal at all. Usually /sign-up or /sign-in. */
   href: string;
   className?: string;
   children: ReactNode;
 };
 
 export function SmartCTA({ href, className, children }: Props) {
+  const router = useRouter();
   const isInMiniApp = useIsInMiniApp();
-  const effectiveHref = isInMiniApp === true ? "/continue" : href;
+  const { isConnected } = useAccount();
+  const { connectAsync } = useConnect();
+  const connectors = useConnectors();
+  const [busy, setBusy] = useState(false);
+
+  const coinbaseConnector = connectors.find(
+    (c) => c.id === COINBASE_WALLET_RDNS || rdnsOf(c) === COINBASE_WALLET_RDNS,
+  );
+
+  const skipConnectForm = isInMiniApp === true || isConnected;
+
+  // SSR-safe href: we never advertise /continue at render time. The
+  // click handler decides what to do based on live wallet state, and
+  // the href is only used as a fallback when none of the special
+  // cases apply (or when JS is disabled).
+  const fallbackHref = href;
+
+  async function onClick(e: MouseEvent<HTMLAnchorElement>) {
+    if (skipConnectForm) {
+      e.preventDefault();
+      router.push("/continue");
+      return;
+    }
+
+    if (coinbaseConnector) {
+      // User gesture path: this click IS the gesture wallets require
+      // before they'll process eth_requestAccounts. Auto-connect from
+      // AutoConnect's useEffect tends to be silently denied here.
+      e.preventDefault();
+      setBusy(true);
+      try {
+        await connectAsync({ connector: coinbaseConnector });
+        router.push("/continue");
+      } catch {
+        // User dismissed the wallet prompt, or the connect was denied.
+        // Let them choose a method on the original href.
+        router.push(href);
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
+
+    // No wallet signal at all — Link's default behavior takes over,
+    // navigating to /sign-up | /sign-in.
+  }
 
   return (
-    <Link href={effectiveHref} className={className}>
-      {children}
+    <Link
+      href={fallbackHref}
+      onClick={onClick}
+      className={className}
+      aria-busy={busy || undefined}
+    >
+      {busy ? "Connecting…" : children}
     </Link>
   );
 }
