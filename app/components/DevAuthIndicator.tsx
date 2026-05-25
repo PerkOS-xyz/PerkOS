@@ -17,6 +17,11 @@
  *                 sees. Includes anything wagmi discovered via EIP-6963.
  *   - ua     :    last 36 chars of navigator.userAgent.
  *
+ * Tap the "hide" button to collapse to a single status dot anchored
+ * top-center: green when signed-in, amber while loading/syncing or
+ * connect is in flight, rose otherwise. The minimised state persists
+ * across page loads via localStorage.
+ *
  * Remove or gate behind an env flag once the alpha auth flow stabilises.
  */
 
@@ -27,6 +32,7 @@ import { useIsInMiniApp } from "../lib/useIsInMiniApp";
 import { useWalletSession } from "../lib/useWalletSession";
 
 const COINBASE_WALLET_RDNS = "com.coinbase.wallet";
+const STORAGE_KEY = "perkos:dev-auth-indicator:minimized";
 
 function rdnsOf(connector: Connector): string | undefined {
   const c = connector as Connector & {
@@ -50,13 +56,33 @@ export function DevAuthIndicator() {
   const connectors = useConnectors();
   const { isPending: isConnectPending, error: connectError } = useConnect();
   const [ua, setUa] = useState<string>("");
+  const [minimized, setMinimized] = useState<boolean>(false);
 
   useEffect(() => {
     if (typeof navigator !== "undefined") {
       const full = navigator.userAgent;
       setUa(full.length > 36 ? `…${full.slice(-36)}` : full);
     }
+    if (typeof window !== "undefined") {
+      try {
+        setMinimized(window.localStorage.getItem(STORAGE_KEY) === "1");
+      } catch {
+        // localStorage unavailable (private mode / iframe) — stay expanded.
+      }
+    }
   }, []);
+
+  const toggle = () => {
+    setMinimized((prev) => {
+      const next = !prev;
+      try {
+        window.localStorage.setItem(STORAGE_KEY, next ? "1" : "0");
+      } catch {
+        // Ignore — preference just won't persist this session.
+      }
+      return next;
+    });
+  };
 
   const hasCoinbaseWallet = connectors.some(
     (c) => c.id === COINBASE_WALLET_RDNS || rdnsOf(c) === COINBASE_WALLET_RDNS,
@@ -71,11 +97,40 @@ export function DevAuthIndicator() {
         ? "text-emerald-300"
         : "text-rose-300";
 
+  // Overall health for the collapsed dot: green when signed-in, amber
+  // while loading/syncing or while a connect is in flight, rose otherwise.
+  const dotColor =
+    session.status === "signed-in"
+      ? "bg-emerald-400"
+      : session.status === "loading" ||
+          session.status === "syncing" ||
+          isConnectPending
+        ? "bg-amber-400"
+        : "bg-rose-400";
+
+  if (minimized) {
+    return (
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label="Show auth debug indicator"
+        className="fixed left-1/2 top-2 z-[100] flex h-7 w-7 -translate-x-1/2 items-center justify-center rounded-full border border-primary/30 bg-black/70 shadow-lg backdrop-blur-sm"
+      >
+        <span className={`h-2.5 w-2.5 rounded-full ${dotColor}`} />
+      </button>
+    );
+  }
+
   return (
-    <div
-      className="pointer-events-none fixed right-2 top-2 z-[100] flex max-w-[220px] flex-col items-end gap-0.5 rounded-md border border-primary/30 bg-black/70 px-2 py-1.5 font-mono text-[10px] leading-tight text-white shadow-lg backdrop-blur-sm"
-      aria-hidden
-    >
+    <div className="fixed left-1/2 top-2 z-[100] flex max-w-[260px] -translate-x-1/2 flex-col gap-0.5 rounded-md border border-primary/30 bg-black/70 px-2 py-1.5 font-mono text-[10px] leading-tight text-white shadow-lg backdrop-blur-sm">
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label="Hide auth debug indicator"
+        className="-mt-1 self-end rounded border border-white/20 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-wider text-white/70 hover:bg-white/10 hover:text-white"
+      >
+        hide
+      </button>
       <span>
         miniapp: <span className={miniappColor}>{miniappLabel}</span>
       </span>
