@@ -113,7 +113,7 @@ export function DevAuthIndicator() {
         type="button"
         onClick={toggle}
         aria-label="Show auth debug indicator"
-        className="fixed right-2 top-2 z-[100] flex h-7 w-7 items-center justify-center rounded-full border border-primary/30 bg-black/70 shadow-lg backdrop-blur-sm"
+        className="fixed left-2 top-2 z-[100] flex h-7 w-7 items-center justify-center rounded-full border border-primary/30 bg-black/70 shadow-lg backdrop-blur-sm"
       >
         <span className={`h-2.5 w-2.5 rounded-full ${dotColor}`} />
       </button>
@@ -121,12 +121,12 @@ export function DevAuthIndicator() {
   }
 
   return (
-    <div className="fixed right-2 top-2 z-[100] flex max-w-[220px] flex-col items-end gap-0.5 rounded-md border border-primary/30 bg-black/70 px-2 py-1.5 font-mono text-[10px] leading-tight text-white shadow-lg backdrop-blur-sm">
+    <div className="fixed left-2 top-2 z-[100] flex max-w-[220px] flex-col items-start gap-0.5 rounded-md border border-primary/30 bg-black/70 px-2 py-1.5 font-mono text-[10px] leading-tight text-white shadow-lg backdrop-blur-sm">
       <button
         type="button"
         onClick={toggle}
         aria-label="Minimise auth debug indicator"
-        className="-mr-1 -mt-0.5 self-end px-1 text-white/60 hover:text-white"
+        className="-ml-1 -mt-0.5 self-start px-1 text-white/60 hover:text-white"
       >
         ×
       </button>
