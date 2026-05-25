@@ -87,14 +87,26 @@ export function SmartCTA({ href, className, children }: Props) {
       try {
         await connectAsync({ connector: coinbaseConnector });
         router.push("/continue");
-      } catch {
-        // User dismissed the wallet prompt. Stay on the landing — the
-        // sign-up form would be confusing (their wallet IS available,
-        // they just declined to authorise this site this time). A
-        // toast nudges them to tap the CTA again when ready.
-        toast("Wallet connection cancelled", {
-          description: "Tap the button again when you're ready.",
-        });
+      } catch (err) {
+        // Stay on landing — sign-up would be confusing (wallet IS
+        // available, user just declined or the wallet errored). Split
+        // friendly toast for user rejection vs surfacing the real
+        // error for everything else so we can diagnose host-specific
+        // failures (Coinbase Wallet RN in-app browser quirks, etc).
+        const message = err instanceof Error ? err.message : "Unknown error";
+        const isUserReject = /reject|denied|cancel|abort|dismiss/i.test(
+          message,
+        );
+        toast(
+          isUserReject
+            ? "Wallet connection cancelled"
+            : "Couldn't connect wallet",
+          {
+            description: isUserReject
+              ? "Tap the button again when you're ready."
+              : message,
+          },
+        );
       } finally {
         setBusy(false);
       }
