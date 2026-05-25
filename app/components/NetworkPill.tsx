@@ -57,8 +57,8 @@ type NetworkOption = {
 };
 
 const NETWORKS: NetworkOption[] = [
-  { id: base.id, name: "Base", logo: "/logos/base-mark.svg" },
-  { id: celo.id, name: "Celo", logo: "/logos/celo-mark.svg" },
+  { id: base.id, name: "Base", logo: "/base.png" },
+  { id: celo.id, name: "Celo", logo: "/celo.png" },
 ];
 
 /**
@@ -163,8 +163,16 @@ export function NetworkPill() {
     if (target.id === activeChainId) return;
     try {
       await switchChainAsync({ chainId: target.id });
-    } catch {
-      toast("Network switch cancelled");
+      toast.success(`Switched to ${target.name}`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      // Some smart wallets (Coinbase Smart Wallet in particular) reject
+      // wallet_switchEthereumChain entirely because they're pinned to
+      // a single chain. Surface the wallet's message so the user can
+      // see what's going on rather than a generic "cancelled".
+      toast.error(`Couldn't switch to ${target.name}`, {
+        description: message,
+      });
     }
   }
 
@@ -241,7 +249,7 @@ export function NetworkPill() {
           return (
             <DropdownMenuItem
               key={network.id}
-              onSelect={() => handleSelect(network)}
+              onClick={() => handleSelect(network)}
               aria-selected={selected}
               className={cn(
                 "flex h-10 items-center gap-2 rounded-md px-3 text-sm",
