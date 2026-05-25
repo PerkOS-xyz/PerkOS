@@ -23,6 +23,7 @@ import { FieldValue } from "firebase-admin/firestore";
 
 import { adminAuth, adminDb } from "../../../lib/firebaseAdmin";
 import { provisionEcsAgent } from "../../../lib/ecsProvision";
+import { registerLlmAgent } from "../../../lib/llmAgentRegistry";
 
 type LaunchBody = {
   walletAddress?: string;
@@ -194,6 +195,46 @@ export async function POST(request: Request) {
   let ecsResult: Awaited<ReturnType<typeof provisionEcsAgent>> | null = null;
   let ecsError: string | null = null;
   if (body.imageTag && typeof body.imageTag === "string") {
+    // PerkOS-mode (no BYOK): mint a per-agent Bearer key against the
+    // shared LLM gateway. We do this BEFORE provisioning so the ECS
+    // task starts with the secret already populated in Secrets Manager.
+    // Registration failures don't abort the launch — the agent still
+    // boots (the wizard already promised it would), but its LLM calls
+    // will 401 until we re-provision. The failure is recorded on the
+    // agent doc so the admin UI can surface it.
+    let perkosLlmApiKey: string | undefined;
+    if (!modelKey) {
+      try {
+        const registered = await registerLlmAgent(name);
+        perkosLlmApiKey = registered.key;
+        await agentRef.set(
+          {
+            llmRegistration: {
+              status: "ok",
+              last4: registered.last4,
+              registeredAt: FieldValue.serverTimestamp(),
+            },
+          },
+          { merge: true },
+        );
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.warn(
+          `[launch] LLM gateway registration failed for ${name}: ${message}`,
+        );
+        await agentRef.set(
+          {
+            llmRegistration: {
+              status: "failed",
+              error: message.slice(0, 500),
+              attemptedAt: FieldValue.serverTimestamp(),
+            },
+          },
+          { merge: true },
+        );
+      }
+    }
+
     try {
       ecsResult = await provisionEcsAgent({
         walletAddress,
@@ -202,6 +243,7 @@ export async function POST(request: Request) {
         imageTag: body.imageTag,
         llmSource: modelKey ? "byok" : "perkos",
         byokApiKey: modelKey ?? undefined,
+        perkosLlmApiKey,
         agentId: agentRef.id,
       });
       await agentRef.set(
