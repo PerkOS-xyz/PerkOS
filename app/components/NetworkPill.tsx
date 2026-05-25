@@ -1,9 +1,12 @@
 "use client";
 
 /**
- * Header pill that shows the connected wallet's USDC balance on the
- * currently selected EVM chain, with a switcher for picking between
- * Base mainnet and Celo mainnet.
+ * Header pill that shows the connected wallet's USDC + PERKOS
+ * balances on the currently selected EVM chain, with a switcher for
+ * picking between Base mainnet and Celo mainnet.
+ *
+ * Pill body shape (left → right):
+ *   [chain logo]  $usdc  ·  prks PRKS  [chevron|spinner]
  *
  * Three contexts, controlled by the Mini App host:
  *
@@ -16,8 +19,9 @@
  *   3. Plain web browser
  *      → Same as Farcaster.
  *
- * USX spec source: ui-ux-designer agent, 2026-05-25. See PR description
- * for the full pattern, state, and accessibility breakdown.
+ * UX spec source: ui-ux-designer agent, 2026-05-25. The PERKOS slot
+ * was added afterwards (the original spec was USDC-only); both
+ * balances share the same loading + error treatment.
  */
 
 import Image from "next/image";
@@ -38,10 +42,11 @@ import {
 import { cn } from "@/lib/utils";
 
 import {
+  PERKOS_BY_CHAIN,
   USDC_BY_CHAIN,
   isSupportedChainId,
   type SupportedChainId,
-} from "../lib/usdcTokens";
+} from "../lib/tokenAddresses";
 
 const BASE_APP_CLIENT_FID = 309857;
 
@@ -57,15 +62,16 @@ const NETWORKS: NetworkOption[] = [
 ];
 
 /**
- * Format a USDC balance for display:
- *   - $0.00 when zero
- *   - $X,XXX (no decimals, comma grouping) when ≥ 100
- *   - $X.XX (two decimals) when < 100
+ * Format an ERC20 balance as a compact display string:
+ *   - "0.00" when zero
+ *   - "X,XXX" (comma-grouped, no decimals) when whole part ≥ 100
+ *   - "X.XX" (two decimals) when whole part < 100
  *
- * The input is a bigint of base units (USDC has 6 decimals).
+ * Callers compose the prefix ($ for USDC) and suffix (symbol for
+ * other tokens) around the result.
  */
-function formatUsdc(raw: bigint, decimals: number): string {
-  if (raw === BigInt(0)) return "$0.00";
+function formatBalance(raw: bigint, decimals: number): string {
+  if (raw === BigInt(0)) return "0.00";
 
   const divisor = BigInt(10) ** BigInt(decimals);
   const whole = raw / divisor;
@@ -73,13 +79,11 @@ function formatUsdc(raw: bigint, decimals: number): string {
   const wholeNum = Number(whole);
 
   if (wholeNum >= 100) {
-    return `$${wholeNum.toLocaleString("en-US")}`;
+    return wholeNum.toLocaleString("en-US");
   }
 
-  // Two-decimal precision for values < 100.
   const fractionScaled = Number(fraction) / Number(divisor); // 0..1
-  const total = wholeNum + fractionScaled;
-  return `$${total.toFixed(2)}`;
+  return (wholeNum + fractionScaled).toFixed(2);
 }
 
 export function NetworkPill() {
@@ -122,8 +126,9 @@ export function NetworkPill() {
 
   const displayedNetwork = NETWORKS.find((n) => n.id === displayedChainId)!;
   const usdc = USDC_BY_CHAIN[displayedChainId];
+  const perkos = PERKOS_BY_CHAIN[displayedChainId];
 
-  const balance = useReadContract({
+  const usdcQuery = useReadContract({
     address: usdc.address,
     abi: erc20Abi,
     functionName: "balanceOf",
@@ -132,14 +137,21 @@ export function NetworkPill() {
     query: { enabled: isConnected && !!address },
   });
 
-  const balanceLabel = (() => {
-    if (!isConnected || !address) return "$0.00";
-    if (balance.isError) return "—";
-    if (balance.data !== undefined) {
-      return formatUsdc(balance.data, usdc.decimals);
-    }
-    return null; // loading
-  })();
+  const perkosQuery = useReadContract({
+    address: perkos.address,
+    abi: erc20Abi,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    chainId: displayedChainId,
+    query: { enabled: isConnected && !!address },
+  });
+
+  const usdcLabel = formatQueryResult(usdcQuery, usdc.decimals, isConnected);
+  const perkosLabel = formatQueryResult(
+    perkosQuery,
+    perkos.decimals,
+    isConnected,
+  );
 
   const isUnsupportedChain =
     !isInBaseApp &&
@@ -156,22 +168,31 @@ export function NetworkPill() {
     }
   }
 
+  const ariaLabel = (() => {
+    const u =
+      usdcLabel === null
+        ? "loading USDC"
+        : usdcLabel === "—"
+          ? "USDC balance unavailable"
+          : `$${usdcLabel} USDC`;
+    const p =
+      perkosLabel === null
+        ? "loading PRKS"
+        : perkosLabel === "—"
+          ? "PRKS balance unavailable"
+          : `${perkosLabel} PRKS`;
+    return `${u}, ${p}, on ${displayedNetwork.name}`;
+  })();
+
   // -----------------------------------------------------------------
   // Base App context — static pill (non-interactive).
   // -----------------------------------------------------------------
 
   if (isInBaseApp) {
     return (
-      <PillShell
-        aria-label={
-          balanceLabel
-            ? `${balanceLabel} USDC on ${displayedNetwork.name}`
-            : `Loading USDC balance on ${displayedNetwork.name}`
-        }
-        static
-      >
+      <PillShell static aria-label={ariaLabel}>
         <LogoMark network={displayedNetwork} />
-        <BalanceLabel value={balanceLabel} />
+        <BalancesBody usdcLabel={usdcLabel} perkosLabel={perkosLabel} />
       </PillShell>
     );
   }
@@ -184,11 +205,7 @@ export function NetworkPill() {
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-haspopup="listbox"
-        aria-label={
-          balanceLabel
-            ? `Network and balance: ${balanceLabel} on ${displayedNetwork.name}`
-            : `Loading balance on ${displayedNetwork.name}`
-        }
+        aria-label={`Network and balances: ${ariaLabel}`}
         aria-disabled={isSwitching || undefined}
         className={cn(
           "group inline-flex items-center gap-1.5 rounded-full border bg-card px-3 text-xs font-medium transition-colors",
@@ -205,7 +222,7 @@ export function NetworkPill() {
         {isUnsupportedChain ? (
           <span className="text-destructive">Wrong network</span>
         ) : (
-          <BalanceLabel value={balanceLabel} />
+          <BalancesBody usdcLabel={usdcLabel} perkosLabel={perkosLabel} />
         )}
         {isSwitching ? (
           <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
@@ -247,6 +264,26 @@ export function NetworkPill() {
 // Subcomponents
 // ---------------------------------------------------------------------
 
+/**
+ * Maps a wagmi useReadContract query result to either:
+ *   - "—" on error
+ *   - null while loading
+ *   - a formatted balance string ("0.00" / "12.50" / "2,450")
+ *
+ * Disconnected wallet collapses to "0.00" so the pill always has
+ * meaningful content even before the user signs in.
+ */
+function formatQueryResult(
+  query: { data: unknown; isError: boolean },
+  decimals: number,
+  isConnected: boolean,
+): string | null {
+  if (!isConnected) return "0.00";
+  if (query.isError) return "—";
+  if (query.data === undefined || query.data === null) return null;
+  return formatBalance(query.data as bigint, decimals);
+}
+
 function LogoMark({ network }: { network: NetworkOption }) {
   return (
     <Image
@@ -260,17 +297,56 @@ function LogoMark({ network }: { network: NetworkOption }) {
   );
 }
 
-function BalanceLabel({ value }: { value: string | null }) {
-  if (value === null) {
+/**
+ * The "$usdc · prks PRKS" body. Each side handles its own
+ * loading / error state independently so a flaky RPC on one token
+ * doesn't blank the other.
+ */
+function BalancesBody({
+  usdcLabel,
+  perkosLabel,
+}: {
+  usdcLabel: string | null;
+  perkosLabel: string | null;
+}) {
+  return (
+    <span className="flex items-center gap-1.5 truncate">
+      <TokenSlot label={usdcLabel} prefix="$" loadingHint="USDC" />
+      <span className="text-muted-foreground/60" aria-hidden>
+        ·
+      </span>
+      <TokenSlot label={perkosLabel} suffix="PRKS" loadingHint="PRKS" />
+    </span>
+  );
+}
+
+function TokenSlot({
+  label,
+  prefix,
+  suffix,
+  loadingHint,
+}: {
+  label: string | null;
+  prefix?: string;
+  suffix?: string;
+  loadingHint: string;
+}) {
+  if (label === null) {
     return (
       <span
-        className="block h-2 w-10 animate-pulse rounded-full bg-muted"
-        aria-label="Loading USDC balance"
+        className="block h-2 w-8 animate-pulse rounded-full bg-muted"
+        aria-label={`Loading ${loadingHint} balance`}
         role="status"
       />
     );
   }
-  return <span className="max-w-[72px] truncate md:max-w-none">{value}</span>;
+  return (
+    <span className="whitespace-nowrap">
+      {prefix}
+      {label}
+      {suffix ? <span className="ml-1 text-muted-foreground/80">{suffix}</span> : null}
+    </span>
+  );
 }
 
 function PillShell({
