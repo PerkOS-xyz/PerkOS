@@ -26,6 +26,7 @@ import { CommandMenu } from "../components/CommandMenu";
 import { MobileBottomNav } from "../components/MobileBottomNav";
 import { AccessGate } from "../components/AccessGate";
 import { NotificationsBell } from "../components/NotificationsBell";
+import { NetworkPill } from "../components/NetworkPill";
 import { UserMenu } from "../components/UserMenu";
 import { formatAddress } from "../lib/format";
 import { useWalletSession } from "../lib/useWalletSession";
@@ -94,19 +95,22 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           <header className="hidden items-center justify-between gap-2 border-b border-border px-8 py-3 md:flex">
             <CommandHint />
             <div className="flex items-center gap-2">
+              <NetworkPill />
               <NotificationsBell />
               <UserMenu />
             </div>
           </header>
 
           {/* Mobile header */}
-          <header className="flex items-center justify-between border-b border-border px-5 py-4 md:hidden">
+          <header className="flex items-center justify-between gap-2 border-b border-border px-5 py-4 md:hidden">
             <Image
               src="/perkos-header.png"
               alt="PerkOS"
               width={150}
               height={52}
             />
+
+            <NetworkPill />
 
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger
