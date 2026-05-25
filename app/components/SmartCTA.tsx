@@ -34,7 +34,6 @@ import {
   useConnect,
   useConnectors,
   useDisconnect,
-  useReconnect,
   type Connector,
 } from "wagmi";
 import { toast } from "sonner";
@@ -63,8 +62,7 @@ export function SmartCTA({ href, className, children }: Props) {
   const isInMiniApp = useIsInMiniApp();
   const { isConnected } = useAccount();
   const { connectAsync } = useConnect();
-  const { reconnectAsync } = useReconnect();
-  const { disconnect } = useDisconnect();
+  const { disconnectAsync } = useDisconnect();
   const connectors = useConnectors();
   const [busy, setBusy] = useState(false);
 
@@ -104,20 +102,22 @@ export function SmartCTA({ href, className, children }: Props) {
             message.toLowerCase().includes("already connected"));
 
         // Half-hydrated wagmi trap: the store has a `current`
-        // connector UID set but useAccount hasn't hydrated. Try
-        // reconnectAsync to finish the hydration; if THAT also
-        // fails, force-clear the state via disconnect() so the next
-        // click is a fresh connect.
+        // connector UID set but useAccount hasn't hydrated. Reconnect
+        // can resolve "successfully" without actually re-injecting
+        // the account in some hosts (Coinbase Wallet RN webview),
+        // leaving the rest of the app stuck on "loading". Force-clear
+        // via disconnect and re-issue connect in one cycle so a
+        // single tap takes the user all the way through.
         if (isAlreadyConnected) {
           try {
-            await reconnectAsync({ connectors: [coinbaseConnector] });
+            await disconnectAsync();
+            await connectAsync({ connector: coinbaseConnector });
             router.push("/continue");
             return;
-          } catch {
-            disconnect();
-            toast("Wallet state refreshed", {
-              description: "Tap the button again to connect.",
-            });
+          } catch (retryErr) {
+            const retryMessage =
+              retryErr instanceof Error ? retryErr.message : "Unknown error";
+            toast("Couldn't connect wallet", { description: retryMessage });
             return;
           }
         }
