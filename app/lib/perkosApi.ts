@@ -734,6 +734,57 @@ export async function getHibernationStatusApi(input: {
   return payload as unknown as HibernationStatus;
 }
 
+export type AvailableUpgrade = {
+  imageTag: string;
+  publishedAt?: string;
+  notes?: string;
+};
+
+export type UpgradeOptions = {
+  currentImageTag: string | null;
+  currentImageUri: string | null;
+  available: AvailableUpgrade[];
+};
+
+export type UpgradeResult = {
+  ok: true;
+  from: string | null;
+  to: string;
+  hibernated: boolean;
+  drainedAfterMs: number;
+  provision: { serviceArn: string; taskDefinitionArn: string; imageUri: string };
+};
+
+export async function getUpgradeOptionsApi(input: {
+  agentId: string;
+}): Promise<UpgradeOptions> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/agents/${encodeURIComponent(input.agentId)}/upgrade`,
+    { method: "GET" },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't list available upgrades."));
+  return payload as unknown as UpgradeOptions;
+}
+
+export async function upgradeAgentApi(input: {
+  agentId: string;
+  imageTag: string;
+}): Promise<UpgradeResult> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/agents/${encodeURIComponent(input.agentId)}/upgrade`,
+    {
+      method: "POST",
+      body: JSON.stringify({ imageTag: input.imageTag }),
+    },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't upgrade agent."));
+  return payload as unknown as UpgradeResult;
+}
+
 export async function deleteAgent(input: {
   walletAddress: string;
   agentId: string;
