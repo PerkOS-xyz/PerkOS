@@ -22,6 +22,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { adminDb } from "../lib/firebaseAdmin";
 import { provisionEcsAgent } from "../lib/ecsProvision";
 import { registerLlmAgent } from "../lib/llmAgentRegistry";
+import { getMetrics } from "../lib/metrics";
 import {
   appendLog,
   completeJob,
@@ -159,6 +160,10 @@ export async function processJob(job: ProvisionJob): Promise<void> {
       imageUri: ecsResult.imageUri,
       llmKeyLast4,
     });
+    getMetrics().agentProvisionedTotal.inc({
+      runtime: input.runtime,
+      result: "success",
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     await appendLog(jobId, "error", `Provisioning failed: ${message.slice(0, 200)}`);
@@ -173,5 +178,9 @@ export async function processJob(job: ProvisionJob): Promise<void> {
       },
       { merge: true },
     );
+    getMetrics().agentProvisionedTotal.inc({
+      runtime: input.runtime,
+      result: "error",
+    });
   }
 }

@@ -47,6 +47,7 @@ import {
   provisionEcsAgent,
   type ProvisionResult,
 } from "./ecsProvision";
+import { getMetrics } from "./metrics";
 
 const REGION = process.env.AWS_REGION ?? "us-east-1";
 const CLUSTER = "perkos-agents";
@@ -203,24 +204,39 @@ async function assertTagIsActive(
 export async function upgradeAgent(
   input: UpgradeInput,
 ): Promise<UpgradeResult> {
+  const metrics = getMetrics();
   if (!input.targetImageTag || typeof input.targetImageTag !== "string") {
+    metrics.upgradeTotal.inc({ result: "bad-input" });
     throw new UpgradeError("BAD_INPUT", "targetImageTag is required.");
   }
 
   const currentTag = imageTagFromUri(input.currentImageUri) ?? null;
   if (currentTag && currentTag === input.targetImageTag) {
+    metrics.upgradeTotal.inc({ result: "same-version" });
     throw new UpgradeError(
       "SAME_VERSION",
       `Agent is already on image tag ${input.targetImageTag}.`,
     );
   }
 
-  await assertTagIsActive(input.runtime, input.targetImageTag);
+  try {
+    await assertTagIsActive(input.runtime, input.targetImageTag);
+  } catch (err) {
+    metrics.upgradeTotal.inc({
+      result: err instanceof UpgradeError ? err.errorClass.toLowerCase().replace("_", "-") : "error",
+    });
+    throw err;
+  }
 
   const serviceName = serviceNameFor(input.walletAddress, input.agentName);
   const drainTimeoutMs = input.drainTimeoutMs ?? 5 * 60 * 1000;
   const drainPollIntervalMs = input.drainPollIntervalMs ?? 5_000;
 
+  // From here on, anything that throws counts as an upgrade failure
+  // labelled by errorClass so the dashboard can split drain timeouts
+  // from generic ECS errors. Wrap the rest of the body in try/catch so
+  // a single counter increment covers every downstream failure mode.
+  try {
   // 1. Hibernate.
   let hibernated = false;
   const hibernateResult = await hibernateAgent({
@@ -292,6 +308,7 @@ export async function upgradeAgent(
       ),
   ]);
 
+  metrics.upgradeTotal.inc({ result: "success" });
   return {
     from: currentTag,
     to: input.targetImageTag,
@@ -299,6 +316,15 @@ export async function upgradeAgent(
     drainedAfterMs,
     provision,
   };
+  } catch (err) {
+    metrics.upgradeTotal.inc({
+      result:
+        err instanceof UpgradeError
+          ? err.errorClass.toLowerCase().replace(/_/g, "-")
+          : "error",
+    });
+    throw err;
+  }
 }
 
 export type AvailableUpgrade = {

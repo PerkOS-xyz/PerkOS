@@ -37,6 +37,7 @@ import {
   type ProvisionJob,
 } from "../lib/provisionJobs";
 import { processJob } from "./processJob";
+import { startMetricsServer, type MetricsServerHandle } from "./metricsServer";
 
 const WORKER_ID =
   process.env.WORKER_INSTANCE_ID ??
@@ -110,7 +111,28 @@ async function tick() {
   }
 }
 
+let metricsHandle: MetricsServerHandle | null = null;
+function maybeStartMetrics() {
+  const portRaw = process.env.PERKOS_METRICS_PORT;
+  if (!portRaw) return;
+  const port = Number(portRaw);
+  if (!Number.isFinite(port) || port <= 0) {
+    log("warn", `PERKOS_METRICS_PORT="${portRaw}" is not a valid port, skipping metrics server`);
+    return;
+  }
+  if (!process.env.PERKOS_METRICS_TOKEN?.trim()) {
+    log("warn", "PERKOS_METRICS_PORT set but PERKOS_METRICS_TOKEN missing — metrics endpoint disabled");
+    return;
+  }
+  metricsHandle = startMetricsServer({
+    port,
+    processName: `provisioner-${WORKER_ID}`,
+    logger: (m) => log("info", m),
+  });
+}
+
 async function loop() {
+  maybeStartMetrics();
   log("info", `worker started (poll every ${POLL_INTERVAL_MS}ms)`);
   while (!stopping) {
     await tick();
@@ -125,6 +147,13 @@ async function gracefulShutdown(signal: string) {
   stopping = true;
   log("info", `received ${signal}, shutting down`);
   stopHeartbeat();
+  if (metricsHandle) {
+    try {
+      await metricsHandle.stop();
+    } catch {
+      /* swallow */
+    }
+  }
   if (currentJob) {
     // Release the lease so another worker can pick it up immediately.
     // Don't bother retrying if it fails — the lease will expire in 5 min.

@@ -45,6 +45,7 @@ import {
 import type { FieldValue } from "firebase-admin/firestore";
 
 import { adminDb } from "./firebaseAdmin";
+import { getMetrics } from "./metrics";
 
 const REGION = process.env.AWS_REGION ?? "us-east-1";
 const ACCOUNT = "089332276762";
@@ -150,15 +151,23 @@ export type HibernationActionResult = {
 export async function hibernateAgent(
   input: HibernateInput,
 ): Promise<HibernationActionResult> {
+  const metrics = getMetrics();
   const service = serviceNameFor(input.walletAddress, input.agentName);
 
-  const described = await ecs().send(
-    new DescribeServicesCommand({ cluster: CLUSTER, services: [service] }),
-  );
+  let described;
+  try {
+    described = await ecs().send(
+      new DescribeServicesCommand({ cluster: CLUSTER, services: [service] }),
+    );
+  } catch (err) {
+    metrics.hibernateTotal.inc({ result: "error" });
+    throw err;
+  }
   const found = described.services?.find(
     (s) => s.status === "ACTIVE" && s.serviceName === service,
   );
   if (!found) {
+    metrics.hibernateTotal.inc({ result: "not-found" });
     throw new HibernationError(
       "SERVICE_NOT_FOUND",
       `ECS service ${service} not found — agent may not be deployed yet.`,
@@ -173,6 +182,7 @@ export async function hibernateAgent(
       state: "hibernated",
       note: "noop — desiredCount was already 0",
     });
+    metrics.hibernateTotal.inc({ result: "noop" });
     return {
       serviceArn: found.serviceArn ?? null,
       previousDesiredCount,
@@ -186,14 +196,21 @@ export async function hibernateAgent(
     hibernatedAt: new Date(),
   });
 
-  const updated = await ecs().send(
-    new UpdateServiceCommand({
-      cluster: CLUSTER,
-      service,
-      desiredCount: 0,
-    }),
-  );
+  let updated;
+  try {
+    updated = await ecs().send(
+      new UpdateServiceCommand({
+        cluster: CLUSTER,
+        service,
+        desiredCount: 0,
+      }),
+    );
+  } catch (err) {
+    metrics.hibernateTotal.inc({ result: "error" });
+    throw err;
+  }
 
+  metrics.hibernateTotal.inc({ result: "success" });
   return {
     serviceArn: updated.service?.serviceArn ?? found.serviceArn ?? null,
     previousDesiredCount,
@@ -209,15 +226,23 @@ export type WakeInput = HibernateInput;
  * write state and return ok.
  */
 export async function wakeAgent(input: WakeInput): Promise<HibernationActionResult> {
+  const metrics = getMetrics();
   const service = serviceNameFor(input.walletAddress, input.agentName);
 
-  const described = await ecs().send(
-    new DescribeServicesCommand({ cluster: CLUSTER, services: [service] }),
-  );
+  let described;
+  try {
+    described = await ecs().send(
+      new DescribeServicesCommand({ cluster: CLUSTER, services: [service] }),
+    );
+  } catch (err) {
+    metrics.wakeTotal.inc({ result: "error" });
+    throw err;
+  }
   const found = described.services?.find(
     (s) => s.status === "ACTIVE" && s.serviceName === service,
   );
   if (!found) {
+    metrics.wakeTotal.inc({ result: "not-found" });
     throw new HibernationError(
       "SERVICE_NOT_FOUND",
       `ECS service ${service} not found — agent may not be deployed yet.`,
@@ -231,6 +256,7 @@ export async function wakeAgent(input: WakeInput): Promise<HibernationActionResu
       state: "active",
       note: "noop — desiredCount was already >= 1",
     });
+    metrics.wakeTotal.inc({ result: "noop" });
     return {
       serviceArn: found.serviceArn ?? null,
       previousDesiredCount,
@@ -244,14 +270,21 @@ export async function wakeAgent(input: WakeInput): Promise<HibernationActionResu
     wakeStartedAt: new Date(),
   });
 
-  const updated = await ecs().send(
-    new UpdateServiceCommand({
-      cluster: CLUSTER,
-      service,
-      desiredCount: 1,
-    }),
-  );
+  let updated;
+  try {
+    updated = await ecs().send(
+      new UpdateServiceCommand({
+        cluster: CLUSTER,
+        service,
+        desiredCount: 1,
+      }),
+    );
+  } catch (err) {
+    metrics.wakeTotal.inc({ result: "error" });
+    throw err;
+  }
 
+  metrics.wakeTotal.inc({ result: "success" });
   return {
     serviceArn: updated.service?.serviceArn ?? found.serviceArn ?? null,
     previousDesiredCount,
