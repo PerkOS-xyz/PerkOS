@@ -1,0 +1,70 @@
+// ops/observability/alloy.example.river
+//
+// Grafana Alloy (the new name for Grafana Agent) configuration.
+// Scrapes the three PerkOS Node processes on the docker network
+// and remote-writes to Grafana Cloud Prometheus. Copy this to
+// alloy.river on the VPS, fill in the placeholders, run the
+// container alongside the PerkOS stack.
+//
+//   docker run -d --name perkos-alloy \
+//     --network perkos-knowledge_default \
+//     -v $(pwd)/alloy.river:/etc/alloy/config.alloy \
+//     -e PERKOS_METRICS_TOKEN=<same as PerkOS env> \
+//     -e GRAFANA_CLOUD_USER=<from grafana.com> \
+//     -e GRAFANA_CLOUD_API_KEY=<from grafana.com> \
+//     grafana/alloy:latest \
+//     run --server.http.listen-addr=0.0.0.0:12345 /etc/alloy/config.alloy
+
+// --- Scrape config -----------------------------------------------------
+
+prometheus.scrape "perkos_miniapp" {
+  targets = [{
+    __address__ = "perkos-miniapp:3000",
+    __metrics_path__ = "/api/metrics",
+    job = "perkos-miniapp",
+    instance = "miniapp",
+  }]
+  scrape_interval = "30s"
+  scrape_timeout = "10s"
+  bearer_token = sys.env("PERKOS_METRICS_TOKEN")
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+}
+
+prometheus.scrape "perkos_worker" {
+  targets = [{
+    __address__ = "perkos-miniapp-worker:9101",
+    job = "perkos-worker",
+    instance = "provisioner",
+  }]
+  scrape_interval = "30s"
+  scrape_timeout = "10s"
+  bearer_token = sys.env("PERKOS_METRICS_TOKEN")
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+}
+
+prometheus.scrape "perkos_curator" {
+  targets = [{
+    __address__ = "perkos-miniapp-curator:9102",
+    job = "perkos-curator",
+    instance = "curator",
+  }]
+  scrape_interval = "30s"
+  scrape_timeout = "10s"
+  bearer_token = sys.env("PERKOS_METRICS_TOKEN")
+  forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+}
+
+// --- Remote-write to Grafana Cloud -------------------------------------
+//
+// Get the endpoint, user id, and API key from grafana.com →
+// My Account → Prometheus.
+
+prometheus.remote_write "grafana_cloud" {
+  endpoint {
+    url = "https://prometheus-prod-NN-prod-XX-XXXX.grafana.net/api/prom/push"
+    basic_auth {
+      username = sys.env("GRAFANA_CLOUD_USER")
+      password = sys.env("GRAFANA_CLOUD_API_KEY")
+    }
+  }
+}

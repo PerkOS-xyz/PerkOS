@@ -37,6 +37,7 @@ import { hostname } from "node:os";
 import { randomBytes } from "node:crypto";
 
 import { loadConfigFromEnv, runCuratorTick } from "../lib/curator";
+import { startMetricsServer, type MetricsServerHandle } from "./metricsServer";
 
 const WORKER_ID =
   process.env.WORKER_INSTANCE_ID ??
@@ -123,7 +124,28 @@ async function tick() {
   }
 }
 
+let metricsHandle: MetricsServerHandle | null = null;
+function maybeStartMetrics() {
+  const portRaw = process.env.PERKOS_METRICS_PORT;
+  if (!portRaw) return;
+  const port = Number(portRaw);
+  if (!Number.isFinite(port) || port <= 0) {
+    log("warn", `PERKOS_METRICS_PORT="${portRaw}" is not valid, skipping metrics server`);
+    return;
+  }
+  if (!process.env.PERKOS_METRICS_TOKEN?.trim()) {
+    log("warn", "PERKOS_METRICS_PORT set but PERKOS_METRICS_TOKEN missing — metrics endpoint disabled");
+    return;
+  }
+  metricsHandle = startMetricsServer({
+    port,
+    processName: `curator-${WORKER_ID}`,
+    logger: (m) => log("info", m),
+  });
+}
+
 async function loop() {
+  maybeStartMetrics();
   log(
     "info",
     `curator worker started (interval=${INTERVAL_MS / 60_000}m, enabled=${ENABLED})`,
@@ -141,16 +163,23 @@ async function loop() {
   log("info", "curator worker stopped");
 }
 
-function gracefulShutdown(signal: string) {
+async function gracefulShutdown(signal: string) {
   if (stopping) return;
   stopping = true;
   log("info", `received ${signal}, shutting down`);
+  if (metricsHandle) {
+    try {
+      await metricsHandle.stop();
+    } catch {
+      /* swallow */
+    }
+  }
   // No in-flight work to wait for — the tick is fully synchronous from
   // our perspective. Exit immediately so docker doesn't have to kill us.
   process.exit(0);
 }
-process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
-process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+process.on("SIGTERM", () => void gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => void gracefulShutdown("SIGINT"));
 
 void loop().catch((err) => {
   log(

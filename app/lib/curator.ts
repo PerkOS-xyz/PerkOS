@@ -40,6 +40,7 @@ import "server-only";
 
 import { adminDb } from "./firebaseAdmin";
 import { hibernateAgent, type HibernationActionResult } from "./hibernation";
+import { getMetrics } from "./metrics";
 
 export type CuratorConfig = {
   /**
@@ -279,13 +280,24 @@ export async function runCuratorTick(opts?: {
   const loadImpl = opts?.loadAgents ?? loadCandidateAgents;
   const resolveAgentIdImpl =
     opts?.resolveAgentId ?? defaultResolveAgentId;
+  const metrics = getMetrics();
+  const tickStartHr = process.hrtime.bigint();
 
   const agents = await loadImpl();
   const decisions = decide({ config, agents, now });
 
+  // Count every decision so the dashboard can show why nothing
+  // happened (vs. dry-run "would have").
+  for (const d of decisions) {
+    metrics.curatorDecisionTotal.inc({ reason: d.reason });
+  }
+
   const hibernated: CuratorTickResult["hibernated"] = [];
 
   if (config.dryRun) {
+    const durationSec =
+      Number(process.hrtime.bigint() - tickStartHr) / 1_000_000_000;
+    metrics.curatorTickDuration.observe({ dryRun: "true" }, durationSec);
     return { config, decisions, hibernated, dryRun: true };
   }
 
@@ -295,6 +307,7 @@ export async function runCuratorTick(opts?: {
     try {
       agentId = await resolveAgentIdImpl(d.walletAddress, d.name);
     } catch (err) {
+      metrics.curatorHibernationsTotal.inc({ result: "resolve-error" });
       hibernated.push({
         name: d.name,
         walletAddress: d.walletAddress,
@@ -303,6 +316,7 @@ export async function runCuratorTick(opts?: {
       continue;
     }
     if (!agentId) {
+      metrics.curatorHibernationsTotal.inc({ result: "agent-id-missing" });
       hibernated.push({
         name: d.name,
         walletAddress: d.walletAddress,
@@ -316,12 +330,14 @@ export async function runCuratorTick(opts?: {
         agentId,
         agentName: d.name,
       });
+      metrics.curatorHibernationsTotal.inc({ result: "success" });
       hibernated.push({
         name: d.name,
         walletAddress: d.walletAddress,
         result,
       });
     } catch (err) {
+      metrics.curatorHibernationsTotal.inc({ result: "error" });
       hibernated.push({
         name: d.name,
         walletAddress: d.walletAddress,
@@ -330,6 +346,9 @@ export async function runCuratorTick(opts?: {
     }
   }
 
+  const durationSec =
+    Number(process.hrtime.bigint() - tickStartHr) / 1_000_000_000;
+  metrics.curatorTickDuration.observe({ dryRun: "false" }, durationSec);
   return { config, decisions, hibernated, dryRun: false };
 }
 

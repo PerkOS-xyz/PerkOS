@@ -45,6 +45,10 @@ services:
       # ADMIN_TOKEN on the gateway VPS (/opt/Perkos-llm/.env).
       PERKOS_LLM_GATEWAY_URL: ${PERKOS_LLM_GATEWAY_URL:-https://api.llm.perkos.xyz}
       PERKOS_LLM_ADMIN_TOKEN: ${PERKOS_LLM_ADMIN_TOKEN:-}
+      # Prometheus metrics — /api/metrics responds when this token is
+      # set. The scraper (Grafana Agent / Alloy) presents it as a
+      # Bearer header. Without it the route returns 503.
+      PERKOS_METRICS_TOKEN: ${PERKOS_METRICS_TOKEN:-}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/"]
       interval: 30s
@@ -78,6 +82,12 @@ services:
       # `claimedBy` field on jobs it holds. Defaults to the container
       # hostname when unset.
       WORKER_INSTANCE_ID: ${WORKER_INSTANCE_ID:-}
+      # Prometheus metrics endpoint. Bound to 0.0.0.0 inside the
+      # compose network — the host never publishes the port, only the
+      # Grafana Agent / Alloy container reaches it by service name.
+      # Leave PERKOS_METRICS_PORT unset to disable the endpoint.
+      PERKOS_METRICS_PORT: ${PROVISIONER_METRICS_PORT:-9101}
+      PERKOS_METRICS_TOKEN: ${PERKOS_METRICS_TOKEN:-}
 
   # Curator worker — periodic loop that auto-hibernates idle ECS
   # agents. Same image as the miniapp; separate command so it ticks
@@ -110,6 +120,11 @@ services:
       PERKOS_CURATOR_SKIP_NAMES: ${PERKOS_CURATOR_SKIP_NAMES:-perkos-assistant}
       PERKOS_CURATOR_MIN_AGE_MINUTES: ${PERKOS_CURATOR_MIN_AGE_MINUTES:-15}
       WORKER_INSTANCE_ID: ${CURATOR_INSTANCE_ID:-}
+      # Curator's metrics endpoint — same auth pattern as the
+      # provisioner. Different port so both can run on the same
+      # internal network.
+      PERKOS_METRICS_PORT: ${CURATOR_METRICS_PORT:-9102}
+      PERKOS_METRICS_TOKEN: ${PERKOS_METRICS_TOKEN:-}
 
 networks:
   perkos-knowledge_default:
