@@ -45,6 +45,7 @@ import { formatAddress } from "../../../lib/format";
 import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { EditAgentDialog } from "../../../components/EditAgentDialog";
 import { HibernationPanel } from "./HibernationPanel";
+import { UpgradePanel } from "./UpgradePanel";
 
 type PageProps = {
   params: Promise<{ agentId: string }>;
@@ -212,6 +213,12 @@ export default function AgentDetailPage({ params }: PageProps) {
       <ChannelsSection channels={channels} runtime={agent.runtime} />
 
       <HibernationPanel
+        agentId={agent.id}
+        agentName={agent.name}
+        ecsDeployed={agent.status === "ready"}
+      />
+
+      <UpgradePanel
         agentId={agent.id}
         agentName={agent.name}
         ecsDeployed={agent.status === "ready"}
