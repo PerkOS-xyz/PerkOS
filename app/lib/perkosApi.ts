@@ -713,6 +713,35 @@ function apiError(payload: Record<string, unknown>, fallback: string) {
     : fallback;
 }
 
+export type AssistantConv = {
+  /** Stable convId for the canonical wallet ↔ PerkOS-Assistant thread. */
+  convId: string;
+  /** The agent identity that owns the canonical jsonl history. Always
+   *  `agent:PerkOS-Assistant` today. */
+  historyHost: string;
+};
+
+/**
+ * Idempotently creates (or finds) the canonical PerkOS Assistant
+ * conversation for the current wallet. Safe to call on every chat-panel
+ * mount — the server-side route uses a Firestore transaction so two
+ * concurrent calls land on the same conv doc.
+ *
+ * Returns `{ convId, historyHost }`. Caller stashes the convId and uses
+ * it for subsequent WS frames against chat.perkos.xyz.
+ */
+export async function ensureAssistantConv(): Promise<AssistantConv> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch("/api/concierge/ensure-conv", {
+    method: "POST",
+  });
+  const payload = await parseJson(response);
+  if (!response.ok) {
+    throw new Error(apiError(payload, "Couldn't open Assistant chat."));
+  }
+  return payload as unknown as AssistantConv;
+}
+
 export type AssistantChatHistory = {
   role: "user" | "assistant";
   content: string;
