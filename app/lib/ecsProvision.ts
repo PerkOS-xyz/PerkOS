@@ -72,6 +72,12 @@ const TASK_ROLE_ARN = `arn:aws:iam::${ACCOUNT}:role/perkos-spark-ecs-task`;
 const LOG_GROUP = "/ecs/perkos-agents";
 const ECR_REGISTRY = `${ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com`;
 const PERKOS_LLM_BASE_URL = "https://api.llm.perkos.xyz";
+const ENV = process.env.PERKOS_ENV ?? "dev";
+const HIBERNATION_BUCKET = `perkos-agent-snapshots-${ENV}`;
+// Generous drain window: lets the container forward SIGTERM to upstream
+// Hermes, wait for it to quiesce, tar HERMES_HOME, and upload to S3.
+// PerkOS-Containers' docker-entrypoint.sh relies on this budget.
+const HIBERNATION_STOP_TIMEOUT_SECONDS = 300;
 
 // Fargate has fixed cpu/memory pairs. 512/1024 = 0.5 vCPU, 1 GB — fits the
 // agent + perkos-a2a sidecar comfortably for alpha.
@@ -218,6 +224,14 @@ export async function provisionEcsAgent(
     { name: "PERKOS_AGENT_NAME", value: input.agentName },
     { name: "PERKOS_LLM_BASE_URL", value: PERKOS_LLM_BASE_URL },
     { name: "PERKOS_LLM_DEFAULT_MODEL", value: "kimi-k2.6:cloud" },
+    // Hibernation: the runtime's entrypoint reads this on boot (restore)
+    // and SIGTERM (snapshot). Wallet/agent-scoped prefix; the bucket's
+    // KMS encryption + IAM least-priv policy were stood up by
+    // ops/aws/hibernation/bootstrap.sh.
+    {
+      name: "PERKOS_HIBERNATION_S3_URI",
+      value: `s3://${HIBERNATION_BUCKET}/${wallet}/${input.agentName.toLowerCase()}/`,
+    },
   ];
 
   // Resolve which key the runtime should send as Authorization: Bearer
@@ -262,6 +276,10 @@ export async function provisionEcsAgent(
       secrets: secretArn
         ? [{ name: "PERKOS_LLM_API_KEY", valueFrom: secretArn }]
         : [],
+      // Give the entrypoint enough time to drain Hermes + tar +
+      // upload to S3 when SIGTERM arrives (default would be 30s and
+      // kill the snapshot mid-upload).
+      stopTimeout: HIBERNATION_STOP_TIMEOUT_SECONDS,
       logConfiguration: {
         logDriver: LogDriver.AWSLOGS,
         options: {
