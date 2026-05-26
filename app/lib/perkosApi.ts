@@ -785,6 +785,39 @@ export async function upgradeAgentApi(input: {
   return payload as unknown as UpgradeResult;
 }
 
+export type EnsureAwakeResult = {
+  ok: true;
+  initialState: HibernationApiState;
+  finalState: HibernationApiState;
+  triggeredWake: boolean;
+  online: boolean;
+  waitedMs: number;
+  timedOut?: true;
+};
+
+export async function ensureAgentAwakeApi(input: {
+  agentId: string;
+  waitForRunning?: boolean;
+  waitTimeoutMs?: number;
+}): Promise<EnsureAwakeResult> {
+  const { authedFetch } = await import("./apiClient");
+  const body: Record<string, unknown> = {};
+  if (typeof input.waitForRunning === "boolean") body.waitForRunning = input.waitForRunning;
+  if (typeof input.waitTimeoutMs === "number") body.waitTimeoutMs = input.waitTimeoutMs;
+  const response = await authedFetch(
+    `/api/agents/${encodeURIComponent(input.agentId)}/ensure-awake`,
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+    },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) {
+    throw new Error(apiError(payload, "Couldn't ensure agent is awake."));
+  }
+  return payload as unknown as EnsureAwakeResult;
+}
+
 export async function deleteAgent(input: {
   walletAddress: string;
   agentId: string;
