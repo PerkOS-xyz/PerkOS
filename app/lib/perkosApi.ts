@@ -669,6 +669,71 @@ export async function updateAgent(input: {
   return { agent: fresh.data() };
 }
 
+export type HibernationApiState = "active" | "hibernating" | "hibernated" | "waking";
+
+export type HibernationStatus = {
+  state: HibernationApiState;
+  desiredCount: number;
+  runningCount: number;
+  pendingCount: number;
+  snapshot: {
+    bucket: string;
+    prefix: string;
+    key?: string;
+    sizeBytes?: number;
+  };
+  hibernatedAt?: string;
+  wakeStartedAt?: string;
+  note?: string;
+};
+
+export type HibernationActionResult = {
+  ok: true;
+  serviceArn: string | null;
+  previousDesiredCount: number;
+  newDesiredCount: number;
+  state: HibernationApiState;
+};
+
+export async function hibernateAgentApi(input: {
+  agentId: string;
+}): Promise<HibernationActionResult> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/agents/${encodeURIComponent(input.agentId)}/hibernate`,
+    { method: "POST" },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't hibernate agent."));
+  return payload as unknown as HibernationActionResult;
+}
+
+export async function wakeAgentApi(input: {
+  agentId: string;
+}): Promise<HibernationActionResult> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/agents/${encodeURIComponent(input.agentId)}/wake`,
+    { method: "POST" },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't wake agent."));
+  return payload as unknown as HibernationActionResult;
+}
+
+export async function getHibernationStatusApi(input: {
+  agentId: string;
+}): Promise<HibernationStatus> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/agents/${encodeURIComponent(input.agentId)}/hibernation`,
+    { method: "GET" },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't read hibernation status."));
+  return payload as unknown as HibernationStatus;
+}
+
 export async function deleteAgent(input: {
   walletAddress: string;
   agentId: string;

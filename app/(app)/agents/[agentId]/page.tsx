@@ -44,6 +44,7 @@ import {
 import { formatAddress } from "../../../lib/format";
 import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { EditAgentDialog } from "../../../components/EditAgentDialog";
+import { HibernationPanel } from "./HibernationPanel";
 
 type PageProps = {
   params: Promise<{ agentId: string }>;
@@ -209,6 +210,12 @@ export default function AgentDetailPage({ params }: PageProps) {
       </section>
 
       <ChannelsSection channels={channels} runtime={agent.runtime} />
+
+      <HibernationPanel
+        agentId={agent.id}
+        agentName={agent.name}
+        ecsDeployed={agent.status === "ready"}
+      />
 
       <TasksSection
         tasks={assignedTasks}
