@@ -10,7 +10,6 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react";
-import { useMutation } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
 import {
   X,
@@ -29,7 +28,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { assistantChat } from "../lib/perkosApi";
+import { useChatPerkosClient } from "../lib/useChatPerkosClient";
 import { useSpeechToText } from "../lib/useSpeechToText";
 import { useChatbot, type ChatBubble } from "./ChatbotProvider";
 import { Markdown } from "./Markdown";
@@ -52,10 +51,26 @@ function genId() {
 }
 
 export function ChatbotPanel() {
-  const { open, setOpen, messages, appendMessage, resetConversation } = useChatbot();
+  const {
+    open,
+    setOpen,
+    messages,
+    appendMessage,
+    resetConversation,
+    convId,
+    loadingConv,
+    convError,
+  } = useChatbot();
   const router = useRouter();
   const { address, isConnected } = useConnection();
   const [draft, setDraft] = useState("");
+  // Track which message ids the user just sent so the server echo
+  // (chat_message broadcast back to all participants, including us)
+  // doesn't render a duplicate bubble.
+  const sentIdsRef = useRef<Set<string>>(new Set());
+  // True while we're waiting for an Assistant reply after sending —
+  // toggles the typing bubble. Cleared when any non-self message arrives.
+  const [awaitingReply, setAwaitingReply] = useState(false);
 
   // Dictation (Web Speech API). Appends transcribed phrases to the draft.
   const speech = useSpeechToText({
@@ -72,26 +87,25 @@ export function ChatbotPanel() {
 
   const isEmpty = messages.length === 0;
 
-  const mutation = useMutation({
-    mutationFn: async (text: string) => {
-      if (!isConnected || !address) {
-        throw new Error("Connect a wallet to chat with the assistant.");
+  // WebSocket client. Opens to chat.perkos.xyz when the panel is open
+  // and a convId is loaded; routes incoming `chat_message` frames into
+  // the message list, skipping echoes of our own sends.
+  const chat = useChatPerkosClient({
+    convId,
+    enabled: open && isConnected,
+    onMessage: (msg) => {
+      if (sentIdsRef.current.has(msg.id)) {
+        // Our own message echoing back from the server broadcast — skip.
+        sentIdsRef.current.delete(msg.id);
+        return;
       }
-      const history = messages.map((m) => ({
-        role: (m.role === "user" ? "user" : "assistant") as "user" | "assistant",
-        content: m.text,
-      }));
-      return assistantChat({ walletAddress: address, message: text, history });
-    },
-    onSuccess: (data) => {
-      appendMessage({ id: genId(), role: "agent", text: data.reply });
-    },
-    onError: (error: Error) => {
+      const isFromAgent = msg.from.startsWith("agent:");
       appendMessage({
-        id: genId(),
-        role: "agent",
-        text: `⚠ ${error.message}`,
+        id: msg.id,
+        role: isFromAgent ? "agent" : "user",
+        text: msg.text,
       });
+      if (isFromAgent) setAwaitingReply(false);
     },
   });
 
@@ -99,14 +113,49 @@ export function ChatbotPanel() {
     if (!open) return;
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [open, messages.length, mutation.isPending]);
+  }, [open, messages.length, awaitingReply]);
+
+  // If the WS connection drops, also clear the typing indicator so the
+  // user doesn't see a stale "Assistant is typing…" forever.
+  useEffect(() => {
+    if (!chat.authed) setAwaitingReply(false);
+  }, [chat.authed]);
 
   function send(text: string) {
     const trimmed = text.trim();
-    if (!trimmed || mutation.isPending) return;
-    appendMessage({ id: genId(), role: "user", text: trimmed });
+    if (!trimmed) return;
+    if (!isConnected || !address) {
+      appendMessage({
+        id: genId(),
+        role: "agent",
+        text: "⚠ Connect a wallet to chat with the assistant.",
+      });
+      return;
+    }
+    if (loadingConv || !convId) {
+      appendMessage({
+        id: genId(),
+        role: "agent",
+        text: "⚠ Still opening your Assistant conversation, try again in a moment.",
+      });
+      return;
+    }
+    if (convError) {
+      appendMessage({
+        id: genId(),
+        role: "agent",
+        text: `⚠ Couldn't open Assistant chat: ${convError}`,
+      });
+      return;
+    }
+    // Optimistically render the user's bubble immediately; the WS
+    // server-echo carries the same id which the onMessage handler
+    // de-dupes against sentIdsRef.
+    const id = chat.send(trimmed);
+    sentIdsRef.current.add(id);
+    appendMessage({ id, role: "user", text: trimmed });
     setDraft("");
-    mutation.mutate(trimmed);
+    setAwaitingReply(true);
   }
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -157,7 +206,15 @@ export function ChatbotPanel() {
       >
         <Header
           title="PerkOS Agent"
-          subtitle={isEmpty ? "Online" : "New chat"}
+          subtitle={
+            loadingConv
+              ? "Opening chat…"
+              : chat.error
+                ? "Offline"
+                : chat.authed
+                  ? "Online"
+                  : "Connecting…"
+          }
           onClose={() => setOpen(false)}
           onReset={isEmpty ? undefined : resetConversation}
         />
@@ -177,7 +234,7 @@ export function ChatbotPanel() {
                   showReactions={m.role === "agent" && idx === lastAgentIndex}
                 />
               ))}
-              {mutation.isPending ? <TypingBubble /> : null}
+              {awaitingReply ? <TypingBubble /> : null}
             </div>
           )}
         </div>
@@ -214,7 +271,7 @@ export function ChatbotPanel() {
                   size="icon"
                   variant="ghost"
                   onClick={speech.toggle}
-                  disabled={mutation.isPending}
+                  disabled={awaitingReply}
                   className={cn(
                     "h-8 w-8 rounded-full text-muted-foreground hover:text-primary",
                     speech.listening && "animate-pulse text-primary",
@@ -228,11 +285,11 @@ export function ChatbotPanel() {
                 <Button
                   type="submit"
                   size="icon"
-                  disabled={mutation.isPending}
+                  disabled={awaitingReply}
                   className="h-8 w-8 rounded-full"
                   aria-label="Send"
                 >
-                  {mutation.isPending ? (
+                  {awaitingReply ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <ArrowUp className="h-4 w-4" />
