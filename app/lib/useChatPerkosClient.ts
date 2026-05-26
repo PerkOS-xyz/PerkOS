@@ -1,0 +1,293 @@
+"use client";
+
+/**
+ * React hook for the user side of chat.perkos.xyz.
+ *
+ * Opens a WebSocket to `wss://chat.perkos.xyz/chat`, authenticates with
+ * the current Firebase user's ID token, and exposes `send(text)` plus
+ * an `onMessage` callback for incoming `chat_message` frames from the
+ * other side of the conversation (the PerkOS Assistant agent today).
+ *
+ * What we do NOT do here:
+ *   - History loading (`history` / `history_chunk` frames) — v2
+ *   - Typing indicators — v2
+ *   - Receipt requests — v2
+ * v1 is one user ↔ one agent live messaging.
+ *
+ * Reconnect policy: on any unexpected close, exponential backoff up to
+ * 30s between attempts. Stops once the consumer disables (`enabled: false`)
+ * or unmounts.
+ */
+
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { firebaseAuth } from "./firebase";
+
+const DEFAULT_CHAT_URL =
+  process.env.NEXT_PUBLIC_PERKOS_CHAT_URL ?? "wss://chat.perkos.xyz/chat";
+
+const MIN_RECONNECT_MS = 1_000;
+const MAX_RECONNECT_MS = 30_000;
+
+export type ChatPerkosMessage = {
+  /** Server-assigned id; stable for de-duping echoes of our own sends. */
+  id: string;
+  /** Frame sender, e.g. `user:0xc256…` or `agent:PerkOS-Assistant`. */
+  from: string;
+  text: string;
+  /** ISO timestamp from the server. */
+  timestamp: string;
+  /** Optional id of the message this one replies to. */
+  replyTo?: string | null;
+};
+
+export type ChatPerkosState = {
+  /** WebSocket is open and we've completed `auth_ok`. */
+  authed: boolean;
+  /** Most recent connection-level error message, if any. */
+  error: string | null;
+  /**
+   * Queue a message for the conversation. Returns the local id used in
+   * the `send` frame — useful if the caller wants to optimistically
+   * render the message and reconcile when the server echoes it back.
+   * If the WS isn't authed yet, the message is buffered and sent on
+   * the next successful auth.
+   */
+  send: (text: string) => string;
+};
+
+type Options = {
+  /** ConvId from `/api/concierge/ensure-conv`. WS opens only when set. */
+  convId: string | null;
+  /** Master switch — close the WS when the panel is closed/unmounted. */
+  enabled: boolean;
+  /** Called once per incoming `chat_message` frame. */
+  onMessage: (msg: ChatPerkosMessage) => void;
+};
+
+function newId(): string {
+  // Wide enough to avoid collisions across sessions; not crypto-strong.
+  return Math.random().toString(36).slice(2, 14);
+}
+
+export function useChatPerkosClient(opts: Options): ChatPerkosState {
+  const { convId, enabled, onMessage } = opts;
+  const [authed, setAuthed] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Live refs for the WebSocket + the latest onMessage handler so the
+  // open/close effect doesn't need to re-tear-down the socket every
+  // time the caller re-renders.
+  const wsRef = useRef<WebSocket | null>(null);
+  const onMessageRef = useRef(onMessage);
+  onMessageRef.current = onMessage;
+
+  const reconnectAttemptsRef = useRef(0);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingRef = useRef<Array<{ id: string; text: string }>>([]);
+
+  // Flush queued messages once we're authed.
+  const flushPending = useCallback(() => {
+    const ws = wsRef.current;
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    const pending = pendingRef.current;
+    pendingRef.current = [];
+    for (const msg of pending) {
+      try {
+        ws.send(
+          JSON.stringify({
+            type: "send",
+            convId,
+            text: msg.text,
+            id: msg.id,
+          }),
+        );
+      } catch {
+        // Drop on error; reconnect logic will retry the flush after next auth.
+        pendingRef.current.push(msg);
+      }
+    }
+  }, [convId]);
+
+  useEffect(() => {
+    if (!enabled || !convId) {
+      // Tear down any existing connection when disabled.
+      if (wsRef.current) {
+        wsRef.current.close(1000, "disabled");
+        wsRef.current = null;
+      }
+      setAuthed(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function open() {
+      // Fresh Firebase token per connection — they expire after 1h and
+      // chat.perkos.xyz validates them at auth time.
+      const user = firebaseAuth().currentUser;
+      if (!user) {
+        setError("Not signed in. Connect your wallet first.");
+        return;
+      }
+      let idToken: string;
+      try {
+        idToken = await user.getIdToken();
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? `Couldn't get Firebase token: ${err.message}`
+            : "Couldn't get Firebase token.",
+        );
+        return;
+      }
+      if (cancelled) return;
+
+      let ws: WebSocket;
+      try {
+        ws = new WebSocket(DEFAULT_CHAT_URL);
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? `WS construct failed: ${err.message}`
+            : "WS construct failed.",
+        );
+        scheduleReconnect();
+        return;
+      }
+      wsRef.current = ws;
+
+      ws.addEventListener("open", () => {
+        if (cancelled) return;
+        // First frame MUST be auth per the chat.perkos.xyz protocol.
+        ws.send(
+          JSON.stringify({ type: "auth", role: "user", idToken }),
+        );
+      });
+
+      ws.addEventListener("message", (evt) => {
+        if (cancelled) return;
+        let frame: { type?: string; [k: string]: unknown };
+        try {
+          frame = JSON.parse(typeof evt.data === "string" ? evt.data : "");
+        } catch {
+          return;
+        }
+        switch (frame.type) {
+          case "auth_ok":
+            setAuthed(true);
+            setError(null);
+            reconnectAttemptsRef.current = 0;
+            flushPending();
+            return;
+
+          case "auth_error":
+            setError(
+              `Chat auth failed: ${
+                (frame.message as string | undefined) ??
+                (frame.code as string | undefined) ??
+                "unknown"
+              }`,
+            );
+            // No reconnect on auth failure — likely a stale token or a
+            // wallet that the chat server doesn't allowlist. The next
+            // useEffect run (e.g. on token refresh) will retry.
+            return;
+
+          case "chat_message": {
+            // Server-broadcast of a message in the conversation, sent to
+            // every participant including the original sender.
+            const fromValue = frame.from as string | undefined;
+            const textValue = frame.text as string | undefined;
+            if (!fromValue || typeof textValue !== "string") return;
+            onMessageRef.current({
+              id: (frame.id as string | undefined) ?? newId(),
+              from: fromValue,
+              text: textValue,
+              timestamp:
+                (frame.timestamp as string | undefined) ??
+                new Date().toISOString(),
+              replyTo: (frame.replyTo as string | null | undefined) ?? null,
+            });
+            return;
+          }
+
+          case "ack":
+          case "typing":
+          case "presence":
+          case "history_chunk":
+            // Not used by v1 of this panel.
+            return;
+
+          default:
+            // Unknown frame type — log for debugging, ignore otherwise.
+            // eslint-disable-next-line no-console
+            console.debug("[chat-perkos] unknown frame", frame);
+        }
+      });
+
+      ws.addEventListener("close", (evt) => {
+        if (cancelled) return;
+        setAuthed(false);
+        if (evt.code === 1000) return; // clean shutdown
+        scheduleReconnect();
+      });
+
+      ws.addEventListener("error", () => {
+        if (cancelled) return;
+        // Browser WebSocket errors are intentionally opaque; the close
+        // event right after will carry the actionable info.
+        setError("WS error (see console)");
+      });
+    }
+
+    function scheduleReconnect() {
+      if (cancelled) return;
+      const attempt = ++reconnectAttemptsRef.current;
+      const delay = Math.min(MIN_RECONNECT_MS * 2 ** (attempt - 1), MAX_RECONNECT_MS);
+      if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = setTimeout(open, delay);
+    }
+
+    open();
+
+    return () => {
+      cancelled = true;
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = null;
+      }
+      if (wsRef.current) {
+        wsRef.current.close(1000, "unmount");
+        wsRef.current = null;
+      }
+      setAuthed(false);
+    };
+  }, [enabled, convId, flushPending]);
+
+  const send = useCallback(
+    (text: string): string => {
+      const id = newId();
+      const trimmed = text.trim();
+      if (!trimmed) return id;
+
+      const ws = wsRef.current;
+      if (ws && ws.readyState === WebSocket.OPEN && authed) {
+        ws.send(
+          JSON.stringify({
+            type: "send",
+            convId,
+            text: trimmed,
+            id,
+          }),
+        );
+      } else {
+        pendingRef.current.push({ id, text: trimmed });
+      }
+      return id;
+    },
+    [convId, authed],
+  );
+
+  return { authed, error, send };
+}
