@@ -43,6 +43,7 @@ export type PerkosMetrics = {
   curatorDecisionTotal: Counter<"reason">;
   curatorHibernationsTotal: Counter<"result">;
   agentProvisionedTotal: Counter<"runtime" | "result">;
+  ensureAwakeTotal: Counter<"state">;
 };
 
 /**
@@ -106,6 +107,14 @@ function init(): { register: Registry; metrics: PerkosMetrics } {
     labelNames: ["runtime", "result"] as const,
     registers: [register],
   });
+  const ensureAwakeTotal = new Counter({
+    name: "perkos_ensure_awake_total",
+    help:
+      "Auto-wake invocations on incoming interactions, labelled by what the helper did. " +
+      "noop = agent was already active. triggered = a wake call was issued. timeout = wake issued but the task didn't come up before the helper's wait window expired.",
+    labelNames: ["state"] as const,
+    registers: [register],
+  });
 
   const metrics: PerkosMetrics = {
     hibernateTotal,
@@ -115,6 +124,7 @@ function init(): { register: Registry; metrics: PerkosMetrics } {
     curatorDecisionTotal,
     curatorHibernationsTotal,
     agentProvisionedTotal,
+    ensureAwakeTotal,
   };
 
   globalThis.__perkosMetricsRegistry = register;

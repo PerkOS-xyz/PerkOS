@@ -46,6 +46,7 @@ import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { EditAgentDialog } from "../../../components/EditAgentDialog";
 import { HibernationPanel } from "./HibernationPanel";
 import { UpgradePanel } from "./UpgradePanel";
+import { AutoWakeBanner } from "./AutoWakeBanner";
 
 type PageProps = {
   params: Promise<{ agentId: string }>;
@@ -203,6 +204,12 @@ export default function AgentDetailPage({ params }: PageProps) {
         onRefresh={refresh}
         refreshing={agentsQuery.isFetching}
         walletAddress={address ?? ""}
+      />
+
+      <AutoWakeBanner
+        agentId={agent.id}
+        agentName={agent.name}
+        ecsDeployed={agent.status === "ready"}
       />
 
       <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
