@@ -33,6 +33,10 @@ type ChatbotState = {
   setOpen: (open: boolean) => void;
   toggle: () => void;
   appendMessage: (msg: ChatBubble) => void;
+  /** Insert a batch of older messages at the head of the list (used by
+   *  history loading; the historyHost agent returns chronologically-
+   *  ordered batches oldest-first within a chunk). */
+  prependMessages: (msgs: ChatBubble[]) => void;
   resetConversation: () => void;
 };
 
@@ -52,6 +56,17 @@ export function ChatbotProvider({ children }: { children: ReactNode }) {
     (msg: ChatBubble) => setMessages((prev) => [...prev, msg]),
     []
   );
+
+  const prependMessages = useCallback((msgs: ChatBubble[]) => {
+    if (msgs.length === 0) return;
+    setMessages((prev) => {
+      // De-dupe by id — history pulls may overlap with live messages
+      // the user already saw via chat_message broadcasts.
+      const seen = new Set(prev.map((m) => m.id));
+      const filtered = msgs.filter((m) => !seen.has(m.id));
+      return [...filtered, ...prev];
+    });
+  }, []);
 
   const resetConversation = useCallback(() => setMessages([]), []);
 
@@ -92,6 +107,7 @@ export function ChatbotProvider({ children }: { children: ReactNode }) {
         setOpen,
         toggle,
         appendMessage,
+        prependMessages,
         resetConversation,
       }}
     >

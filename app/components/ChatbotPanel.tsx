@@ -56,6 +56,7 @@ export function ChatbotPanel() {
     setOpen,
     messages,
     appendMessage,
+    prependMessages,
     resetConversation,
     convId,
     loadingConv,
@@ -107,7 +108,39 @@ export function ChatbotPanel() {
       });
       if (isFromAgent) setAwaitingReply(false);
     },
+    onHistory: (chunk) => {
+      // history_chunk arrives chronologically (oldest first within the
+      // chunk). Map identities to bubble roles + prepend to the list,
+      // skipping ids we've already rendered live. We don't request more
+      // pages today; one chunk is enough for the typical session.
+      const bubbles: ChatBubble[] = chunk.messages.map((m) => ({
+        id: m.id,
+        role: m.from.startsWith("agent:") ? "agent" : "user",
+        text: m.text,
+      }));
+      prependMessages(bubbles);
+    },
   });
+
+  // Pull conversation history once per WS auth — when the user opens the
+  // panel and we get authed, request the most recent 50 messages from
+  // the historyHost agent (PerkOS Assistant) and prepend them. Subsequent
+  // re-auths within the same session don't re-pull because the messages
+  // array already has them (and the de-dupe in prependMessages would
+  // drop them anyway).
+  const historyPulledRef = useRef(false);
+  useEffect(() => {
+    if (!chat.authed || historyPulledRef.current) return;
+    if (chat.requestHistory({ limit: 50 })) {
+      historyPulledRef.current = true;
+    }
+  }, [chat.authed, chat.requestHistory]);
+
+  // Reset the history-pulled flag when the convId or panel closes so a
+  // wallet switch (different convId) or a fresh panel open pulls again.
+  useEffect(() => {
+    if (!open || !convId) historyPulledRef.current = false;
+  }, [open, convId]);
 
   useEffect(() => {
     if (!open) return;

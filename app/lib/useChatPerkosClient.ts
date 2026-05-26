@@ -54,6 +54,22 @@ export type ChatPerkosState = {
    * the next successful auth.
    */
   send: (text: string) => string;
+  /**
+   * Ask the historyHost agent for past messages. Returns the request id.
+   * The reply arrives as a `history_chunk` frame routed back to the
+   * `onHistory` callback. Pass `before` (ISO) to paginate further back;
+   * leave undefined for the most recent page. No-op if not authed.
+   */
+  requestHistory: (opts?: { before?: string; limit?: number }) => string | null;
+};
+
+export type ChatPerkosHistoryChunk = {
+  /** Request id from the matching `requestHistory()` call. */
+  requestId: string | null;
+  /** Server-side pagination flag: another chunk follows if true. */
+  hasMore: boolean;
+  /** Messages in chronological order (oldest first within the chunk). */
+  messages: ChatPerkosMessage[];
 };
 
 type Options = {
@@ -63,6 +79,9 @@ type Options = {
   enabled: boolean;
   /** Called once per incoming `chat_message` frame. */
   onMessage: (msg: ChatPerkosMessage) => void;
+  /** Optional. Called when a `history_chunk` arrives in response to a
+   *  prior `requestHistory()` call (or any in-flight history pull). */
+  onHistory?: (chunk: ChatPerkosHistoryChunk) => void;
 };
 
 function newId(): string {
@@ -71,16 +90,18 @@ function newId(): string {
 }
 
 export function useChatPerkosClient(opts: Options): ChatPerkosState {
-  const { convId, enabled, onMessage } = opts;
+  const { convId, enabled, onMessage, onHistory } = opts;
   const [authed, setAuthed] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Live refs for the WebSocket + the latest onMessage handler so the
+  // Live refs for the WebSocket + the latest handlers so the
   // open/close effect doesn't need to re-tear-down the socket every
   // time the caller re-renders.
   const wsRef = useRef<WebSocket | null>(null);
   const onMessageRef = useRef(onMessage);
   onMessageRef.current = onMessage;
+  const onHistoryRef = useRef(onHistory);
+  onHistoryRef.current = onHistory;
 
   const reconnectAttemptsRef = useRef(0);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -212,10 +233,44 @@ export function useChatPerkosClient(opts: Options): ChatPerkosState {
             return;
           }
 
+          case "history_chunk": {
+            // Agent's reply to a previous `requestHistory()` (or to the
+            // server's auto-fanout when the user joins). Server already
+            // verified the requester is a participant, so we just forward.
+            const rawMessages = Array.isArray(frame.messages)
+              ? (frame.messages as Array<Record<string, unknown>>)
+              : [];
+            const messages: ChatPerkosMessage[] = rawMessages
+              .map((m) => ({
+                id: typeof m.id === "string" ? m.id : newId(),
+                from: typeof m.from === "string" ? m.from : "",
+                text: typeof m.text === "string" ? m.text : "",
+                timestamp:
+                  typeof m.timestamp === "string"
+                    ? m.timestamp
+                    : new Date().toISOString(),
+                replyTo:
+                  typeof m.replyTo === "string"
+                    ? m.replyTo
+                    : null,
+              }))
+              .filter((m) => m.from && m.text);
+            onHistoryRef.current?.({
+              requestId: (frame.id as string | undefined) ?? null,
+              hasMore: Boolean(frame.hasMore),
+              messages,
+            });
+            return;
+          }
+
+          case "history_pending":
+            // Server ack of our history request — agent is being asked.
+            // Nothing to do until the chunk arrives.
+            return;
+
           case "ack":
           case "typing":
           case "presence":
-          case "history_chunk":
             // Not used by v1 of this panel.
             return;
 
@@ -289,5 +344,26 @@ export function useChatPerkosClient(opts: Options): ChatPerkosState {
     [convId, authed],
   );
 
-  return { authed, error, send };
+  const requestHistory = useCallback(
+    (opts: { before?: string; limit?: number } = {}): string | null => {
+      const ws = wsRef.current;
+      if (!ws || ws.readyState !== WebSocket.OPEN || !authed || !convId) {
+        return null;
+      }
+      const id = newId();
+      ws.send(
+        JSON.stringify({
+          type: "history",
+          id,
+          convId,
+          before: opts.before ?? null,
+          limit: opts.limit ?? 50,
+        }),
+      );
+      return id;
+    },
+    [convId, authed],
+  );
+
+  return { authed, error, send, requestHistory };
 }
