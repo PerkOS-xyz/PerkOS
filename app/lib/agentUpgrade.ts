@@ -246,15 +246,33 @@ export async function upgradeAgent(
   });
   hibernated = hibernateResult.previousDesiredCount > 0;
 
-  // 2. Wait for drain — only matters if we actually had a task running.
-  //    If desiredCount was already 0, there's nothing to wait for.
-  const drainedAfterMs = hibernated
-    ? await waitForDrain({
-        serviceName,
-        timeoutMs: drainTimeoutMs,
-        pollIntervalMs: drainPollIntervalMs,
-      })
-    : 0;
+  // 2. Wait for drain — ALWAYS, even when our hibernate was a noop.
+  //
+  //    The curator (app/worker/curator.ts) can hibernate the same
+  //    agent we're about to upgrade. If it gets there first, our
+  //    hibernateAgent returns previousDesiredCount=0 (noop) and we'd
+  //    skip the drain wait — except the OLD task triggered by the
+  //    curator may still be uploading its snapshot. Starting the new
+  //    task in that window races the snapshot upload: the new task
+  //    can boot before the old snapshot finishes, or worse, restore
+  //    from a stale snapshot that hadn't yet captured the final
+  //    state. We always drain, and waitForDrain returns immediately
+  //    if runningCount is already 0 — a cheap insurance.
+  const drainedAfterMs = await waitForDrain({
+    serviceName,
+    timeoutMs: drainTimeoutMs,
+    pollIntervalMs: drainPollIntervalMs,
+  });
+
+  // Conservative snapshot-completion grace. If our hibernate was a
+  // noop (curator got there first), drain might already report 0 but
+  // the snapshot could still be uploading inside the old task's
+  // SIGTERM handler. Until we have a snapshot-completion ping, sleep
+  // a small buffer to let any in-flight tar+upload finish before the
+  // new task pulls from the same S3 prefix.
+  if (!hibernated && drainedAfterMs < 30_000) {
+    await new Promise((r) => setTimeout(r, 30_000 - drainedAfterMs));
+  }
 
   // 3. Re-provision with the new tag. This re-registers the task
   //    definition (a new revision pinned to the new image) and

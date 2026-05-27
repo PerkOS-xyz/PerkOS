@@ -148,6 +148,24 @@ export function AgentChatPanel({ agentId, agentName, ecsDeployed }: Props) {
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages.length, showTyping]);
 
+  // Timeout fallback for the "thinking…" indicator. If the agent was
+  // hibernated when the user sent, wake takes 30-60s and the chat
+  // server doesn't queue messages indefinitely; without this the
+  // bubble would spin forever. After 90s we clear the indicator and
+  // surface a recoverable error string instead.
+  useEffect(() => {
+    if (!awaitingReply) return;
+    const timer = setTimeout(() => {
+      setAwaitingReply(false);
+      setError(
+        `No response from ${agentName} after 90s. ` +
+          `If the agent was hibernated, give it another moment to wake — ` +
+          `your message should land once the runtime is online.`,
+      );
+    }, 90_000);
+    return () => clearTimeout(timer);
+  }, [awaitingReply, agentName]);
+
   async function send(text: string) {
     const trimmed = text.trim();
     if (!trimmed) return;

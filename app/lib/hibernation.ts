@@ -340,12 +340,34 @@ export async function getHibernationStatus(input: {
     .get();
   const fsHibernation = (docSnap.data()?.hibernation ?? {}) as HibernationDoc;
 
-  // Reconcile state — ECS is the source of truth for "is the task up".
+  // Reconcile state — ECS is the source of truth for "is the task up",
+  // but with one caveat: when the runtime container hits SIGTERM it
+  // takes up to ~stopTimeout (300s) AFTER `runningCount` drops to 0 to
+  // finish uploading the snapshot to S3 (see PerkOS-Containers'
+  // docker-entrypoint.sh). Promoting "hibernating" → "hibernated"
+  // immediately on `runningCount === 0` would let the UI advertise a
+  // finished hibernation while the snapshot is still in flight — a
+  // wake fired in that window restores stale state and the agent
+  // loses any conversation history written between hibernate request
+  // and snapshot completion. Until a snapshot-completion ping lands
+  // (separate PR), we conservatively wait SNAPSHOT_GRACE_MS past the
+  // `hibernatedAt` timestamp before promoting.
+  const SNAPSHOT_GRACE_MS = 90 * 1000;
   let state: HibernationState = fsHibernation.state ?? "active";
   if (desiredCount === 0 && runningCount === 0) {
-    // Tasks fully stopped. If we marked "hibernating", promote to
-    // "hibernated" so the UI reflects reality.
-    if (state === "hibernating" || state === "active") state = "hibernated";
+    if (state === "active") {
+      // Fresh-stopped: nothing was in flight, safe to call it hibernated.
+      state = "hibernated";
+    } else if (state === "hibernating") {
+      const hibMs = toMs(fsHibernation.hibernatedAt);
+      if (hibMs === null || Date.now() - hibMs > SNAPSHOT_GRACE_MS) {
+        // Either no timestamp (legacy doc, treat as old enough) or
+        // past the grace window — the snapshot should have landed by
+        // now, promote.
+        state = "hibernated";
+      }
+      // else: stay "hibernating"; UI shows the right transient state.
+    }
   } else if (runningCount >= 1 && state === "waking") {
     state = "active";
   } else if (runningCount >= 1) {
@@ -367,6 +389,18 @@ export async function getHibernationStatus(input: {
     wakeStartedAt: serializeTs(fsHibernation.wakeStartedAt),
     note: fsHibernation.note,
   };
+}
+
+function toMs(v: FieldValue | Date | string | undefined): number | null {
+  if (!v) return null;
+  if (v instanceof Date) return v.getTime();
+  if (typeof v === "string") {
+    const d = new Date(v);
+    return Number.isFinite(d.getTime()) ? d.getTime() : null;
+  }
+  const maybe = v as { toDate?: () => Date };
+  if (typeof maybe.toDate === "function") return maybe.toDate().getTime();
+  return null;
 }
 
 function serializeTs(v: FieldValue | Date | string | undefined): string | undefined {

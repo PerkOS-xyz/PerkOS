@@ -362,13 +362,26 @@ async function defaultResolveAgentId(
   walletAddress: string,
   agentName: string,
 ): Promise<string | null> {
+  // Query `limit(2)` (not 1) so we can DETECT duplicates rather than
+  // silently picking one. The launch route should enforce uniqueness
+  // per (wallet, name), but a failed-then-retried provision could
+  // leave two docs with the same name under the same wallet. If we
+  // resolved to "the first match" the curator could hibernate the
+  // wrong doc; throwing here makes the operator notice + clean up.
   const snap = await adminDb()
     .collection("wallets")
     .doc(walletAddress.toLowerCase())
     .collection("agents")
     .where("name", "==", agentName)
-    .limit(1)
+    .limit(2)
     .get();
   if (snap.empty) return null;
+  if (snap.docs.length > 1) {
+    throw new Error(
+      `Ambiguous (wallet, name): ${walletAddress}/${agentName} has ` +
+        `multiple agent docs. Refusing to hibernate either; resolve the ` +
+        `duplicate in Firestore first.`,
+    );
+  }
   return snap.docs[0]!.id;
 }

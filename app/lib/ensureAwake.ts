@@ -87,16 +87,27 @@ export async function ensureAgentAwake(
   });
   const initialState = initial.state;
 
+  // We bump the metric exactly ONCE per call, on the way out, with the
+  // most-specific label. Avoids the old shape where "waking" agents
+  // would bump both "noop" (on entry) and "timeout" (after poll) for
+  // a single invocation.
+  const exitWith = (
+    label: "noop" | "triggered" | "timeout",
+    payload: EnsureAwakeOutcome,
+  ): EnsureAwakeOutcome => {
+    metrics.ensureAwakeTotal.inc({ state: label });
+    return payload;
+  };
+
   // Fast paths: already running and not transitioning → done.
   if (initial.runningCount > 0 && initial.state === "active") {
-    metrics.ensureAwakeTotal.inc({ state: "noop" });
-    return {
+    return exitWith("noop", {
       initialState,
       finalState: "active",
       triggeredWake: false,
       online: true,
       waitedMs: 0,
-    };
+    });
   }
 
   // If we're already "waking", don't re-issue wake — just wait.
@@ -108,19 +119,16 @@ export async function ensureAgentAwake(
       agentName: input.agentName,
     });
     triggeredWake = true;
-    metrics.ensureAwakeTotal.inc({ state: "triggered" });
-  } else {
-    metrics.ensureAwakeTotal.inc({ state: "noop" });
   }
 
   if (!waitForRunning) {
-    return {
+    return exitWith(triggeredWake ? "triggered" : "noop", {
       initialState,
       finalState: "waking",
       triggeredWake,
       online: false,
       waitedMs: 0,
-    };
+    });
   }
 
   // Poll until at least one task is running, or we time out.
@@ -132,25 +140,24 @@ export async function ensureAgentAwake(
       agentName: input.agentName,
     });
     if (cur.runningCount > 0) {
-      return {
+      return exitWith(triggeredWake ? "triggered" : "noop", {
         initialState,
         finalState: "active",
         triggeredWake,
         online: true,
         waitedMs: Date.now() - start,
-      };
+      });
     }
   }
 
   // Timed out — the caller can decide whether to keep waiting or surface
   // the partial outcome to the user.
-  metrics.ensureAwakeTotal.inc({ state: "timeout" });
-  return {
+  return exitWith("timeout", {
     initialState,
     finalState: "waking",
     triggeredWake,
     online: false,
     waitedMs: Date.now() - start,
     timedOut: true,
-  };
+  });
 }

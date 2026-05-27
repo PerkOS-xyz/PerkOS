@@ -127,4 +127,27 @@ describe("ensureAgentAwake", () => {
     expect(out.online).toBe(false);
     expect(out.waitedMs).toBeGreaterThanOrEqual(40);
   });
+
+  it("waking + timeout: increments the metric exactly ONCE (not noop + timeout)", async () => {
+    // Regression test for the "exactly one counter per call" contract.
+    // Before the fix, an initial "waking" state would bump `noop` on
+    // entry and `timeout` after the poll loop expired — two counters
+    // for one invocation.
+    const getStatus = vi.fn().mockImplementation(async () =>
+      status({ state: "waking", running: 0, desired: 1 }),
+    );
+    const wake = vi.fn();
+    await ensureAgentAwake(
+      { ...INPUT, pollIntervalMs: 10, waitTimeoutMs: 50 },
+      { getStatus, wake },
+    );
+    const reg = getRegistry();
+    const text = await reg.metrics();
+    // Total observations across all label sets for the counter — sum
+    // by extracting the integer at the end of each matching line.
+    const total = (text.match(/^perkos_ensure_awake_total\{[^}]*\}\s+(\d+)/gm) ?? [])
+      .map((line) => Number(line.split(/\s+/).at(-1)))
+      .reduce((a, b) => a + b, 0);
+    expect(total).toBe(1);
+  });
 });
