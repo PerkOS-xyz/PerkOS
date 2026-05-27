@@ -891,6 +891,32 @@ export async function ensureAssistantConv(): Promise<AssistantConv> {
   return payload as unknown as AssistantConv;
 }
 
+export type AgentConv = {
+  convId: string;
+  historyHost: string;
+  agentName: string;
+};
+
+/**
+ * Per-agent equivalent of `ensureAssistantConv`. Resolves the
+ * canonical conversation between the caller wallet and one of its
+ * own agents. Convention: `agent-${wallet}-${agentName}` server-side.
+ */
+export async function ensureAgentConv(input: {
+  agentId: string;
+}): Promise<AgentConv> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/agents/${encodeURIComponent(input.agentId)}/ensure-conv`,
+    { method: "POST" },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) {
+    throw new Error(apiError(payload, "Couldn't open agent chat."));
+  }
+  return payload as unknown as AgentConv;
+}
+
 export type AssistantChatHistory = {
   role: "user" | "assistant";
   content: string;
