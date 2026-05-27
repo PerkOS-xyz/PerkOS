@@ -298,6 +298,20 @@ export async function provisionEcsAgent(
   // this PR, no behavior change for unconfigured deploys.
   const attachBridge = A2A_BRIDGE_ENABLED && Boolean(input.relayApiKey);
 
+  // Safety: in non-dev environments, refuse to provision with the
+  // sidecar pinned to ":latest". CI republishes the bridge image
+  // tag-in-place, so every new ECS task placement could silently
+  // boot a different binary — operationally dangerous. Force the
+  // operator to pin a specific version (or digest) before flipping
+  // PERKOS_A2A_BRIDGE_ENABLED in prod.
+  if (attachBridge && A2A_BRIDGE_IMAGE_TAG === "latest" && ENV !== "dev") {
+    throw new Error(
+      `PERKOS_A2A_BRIDGE_IMAGE_TAG must be pinned (not "latest") when ` +
+        `PERKOS_A2A_BRIDGE_ENABLED=true in env=${ENV}. ` +
+        `Set it to a specific version, e.g. "0.10.0".`,
+    );
+  }
+
   // Stash the relayApiKey in Secrets Manager so the bridge container
   // reads it via the task def's `secrets` field instead of a plaintext
   // env literal that would be visible to anyone with ecs:Describe* on

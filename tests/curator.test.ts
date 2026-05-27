@@ -378,4 +378,29 @@ describe("runCuratorTick (live)", () => {
     });
     expect(result.hibernated[0].error).toContain("agentId not found");
   });
+
+  it("surfaces a resolveAgentId throw (e.g. ambiguous wallet/name) as a per-agent error, not a bulk abort", async () => {
+    const resolveAgentIdMock = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("Ambiguous (wallet, name): 0xabc/Bot has multiple agent docs."));
+    const result = await runCuratorTick({
+      config: { ...DEFAULT_CONFIG, dryRun: false, idleMinutes: 60, minAgeMinutes: 0 },
+      now: NOW,
+      hibernate: vi.fn(),
+      resolveAgentId: resolveAgentIdMock,
+      loadAgents: async () => [
+        {
+          name: "Bot",
+          walletAddress: "0xabc",
+          updatedAt: minsAgo(120),
+          createdAt: minsAgo(9999),
+          ecsServiceArn: "arn:1",
+          hibernationState: "active",
+        },
+      ],
+    });
+    // Resolution threw → captured per-agent, tick still completes.
+    expect(result.hibernated).toHaveLength(1);
+    expect(result.hibernated[0].error).toMatch(/resolveAgentId failed.*Ambiguous/);
+  });
 });
