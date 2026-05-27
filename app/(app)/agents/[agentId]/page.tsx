@@ -47,6 +47,7 @@ import { EditAgentDialog } from "../../../components/EditAgentDialog";
 import { HibernationPanel } from "./HibernationPanel";
 import { UpgradePanel } from "./UpgradePanel";
 import { AutoWakeBanner } from "./AutoWakeBanner";
+import { AgentChatPanel } from "./AgentChatPanel";
 
 type PageProps = {
   params: Promise<{ agentId: string }>;
@@ -207,6 +208,12 @@ export default function AgentDetailPage({ params }: PageProps) {
       />
 
       <AutoWakeBanner
+        agentId={agent.id}
+        agentName={agent.name}
+        ecsDeployed={agent.status === "ready"}
+      />
+
+      <AgentChatPanel
         agentId={agent.id}
         agentName={agent.name}
         ecsDeployed={agent.status === "ready"}
