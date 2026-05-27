@@ -126,6 +126,33 @@ export async function processJob(job: ProvisionJob): Promise<void> {
       "info",
       `Provisioning ECS service (image tag: ${input.imageTag})…`,
     );
+
+    // Fetch the agent's relayApiKey from the global registry — the
+    // a2a-bridge sidecar (added in ecsProvision when
+    // PERKOS_A2A_BRIDGE_ENABLED is on) needs it to authenticate to
+    // chat.perkos.xyz + transport.perkos.xyz. Missing key is non-fatal:
+    // provisioning continues without the sidecar, the agent runs
+    // unreachable but functional.
+    let relayApiKey: string | undefined;
+    try {
+      const globalAgentSnap = await db
+        .collection("agents")
+        .doc(agentName)
+        .get();
+      const data = globalAgentSnap.data() as
+        | { relayApiKey?: string }
+        | undefined;
+      relayApiKey = data?.relayApiKey;
+    } catch (err) {
+      await appendLog(
+        jobId,
+        "warn",
+        `relayApiKey lookup failed (bridge sidecar disabled for this provision): ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+    }
+
     const ecsResult = await provisionEcsAgent({
       walletAddress,
       agentName,
@@ -135,6 +162,7 @@ export async function processJob(job: ProvisionJob): Promise<void> {
       byokApiKey,
       perkosLlmApiKey,
       agentId,
+      relayApiKey,
     });
     await appendLog(jobId, "ok", `ECS task definition: ${ecsResult.taskDefinitionArn}`);
     await appendLog(jobId, "ok", `ECS service: ${ecsResult.serviceArn}`);
