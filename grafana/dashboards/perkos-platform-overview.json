@@ -1,0 +1,159 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "Datasource that scrapes the perkos-miniapp /metrics endpoint",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "title": "PerkOS — Platform Overview",
+  "uid": "perkos-platform-overview",
+  "tags": ["perkos", "platform"],
+  "schemaVersion": 38,
+  "version": 1,
+  "timezone": "",
+  "refresh": "30s",
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "label": "Datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": { "selected": false, "text": "Prometheus", "value": "${DS_PROMETHEUS}" },
+        "hide": 0
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Hibernate / wake / upgrade — last 24h",
+      "description": "Total agent-lifecycle ops over the last day, by outcome. A spike in 'error' here is the first signal something is wrong with the ECS plane.",
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "expr": "sum by (result) (increase(perkos_hibernate_total[24h]))",
+          "legendFormat": "hibernate / {{result}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum by (result) (increase(perkos_wake_total[24h]))",
+          "legendFormat": "wake / {{result}}",
+          "refId": "B"
+        },
+        {
+          "expr": "sum by (result) (increase(perkos_upgrade_total[24h]))",
+          "legendFormat": "upgrade / {{result}}",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "orientation": "horizontal",
+        "textMode": "value_and_name",
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Hibernate vs wake rate (per minute)",
+      "description": "Per-minute rate of hibernate vs wake. A healthy steady state usually shows roughly matched rates; sustained wake >> hibernate suggests the curator is falling behind.",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "expr": "sum(rate(perkos_hibernate_total{result=\"ok\"}[5m])) * 60",
+          "legendFormat": "hibernate/min",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(perkos_wake_total{result=\"ok\"}[5m])) * 60",
+          "legendFormat": "wake/min",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "custom": { "drawStyle": "line", "lineInterpolation": "smooth", "fillOpacity": 10 }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Auto-wake outcomes",
+      "description": "What the ensure-awake helper did per incoming interaction. 'noop' means the agent was already up — high noop is a healthy steady state. Rising 'timeout' is the alarm: wake was issued but the agent didn't come up in time.",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "expr": "sum by (state) (rate(perkos_ensure_awake_total[5m])) * 60",
+          "legendFormat": "{{state}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "custom": { "drawStyle": "bars", "fillOpacity": 60, "stacking": { "mode": "normal" } }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Agent provisioning rate by runtime",
+      "description": "How many agents are being provisioned per minute, split by runtime image. Useful for spotting when a new image starts to dominate.",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "expr": "sum by (runtime, result) (rate(perkos_agent_provisioned_total[5m])) * 60",
+          "legendFormat": "{{runtime}} / {{result}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops",
+          "custom": { "drawStyle": "line", "lineInterpolation": "smooth", "fillOpacity": 5 }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Process — memory + event loop lag",
+      "description": "Default Node.js process metrics from prom-client. Sustained event-loop lag is the first signal Next.js is swamped or stuck on sync work.",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "expr": "perkos_process_resident_memory_bytes",
+          "legendFormat": "RSS (bytes)",
+          "refId": "A"
+        },
+        {
+          "expr": "perkos_nodejs_eventloop_lag_seconds",
+          "legendFormat": "event loop lag (s)",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "lineInterpolation": "smooth", "fillOpacity": 0 }
+        }
+      }
+    }
+  ]
+}
