@@ -79,6 +79,26 @@ const HIBERNATION_BUCKET = `perkos-agent-snapshots-${ENV}`;
 // PerkOS-Containers' docker-entrypoint.sh relies on this budget.
 const HIBERNATION_STOP_TIMEOUT_SECONDS = 300;
 
+// --- perkos-a2a bridge sidecar config ---------------------------------
+// The bridge image lives in its own ECR repo (perkos-a2a-bridge) built
+// from PerkOS-Containers/images/perkos-a2a-bridge/Dockerfile. The image
+// has to be pushed to ECR for the sidecar wiring below to actually
+// launch — until the push exists, every provision that asks for the
+// bridge will fail at ECS task-start with "image pull failed". We
+// guard against that by only attaching the sidecar when the runtime
+// config provides relayApiKey AND the PERKOS_A2A_BRIDGE_ENABLED env
+// flag is on.
+const A2A_BRIDGE_ENABLED =
+  (process.env.PERKOS_A2A_BRIDGE_ENABLED ?? "false").toLowerCase() === "true";
+const A2A_BRIDGE_IMAGE_TAG = process.env.PERKOS_A2A_BRIDGE_IMAGE_TAG ?? "latest";
+const A2A_BRIDGE_IMAGE_URI = `${ECR_REGISTRY}/perkos-a2a-bridge:${A2A_BRIDGE_IMAGE_TAG}`;
+const A2A_RELAY_URL =
+  process.env.PERKOS_TRANSPORT_URL ?? "wss://transport.perkos.xyz/a2a";
+const A2A_CHAT_URL =
+  process.env.PERKOS_CHAT_URL ?? "wss://chat.perkos.xyz/chat";
+const A2A_TOOLS_API_URL = process.env.PERKOS_TOOLS_API_URL?.trim() ?? "";
+const A2A_TOOLS_JWT_SECRET = process.env.A2A_TOOLS_JWT_SECRET?.trim() ?? "";
+
 // Fargate has fixed cpu/memory pairs. 512/1024 = 0.5 vCPU, 1 GB — fits the
 // agent + perkos-a2a sidecar comfortably for alpha.
 const TASK_CPU = "512";
@@ -121,6 +141,14 @@ export type ProvisionInput = {
   perkosLlmApiKey?: string;
   /** Agent ID issued by /api/agents/launch (firestore agents/{name} doc). */
   agentId: string;
+  /** Per-agent relayApiKey minted at launch time (lives at
+   *  /agents/{name}.relayApiKey in Firestore). When provided + the
+   *  PERKOS_A2A_BRIDGE_ENABLED env is true, the task definition gets a
+   *  perkos-a2a-bridge sidecar that connects this agent to
+   *  chat.perkos.xyz + transport.perkos.xyz. Without this, the agent
+   *  is reachable only through whatever direct transport its runtime
+   *  image ships with. */
+  relayApiKey?: string;
 };
 
 export type ProvisionResult = {
@@ -179,7 +207,7 @@ function serviceNameFor(walletAddress: string, agentName: string): string {
 async function ensureAgentSecret(
   walletAddress: string,
   agentName: string,
-  kind: "llm-key" | "perkos-llm-key",
+  kind: "llm-key" | "perkos-llm-key" | "relay-api-key",
   apiKey: string,
   description: string,
 ): Promise<string> {
@@ -261,12 +289,35 @@ export async function provisionEcsAgent(
     );
   }
 
-  // Task definition: runtime container + perkos-a2a sidecar.
-  // The sidecar pins the npm @perkos/perkos-a2a@0.9.0 image (separate ECR
-  // repo — to be set up in a follow-up). For now we ship the runtime
-  // alone; A2A bridging stays a manual wire-up until the bridge image
-  // gets published.
-  const containerDefinitions = [
+  // The bridge sidecar is only added when:
+  //   1. The runtime config gives us a relayApiKey (so the bridge can
+  //      authenticate to chat.perkos.xyz + transport.perkos.xyz), AND
+  //   2. PERKOS_A2A_BRIDGE_ENABLED env is "true" (so the operator has
+  //      opted in once the perkos-a2a-bridge ECR image is published).
+  // Without both, we ship the runtime alone — same shape as before
+  // this PR, no behavior change for unconfigured deploys.
+  const attachBridge = A2A_BRIDGE_ENABLED && Boolean(input.relayApiKey);
+
+  // Stash the relayApiKey in Secrets Manager so the bridge container
+  // reads it via the task def's `secrets` field instead of a plaintext
+  // env literal that would be visible to anyone with ecs:Describe* on
+  // the task definition.
+  let relayApiKeySecretArn: string | null = null;
+  if (attachBridge && input.relayApiKey) {
+    relayApiKeySecretArn = await ensureAgentSecret(
+      wallet,
+      input.agentName,
+      "relay-api-key",
+      input.relayApiKey,
+      `relayApiKey for ${wallet} / ${input.agentName} (a2a bridge auth)`,
+    );
+  }
+
+  // Task definition: runtime container + (optionally) perkos-a2a bridge
+  // sidecar. The two containers share the task's network namespace, so
+  // the bridge reaches the runtime over 127.0.0.1 — no service mesh
+  // needed, no security group exposure.
+  const containerDefinitions: Array<Record<string, unknown>> = [
     {
       name: "runtime",
       image: imageUri,
@@ -292,13 +343,86 @@ export async function provisionEcsAgent(
     },
   ];
 
+  if (attachBridge && relayApiKeySecretArn) {
+    // Bridge env — keep this in sync with PerkOS-A2A's bridge-agent.ts
+    // loadConfig(). The bridge reaches the runtime over localhost
+    // because Fargate puts both containers in the same network
+    // namespace; HERMES_API_URL therefore points at 127.0.0.1.
+    const bridgeEnv: { name: string; value: string }[] = [
+      { name: "A2A_AGENT_NAME", value: input.agentName },
+      { name: "A2A_RUNTIME", value: input.runtime === "Hermes" ? "hermes-api" : "openclaw" },
+      { name: "HERMES_API_URL", value: "http://127.0.0.1:8642" },
+      { name: "A2A_RELAY_ENABLED", value: "true" },
+      { name: "A2A_RELAY_URL", value: A2A_RELAY_URL },
+      { name: "A2A_CHAT_ENABLED", value: "true" },
+      { name: "A2A_CHAT_URL", value: A2A_CHAT_URL },
+    ];
+    // Tools-API wiring — only when both knobs are configured. Without
+    // them the bridge skips the tools-token listener and the runtime
+    // simply can't call the platform-tools-api. Per the PerkOS-A2A
+    // 0.10.0 contract, partial config is a hard refuse.
+    if (A2A_TOOLS_API_URL && A2A_TOOLS_JWT_SECRET) {
+      bridgeEnv.push(
+        { name: "A2A_TOOLS_API_URL", value: A2A_TOOLS_API_URL },
+        // A2A_TOOLS_JWT_SECRET is passed as a secret below — listing
+        // it here as a literal would shadow that. (Intentionally
+        // omitted from bridgeEnv.)
+      );
+    }
+
+    const bridgeSecrets: Array<{ name: string; valueFrom: string }> = [
+      { name: "A2A_RELAY_API_KEY", valueFrom: relayApiKeySecretArn },
+      // Same key under the chat-specific env var name the bridge reads
+      // when A2A_CHAT_ENABLED=true.
+      { name: "A2A_CHAT_API_KEY", valueFrom: relayApiKeySecretArn },
+    ];
+    if (A2A_TOOLS_API_URL && A2A_TOOLS_JWT_SECRET) {
+      // The tools-JWT secret is operator config, NOT per-agent state —
+      // we stash it under a shared Secrets Manager name so all agents
+      // in this environment reference the same secret. Caller is
+      // responsible for ensuring the secret exists; we don't create
+      // it here (that's an ops one-time setup, not a per-provision
+      // side effect).
+      const sharedToolsSecretArn = `arn:aws:secretsmanager:${REGION}:${ACCOUNT}:secret:perkos-platform/${ENV}/tools-jwt-secret`;
+      bridgeSecrets.push({
+        name: "A2A_TOOLS_JWT_SECRET",
+        valueFrom: sharedToolsSecretArn,
+      });
+    }
+
+    containerDefinitions.push({
+      name: "a2a-bridge",
+      image: A2A_BRIDGE_IMAGE_URI,
+      essential: false, // bridge dying shouldn't kill the agent
+      cpu: 0,
+      environment: bridgeEnv,
+      secrets: bridgeSecrets,
+      logConfiguration: {
+        logDriver: LogDriver.AWSLOGS,
+        options: {
+          "awslogs-group": LOG_GROUP,
+          "awslogs-region": REGION,
+          "awslogs-stream-prefix": `bridge-${wallet.slice(2, 10)}-${input.agentName}`,
+          "awslogs-create-group": "true",
+        },
+      },
+    });
+  }
+
+  // CPU/memory: when the bridge is attached we double the budget so
+  // both containers have headroom. Single-container provisions stay
+  // on the lean shape they had pre-bridge, so existing deploys don't
+  // see a cost bump.
+  const taskCpu = attachBridge ? "1024" : TASK_CPU;
+  const taskMemory = attachBridge ? "2048" : TASK_MEMORY;
+
   const taskDef = await ecs().send(
     new RegisterTaskDefinitionCommand({
       family,
       networkMode: "awsvpc",
       requiresCompatibilities: ["FARGATE"],
-      cpu: TASK_CPU,
-      memory: TASK_MEMORY,
+      cpu: taskCpu,
+      memory: taskMemory,
       executionRoleArn: EXECUTION_ROLE_ARN,
       taskRoleArn: TASK_ROLE_ARN,
       containerDefinitions,

@@ -261,6 +261,24 @@ export async function upgradeAgent(
   //    UpdateService(desiredCount=1, forceNewDeployment=true). The new
   //    task's entrypoint downloads the snapshot we just took and
   //    restores it before Hermes starts.
+  //
+  //    Re-fetch the relayApiKey from /agents/{name} so the bridge
+  //    sidecar (added in ecsProvision when PERKOS_A2A_BRIDGE_ENABLED
+  //    is on) survives the upgrade. Without this, an upgrade would
+  //    drop the sidecar from the task def and the agent would lose
+  //    chat reachability on the new image.
+  let relayApiKey: string | undefined;
+  try {
+    const snap = await adminDb()
+      .collection("agents")
+      .doc(input.agentName)
+      .get();
+    const data = snap.data() as { relayApiKey?: string } | undefined;
+    relayApiKey = data?.relayApiKey;
+  } catch {
+    /* swallow — upgrade proceeds without bridge if lookup fails */
+  }
+
   const provision = await provisionEcsAgent({
     walletAddress: input.walletAddress,
     agentName: input.agentName,
@@ -270,6 +288,7 @@ export async function upgradeAgent(
     byokApiKey: input.byokApiKey,
     perkosLlmApiKey: input.perkosLlmApiKey,
     agentId: input.agentId,
+    relayApiKey,
   });
 
   // Record the upgrade in Firestore so the UI can show "Last upgraded".
