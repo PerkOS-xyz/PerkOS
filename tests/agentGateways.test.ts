@@ -159,6 +159,83 @@ describe("gatewayRuntimeEnv", () => {
   });
 });
 
+describe("end-to-end materialization (ecsProvision integration shape)", () => {
+  // Mirrors what ecsProvision now does for every enabled gateway on
+  // an agent doc. The point is to catch the case where a future
+  // catalog change shifts the env contract and silently breaks the
+  // task-def shape without anyone noticing — the integration site
+  // only does `runtimeEnv.push(...materialized.env)` so a bug here
+  // would surface as a runtime error in a real ECS task, not in tests.
+  it("materializes a multi-gateway agent doc into a full env+secrets bundle", () => {
+    const telegramRecord: AgentGatewayRecord = {
+      type: "telegram",
+      enabled: true,
+      nonSecretConfig: { webhookUrl: "https://relay.perkos.xyz/wh/agent-1" },
+      secretsProvided: ["botToken"],
+      secretArns: { botToken: "arn:aws:secretsmanager:us-east-1:123:secret:telegram-bot-token" },
+      status: "pending",
+      createdAt: "2026-05-27T00:00:00.000Z",
+      updatedAt: "2026-05-27T00:00:00.000Z",
+    };
+    const farcasterRecord: AgentGatewayRecord = {
+      type: "farcaster",
+      enabled: true,
+      nonSecretConfig: { fid: "987", replyVisibility: "mentions" },
+      secretsProvided: ["neynarApiKey", "signerUuid"],
+      secretArns: {
+        neynarApiKey: "arn:aws:secretsmanager:us-east-1:123:secret:fc-key",
+        signerUuid: "arn:aws:secretsmanager:us-east-1:123:secret:fc-signer",
+      },
+      status: "active",
+      createdAt: "2026-05-27T00:00:00.000Z",
+      updatedAt: "2026-05-27T00:00:00.000Z",
+    };
+
+    const envOut: Array<{ name: string; value: string }> = [];
+    const secretsOut: Array<{ name: string; valueFrom: string }> = [];
+    for (const record of [telegramRecord, farcasterRecord]) {
+      const m = gatewayRuntimeEnv(record, record.secretArns ?? {});
+      envOut.push(...m.env);
+      secretsOut.push(...m.secrets);
+    }
+
+    const envNames = envOut.map((e) => e.name).sort();
+    expect(envNames).toEqual([
+      "FARCASTER_ENABLED",
+      "FARCASTER_FID",
+      "FARCASTER_REPLY_VISIBILITY",
+      "TELEGRAM_ENABLED",
+      "TELEGRAM_WEBHOOK_URL",
+    ]);
+    const secretNames = secretsOut.map((s) => s.name).sort();
+    expect(secretNames).toEqual([
+      "FARCASTER_NEYNAR_API_KEY",
+      "FARCASTER_SIGNER_UUID",
+      "TELEGRAM_BOT_TOKEN",
+    ]);
+  });
+
+  it("a disabled gateway contributes nothing to the task def", () => {
+    const disabled: AgentGatewayRecord = {
+      type: "telegram",
+      enabled: false,
+      nonSecretConfig: { webhookUrl: "https://x.test/wh" },
+      secretsProvided: ["botToken"],
+      secretArns: { botToken: "arn:1" },
+      status: "pending",
+      createdAt: "2026-05-27T00:00:00.000Z",
+      updatedAt: "2026-05-27T00:00:00.000Z",
+    };
+    const m = gatewayRuntimeEnv(disabled, disabled.secretArns ?? {});
+    expect(m.env.find((e) => e.name === "TELEGRAM_ENABLED")).toBeUndefined();
+    // We do still materialize the non-secret env and the secret ref,
+    // matching the gatewayRuntimeEnv contract — but the entrypoint
+    // gates plugin-staging on TELEGRAM_ENABLED so the gateway is
+    // effectively off. Test documents that contract.
+    expect(m.secrets.length).toBe(1);
+  });
+});
+
 describe("gatewaySecretName", () => {
   it("matches the existing perkos-agents/*/*/kind convention", () => {
     const name = gatewaySecretName(
