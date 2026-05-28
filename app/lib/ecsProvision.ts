@@ -424,7 +424,21 @@ export async function provisionEcsAgent(
       { name: "A2A_RELAY_URL", value: A2A_RELAY_URL },
       { name: "A2A_CHAT_ENABLED", value: "true" },
       { name: "A2A_CHAT_URL", value: A2A_CHAT_URL },
+      // Per-agent doc id so the bridge can form
+      // /api/agents/<agentId>/gateways/<type>/status when it reports
+      // gateway health (PerkOS-A2A@0.11.0). Without this var the
+      // bridge logs a clean no-op and the admin gateways panel
+      // continues to show "pending" for everything.
+      { name: "PERKOS_AGENT_ID", value: input.agentId },
     ];
+    // Mirror the per-gateway *_ENABLED flags from the runtime container
+    // into the bridge env so the bridge knows what to report status for.
+    // Same flags the perkos-hermes entrypoint reads to decide what to
+    // stage; passing them through here is a small env duplication, not
+    // a second secret round-trip (these are non-secret booleans).
+    for (const e of gatewayEnv) {
+      if (/_ENABLED$/.test(e.name)) bridgeEnv.push({ name: e.name, value: e.value });
+    }
     // Tools-API wiring — only when both knobs are configured. Without
     // them the bridge skips the tools-token listener and the runtime
     // simply can't call the platform-tools-api. Per the PerkOS-A2A
