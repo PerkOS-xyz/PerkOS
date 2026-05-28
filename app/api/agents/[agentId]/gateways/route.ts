@@ -67,16 +67,20 @@ async function requireAuth(request: Request): Promise<string> {
  * kinds. Sharing one implementation later (post-MVP) is fine; the
  * runtime contract is what matters.
  */
-async function stashSecret(name: string, value: string, description: string): Promise<void> {
+async function stashSecret(name: string, value: string, description: string): Promise<string> {
   try {
-    await sm().send(new DescribeSecretCommand({ SecretId: name }));
+    const existing = await sm().send(new DescribeSecretCommand({ SecretId: name }));
     await sm().send(new PutSecretValueCommand({ SecretId: name, SecretString: value }));
+    if (!existing.ARN) throw new Error("Secrets Manager returned no ARN.");
+    return existing.ARN;
   } catch (err) {
     const code = (err as { name?: string }).name;
     if (code !== "ResourceNotFoundException") throw err;
-    await sm().send(
+    const created = await sm().send(
       new CreateSecretCommand({ Name: name, SecretString: value, Description: description }),
     );
+    if (!created.ARN) throw new Error("Secrets Manager create returned no ARN.");
+    return created.ARN;
   }
 }
 
@@ -93,6 +97,11 @@ type AgentDoc = {
  * still gets stripped before it leaves the server.
  */
 function publicGateway(record: AgentGatewayRecord): AgentGatewayRecord {
+  // Note: secretArns is internal infra plumbing; the GET surface
+  // doesn't need it. The wizard only needs to know WHICH secrets are
+  // stored (via secretsProvided). The ARNs stay server-side so
+  // misuse (e.g. crafting fake bearer headers with ARN values) has
+  // zero attack surface.
   return {
     type: record.type,
     enabled: record.enabled,
@@ -203,9 +212,10 @@ export async function POST(
   // and the operator can simply retry — no orphaned doc state
   // referencing a non-existent secret.
   const supplied = Object.entries(clean.secrets ?? {});
+  const freshArns: Record<string, string> = {};
   for (const [formKey, value] of supplied) {
     const name = gatewaySecretName(caller, doc.name, clean.type as GatewayType, formKey);
-    await stashSecret(
+    freshArns[formKey] = await stashSecret(
       name,
       value,
       `Gateway secret for ${doc.name}/${clean.type}/${formKey}`,
@@ -213,18 +223,22 @@ export async function POST(
   }
 
   // Merge with whatever was previously persisted: enabling without
-  // supplying secrets keeps the old `secretsProvided` set; disabling
-  // wipes nothing (operator can re-enable without re-entering).
+  // supplying secrets keeps the old `secretsProvided` set + ARNs;
+  // disabling wipes nothing (operator can re-enable without
+  // re-entering). New secrets supplied this turn overwrite the
+  // matching ARN entries.
   const existing = doc.gateways?.[clean.type as GatewayType];
   const now = new Date().toISOString();
   const mergedProvided = new Set<string>(existing?.secretsProvided ?? []);
   for (const [formKey] of supplied) mergedProvided.add(formKey);
+  const mergedArns: Record<string, string> = { ...(existing?.secretArns ?? {}), ...freshArns };
 
   const record: AgentGatewayRecord = {
     type: clean.type,
     enabled: clean.enabled,
     nonSecretConfig: clean.nonSecretConfig ?? {},
     secretsProvided: Array.from(mergedProvided),
+    secretArns: mergedArns,
     status: "pending",
     statusMessage: clean.enabled
       ? "Saved — will take effect on next agent restart/wake."

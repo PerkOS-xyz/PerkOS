@@ -126,6 +126,18 @@ export type AgentGatewayRecord = {
   enabled: boolean;
   nonSecretConfig: Record<string, string>;
   secretsProvided: string[];
+  /**
+   * Map of `formKey -> AWS Secrets Manager ARN`. Populated by the
+   * gateways POST route when it stashes a secret. ecsProvision reads
+   * this to wire each secret into the task definition without an
+   * extra DescribeSecret round-trip per provision.
+   *
+   * Why we trust the ARN on the doc: the ARN is not sensitive (only
+   * the SM `GetSecretValue` IAM permission grants access to the
+   * value); persisting it is a cache, not a credential. It's also
+   * stable for the lifetime of the secret — SM ARNs don't rotate.
+   */
+  secretArns?: Record<string, string>;
   status: AgentGatewayStatus;
   statusMessage?: string;
   createdAt: string;

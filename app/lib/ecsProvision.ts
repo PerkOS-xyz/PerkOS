@@ -51,6 +51,7 @@ import {
   DescribeSecretCommand,
 } from "@aws-sdk/client-secrets-manager";
 
+import { type AgentGateways, gatewayRuntimeEnv } from "./agentGateways";
 import { adminDb } from "./firebaseAdmin";
 
 const REGION = process.env.AWS_REGION ?? "us-east-1";
@@ -163,6 +164,29 @@ export type ProvisionResult = {
  * matches — the check exists to make sure a hand-crafted request can't
  * pin some random/old tag we haven't approved.
  */
+/**
+ * Pull `gateways` from the per-wallet agent doc. Returns an empty
+ * record when the agent has none configured (the common case at
+ * MVP). Kept out of the main flow so the read path is testable.
+ *
+ * We look up the doc by id under `/wallets/<wallet>/agents/<id>` —
+ * same path the gateways POST route writes to.
+ */
+async function readAgentGateways(
+  walletAddress: string,
+  agentId: string,
+): Promise<AgentGateways> {
+  const snap = await adminDb()
+    .collection("wallets")
+    .doc(walletAddress.toLowerCase())
+    .collection("agents")
+    .doc(agentId)
+    .get();
+  if (!snap.exists) return {};
+  const data = snap.data() as { gateways?: AgentGateways } | undefined;
+  return data?.gateways ?? {};
+}
+
 async function assertImageTagIsActive(
   runtime: "OpenClaw" | "Hermes",
   imageTag: string
@@ -327,6 +351,33 @@ export async function provisionEcsAgent(
     );
   }
 
+  // Messaging gateways — read whatever the wallet has configured for
+  // this agent via /api/agents/[agentId]/gateways and materialize the
+  // env vars + secret refs the runtime needs. We read at provision
+  // time (rather than caching) so a gateway toggled between launches
+  // takes effect on the next provision/wake without any other plumbing.
+  //
+  // The gateway secrets are already in Secrets Manager (created by
+  // the gateways route); we only need to wire their ARNs into the
+  // task def. The IAM execution role's `perkos-agents/*` policy
+  // covers these without changes.
+  const gatewayEnv: Array<{ name: string; value: string }> = [];
+  const gatewaySecrets: Array<{ name: string; valueFrom: string }> = [];
+  try {
+    const gatewaysOnDoc = await readAgentGateways(wallet, input.agentId);
+    for (const record of Object.values(gatewaysOnDoc)) {
+      if (!record || !record.enabled) continue;
+      const materialized = gatewayRuntimeEnv(record, record.secretArns ?? {});
+      gatewayEnv.push(...materialized.env);
+      gatewaySecrets.push(...materialized.secrets);
+    }
+  } catch (err) {
+    // Reading gateways must never block provisioning of the agent
+    // itself. The agent comes up without messaging gateways; the
+    // operator can re-trigger via the gateways endpoint + upgrade.
+    console.warn("ecsProvision: skipping gateway materialization", err);
+  }
+
   // Task definition: runtime container + (optionally) perkos-a2a bridge
   // sidecar. The two containers share the task's network namespace, so
   // the bridge reaches the runtime over 127.0.0.1 — no service mesh
@@ -337,10 +388,13 @@ export async function provisionEcsAgent(
       image: imageUri,
       essential: true,
       cpu: 0,
-      environment: runtimeEnv,
-      secrets: secretArn
-        ? [{ name: "PERKOS_LLM_API_KEY", valueFrom: secretArn }]
-        : [],
+      environment: [...runtimeEnv, ...gatewayEnv],
+      secrets: [
+        ...(secretArn
+          ? [{ name: "PERKOS_LLM_API_KEY", valueFrom: secretArn }]
+          : []),
+        ...gatewaySecrets,
+      ],
       // Give the entrypoint enough time to drain Hermes + tar +
       // upload to S3 when SIGTERM arrives (default would be 30s and
       // kill the snapshot mid-upload).
