@@ -31,7 +31,7 @@
  * Firestore or AWS.
  */
 
-export type GatewayType = "telegram" | "farcaster";
+export type GatewayType = "telegram" | "farcaster" | "slack";
 
 /**
  * What the runtime needs to bring a gateway up.
@@ -108,6 +108,33 @@ export const GATEWAY_CATALOG: Record<GatewayType, GatewaySpec> = {
       fid: { envVar: "FARCASTER_FID", required: true },
       replyVisibility: { envVar: "FARCASTER_REPLY_VISIBILITY", required: false },
       parentChannel: { envVar: "FARCASTER_PARENT_CHANNEL", required: false },
+    },
+  },
+  slack: {
+    type: "slack",
+    label: "Slack",
+    enabledEnvVar: "SLACK_ENABLED",
+    secrets: {
+      // Hermes upstream's bundled Slack adapter takes a "bot token"
+      // (xoxb-*) for outbound + a "signing secret" for verifying
+      // inbound webhook payloads. We keep the form keys minimal and
+      // let the adapter handle the rest — no Slack App ID or Client
+      // ID needed because the bot token is already scoped.
+      botToken: {
+        secretKind: "gateway-slack-bot-token",
+        envVar: "SLACK_BOT_TOKEN",
+      },
+      signingSecret: {
+        secretKind: "gateway-slack-signing-secret",
+        envVar: "SLACK_SIGNING_SECRET",
+      },
+    },
+    nonSecretConfig: {
+      // Optional channel filter — when set, the agent only responds
+      // in this channel id (e.g. "C0123ABC"). Leave blank for the
+      // bot to respond to mentions + DMs in any channel it's
+      // invited to (the default Slack behavior).
+      channelId: { envVar: "SLACK_CHANNEL_ID", required: false },
     },
   },
 };

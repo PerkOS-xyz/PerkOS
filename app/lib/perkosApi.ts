@@ -1053,7 +1053,7 @@ export async function assistantChatStream(input: {
 export async function saveAgentGateway(
   agentId: string,
   input: {
-    type: "telegram" | "farcaster";
+    type: "telegram" | "farcaster" | "slack";
     enabled: boolean;
     nonSecretConfig?: Record<string, string>;
     secrets?: Record<string, string>;

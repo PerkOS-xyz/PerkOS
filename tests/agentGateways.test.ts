@@ -16,11 +16,14 @@ import {
 } from "../app/lib/agentGateways";
 
 describe("GATEWAY_CATALOG", () => {
-  it("declares both MVP gateways with required env contracts", () => {
-    expect(Object.keys(GATEWAY_CATALOG).sort()).toEqual(["farcaster", "telegram"]);
+  it("declares the MVP + Sprint 2 gateways with required env contracts", () => {
+    expect(Object.keys(GATEWAY_CATALOG).sort()).toEqual(["farcaster", "slack", "telegram"]);
     expect(GATEWAY_CATALOG.telegram.secrets.botToken.envVar).toBe("TELEGRAM_BOT_TOKEN");
     expect(GATEWAY_CATALOG.farcaster.secrets.neynarApiKey.envVar).toBe("FARCASTER_NEYNAR_API_KEY");
     expect(GATEWAY_CATALOG.farcaster.nonSecretConfig.fid.required).toBe(true);
+    expect(GATEWAY_CATALOG.slack.secrets.botToken.envVar).toBe("SLACK_BOT_TOKEN");
+    expect(GATEWAY_CATALOG.slack.secrets.signingSecret.envVar).toBe("SLACK_SIGNING_SECRET");
+    expect(GATEWAY_CATALOG.slack.nonSecretConfig.channelId.required).toBe(false);
   });
 
   it("uses the perkos-agents/* prefix convention in secret kinds", () => {
@@ -45,6 +48,27 @@ describe("validateGatewayUpsert", () => {
     if (result.ok) {
       expect(result.clean.secrets?.botToken).toBe("123:abcDEF");
     }
+  });
+
+  it("Slack: requires both secrets, channelId is optional", () => {
+    const missingBoth = validateGatewayUpsert({
+      type: "slack",
+      enabled: true,
+      secrets: {},
+    });
+    expect(missingBoth.ok).toBe(false);
+    if (!missingBoth.ok) {
+      const fields = missingBoth.errors.map((e) => e.field).sort();
+      expect(fields).toEqual(["secrets.botToken", "secrets.signingSecret"]);
+    }
+
+    const enoughToEnable = validateGatewayUpsert({
+      type: "slack",
+      enabled: true,
+      secrets: { botToken: "xoxb-1", signingSecret: "hex" },
+      // No channelId — should validate fine since it's optional.
+    });
+    expect(enoughToEnable.ok).toBe(true);
   });
 
   it("requires every secret + required non-secret when enabling", () => {

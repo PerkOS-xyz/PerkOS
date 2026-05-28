@@ -157,6 +157,10 @@ type State = {
   gatewayFarcasterFid: string;
   gatewayFarcasterReplyVisibility: string;
   gatewayFarcasterParentChannel: string;
+  gatewaySlackEnabled: boolean;
+  gatewaySlackBotToken: string;
+  gatewaySlackSigningSecret: string;
+  gatewaySlackChannelId: string;
 };
 
 const TOTAL_STEPS = 6;
@@ -229,6 +233,10 @@ export default function AgentLauncherPage() {
     gatewayFarcasterFid: "",
     gatewayFarcasterReplyVisibility: "mentions",
     gatewayFarcasterParentChannel: "",
+    gatewaySlackEnabled: false,
+    gatewaySlackBotToken: "",
+    gatewaySlackSigningSecret: "",
+    gatewaySlackChannelId: "",
   });
 
   const update = (patch: Partial<State>) => setState((s) => ({ ...s, ...patch }));
@@ -333,6 +341,28 @@ export default function AgentLauncherPage() {
             });
           } catch (err) {
             toast.error("Farcaster gateway not saved", {
+              description: err instanceof Error ? err.message : String(err),
+            });
+          }
+        }
+        if (state.gatewaySlackEnabled) {
+          try {
+            await saveAgentGateway(agentId, {
+              type: "slack",
+              enabled: true,
+              secrets: {
+                botToken: state.gatewaySlackBotToken,
+                signingSecret: state.gatewaySlackSigningSecret,
+              },
+              nonSecretConfig: state.gatewaySlackChannelId
+                ? { channelId: state.gatewaySlackChannelId }
+                : undefined,
+            });
+            toast.success("Slack gateway saved", {
+              description: "Will activate on next agent restart.",
+            });
+          } catch (err) {
+            toast.error("Slack gateway not saved", {
               description: err instanceof Error ? err.message : String(err),
             });
           }
@@ -1549,6 +1579,57 @@ function StepGateways({ state, onChange }: StepProps) {
             />
             <span className="text-xs text-muted-foreground">
               Leave blank to use long-polling. Setting a webhook URL is recommended for hibernation friendliness.
+            </span>
+          </div>
+        </div>
+      </GatewayCard>
+
+      <GatewayCard
+        title="Slack"
+        icon={MessageSquare}
+        enabled={state.gatewaySlackEnabled}
+        onToggle={(v) => onChange({ gatewaySlackEnabled: v })}
+        blurb="Your agent answers in Slack channels it's invited to. Webhook-mode (Events API), hibernation-friendly. You create a Slack app, install it to your workspace, copy the bot token + signing secret."
+      >
+        <div className="grid gap-3">
+          <div className="grid gap-1.5">
+            <Label htmlFor="slack-bot-token">Bot token (xoxb-...)</Label>
+            <Input
+              id="slack-bot-token"
+              type="password"
+              autoComplete="off"
+              value={state.gatewaySlackBotToken}
+              onChange={(e) => onChange({ gatewaySlackBotToken: e.target.value })}
+              placeholder="xoxb-XXXXXXXX..."
+            />
+            <span className="text-xs text-muted-foreground">
+              Slack app → OAuth &amp; Permissions → Bot User OAuth Token.
+            </span>
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="slack-signing-secret">Signing secret</Label>
+            <Input
+              id="slack-signing-secret"
+              type="password"
+              autoComplete="off"
+              value={state.gatewaySlackSigningSecret}
+              onChange={(e) => onChange({ gatewaySlackSigningSecret: e.target.value })}
+              placeholder="32-char hex from Slack app settings"
+            />
+            <span className="text-xs text-muted-foreground">
+              Slack app → Basic Information → Signing Secret. Used to verify inbound webhook payloads.
+            </span>
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="slack-channel-id">Channel id (optional)</Label>
+            <Input
+              id="slack-channel-id"
+              value={state.gatewaySlackChannelId}
+              onChange={(e) => onChange({ gatewaySlackChannelId: e.target.value })}
+              placeholder="e.g. C0123ABC"
+            />
+            <span className="text-xs text-muted-foreground">
+              Restrict the agent to a single channel. Leave blank for mentions + DMs in every channel the bot is in.
             </span>
           </div>
         </div>
