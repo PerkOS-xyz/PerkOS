@@ -74,6 +74,14 @@ export function ChatbotProvider({ children }: { children: ReactNode }) {
   // opens the panel while signed in. Cached for the rest of the session;
   // a fresh page load will re-fetch (it's idempotent server-side, so the
   // existing doc is returned).
+  //
+  // loadingConv is intentionally NOT in the deps even though we read it
+  // for guarding: including it caused a deadlock where the effect's own
+  // setLoadingConv(true) re-triggered the effect, the cleanup fired
+  // cancelled=true on the in-flight request, and the .finally (gated on
+  // !cancelled) never reset loadingConv — leaving the panel stuck in
+  // "Opening chat…" forever. The cancelled guard still protects against
+  // stale state updates (e.g. panel closed mid-flight).
   useEffect(() => {
     if (!open || !isConnected || convId || loadingConv) return;
     let cancelled = false;
@@ -89,12 +97,18 @@ export function ChatbotProvider({ children }: { children: ReactNode }) {
         setConvError(err.message ?? "Couldn't open Assistant chat.");
       })
       .finally(() => {
-        if (!cancelled) setLoadingConv(false);
+        // Always reset — never gate on cancelled here. If the effect
+        // re-ran for any reason, the next run will early-return on
+        // !convId (already set) or fire a fresh request (which is the
+        // intended behavior). Leaving loadingConv true on cancellation
+        // is what caused the original deadlock.
+        setLoadingConv(false);
       });
     return () => {
       cancelled = true;
     };
-  }, [open, isConnected, convId, loadingConv]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, isConnected, convId]);
 
   return (
     <Ctx.Provider
