@@ -49,6 +49,7 @@ import { cn } from "@/lib/utils";
 
 import {
   launchAgent,
+  saveAgentGateway,
   type AgentRuntime,
   type LaunchAgentCredentials,
 } from "../../../lib/perkosApi";
@@ -141,6 +142,21 @@ type State = {
   // Step 5 — plugins + channels
   channels: string[];
   plugins: string[];
+  // Step 5 — messaging gateways. Each enabled entry is POSTed to
+  // /api/agents/{agentId}/gateways right after launchAgent returns,
+  // using the agentId from the launch response. Keeping the secrets
+  // in client memory ONLY until that POST completes; never persisted
+  // to localStorage and never sent in the launch payload itself.
+  gatewayTelegramEnabled: boolean;
+  gatewayTelegramBotToken: string;
+  gatewayTelegramWebhookUrl: string;
+  gatewayFarcasterEnabled: boolean;
+  gatewayFarcasterNeynarApiKey: string;
+  gatewayFarcasterSignerUuid: string;
+  gatewayFarcasterWebhookSecret: string;
+  gatewayFarcasterFid: string;
+  gatewayFarcasterReplyVisibility: string;
+  gatewayFarcasterParentChannel: string;
 };
 
 const TOTAL_STEPS = 6;
@@ -203,6 +219,16 @@ export default function AgentLauncherPage() {
     byokApiKey: "",
     channels: [],
     plugins: [],
+    gatewayTelegramEnabled: false,
+    gatewayTelegramBotToken: "",
+    gatewayTelegramWebhookUrl: "",
+    gatewayFarcasterEnabled: false,
+    gatewayFarcasterNeynarApiKey: "",
+    gatewayFarcasterSignerUuid: "",
+    gatewayFarcasterWebhookSecret: "",
+    gatewayFarcasterFid: "",
+    gatewayFarcasterReplyVisibility: "mentions",
+    gatewayFarcasterParentChannel: "",
   });
 
   const update = (patch: Partial<State>) => setState((s) => ({ ...s, ...patch }));
@@ -250,12 +276,69 @@ export default function AgentLauncherPage() {
         imageTag: state.deployMode === "perkos-ecs" ? state.imageTag : null,
       });
     },
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       queryClient.invalidateQueries({ queryKey: ["wallet-agents", address] });
       if (fromOnboarding) markAgentRegistered();
       toast.success("Agent launched", {
         description: `${state.agentName.trim() || preset?.name || "Your agent"} is ready.`,
       });
+
+      // Wire any messaging gateways the user enabled. We do this AFTER
+      // launchAgent returns because the gateways endpoint needs the
+      // agentId (which the launch response carries). Failures are
+      // surfaced as per-gateway toasts but don't block the rest of
+      // the launch flow — the agent is up; the operator can re-save
+      // a misconfigured gateway from the admin panel later.
+      const agentId = response?.result?.agent?.id;
+      if (agentId) {
+        if (state.gatewayTelegramEnabled) {
+          try {
+            await saveAgentGateway(agentId, {
+              type: "telegram",
+              enabled: true,
+              secrets: { botToken: state.gatewayTelegramBotToken },
+              nonSecretConfig: state.gatewayTelegramWebhookUrl
+                ? { webhookUrl: state.gatewayTelegramWebhookUrl }
+                : undefined,
+            });
+            toast.success("Telegram gateway saved", {
+              description: "Will activate on next agent restart.",
+            });
+          } catch (err) {
+            toast.error("Telegram gateway not saved", {
+              description: err instanceof Error ? err.message : String(err),
+            });
+          }
+        }
+        if (state.gatewayFarcasterEnabled) {
+          try {
+            await saveAgentGateway(agentId, {
+              type: "farcaster",
+              enabled: true,
+              secrets: {
+                neynarApiKey: state.gatewayFarcasterNeynarApiKey,
+                signerUuid: state.gatewayFarcasterSignerUuid,
+                webhookSecret: state.gatewayFarcasterWebhookSecret,
+              },
+              nonSecretConfig: {
+                fid: state.gatewayFarcasterFid,
+                replyVisibility: state.gatewayFarcasterReplyVisibility,
+                ...(state.gatewayFarcasterParentChannel
+                  ? { parentChannel: state.gatewayFarcasterParentChannel }
+                  : {}),
+              },
+            });
+            toast.success("Farcaster gateway saved", {
+              description: "Will activate on next agent restart.",
+            });
+          } catch (err) {
+            toast.error("Farcaster gateway not saved", {
+              description: err instanceof Error ? err.message : String(err),
+            });
+          }
+        }
+      }
+
       if (response?.credentials) {
         setIssuedCredentials(response.credentials);
         return;
@@ -1372,9 +1455,9 @@ function Step5Plugins({
       </div>
 
       <div className="flex flex-col gap-3">
-        <h3 className="text-sm font-medium text-foreground">External channels</h3>
+        <h3 className="text-sm font-medium text-foreground">External channels (preview)</h3>
         <p className="text-xs text-muted-foreground">
-          Where users can also reach this agent, in addition to inside PerkOS.
+          Visual selection only — wiring lives below under &ldquo;Messaging gateways&rdquo;.
         </p>
         <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
           {channels.map((c) => {
@@ -1402,6 +1485,210 @@ function Step5Plugins({
           })}
         </div>
       </div>
+
+      <StepGateways state={state} onChange={onChange} />
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Messaging gateways (MVP: Telegram + Farcaster)
+// ---------------------------------------------------------------------------
+//
+// Renders inside Step 5 so the user enables and configures gateways in
+// the same place they pick capabilities. Each gateway is a toggle
+// card; when enabled, the form for that gateway expands. Secrets are
+// held in component state ONLY until the launch mutation's onSuccess
+// posts them to /api/agents/{agentId}/gateways. Nothing is persisted
+// to localStorage and nothing rides on the launch payload itself.
+//
+// Validation is intentionally lightweight: we let the server-side
+// validateGatewayUpsert be the source of truth and surface its field
+// errors via the toast. Local validation just hides the launch button
+// when an enabled gateway is missing a required secret, to save a
+// round-trip on the obvious cases.
+function StepGateways({ state, onChange }: StepProps) {
+  return (
+    <div className="flex flex-col gap-3">
+      <h3 className="text-sm font-medium text-foreground">Messaging gateways</h3>
+      <p className="text-xs text-muted-foreground">
+        Lets your agent receive messages from outside PerkOS. Secrets stay in
+        AWS Secrets Manager under your wallet&rsquo;s namespace — never in the
+        agent doc, never in this browser tab beyond the launch request.
+      </p>
+
+      <GatewayCard
+        title="Telegram"
+        icon={Send}
+        enabled={state.gatewayTelegramEnabled}
+        onToggle={(v) => onChange({ gatewayTelegramEnabled: v })}
+        blurb="Your agent answers from a Telegram bot you create at @BotFather. Webhook mode is friendly to hibernation — no idle connection while the agent sleeps."
+      >
+        <div className="grid gap-3">
+          <div className="grid gap-1.5">
+            <Label htmlFor="telegram-bot-token">Bot token</Label>
+            <Input
+              id="telegram-bot-token"
+              type="password"
+              autoComplete="off"
+              value={state.gatewayTelegramBotToken}
+              onChange={(e) => onChange({ gatewayTelegramBotToken: e.target.value })}
+              placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+            />
+            <span className="text-xs text-muted-foreground">
+              From @BotFather. Stored in AWS Secrets Manager; never returned by the API.
+            </span>
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="telegram-webhook-url">Webhook URL (optional)</Label>
+            <Input
+              id="telegram-webhook-url"
+              value={state.gatewayTelegramWebhookUrl}
+              onChange={(e) => onChange({ gatewayTelegramWebhookUrl: e.target.value })}
+              placeholder="https://relay.perkos.xyz/webhook/telegram/<agentId>"
+            />
+            <span className="text-xs text-muted-foreground">
+              Leave blank to use long-polling. Setting a webhook URL is recommended for hibernation friendliness.
+            </span>
+          </div>
+        </div>
+      </GatewayCard>
+
+      <GatewayCard
+        title="Farcaster"
+        icon={Hash}
+        enabled={state.gatewayFarcasterEnabled}
+        onToggle={(v) => onChange({ gatewayFarcasterEnabled: v })}
+        blurb="Your agent replies to mentions on Farcaster via Neynar. You need a Neynar-managed signer for the agent's identity."
+      >
+        <div className="grid gap-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <div className="grid gap-1.5">
+              <Label htmlFor="fc-fid">FID</Label>
+              <Input
+                id="fc-fid"
+                inputMode="numeric"
+                value={state.gatewayFarcasterFid}
+                onChange={(e) => onChange({ gatewayFarcasterFid: e.target.value })}
+                placeholder="e.g. 12345"
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="fc-visibility">Reply visibility</Label>
+              <select
+                id="fc-visibility"
+                value={state.gatewayFarcasterReplyVisibility}
+                onChange={(e) => onChange({ gatewayFarcasterReplyVisibility: e.target.value })}
+                className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="mentions">mentions only (recommended)</option>
+                <option value="all">all (requires parent channel)</option>
+              </select>
+            </div>
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="fc-neynar-key">Neynar API key</Label>
+            <Input
+              id="fc-neynar-key"
+              type="password"
+              autoComplete="off"
+              value={state.gatewayFarcasterNeynarApiKey}
+              onChange={(e) => onChange({ gatewayFarcasterNeynarApiKey: e.target.value })}
+              placeholder="NEYNAR_XXXXXXXX..."
+            />
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="fc-signer">Signer UUID</Label>
+            <Input
+              id="fc-signer"
+              type="password"
+              autoComplete="off"
+              value={state.gatewayFarcasterSignerUuid}
+              onChange={(e) => onChange({ gatewayFarcasterSignerUuid: e.target.value })}
+              placeholder="00000000-0000-0000-0000-000000000000"
+            />
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="fc-webhook-secret">Webhook secret</Label>
+            <Input
+              id="fc-webhook-secret"
+              type="password"
+              autoComplete="off"
+              value={state.gatewayFarcasterWebhookSecret}
+              onChange={(e) => onChange({ gatewayFarcasterWebhookSecret: e.target.value })}
+              placeholder="HMAC secret you set on the Neynar webhook"
+            />
+          </div>
+          {state.gatewayFarcasterReplyVisibility === "all" ? (
+            <div className="grid gap-1.5">
+              <Label htmlFor="fc-channel">Parent channel</Label>
+              <Input
+                id="fc-channel"
+                value={state.gatewayFarcasterParentChannel}
+                onChange={(e) => onChange({ gatewayFarcasterParentChannel: e.target.value })}
+                placeholder="chain://eip155:..."
+              />
+              <span className="text-xs text-muted-foreground">
+                Required when visibility is &ldquo;all&rdquo; — scopes the agent to one channel.
+              </span>
+            </div>
+          ) : null}
+        </div>
+      </GatewayCard>
+    </div>
+  );
+}
+
+function GatewayCard({
+  title,
+  icon: Icon,
+  enabled,
+  onToggle,
+  blurb,
+  children,
+}: {
+  title: string;
+  icon: typeof Send;
+  enabled: boolean;
+  onToggle: (next: boolean) => void;
+  blurb: string;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col gap-3 rounded-lg border p-3 transition-colors",
+        enabled
+          ? "border-primary bg-primary/5"
+          : "border-border bg-card",
+      )}
+    >
+      <button
+        type="button"
+        onClick={() => onToggle(!enabled)}
+        className="flex w-full items-start justify-between gap-3 text-left"
+      >
+        <div className="flex items-start gap-3">
+          <div
+            className={cn(
+              "grid h-8 w-8 shrink-0 place-items-center rounded-md",
+              enabled ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground",
+            )}
+          >
+            <Icon className="h-4 w-4" />
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm font-medium text-foreground">{title}</span>
+            <span className="text-xs text-muted-foreground">{blurb}</span>
+          </div>
+        </div>
+        {enabled ? (
+          <Check className="h-4 w-4 text-primary" />
+        ) : (
+          <Plus className="h-4 w-4 text-muted-foreground" />
+        )}
+      </button>
+      {enabled ? <div className="border-t border-border pt-3">{children}</div> : null}
     </div>
   );
 }
