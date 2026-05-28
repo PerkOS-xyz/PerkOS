@@ -1036,6 +1036,39 @@ export async function assistantChatStream(input: {
   return { reply: assembled, agent };
 }
 
+/**
+ * Save (enable / update / disable) a single messaging gateway for an
+ * existing agent. Called by the /agents/new wizard right after
+ * `launchAgent` returns successfully — the agentId is needed because
+ * gateway secrets are stashed under the agent's Secrets Manager
+ * prefix.
+ *
+ * Body shape matches `GatewayUpsertInput` from app/lib/agentGateways.ts;
+ * we keep the type lightweight here (Record<string, string>) so this
+ * client helper doesn't need to import the server-side module.
+ *
+ * Returns the sanitized record the server persisted, or throws on
+ * validation errors (caller surfaces as a toast).
+ */
+export async function saveAgentGateway(
+  agentId: string,
+  input: {
+    type: "telegram" | "farcaster";
+    enabled: boolean;
+    nonSecretConfig?: Record<string, string>;
+    secrets?: Record<string, string>;
+  },
+): Promise<unknown> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(`/api/agents/${encodeURIComponent(agentId)}/gateways`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Saving gateway failed"));
+  return payload;
+}
+
 export async function launchAgent(input: {
   walletAddress: string;
   runtime: AgentRuntime;
