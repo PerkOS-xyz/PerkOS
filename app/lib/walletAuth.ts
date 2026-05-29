@@ -8,14 +8,18 @@
  * Firebase `signInWithCustomToken` call (the shared helper deliberately
  * stops short of that so it stays framework-agnostic).
  *
- * `apiBase: ""` means we hit App's own `/api/auth/nonce` and
- * `/api/auth/wallet-signin` routes — Phase 1.2 will flip this to
- * `https://api.perkos.xyz` once the backbone migration completes.
+ * `apiBase` resolves from `NEXT_PUBLIC_PERKOS_API_URL` at build time so
+ * App can target the platform API at `https://api.perkos.xyz` (default,
+ * Phase 1.2) and roll back to its own `/api/auth/*` routes by setting
+ * the env var to an empty string for a release.
  */
 import { signInWithCustomToken } from "firebase/auth";
 import { signInWithWallet as sharedSignIn } from "@perkos/shared-client";
 
 import { firebaseAuth } from "./firebase";
+
+const apiBase =
+  process.env.NEXT_PUBLIC_PERKOS_API_URL ?? "https://api.perkos.xyz";
 
 export async function signInWithWallet(input: {
   address: string;
@@ -25,7 +29,7 @@ export async function signInWithWallet(input: {
     address: input.address.toLowerCase() as `0x${string}`,
     signMessage: (message) =>
       input.signMessage(message) as Promise<`0x${string}`>,
-    apiBase: "",
+    apiBase,
   });
   const credential = await signInWithCustomToken(firebaseAuth(), session.token);
   return credential.user;
