@@ -3,31 +3,45 @@
 PerkOS App (`app.perkos.xyz`). One entry per release dated by deploy day.
 Phase numbering tracks `MIGRATION-PLAN-v2.md` in the workspace root.
 
-## 2026-05-29 — Platform-API migration (Phase 1.1 + 1.2)
+## 2026-05-29 — Platform-API migration (Phase 1.1 + 1.2.b, auth carved out)
+
+### Architectural law (verified in prod)
+
+> **Wallet sign-in stays in App.** The browser + Farcaster MiniApp +
+> Base App flow is complex enough that we explicitly keep its client
+> code and `/api/auth/*` routes in App, untouched by the shared lib.
+> Once Firebase is signed in, every other authenticated call goes to
+> `api.perkos.xyz`.
 
 ### Added
 
 - **`@perkos/shared-types ^0.1.0`** + **`@perkos/shared-client ^0.1.0`**
-  as runtime deps. Lib code now flows through the platform packages
-  instead of carrying its own copy.
+  as runtime deps. Lib code that's NOT in the sign-in critical path
+  now flows through the platform packages.
 
 ### Changed
 
 - **`app/lib/firebase.ts`** delegates to `initFirebase` from
   `@perkos/shared-client`. Public surface (`firebaseAuth()`,
   `firebaseDb()`) unchanged so component code is untouched.
-- **`app/lib/walletAuth.ts`** delegates to `signInWithWallet` from
-  `@perkos/shared-client`. `apiBase` resolves from
-  `NEXT_PUBLIC_PERKOS_API_URL`, defaulting to `https://api.perkos.xyz`
-  — the wallet sign-in flow now goes through the platform backbone
-  instead of App's own `/api/auth/*` routes.
-- **`app/lib/apiClient.ts`** swaps the previous same-origin fetch
-  for the shared `createApiClient` and rewrites legacy `/api/*`
-  paths (e.g. `/api/agents/launch`) to platform-API paths
-  (`/agents/launch`) when `NEXT_PUBLIC_PERKOS_API_URL` is set.
-  All authenticated data calls (agents, runtimes, concierge,
-  jobs, access checks) now hit `api.perkos.xyz` instead of App's
-  own Next routes.
+- **`app/lib/walletAuth.ts`** — **kept as the original same-origin
+  flow** (POST `/api/auth/nonce` → sign → POST
+  `/api/auth/wallet-signin` with `{ address, nonce, signature }`).
+  An earlier Phase 1.2 attempt to route this through shared-client +
+  api.perkos.xyz was reverted same-day because it broke Farcaster
+  MiniApp / Base App signin and lost the in-flight signature mutex.
+- **`app/lib/useWalletSession.ts`** — **kept as the original native
+  hook** with its module-level `pendingSignIn` mutex (de-dupes the
+  signature prompt across multiple hook instances) and the
+  wagmi-disconnect → Firebase signOut effect. Phase 1.1 wrapper was
+  reverted same-day for the same reason as walletAuth.
+- **`app/lib/apiClient.ts`** swaps the previous same-origin fetch for
+  the shared `createApiClient` and rewrites legacy `/api/*` paths
+  (e.g. `/api/agents/launch`) to platform-API paths
+  (`/agents/launch`) when `NEXT_PUBLIC_PERKOS_API_URL` is set
+  (defaults to `https://api.perkos.xyz`). All POST-auth data calls
+  (agents, runtimes, concierge, jobs, access checks) now hit
+  `api.perkos.xyz` instead of App's own Next routes.
 - **`app/lib/validators.ts`** + **`app/lib/format.ts`** are now
   pure re-exports of the shared helpers.
 - **`app/lib/useFirebaseUser.ts`** + **`app/lib/useWalletSession.ts`**
