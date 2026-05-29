@@ -3,10 +3,11 @@
 /**
  * `authedFetch` shim — backed by `@perkos/shared-client`'s `createApiClient`.
  *
- * Phase 1.1 keeps App talking to its own Next.js `/api/*` routes (empty
- * baseUrl = same-origin), but the underlying wrapper that attaches the
- * Firebase ID token is the shared one. Phase 1.2 will swap the empty
- * baseUrl for `https://api.perkos.xyz`.
+ * Phase 1.2 points App at the platform API at `https://api.perkos.xyz` by
+ * default. Call sites use legacy `/api/*` paths (e.g. `/api/agents/launch`)
+ * — those get rewritten to the platform route (`/agents/launch`) when
+ * `apiBase` is non-empty. Set `NEXT_PUBLIC_PERKOS_API_URL=""` at build time
+ * to roll back to App's own same-origin `/api/*` routes for a release.
  *
  * Throws if the user isn't signed into Firebase — callers are expected to
  * have triggered `signInWithWallet` first.
@@ -15,10 +16,22 @@ import { createApiClient } from "@perkos/shared-client";
 
 import { firebaseAuth } from "./firebase";
 
+const apiBase =
+  process.env.NEXT_PUBLIC_PERKOS_API_URL ?? "https://api.perkos.xyz";
+
+// When apiBase is empty (or "/"), we hit App's own Next routes — keep paths
+// as-is. When apiBase is a real host (the platform API), strip the leading
+// `/api` so legacy call sites like `/api/agents/launch` resolve to
+// `api.perkos.xyz/agents/launch`.
+const stripApiPrefix = apiBase !== "" && apiBase !== "/";
+
+function rewritePath(path: string): string {
+  if (!stripApiPrefix) return path;
+  return path.startsWith("/api/") ? path.slice(4) : path;
+}
+
 const client = createApiClient({
-  // Empty baseUrl => path is used verbatim; preserves App's same-origin call
-  // sites like `/api/agents/launch`. Reset to api.perkos.xyz in Phase 1.2.
-  baseUrl: "/",
+  baseUrl: apiBase || "/",
   getIdToken: async () => {
     const user = firebaseAuth().currentUser;
     if (!user) throw new Error("Not signed in. Connect your wallet first.");
@@ -30,14 +43,11 @@ export async function authedFetch(
   input: RequestInfo | URL,
   init: RequestInit = {},
 ): Promise<Response> {
-  // `createApiClient.fetch` accepts a string path. For URL/Request inputs we
-  // fall back to letting the underlying fetch handle them, but App's call
-  // sites always pass plain strings.
   const path =
     typeof input === "string"
       ? input
       : input instanceof URL
         ? input.toString()
         : input.url;
-  return client.fetch(path, init);
+  return client.fetch(rewritePath(path), init);
 }
