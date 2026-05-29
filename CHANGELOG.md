@@ -3,6 +3,67 @@
 PerkOS App (`app.perkos.xyz`). One entry per release dated by deploy day.
 Phase numbering tracks `MIGRATION-PLAN-v2.md` in the workspace root.
 
+## 2026-05-29 — Legacy `/api/*` route deletion (Phase 1.3)
+
+### Removed
+
+Now that every authenticated client call goes through `apiClient` →
+`api.perkos.xyz` (Phase 1.2.b shipped same-day), the corresponding
+same-origin Next route handlers under `app/api/*` are dead code. They
+were the rollback target during the overlap window; the platform API
+has been stable in prod, so they are deleted to:
+
+- enforce the architectural law that **wallet sign-in is the only
+  authenticated server logic that lives in App** — every other call
+  flows through the platform API,
+- remove ~15 stale route files that drifted from their platform-side
+  equivalents and were a footgun for anyone editing both,
+- shrink the Docker image and the cold-start surface area.
+
+Deleted directories (PerkOS App):
+
+- `app/api/access/ecs-check/`
+- `app/api/access/llm-check/`
+- `app/api/agents/` (entire tree — `[agentId]/{ensure-awake,ensure-conv,gateways,gateways/[type]/status,hibernate,hibernation,upgrade,wake,route}`, `jobs/[jobId]/`, `launch/`)
+- `app/api/assistant/chat/`
+- `app/api/concierge/ensure-conv/`
+- `app/api/metrics/` (Grafana scrape endpoint — moved to platform API)
+- `app/api/runtimes/`
+
+Kept:
+
+- `app/api/auth/nonce/` + `app/api/auth/wallet-signin/` — wallet
+  sign-in carve-out, by architectural law.
+- `app/api/request-access/` — still called directly (not via
+  `authedFetch`) from `app/components/AccessGate.tsx`. Unauthenticated
+  pre-login path; not yet ported to the platform API. Left in place.
+- `app/api/contact/` — still called directly from
+  `app/components/landing/ContactForm.tsx`. Public landing-page form,
+  unauthenticated; not yet ported. Left in place.
+
+Also deleted: `tests/gatewaysApiRoute.test.ts` and
+`tests/gatewayStatusRoute.test.ts` — they imported handler functions
+from the now-deleted route files. Equivalent coverage lives in the
+platform-API repo's test suite.
+
+### Rollback
+
+`git revert` the deletion commit and redeploy. The handlers are
+self-contained and their dependencies (`app/lib/*`, AWS SDK, Firebase
+admin) are still on disk for the auth + carve-out routes — the
+restored files compile without further changes. Note the
+`NEXT_PUBLIC_PERKOS_API_URL=""` env-var rollback documented in the
+Phase 1.2.b entry is no longer sufficient on its own: if the platform
+API is broken AND you've already deployed past this commit, restore
+the route files first, then flip the env var.
+
+### Verified
+
+- `npm run typecheck` clean (after clearing stale `.next/types`).
+- `npm run test` — 22 suites, 200 cases green.
+- `npm run build` clean (Next standalone output). Build manifest
+  shows only the four kept routes under `/api/*`.
+
 ## 2026-05-29 — Platform-API migration (Phase 1.1 + 1.2.b, auth carved out)
 
 ### Architectural law (verified in prod)
