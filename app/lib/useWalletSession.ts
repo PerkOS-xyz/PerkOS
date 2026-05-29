@@ -24,6 +24,12 @@ import { useWalletSession as sharedUseWalletSession } from "@perkos/shared-clien
 
 import { firebaseAuth } from "./firebase";
 
+// Phase 1.2: the wallet-signin nonce + verify round-trip targets the
+// platform API by default. Set NEXT_PUBLIC_PERKOS_API_URL="" at build
+// time to roll back to App's own /api/auth/* routes.
+const apiBase =
+  process.env.NEXT_PUBLIC_PERKOS_API_URL ?? "https://api.perkos.xyz";
+
 export type WalletSessionStatus =
   | "loading"
   | "signed-out"
@@ -47,7 +53,7 @@ export function useWalletSession(): Result {
   const auth = firebaseAuth();
 
   const shared = sharedUseWalletSession({
-    apiBase: "",
+    apiBase,
     address: address as `0x${string}` | undefined,
     signMessage: (message) =>
       signMessageAsync({ message }) as Promise<`0x${string}`>,
