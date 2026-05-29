@@ -101,32 +101,17 @@ export type ProjectDetail = {
   messages: ChatMessage[];
 };
 
-export type AgentRuntime = "OpenClaw" | "Hermes";
+// Agent, AgentRuntime, LaunchAgentCredentials are the canonical platform
+// shapes — sourced from `@perkos/shared-types` so server (PerkOS-API) and
+// every client agree on the wire format.
+export type { Agent, AgentRuntime, LaunchAgentCredentials } from "@perkos/shared-types";
+import type { Agent, AgentRuntime, LaunchAgentCredentials } from "@perkos/shared-types";
 
-export type Agent = {
-  id: string;
-  name: string;
-  runtime: AgentRuntime;
-  status: "provisioning" | "ready" | "failed" | "unknown";
-  walletAddress: string;
-  plugins: string[];
-  taskArn?: string;
-  endpoint?: string;
-  createdAt?: string;
-  image?: string;
-  modelKeyProvided?: boolean;
-};
-
-export type LaunchAgentCredentials = {
-  /** Globally unique name used in the wire protocol. */
-  agentName: string;
-  /** Relay API key — returned ONCE; client must surface to the user immediately. */
-  relayApiKey: string;
-  /** WS URL to embed in the agent's config. */
-  chatUrl: string;
-  transportUrl: string;
-};
-
+/**
+ * App-local launch response. Slimmer than the platform `LaunchAgentResponse`
+ * (which surfaces jobId for the async provisioning queue) — the mini-app
+ * doesn't render that field today. Keeps the existing call sites unchanged.
+ */
 export type LaunchAgentResponse = {
   ok: boolean;
   launchId: string;

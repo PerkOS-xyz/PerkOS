@@ -1,59 +1,32 @@
 "use client";
 
+/**
+ * Wallet -> Firebase sign-in shim.
+ *
+ * Delegates the nonce + signature + custom-token exchange to
+ * `@perkos/shared-client`'s `signInWithWallet`, then finishes with the
+ * Firebase `signInWithCustomToken` call (the shared helper deliberately
+ * stops short of that so it stays framework-agnostic).
+ *
+ * `apiBase: ""` means we hit App's own `/api/auth/nonce` and
+ * `/api/auth/wallet-signin` routes — Phase 1.2 will flip this to
+ * `https://api.perkos.xyz` once the backbone migration completes.
+ */
 import { signInWithCustomToken } from "firebase/auth";
+import { signInWithWallet as sharedSignIn } from "@perkos/shared-client";
 
 import { firebaseAuth } from "./firebase";
 
-/**
- * Full wallet → Firebase sign-in dance.
- *
- *   1. Ask /api/auth/nonce for a fresh nonce + canonical message.
- *   2. Have the wallet sign that message (caller provides `signMessage`).
- *   3. POST the signature to /api/auth/wallet-signin.
- *   4. signInWithCustomToken with the token the server returned.
- *
- * Returns the Firebase User on success. Throws on any step that fails so the
- * caller can surface a toast / inline error.
- */
 export async function signInWithWallet(input: {
   address: string;
   signMessage: (message: string) => Promise<string>;
 }) {
-  const address = input.address.toLowerCase();
-
-  // 1. Nonce -----------------------------------------------------------
-  const nonceRes = await fetch(
-    `/api/auth/nonce?address=${encodeURIComponent(address)}`
-  );
-  if (!nonceRes.ok) {
-    const { error } = (await nonceRes.json().catch(() => ({}))) as {
-      error?: string;
-    };
-    throw new Error(error ?? "Couldn't request a sign-in nonce.");
-  }
-  const { nonce, message } = (await nonceRes.json()) as {
-    nonce: string;
-    message: string;
-  };
-
-  // 2. Wallet signs ----------------------------------------------------
-  const signature = await input.signMessage(message);
-
-  // 3. Exchange for Firebase custom token ------------------------------
-  const exchangeRes = await fetch("/api/auth/wallet-signin", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ address, nonce, signature }),
+  const session = await sharedSignIn({
+    address: input.address.toLowerCase() as `0x${string}`,
+    signMessage: (message) =>
+      input.signMessage(message) as Promise<`0x${string}`>,
+    apiBase: "",
   });
-  if (!exchangeRes.ok) {
-    const { error } = (await exchangeRes.json().catch(() => ({}))) as {
-      error?: string;
-    };
-    throw new Error(error ?? "Sign-in rejected by server.");
-  }
-  const { token } = (await exchangeRes.json()) as { token: string };
-
-  // 4. Sign into Firebase ---------------------------------------------
-  const credential = await signInWithCustomToken(firebaseAuth(), token);
+  const credential = await signInWithCustomToken(firebaseAuth(), session.token);
   return credential.user;
 }

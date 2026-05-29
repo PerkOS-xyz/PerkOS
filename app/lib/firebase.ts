@@ -1,55 +1,35 @@
 /**
- * Firebase client SDK. Browser-safe (uses only NEXT_PUBLIC_* config).
+ * Firebase client SDK shim — delegates to `@perkos/shared-client`.
  *
- * The web `apiKey` looks secret but is treated by Firebase as an identifier —
- * security lives in Firestore rules and Authorized Domains, not in hiding it.
+ * Phase 1.1 of the platform-extraction migration moved the lazy-init Firebase
+ * helpers into the shared package. This file keeps App's existing call sites
+ * (`firebaseAuth()`, `firebaseDb()`) unchanged by adapting the shared
+ * `initFirebase` cache to the same getter shape.
  *
- * Use:
- *   import { firebaseAuth, firebaseDb } from "@/app/lib/firebase";
- *   const user = firebaseAuth().currentUser;
- *   const snap = await getDoc(doc(firebaseDb(), "allowlist", addr));
- *
- * Both helpers are lazy and singleton-safe across hot reloads.
+ * The browser-only `NEXT_PUBLIC_*` config still lives here — the shared
+ * package is config-agnostic by design so it can also be used from Vite,
+ * CLI tools, and Tauri.
  */
+import { initFirebase } from "@perkos/shared-client";
+import type { Auth } from "firebase/auth";
+import type { Firestore } from "firebase/firestore";
 
-import { getApp, getApps, initializeApp, type FirebaseApp } from "firebase/app";
-import { getAuth, type Auth } from "firebase/auth";
-import { getFirestore, type Firestore } from "firebase/firestore";
-
-const config = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
-};
-
-function getFirebaseApp(): FirebaseApp {
-  if (getApps().length > 0) return getApp();
-
-  if (!config.apiKey || !config.projectId || !config.appId) {
-    throw new Error(
-      "Missing Firebase web config. Set NEXT_PUBLIC_FIREBASE_API_KEY / _PROJECT_ID / _APP_ID."
-    );
-  }
-
-  return initializeApp({
-    apiKey: config.apiKey,
-    authDomain: config.authDomain,
-    projectId: config.projectId,
-    storageBucket: config.storageBucket,
-    messagingSenderId: config.messagingSenderId,
-    appId: config.appId,
-    measurementId: config.measurementId,
+function handles() {
+  return initFirebase({
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "",
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "",
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
   });
 }
 
 export function firebaseAuth(): Auth {
-  return getAuth(getFirebaseApp());
+  return handles().auth;
 }
 
 export function firebaseDb(): Firestore {
-  return getFirestore(getFirebaseApp());
+  return handles().db;
 }

@@ -8,7 +8,7 @@
 FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm ci --no-audit --no-fund
+RUN npm ci --no-audit --no-fund --legacy-peer-deps
 
 FROM node:22-alpine AS build
 WORKDIR /app
@@ -69,7 +69,7 @@ COPY --from=build /app/public ./public
 # ship a no-op shim — the worker is unambiguously server-side and the
 # client-import check is meaningless here.
 RUN npm install -g tsx@4 \
- && cd /app && npm install --omit=dev --no-save --no-audit --no-fund \
+ && cd /app && npm install --omit=dev --no-save --no-audit --no-fund --legacy-peer-deps \
       @aws-sdk/client-ecs \
       @aws-sdk/client-secrets-manager \
  && mkdir -p /app/node_modules/server-only \
