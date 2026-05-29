@@ -1,5 +1,5 @@
 import { createConfig, http } from "wagmi";
-import { base, baseSepolia, celo } from "wagmi/chains";
+import { base, baseSepolia, celo, celoSepolia } from "wagmi/chains";
 import { baseAccount, injected } from "wagmi/connectors";
 import { farcasterMiniApp } from "@farcaster/miniapp-wagmi-connector";
 
@@ -18,13 +18,16 @@ const baseSepoliaRpc = alchemyKey
 const celoRpc = alchemyKey
   ? `https://celo-mainnet.g.alchemy.com/v2/${alchemyKey}`
   : undefined;
+const celoSepoliaRpc = alchemyKey
+  ? `https://celo-sepolia.g.alchemy.com/v2/${alchemyKey}`
+  : undefined;
 
 export const wagmiConfig = createConfig({
   // base + celo are the chains the user can pick from the header
   // NetworkPill. baseSepolia stays in the list because the Receipt
   // Anchor contract lives there during alpha — receipt code keeps
   // talking to Sepolia even when the user switches header chain.
-  chains: [base, celo, baseSepolia],
+  chains: [base, celo, baseSepolia, celoSepolia],
   connectors: [
     // Auto-detected when running inside Farcaster (Warpcast web/mobile)
     // or any other Farcaster Mini App host. AutoConnect picks this when
@@ -39,6 +42,7 @@ export const wagmiConfig = createConfig({
     [base.id]: http(baseRpc),
     [celo.id]: http(celoRpc),
     [baseSepolia.id]: http(baseSepoliaRpc),
+    [celoSepolia.id]: http(celoSepoliaRpc),
   },
   ssr: true,
 });
