@@ -3,6 +3,56 @@
 PerkOS App (`app.perkos.xyz`). One entry per release dated by deploy day.
 Phase numbering tracks `MIGRATION-PLAN-v2.md` in the workspace root.
 
+## 2026-05-29 — BYO (bring-your-own infra) agent wizard
+
+### Added
+
+- **Step 3 in `/agents/new` now offers three deploy modes**:
+  - **PerkOS infra (AWS ECS)** — unchanged platform-managed path.
+  - **Self-hosted (your infra)** — generates a docker-compose bundle
+    (Hermes/OpenClaw runtime + perkos-a2a bridge sidecar). Bridge dials
+    OUT to chat + transport, so no inbound ports / NAT / SSH needed.
+  - **Import an existing agent** — bridge-only bundle for users who
+    already have a Hermes / OpenClaw / custom runtime process running.
+    Optional `HERMES_API_URL` override when the runtime isn't on the
+    default port.
+- **`DeployBundleScreen`** (`app/components/DeployBundleScreen.tsx`).
+  Post-launch modal for BYO flows. Tabs: `docker-compose`, `.env`,
+  `docker run` (one-liner), `INSTRUCTIONS.md`. Copy-per-tab + download
+  whole bundle as a single text file. Polls `GET /api/agents/<id>`
+  every 5s for `bridgeConnected: true` and flips a "Waiting for first
+  ping…" card to "Online ✓" once the bridge phones home. 10-minute
+  timeout fallback with a refresh button.
+- **`fetchAgent(agentId)`** helper in `app/lib/perkosApi.ts` — read
+  one agent's projection including the new 0.2.0 BYO fields.
+- **`launchAgent` extended** to pass `deployMode`, `runtimeKind`, and
+  `hermesApiUrl` through to `POST /api/agents/launch`. Capture the
+  `deployBundle` from the response when present.
+
+### Removed
+
+- **`vpsIp` / `vpsSshKey` fields from wizard `State`.** The old VPS
+  card asked for an SSH endpoint + public key so the platform could
+  push the install script; the bridge dial-out pattern makes that
+  obsolete. Existing Firestore agent docs may still carry the fields
+  (Zod drops unknown keys on read); no migration needed.
+- **`ipv4Schema` / `sshPublicKeySchema` validator imports** from
+  `app/lib/validators.ts` (the schemas themselves stay in shared-client
+  for now; just no longer used by this wizard).
+- **`ipError` / `sshError` useMemo blocks** in the wizard.
+- **Legacy "Run on a VPS I own" and "Run on my machine" cards**
+  (both replaced by the unified "Self-hosted" + "Imported" cards;
+  the bridge dial-out works for both).
+
+### Migration notes
+
+- `@perkos/shared-types` peer bumped to `^0.2.0`. Re-install before
+  building (`npm install ../../PerkOS-Shared-Types/perkos-shared-types-0.2.0.tgz --no-save --legacy-peer-deps` locally until the package is published).
+- Legacy `deployMode: "vps"` / `"local"` values on existing wizard
+  drafts (saved in localStorage by older builds — unlikely since we
+  removed `useFormDraft` already) would map to `"self-hosted"` on
+  the server; safe to ignore.
+
 ## 2026-05-29 — Legacy `/api/*` route deletion (Phase 1.3)
 
 ### Removed

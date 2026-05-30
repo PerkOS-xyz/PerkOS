@@ -104,8 +104,21 @@ export type ProjectDetail = {
 // Agent, AgentRuntime, LaunchAgentCredentials are the canonical platform
 // shapes — sourced from `@perkos/shared-types` so server (PerkOS-API) and
 // every client agree on the wire format.
-export type { Agent, AgentRuntime, LaunchAgentCredentials } from "@perkos/shared-types";
-import type { Agent, AgentRuntime, LaunchAgentCredentials } from "@perkos/shared-types";
+export type {
+  Agent,
+  AgentRuntime,
+  DeployBundle,
+  DeployMode,
+  LaunchAgentCredentials,
+  RuntimeKind,
+} from "@perkos/shared-types";
+import type {
+  Agent,
+  AgentRuntime,
+  DeployBundle,
+  LaunchAgentCredentials,
+  RuntimeKind,
+} from "@perkos/shared-types";
 
 /**
  * App-local launch response. Slimmer than the platform `LaunchAgentResponse`
@@ -117,6 +130,8 @@ export type LaunchAgentResponse = {
   launchId: string;
   /** One-shot credentials. Present on successful provisioning only. */
   credentials?: LaunchAgentCredentials;
+  /** Present on self-hosted / imported deploys; absent for perkos-managed. */
+  deployBundle?: DeployBundle;
   result: {
     mode?: string;
     status?: string;
@@ -1061,8 +1076,17 @@ export async function launchAgent(input: {
   plugins?: string[];
   modelKey?: string;
   /** When provisioning on PerkOS infra (ECS), the specific image tag the
-   *  admin has approved. Ignored for VPS / Local deploys. */
+   *  admin has approved. Ignored for self-hosted / imported deploys. */
   imageTag?: string | null;
+  /**
+   * New in 0.2.0. Defaults to "perkos-managed" server-side when omitted
+   * so older builds keep working without code changes.
+   */
+  deployMode?: "perkos-managed" | "self-hosted" | "imported";
+  /** Only meaningful when deployMode === "imported". */
+  runtimeKind?: RuntimeKind;
+  /** Override HERMES_API_URL on imported flows (non-default port). */
+  hermesApiUrl?: string;
 }): Promise<LaunchAgentResponse> {
   const { authedFetch } = await import("./apiClient");
   const response = await authedFetch("/api/agents/launch", {
@@ -1074,9 +1098,42 @@ export async function launchAgent(input: {
       plugins: input.plugins ?? [],
       modelKey: input.modelKey,
       imageTag: input.imageTag ?? undefined,
+      deployMode: input.deployMode,
+      runtimeKind: input.runtimeKind,
+      hermesApiUrl: input.hermesApiUrl,
     }),
   });
   const payload = await parseJson(response);
   if (!response.ok) throw new Error(apiError(payload, "Agent registration failed"));
   return payload as unknown as LaunchAgentResponse;
+}
+
+/**
+ * GET /api/agents/<id> — returns the per-wallet agent projection
+ * including the 0.2.0 BYO fields (`bridgeConnected`, `deployMode`,
+ * `lastBridgeSeenAt`, `runtimeKind`). Used by the wizard's
+ * post-launch polling card.
+ */
+export async function fetchAgent(agentId: string): Promise<{
+  id: string;
+  name: string;
+  runtime: AgentRuntime;
+  status: string;
+  walletAddress: string;
+  plugins: string[];
+  modelKeyProvided: boolean;
+  deployMode?: string | null;
+  runtimeKind?: string | null;
+  bridgeConnected?: boolean;
+  lastBridgeSeenAt?: string | null;
+  runtimeVersion?: string | null;
+}> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/agents/${encodeURIComponent(agentId)}`,
+    { method: "GET" },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Failed to load agent"));
+  return payload as never;
 }

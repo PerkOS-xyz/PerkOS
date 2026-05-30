@@ -11,7 +11,6 @@ import { toast } from "sonner";
 import {
   Cloud,
   Server,
-  Laptop,
   KeyRound,
   Sparkles,
   MessageSquare,
@@ -28,6 +27,7 @@ import {
   FileCode,
   ChevronDown,
   ChevronUp,
+  PackageOpen,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -51,13 +51,15 @@ import {
   launchAgent,
   saveAgentGateway,
   type AgentRuntime,
+  type DeployBundle,
   type LaunchAgentCredentials,
 } from "../../../lib/perkosApi";
 import { AgentKeyRevealDialog } from "../../../components/AgentKeyRevealDialog";
+import { DeployBundleScreen } from "../../../components/DeployBundleScreen";
 import { useOnboarding } from "../../../lib/onboardingState";
 import {
-  ipv4Schema,
-  sshPublicKeySchema,
+  // ipv4Schema + sshPublicKeySchema removed in 0.2 — the BYO flow no
+  // longer collects an SSH endpoint, the bridge dials OUT instead.
   validateApiKey,
 } from "../../../lib/validators";
 import {
@@ -80,7 +82,17 @@ import { useQuery } from "@tanstack/react-query";
 // Types + constants
 // ---------------------------------------------------------------------------
 
-type DeployMode = "perkos-ecs" | "vps" | "local";
+// 0.2.0 deploy modes. "perkos-ecs" stays as the wizard-side label for
+// the platform-managed Fargate path (the wire value sent to the API is
+// "perkos-managed"). The old "vps" / "local" options are dead — both
+// are folded into "self-hosted" because the bridge dials out either
+// way, and "imported" is the new mode for users who already have a
+// runtime process running and only need the bridge sidecar.
+type DeployMode = "perkos-ecs" | "self-hosted" | "imported";
+
+// Only set for imported flows — tells the API which A2A_RUNTIME shape
+// the bridge should speak (`hermes-api` / `openclaw` / `custom`).
+type RuntimeKindChoice = "hermes" | "openclaw" | "custom";
 
 type Channel = {
   id: string;
@@ -132,8 +144,11 @@ type State = {
   imageTag: string | null;
   // Step 3 — deploy mode
   deployMode: DeployMode | null;
-  vpsIp: string;
-  vpsSshKey: string;
+  // For "imported" deploy mode: which runtime API the bridge talks to.
+  runtimeKind: RuntimeKindChoice | null;
+  // For "imported" deploy mode: HERMES_API_URL override (when the
+  // user's runtime is not on the default port).
+  importedHermesApiUrl: string;
   // Step 4 — LLM
   llmSource: LLMSource | null;
   byokProvider: string;
@@ -180,6 +195,18 @@ export default function AgentLauncherPage() {
   const [issuedCredentials, setIssuedCredentials] =
     useState<LaunchAgentCredentials | null>(null);
 
+  // 0.2.0 — for self-hosted + imported deploys the API returns a
+  // deployBundle next to the credentials. We capture both so the
+  // post-launch screen can render either the legacy key-reveal dialog
+  // (perkos-managed) or the new bundle + polling screen (BYO).
+  const [issuedBundle, setIssuedBundle] = useState<{
+    bundle: DeployBundle;
+    agentId: string;
+    agentName: string;
+    deployMode: "self-hosted" | "imported";
+    relayApiKey: string;
+  } | null>(null);
+
   // Resolve ECS access for the signed-in user. While loading, treat as
   // disallowed so the wizard never optimistically shows ECS as available
   // and then snaps it away. Refetch on window focus so an admin granting
@@ -215,8 +242,8 @@ export default function AgentLauncherPage() {
     runtime: null,
     imageTag: null,
     deployMode: null,
-    vpsIp: "",
-    vpsSshKey: "",
+    runtimeKind: null,
+    importedHermesApiUrl: "",
     llmSource: null,
     byokProvider: "",
     byokModel: "",
@@ -273,15 +300,31 @@ export default function AgentLauncherPage() {
           ...state.channels.map((c) => `channel:${c}`),
         ])
       );
+      // Translate wizard-side mode labels to the API wire shape.
+      const wireMode: "perkos-managed" | "self-hosted" | "imported" =
+        state.deployMode === "perkos-ecs"
+          ? "perkos-managed"
+          : state.deployMode === "self-hosted"
+            ? "self-hosted"
+            : "imported";
       return launchAgent({
         walletAddress: address,
         runtime: state.runtime,
         name: finalName,
         plugins: finalPlugins,
         modelKey: state.llmSource === "byok" ? state.byokApiKey : undefined,
-        // Only meaningful for PerkOS-ECS deploys; the launch endpoint
-        // ignores it for VPS / Local.
+        // Only meaningful for the perkos-managed (ECS) path; the launch
+        // endpoint ignores it for self-hosted / imported.
         imageTag: state.deployMode === "perkos-ecs" ? state.imageTag : null,
+        deployMode: wireMode,
+        runtimeKind:
+          wireMode === "imported" && state.runtimeKind
+            ? state.runtimeKind
+            : undefined,
+        hermesApiUrl:
+          wireMode === "imported" && state.importedHermesApiUrl.trim().length > 0
+            ? state.importedHermesApiUrl.trim()
+            : undefined,
       });
     },
     onSuccess: async (response) => {
@@ -369,6 +412,27 @@ export default function AgentLauncherPage() {
         }
       }
 
+      // BYO flows (self-hosted / imported) get a bundle screen that
+      // shows the compose.yml + .env + INSTRUCTIONS.md side-by-side and
+      // polls /agents/<id> for bridgeConnected to flip "Waiting…" →
+      // "Online ✓". The legacy AgentKeyRevealDialog only surfaces the
+      // relayApiKey, which is now baked into .env, so we skip it here.
+      const launchedAgentId = response?.result?.agent?.id ?? response?.launchId;
+      if (
+        response?.deployBundle &&
+        launchedAgentId &&
+        response?.credentials &&
+        (state.deployMode === "self-hosted" || state.deployMode === "imported")
+      ) {
+        setIssuedBundle({
+          bundle: response.deployBundle,
+          agentId: launchedAgentId,
+          agentName: response.credentials.agentName,
+          deployMode: state.deployMode,
+          relayApiKey: response.credentials.relayApiKey,
+        });
+        return;
+      }
       if (response?.credentials) {
         setIssuedCredentials(response.credentials);
         return;
@@ -380,19 +444,9 @@ export default function AgentLauncherPage() {
     },
   });
 
-  const ipError = useMemo(() => {
-    if (state.deployMode !== "vps") return undefined;
-    if (state.vpsIp.trim().length === 0) return undefined;
-    const parsed = ipv4Schema.safeParse(state.vpsIp);
-    return parsed.success ? undefined : parsed.error.issues[0]?.message;
-  }, [state.deployMode, state.vpsIp]);
-
-  const sshError = useMemo(() => {
-    if (state.deployMode !== "vps") return undefined;
-    if (state.vpsSshKey.trim().length === 0) return undefined;
-    const parsed = sshPublicKeySchema.safeParse(state.vpsSshKey);
-    return parsed.success ? undefined : parsed.error.issues[0]?.message;
-  }, [state.deployMode, state.vpsSshKey]);
+  // ipError / sshError dropped in 0.2 — BYO flows no longer collect a
+  // VPS IP or SSH key. The bridge dials out, so the platform never
+  // needs SSH access to the user's host.
 
   const apiKeyError = useMemo(() => {
     if (state.llmSource !== "byok") return undefined;
@@ -413,15 +467,9 @@ export default function AgentLauncherPage() {
       case 2:
         return state.runtime !== null;
       case 3:
-        if (state.deployMode === "local") return true;
         if (state.deployMode === "perkos-ecs") return ecsAllowed;
-        if (state.deployMode === "vps")
-          return (
-            state.vpsIp.trim().length > 0 &&
-            state.vpsSshKey.trim().length > 0 &&
-            !ipError &&
-            !sshError
-          );
+        if (state.deployMode === "self-hosted") return true;
+        if (state.deployMode === "imported") return state.runtimeKind !== null;
         return false;
       case 4:
         if (state.llmSource === "perkos") return llmAllowed;
@@ -436,7 +484,7 @@ export default function AgentLauncherPage() {
       default:
         return false;
     }
-  }, [state, mutation.isPending, mutation.isSuccess, ipError, sshError, apiKeyError, ecsAllowed, llmAllowed]);
+  }, [state, mutation.isPending, mutation.isSuccess, apiKeyError, ecsAllowed, llmAllowed]);
 
   const nextStep = () => update({ step: Math.min(state.step + 1, TOTAL_STEPS) });
   const prevStep = () => update({ step: Math.max(state.step - 1, 1) });
@@ -471,8 +519,6 @@ export default function AgentLauncherPage() {
           <Step3Deploy
             state={state}
             onChange={update}
-            ipError={ipError}
-            sshError={sshError}
             ecsAllowed={ecsAllowed}
           />
         )}
@@ -535,6 +581,20 @@ export default function AgentLauncherPage() {
           router.replace(fromOnboarding ? "/dashboard" : "/agents");
         }}
       />
+
+      {issuedBundle ? (
+        <DeployBundleScreen
+          bundle={issuedBundle.bundle}
+          agentId={issuedBundle.agentId}
+          agentName={issuedBundle.agentName}
+          deployMode={issuedBundle.deployMode}
+          relayApiKey={issuedBundle.relayApiKey}
+          onDone={() => {
+            setIssuedBundle(null);
+            router.replace(fromOnboarding ? "/dashboard" : "/agents");
+          }}
+        />
+      ) : null}
     </div>
   );
 }
@@ -1071,10 +1131,8 @@ function Step2Runtime({ state, onChange }: StepProps) {
 function Step3Deploy({
   state,
   onChange,
-  ipError,
-  sshError,
   ecsAllowed,
-}: StepProps & { ipError?: string; sshError?: string; ecsAllowed: boolean }) {
+}: StepProps & { ecsAllowed: boolean }) {
   // Auto-detect the chain so the ECS card shows the right network name
   // (Base / Celo today, more later). Falls back to "your connected chain"
   // when wagmi reports an unsupported id so the copy never lies.
@@ -1090,7 +1148,7 @@ function Step3Deploy({
     <div className="flex flex-col gap-4">
       <StepHeader
         title="Where should this agent run?"
-        description="Pick a deploy mode. You can move the agent later — only the credential changes."
+        description="Pick a deploy mode. The bridge dials OUT to PerkOS — no inbound ports needed for either self-hosted option."
       />
       <RadioGroup
         value={state.deployMode ?? ""}
@@ -1132,9 +1190,9 @@ function Step3Deploy({
               </p>
               {!ecsAllowed ? (
                 <p className="text-xs text-muted-foreground">
-                  Currently invite-only while we test. Pick VPS or Local for
-                  now, or contact an admin to be added to the early access
-                  list.
+                  Currently invite-only while we test. Pick self-hosted or
+                  imported for now, or contact an admin to be added to the
+                  early access list.
                 </p>
               ) : null}
             </div>
@@ -1143,92 +1201,118 @@ function Step3Deploy({
         </SelectableCard>
 
         <SelectableCard
-          selected={state.deployMode === "vps"}
-          onClick={() => onChange({ deployMode: "vps" })}
+          selected={state.deployMode === "self-hosted"}
+          onClick={() => onChange({ deployMode: "self-hosted" })}
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
                 <Server className="h-4 w-4 text-primary" />
                 <span className="text-base font-medium text-foreground">
-                  Run on a VPS I own
+                  Self-hosted (your infra)
                 </span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Paste an SSH endpoint + key. PerkOS pushes the install script
-                and watches the bridge come online.
+                We generate a docker-compose bundle (runtime + bridge sidecar).
+                Run <code className="rounded bg-muted px-1 font-mono text-[11px]">docker compose up -d</code>
+                {" "}on any host with Docker — bridge dials OUT, no inbound
+                ports / SSH access needed.
               </p>
             </div>
-            <RadioGroupItem value="vps" id="deploy-vps" />
+            <RadioGroupItem value="self-hosted" id="deploy-self-hosted" />
           </div>
         </SelectableCard>
 
         <SelectableCard
-          selected={state.deployMode === "local"}
-          onClick={() => onChange({ deployMode: "local" })}
+          selected={state.deployMode === "imported"}
+          onClick={() => onChange({ deployMode: "imported" })}
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
-                <Laptop className="h-4 w-4 text-primary" />
+                <PackageOpen className="h-4 w-4 text-primary" />
                 <span className="text-base font-medium text-foreground">
-                  Run on my machine
+                  Import an existing agent
                 </span>
               </div>
               <p className="text-sm text-muted-foreground">
-                PerkOS issues a relay credential. Paste it into your local
-                OpenClaw or Hermes config and restart. No infra required.
+                You already have a Hermes / OpenClaw / custom runtime running.
+                We hand you just the perkos-a2a bridge sidecar to plug it into
+                chat.perkos.xyz + transport.perkos.xyz.
               </p>
             </div>
-            <RadioGroupItem value="local" id="deploy-local" />
+            <RadioGroupItem value="imported" id="deploy-imported" />
           </div>
         </SelectableCard>
       </RadioGroup>
 
-      {state.deployMode === "vps" ? (
+      {state.deployMode === "imported" ? (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">VPS access</CardTitle>
+            <CardTitle className="text-base">What's already running?</CardTitle>
             <CardDescription>
-              We use this to push the install script. Public key only — we
-              never read or store your private key.
+              Tells the bridge which API shape to speak when it forwards
+              inbound chat frames into your runtime.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
+            <RadioGroup
+              value={state.runtimeKind ?? ""}
+              onValueChange={(v) =>
+                onChange({ runtimeKind: v as RuntimeKindChoice })
+              }
+              className="grid grid-cols-1 gap-2 md:grid-cols-3"
+            >
+              <SelectableCard
+                selected={state.runtimeKind === "hermes"}
+                onClick={() => onChange({ runtimeKind: "hermes" })}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-medium">Hermes</span>
+                  <RadioGroupItem value="hermes" id="rk-hermes" />
+                </div>
+              </SelectableCard>
+              <SelectableCard
+                selected={state.runtimeKind === "openclaw"}
+                onClick={() => onChange({ runtimeKind: "openclaw" })}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-medium">OpenClaw</span>
+                  <RadioGroupItem value="openclaw" id="rk-openclaw" />
+                </div>
+              </SelectableCard>
+              <SelectableCard
+                selected={state.runtimeKind === "custom"}
+                onClick={() => onChange({ runtimeKind: "custom" })}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-medium">Custom</span>
+                  <RadioGroupItem value="custom" id="rk-custom" />
+                </div>
+              </SelectableCard>
+            </RadioGroup>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="vps-ip">Public IP address</Label>
+              <Label htmlFor="imported-api-url">
+                Runtime URL (HERMES_API_URL){" "}
+                <span className="text-xs text-muted-foreground">
+                  optional
+                </span>
+              </Label>
               <Input
-                id="vps-ip"
-                value={state.vpsIp}
-                onChange={(e) => onChange({ vpsIp: e.target.value })}
-                placeholder="203.0.113.42"
-                inputMode="numeric"
-                aria-invalid={Boolean(ipError)}
-                aria-describedby={ipError ? "vps-ip-error" : undefined}
-              />
-              {ipError ? (
-                <p id="vps-ip-error" className="text-xs text-destructive">
-                  {ipError}
-                </p>
-              ) : null}
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="vps-ssh">SSH public key</Label>
-              <Textarea
-                id="vps-ssh"
-                value={state.vpsSshKey}
-                onChange={(e) => onChange({ vpsSshKey: e.target.value })}
-                placeholder="ssh-ed25519 AAAA…"
-                rows={4}
+                id="imported-api-url"
+                value={state.importedHermesApiUrl}
+                onChange={(e) =>
+                  onChange({ importedHermesApiUrl: e.target.value })
+                }
+                placeholder="http://host.docker.internal:8642"
                 className="font-mono text-xs"
-                aria-invalid={Boolean(sshError)}
-                aria-describedby={sshError ? "vps-ssh-error" : undefined}
               />
-              {sshError ? (
-                <p id="vps-ssh-error" className="text-xs text-destructive">
-                  {sshError}
-                </p>
-              ) : null}
+              <p className="text-xs text-muted-foreground">
+                Defaults to <code className="rounded bg-muted px-1 font-mono text-[10px]">host.docker.internal:8642</code>{" "}
+                for Hermes / <code className="rounded bg-muted px-1 font-mono text-[10px]">:8740</code>{" "}
+                for OpenClaw. Override if your runtime listens on a
+                non-default port.
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -1814,18 +1898,18 @@ function Step6Review({ state, onChange }: StepProps) {
             value={
               state.deployMode === "perkos-ecs"
                 ? "PerkOS infra (AWS ECS)"
-                : state.deployMode === "vps"
-                  ? `VPS · ${state.vpsIp || "no IP yet"}`
-                  : state.deployMode === "local"
-                    ? "Local machine"
+                : state.deployMode === "self-hosted"
+                  ? "Self-hosted (your infra)"
+                  : state.deployMode === "imported"
+                    ? `Imported · ${state.runtimeKind ?? "?"}`
                     : "—"
             }
             icon={
               state.deployMode === "perkos-ecs"
                 ? Cloud
-                : state.deployMode === "vps"
+                : state.deployMode === "self-hosted"
                   ? Server
-                  : Laptop
+                  : PackageOpen
             }
           />
           <SummaryRow
