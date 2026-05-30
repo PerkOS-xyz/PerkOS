@@ -3,6 +3,56 @@
 PerkOS App (`app.perkos.xyz`). One entry per release dated by deploy day.
 Phase numbering tracks `MIGRATION-PLAN-v2.md` in the workspace root.
 
+## 2026-05-30 — OpenClaw BYO end-to-end (imported runtime)
+
+Same wallet, third runtime variant proven: a **real OpenClaw runtime**
+plugged into PerkOS via the imported-bundle flow. Distinct from the
+Hermes path because OpenClaw's API shape is incompatible by default.
+
+### Two bridge-bundle bugs caught + fixed (see PerkOS-API CHANGELOG)
+
+1. **Wrong endpoint**: bundle defaulted to `/v1/responses` (Hermes).
+   OpenClaw exposes `/v1/chat/completions`. Fixed in
+   `deployBundle.ts` — now emits
+   `HERMES_API_ENDPOINT: /v1/chat/completions` when
+   `runtimeKind === "openclaw"`.
+2. **Wrong model field**: bridge's `deliverToHermes` defaulted to
+   `model: "hermes-agent"` in the request body. OpenClaw strictly
+   validates `openclaw` or `openclaw/<id>` and 400s on anything else.
+   Fixed by baking `HERMES_MODEL: openclaw` into the OpenClaw
+   bundle's compose env.
+3. **Wrong port** (self-hosted only): OpenClaw listens on
+   `:3000`, not `:8642` like Hermes. Self-hosted compose now wires
+   `HERMES_API_URL: http://perkos-runtime:3000` for OpenClaw.
+
+### Live proof
+
+- Existing OpenClaw runtime: `perkos-perkos` (council-perkos)
+  already running on port 3005 of the LLM VPS host. Treated as a
+  third-party Hermes-equivalent — bridge connects via
+  `host.docker.internal:3005` with `OPENCLAW_TOKEN=perkos-agent-2026`
+  baked into the bundle's `API_SERVER_KEY`.
+- Imported launch: agent `PerkOS-Claw-v1`
+  (id `eIlhEZ0cPwxiurZPs1g8`), `runtime: "OpenClaw"`,
+  `runtimeKind: "openclaw"`, `deployMode: "imported"`.
+- Heartbeat: 200 → `bridgeConnected: true`,
+  `runtimeVersion: "0.12.3"`, `runtimeKind: "openclaw"`.
+- Chat round-trip: sent `"Reply with the literal word
+  OPENCLAW_LIVE only."`, agent replied **`OPENCLAW_LIVE` in 7.8s**
+  via `chat_message from=agent:PerkOS-Claw-v1`. ~3× faster than
+  Hermes (the council OpenClaw runtimes are warm + co-located).
+- Bundle regenerated post-fix as `PerkOS-Claw-v3`
+  (id `eyKoHo2c5Nt2Ou44gNer`) — compose ships
+  `HERMES_API_ENDPOINT: /v1/chat/completions` +
+  `HERMES_MODEL: openclaw` natively, no manual patch needed.
+
+### What this proves
+
+The bridge sidecar is genuinely **runtime-agnostic**: same image, same
+heartbeat path, same chat WSS — the bundle just rewires three env
+vars (endpoint, model, port) per runtimeKind. Users with an existing
+OpenClaw fleet can join PerkOS without modifying their runtime.
+
 ## 2026-05-30 — BYO end-to-end chat round-trip + project membership
 
 Full user-visible loop validated against `app.perkos.xyz` for BOTH
