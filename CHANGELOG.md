@@ -3,6 +3,102 @@
 PerkOS App (`app.perkos.xyz`). One entry per release dated by deploy day.
 Phase numbering tracks `MIGRATION-PLAN-v2.md` in the workspace root.
 
+## 2026-05-30 — Multi-agent swarm fully live (OpenClaw broadcast fix + A2A delegation)
+
+Both gaps from the earlier swarm entry are closed. Same 3-agent swarm
+(`Multi-Agent-Swarm-Test`, project `QBMeFh7dQd17BDIB3vSp`), same wallet.
+
+### Fixes shipped (PerkOS-A2A 0.12.4)
+
+1. **OpenClaw chat replies through `chat.perkos.xyz` now work** (~15 s,
+   not 60+ s of apology paragraphs). Root cause: the bridge prepended
+   "POST to 127.0.0.1:5060/chat/reply with…" instructions to every chat
+   message. Hermes ignored those; OpenClaw is action-oriented and
+   actually tried to honor them via its tool registry, found no
+   `perkos-chat` channel registered, and spent the LLM's entire time
+   budget retrying tool calls. Fixed in `buildChatMessage` —
+   short-circuit to a sender label + the user's text when
+   `A2A_HERMES_AUTO_REPLY` is on (the BYO default). The bridge handles
+   routing.
+2. **`tryHandleAgenticTask` wired into `bridge-agent.ts`.** The
+   `agentic-actions.ts` module (sendTask, peer discovery, arrow-route
+   parser, @mention detector) already existed but was only reachable
+   from the OpenClaw-plugin entry path (`agent.ts`). The chat-enabled
+   standalone bridge — what all BYO agents run — had no hook. Wired
+   in. BYO agents can now delegate to peers via the relay.
+3. **OpenClaw is a first-class runtimeKind in bridge mode.**
+   Previously threw "Standalone runtime 'openclaw' is not supported";
+   now uses the same `deliverToHermes` path with the bundle's
+   `HERMES_API_ENDPOINT` override (already set to
+   `/v1/chat/completions` per the OpenClaw fix earlier today).
+
+### Smoke 1 — group broadcast, all 3 agents reply
+
+```
+ack delivered=3
+<- agent:PerkOS-Tester-v3     +4.6s   OPENCLAW_FIXED
+<- agent:PerkOS-Imported-v1   +8.6s   OPENCLAW_FIXED
+<- agent:PerkOS-Claw-v1       +14.9s  OPENCLAW_FIXED
+PASS  replies: 3
+```
+
+OpenClaw replies with the literal text requested in ~15 s — clean,
+no more "I'm having trouble finding the reply endpoint" apologies.
+Compare to before: 0 / 3 replies from OpenClaw inside a 90 s window.
+
+### Smoke 2 — A2A delegation, multi-hop, mixed runtimes
+
+`Test-Delegation-Driver` (a synthetic sender registered as
+`/agents/Test-Delegation-Driver` in Firestore) connects to the relay
+`wss://transport.perkos.xyz/a2a`, sends an A2A task to
+`PerkOS-Tester-v3` with the body:
+
+> Hand this task to PerkOS-Imported-v1. PerkOS-Imported-v1 should
+> reply with the literal text A2A_HOP_OK only.
+
+What happens behind the scenes (parsed from the returned task
+artifacts):
+
+```
+Test-Delegation-Driver
+  → A2A task
+PerkOS-Tester-v3  (Hermes, self-hosted, role=pm)
+  bridge tryHandleAgenticTask:
+    "Route: PerkOS-Tester-v3 -> PerkOS-Imported-v1 -> PerkOS-Claw-v1"
+  → server.sendTask
+PerkOS-Imported-v1  (Hermes, imported, role=researcher)
+  bridge tryHandleAgenticTask: route continues
+  → server.sendTask
+PerkOS-Claw-v1  (OpenClaw, imported, role=analyst)
+  emits: "**A2A_HOP_OK**\nTRI_HERMES_DONE"
+  ↓ reply target = PerkOS-Claw-v1 (terminal node)
+Final task_response → Test-Delegation-Driver  after 13.9s
+```
+
+Two A2A hops across 3 BYO agents of mixed runtimes (Hermes →
+Hermes → OpenClaw), the terminal node — an OpenClaw — emits the
+literal `A2A_HOP_OK` the user asked for. Whole multi-hop chain
+completes in **13.9 s**.
+
+### What this means for the product story
+
+The BYO bundle is now genuinely a **swarm-ready** sidecar, not just
+a relay attach point:
+- Any user-running Hermes or OpenClaw can be invited as a swarm
+  member, reply in chat, AND delegate work to peers via A2A.
+- The OpenClaw "tool action" mismatch that blocked the original
+  multi-agent test no longer exists — both runtimes get a clean
+  prompt and the bridge brokers the reply.
+- Cross-runtime delegation (Hermes ↔ OpenClaw) goes through the same
+  relay frame shape — no runtime-specific glue per hop.
+
+Pending product work, NOT shipped today (honest scope):
+- A Hermes-as-PM orchestrator prompt template (the BYO PM is still a
+  one-shot Hermes; coordination still needs the user to drive
+  `Test-Delegation-Driver` or equivalent).
+- Auto-completion writeback (runtime reply → Firestore
+  `task.result`). Today the PM-script does this.
+
 ## 2026-05-30 — Multi-agent swarm project (3 agents, mixed runtimes)
 
 Stress-test of the project + swarm + task model with the 3 BYO agents
