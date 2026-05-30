@@ -3,6 +3,100 @@
 PerkOS App (`app.perkos.xyz`). One entry per release dated by deploy day.
 Phase numbering tracks `MIGRATION-PLAN-v2.md` in the workspace root.
 
+## 2026-05-30 — Multi-agent swarm project (3 agents, mixed runtimes)
+
+Stress-test of the project + swarm + task model with the 3 BYO agents
+from earlier in the day. Validates what works today AND surfaces a
+concrete architectural gap I owe you. Test wallet
+`0xc2564e41…8228f`, project `Multi-Agent-Swarm-Test`
+(id `QBMeFh7dQd17BDIB3vSp`).
+
+### Swarm roster
+
+| handle     | agent                | runtime                  | role       |
+|------------|----------------------|--------------------------|------------|
+| pm         | PerkOS-Tester-v3     | Hermes (self-hosted)     | pm         |
+| researcher | PerkOS-Imported-v1   | Hermes (imported)        | researcher |
+| analyst    | PerkOS-Claw-v1       | OpenClaw (imported)      | analyst    |
+
+Project doc carries the full `swarm: { version:"1", roster:[…] }`
+shape that `app/lib/swarm.ts validateSwarm()` accepts. `agentIds`
++ `members` arrays mirror it for the projects-list UI.
+
+### Group conversation broadcast — works for Hermes, gap for OpenClaw
+
+Created a 4-participant conversation
+(`project-QBMeFh7dQd17BDIB3vSp-group`,
+kind `channel`, participants `user + 3 agents`). One user `send` →
+chat router returned `ack delivered=3` (proves backend broadcast),
+both Hermes agents replied in ~21–23s with `chat_message` frames.
+
+**OpenClaw runtime did NOT reply through the broadcast path.** Logs
+on `perkos-perkos` (the council OpenClaw) show it understood the
+message and generated a reply, but tried to route it through an
+OpenClaw "tool action" with `channel: "perkos-chat"` — that channel
+isn't registered in the council's tool registry, so the reply
+landed as an internal `Unknown channel: perkos-chat` error and never
+came back to `chat.sendReply`. Hermes works because the bridge
+sidecar uses the `A2A_HERMES_AUTO_REPLY` shortcut to read the
+runtime's HTTP response body directly and post a `chat_reply` frame
+itself — OpenClaw needs an analogous `perkos-chat` tool registration
+inside the OpenClaw runtime, or a similar HTTP-response-shortcut in
+the bridge that knows OpenClaw's response shape.
+
+For now: **group-chat broadcasts reach all 3 bridges, Hermes agents
+reply correctly, OpenClaw agents are still reachable via DM only.**
+
+### Per-agent task dispatch (PM-as-script)
+
+PerkOS does not ship a runtime-side PM orchestrator yet — the
+`agentic-actions.ts` in `@perkos/perkos-a2a` HAS the routing
+primitives (`sendTask`, `discoverPeers`, arrow-route parser, mention
+detector) but is only wired into `agent.ts` (the OpenClaw plugin
+path), NOT into `bridge-agent.ts` (the chat-enabled standalone bridge
+the BYO agents run). So the "PM" role in this test is a **node
+script** (`/tmp/dispatch-tasks.mjs`), not a Hermes LLM agent acting
+as PM. That's a real product gap.
+
+What the script does:
+1. `POST /agents/<id>/ensure-conv` for each of the 3 agents (parallel).
+2. For each conv, send `task.prompt` over `wss://chat.perkos.xyz/chat`.
+3. Wait up to 90 s for a `chat_message from=agent:<name>`.
+4. Write the captured reply back to Firestore as `task.result` and
+   flip `task.status: "Done"`.
+
+### Live results — all 3 tasks completed
+
+```
+[OK] pm         (PerkOS-Tester-v3)   +22.5s
+     "Ship one complete, end-to-end user feature to staging and
+      validate it with a live smoke test before end of day."
+[OK] researcher (PerkOS-Imported-v1) +19.9s
+     (empty reply — Hermes returned blank text; still wrote Done so
+      the lifecycle is observable. Real-world: a PM would re-prompt.)
+[OK] analyst    (PerkOS-Claw-v1)     +4.6s
+     "No, but $5/mo Hermes is cheaper than $18/mo Fargate, though
+      for a hobby project you might not need either if a free tier
+      or local setup works."
+```
+
+Firestore final state: project has `agents: 3, tasks: 3`. Three task
+docs under
+`wallets/<wallet>/projects/QBMeFh7dQd17BDIB3vSp/tasks/` carry
+`status: "Done"`, the captured `result`, and per-task `logs`
+(`dispatched via DM at convId=…`, `elapsed=Xms`).
+
+### Honest scope statement
+
+This test proves: real swarm + group conv + task lifecycle work as
+plumbing today. It does NOT prove: a Hermes agent autonomously
+decomposing a goal into tasks, agents delegating to each other via
+the A2A relay from BYO bridge mode, or auto-completion writeback from
+runtime to Firestore. Those require wiring `tryHandleAgenticTask`
+into `bridge-agent.ts` (small) + a PM-prompt template +
+runtime-to-Firestore result hook (medium), all separate from this
+deploy.
+
 ## 2026-05-30 — OpenClaw BYO end-to-end (imported runtime)
 
 Same wallet, third runtime variant proven: a **real OpenClaw runtime**
