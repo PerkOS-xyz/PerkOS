@@ -3,6 +3,68 @@
 PerkOS App (`app.perkos.xyz`). One entry per release dated by deploy day.
 Phase numbering tracks `MIGRATION-PLAN-v2.md` in the workspace root.
 
+## 2026-05-30 — BYO end-to-end chat round-trip + project membership
+
+Full user-visible loop validated against `app.perkos.xyz` for BOTH
+self-hosted and imported deploy modes. Test wallet
+`0xc2564e41…8228f` on the LLM VPS (`46.225.62.30`).
+
+### Mode 2 — self-hosted (full stack)
+
+- Agent: `PerkOS-Tester-v3` (id `vgXgI79rBap1F2ELkfhP`).
+- Compose: `perkos-assistant-hermes:local` runtime + locally-built
+  `perkos-tester-bridge:local` (perkos-a2a `0.12.3`) sidecar.
+- Heartbeat: 200 → `bridgeConnected: true`,
+  `runtimeVersion: "0.12.3"`.
+- Chat round-trip: `POST /agents/<id>/ensure-conv` → user opened WSS
+  to `wss://chat.perkos.xyz/chat`, sent `"Reply with the literal
+  word PINGBACK"`, agent replied `PINGBACK` in ~19s via
+  `chat_message from=agent:PerkOS-Tester-v3`.
+- Project: `BYO-Validation-Test` (id `0c9HmCsdxKNwGQZaF28e`) created
+  with `agentIds: [vgXgI79rBap1F2ELkfhP]`. Visible under `/projects`
+  for the test wallet.
+
+### Mode 3 — imported (bridge sidecar only, existing Hermes)
+
+- "Existing" Hermes simulated as a SEPARATE compose project on the
+  LLM VPS (`existing-hermes-for-imported-test`, host port 18642) —
+  represents a Hermes the user already has running outside any
+  PerkOS-issued bundle.
+- Imported launch: agent `PerkOS-Imported-v1`
+  (id `NmXyZaKeQS8gSVSgo68k`) with `deployMode: "imported"`,
+  `runtimeKind: "hermes"`,
+  `hermesApiUrl: "http://host.docker.internal:18642"`.
+- Bundle: bridge-only compose (no runtime container) +
+  `API_SERVER_KEY` shared between bridge and external Hermes — the
+  bundle ships with `API_SERVER_KEY=` blank and the
+  INSTRUCTIONS.md tells the operator to generate one and set it on
+  both sides; we did exactly that.
+- Heartbeat: 200 → `bridgeConnected: true`,
+  `lastBridgeSeenAt: 2026-05-30T04:42:18Z`,
+  `runtimeVersion: "0.12.3"`.
+- Chat round-trip: same `ensure-conv` → WSS auth → send flow. Agent
+  replied `IMPORTED_OK` in ~25s, proving the bridge sidecar
+  successfully forwarded the chat frame from `chat.perkos.xyz` to
+  the unrelated Hermes process on `host.docker.internal:18642` and
+  pushed the reply back through `chat.sendReply`.
+- Project: `Imported-Only-Project` (id `bXKb27hUnGhFh4qBzrBE`)
+  created with `agentIds: [NmXyZaKeQS8gSVSgo68k]`, plus
+  `BYO-Validation-Test` extended to include BOTH agents
+  (`agentIds: [vgXgI79rBap1F2ELkfhP, NmXyZaKeQS8gSVSgo68k]`,
+  `members` ranked owner / collaborator). Confirms a single project
+  can mix managed + BYO + imported agents transparently.
+
+### Test scripts left in `/tmp/` for re-runs
+
+- `/tmp/chat-roundtrip-test.mjs` — minimal ws client that takes
+  `AGENT_ID` + `TEST_MSG` env and asserts a `chat_message` from
+  `agent:<name>` lands within 90 s. Self-contained; only needs
+  `/tmp/perkos-tester-id-token.txt` + the `ws` npm package.
+- `/tmp/mint-tester-token.js` — mints a Firebase ID token for the
+  test wallet by exec'ing inside the `perkos-api` container (the
+  Firebase Admin creds are already in env there). Web API key
+  passed as `FIREBASE_PUBLIC_API_KEY=`.
+
 ## 2026-05-30 — BYO end-to-end validated on LLM VPS
 
 End-to-end smoke against a fresh `self-hosted` launch on the LLM VPS
