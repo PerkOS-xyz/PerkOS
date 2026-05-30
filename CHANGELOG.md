@@ -3,6 +3,127 @@
 PerkOS App (`app.perkos.xyz`). One entry per release dated by deploy day.
 Phase numbering tracks `MIGRATION-PLAN-v2.md` in the workspace root.
 
+## 2026-05-30 — Real-PM workflow E2E (Hermes plans, Hermes + OpenClaw work)
+
+The full PM workflow the user asked for is live, end-to-end, against
+real LLMs. Project `Multi-Agent-Swarm-Test`
+(id `QBMeFh7dQd17BDIB3vSp`), wallet `0xc2564e41…8228f`.
+
+### What runs in the loop
+
+```
+USER
+  ↓ (chat DM, real Hermes LLM)
+PM = PerkOS-Tester-v3 (Hermes, role=pm)
+  • given a goal + PM system prompt, outputs a strict JSON plan
+    `{ plan: [{ name, assigned_to, prompt }, ...] }`
+  • picks the right worker per task (researcher vs analyst)
+
+ORCHESTRATOR (script)
+  • writes 1 Firestore task doc per plan entry, status=Pending
+  • dispatches each task via A2A relay (single persistent connection
+    as Test-Delegation-Driver, multiplexed by task id)
+
+PerkOS-Imported-v1 (Hermes, role=researcher)   PerkOS-Claw-v1 (OpenClaw, role=analyst)
+  • runtime processes the prompt, returns text  • runtime processes, returns text
+  • A2A task_response payload now carries the   • same — see PerkOS-A2A 0.12.5–0.12.7
+    real text, not a delivery placeholder
+    (PerkOS-A2A 0.12.5–0.12.7)
+
+ORCHESTRATOR
+  • for each result: Firestore task → status=Done, result=<text>,
+    logs=[dispatched via A2A relay, worker, elapsed]
+  • sends completion summary to PM via DM
+
+PM (Hermes)
+  • generates a one-sentence acknowledgement (real LLM)
+
+ORCHESTRATOR
+  • posts the PM ack + per-task summary to the project's group conv
+    → all 3 agents see it (delivered=3)
+```
+
+The PM is real (Hermes LLM does the planning). Workers are real
+(Hermes + OpenClaw LLMs do the work). Firestore task lifecycle is
+real (Pending → Done with captured result text + logs). A2A relay
+is real (`wss://transport.perkos.xyz/a2a`, single connection
+multiplexed). Group chat broadcast is real (`wss://chat.perkos.xyz`,
+3 delivered).
+
+### Live run output
+
+```
+[1/8] ensure DM with PM
+[2/8] PM replied in 5.0s  ← real Hermes LLM planning
+      plan = 2 tasks
+        "Explain sidecar pattern"     → PerkOS-Imported-v1 (researcher)
+        "Calculate hosting savings"   → PerkOS-Claw-v1 (analyst)
+[3/8] created 2 Firestore task docs, status=Pending
+[4/8] dispatch via A2A (single persistent connection)
+      [OK] PerkOS-Imported-v1 +5.2s
+      [OK] PerkOS-Claw-v1     +5.2s
+[5/8] Firestore: both tasks Done
+[6/8] PM ack in 3.3s  ← real Hermes LLM acknowledgement
+      "Sprint complete — thanks to the team for the solid work."
+[7/8] group conv summary delivered=3
+[8/8] DONE
+```
+
+### Worker output samples (captured to Firestore)
+
+`PerkOS-Imported-v1 / Hermes / researcher` (781 chars):
+
+> The sidecar pattern is when you run a helper container right next
+> to your main application container so they share the same network
+> and storage, but each handles different jobs. It is like a
+> motorcyc… [truncated]
+
+`PerkOS-Claw-v1 / OpenClaw / analyst` (508 chars):
+
+> **Self-hosting:**\n- $5/month × 12 months = **$60/year**\n
+> **Managed service:**\n- $18/month × 12 months = **$216/year**\n
+> **Total one-year savings:**\n- $216 − …
+
+Both are real LLM output, persisted to
+`wallets/<wallet>/projects/QBMeFh7dQd17BDIB3vSp/tasks/<id>`.
+
+### Three PerkOS-A2A fixes shipped to make this work
+
+- **0.12.5** — A2A `task_response` carries the runtime's actual
+  reply text. Previously the bridge in BYO mode pushed a fixed
+  "Delivered to Hermes API Server." artifact and returned, so a2a
+  callers saw that placeholder instead of the answer.
+  `completeTaskWithReply` is now called after reading the runtime's
+  body.
+- **0.12.6** — `waitForLocalTaskTerminal` default 45 s → 240 s
+  (+ `A2A_TASK_WAIT_MS` env override). OpenClaw analysis prompts
+  routinely exceed 45 s; the prior default would expire and the
+  relay would emit a non-terminal `task_response` with the
+  intermediate "Task queued: …workspace/memory/…md" artifact.
+- **0.12.7** — `buildRuntimeMessage` short-circuits to a clean
+  prompt when auto-reply is on. The original A2A prompt forced the
+  model to prefix its reply with a literal `[A2A_RESULT:<uuid>]`
+  marker and repeat task/context IDs. Hermes interpreted that
+  rigidly and 50% of the time returned just the marker + nothing.
+  New prompt is `Agent <from> (PerkOS A2A task <id>):\n\n<text>` —
+  same lesson as 0.12.4's `buildChatMessage` fix.
+
+### Honest scope statement
+
+- The PM's **planning** and **acknowledgement** are real LLM work.
+  The **dispatch/persist/notify glue** is a Node script
+  (`/tmp/pm-workflow.mjs`) — productizing this as a wallet-facing
+  background worker is a separate ticket.
+- Workers don't autonomously call `update_task_status` — the
+  orchestrator does. A real `agent-tools` API in PerkOS-API would
+  let workers do this themselves; designed but not built today.
+- Kimi-K2.6 (Hermes default model) returns the literal string
+  "(empty)" when asked about specific terms it doesn't know (e.g.
+  "PerkOS-A2A bridge"). The PM prompt now steers it to use general
+  concepts. Real product would lean on a model with better
+  fallback ("I don't know, but here's a guess") OR provide PerkOS
+  context in the prompt.
+
 ## 2026-05-30 — Multi-agent swarm fully live (OpenClaw broadcast fix + A2A delegation)
 
 Both gaps from the earlier swarm entry are closed. Same 3-agent swarm
