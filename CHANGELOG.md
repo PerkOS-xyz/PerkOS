@@ -3,6 +3,40 @@
 PerkOS App (`app.perkos.xyz`). One entry per release dated by deploy day.
 Phase numbering tracks `MIGRATION-PLAN-v2.md` in the workspace root.
 
+## 2026-05-30 — BYO end-to-end validated on LLM VPS
+
+End-to-end smoke against a fresh `self-hosted` launch on the LLM VPS
+(`46.225.62.30`). Agent: `PerkOS-Tester-v3` (id `vgXgI79rBap1F2ELkfhP`).
+No App code changes — this entry just records what the wizard now
+produces in production.
+
+### Verified
+
+- `POST /agents/launch` with `deployMode: "self-hosted"` returns a
+  bundle that bakes `PERKOS_LLM_API_KEY=allowlisted-vps-temporary`
+  (PerkOS-managed LLM source default) and pins the bridge image to
+  `0.12.3`. Both regressions were on `0.12.2`.
+- Bridge boot fires `POST <api>/agents/<id>/heartbeat` and lands a
+  `200`. The body shape (`runtimeKind: "hermes"`, `ts: <epoch ms>`)
+  matches `HeartbeatRequestSchema`; the 0.12.2 shape was rejected
+  with `400` because it sent `"hermes-api"` + ISO string.
+- `GET /agents/<id>` after the first heartbeat returns
+  `bridgeConnected: true`, `lastBridgeSeenAt: <ISO>`,
+  `runtimeVersion: "0.12.3"`. The wizard's polling card flips to
+  "Online ✓" off this.
+- Hermes runtime `POST /v1/responses` against the LLM gateway returns
+  a Kimi-K2.6 reply, confirming the LLM hop works through the BYO
+  compose network.
+
+### Infra note (LLM gateway)
+
+- `api.llm.perkos.xyz` nginx allowlist widened from `172.20.0.0/16`
+  (the Assistant's specific compose network) to `172.16.0.0/12`
+  (covers every Docker default-bridge subnet). Without this, each new
+  BYO launch picks a fresh `/16` and 403s on the LLM gateway. The
+  magic key `allowlisted-vps-temporary` still gates on source IP, so
+  no untrusted process outside this single host can use it.
+
 ## 2026-05-29 — BYO (bring-your-own infra) agent wizard
 
 ### Added
