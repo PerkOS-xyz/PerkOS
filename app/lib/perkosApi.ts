@@ -1087,6 +1087,10 @@ export async function launchAgent(input: {
   runtimeKind?: RuntimeKind;
   /** Override HERMES_API_URL on imported flows (non-default port). */
   hermesApiUrl?: string;
+  /** Rendered persona markdown (SOUL.md / AGENTS.md). Server caps at 12 KB. */
+  soul?: string;
+  /** Selected skill pack ids; server resolves to raw SKILL.md URLs. */
+  skills?: string[];
 }): Promise<LaunchAgentResponse> {
   const { authedFetch } = await import("./apiClient");
   const response = await authedFetch("/api/agents/launch", {
@@ -1101,6 +1105,8 @@ export async function launchAgent(input: {
       deployMode: input.deployMode,
       runtimeKind: input.runtimeKind,
       hermesApiUrl: input.hermesApiUrl,
+      soul: input.soul,
+      skills: input.skills,
     }),
   });
   const payload = await parseJson(response);
