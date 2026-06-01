@@ -160,6 +160,8 @@ export async function processJob(job: ProvisionJob): Promise<void> {
       imageTag: input.imageTag,
       llmSource: input.llmSource,
       byokApiKey,
+      llmBaseUrl: input.llmBaseUrl,
+      llmModel: input.llmModel,
       perkosLlmApiKey,
       agentId,
       relayApiKey,

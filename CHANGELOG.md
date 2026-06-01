@@ -3,6 +3,24 @@
 PerkOS App (`app.perkos.xyz`). One entry per release dated by deploy day.
 Phase numbering tracks `MIGRATION-PLAN-v2.md` in the workspace root.
 
+## 2026-06-01 — BYOK endpoint overrides in the provisioner
+
+Ported the BYOK ("bring your own model") endpoint overrides into
+`app/lib/ecsProvision.ts` (+ `provisionJobs.ts`, `worker/processJob.ts`)
+to keep it in sync with PerkOS-API's provisioner. When `llmSource === "byok"`
+and `llmBaseUrl` is set, the runtime now points at the user's own
+OpenAI-compatible endpoint+model instead of the gateway+kimi, emitting
+`PERKOS_LLM_API=openai-completions` and `PERKOS_LLM_PROVIDER=byok` for
+OpenClaw. The `byok` provider name is deliberate: a provider named `openai`
++ the official `api.openai.com` baseUrl makes OpenClaw route through the
+Codex/Responses runtime, which ignores the config apiKey → 401. Additive —
+existing perkos-mode launches are unaffected.
+
+Note: the live provisioner is now PerkOS-API's worker (the miniapp worker
+was retired 2026-05-31), so this code path is currently inactive here; the
+change keeps the two provisioners consistent for when/if the miniapp worker
+returns.
+
 ## 2026-05-30 — Real-PM workflow E2E (Hermes plans, Hermes + OpenClaw work)
 
 The full PM workflow the user asked for is live, end-to-end, against

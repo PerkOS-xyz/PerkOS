@@ -70,6 +70,13 @@ export type ProvisionJobInput = {
    *  /agent_secrets/{wallet}/agents/{agentId} — never put plaintext
    *  in the job doc. */
   llmSource: "perkos" | "byok";
+  /** BYOK endpoint overrides (safe to store in the job doc — no secrets).
+   *  When llmSource === "byok" these point the runtime at the user's own
+   *  OpenAI-compatible endpoint+model. llmBaseUrl includes the version
+   *  path (e.g. "https://api.openai.com/v1"); llmModel is the wire id
+   *  (e.g. "gpt-4o"). Absent → runtime falls back to the PerkOS gateway. */
+  llmBaseUrl?: string;
+  llmModel?: string;
 };
 
 export type ProvisionJob = {

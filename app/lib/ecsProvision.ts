@@ -135,6 +135,14 @@ export type ProvisionInput = {
   /** Required when llmSource === "byok" — the user's own LLM provider key
    *  (OpenAI / Anthropic / OpenRouter). Stashed at .../llm-key. */
   byokApiKey?: string;
+  /** BYOK ("bring your own model") endpoint overrides. When llmSource ===
+   *  "byok" and these are set, they point the runtime at the user's own
+   *  OpenAI-compatible endpoint+model instead of the PerkOS gateway+kimi.
+   *  llmBaseUrl should include the version path (e.g.
+   *  "https://api.openai.com/v1"); llmModel is the wire model id (e.g.
+   *  "gpt-4o"). */
+  llmBaseUrl?: string;
+  llmModel?: string;
   /** When llmSource === "perkos", the per-agent key minted via
    *  registerLlmAgent() against api.llm.perkos.xyz. Stashed at
    *  .../perkos-llm-key. The runtime authenticates with this when it
@@ -271,11 +279,45 @@ export async function provisionEcsAgent(
 
   // Env for the runtime container. The entrypoint shim in PerkOS-Containers
   // templates these into ~/.openclaw/openclaw.json or hermes config.yaml.
+  // BYOK ("bring your own model"): when the user supplies their own
+  // OpenAI-compatible endpoint, point the runtime at it instead of the
+  // PerkOS gateway + kimi. See the OpenClaw provider-name note below.
+  const isByok = input.llmSource === "byok" && Boolean(input.llmBaseUrl);
+
   const runtimeEnv: { name: string; value: string }[] = [
     { name: "PERKOS_AGENT_ID", value: input.agentId },
     { name: "PERKOS_AGENT_NAME", value: input.agentName },
-    { name: "PERKOS_LLM_BASE_URL", value: PERKOS_LLM_BASE_URL },
-    { name: "PERKOS_LLM_DEFAULT_MODEL", value: "kimi-k2.6:cloud" },
+    {
+      name: "PERKOS_LLM_BASE_URL",
+      value: isByok ? (input.llmBaseUrl as string) : PERKOS_LLM_BASE_URL,
+    },
+    {
+      name: "PERKOS_LLM_DEFAULT_MODEL",
+      value: isByok && input.llmModel ? input.llmModel : "kimi-k2.6:cloud",
+    },
+    // OpenClaw provider API kind (Hermes ignores this; its template hardcodes
+    // api_mode). OpenClaw's config validator accepts a fixed set
+    // ("openai-completions", "openai-responses", "ollama", …). Use
+    // "openai-completions" for a BYOK OpenAI-compatible endpoint, else
+    // "ollama" (the PerkOS gateway).
+    {
+      name: "PERKOS_LLM_API",
+      value: isByok ? "openai-completions" : "ollama",
+    },
+    // OpenClaw provider NAME: the key under models.providers and the prefix
+    // stripped from the model id on the wire. MUST NOT be "openai" for BYOK:
+    // OpenClaw's openai-routing.ts routes any provider that normalizes to
+    // "openai" + official api.openai.com baseUrl through the Codex/Responses
+    // runtime, which expects an OAuth auth-profile and IGNORES the config
+    // apiKey → posts to /v1/responses with no bearer → 401. A non-"openai"
+    // name ("byok") skips Codex routing and uses the plain openai-completions
+    // client, which sends Authorization: Bearer <apiKey> to
+    // /v1/chat/completions. Wire model becomes "byok/<model>" → stripped to
+    // "<model>". Non-byok stays "ollama" (the gateway).
+    {
+      name: "PERKOS_LLM_PROVIDER",
+      value: isByok ? "byok" : "ollama",
+    },
     // Hibernation: the runtime's entrypoint reads this on boot (restore)
     // and SIGTERM (snapshot). Wallet/agent-scoped prefix; the bucket's
     // KMS encryption + IAM least-priv policy were stood up by
