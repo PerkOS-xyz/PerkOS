@@ -205,7 +205,14 @@ async function assertImageTagIsActive(
   if (!snap.exists) {
     throw new Error(`Image tag ${imageTag} not found for ${runtime}.`);
   }
-  if (snap.data()?.active !== true) {
+  // Channel model (shared-types 0.3.0): provisionable when public. Legacy
+  // docs carry only `active` → treat true as public. NOTE: this miniapp
+  // provisioner is the RETIRED mirror (the live worker is PerkOS-API's,
+  // which additionally allows "beta" for the testers group). Kept in sync
+  // for parity; the public-channel check is the safe subset here.
+  const data = snap.data() as { channel?: string; active?: boolean } | undefined;
+  const channel = data?.channel ?? (data?.active === true ? "public" : "hidden");
+  if (channel !== "public") {
     throw new Error(`Image tag ${imageTag} is not active for provisioning.`);
   }
 }

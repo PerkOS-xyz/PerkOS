@@ -3,6 +3,19 @@
 PerkOS App (`app.perkos.xyz`). One entry per release dated by deploy day.
 Phase numbering tracks `MIGRATION-PLAN-v2.md` in the workspace root.
 
+## 2026-06-01 — Runtime version visibility + beta channel (shared-types 0.3.0)
+
+- **Wizard** (`agents/new`): each runtime card shows the **upstream version**
+  (`OpenClaw v0.9.2`) and a **BETA** badge for beta-channel images. The
+  `/api/runtimes` response only includes beta images for testers, so regular
+  users keep seeing the public set.
+- **Agent detail**: new "Runtime version" row shows the exact OpenClaw/Hermes
+  version the agent runs (`ecs.upstreamVersion`, mirrored to `Agent`).
+- **Parity** (inactive mirror): `app/lib/ecsProvision.ts`'s image gate now
+  reads the `channel` model (back-compat with legacy `active`). This worker is
+  still retired — the live provisioner is PerkOS-API's — so this only keeps
+  the two consistent.
+
 ## 2026-06-01 — BYOK endpoint overrides in the provisioner
 
 Ported the BYOK ("bring your own model") endpoint overrides into

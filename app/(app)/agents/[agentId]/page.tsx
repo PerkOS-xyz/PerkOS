@@ -20,6 +20,7 @@ import {
   Server,
   KeyRound,
   Layers,
+  Boxes,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -387,6 +388,15 @@ function MetadataCard({ agent }: { agent: Agent }) {
             </span>
           ) : (
             <span className="text-muted-foreground">Not provisioned yet</span>
+          )}
+        </MetaRow>
+        <MetaRow Icon={Boxes} label="Runtime version">
+          {agent.upstreamVersion ? (
+            <span className="font-mono text-xs">
+              {agent.runtime} {agent.upstreamVersion}
+            </span>
+          ) : (
+            <span className="text-muted-foreground">—</span>
           )}
         </MetaRow>
         <MetaRow Icon={KeyRound} label="Model key">

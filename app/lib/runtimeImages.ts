@@ -3,6 +3,8 @@
 import { authedFetch } from "./apiClient";
 import type { AgentRuntime } from "./perkosApi";
 
+export type RuntimeChannel = "public" | "beta" | "hidden";
+
 export type RuntimeImage = {
   runtime: AgentRuntime;
   /** Stable tag that PerkOS-Admin pinned active. Used by /api/agents/launch
@@ -12,6 +14,12 @@ export type RuntimeImage = {
   displayName: string | null;
   /** Optional notes shown next to the runtime card. */
   notes: string | null;
+  /** Release channel. "beta" images are only returned to testers; the wizard
+   *  shows a BETA badge for them. Defaults to "public" for older API builds. */
+  channel?: RuntimeChannel;
+  /** Human-readable upstream version ("v0.9.2" or a short digest), or null
+   *  when the API/build predates version capture. */
+  upstreamVersion?: string | null;
 };
 
 /**

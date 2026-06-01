@@ -252,6 +252,11 @@ const agentConverter: FirestoreDataConverter<Agent> = {
       createdAt: tsToIso(data.createdAt),
       image: (data.image as string | undefined) ?? undefined,
       modelKeyProvided: (data.modelKeyProvided as boolean | undefined) ?? undefined,
+      upstreamVersion:
+        ((data.ecs as { upstreamVersion?: string | null } | undefined)
+          ?.upstreamVersion ??
+          (data.upstreamVersion as string | null | undefined)) ??
+        null,
     };
   },
 };

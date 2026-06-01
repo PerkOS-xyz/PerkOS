@@ -1149,10 +1149,21 @@ function Step2Runtime({ state, onChange }: StepProps) {
                     </li>
                   ))}
                 </ul>
-                <div className="mt-3 flex items-center gap-2 rounded-md border border-border bg-muted/30 px-2 py-1.5 text-[11px] text-muted-foreground">
-                  <Badge variant="secondary" className="text-[10px]">
-                    {latest.displayName ?? latest.primaryTag}
-                  </Badge>
+                <div className="mt-3 flex flex-wrap items-center gap-2 rounded-md border border-border bg-muted/30 px-2 py-1.5 text-[11px] text-muted-foreground">
+                  {latest.upstreamVersion ? (
+                    <Badge variant="secondary" className="text-[10px]">
+                      {copy.title} {latest.upstreamVersion}
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary" className="text-[10px]">
+                      {latest.displayName ?? latest.primaryTag}
+                    </Badge>
+                  )}
+                  {latest.channel === "beta" ? (
+                    <Badge className="bg-amber-500 text-[10px] text-white">
+                      BETA
+                    </Badge>
+                  ) : null}
                   <span className="truncate font-mono">{latest.primaryTag}</span>
                 </div>
               </SelectableCard>
