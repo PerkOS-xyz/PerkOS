@@ -7,6 +7,7 @@ import {
   Briefcase,
   Check,
   Clock,
+  CreditCard,
   Handshake,
   Layers,
   Lock,
@@ -27,7 +28,7 @@ import { LandingAutoRoute } from "./components/LandingAutoRoute";
 import { SmartCTA } from "./components/SmartCTA";
 
 export const metadata: Metadata = {
-  title: "PerkOS — Cut operational costs 60-80% with reliable AI agents",
+  title: "PerkOS — Cut operational costs by 60–80% with reliable AI agents",
   description:
     "Replace repetitive work in support, sales, and operations with AI agents that handle real volume, process payments, and escalate to humans only when necessary. Managed or self-hosted. Private beta — invitation only.",
 };
@@ -48,6 +49,8 @@ export default function LandingPage() {
         <DeploymentComparison />
         <PlatformCapabilities />
         <PricingAndToken />
+        <TokenUtility />
+        <WhyPekos />
         <Testimonials />
         <HowItWorks />
         <RequestAccess />
@@ -78,6 +81,9 @@ function TopNav() {
           </Link>
           <Link href="#pricing" className="hover:text-foreground transition-colors">
             Pricing
+          </Link>
+          <Link href="#token" className="hover:text-foreground transition-colors">
+            $PEKOS
           </Link>
           <Link href="#request-access" className="hover:text-foreground transition-colors">
             Contact
@@ -515,6 +521,12 @@ function PricingAndToken() {
           <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
             Simple plans. Real results.
           </h2>
+          <Badge
+            variant="secondary"
+            className="border-primary/30 bg-primary/10 text-xs uppercase tracking-wider text-primary"
+          >
+            Private beta · Invitation only
+          </Badge>
           <p className="max-w-2xl text-base text-muted-foreground">
             Access is invitation-only during the private beta — request access
             and we&apos;ll match you to the right plan.
@@ -570,23 +582,156 @@ function PricingAndToken() {
             </div>
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
 
-        {/* $PEKOS token — contained callout, not a full section */}
-        <div className="mt-8 flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/5 p-6 md:flex-row md:items-center md:gap-6">
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
-            <Zap className="h-5 w-5" />
+// ============================================================================
+// $PEKOS token utility (dedicated section)
+// ============================================================================
+
+function TokenUtility() {
+  const benefits = [
+    {
+      Icon: CreditCard,
+      title: "15–25% discount",
+      copy: "Pay for Growth and Enterprise plans with $PEKOS and save 15–25% versus fiat.",
+    },
+    {
+      Icon: Shield,
+      title: "Staking benefits",
+      copy: "Stake $PEKOS for permanent discounts, priority support, and early access to new AI processes.",
+    },
+    {
+      Icon: TrendingDown,
+      title: "Future revenue share",
+      copy: "Stakers are positioned for revenue share in selected cases as the platform scales.",
+    },
+    {
+      Icon: Zap,
+      title: "Agent micropayments",
+      copy: "Agents settle usage in micropayments via x402 — the same rail that powers instant, chargeback-free billing.",
+    },
+  ];
+  return (
+    <section id="token" className="border-b border-border py-20 md:py-28">
+      <div className="mx-auto max-w-6xl px-4 md:px-8">
+        <div className="mb-12 flex flex-col items-center gap-3 text-center md:mb-16">
+          <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+            $PEKOS token
           </span>
-          <div className="flex-1">
-            <h3 className="text-base font-semibold text-foreground">
-              Pay with $PEKOS — save up to 25%
-            </h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Organizations paying with $PEKOS get 15–25% off Growth and
-              Enterprise plans, plus optional staking benefits: permanent
-              discounts, priority support, and early access to new AI processes.
-              The token aligns PerkOS with the companies building on it.
-            </p>
-          </div>
+          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+            $PEKOS Token Utility
+          </h2>
+          <p className="max-w-2xl text-base text-muted-foreground">
+            <b className="text-foreground">Pay with $PEKOS — save up to 25%.</b>{" "}
+            Organizations that pay with $PEKOS receive 15–25% off Growth and
+            Enterprise plans. Stakers also unlock permanent discounts, priority
+            support, and early access to new AI processes. The token aligns
+            incentives between PerkOS and the companies running real operations
+            on the platform.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-4">
+          {benefits.map(({ Icon, title, copy }) => (
+            <div
+              key={title}
+              className="flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/5 p-6"
+            >
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/15 text-primary">
+                <Icon className="h-4 w-4" />
+              </span>
+              <h3 className="text-base font-medium text-foreground">{title}</h3>
+              <p className="text-sm text-muted-foreground">{copy}</p>
+            </div>
+          ))}
+        </div>
+
+        <p className="mt-8 text-center text-xs text-muted-foreground">
+          $PEKOS settles on <b className="text-foreground">Base</b> and{" "}
+          <b className="text-foreground">Celo</b> via the x402 protocol —
+          low-fee, instant, multi-chain payments for agents and organizations.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================================
+// Why $PEKOS — investor narrative
+// ============================================================================
+
+function WhyPekos() {
+  const points = [
+    {
+      Icon: Zap,
+      title: "Token demand flywheel",
+      copy: "Every organization paying or staking with $PEKOS to cut costs adds recurring demand for the token — usage and value reinforce each other.",
+    },
+    {
+      Icon: Briefcase,
+      title: "Revenue-share potential",
+      copy: "As platform revenue grows, stakers are positioned to share in it — aligning long-term holders with real operational usage, not speculation.",
+    },
+    {
+      Icon: Layers,
+      title: "Multi-chain strategy",
+      copy: "Settlement on Base + Celo via x402 gives $PEKOS reach across ecosystems and instant, chargeback-free micropayments at agent scale.",
+    },
+  ];
+  return (
+    <section
+      id="investors"
+      className="relative overflow-hidden border-b border-border bg-card/30 py-20 md:py-28"
+    >
+      <div
+        aria-hidden
+        className="absolute inset-0 -z-10"
+        style={{
+          backgroundImage:
+            "radial-gradient(ellipse 50% 40% at 50% 50%, rgba(236,27,105,0.08) 0%, transparent 70%)",
+        }}
+      />
+      <div className="mx-auto max-w-6xl px-4 md:px-8">
+        <div className="mb-12 flex flex-col items-center gap-3 text-center md:mb-16">
+          <Badge
+            variant="secondary"
+            className="border-primary/30 bg-primary/10 text-xs uppercase tracking-wider text-primary"
+          >
+            For investors
+          </Badge>
+          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+            Why $PEKOS — value for long-term holders.
+          </h2>
+          <p className="max-w-2xl text-base text-muted-foreground">
+            $PEKOS isn&apos;t a side feature — it&apos;s the alignment layer
+            between the platform&apos;s growth and the people backing it.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+          {points.map(({ Icon, title, copy }) => (
+            <div
+              key={title}
+              className="flex flex-col gap-3 rounded-xl border border-border bg-card p-6"
+            >
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/15 text-primary">
+                <Icon className="h-4 w-4" />
+              </span>
+              <h3 className="text-base font-medium text-foreground">{title}</h3>
+              <p className="text-sm text-muted-foreground">{copy}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-10 text-center">
+          <a
+            href="mailto:invest@perkos.xyz"
+            className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-5 py-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40"
+          >
+            <Briefcase className="h-4 w-4 text-primary" />
+            Investor inquiries — invest@perkos.xyz
+          </a>
         </div>
       </div>
     </section>
@@ -821,6 +966,12 @@ function FinalCTA() {
         }}
       />
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-7 px-4 text-center">
+        <Badge
+          variant="secondary"
+          className="border-primary/30 bg-primary/10 text-xs uppercase tracking-wider text-primary"
+        >
+          Private beta · Invitation only
+        </Badge>
         <h2 className="text-3xl font-semibold leading-tight tracking-tight md:text-5xl">
           Ready to reduce operational costs with AI agents that deliver?
         </h2>
@@ -881,16 +1032,17 @@ function Footer() {
               { label: "Use cases", href: "#use-cases" },
               { label: "How it works", href: "#how-it-works" },
               { label: "Pricing", href: "#pricing" },
+              { label: "$PEKOS token", href: "#token" },
+              { label: "For investors", href: "#investors" },
               { label: "Request access", href: "#request-access" },
             ]}
           />
 
           <FooterColumn
-            title="Stack"
+            title="Ecosystem"
             links={[
               { label: "Stack — payments ↗", href: "https://stack.perkos.xyz", external: true },
               { label: "Spark — single agent ↗", href: "https://spark.perkos.xyz", external: true },
-              { label: "Aura — AI APIs ↗", href: "https://aura.perkos.xyz", external: true },
             ]}
           />
 
