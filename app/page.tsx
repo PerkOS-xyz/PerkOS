@@ -791,6 +791,9 @@ function RequestAccess() {
                 <Link href="https://farcaster.xyz/perkos" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-foreground transition-colors hover:border-primary/40">
                   Farcaster ↗
                 </Link>
+                <Link href="https://www.linkedin.com/company/perkos/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-foreground transition-colors hover:border-primary/40">
+                  LinkedIn ↗
+                </Link>
               </div>
             </div>
           </div>
@@ -898,6 +901,7 @@ function Footer() {
               { label: "GitHub", href: "https://github.com/PerkOS-xyz", external: true },
               { label: "x402 Protocol", href: "https://www.x402.org/", external: true },
               { label: "X / Twitter", href: "https://x.com/perk_os", external: true },
+              { label: "LinkedIn", href: "https://www.linkedin.com/company/perkos/", external: true },
             ]}
           />
         </div>
