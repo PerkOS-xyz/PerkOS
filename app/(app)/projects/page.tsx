@@ -1,21 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
-import { Folder, Plus, X } from "lucide-react";
+import { Archive, ArchiveRestore, Folder, Plus, Trash2, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { getWalletProjects, type Project } from "../../lib/perkosApi";
+import { toast } from "sonner";
 import {
-  SearchInput,
-  matchesQuery,
-} from "../../components/SearchInput";
+  deleteProject,
+  getWalletProjects,
+  updateProject,
+  type Project,
+} from "../../lib/perkosApi";
+import { SearchInput, matchesQuery } from "../../components/SearchInput";
 import { EmptyState } from "../../components/EmptyState";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 
 export default function ProjectsPage() {
   const { address, isConnected } = useConnection();
+  const qc = useQueryClient();
   const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const searchParams = useSearchParams();
   // Status filter via ?status=. Currently "active" is the only value the
   // dashboard sends; other values silently pass through.
@@ -37,6 +46,77 @@ export default function ProjectsPage() {
   );
   const hasProjects = allProjects.length > 0;
   const noResults = hasProjects && projects.length === 0;
+
+  // Selection is scoped to what's currently visible (filtered).
+  const visibleIds = useMemo(
+    () => projects.map((p) => p.id).filter((id): id is string => Boolean(id)),
+    [projects]
+  );
+  const selectedVisible = visibleIds.filter((id) => selected.has(id));
+  const allChecked =
+    visibleIds.length > 0 && selectedVisible.length === visibleIds.length;
+  const someChecked = selectedVisible.length > 0 && !allChecked;
+
+  function toggle(id: string, on: boolean) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }
+  function toggleAll(on: boolean) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      for (const id of visibleIds) {
+        if (on) next.add(id);
+        else next.delete(id);
+      }
+      return next;
+    });
+  }
+  const clear = () => setSelected(new Set());
+
+  const runBulk = async (ids: string[], fn: (id: string) => Promise<unknown>) => {
+    const results = await Promise.allSettled(ids.map(fn));
+    const failed = results.filter((r) => r.status === "rejected").length;
+    return { ok: ids.length - failed, failed };
+  };
+
+  const archiveMut = useMutation({
+    mutationFn: (status: "Archived" | "Active") =>
+      runBulk(selectedVisible, (id) =>
+        updateProject({ walletAddress: address!, projectId: id, patch: { status } })
+      ),
+    onSuccess: ({ ok, failed }, status) => {
+      qc.invalidateQueries({ queryKey: ["wallet-projects", address] });
+      const verb = status === "Archived" ? "Archived" : "Unarchived";
+      if (failed) toast.error(`${verb} ${ok}, ${failed} failed`);
+      else toast.success(`${verb} ${ok} project${ok === 1 ? "" : "s"}`);
+      clear();
+    },
+    onError: (e: Error) => toast.error("Bulk update failed", { description: e.message }),
+  });
+
+  const deleteMut = useMutation({
+    mutationFn: () =>
+      runBulk(selectedVisible, (id) =>
+        deleteProject({ walletAddress: address!, projectId: id })
+      ),
+    onSuccess: ({ ok, failed }) => {
+      qc.invalidateQueries({ queryKey: ["wallet-projects", address] });
+      if (failed) toast.error(`Deleted ${ok}, ${failed} failed`);
+      else toast.success(`Deleted ${ok} project${ok === 1 ? "" : "s"}`);
+      setConfirmDelete(false);
+      clear();
+    },
+    onError: (e: Error) => {
+      toast.error("Bulk delete failed", { description: e.message });
+      setConfirmDelete(false);
+    },
+  });
+
+  const mutating = archiveMut.isPending || deleteMut.isPending;
 
   return (
     <div className="flex flex-col gap-6">
@@ -73,19 +153,85 @@ export default function ProjectsPage() {
 
       {isLoading ? <SkeletonCards /> : null}
       {error ? <ErrorBanner message={(error as Error).message} /> : null}
+
       {!isLoading && !error && projects.length > 0 ? (
-        <ul className="flex flex-col gap-3">
-          {projects.map((p) => (
-            <ProjectCard key={p.id ?? p.name} project={p} />
-          ))}
-        </ul>
+        <div className="flex flex-col gap-3">
+          {/* Select-all + bulk actions row */}
+          <div className="flex flex-wrap items-center gap-3 px-1">
+            <label className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Checkbox
+                checked={allChecked ? true : someChecked ? "indeterminate" : false}
+                onCheckedChange={toggleAll}
+                aria-label="Select all projects"
+              />
+              Select all
+            </label>
+            {selectedVisible.length > 0 ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-medium text-foreground">
+                  {selectedVisible.length} selected
+                </span>
+                <Button
+                  size="xs"
+                  variant="outline"
+                  disabled={mutating}
+                  onClick={() => archiveMut.mutate("Archived")}
+                >
+                  <Archive className="h-3.5 w-3.5" /> Archive
+                </Button>
+                <Button
+                  size="xs"
+                  variant="outline"
+                  disabled={mutating}
+                  onClick={() => archiveMut.mutate("Active")}
+                >
+                  <ArchiveRestore className="h-3.5 w-3.5" /> Unarchive
+                </Button>
+                <Button
+                  size="xs"
+                  variant="destructive"
+                  disabled={mutating}
+                  onClick={() => setConfirmDelete(true)}
+                >
+                  <Trash2 className="h-3.5 w-3.5" /> Delete
+                </Button>
+                <Button size="xs" variant="ghost" disabled={mutating} onClick={clear}>
+                  Clear
+                </Button>
+              </div>
+            ) : null}
+          </div>
+
+          <ul className="flex flex-col gap-3">
+            {projects.map((p) => (
+              <ProjectCard
+                key={p.id ?? p.name}
+                project={p}
+                checked={p.id ? selected.has(p.id) : false}
+                onToggle={(on) => p.id && toggle(p.id, on)}
+              />
+            ))}
+          </ul>
+        </div>
       ) : null}
+
       {!isLoading && !error && noResults ? (
         <p className="rounded-md border border-dashed border-[#1b1833] px-6 py-10 text-center text-sm text-[#7975a8]">
           No projects match &quot;{query}&quot;.
         </p>
       ) : null}
       {!isLoading && !error && !hasProjects ? <EmptyHint /> : null}
+
+      <ConfirmDialog
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title={`Delete ${selectedVisible.length} project${selectedVisible.length === 1 ? "" : "s"}?`}
+        description="This permanently deletes the selected projects and removes them from your workspace. This can't be undone."
+        confirmLabel="Delete"
+        destructive
+        pending={deleteMut.isPending}
+        onConfirm={() => deleteMut.mutate()}
+      />
     </div>
   );
 }
@@ -102,15 +248,24 @@ function CreateProjectButton() {
   );
 }
 
-function ProjectCard({ project }: { project: Project }) {
+function ProjectCard({
+  project,
+  checked,
+  onToggle,
+}: {
+  project: Project;
+  checked: boolean;
+  onToggle: (on: boolean) => void;
+}) {
   // Take the first letter of each significant word for the avatar
   // (max 2 chars). "DeFi Research" → "DR", "Welcome to PerkOS" → "WP".
-  const initials = project.name
-    .split(/\s+/)
-    .filter((w) => w.length > 1 || /[A-Z]/.test(w))
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? "")
-    .join("") || project.name.slice(0, 2).toUpperCase();
+  const initials =
+    project.name
+      .split(/\s+/)
+      .filter((w) => w.length > 1 || /[A-Z]/.test(w))
+      .slice(0, 2)
+      .map((w) => w[0]?.toUpperCase() ?? "")
+      .join("") || project.name.slice(0, 2).toUpperCase();
 
   // Stable hue per project so each card has its own avatar tint without
   // needing per-project config. Hashes the id (or name fallback) into 0-360.
@@ -120,10 +275,19 @@ function ProjectCard({ project }: { project: Project }) {
   const hue = seed % 360;
 
   return (
-    <li>
+    <li
+      className={`flex items-center gap-2 rounded-lg border bg-card/60 pl-3 transition-colors ${
+        checked ? "border-primary/60" : "border-primary/25 hover:border-primary/50"
+      }`}
+    >
+      <Checkbox
+        checked={checked}
+        onCheckedChange={onToggle}
+        aria-label={`Select ${project.name}`}
+      />
       <Link
         href={`/projects/${encodeURIComponent(project.id ?? "")}`}
-        className="glow-card flex items-center gap-3 rounded-lg border border-primary/25 bg-card/60 px-3 py-3 transition-colors hover:border-primary/50"
+        className="glow-card flex flex-1 items-center gap-3 rounded-lg px-2 py-3"
       >
         {/* Project avatar: tinted circle with initials. Glow halo on hover. */}
         <div

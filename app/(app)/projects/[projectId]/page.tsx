@@ -9,15 +9,19 @@ import { toast } from "sonner";
 import { Pencil, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 
 import {
   addProjectMessage,
   deleteProject,
   deleteTask,
   getWalletProject,
+  updateTask,
   type ChatMessage,
   type ProjectDetail,
   type Task,
+  type TaskStatus,
 } from "../../../lib/perkosApi";
 import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { EditProjectDialog } from "../../../components/EditProjectDialog";
@@ -332,6 +336,10 @@ function TasksTab({
   tasks: Task[];
   projectId: string;
 }) {
+  const { address } = useConnection();
+  const queryClient = useQueryClient();
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const newTaskHref = `/tasks/new?projectId=${encodeURIComponent(projectId)}`;
 
   // Map tasks to KanbanItem shape; carry the original task in `task` for renderCard.
@@ -342,6 +350,67 @@ function TasksTab({
       status: BACKEND_TO_KANBAN[task.status] ?? "todo",
       task,
     }));
+
+  const visibleIds = kanbanItems.map((i) => i.id);
+  const selectedIds = visibleIds.filter((id) => selected.has(id));
+
+  const toggle = (id: string, on: boolean) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  const clear = () => setSelected(new Set());
+
+  const summarize = (results: PromiseSettledResult<unknown>[]) => {
+    const failed = results.filter((r) => r.status === "rejected").length;
+    return { ok: results.length - failed, failed };
+  };
+  const invalidate = () =>
+    queryClient.invalidateQueries({
+      queryKey: ["wallet-project", address, projectId],
+    });
+
+  const moveMut = useMutation({
+    mutationFn: (status: TaskStatus) =>
+      Promise.allSettled(
+        selectedIds.map((id) =>
+          updateTask({ walletAddress: address!, projectId, taskId: id, patch: { status } })
+        )
+      ),
+    onSuccess: (results) => {
+      invalidate();
+      const { ok, failed } = summarize(results);
+      if (failed) toast.error(`Moved ${ok}, ${failed} failed`);
+      else toast.success(`Moved ${ok} task${ok === 1 ? "" : "s"}`);
+      clear();
+    },
+    onError: (e: Error) => toast.error("Bulk move failed", { description: e.message }),
+  });
+
+  const deleteMut = useMutation({
+    mutationFn: () =>
+      Promise.allSettled(
+        selectedIds.map((id) =>
+          deleteTask({ walletAddress: address!, projectId, taskId: id })
+        )
+      ),
+    onSuccess: (results) => {
+      invalidate();
+      const { ok, failed } = summarize(results);
+      if (failed) toast.error(`Deleted ${ok}, ${failed} failed`);
+      else toast.success(`Deleted ${ok} task${ok === 1 ? "" : "s"}`);
+      setConfirmDelete(false);
+      clear();
+    },
+    onError: (e: Error) => {
+      toast.error("Bulk delete failed", { description: e.message });
+      setConfirmDelete(false);
+    },
+  });
+
+  const mutating = moveMut.isPending || deleteMut.isPending;
 
   const createTaskCtaByColumn = {
     todo: (
@@ -357,6 +426,30 @@ function TasksTab({
 
   return (
     <div className="flex flex-col gap-3">
+      {selectedIds.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-2 rounded-md border border-primary/30 bg-card/60 px-3 py-2">
+          <span className="text-xs font-medium text-foreground">
+            {selectedIds.length} selected
+          </span>
+          <span className="text-[11px] text-muted-foreground">Move to:</span>
+          <Button size="xs" variant="outline" disabled={mutating} onClick={() => moveMut.mutate("Backlog")}>
+            To do
+          </Button>
+          <Button size="xs" variant="outline" disabled={mutating} onClick={() => moveMut.mutate("In progress")}>
+            In progress
+          </Button>
+          <Button size="xs" variant="outline" disabled={mutating} onClick={() => moveMut.mutate("Done")}>
+            Done
+          </Button>
+          <Button size="xs" variant="destructive" disabled={mutating} onClick={() => setConfirmDelete(true)}>
+            <Trash2 className="h-3.5 w-3.5" /> Delete
+          </Button>
+          <Button size="xs" variant="ghost" disabled={mutating} onClick={clear}>
+            Clear
+          </Button>
+        </div>
+      ) : null}
+
       <KanbanBoard
         items={kanbanItems}
         emptyMessage="Drag a task here or create one."
@@ -371,13 +464,30 @@ function TasksTab({
           });
         }}
         renderCard={({ item }) => (
-          <TaskCard task={item.task} projectId={projectId} />
+          <TaskCard
+            task={item.task}
+            projectId={projectId}
+            selectable
+            checked={selected.has(item.id)}
+            onToggle={(on) => toggle(item.id, on)}
+          />
         )}
       />
       <p className="text-[10px] text-muted-foreground">
         Drag-and-drop is local for now. Backend sync coming with the next
         release.
       </p>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title={`Delete ${selectedIds.length} task${selectedIds.length === 1 ? "" : "s"}?`}
+        description="The selected tasks and their history will be removed. This can't be undone."
+        confirmLabel="Delete"
+        destructive
+        pending={deleteMut.isPending}
+        onConfirm={() => deleteMut.mutate()}
+      />
     </div>
   );
 }
@@ -416,7 +526,19 @@ function ConductorTab({
   );
 }
 
-function TaskCard({ task, projectId }: { task: Task; projectId: string }) {
+function TaskCard({
+  task,
+  projectId,
+  selectable,
+  checked,
+  onToggle,
+}: {
+  task: Task;
+  projectId: string;
+  selectable?: boolean;
+  checked?: boolean;
+  onToggle?: (on: boolean) => void;
+}) {
   const queryClient = useQueryClient();
   const { address } = useConnection();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -470,9 +592,18 @@ function TaskCard({ task, projectId }: { task: Task; projectId: string }) {
 
   return (
     <div className="group relative">
+      {selectable ? (
+        <div className="absolute left-2 top-3 z-10">
+          <Checkbox
+            checked={Boolean(checked)}
+            onCheckedChange={(on) => onToggle?.(on)}
+            aria-label={`Select ${task.name}`}
+          />
+        </div>
+      ) : null}
       <Link
         href={`/projects/${encodeURIComponent(projectId)}/tasks/${encodeURIComponent(task.id)}`}
-        className={cardClass}
+        className={cn(cardClass, selectable && "pl-9")}
       >
         {inner}
       </Link>
