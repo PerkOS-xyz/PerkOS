@@ -2,19 +2,25 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
-import { Plus, Folder, ListTodo, X, ChevronDown } from "lucide-react";
+import { Plus, Folder, ListTodo, Trash2, X, ChevronDown } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
 import {
+  deleteTask,
   getWalletProject,
   getWalletProjects,
+  updateTask,
   type Project,
   type Task,
+  type TaskStatus,
 } from "../../lib/perkosApi";
 import { KanbanBoard } from "../../components/KanbanBoard";
 import {
@@ -22,6 +28,7 @@ import {
   matchesQuery,
 } from "../../components/SearchInput";
 import { EmptyState } from "../../components/EmptyState";
+import { ConfirmDialog } from "../../components/ConfirmDialog";
 
 type EnrichedTask = {
   task: Task;
@@ -31,7 +38,10 @@ type EnrichedTask = {
 
 export default function TasksPage() {
   const { address, isConnected } = useConnection();
+  const queryClient = useQueryClient();
   const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const searchParams = useSearchParams();
   // Status filter via ?status=. Values:
   //   "active" → In progress + Review
@@ -131,6 +141,69 @@ export default function TasksPage() {
   const noResults =
     allTasks.length > 0 && filteredTasks.length === 0;
 
+  // --- bulk selection (cross-project: carry each task's projectId) --------
+  const selectedItems = kanbanItems.filter((i) => selected.has(i.id));
+  const toggle = (id: string, on: boolean) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  const clear = () => setSelected(new Set());
+
+  const summarize = (results: PromiseSettledResult<unknown>[]) => {
+    const failed = results.filter((r) => r.status === "rejected").length;
+    return { ok: results.length - failed, failed };
+  };
+  const invalidateAffected = () => {
+    const pids = new Set(selectedItems.map((i) => i.projectId));
+    for (const pid of pids) {
+      queryClient.invalidateQueries({ queryKey: ["wallet-project", address, pid] });
+    }
+    queryClient.invalidateQueries({ queryKey: ["wallet-projects", address] });
+  };
+
+  const moveMut = useMutation({
+    mutationFn: (status: TaskStatus) =>
+      Promise.allSettled(
+        selectedItems.map((i) =>
+          updateTask({ walletAddress: address!, projectId: i.projectId, taskId: i.id, patch: { status } })
+        )
+      ),
+    onSuccess: (results) => {
+      invalidateAffected();
+      const { ok, failed } = summarize(results);
+      if (failed) toast.error(`Moved ${ok}, ${failed} failed`);
+      else toast.success(`Moved ${ok} task${ok === 1 ? "" : "s"}`);
+      clear();
+    },
+    onError: (e: Error) => toast.error("Bulk move failed", { description: e.message }),
+  });
+
+  const deleteMut = useMutation({
+    mutationFn: () =>
+      Promise.allSettled(
+        selectedItems.map((i) =>
+          deleteTask({ walletAddress: address!, projectId: i.projectId, taskId: i.id })
+        )
+      ),
+    onSuccess: (results) => {
+      invalidateAffected();
+      const { ok, failed } = summarize(results);
+      if (failed) toast.error(`Deleted ${ok}, ${failed} failed`);
+      else toast.success(`Deleted ${ok} task${ok === 1 ? "" : "s"}`);
+      setConfirmDelete(false);
+      clear();
+    },
+    onError: (e: Error) => {
+      toast.error("Bulk delete failed", { description: e.message });
+      setConfirmDelete(false);
+    },
+  });
+
+  const mutating = moveMut.isPending || deleteMut.isPending;
+
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-3">
@@ -209,6 +282,30 @@ export default function TasksPage() {
         </p>
       ) : (
         <div className="flex flex-col gap-3">
+          {selectedItems.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-2 rounded-md border border-primary/30 bg-card/60 px-3 py-2">
+              <span className="text-xs font-medium text-foreground">
+                {selectedItems.length} selected
+              </span>
+              <span className="text-[11px] text-muted-foreground">Move to:</span>
+              <Button size="xs" variant="outline" disabled={mutating} onClick={() => moveMut.mutate("Backlog")}>
+                To do
+              </Button>
+              <Button size="xs" variant="outline" disabled={mutating} onClick={() => moveMut.mutate("In progress")}>
+                In progress
+              </Button>
+              <Button size="xs" variant="outline" disabled={mutating} onClick={() => moveMut.mutate("Done")}>
+                Done
+              </Button>
+              <Button size="xs" variant="destructive" disabled={mutating} onClick={() => setConfirmDelete(true)}>
+                <Trash2 className="h-3.5 w-3.5" /> Delete
+              </Button>
+              <Button size="xs" variant="ghost" disabled={mutating} onClick={clear}>
+                Clear
+              </Button>
+            </div>
+          ) : null}
+
           <KanbanBoard
             items={kanbanItems}
             onMove={(itemId, nextStatus) => {
@@ -216,22 +313,31 @@ export default function TasksPage() {
               console.info("[Kanban Global] move", { itemId, nextStatus });
             }}
             renderCard={({ item }) => (
-              <Link
-                href={`/projects/${encodeURIComponent(item.projectId)}/tasks/${encodeURIComponent(item.id)}`}
-                className="glow-card flex flex-col gap-2 rounded-md border border-primary/25 bg-card px-4 py-3 transition-colors hover:border-primary/50"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <span className="pl-4 text-sm text-foreground">{item.task.name}</span>
-                  <PriorityBadge priority={item.task.priority} />
+              <div className="group relative">
+                <div className="absolute left-2.5 top-3 z-10">
+                  <Checkbox
+                    checked={selected.has(item.id)}
+                    onCheckedChange={(on) => toggle(item.id, on)}
+                    aria-label={`Select ${item.task.name}`}
+                  />
                 </div>
-                <div className="flex items-center justify-between gap-3 pl-4 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1.5 truncate">
-                    <Folder className="h-3 w-3" />
-                    <span className="truncate">{item.projectName}</span>
-                  </span>
-                  <span className="shrink-0">Agent: {item.task.agent || "—"}</span>
-                </div>
-              </Link>
+                <Link
+                  href={`/projects/${encodeURIComponent(item.projectId)}/tasks/${encodeURIComponent(item.id)}`}
+                  className="glow-card flex flex-col gap-2 rounded-md border border-primary/25 bg-card px-4 py-3 pl-9 transition-colors hover:border-primary/50"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="text-sm text-foreground">{item.task.name}</span>
+                    <PriorityBadge priority={item.task.priority} />
+                  </div>
+                  <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1.5 truncate">
+                      <Folder className="h-3 w-3" />
+                      <span className="truncate">{item.projectName}</span>
+                    </span>
+                    <span className="shrink-0">Agent: {item.task.agent || "—"}</span>
+                  </div>
+                </Link>
+              </div>
             )}
           />
           <p className="text-[10px] text-muted-foreground">
@@ -240,6 +346,17 @@ export default function TasksPage() {
           </p>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title={`Delete ${selectedItems.length} task${selectedItems.length === 1 ? "" : "s"}?`}
+        description="The selected tasks (across projects) and their history will be removed. This can't be undone."
+        confirmLabel="Delete"
+        destructive
+        pending={deleteMut.isPending}
+        onConfirm={() => deleteMut.mutate()}
+      />
     </div>
   );
 }
