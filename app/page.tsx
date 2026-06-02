@@ -651,9 +651,29 @@ function TokenUtility() {
 
         <p className="mt-8 text-center text-xs text-muted-foreground">
           $PEKOS settles on <b className="text-foreground">Base</b> and{" "}
-          <b className="text-foreground">Celo</b> via the x402 protocol —
-          low-fee, instant, multi-chain payments for agents and organizations.
+          <b className="text-foreground">Celo</b> via USDC using the x402
+          protocol — low-fee, instant, multi-chain payments for agents and
+          organizations.
         </p>
+
+        <div className="mx-auto mt-5 flex max-w-2xl flex-col items-stretch gap-2 sm:flex-row sm:justify-center">
+          {[
+            { chain: "Base", ca: "0xF714E60f85497D70508F7E356b5DB80e64539BA3" },
+            { chain: "Celo", ca: "0xb7Ba43fBD4F2E85FCE929f7d4DFE3905Ae846A46" },
+          ].map(({ chain, ca }) => (
+            <div
+              key={chain}
+              className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2"
+            >
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">
+                CA · {chain}
+              </span>
+              <span className="break-all font-mono text-[11px] text-muted-foreground">
+                {ca}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
