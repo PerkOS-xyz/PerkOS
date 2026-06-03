@@ -70,8 +70,10 @@ import {
   AGENT_PRESETS,
   findPreset,
   presetSystemPrompt,
+  type AgentPreset,
   type SoulFields,
 } from "../../../lib/agentPresets";
+import { fetchVisiblePresets } from "../../../lib/agentPresetAccess";
 import {
   SKILLS_CATALOG,
   findSkillPack,
@@ -244,6 +246,17 @@ export default function AgentLauncherPage() {
   });
   const llmAllowed = llmAccessQuery.data?.allowed === true;
 
+  // Templates visible to this viewer, with admin property overrides merged.
+  // Falls back to the full static catalogue while loading / on error so the
+  // picker never goes blank. Drives both the Step-1 grid and the `preset`
+  // lookup below (so name / recommended-plugins overrides flow into launch).
+  const presetsQuery = useQuery({
+    queryKey: ["wizard", "presets"],
+    queryFn: fetchVisiblePresets,
+    staleTime: 60_000,
+  });
+  const visiblePresets = presetsQuery.data ?? AGENT_PRESETS;
+
   // Wizard state is intentionally NOT persisted to localStorage. Earlier
   // we used useFormDraft here, but it created a confusing UX after the
   // two-state Step-1 refactor: returning to /agents/new would drop the
@@ -286,7 +299,12 @@ export default function AgentLauncherPage() {
 
   const update = (patch: Partial<State>) => setState((s) => ({ ...s, ...patch }));
 
-  const preset = useMemo(() => findPreset(state.personaId), [state.personaId]);
+  const preset = useMemo(
+    () =>
+      visiblePresets.find((p) => p.id === state.personaId) ??
+      findPreset(state.personaId),
+    [visiblePresets, state.personaId],
+  );
 
   // When the user picks a runtime, seed a sensible default BYOK provider.
   useEffect(() => {
@@ -549,7 +567,9 @@ export default function AgentLauncherPage() {
       <Stepper current={state.step} total={TOTAL_STEPS} />
 
       <div className="mt-2">
-        {state.step === 1 && <Step1Persona state={state} onChange={update} />}
+        {state.step === 1 && (
+          <Step1Persona state={state} onChange={update} presets={visiblePresets} />
+        )}
         {state.step === 2 && <Step2Runtime state={state} onChange={update} />}
         {state.step === 3 && (
           <Step3Deploy
@@ -679,8 +699,14 @@ type StepProps = {
   onChange: (patch: Partial<State>) => void;
 };
 
-function Step1Persona({ state, onChange }: StepProps) {
-  const preset = findPreset(state.personaId);
+function Step1Persona({
+  state,
+  onChange,
+  presets,
+}: StepProps & { presets: AgentPreset[] }) {
+  const preset =
+    presets.find((p) => p.id === state.personaId) ??
+    findPreset(state.personaId);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
   // Default prompt = full SOUL.md rendered from preset, with the user's
@@ -853,7 +879,7 @@ function Step1Persona({ state, onChange }: StepProps) {
         aria-label="Choose an agent persona"
         className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4"
       >
-        {AGENT_PRESETS.map((p) => (
+        {presets.map((p) => (
           <button
             key={p.id}
             role="radio"
