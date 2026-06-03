@@ -1,7 +1,7 @@
 "use client";
 
 import { authedFetch } from "./apiClient";
-import { AGENT_PRESETS, type AgentPreset } from "./agentPresets";
+import { AGENT_PRESETS, type AgentPreset, type SoulFields } from "./agentPresets";
 
 /** Per-preset admin overlay decision for the current viewer. */
 type ViewerPreset = {
@@ -11,6 +11,7 @@ type ViewerPreset = {
   blurb: string | null;
   recommendedPlugins: string[] | null;
   recommendedSkills: string[] | null;
+  soul: SoulFields | null;
 };
 
 /**
@@ -48,6 +49,10 @@ export async function fetchVisiblePresets(): Promise<AgentPreset[]> {
         blurb: o.blurb ?? p.blurb,
         recommendedPlugins: o.recommendedPlugins ?? p.recommendedPlugins,
         recommendedSkills: o.recommendedSkills ?? p.recommendedSkills,
+        // Soul override replaces the whole persona; the wizard renders SOUL.md
+        // and shows the persona detail entirely off preset.soul, so overriding
+        // it here flows into both the preview and the launched agent.
+        soul: o.soul ?? p.soul,
       };
     });
   } catch {
