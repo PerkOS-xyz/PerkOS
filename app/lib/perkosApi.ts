@@ -521,6 +521,30 @@ export async function setProjectSwarm(input: {
   });
 }
 
+/**
+ * Add one or more agents (by name — the project roster + "Lead" use agent
+ * names, see project.agentIds) to a project. Merges with the existing roster
+ * (dedup) and keeps the denormalized `agents` count in sync. Read-merge-write
+ * (not a transaction) — fine at workspace scale, bulk-assign tolerant.
+ */
+export async function assignAgentsToProject(input: {
+  walletAddress: string;
+  projectId: string;
+  agentNames: string[];
+}): Promise<{ added: number; total: number }> {
+  const ref = projectDoc(input.walletAddress, input.projectId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) throw new Error("Project not found.");
+  const existing = (snap.data().agentIds as string[] | undefined) ?? [];
+  const merged = Array.from(new Set([...existing, ...input.agentNames]));
+  await updateDoc(ref, {
+    agentIds: merged,
+    agents: merged.length,
+    updatedAt: serverTimestamp(),
+  });
+  return { added: merged.length - existing.length, total: merged.length };
+}
+
 export async function deleteProject(input: {
   walletAddress: string;
   projectId: string;
