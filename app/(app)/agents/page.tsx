@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
-import { Bot, FolderPlus, Moon, Play, Plus, Trash2 } from "lucide-react";
+import { Bot, FolderPlus, Loader2, Moon, Play, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -42,6 +42,11 @@ export default function AgentsPage() {
     queryKey: ["wallet-agents", address],
     queryFn: () => getWalletAgents(address!),
     enabled: isConnected && Boolean(address),
+    // While any agent is still provisioning, poll so the card flips to
+    // "Online" on its own once the runtime's bridge connects (the heartbeat
+    // sets status:"ready") — no manual refresh needed.
+    refetchInterval: (q) =>
+      (q.state.data ?? []).some((a) => a.status === "provisioning") ? 4000 : false,
   });
 
   const allAgents = useMemo(() => data ?? [], [data]);
@@ -368,6 +373,14 @@ function AgentCard({
           <StatusBadge status={agent.status} />
         </div>
 
+        {agent.status === "provisioning" ? (
+          <p className="flex items-center gap-1.5 text-xs text-amber-300/90">
+            <Loader2 className="h-3 w-3 shrink-0 animate-spin" />
+            Setting up your agent — usually under a minute. This updates on its
+            own.
+          </p>
+        ) : null}
+
         <p className="text-xs leading-relaxed text-[#7975a8]">
           {agent.plugins.length > 0
             ? `Capabilities: ${agent.plugins.join(", ")}`
@@ -384,22 +397,31 @@ function AgentCard({
 }
 
 function StatusBadge({ status }: { status: Agent["status"] }) {
+  const provisioning = status === "provisioning";
   const tone =
     status === "ready"
       ? "bg-emerald-500/20 text-emerald-300"
       : status === "failed"
       ? "bg-[#ec1b69]/20 text-[#ec1b69]"
-      : "bg-amber-500/20 text-amber-300";
+      : provisioning
+      ? "bg-amber-500/20 text-amber-300"
+      : "bg-[#7975a8]/20 text-[#7975a8]";
   const label =
     status === "ready"
       ? "Online"
       : status === "failed"
       ? "Failed"
-      : status === "provisioning"
+      : provisioning
       ? "Provisioning"
       : "Unknown";
   return (
-    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${tone}`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${tone}`}
+    >
+      {provisioning ? <Loader2 className="h-3 w-3 animate-spin" /> : null}
+      {status === "ready" ? (
+        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+      ) : null}
       {label}
     </span>
   );
