@@ -160,7 +160,10 @@ export function DeployBundleScreen({
 
   return (
     <Dialog open onOpenChange={(o) => !o && acknowledged && onDone()}>
-      <DialogContent className="max-w-3xl">
+      {/* sm:max-w-3xl beats the base sm:max-w-sm; grid-cols-[minmax(0,1fr)]
+          keeps the grid column pinned to the panel so the long compose / .env
+          lines scroll inside the <pre> instead of overflowing the dialog. */}
+      <DialogContent className="sm:max-w-3xl grid-cols-[minmax(0,1fr)]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Server className="h-5 w-5 text-primary" />

@@ -65,7 +65,14 @@ export function AgentKeyRevealDialog({ open, credentials, onClose }: Props) {
         if (!next) onClose();
       }}
     >
-      <DialogContent className="max-w-lg">
+      {/* grid-cols-[minmax(0,1fr)]: the base DialogContent is a `grid`, whose
+          implicit `auto` column sizes to the widest child's max-content — the
+          long unbroken relay key / env line blew the column (and its content)
+          past the panel's right edge. Pinning the column to minmax(0,1fr) makes
+          it fill the panel and lets the key wrap / env block scroll inside it.
+          sm:max-w-lg overrides the base sm:max-w-sm so the panel is actually
+          wide enough for the env block. */}
+      <DialogContent className="sm:max-w-lg grid-cols-[minmax(0,1fr)]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <KeyRound className="h-4 w-4 text-primary" />
