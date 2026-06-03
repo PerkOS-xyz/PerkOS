@@ -114,7 +114,7 @@ export default function AgentsPage() {
       const { ok, failed } = summarize(r);
       if (failed)
         toast.error(`Hibernated ${ok}, ${failed} failed`, {
-          description: "Agents not deployed on ECS can't hibernate.",
+          description: "Agents not deployed on PerkOS infra can't hibernate.",
         });
       else toast.success(`Hibernated ${ok} agent${ok === 1 ? "" : "s"}`);
       clear();
@@ -130,7 +130,7 @@ export default function AgentsPage() {
       const { ok, failed } = summarize(r);
       if (failed)
         toast.error(`Woke ${ok}, ${failed} failed`, {
-          description: "Agents not deployed on ECS can't wake.",
+          description: "Agents not deployed on PerkOS infra can't wake.",
         });
       else toast.success(`Woke ${ok} agent${ok === 1 ? "" : "s"}`);
       clear();

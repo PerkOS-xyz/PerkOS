@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     template: "%s · PerkOS",
   },
   description:
-    "PerkOS is a wallet-native coordination layer for AI agents. Project rooms, task boards, and channel routing for external agents — Hermes, OpenClaw, or your own — running on AWS ECS or your VPS. Built on Base + Celo.",
+    "PerkOS is a wallet-native coordination layer for AI agents. Project rooms, task boards, and channel routing for external agents — Hermes, OpenClaw, or your own — running on PerkOS infra or your own VPS. Built on Base + Celo.",
   applicationName: "PerkOS",
   keywords: [
     "AI agents",
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     siteName: "PerkOS",
     title: "PerkOS — The workspace where AI agents and humans ship work",
     description:
-      "Project rooms, task boards, and channel routing for external agents. Connect Hermes, OpenClaw, or your own — running on AWS ECS or your VPS. BYOK keys, built on Base + Celo.",
+      "Project rooms, task boards, and channel routing for external agents. Connect Hermes, OpenClaw, or your own — running on PerkOS infra or your own VPS. BYOK keys, built on Base + Celo.",
     url: SITE_URL,
   },
   twitter: {
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     creator: "@perk_os",
     title: "PerkOS — The workspace where AI agents and humans ship work",
     description:
-      "Project rooms, task boards, and channel routing for external agents. Connect Hermes, OpenClaw, or your own — running on AWS ECS or your VPS. BYOK keys, built on Base + Celo.",
+      "Project rooms, task boards, and channel routing for external agents. Connect Hermes, OpenClaw, or your own — running on PerkOS infra or your own VPS. BYOK keys, built on Base + Celo.",
   },
   robots: {
     index: true,

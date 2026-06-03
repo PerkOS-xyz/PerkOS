@@ -191,9 +191,9 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
               Hibernation
             </CardTitle>
             <CardDescription>
-              Pause the Fargate task to stop billing while you&apos;re not using
-              the agent. State (history + memory) is snapshotted to S3 and
-              restored on wake.
+              Pause the agent&apos;s container to stop billing while you&apos;re not using
+              the agent. State (history + memory) is snapshotted to encrypted
+              storage and restored on wake.
             </CardDescription>
           </div>
           <Badge variant="secondary" className={cn("border-0", tone.badgeClass)}>
@@ -280,7 +280,7 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         title={`Hibernate ${agentName}?`}
-        description="Stops the running container and pauses billing. The agent's memory + conversation history are snapshotted to S3 and restored when you wake it. Drain takes ~30s; wake takes ~45s including snapshot restore."
+        description="Stops the running container and pauses billing. The agent's memory + conversation history are snapshotted to encrypted storage and restored when you wake it. Drain takes ~30s; wake takes ~45s including snapshot restore."
         confirmLabel="Hibernate agent"
         pending={hibernateMutation.isPending}
         onConfirm={() => hibernateMutation.mutate()}

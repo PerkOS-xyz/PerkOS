@@ -1240,7 +1240,7 @@ function Step3Deploy({
               <div className="flex items-center gap-2">
                 <Cloud className="h-4 w-4 text-primary" />
                 <span className="text-base font-medium text-foreground">
-                  PerkOS infra (AWS ECS)
+                  PerkOS infra
                 </span>
                 {!ecsAllowed ? (
                   <Badge
@@ -1255,7 +1255,7 @@ function Step3Deploy({
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground">
-                PerkOS provisions a Fargate task for your agent. From{" "}
+                PerkOS provisions a managed container for your agent. From{" "}
                 <span className="font-medium text-foreground">$29/mo</span>{" "}
                 billed via x402{networkName ? ` on ${networkName}` : ""}.
                 Status flips to &ldquo;ready&rdquo; once the container is
@@ -1903,7 +1903,7 @@ function StepGateways({ state, onChange }: StepProps) {
       <h3 className="text-sm font-medium text-foreground">Messaging gateways</h3>
       <p className="text-xs text-muted-foreground">
         Lets your agent receive messages from outside PerkOS. Secrets stay in
-        AWS Secrets Manager under your wallet&rsquo;s namespace — never in the
+        a managed secrets vault under your wallet&rsquo;s namespace — never in the
         agent doc, never in this browser tab beyond the launch request.
       </p>
 
@@ -1926,7 +1926,7 @@ function StepGateways({ state, onChange }: StepProps) {
               placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
             />
             <span className="text-xs text-muted-foreground">
-              From @BotFather. Stored in AWS Secrets Manager; never returned by the API.
+              From @BotFather. Stored in a managed secrets vault; never returned by the API.
             </span>
           </div>
           <div className="grid gap-1.5">
@@ -2151,7 +2151,7 @@ function Step6Review({ state, onChange }: StepProps) {
     <div className="flex flex-col gap-4">
       <StepHeader
         title="Review + launch"
-        description="What we'll write to disk (or to your ECS task) when you click Launch."
+        description="What we'll write to disk (or to your managed container) when you click Launch."
       />
 
       <Card>
@@ -2173,7 +2173,7 @@ function Step6Review({ state, onChange }: StepProps) {
             label="Deploy"
             value={
               state.deployMode === "perkos-ecs"
-                ? "PerkOS infra (AWS ECS)"
+                ? "PerkOS infra"
                 : state.deployMode === "self-hosted"
                   ? "Self-hosted (your infra)"
                   : state.deployMode === "imported"

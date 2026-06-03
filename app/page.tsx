@@ -396,12 +396,12 @@ function DeploymentComparison() {
             </Badge>
             <h3 className="text-xl font-semibold text-foreground">Run on your infrastructure</h3>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Run everything on your own AWS, VPS, or on-prem. Full control,
+              Run everything on your own cloud, VPS, or on-prem. Full control,
               same enterprise capabilities. Built for strict data residency or
               compliance requirements.
             </p>
             <ul className="flex flex-col gap-2">
-              {["Your AWS / VPS / on-prem", "Full data residency", "Same capabilities", "Bring your own keys (BYOK)"].map((b) => (
+              {["Your cloud / VPS / on-prem", "Full data residency", "Same capabilities", "Bring your own keys (BYOK)"].map((b) => (
                 <li key={b} className="flex items-center gap-2.5 text-sm text-muted-foreground">
                   <Check className="h-4 w-4 shrink-0 text-primary" />
                   {b}
