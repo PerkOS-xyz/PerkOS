@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import {
   ensureAgentAwakeApi,
   ensureAgentConv,
+  recordAgentActivityApi,
   type HibernationStatus,
 } from "../../../lib/perkosApi";
 import { useChatPerkosClient } from "../../../lib/useChatPerkosClient";
@@ -206,6 +207,10 @@ export function AgentChatPanel({ agentId, agentName, ecsDeployed }: Props) {
     ]);
     setDraft("");
     setAwaitingReply(true);
+
+    // Stamp real user activity so the curator's idle timer resets on use.
+    // Fire-and-forget — a missed ping never breaks the send.
+    void recordAgentActivityApi({ agentId }).catch(() => {});
   }
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {

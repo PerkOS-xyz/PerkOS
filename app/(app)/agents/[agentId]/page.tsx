@@ -21,6 +21,8 @@ import {
   KeyRound,
   Layers,
   Boxes,
+  Power,
+  Loader2,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +41,7 @@ import {
   getWalletAgents,
   getWalletProject,
   getWalletProjects,
+  hibernateAgentApi,
   type Agent,
   type Task,
 } from "../../../lib/perkosApi";
@@ -274,6 +277,26 @@ function AgentHeader({
   walletAddress: string;
 }) {
   const [editOpen, setEditOpen] = useState(false);
+  const queryClient = useQueryClient();
+
+  // "Stop" hibernates the agent (ECS scale-to-0). It's reversible — the next
+  // chat message wakes it — so no confirm dialog; the toast says as much.
+  // Only offered while the agent is Online (status==="ready").
+  const stopMutation = useMutation({
+    mutationFn: () => hibernateAgentApi({ agentId: agent.id }),
+    onSuccess: (result) => {
+      toast.success(
+        result.previousDesiredCount === 0
+          ? `${agent.name} was already stopped.`
+          : `${agent.name} stopped — it'll wake automatically on your next message.`
+      );
+      queryClient.invalidateQueries({ queryKey: ["agent-hibernation", agent.id] });
+      queryClient.invalidateQueries({ queryKey: ["wallet-agents", walletAddress] });
+    },
+    onError: (err: Error) =>
+      toast.error("Couldn't stop agent", { description: err.message }),
+  });
+
   return (
     <div className="flex flex-wrap items-start justify-between gap-4">
       <div className="flex items-start gap-4">
@@ -307,6 +330,22 @@ function AgentHeader({
       </div>
 
       <div className="flex items-center gap-2">
+        {agent.status === "ready" ? (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => stopMutation.mutate()}
+            disabled={stopMutation.isPending}
+            className="gap-1.5 border-amber-500/40 text-amber-300 hover:bg-amber-500/10 hover:text-amber-200"
+          >
+            {stopMutation.isPending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Power className="h-3.5 w-3.5" />
+            )}
+            Stop
+          </Button>
+        ) : null}
         <Button
           variant="outline"
           size="sm"

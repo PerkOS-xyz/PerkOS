@@ -847,6 +847,21 @@ export async function ensureAgentAwakeApi(input: {
   return payload as unknown as EnsureAwakeResult;
 }
 
+/**
+ * Record real user interaction (a chat send) so the curator can measure idle
+ * time. Fire-and-forget: a missed ping only shifts the idle calc slightly and
+ * must never break a chat send, so callers should `.catch(() => {})`.
+ */
+export async function recordAgentActivityApi(input: {
+  agentId: string;
+}): Promise<void> {
+  const { authedFetch } = await import("./apiClient");
+  await authedFetch(
+    `/api/agents/${encodeURIComponent(input.agentId)}/activity`,
+    { method: "POST" },
+  );
+}
+
 export async function deleteAgent(input: {
   walletAddress: string;
   agentId: string;
