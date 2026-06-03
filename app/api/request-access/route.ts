@@ -6,8 +6,9 @@ import { adminDb } from "../../lib/firebaseAdmin";
 type Payload = {
   walletAddress: string;
   email: string;
-  name?: string;
-  useCase?: string;
+  username?: string;
+  company?: string;
+  website?: string;
 };
 
 export async function POST(request: Request) {
@@ -39,8 +40,9 @@ export async function POST(request: Request) {
     .add({
       walletAddress,
       email,
-      name: body.name?.trim() || null,
-      useCase: body.useCase?.slice(0, 1000) || null,
+      username: body.username?.trim().slice(0, 120) || null,
+      company: body.company?.trim().slice(0, 200) || null,
+      website: body.website?.trim().slice(0, 300) || null,
       status: "pending",
       createdAt: FieldValue.serverTimestamp(),
     });

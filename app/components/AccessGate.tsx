@@ -17,7 +17,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { formatAddress } from "../lib/format";
 
@@ -28,8 +27,9 @@ type Props = {
 export function AccessGate({ address }: Props) {
   const { disconnect } = useDisconnect();
   const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [useCase, setUseCase] = useState("");
+  const [username, setUsername] = useState("");
+  const [company, setCompany] = useState("");
+  const [website, setWebsite] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +39,11 @@ export function AccessGate({ address }: Props) {
     const parsed = emailSchema.safeParse(email);
     return parsed.success ? undefined : parsed.error.issues[0]?.message;
   }, [email]);
-  const canSubmit = !submitting && !emailError;
+  const canSubmit =
+    !submitting &&
+    !emailError &&
+    username.trim().length > 0 &&
+    company.trim().length > 0;
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -54,8 +58,9 @@ export function AccessGate({ address }: Props) {
         body: JSON.stringify({
           walletAddress: address,
           email: email.trim(),
-          name: name.trim() || undefined,
-          useCase: useCase.trim() || undefined,
+          username: username.trim(),
+          company: company.trim(),
+          website: website.trim() || undefined,
         }),
       });
       if (!res.ok) {
@@ -149,22 +154,31 @@ export function AccessGate({ address }: Props) {
                 ) : null}
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="access-name">Name (optional)</Label>
+                <Label htmlFor="access-username">Username</Label>
                 <Input
-                  id="access-name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Your name"
+                  id="access-username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Your name or handle"
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="access-use">What would you build? (optional)</Label>
-                <Textarea
-                  id="access-use"
-                  value={useCase}
-                  onChange={(e) => setUseCase(e.target.value)}
-                  placeholder="A team of marketing + research agents that ship weekly reports"
-                  rows={3}
+                <Label htmlFor="access-company">Company / organization</Label>
+                <Input
+                  id="access-company"
+                  value={company}
+                  onChange={(e) => setCompany(e.target.value)}
+                  placeholder="Acme Inc."
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="access-website">Website (optional)</Label>
+                <Input
+                  id="access-website"
+                  type="url"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                  placeholder="https://acme.com"
                 />
               </div>
 
