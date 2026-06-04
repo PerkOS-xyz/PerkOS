@@ -38,11 +38,13 @@ import { cn } from "@/lib/utils";
 
 import {
   deleteAgent,
+  getHibernationStatusApi,
   getWalletAgents,
   getWalletProject,
   getWalletProjects,
   hibernateAgentApi,
   type Agent,
+  type HibernationApiState,
   type Task,
 } from "../../../lib/perkosApi";
 import { formatAddress } from "../../../lib/format";
@@ -297,6 +299,22 @@ function AgentHeader({
       toast.error("Couldn't stop agent", { description: err.message }),
   });
 
+  // Hibernation state lives in a separate live query (shared cache with the
+  // HibernationPanel / AutoWakeBanner). It takes priority over `agent.status`:
+  // a scaled-to-0 agent still reads status==="ready" in Firestore, so without
+  // this the header would show "Online" + a "Stop" button on a sleeping agent.
+  const hibQuery = useQuery({
+    queryKey: ["agent-hibernation", agent.id],
+    queryFn: () => getHibernationStatusApi({ agentId: agent.id }),
+    enabled: agent.status === "ready",
+  });
+  const hibState = hibQuery.data?.state;
+  const sleeping =
+    hibState === "hibernated" ||
+    hibState === "hibernating" ||
+    hibState === "waking";
+  const isRunning = agent.status === "ready" && !sleeping;
+
   return (
     <div className="flex flex-wrap items-start justify-between gap-4">
       <div className="flex items-start gap-4">
@@ -307,8 +325,10 @@ function AgentHeader({
           <span
             className={cn(
               "absolute -bottom-0.5 -right-0.5 grid h-3 w-3 place-items-center rounded-full ring-2 ring-background",
-              agent.status === "ready"
+              isRunning
                 ? "bg-emerald-400"
+                : sleeping
+                ? "bg-slate-400"
                 : agent.status === "failed"
                 ? "bg-destructive"
                 : "bg-amber-400"
@@ -324,13 +344,13 @@ function AgentHeader({
             <Badge variant="secondary" className="border-0 bg-muted">
               {agent.runtime}
             </Badge>
-            <StatusBadge status={agent.status} />
+            <StatusBadge status={agent.status} hibernationState={hibState} />
           </div>
         </div>
       </div>
 
       <div className="flex items-center gap-2">
-        {agent.status === "ready" ? (
+        {isRunning ? (
           <Button
             variant="outline"
             size="sm"
@@ -382,7 +402,28 @@ function AgentHeader({
   );
 }
 
-function StatusBadge({ status }: { status: Agent["status"] }) {
+function StatusBadge({
+  status,
+  hibernationState,
+}: {
+  status: Agent["status"];
+  hibernationState?: HibernationApiState;
+}) {
+  // A hibernated/waking ECS agent still reports status==="ready", so surface
+  // the live hibernation state instead of a misleading "Online".
+  if (status === "ready" && hibernationState && hibernationState !== "active") {
+    const sleep =
+      hibernationState === "hibernated"
+        ? { tone: "bg-slate-500/20 text-slate-300", label: "Hibernated" }
+        : hibernationState === "hibernating"
+        ? { tone: "bg-amber-500/20 text-amber-300", label: "Hibernating…" }
+        : { tone: "bg-sky-500/20 text-sky-300", label: "Waking…" };
+    return (
+      <Badge variant="secondary" className={cn("border-0", sleep.tone)}>
+        {sleep.label}
+      </Badge>
+    );
+  }
   const tone =
     status === "ready"
       ? "bg-emerald-500/20 text-emerald-300"
