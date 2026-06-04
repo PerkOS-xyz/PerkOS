@@ -10,11 +10,13 @@ import { toast } from "sonner";
 import {
   assignAgentsToProject,
   deleteAgent,
+  getHibernationStatusApi,
   getWalletAgents,
   getWalletProjects,
   hibernateAgentApi,
   wakeAgentApi,
   type Agent,
+  type HibernationApiState,
 } from "../../lib/perkosApi";
 import { SearchInput, matchesQuery } from "../../components/SearchInput";
 import { EmptyState } from "../../components/EmptyState";
@@ -347,6 +349,16 @@ function AgentCard({
   checked: boolean;
   onToggle: (on: boolean) => void;
 }) {
+  // Cross-reference the live hibernation status so a scaled-to-0 agent shows
+  // "Hibernated" instead of a stale "Online" (agent.status stays "ready").
+  // Shares the react-query cache with the detail page's query for this agent.
+  const hibQuery = useQuery({
+    queryKey: ["agent-hibernation", agent.id],
+    queryFn: () => getHibernationStatusApi({ agentId: agent.id }),
+    enabled: agent.status === "ready",
+  });
+  const hibState = hibQuery.data?.state;
+  const syncing = agent.status === "ready" && hibQuery.isLoading;
   return (
     <li>
       <Link
@@ -370,7 +382,11 @@ function AgentCard({
               <span className="text-xs text-[#7975a8]">{agent.runtime}</span>
             </div>
           </div>
-          <StatusBadge status={agent.status} />
+          <StatusBadge
+            status={agent.status}
+            hibernationState={hibState}
+            syncing={syncing}
+          />
         </div>
 
         {agent.status === "provisioning" ? (
@@ -396,7 +412,46 @@ function AgentCard({
   );
 }
 
-function StatusBadge({ status }: { status: Agent["status"] }) {
+function StatusBadge({
+  status,
+  hibernationState,
+  syncing,
+}: {
+  status: Agent["status"];
+  hibernationState?: HibernationApiState;
+  syncing?: boolean;
+}) {
+  // Live hibernation status still loading — don't assert "Online".
+  if (syncing) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-[#7975a8]/20 px-2 py-0.5 text-xs font-medium text-[#7975a8]">
+        <Loader2 className="h-3 w-3 animate-spin" />
+        Syncing…
+      </span>
+    );
+  }
+  // A hibernated/waking ECS agent still reports status==="ready" — surface the
+  // live hibernation state instead of a misleading "Online".
+  if (status === "ready" && hibernationState && hibernationState !== "active") {
+    const sleep =
+      hibernationState === "hibernated"
+        ? { tone: "bg-[#7975a8]/20 text-[#7975a8]", label: "Hibernated", spin: false }
+        : hibernationState === "hibernating"
+        ? { tone: "bg-amber-500/20 text-amber-300", label: "Hibernating…", spin: true }
+        : { tone: "bg-sky-500/20 text-sky-300", label: "Waking…", spin: true };
+    return (
+      <span
+        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${sleep.tone}`}
+      >
+        {sleep.spin ? (
+          <Loader2 className="h-3 w-3 animate-spin" />
+        ) : (
+          <Moon className="h-3 w-3" />
+        )}
+        {sleep.label}
+      </span>
+    );
+  }
   const provisioning = status === "provisioning";
   const tone =
     status === "ready"

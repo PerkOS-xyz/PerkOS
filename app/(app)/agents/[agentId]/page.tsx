@@ -318,11 +318,17 @@ function AgentHeader({
     enabled: agent.status === "ready",
   });
   const hibState = hibQuery.data?.state;
+  // While the live hibernation status is still loading we don't yet know if a
+  // "ready" agent is actually running or hibernated — show a neutral "Syncing…"
+  // instead of flashing "Online" then snapping to "Hibernated".
+  const hibSyncing = agent.status === "ready" && hibQuery.isLoading;
   const sleeping =
     hibState === "hibernated" ||
     hibState === "hibernating" ||
     hibState === "waking";
-  const isRunning = agent.status === "ready" && !sleeping;
+  // Only offer Stop once we KNOW it's running (not mid-sync) — avoids a
+  // Stop button flashing in then disappearing on a hibernated agent.
+  const isRunning = agent.status === "ready" && !sleeping && !hibSyncing;
 
   return (
     <div className="flex flex-wrap items-start justify-between gap-4">
@@ -353,7 +359,11 @@ function AgentHeader({
             <Badge variant="secondary" className="border-0 bg-muted">
               {agent.runtime}
             </Badge>
-            <StatusBadge status={agent.status} hibernationState={hibState} />
+            <StatusBadge
+              status={agent.status}
+              hibernationState={hibState}
+              syncing={hibSyncing}
+            />
           </div>
         </div>
       </div>
@@ -414,10 +424,25 @@ function AgentHeader({
 function StatusBadge({
   status,
   hibernationState,
+  syncing,
 }: {
   status: Agent["status"];
   hibernationState?: HibernationApiState;
+  syncing?: boolean;
 }) {
+  // Don't assert "Online" while the live hibernation status is still loading —
+  // it may resolve to "Hibernated". Show a neutral syncing state instead.
+  if (syncing) {
+    return (
+      <Badge
+        variant="secondary"
+        className="inline-flex items-center gap-1 border-0 bg-muted text-muted-foreground"
+      >
+        <Loader2 className="h-3 w-3 animate-spin" />
+        Syncing…
+      </Badge>
+    );
+  }
   // A hibernated/waking ECS agent still reports status==="ready", so surface
   // the live hibernation state instead of a misleading "Online".
   if (status === "ready" && hibernationState && hibernationState !== "active") {
