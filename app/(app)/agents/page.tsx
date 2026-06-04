@@ -16,6 +16,7 @@ import {
   hibernateAgentApi,
   wakeAgentApi,
   type Agent,
+  type AgentRow,
   type HibernationApiState,
 } from "../../lib/perkosApi";
 import { SearchInput, matchesQuery } from "../../components/SearchInput";
@@ -66,6 +67,11 @@ export default function AgentsPage() {
   const selectedNames = selectedIds
     .map((id) => byId.get(id)?.name)
     .filter((n): n is string => Boolean(n));
+  // Hibernate/Wake is ECS scale-to-0 — only for agents on PerkOS infra. Hide
+  // those actions when any selected agent is external (invited / self-hosted /
+  // imported), since PerkOS doesn't control their hosting.
+  const selectedAllHibernatable =
+    selectedIds.length > 0 && selectedIds.every((id) => !byId.get(id)?.external);
 
   function toggle(id: string, on: boolean) {
     setSelected((prev) => {
@@ -205,12 +211,16 @@ export default function AgentsPage() {
                 <Button size="xs" variant="outline" disabled={mutating} onClick={() => setAssignOpen(true)}>
                   <FolderPlus className="h-3.5 w-3.5" /> Assign to project
                 </Button>
-                <Button size="xs" variant="outline" disabled={mutating} onClick={() => hibernateMut.mutate()}>
-                  <Moon className="h-3.5 w-3.5" /> Hibernate
-                </Button>
-                <Button size="xs" variant="outline" disabled={mutating} onClick={() => wakeMut.mutate()}>
-                  <Play className="h-3.5 w-3.5" /> Wake
-                </Button>
+                {selectedAllHibernatable ? (
+                  <>
+                    <Button size="xs" variant="outline" disabled={mutating} onClick={() => hibernateMut.mutate()}>
+                      <Moon className="h-3.5 w-3.5" /> Hibernate
+                    </Button>
+                    <Button size="xs" variant="outline" disabled={mutating} onClick={() => wakeMut.mutate()}>
+                      <Play className="h-3.5 w-3.5" /> Wake
+                    </Button>
+                  </>
+                ) : null}
                 <Button size="xs" variant="destructive" disabled={mutating} onClick={() => setConfirmDelete(true)}>
                   <Trash2 className="h-3.5 w-3.5" /> Delete
                 </Button>
@@ -354,17 +364,18 @@ function AgentCard({
   checked,
   onToggle,
 }: {
-  agent: Agent;
+  agent: AgentRow;
   checked: boolean;
   onToggle: (on: boolean) => void;
 }) {
   // Cross-reference the live hibernation status so a scaled-to-0 agent shows
   // "Hibernated" instead of a stale "Online" (agent.status stays "ready").
   // Shares the react-query cache with the detail page's query for this agent.
+  // External (invited/self-hosted) agents have no ECS service, so skip it.
   const hibQuery = useQuery({
     queryKey: ["agent-hibernation", agent.id],
     queryFn: () => getHibernationStatusApi({ agentId: agent.id }),
-    enabled: agent.status === "ready",
+    enabled: agent.status === "ready" && !agent.external,
   });
   const hibState = hibQuery.data?.state;
   const syncing = agent.status === "ready" && hibQuery.isLoading;
@@ -391,11 +402,21 @@ function AgentCard({
               <span className="text-xs text-[#7975a8]">{agent.runtime}</span>
             </div>
           </div>
-          <StatusBadge
-            status={agent.status}
-            hibernationState={hibState}
-            syncing={syncing}
-          />
+          <div className="flex items-center gap-2">
+            {agent.external ? (
+              <span
+                className="rounded border border-[#1b1833] px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-[#7975a8]"
+                title="Runs on your own infra (invited / self-hosted) — PerkOS can't hibernate it"
+              >
+                External
+              </span>
+            ) : null}
+            <StatusBadge
+              status={agent.status}
+              hibernationState={hibState}
+              syncing={syncing}
+            />
+          </div>
         </div>
 
         {agent.status === "provisioning" ? (

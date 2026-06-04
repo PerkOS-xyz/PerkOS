@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Moon, Sun, Loader2, Archive } from "lucide-react";
+import { Moon, Sun, Loader2, Archive, History, Lock } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,8 +19,12 @@ import {
   getHibernationStatusApi,
   hibernateAgentApi,
   wakeAgentApi,
+  getAgentBackupsApi,
+  setBackupRetentionApi,
   type HibernationApiState,
   type HibernationStatus,
+  type AgentBackup,
+  type AgentBackupsResult,
 } from "../../../lib/perkosApi";
 import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { useState } from "react";
@@ -86,6 +90,14 @@ function formatDate(value?: string): string | undefined {
   }
 }
 
+// Human label for one backup — its S3 timestamp, falling back to the snapshot
+// id (state-<ts>) when LastModified is unavailable.
+function backupLabel(b: AgentBackup): string {
+  return formatDate(b.createdAt ?? undefined) ?? b.ts;
+}
+
+const RETENTION_PRESETS = [1, 3, 5, 10, 20, 30];
+
 export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
   const queryClient = useQueryClient();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -130,6 +142,26 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
     },
     onError: (err: Error) => {
       toast.error("Couldn't wake agent", { description: err.message });
+    },
+  });
+
+  // State backups — encrypted snapshots in S3 (inventory + keep-last-N).
+  const backupsQuery = useQuery<AgentBackupsResult>({
+    queryKey: ["agent-backups", agentId],
+    queryFn: () => getAgentBackupsApi({ agentId }),
+    enabled: ecsDeployed,
+  });
+
+  const retentionMutation = useMutation({
+    mutationFn: (n: number) => setBackupRetentionApi({ agentId, retention: n }),
+    onSuccess: (r) => {
+      toast.success(
+        `Keeping the last ${r.retention} backups — applies after the next restart.`,
+      );
+      queryClient.invalidateQueries({ queryKey: ["agent-backups", agentId] });
+    },
+    onError: (err: Error) => {
+      toast.error("Couldn't update retention", { description: err.message });
     },
   });
 
@@ -181,6 +213,9 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
   const hibernatedAt = formatDate(status.hibernatedAt);
   const wakeStartedAt = formatDate(status.wakeStartedAt);
 
+  const backups = backupsQuery.data?.backups ?? [];
+  const retention = backupsQuery.data?.retention ?? 5;
+
   return (
     <Card>
       <CardHeader>
@@ -192,9 +227,9 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
             </CardTitle>
             <CardDescription>
               Pause the agent&apos;s container to stop billing while you&apos;re not
-              using it — sending a message wakes it back up. (Saved-state
-              restore on wake is in progress; for now the agent restarts fresh
-              each time.)
+              using it — sending a message wakes it back up. On the latest
+              runtime its state is snapshotted (encrypted) and restored on
+              wake; agents on older images restart fresh.
             </CardDescription>
           </div>
           <Badge variant="secondary" className={cn("border-0", tone.badgeClass)}>
@@ -275,13 +310,86 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
             </span>
           ) : null}
         </div>
+
+        {/* State backups — encrypted snapshot inventory + retention. */}
+        <div className="rounded-md border border-border/50 p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <History className="h-4 w-4 text-muted-foreground" />
+              State backups
+              {backups.length > 0 ? (
+                <Badge variant="secondary" className="border-0">
+                  {backups.length}
+                </Badge>
+              ) : null}
+            </div>
+            <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              Keep last
+              <select
+                className="rounded border border-border bg-background px-1.5 py-0.5 text-foreground disabled:opacity-50"
+                value={retention}
+                disabled={retentionMutation.isPending || backupsQuery.isLoading}
+                onChange={(e) =>
+                  retentionMutation.mutate(Number(e.target.value))
+                }
+              >
+                {(RETENTION_PRESETS.includes(retention)
+                  ? RETENTION_PRESETS
+                  : [retention, ...RETENTION_PRESETS]
+                ).map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+              {retentionMutation.isPending ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : null}
+            </label>
+          </div>
+
+          {backupsQuery.isLoading ? (
+            <div className="mt-2 h-8 animate-pulse rounded bg-muted" />
+          ) : backupsQuery.error ? (
+            <p className="mt-2 text-xs text-destructive">
+              {(backupsQuery.error as Error).message}
+            </p>
+          ) : backups.length === 0 ? (
+            <p className="mt-2 text-xs text-muted-foreground">
+              No backups yet. Encrypted state snapshots are captured
+              automatically every few minutes while the agent runs, and restored
+              when it wakes. (Agents on older runtime images restart fresh —
+              relaunch to pick up the latest.)
+            </p>
+          ) : (
+            <ul className="mt-2 flex flex-col divide-y divide-border/40">
+              {backups.map((b) => (
+                <li
+                  key={b.ts}
+                  className="flex items-center justify-between gap-2 py-1.5 text-xs"
+                >
+                  <span className="text-foreground">{backupLabel(b)}</span>
+                  <span className="font-mono text-muted-foreground">
+                    {formatBytes(b.bytes)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <p className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground">
+            <Lock className="h-3 w-3" />
+            Encrypted client-side (AES-256) before upload — only your agent can
+            decrypt them.
+          </p>
+        </div>
       </CardContent>
 
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         title={`Hibernate ${agentName}?`}
-        description="Stops the running container and pauses billing. Sending a message wakes it (~30-60s to come back). Note: saved-state restore on wake is in progress — for now the agent restarts fresh, so any in-progress context is lost."
+        description="Stops the running container and pauses billing. Sending a message wakes it (~30-60s to come back). On the latest runtime its encrypted state is restored on wake; agents on older images restart fresh, so any in-progress context is lost."
         confirmLabel="Hibernate agent"
         pending={hibernateMutation.isPending}
         onConfirm={() => hibernateMutation.mutate()}

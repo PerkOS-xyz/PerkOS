@@ -44,6 +44,7 @@ import {
   getWalletProjects,
   hibernateAgentApi,
   type Agent,
+  type AgentRow,
   type HibernationApiState,
   type HibernationStatus,
   type Task,
@@ -214,11 +215,13 @@ export default function AgentDetailPage({ params }: PageProps) {
         walletAddress={address ?? ""}
       />
 
-      <AutoWakeBanner
-        agentId={agent.id}
-        agentName={agent.name}
-        ecsDeployed={agent.status === "ready"}
-      />
+      {!isExternalAgent(agent) ? (
+        <AutoWakeBanner
+          agentId={agent.id}
+          agentName={agent.name}
+          ecsDeployed={agent.status === "ready"}
+        />
+      ) : null}
 
       <AgentChatPanel
         agentId={agent.id}
@@ -233,17 +236,21 @@ export default function AgentDetailPage({ params }: PageProps) {
 
       <ChannelsSection channels={channels} runtime={agent.runtime} />
 
-      <HibernationPanel
-        agentId={agent.id}
-        agentName={agent.name}
-        ecsDeployed={agent.status === "ready"}
-      />
+      {!isExternalAgent(agent) ? (
+        <HibernationPanel
+          agentId={agent.id}
+          agentName={agent.name}
+          ecsDeployed={agent.status === "ready"}
+        />
+      ) : null}
 
-      <UpgradePanel
-        agentId={agent.id}
-        agentName={agent.name}
-        ecsDeployed={agent.status === "ready"}
-      />
+      {!isExternalAgent(agent) ? (
+        <UpgradePanel
+          agentId={agent.id}
+          agentName={agent.name}
+          ecsDeployed={agent.status === "ready"}
+        />
+      ) : null}
 
       <TasksSection
         tasks={assignedTasks}
@@ -268,6 +275,18 @@ function BackLink() {
   );
 }
 
+/**
+ * External = the user's own hosting (invited / self-hosted / imported BYO).
+ * Hibernation/wake/upgrade are ECS-only (PerkOS infra), so they don't apply.
+ */
+function isExternalAgent(a: { deployMode?: string | null }): boolean {
+  return (
+    a.deployMode === "invited" ||
+    a.deployMode === "self-hosted" ||
+    a.deployMode === "imported"
+  );
+}
+
 function AgentHeader({
   agent,
   onRefresh,
@@ -281,6 +300,7 @@ function AgentHeader({
 }) {
   const [editOpen, setEditOpen] = useState(false);
   const queryClient = useQueryClient();
+  const isExternal = isExternalAgent(agent);
 
   // "Stop" hibernates the agent (ECS scale-to-0). It's reversible — the next
   // chat message wakes it — so no confirm dialog; the toast says as much.
@@ -315,7 +335,7 @@ function AgentHeader({
   const hibQuery = useQuery({
     queryKey: ["agent-hibernation", agent.id],
     queryFn: () => getHibernationStatusApi({ agentId: agent.id }),
-    enabled: agent.status === "ready",
+    enabled: agent.status === "ready" && !isExternal,
   });
   const hibState = hibQuery.data?.state;
   // While the live hibernation status is still loading we don't yet know if a
@@ -327,8 +347,10 @@ function AgentHeader({
     hibState === "hibernating" ||
     hibState === "waking";
   // Only offer Stop once we KNOW it's running (not mid-sync) — avoids a
-  // Stop button flashing in then disappearing on a hibernated agent.
-  const isRunning = agent.status === "ready" && !sleeping && !hibSyncing;
+  // Stop button flashing in then disappearing on a hibernated agent. External
+  // agents (own infra) are never hibernatable, so never show Stop.
+  const isRunning =
+    agent.status === "ready" && !sleeping && !hibSyncing && !isExternal;
 
   return (
     <div className="flex flex-wrap items-start justify-between gap-4">

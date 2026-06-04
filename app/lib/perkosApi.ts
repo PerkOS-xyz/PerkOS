@@ -233,13 +233,23 @@ const messageConverter: FirestoreDataConverter<ChatMessage> = {
   },
 };
 
-const agentConverter: FirestoreDataConverter<Agent> = {
+/**
+ * `Agent` plus the BYO/hosting fields the UI needs to gate lifecycle actions.
+ * `external` agents (invited / self-hosted / imported) run on the user's own
+ * infra, so they CAN'T be hibernated/woken (that's ECS scale-to-0, PerkOS-only).
+ */
+export type AgentRow = Agent & {
+  external?: boolean;
+};
+
+const agentConverter: FirestoreDataConverter<AgentRow> = {
   toFirestore(agent) {
     const { id: _id, ...rest } = agent;
     return rest;
   },
   fromFirestore(snap) {
     const data = snap.data();
+    const rawDeployMode = typeof data.deployMode === "string" ? data.deployMode : undefined;
     return {
       id: snap.id,
       name: (data.name as string) ?? "",
@@ -257,6 +267,11 @@ const agentConverter: FirestoreDataConverter<Agent> = {
           ?.upstreamVersion ??
           (data.upstreamVersion as string | null | undefined)) ??
         null,
+      external:
+        data.external === true ||
+        rawDeployMode === "invited" ||
+        rawDeployMode === "self-hosted" ||
+        rawDeployMode === "imported",
     };
   },
 };
@@ -676,7 +691,7 @@ export async function addProjectMessage(input: {
 
 export async function getWalletAgents(
   walletAddress: string
-): Promise<Agent[]> {
+): Promise<AgentRow[]> {
   const snap = await getDocs(agentsCol(walletAddress));
   return snap.docs.map((d) => d.data());
 }
@@ -761,6 +776,53 @@ export async function getHibernationStatusApi(input: {
   const payload = await parseJson(response);
   if (!response.ok) throw new Error(apiError(payload, "Couldn't read hibernation status."));
   return payload as unknown as HibernationStatus;
+}
+
+// ---- Backups (hibernation state snapshots) --------------------------------
+
+export type AgentBackup = {
+  /** Snapshot timestamp id, e.g. "20260604T085920Z". */
+  ts: string;
+  /** Encrypted size in bytes. */
+  bytes: number;
+  /** ISO-8601 time the snapshot landed in S3, or null. */
+  createdAt: string | null;
+  /** Always true — only encrypted snapshots are stored. */
+  encrypted: true;
+};
+
+export type AgentBackupsResult = {
+  backups: AgentBackup[];
+  /** Keep-last-N retention currently configured for the agent. */
+  retention: number;
+};
+
+export async function getAgentBackupsApi(input: {
+  agentId: string;
+}): Promise<AgentBackupsResult> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/agents/${encodeURIComponent(input.agentId)}/backups`,
+    { method: "GET" },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't list backups."));
+  return payload as unknown as AgentBackupsResult;
+}
+
+export async function setBackupRetentionApi(input: {
+  agentId: string;
+  retention: number;
+}): Promise<{ ok: true; retention: number; appliesOn: string }> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/agents/${encodeURIComponent(input.agentId)}/backups/retention`,
+    { method: "POST", body: JSON.stringify({ retention: input.retention }) },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok)
+    throw new Error(apiError(payload, "Couldn't update backup retention."));
+  return payload as unknown as { ok: true; retention: number; appliesOn: string };
 }
 
 export type AvailableUpgrade = {
