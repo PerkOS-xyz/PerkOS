@@ -90,18 +90,21 @@ function TopNav() {
           </Link>
         </nav>
         <div className="flex items-center gap-2">
-          {/* Wallet sign-in is preserved — required for Base App / Farcaster / web. */}
+          {/* Wallet sign-in — visible on ALL viewports. In a mini-app (Base App /
+              Farcaster) the wallet is already connected, so SmartCTA signs in and
+              routes to /continue → dashboard/welcome; on web it goes to /sign-in. */}
           <SmartCTA
             href="/sign-in"
-            className="hidden rounded-md px-3 py-2 text-sm text-muted-foreground hover:text-foreground sm:inline-flex"
+            className="inline-flex items-center rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/40"
           >
             Sign in
           </SmartCTA>
           <Link
             href="#request-access"
-            className="inline-flex items-center gap-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+            className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 sm:px-4"
           >
-            Join the private beta
+            <span className="hidden sm:inline">Join the private beta</span>
+            <span className="sm:hidden">Join beta</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
