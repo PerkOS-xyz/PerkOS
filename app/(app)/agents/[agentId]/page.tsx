@@ -279,8 +279,9 @@ function BackLink() {
  * External = the user's own hosting (invited / self-hosted / imported BYO).
  * Hibernation/wake/upgrade are ECS-only (PerkOS infra), so they don't apply.
  */
-function isExternalAgent(a: { deployMode?: string | null }): boolean {
+function isExternalAgent(a: { external?: boolean; deployMode?: string | null }): boolean {
   return (
+    a.external === true ||
     a.deployMode === "invited" ||
     a.deployMode === "self-hosted" ||
     a.deployMode === "imported"
@@ -293,7 +294,7 @@ function AgentHeader({
   refreshing,
   walletAddress,
 }: {
-  agent: Agent;
+  agent: AgentRow;
   onRefresh: () => void;
   refreshing: boolean;
   walletAddress: string;
