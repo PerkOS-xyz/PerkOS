@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
-import { Bot, FolderPlus, Loader2, Moon, Play, Plus, Trash2 } from "lucide-react";
+import { Bot, FolderPlus, Loader2, Moon, Play, Plus, Trash2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -157,13 +157,22 @@ export default function AgentsPage() {
             Connect your agents, assign them to projects, and put them to work.
           </p>
         </div>
-        <Link
-          href="/agents/new"
-          className="flex items-center justify-center gap-2 rounded-md bg-[#ec1b69] px-5 py-2.5 text-sm font-medium text-[#ececff] transition-opacity hover:opacity-90"
-        >
-          <PlusIcon />
-          Register agent
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/agents/invite"
+            className="flex items-center justify-center gap-2 rounded-md border border-[#1b1833] px-4 py-2.5 text-sm font-medium text-[#ececff] transition-colors hover:border-[#7975a8]/50"
+          >
+            <UserPlus className="h-4 w-4" />
+            Invite agent
+          </Link>
+          <Link
+            href="/agents/new"
+            className="flex items-center justify-center gap-2 rounded-md bg-[#ec1b69] px-5 py-2.5 text-sm font-medium text-[#ececff] transition-opacity hover:opacity-90"
+          >
+            <PlusIcon />
+            Create agent
+          </Link>
+        </div>
       </header>
 
       {hasAgents ? (
@@ -487,12 +496,18 @@ function EmptyHint() {
     <EmptyState
       icon={Bot}
       title="No agents yet"
-      description="Launch a Hermes or OpenClaw agent and assign it to your projects."
+      description="Create a Hermes or OpenClaw agent on PerkOS, or invite an agent you already run elsewhere into your org."
       actions={[
         {
-          label: "Launch agent",
+          label: "Create agent",
           href: "/agents/new",
           icon: Plus,
+        },
+        {
+          label: "Invite agent",
+          href: "/agents/invite",
+          icon: UserPlus,
+          variant: "outline",
         },
       ]}
     />

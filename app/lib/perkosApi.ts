@@ -1158,6 +1158,39 @@ export async function launchAgent(input: {
   return payload as unknown as LaunchAgentResponse;
 }
 
+export type InviteAgentResult = {
+  ok: boolean;
+  agentId: string;
+  agentName: string;
+  relayApiKey: string;
+  invitePrompt: string;
+};
+
+/**
+ * POST /api/agents/invite — register an EXTERNAL agent the user already runs
+ * into the caller's org. Provisions no infra; returns an onboarding prompt the
+ * user hands to their agent so it connects via perkos-a2a + perkos-chat and can
+ * work the job board with parity to native agents.
+ */
+export async function inviteAgent(input: {
+  name: string;
+  runtimeKind?: RuntimeKind;
+  note?: string;
+}): Promise<InviteAgentResult> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch("/api/agents/invite", {
+    method: "POST",
+    body: JSON.stringify({
+      name: input.name,
+      runtimeKind: input.runtimeKind,
+      note: input.note,
+    }),
+  });
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Invite failed"));
+  return payload as unknown as InviteAgentResult;
+}
+
 /**
  * GET /api/agents/<id> — returns the per-wallet agent projection
  * including the 0.2.0 BYO fields (`bridgeConnected`, `deployMode`,
