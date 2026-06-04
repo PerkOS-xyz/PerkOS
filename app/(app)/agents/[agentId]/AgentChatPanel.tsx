@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
-import { Loader2, MessageSquare, Send } from "lucide-react";
+import { Loader2, MessageSquare, Send, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +26,7 @@ import {
 } from "../../../lib/perkosApi";
 import { useChatPerkosClient } from "../../../lib/useChatPerkosClient";
 import { getHibernationStatusApi } from "../../../lib/perkosApi";
+import { ConfirmDialog } from "../../../components/ConfirmDialog";
 
 type Props = {
   agentId: string;
@@ -41,6 +43,19 @@ type Bubble = {
   ts?: number;
 };
 
+/** Short local time (HH:MM) for a message timestamp. */
+function formatTime(ts?: number): string {
+  if (!ts) return "";
+  try {
+    return new Date(ts).toLocaleTimeString(undefined, {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return "";
+  }
+}
+
 export function AgentChatPanel({ agentId, agentName, ecsDeployed }: Props) {
   const { address, isConnected } = useConnection();
   const queryClient = useQueryClient();
@@ -48,6 +63,7 @@ export function AgentChatPanel({ agentId, agentName, ecsDeployed }: Props) {
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [awaitingReply, setAwaitingReply] = useState(false);
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
 
   // Track ids we just sent so the WS echo (chat_message broadcast back
   // to all participants, including us) doesn't render a duplicate
@@ -224,6 +240,20 @@ export function AgentChatPanel({ agentId, agentName, ecsDeployed }: Props) {
     }
   }
 
+  // Clear the conversation from THIS view. The chat backend keeps the
+  // history (the WS client exposes no delete), so we just empty the local
+  // thread + stop the one-shot history pull from re-populating it this
+  // session. Reloading re-syncs from the server — the confirm says so.
+  function clearChat() {
+    setMessages([]);
+    sentIdsRef.current.clear();
+    historyPulledRef.current = true;
+    setAwaitingReply(false);
+    setError(null);
+    setConfirmClearOpen(false);
+    toast.success("Conversation cleared");
+  }
+
   if (!ecsDeployed) {
     return (
       <Card>
@@ -267,7 +297,21 @@ export function AgentChatPanel({ agentId, agentName, ecsDeployed }: Props) {
               with the runtime&apos;s configured LLM.
             </CardDescription>
           </div>
-          {wsBadge}
+          <div className="flex shrink-0 items-center gap-2">
+            {messages.length > 0 ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setConfirmClearOpen(true)}
+                className="h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Clear
+              </Button>
+            ) : null}
+            {wsBadge}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">
@@ -299,6 +343,16 @@ export function AgentChatPanel({ agentId, agentName, ecsDeployed }: Props) {
                   <pre className="whitespace-pre-wrap break-words font-sans">
                     {m.text}
                   </pre>
+                  {m.ts ? (
+                    <span
+                      className={cn(
+                        "mt-1 block text-[10px] leading-none text-muted-foreground",
+                        m.role === "user" ? "text-right" : "text-left",
+                      )}
+                    >
+                      {formatTime(m.ts)}
+                    </span>
+                  ) : null}
                 </div>
               </div>
             ))
@@ -350,6 +404,15 @@ export function AgentChatPanel({ agentId, agentName, ecsDeployed }: Props) {
           </div>
         </form>
       </CardContent>
+
+      <ConfirmDialog
+        open={confirmClearOpen}
+        onOpenChange={setConfirmClearOpen}
+        title="Clear conversation?"
+        description="Removes the messages from this view. The agent and its server-side history are unaffected — reloading the page re-syncs them."
+        confirmLabel="Clear"
+        onConfirm={clearChat}
+      />
     </Card>
   );
 }
