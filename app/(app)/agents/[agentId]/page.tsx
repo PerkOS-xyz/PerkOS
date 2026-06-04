@@ -45,6 +45,7 @@ import {
   hibernateAgentApi,
   type Agent,
   type HibernationApiState,
+  type HibernationStatus,
   type Task,
 } from "../../../lib/perkosApi";
 import { formatAddress } from "../../../lib/format";
@@ -290,7 +291,15 @@ function AgentHeader({
       toast.success(
         result.previousDesiredCount === 0
           ? `${agent.name} was already stopped.`
-          : `${agent.name} stopped — it'll wake automatically on your next message.`
+          : `${agent.name} stopping — it'll wake automatically on your next message.`
+      );
+      // Optimistically flip to "hibernating" so the badge updates instantly and
+      // the chat panel's status poll kicks in. Without this the live ECS status
+      // lags the drain (desiredCount=0 but the task takes up to ~2 min to stop),
+      // so the cached "active" would otherwise leave the badge stuck on "Online".
+      queryClient.setQueryData<HibernationStatus>(
+        ["agent-hibernation", agent.id],
+        (old) => (old ? { ...old, state: "hibernating" } : old)
       );
       queryClient.invalidateQueries({ queryKey: ["agent-hibernation", agent.id] });
       queryClient.invalidateQueries({ queryKey: ["wallet-agents", walletAddress] });
