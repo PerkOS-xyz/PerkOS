@@ -3,6 +3,16 @@
 PerkOS App (`app.perkos.xyz`). One entry per release dated by deploy day.
 Phase numbering tracks `MIGRATION-PLAN-v2.md` in the workspace root.
 
+## 2026-06-04 — Invite external agents
+
+- **Agents page** is now **Create agent** (the launch wizard) vs **Invite
+  agent**. New `/agents/invite` page registers an agent the user already runs
+  elsewhere into their org and shows a copyable **onboarding prompt** to hand to
+  it — the agent connects via perkos-a2a + perkos-chat and works the job board
+  with full parity to native agents (board auth via a `relayApiKey`-minted,
+  server-side tools token, so no platform secret is ever exposed). Adds
+  `inviteAgent()` to `app/lib/perkosApi.ts`.
+
 ## 2026-06-01 — Runtime version visibility + beta channel (shared-types 0.3.0)
 
 - **Wizard** (`agents/new`): each runtime card shows the **upstream version**
