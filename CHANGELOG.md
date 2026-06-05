@@ -5,6 +5,17 @@ Phase numbering tracks `MIGRATION-PLAN-v2.md` in the workspace root.
 
 ## 2026-06-05 — Mini-app (Base App / Farcaster) UX fixes
 
+- **Pull-to-refresh + a Refresh button**: data is fetched once and cached, so
+  after a mutation on another screen a page could show stale numbers. Mobile
+  now supports **pull-to-refresh** (drag down at the top of any page) and both
+  the desktop and mobile headers gain a **Refresh** button — either invalidates
+  every active query so the current page refetches its live data. New
+  `app/components/PullToRefresh.tsx` + `RefreshButton.tsx`, wired in the
+  `(app)` layout.
+- **Deleting a project now updates the dashboard count**: the delete only
+  invalidated the projects *list*, not the `wallet-overview` query the
+  dashboard reads — so the dashboard still showed **ACTIVE PROJECTS 1** right
+  after the only project was deleted. It now invalidates both.
 - **Sign in on mobile**: the landing CTA was `hidden sm:inline-flex`, so the
   Sign-in button only rendered on desktop. It's now visible on mobile too. In a
   mini-app / connected-wallet context it signs in with the already-connected

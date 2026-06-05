@@ -148,7 +148,11 @@ function DetailHeader({ detail }: { detail: ProjectDetail }) {
       return deleteProject({ walletAddress: address, projectId: project.id });
     },
     onSuccess: () => {
+      // Both the projects list AND the dashboard overview (active-projects
+      // count) read this data — invalidate both, or the dashboard keeps
+      // showing the deleted project in "ACTIVE PROJECTS".
       queryClient.invalidateQueries({ queryKey: ["wallet-projects", address] });
+      queryClient.invalidateQueries({ queryKey: ["wallet-overview", address] });
       toast.success("Project deleted", {
         description: `"${project.name}" was removed.`,
       });

@@ -28,6 +28,8 @@ import { AccessGate } from "../components/AccessGate";
 import { NotificationsBell } from "../components/NotificationsBell";
 import { NetworkPill } from "../components/NetworkPill";
 import { UserMenu } from "../components/UserMenu";
+import { RefreshButton } from "../components/RefreshButton";
+import { PullToRefresh } from "../components/PullToRefresh";
 import { formatAddress } from "../lib/format";
 import { useWalletSession } from "../lib/useWalletSession";
 
@@ -95,6 +97,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           <header className="hidden items-center justify-between gap-2 border-b border-border px-8 py-3 md:flex">
             <CommandHint />
             <div className="flex items-center gap-2">
+              <RefreshButton />
               <NetworkPill />
               <NotificationsBell />
               <UserMenu />
@@ -110,53 +113,56 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               height={52}
             />
 
-            <NetworkPill />
+            <div className="flex items-center gap-1">
+              <NetworkPill />
+              <RefreshButton />
 
-            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <SheetTrigger
-                render={
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Open menu"
-                    className="h-9 w-9 text-foreground hover:bg-primary/10"
-                  />
-                }
-              >
-                <Menu className="h-5 w-5" />
-              </SheetTrigger>
-              <SheetContent
-                side="right"
-                className="flex w-72 flex-col gap-6 border-l border-border bg-card p-6"
-              >
-                <SheetHeader className="p-0 text-left">
-                  <SheetTitle className="flex items-center gap-3 text-base px-4">
-                    <Image
-                      src="/perkos-header.png"
-                      alt="PerkOS"
-                      width={120}
-                      height={32}
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Open menu"
+                      className="h-9 w-9 text-foreground hover:bg-primary/10"
                     />
-                  </SheetTitle>
-                  <SheetDescription className="sr-only">
-                    Main navigation
-                  </SheetDescription>
-                </SheetHeader>
+                  }
+                >
+                  <Menu className="h-5 w-5" />
+                </SheetTrigger>
+                <SheetContent
+                  side="right"
+                  className="flex w-72 flex-col gap-6 border-l border-border bg-card p-6"
+                >
+                  <SheetHeader className="p-0 text-left">
+                    <SheetTitle className="flex items-center gap-3 text-base px-4">
+                      <Image
+                        src="/perkos-header.png"
+                        alt="PerkOS"
+                        width={120}
+                        height={32}
+                      />
+                    </SheetTitle>
+                    <SheetDescription className="sr-only">
+                      Main navigation
+                    </SheetDescription>
+                  </SheetHeader>
 
-                <NavList pathname={pathname} />
+                  <NavList pathname={pathname} />
 
-                <Separator className="bg-border" />
+                  <Separator className="bg-border" />
 
-                <WalletFooter
-                  address={address}
-                  onDisconnect={() => disconnect()}
-                />
-              </SheetContent>
-            </Sheet>
+                  <WalletFooter
+                    address={address}
+                    onDisconnect={() => disconnect()}
+                  />
+                </SheetContent>
+              </Sheet>
+            </div>
           </header>
 
           <div id="main-content" className="p-5 pb-44 md:p-8 md:pb-8">
-            {children}
+            <PullToRefresh>{children}</PullToRefresh>
           </div>
         </main>
         <MobileBottomNav />
