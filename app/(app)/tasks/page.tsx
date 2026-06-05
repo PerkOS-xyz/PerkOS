@@ -37,7 +37,7 @@ type EnrichedTask = {
 };
 
 export default function TasksPage() {
-  const { address, isConnected } = useConnection();
+  const { address } = useConnection();
   const queryClient = useQueryClient();
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -55,7 +55,7 @@ export default function TasksPage() {
   const projectsQuery = useQuery({
     queryKey: ["wallet-projects", address],
     queryFn: () => getWalletProjects(address!),
-    enabled: isConnected && Boolean(address),
+    enabled: Boolean(address),
   });
 
   const projects = projectsQuery.data?.projects ?? [];
@@ -69,7 +69,7 @@ export default function TasksPage() {
       queryKey: ["wallet-project", address, pid],
       queryFn: () =>
         getWalletProject({ walletAddress: address!, projectId: pid }),
-      enabled: isConnected && Boolean(address),
+      enabled: Boolean(address),
     })),
   });
 

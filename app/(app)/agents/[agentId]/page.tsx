@@ -97,12 +97,12 @@ const CHANNEL_LABELS: Record<string, { label: string; Icon: typeof Send }> = {
 export default function AgentDetailPage({ params }: PageProps) {
   const { agentId } = use(params);
   const queryClient = useQueryClient();
-  const { address, isConnected } = useConnection();
+  const { address } = useConnection();
 
   const agentsQuery = useQuery({
     queryKey: ["wallet-agents", address],
     queryFn: () => getWalletAgents(address!),
-    enabled: isConnected && Boolean(address),
+    enabled: Boolean(address),
   });
 
   const agent = agentsQuery.data?.find((a) => a.id === agentId);
@@ -110,7 +110,7 @@ export default function AgentDetailPage({ params }: PageProps) {
   const projectsQuery = useQuery({
     queryKey: ["wallet-projects", address],
     queryFn: () => getWalletProjects(address!),
-    enabled: isConnected && Boolean(address),
+    enabled: Boolean(address),
   });
 
   const projectIds = useMemo(
@@ -126,7 +126,7 @@ export default function AgentDetailPage({ params }: PageProps) {
       queryKey: ["wallet-project", address, pid],
       queryFn: () =>
         getWalletProject({ walletAddress: address!, projectId: pid }),
-      enabled: isConnected && Boolean(address) && Boolean(pid),
+      enabled: Boolean(address) && Boolean(pid),
     })),
   });
 

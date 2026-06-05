@@ -20,7 +20,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
 export default function ProjectsPage() {
-  const { address, isConnected } = useConnection();
+  const { address } = useConnection();
   const qc = useQueryClient();
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -33,7 +33,7 @@ export default function ProjectsPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["wallet-projects", address],
     queryFn: () => getWalletProjects(address!),
-    enabled: isConnected && Boolean(address),
+    enabled: Boolean(address),
   });
 
   const allProjects = data?.projects ?? [];

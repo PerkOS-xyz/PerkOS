@@ -46,7 +46,7 @@ export default function AgentChatPage({ params }: PageProps) {
   const agentsQuery = useQuery({
     queryKey: ["wallet-agents", address],
     queryFn: () => getWalletAgents(address!),
-    enabled: isConnected && Boolean(address),
+    enabled: Boolean(address),
   });
 
   const agent = agentsQuery.data?.find((a) => a.id === agentId);

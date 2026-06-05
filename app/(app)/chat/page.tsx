@@ -33,20 +33,20 @@ function initials(name: string): string {
 }
 
 export default function ChatHubPage() {
-  const { address, isConnected } = useConnection();
+  const { address } = useConnection();
   const { setOpen } = useChatbot();
   const [query, setQuery] = useState("");
 
   const agentsQuery = useQuery({
     queryKey: ["wallet-agents", address],
     queryFn: () => getWalletAgents(address!),
-    enabled: isConnected && Boolean(address),
+    enabled: Boolean(address),
   });
 
   const projectsQuery = useQuery({
     queryKey: ["wallet-projects", address],
     queryFn: () => getWalletProjects(address!),
-    enabled: isConnected && Boolean(address),
+    enabled: Boolean(address),
   });
 
   const allAgents = agentsQuery.data ?? [];

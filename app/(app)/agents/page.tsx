@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/dialog";
 
 export default function AgentsPage() {
-  const { address, isConnected } = useConnection();
+  const { address } = useConnection();
   const qc = useQueryClient();
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -44,7 +44,7 @@ export default function AgentsPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["wallet-agents", address],
     queryFn: () => getWalletAgents(address!),
-    enabled: isConnected && Boolean(address),
+    enabled: Boolean(address),
     // While any agent is still provisioning, poll so the card flips to
     // "Online" on its own once the runtime's bridge connects (the heartbeat
     // sets status:"ready") — no manual refresh needed.

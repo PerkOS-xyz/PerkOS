@@ -82,7 +82,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
     queryKey: ["wallet-project", address, projectId],
     queryFn: () =>
       getWalletProject({ walletAddress: address!, projectId }),
-    enabled: isConnected && Boolean(address) && Boolean(projectId),
+    enabled: Boolean(address) && Boolean(projectId),
   });
 
   return (

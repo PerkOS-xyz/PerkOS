@@ -45,13 +45,13 @@ export default function CreateTaskPage() {
   const projectsQuery = useQuery({
     queryKey: ["wallet-projects", address],
     queryFn: () => getWalletProjects(address!),
-    enabled: isConnected && Boolean(address),
+    enabled: Boolean(address),
   });
 
   const agentsQuery = useQuery({
     queryKey: ["wallet-agents", address],
     queryFn: () => getWalletAgents(address!),
-    enabled: isConnected && Boolean(address),
+    enabled: Boolean(address),
   });
 
   const projects = projectsQuery.data?.projects ?? [];

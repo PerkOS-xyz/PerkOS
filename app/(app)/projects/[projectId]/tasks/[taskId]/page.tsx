@@ -48,7 +48,7 @@ export default function TaskDetailPage({ params }: PageProps) {
   const { projectId, taskId } = use(params);
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { address, isConnected } = useConnection();
+  const { address } = useConnection();
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -56,7 +56,7 @@ export default function TaskDetailPage({ params }: PageProps) {
     queryKey: ["wallet-project", address, projectId],
     queryFn: () =>
       getWalletProject({ walletAddress: address!, projectId }),
-    enabled: isConnected && Boolean(address) && Boolean(projectId),
+    enabled: Boolean(address) && Boolean(projectId),
   });
 
   const task = data?.tasks.find((t) => t.id === taskId);

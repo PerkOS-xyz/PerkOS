@@ -101,13 +101,13 @@ const STAT_CARDS: {
 ];
 
 export default function DashboardPage() {
-  const { address, isConnected } = useConnection();
+  const { address } = useConnection();
   const { workspaceName } = useOnboarding();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["wallet-overview", address],
     queryFn: () => getWalletOverview(address!),
-    enabled: isConnected && Boolean(address),
+    enabled: Boolean(address),
     staleTime: 30_000,
   });
 
