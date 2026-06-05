@@ -83,6 +83,7 @@ import {
 } from "../../../lib/skillsCatalog";
 import {
   buildConfigPreview,
+  byokBaseUrl,
   byokProviderOptions,
   type LLMSource,
 } from "../../../lib/agentConfigPreview";
@@ -367,6 +368,17 @@ export default function AgentLauncherPage() {
         soul: soul || undefined,
         skills: state.skills.length ? state.skills : undefined,
         modelKey: state.llmSource === "byok" ? state.byokApiKey : undefined,
+        // BYOK: point the runtime at the chosen provider's OpenAI-compatible
+        // endpoint + model. Without these the launch route would ship the BYOK
+        // key to the PerkOS gateway with the ollama protocol (→ 401/wrong API).
+        llmBaseUrl:
+          state.llmSource === "byok"
+            ? byokBaseUrl(state.byokProvider)
+            : undefined,
+        llmModel:
+          state.llmSource === "byok"
+            ? state.byokModel.trim() || undefined
+            : undefined,
         // Only meaningful for the perkos-managed (ECS) path; the launch
         // endpoint ignores it for self-hosted / imported.
         imageTag: state.deployMode === "perkos-ecs" ? state.imageTag : null,

@@ -205,3 +205,27 @@ export function byokProviderOptions(runtime: AgentRuntime): {
     { id: "ollama", label: "Local Ollama", defaultModel: "qwen2.5:7b" },
   ];
 }
+
+/**
+ * BYOK provider → OpenAI-compatible base URL (incl. version path). The launch
+ * route forwards this as `llmBaseUrl`; provision.ts then points the runtime at
+ * it with the `openai-completions` wire protocol + provider name `byok` (which
+ * skips OpenClaw's Codex/Responses routing — see project_byok_openai_runtime_config).
+ * openai + openrouter are first-class OpenAI-compatible; anthropic is best-effort
+ * (its native API isn't /chat/completions — prefer OpenRouter for Claude); ollama
+ * assumes a sidecar reachable from the task (not the user's localhost).
+ */
+export function byokBaseUrl(provider: string): string {
+  switch (provider) {
+    case "openai":
+      return "https://api.openai.com/v1";
+    case "openrouter":
+      return "https://openrouter.ai/api/v1";
+    case "anthropic":
+      return "https://api.anthropic.com/v1";
+    case "ollama":
+      return "http://127.0.0.1:11434/v1";
+    default:
+      return "https://api.openai.com/v1";
+  }
+}

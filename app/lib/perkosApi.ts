@@ -1337,7 +1337,15 @@ export async function launchAgent(input: {
   runtime: AgentRuntime;
   name: string;
   plugins?: string[];
+  /** BYOK: the user's own model API key. The launch route writes it
+   *  server-side to /agent_secrets (never in the provision-job doc) and
+   *  provisions with llmSource: "byok". */
   modelKey?: string;
+  /** BYOK: OpenAI-compatible endpoint base URL incl. version path
+   *  (e.g. "https://api.openai.com/v1"). Only meaningful with modelKey. */
+  llmBaseUrl?: string;
+  /** BYOK: wire model id (e.g. "gpt-4o-mini"). Only meaningful with modelKey. */
+  llmModel?: string;
   /** When provisioning on PerkOS infra (ECS), the specific image tag the
    *  admin has approved. Ignored for self-hosted / imported deploys. */
   imageTag?: string | null;
@@ -1364,6 +1372,8 @@ export async function launchAgent(input: {
       name: input.name,
       plugins: input.plugins ?? [],
       modelKey: input.modelKey,
+      llmBaseUrl: input.llmBaseUrl,
+      llmModel: input.llmModel,
       imageTag: input.imageTag ?? undefined,
       deployMode: input.deployMode,
       runtimeKind: input.runtimeKind,
