@@ -396,8 +396,17 @@ export default function AgentLauncherPage() {
     onSuccess: async (response) => {
       queryClient.invalidateQueries({ queryKey: ["wallet-agents", address] });
       if (fromOnboarding) markAgentRegistered();
+      // The launch route may auto-uniquify the name — a wallet can own several
+      // agents of the same persona ("Researcher", "Researcher-2", …) — so show
+      // the name the server actually assigned, and flag it when it was changed.
+      const requestedName =
+        state.agentName.trim() || preset?.name || "Your agent";
+      const launchedName = response?.result?.agent?.name || requestedName;
       toast.success("Agent launched", {
-        description: `${state.agentName.trim() || preset?.name || "Your agent"} is ready.`,
+        description:
+          launchedName !== requestedName
+            ? `Saved as "${launchedName}" — you already have an agent named "${requestedName}".`
+            : `${launchedName} is ready.`,
       });
 
       // Wire any messaging gateways the user enabled. We do this AFTER
