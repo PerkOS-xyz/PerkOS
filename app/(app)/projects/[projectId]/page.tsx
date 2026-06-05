@@ -176,29 +176,29 @@ function DetailHeader({ detail }: { detail: ProjectDetail }) {
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-[#7975a8]">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="mr-1 text-xs text-[#7975a8]">
             {project.budget || "0 USDC"}
           </span>
           <Button
-            variant="ghost"
-            size="icon"
+            variant="outline"
+            size="sm"
             onClick={() => setEditOpen(true)}
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
             aria-label="Edit project"
             title="Edit project"
           >
             <Pencil className="h-4 w-4" />
+            Edit
           </Button>
           <Button
-            variant="ghost"
-            size="icon"
+            variant="destructive"
+            size="sm"
             onClick={() => setConfirmOpen(true)}
-            className="h-8 w-8 text-muted-foreground hover:text-destructive"
             aria-label="Delete project"
             title="Delete project"
           >
             <Trash2 className="h-4 w-4" />
+            Delete
           </Button>
         </div>
       </div>

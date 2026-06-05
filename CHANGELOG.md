@@ -26,6 +26,12 @@ Phase numbering tracks `MIGRATION-PLAN-v2.md` in the workspace root.
   pattern as the task counter). The in-memory project is corrected even if the
   heal write never lands (flaky mini-app writes), so the stat tile and Agents
   tab render the real roster regardless.
+- **Delete project button is now visible on mobile**: the project header's
+  edit/delete affordances were icon-only *ghost* buttons whose delete icon was
+  muted grey and only turned red on **hover** — invisible/unrecognisable on a
+  touch device, so users couldn't find how to delete a project. Both are now
+  labelled buttons (**Edit** outline, **Delete** in the destructive/red
+  variant) that read clearly without hover.
 - **External agents**: hibernate / wake / upgrade controls are hidden for
   invited / self-hosted / imported agents — PerkOS only controls hosting for
   the agents it runs on ECS, so those lifecycle actions don't apply to
