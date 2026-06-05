@@ -14,8 +14,10 @@ import { cn } from "@/lib/utils";
 
 import {
   addProjectMessage,
+  assignAgentsToProject,
   deleteProject,
   deleteTask,
+  getWalletAgents,
   getWalletProject,
   updateTask,
   type ChatMessage,
@@ -26,7 +28,14 @@ import {
 import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { EditProjectDialog } from "../../../components/EditProjectDialog";
 import { EditTaskDialog } from "../../../components/EditTaskDialog";
-import { Bot, Plus } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Bot, Loader2, Plus } from "lucide-react";
 
 import { ChatComposer } from "../../../components/ChatComposer";
 import { Markdown } from "../../../components/Markdown";
@@ -673,42 +682,183 @@ function PriorityBadge({ priority }: { priority: string }) {
 }
 
 function AgentsTab({ detail }: { detail: ProjectDetail }) {
+  const [addOpen, setAddOpen] = useState(false);
   const agentNames = uniqueAgents(detail.tasks, detail.project.agentIds ?? []);
+  const projectId = detail.project.id ?? "";
 
-  if (agentNames.length === 0) {
-    return (
-      <EmptyState
-        icon={Bot}
-        title="No agents on this project"
-        description="Assign agents from your team or launch a new one to start working on tasks."
-        actions={[
-          { label: "Browse agents", href: "/agents", variant: "outline" },
-          { label: "Launch agent", href: "/agents/new", icon: Plus },
-        ]}
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-sm font-medium text-[#ececff]">
+          {agentNames.length} agent{agentNames.length === 1 ? "" : "s"} on this project
+        </h2>
+        <Button size="sm" className="gap-1.5" onClick={() => setAddOpen(true)}>
+          <Plus className="h-3.5 w-3.5" /> Add agent
+        </Button>
+      </div>
+
+      {agentNames.length === 0 ? (
+        <EmptyState
+          icon={Bot}
+          title="No agents on this project"
+          description="Add an agent from your team, or launch a new one to start working on tasks."
+          actions={[
+            { label: "Add existing agent", onClick: () => setAddOpen(true), icon: Plus },
+            { label: "Launch agent", href: "/agents/new", variant: "outline" },
+          ]}
+        />
+      ) : (
+        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          {agentNames.map((name) => (
+            <li
+              key={name}
+              className="flex items-center gap-3 rounded-md border border-[#1b1833] bg-[#0e0716] px-4 py-3"
+            >
+              <span className="grid h-9 w-9 place-items-center rounded-full bg-[#ec1b69]/20 text-xs font-medium text-[#ec1b69]">
+                {initials(name)}
+              </span>
+              <div className="flex flex-col">
+                <span className="text-sm text-[#ececff]">{name}</span>
+                <span className="text-xs text-[#7975a8]">
+                  {countTasksFor(name, detail.tasks)} task
+                  {countTasksFor(name, detail.tasks) === 1 ? "" : "s"}
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <AddAgentToProjectDialog
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        projectId={projectId}
+        existingNames={agentNames}
       />
-    );
+    </div>
+  );
+}
+
+function AddAgentToProjectDialog({
+  open,
+  onOpenChange,
+  projectId,
+  existingNames,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  projectId: string;
+  existingNames: string[];
+}) {
+  const { address } = useConnection();
+  const qc = useQueryClient();
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["wallet-agents", address],
+    queryFn: () => getWalletAgents(address!),
+    enabled: open && Boolean(address),
+  });
+
+  const existing = new Set(existingNames.map((n) => n.toLowerCase()));
+  const available = (data ?? []).filter(
+    (a) => a.name && !existing.has(a.name.toLowerCase())
+  );
+
+  const addMut = useMutation({
+    mutationFn: () =>
+      assignAgentsToProject({
+        walletAddress: address!,
+        projectId,
+        agentNames: [...selected],
+      }),
+    onSuccess: ({ added }) => {
+      qc.invalidateQueries({ queryKey: ["wallet-project", address, projectId] });
+      qc.invalidateQueries({ queryKey: ["wallet-projects", address] });
+      toast.success(
+        added > 0
+          ? `Added ${added} agent${added === 1 ? "" : "s"} to the project`
+          : "Those agents are already on the project"
+      );
+      setSelected(new Set());
+      onOpenChange(false);
+    },
+    onError: (e: Error) =>
+      toast.error("Couldn't add agents", { description: e.message }),
+  });
+
+  function toggle(name: string, on: boolean) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(name);
+      else next.delete(name);
+      return next;
+    });
   }
 
   return (
-    <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
-      {agentNames.map((name) => (
-        <li
-          key={name}
-          className="flex items-center gap-3 rounded-md border border-[#1b1833] bg-[#0e0716] px-4 py-3"
-        >
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-[#ec1b69]/20 text-xs font-medium text-[#ec1b69]">
-            {initials(name)}
-          </span>
-          <div className="flex flex-col">
-            <span className="text-sm text-[#ececff]">{name}</span>
-            <span className="text-xs text-[#7975a8]">
-              {countTasksFor(name, detail.tasks)} task
-              {countTasksFor(name, detail.tasks) === 1 ? "" : "s"}
-            </span>
-          </div>
-        </li>
-      ))}
-    </ul>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add agents to this project</DialogTitle>
+          <DialogDescription>
+            Pick agents from your team to add to this project&apos;s roster — then
+            you can assign them tasks.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex max-h-80 flex-col gap-2 overflow-auto py-1">
+          {isLoading ? (
+            <p className="flex items-center gap-2 text-sm text-[#7975a8]">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading your agents…
+            </p>
+          ) : available.length === 0 ? (
+            <p className="text-sm text-[#7975a8]">
+              {(data ?? []).length === 0
+                ? "You don't have any agents yet. Create or invite one first."
+                : "All your agents are already on this project."}
+            </p>
+          ) : (
+            available.map((a) => (
+              <label
+                key={a.id}
+                className="flex cursor-pointer items-center gap-3 rounded-md border border-[#1b1833] px-3 py-2 transition-colors hover:border-[#7975a8]/40"
+              >
+                <Checkbox
+                  checked={selected.has(a.name)}
+                  onCheckedChange={(on) => toggle(a.name, on === true)}
+                />
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-[#ec1b69]/20 text-xs font-medium text-[#ec1b69]">
+                  {initials(a.name)}
+                </span>
+                <div className="flex flex-col">
+                  <span className="text-sm text-[#ececff]">{a.name}</span>
+                  <span className="text-xs text-[#7975a8]">
+                    {a.runtime}
+                    {a.external ? " · external" : ""}
+                  </span>
+                </div>
+              </label>
+            ))
+          )}
+        </div>
+
+        <div className="flex justify-end gap-2 pt-1">
+          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button
+            size="sm"
+            className="gap-1.5"
+            disabled={selected.size === 0 || addMut.isPending}
+            onClick={() => addMut.mutate()}
+          >
+            {addMut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+            Add{selected.size > 0 ? ` ${selected.size}` : ""}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
