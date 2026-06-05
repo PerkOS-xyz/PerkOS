@@ -825,6 +825,20 @@ export async function setBackupRetentionApi(input: {
   return payload as unknown as { ok: true; retention: number; appliesOn: string };
 }
 
+export async function restoreAgentBackupApi(input: {
+  agentId: string;
+  ts: string;
+}): Promise<{ ok: true; ts: string; restarting: boolean }> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/agents/${encodeURIComponent(input.agentId)}/restore`,
+    { method: "POST", body: JSON.stringify({ ts: input.ts }) },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't start restore."));
+  return payload as unknown as { ok: true; ts: string; restarting: boolean };
+}
+
 export type AvailableUpgrade = {
   imageTag: string;
   publishedAt?: string;

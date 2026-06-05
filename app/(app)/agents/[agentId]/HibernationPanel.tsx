@@ -2,7 +2,15 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Moon, Sun, Loader2, Archive, History, Lock } from "lucide-react";
+import {
+  Moon,
+  Sun,
+  Loader2,
+  Archive,
+  History,
+  Lock,
+  RotateCcw,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,6 +29,7 @@ import {
   wakeAgentApi,
   getAgentBackupsApi,
   setBackupRetentionApi,
+  restoreAgentBackupApi,
   type HibernationApiState,
   type HibernationStatus,
   type AgentBackup,
@@ -101,6 +110,7 @@ const RETENTION_PRESETS = [1, 3, 5, 10, 20, 30];
 export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
   const queryClient = useQueryClient();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [restoreTarget, setRestoreTarget] = useState<AgentBackup | null>(null);
 
   const statusQuery = useQuery<HibernationStatus>({
     queryKey: ["agent-hibernation", agentId],
@@ -162,6 +172,21 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
     },
     onError: (err: Error) => {
       toast.error("Couldn't update retention", { description: err.message });
+    },
+  });
+
+  const restoreMutation = useMutation({
+    mutationFn: (ts: string) => restoreAgentBackupApi({ agentId, ts }),
+    onSuccess: () => {
+      toast.success(
+        `Restoring ${agentName} — it will restart and come back with that backup (~30-60s).`,
+      );
+      setRestoreTarget(null);
+      queryClient.invalidateQueries({ queryKey: ["agent-hibernation", agentId] });
+    },
+    onError: (err: Error) => {
+      toast.error("Couldn't restore", { description: err.message });
+      setRestoreTarget(null);
     },
   });
 
@@ -369,9 +394,21 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
                   className="flex items-center justify-between gap-2 py-1.5 text-xs"
                 >
                   <span className="text-foreground">{backupLabel(b)}</span>
-                  <span className="font-mono text-muted-foreground">
-                    {formatBytes(b.bytes)}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-muted-foreground">
+                      {formatBytes(b.bytes)}
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 gap-1 px-2 text-xs"
+                      disabled={restoreMutation.isPending || isTransient}
+                      onClick={() => setRestoreTarget(b)}
+                    >
+                      <RotateCcw className="h-3 w-3" />
+                      Restore
+                    </Button>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -393,6 +430,26 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
         confirmLabel="Hibernate agent"
         pending={hibernateMutation.isPending}
         onConfirm={() => hibernateMutation.mutate()}
+      />
+
+      <ConfirmDialog
+        open={restoreTarget !== null}
+        onOpenChange={(o) => {
+          if (!o) setRestoreTarget(null);
+        }}
+        title={`Restore ${agentName} to this backup?`}
+        description={
+          restoreTarget
+            ? `The agent will restart and come back with its state from ${backupLabel(
+                restoreTarget,
+              )}. Anything it changed since then is replaced (~30-60s to come back).`
+            : ""
+        }
+        confirmLabel="Restore"
+        pending={restoreMutation.isPending}
+        onConfirm={() => {
+          if (restoreTarget) restoreMutation.mutate(restoreTarget.ts);
+        }}
       />
     </Card>
   );
