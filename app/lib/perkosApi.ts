@@ -430,7 +430,7 @@ export async function getWalletProject(input: {
   }
   const project = projectSnap.data();
 
-  const [tasksSnap, messagesSnap] = await Promise.all([
+  const [tasksSnap, messagesSnap, agentsSnap] = await Promise.all([
     getDocs(tasksCol(input.walletAddress, input.projectId)),
     getDocs(
       query(
@@ -438,6 +438,7 @@ export async function getWalletProject(input: {
         orderBy("createdAt", "asc")
       )
     ),
+    getDocs(agentsCol(input.walletAddress)),
   ]);
 
   // Self-heal the denormalized task counter for projects created before
@@ -452,6 +453,38 @@ export async function getWalletProject(input: {
       // Healing is best-effort. A failure (e.g. rules tightening) is fine.
     });
     project.tasks = actualTaskCount;
+  }
+
+  // Self-heal the agent roster + its denormalized count. Deleting an agent
+  // does not walk every project, so a project keeps a dangling name in
+  // `agentIds` (and a stale `agents` count) once its agent is gone — which
+  // is why a project still showed "AGENTS 2" after both agents were
+  // deleted. Drop roster entries whose agent no longer exists and re-derive
+  // the count. NOTE: the in-memory project is corrected even if the write
+  // below never lands (e.g. a mini-app webview where writes are flaky), so
+  // the stat tile / agents tab render correctly regardless. task.agent is a
+  // historical attribution and is intentionally left untouched.
+  const liveAgentNames = new Set(
+    agentsSnap.docs
+      .map((d) => (d.data().name ?? "").trim().toLowerCase())
+      .filter((n) => n.length > 0)
+  );
+  const roster = (project.agentIds as string[] | undefined) ?? [];
+  const reconciledRoster = roster.filter((name) =>
+    liveAgentNames.has(name.trim().toLowerCase())
+  );
+  if (
+    reconciledRoster.length !== roster.length ||
+    project.agents !== reconciledRoster.length
+  ) {
+    updateDoc(projectDoc(input.walletAddress, input.projectId), {
+      agentIds: reconciledRoster,
+      agents: reconciledRoster.length,
+    }).catch(() => {
+      // Best-effort, same rationale as the task counter above.
+    });
+    project.agentIds = reconciledRoster;
+    project.agents = reconciledRoster.length;
   }
 
   return {

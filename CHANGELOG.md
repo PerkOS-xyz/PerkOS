@@ -3,6 +3,34 @@
 PerkOS App (`app.perkos.xyz`). One entry per release dated by deploy day.
 Phase numbering tracks `MIGRATION-PLAN-v2.md` in the workspace root.
 
+## 2026-06-05 — Mini-app (Base App / Farcaster) UX fixes
+
+- **Sign in on mobile**: the landing CTA was `hidden sm:inline-flex`, so the
+  Sign-in button only rendered on desktop. It's now visible on mobile too. In a
+  mini-app / connected-wallet context it signs in with the already-connected
+  wallet and routes to the dashboard/wizard; on the web it goes to `/sign-in`
+  as before (`SmartCTA` was already context-aware — only the CSS hid it).
+- **Data now loads in the mini-app**: pages gated their Firestore reads on
+  `isConnected && address`, but `isConnected` is flaky in the Base App /
+  Farcaster webview (wallet present, connector not yet "connected") — so
+  projects, agents, tasks and chat rendered empty even though the data
+  existed. All read queries now gate on `Boolean(address)` only (10 pages).
+- **Add agents to a project from the project page**: the Agents tab gains an
+  **Add agent** button (header + empty state) that lists the org's agents not
+  already on the project and assigns the selected ones (`assignAgentsToProject`).
+- **Stale "Agents N" count fixed**: deleting an agent does not walk every
+  project, so a project kept the deleted name in its roster and a stale count
+  — a project still showed **AGENTS 2** after both its agents were deleted.
+  `getWalletProject` now reconciles `agentIds` against the agents that still
+  exist and re-derives the count, self-healing the doc (same fire-and-forget
+  pattern as the task counter). The in-memory project is corrected even if the
+  heal write never lands (flaky mini-app writes), so the stat tile and Agents
+  tab render the real roster regardless.
+- **External agents**: hibernate / wake / upgrade controls are hidden for
+  invited / self-hosted / imported agents — PerkOS only controls hosting for
+  the agents it runs on ECS, so those lifecycle actions don't apply to
+  externally hosted ones.
+
 ## 2026-06-04 — Invite external agents
 
 - **Agents page** is now **Create agent** (the launch wizard) vs **Invite
