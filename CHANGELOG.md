@@ -3,6 +3,35 @@
 PerkOS App (`app.perkos.xyz`). One entry per release dated by deploy day.
 Phase numbering tracks `MIGRATION-PLAN-v2.md` in the workspace root.
 
+## 2026-06-05 — Autonomous PM / orchestrator for projects
+
+Projects can now run themselves. Designate one project agent as the **PM**
+(there's a new **PM** template, and a "Make PM" action in the Agents tab); the
+rest are workers. Then either click **Run with PM** on the project, or just post
+a goal in the project chat — the PM plans the goal into tasks, assigns each to a
+worker, and the existing **dispatcher** wakes those workers to do the job. When
+a round finishes, the PM reviews the results and plans the next round or
+declares the goal done — autonomously. A status banner shows what it's doing
+(planning / workers running / done), and the PM narrates progress in the chat.
+
+Why this was needed: posting in the project chat did nothing — it was a passive
+log that never notified the assigned agents. Now the chat is the project's
+command surface.
+
+How it's built (no new moving parts on the hot path — it reuses what was there):
+- The PM runs **server-side** as its own persona (`complete()` + the extracted
+  `loadAgentContext`), emitting a strict JSON plan we parse + sanitize
+  (assignees must be real workers; counts capped). It creates assigned tasks the
+  exact way `createTask` does, so the **already-running dispatcher** executes the
+  workers — the PM never runs them itself.
+- A new **`pm` worker** (PerkOS-API, alongside the dispatcher/curator) drives the
+  autonomous loop: when a round's tasks settle it runs a PM review turn. Safety
+  caps bound LLM cost — **max 5 rounds**, **6 tasks/round**, a stuck-timeout, and
+  a per-project turn lock so the route and the worker never double-run.
+- App: `project.pmAgent` + `project.pmSession`, `setProjectPm()`, `pmTurn()`,
+  a **Run with PM** button, the **PmSessionBanner**, role badges, and a
+  fire-and-forget PM wake when you post in the chat.
+
 ## 2026-06-05 — Mini-app (Base App / Farcaster) UX fixes
 
 - **Pull-to-refresh + a Refresh button**: data is fetched once and cached, so

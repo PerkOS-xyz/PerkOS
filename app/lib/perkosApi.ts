@@ -39,6 +39,28 @@ import {
 import { firebaseDb } from "./firebase";
 import { validateSwarm, type SwarmDefinition } from "./swarm";
 
+export type PmSessionStatus =
+  | "planning"
+  | "working"
+  | "reviewing"
+  | "done"
+  | "stopped";
+
+/**
+ * Autonomous PM/orchestrator session state, persisted on the project doc.
+ * Driven by the PerkOS-API `pm` worker; the UI reads it to show progress.
+ */
+export type PmSession = {
+  status: PmSessionStatus;
+  goal: string;
+  round: number;
+  taskIds: string[];
+  maxRounds: number;
+  maxTasksPerRound: number;
+  reason?: string;
+  lastRunAt?: string;
+};
+
 export type Project = {
   id?: string;
   name: string;
@@ -53,6 +75,10 @@ export type Project = {
    * this project's chat room. Set/exported via the swarm.yaml flow.
    */
   swarm?: SwarmDefinition;
+  /** Display name of the agent designated as this project's PM/orchestrator. */
+  pmAgent?: string | null;
+  /** Autonomous PM session state (set by the PM route/worker). */
+  pmSession?: PmSession;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -177,6 +203,22 @@ const projectConverter: FirestoreDataConverter<Project> = {
       const v = validateSwarm(data.swarm);
       if (v.ok) swarm = v.swarm;
     }
+    // PM session is written by the API/worker; read it loosely (Timestamps →
+    // ISO) so the UI can render status without re-asserting the full shape.
+    let pmSession: PmSession | undefined;
+    if (data.pmSession && typeof data.pmSession === "object") {
+      const s = data.pmSession as Record<string, unknown>;
+      pmSession = {
+        status: (s.status as PmSessionStatus) ?? "stopped",
+        goal: (s.goal as string) ?? "",
+        round: (s.round as number) ?? 0,
+        taskIds: (s.taskIds as string[] | undefined) ?? [],
+        maxRounds: (s.maxRounds as number) ?? 0,
+        maxTasksPerRound: (s.maxTasksPerRound as number) ?? 0,
+        reason: typeof s.reason === "string" ? s.reason : undefined,
+        lastRunAt: tsToIso(s.lastRunAt),
+      };
+    }
     return {
       id: snap.id,
       name: (data.name as string) ?? "",
@@ -187,6 +229,8 @@ const projectConverter: FirestoreDataConverter<Project> = {
       budget: (data.budget as string) ?? "0 USDC",
       agentIds: (data.agentIds as string[] | undefined) ?? [],
       swarm,
+      pmAgent: (data.pmAgent as string | null | undefined) ?? null,
+      pmSession,
       createdAt: tsToIso(data.createdAt),
       updatedAt: tsToIso(data.updatedAt),
     };
@@ -591,6 +635,33 @@ export async function assignAgentsToProject(input: {
     updatedAt: serverTimestamp(),
   });
   return { added: merged.length - existing.length, total: merged.length };
+}
+
+/**
+ * Designate (or clear) the project's PM/orchestrator agent by display name.
+ * Pass `pmAgent: null` to remove the PM. The named agent is also ensured into
+ * the roster so a PM is always a project member.
+ */
+export async function setProjectPm(input: {
+  walletAddress: string;
+  projectId: string;
+  pmAgent: string | null;
+}): Promise<void> {
+  const ref = projectDoc(input.walletAddress, input.projectId);
+  const patch: Record<string, unknown> = {
+    pmAgent: input.pmAgent,
+    updatedAt: serverTimestamp(),
+  };
+  if (input.pmAgent) {
+    const snap = await getDoc(ref);
+    const existing = (snap.data()?.agentIds as string[] | undefined) ?? [];
+    if (!existing.includes(input.pmAgent)) {
+      const merged = [...existing, input.pmAgent];
+      patch.agentIds = merged;
+      patch.agents = merged.length;
+    }
+  }
+  await updateDoc(ref, patch);
 }
 
 export async function deleteProject(input: {
@@ -1101,6 +1172,45 @@ export async function assistantChat(input: {
     throw new Error(apiError(payload, "Assistant unavailable"));
   }
   return (payload.data ?? payload) as AssistantChatResponse;
+}
+
+export type PmTurnTrigger = "run-button" | "chat";
+
+export type PmTurnResult = {
+  ok: boolean;
+  status?: PmSessionStatus;
+  reason?: string;
+  created?: number;
+  message?: string;
+};
+
+/**
+ * Trigger a PM/orchestrator turn for a project: start (or advance) the
+ * autonomous session and let the PM plan + assign work. `trigger:"run-button"`
+ * kicks off from the project goal; `trigger:"chat"` wakes the PM to react to a
+ * just-posted chat message.
+ */
+export async function pmTurn(input: {
+  projectId: string;
+  trigger: PmTurnTrigger;
+  userMessageId?: string;
+}): Promise<PmTurnResult> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/projects/${input.projectId}/pm-turn`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        trigger: input.trigger,
+        userMessageId: input.userMessageId,
+      }),
+    },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) {
+    throw new Error(apiError(payload, "PM unavailable"));
+  }
+  return (payload.data ?? payload) as PmTurnResult;
 }
 
 export async function assistantChatStream(input: {

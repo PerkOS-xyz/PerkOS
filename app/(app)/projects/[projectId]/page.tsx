@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useConnection } from "wagmi";
 import { toast } from "sonner";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Sparkles, Compass } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -19,12 +19,15 @@ import {
   deleteTask,
   getWalletAgents,
   getWalletProject,
+  pmTurn,
+  setProjectPm,
   updateTask,
   type ChatMessage,
   type ProjectDetail,
   type Task,
   type TaskStatus,
 } from "../../../lib/perkosApi";
+import { PmSessionBanner } from "../../../components/PmSessionBanner";
 import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { EditProjectDialog } from "../../../components/EditProjectDialog";
 import { EditTaskDialog } from "../../../components/EditTaskDialog";
@@ -164,6 +167,38 @@ function DetailHeader({ detail }: { detail: ProjectDetail }) {
     },
   });
 
+  const pmActive =
+    project.pmSession?.status === "planning" ||
+    project.pmSession?.status === "working" ||
+    project.pmSession?.status === "reviewing";
+
+  const runPmMutation = useMutation({
+    mutationFn: () => {
+      if (!project.id) throw new Error("Missing project id.");
+      return pmTurn({ projectId: project.id, trigger: "run-button" });
+    },
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({
+        queryKey: ["wallet-project", address, project.id],
+      });
+      if (res.reason === "no-pm") {
+        toast.error("Designate a PM agent first — see the Agents tab.");
+      } else if (res.reason === "already-active") {
+        toast.info("The PM is already running on this project.");
+      } else if (res.status === "working") {
+        toast.success(
+          `PM assigned ${res.created ?? 0} task${res.created === 1 ? "" : "s"}.`,
+        );
+      } else if (res.status === "done") {
+        toast.success("PM says the goal is already complete.");
+      } else {
+        toast.success("PM is on it.");
+      }
+    },
+    onError: (err: Error) =>
+      toast.error("Couldn't start the PM", { description: err.message }),
+  });
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -181,6 +216,24 @@ function DetailHeader({ detail }: { detail: ProjectDetail }) {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <Button
+            size="sm"
+            className="gap-1.5"
+            disabled={!project.pmAgent || runPmMutation.isPending || pmActive}
+            onClick={() => runPmMutation.mutate()}
+            title={
+              project.pmAgent
+                ? "Let the PM plan the goal and delegate to your workers"
+                : "Designate a PM agent in the Agents tab first"
+            }
+          >
+            {runPmMutation.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
+            {pmActive ? "PM running…" : "Run with PM"}
+          </Button>
           <span className="mr-1 text-xs text-[#7975a8]">
             {project.budget || "0 USDC"}
           </span>
@@ -208,6 +261,10 @@ function DetailHeader({ detail }: { detail: ProjectDetail }) {
       </div>
       {project.goal ? (
         <p className="max-w-2xl text-sm text-[#7975a8]">{project.goal}</p>
+      ) : null}
+
+      {project.pmSession ? (
+        <PmSessionBanner session={project.pmSession} pmAgent={project.pmAgent} />
       ) : null}
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -686,9 +743,23 @@ function PriorityBadge({ priority }: { priority: string }) {
 }
 
 function AgentsTab({ detail }: { detail: ProjectDetail }) {
+  const { address } = useConnection();
+  const qc = useQueryClient();
   const [addOpen, setAddOpen] = useState(false);
   const agentNames = uniqueAgents(detail.tasks, detail.project.agentIds ?? []);
   const projectId = detail.project.id ?? "";
+  const pmAgent = detail.project.pmAgent ?? null;
+
+  const setPmMut = useMutation({
+    mutationFn: (name: string | null) =>
+      setProjectPm({ walletAddress: address!, projectId, pmAgent: name }),
+    onSuccess: (_d, name) => {
+      qc.invalidateQueries({ queryKey: ["wallet-project", address, projectId] });
+      toast.success(name ? `${name} is now the PM` : "Cleared the project's PM");
+    },
+    onError: (e: Error) =>
+      toast.error("Couldn't update the PM", { description: e.message }),
+  });
 
   return (
     <div className="flex flex-col gap-4">
@@ -700,6 +771,11 @@ function AgentsTab({ detail }: { detail: ProjectDetail }) {
           <Plus className="h-3.5 w-3.5" /> Add agent
         </Button>
       </div>
+
+      <p className="-mt-1 text-xs text-[#7975a8]">
+        Designate one agent as the <span className="text-primary">PM</span> — it
+        plans the goal and delegates tasks to the others when you Run with PM.
+      </p>
 
       {agentNames.length === 0 ? (
         <EmptyState
@@ -716,18 +792,37 @@ function AgentsTab({ detail }: { detail: ProjectDetail }) {
           {agentNames.map((name) => (
             <li
               key={name}
-              className="flex items-center gap-3 rounded-md border border-[#1b1833] bg-[#0e0716] px-4 py-3"
+              className="flex items-center justify-between gap-3 rounded-md border border-[#1b1833] bg-[#0e0716] px-4 py-3"
             >
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-[#ec1b69]/20 text-xs font-medium text-[#ec1b69]">
-                {initials(name)}
-              </span>
-              <div className="flex flex-col">
-                <span className="text-sm text-[#ececff]">{name}</span>
-                <span className="text-xs text-[#7975a8]">
-                  {countTasksFor(name, detail.tasks)} task
-                  {countTasksFor(name, detail.tasks) === 1 ? "" : "s"}
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#ec1b69]/20 text-xs font-medium text-[#ec1b69]">
+                  {initials(name)}
                 </span>
+                <div className="flex min-w-0 flex-col">
+                  <span className="truncate text-sm text-[#ececff]">{name}</span>
+                  <span className="text-xs text-[#7975a8]">
+                    {name === pmAgent ? "Orchestrator · " : "Worker · "}
+                    {countTasksFor(name, detail.tasks)} task
+                    {countTasksFor(name, detail.tasks) === 1 ? "" : "s"}
+                  </span>
+                </div>
               </div>
+              {name === pmAgent ? (
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                  <Compass className="h-3 w-3" /> PM
+                </span>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  className="shrink-0 text-[#7975a8] hover:text-primary"
+                  disabled={setPmMut.isPending || !address}
+                  onClick={() => setPmMut.mutate(name)}
+                  title="Make this agent the project's PM"
+                >
+                  Make PM
+                </Button>
+              )}
             </li>
           ))}
         </ul>
@@ -894,8 +989,18 @@ function ChatTab({
         from: "user",
       });
     },
-    onSuccess: () => {
+    onSuccess: (res) => {
       setDraft("");
+      // If this project has a PM, wake it to read + react to the message
+      // (plan/delegate or just reply). Fire-and-forget — never block the send;
+      // the PM's reply lands via the realtime messages subscription.
+      if (detail.project.pmAgent) {
+        pmTurn({
+          projectId,
+          trigger: "chat",
+          userMessageId: res?.message?.id,
+        }).catch(() => {});
+      }
     },
   });
 
