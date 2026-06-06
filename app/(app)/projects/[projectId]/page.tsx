@@ -116,7 +116,11 @@ export default function ProjectDetailPage({ params }: PageProps) {
           ) : null}
           {tab === "agents" ? <AgentsTab detail={data} /> : null}
           {tab === "chat" ? (
-            <ChatTab detail={data} projectId={projectId} />
+            <ChatTab
+              detail={data}
+              projectId={projectId}
+              onDesignatePm={() => setTab("agents")}
+            />
           ) : null}
         </>
       ) : null}
@@ -964,18 +968,47 @@ function AddAgentToProjectDialog({
 function ChatTab({
   detail,
   projectId,
+  onDesignatePm,
 }: {
   detail: ProjectDetail;
   projectId: string;
+  onDesignatePm: () => void;
 }) {
   const { address, isConnected } = useConnection();
+  const queryClient = useQueryClient();
   const [draft, setDraft] = useState("");
 
   const participants = projectParticipants(detail, address);
+  const pmAgent = detail.project.pmAgent ?? null;
+  const agentIds = detail.project.agentIds ?? [];
+  // The most PM-like assigned agent, for a one-click "Make PM" right here.
+  const pmCandidate =
+    agentIds.find((n) =>
+      /(^|[^a-z])pm($|[^a-z])|manager|orchestrat|conductor/i.test(n)
+    ) ??
+    agentIds[0] ??
+    null;
 
   // Realtime subscription to the messages subcollection — no manual refetch
   // needed after a send, the snapshot listener delivers the new doc.
   const { messages } = useProjectMessages(address, projectId);
+
+  const setPmMut = useMutation({
+    mutationFn: (name: string) => {
+      if (!address) throw new Error("Connect a wallet first.");
+      return setProjectPm({ walletAddress: address, projectId, pmAgent: name });
+    },
+    onSuccess: (_res, name) => {
+      queryClient.invalidateQueries({
+        queryKey: ["wallet-project", address, projectId],
+      });
+      toast.success(`${name} is now the PM`, {
+        description: "Send your goal in the chat and the PM will plan + delegate.",
+      });
+    },
+    onError: (e: Error) =>
+      toast.error("Couldn't set the PM", { description: e.message }),
+  });
 
   const sendMutation = useMutation({
     mutationFn: async (text: string) => {
@@ -994,12 +1027,20 @@ function ChatTab({
       // If this project has a PM, wake it to read + react to the message
       // (plan/delegate or just reply). Fire-and-forget — never block the send;
       // the PM's reply lands via the realtime messages subscription.
-      if (detail.project.pmAgent) {
+      if (pmAgent) {
         pmTurn({
           projectId,
           trigger: "chat",
           userMessageId: res?.message?.id,
         }).catch(() => {});
+      } else {
+        // No PM designated → nothing autonomous happens. Tell the user instead
+        // of silently swallowing the goal (the message still posts to chat).
+        toast.info("No PM on this project yet", {
+          description: agentIds.length
+            ? "Designate a PM agent so it can plan your goal and delegate to the others."
+            : "Add agents and designate a PM to let it plan + delegate.",
+        });
       }
     },
   });
@@ -1015,6 +1056,45 @@ function ChatTab({
             {participants.length} member{participants.length === 1 ? "" : "s"}
           </span>
         </div>
+
+        {!pmAgent ? (
+          <div className="flex flex-col gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-200">
+            <div className="flex items-start gap-2">
+              <Compass className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              <p>
+                No PM on this project yet. Messages here won&apos;t start any
+                work until you designate a PM agent — it plans your goal and
+                delegates tasks to the other agents.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {pmCandidate ? (
+                <Button
+                  size="sm"
+                  className="h-7"
+                  disabled={setPmMut.isPending || !address}
+                  onClick={() => setPmMut.mutate(pmCandidate)}
+                  title={`Make ${pmCandidate} the project's PM`}
+                >
+                  {setPmMut.isPending ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <Compass className="h-3 w-3" />
+                  )}
+                  Make {pmCandidate} the PM
+                </Button>
+              ) : null}
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7"
+                onClick={onDesignatePm}
+              >
+                {pmCandidate ? "Choose another in Agents" : "Designate in Agents"}
+              </Button>
+            </div>
+          </div>
+        ) : null}
 
         <div className="flex-1 overflow-y-auto pr-1">
           {messages.length === 0 ? (
