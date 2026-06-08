@@ -49,7 +49,7 @@ import { EmptyState } from "../../../components/EmptyState";
 import { formatAddress } from "../../../lib/format";
 import { useProjectMessages } from "../../../lib/useProjectMessages";
 import { useProjectTasks } from "../../../lib/useProjectTasks";
-import { useWalletAgents, agentStatusBadge } from "../../../lib/useWalletAgents";
+import { useWalletAgents, realtimeAgentStatus } from "../../../lib/useWalletAgents";
 
 type Tab = "tasks" | "conductor" | "agents" | "chat";
 
@@ -820,8 +820,8 @@ function AgentsTab({ detail }: { detail: ProjectDetail }) {
                   {initials(name)}
                   {/* Live status dot (Online / Starting / Hibernated / …) */}
                   <span
-                    className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#0e0716] ${agentStatusBadge(agentStatus[name]?.status).color}`}
-                    title={agentStatusBadge(agentStatus[name]?.status).label}
+                    className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#0e0716] ${realtimeAgentStatus(agentStatus[name]).color}`}
+                    title={realtimeAgentStatus(agentStatus[name]).label}
                   />
                 </span>
                 <div className="flex min-w-0 flex-col">
@@ -832,13 +832,13 @@ function AgentsTab({ detail }: { detail: ProjectDetail }) {
                       : ""}
                     <span
                       className={
-                        agentStatusBadge(agentStatus[name]?.status).label ===
+                        realtimeAgentStatus(agentStatus[name]).label ===
                         "Online"
                           ? "text-emerald-400"
                           : ""
                       }
                     >
-                      {agentStatusBadge(agentStatus[name]?.status).label}
+                      {realtimeAgentStatus(agentStatus[name]).label}
                     </span>
                     {" · "}
                     {name === pmAgent ? "Orchestrator · " : "Worker · "}
