@@ -5,6 +5,12 @@ import { Bot, Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type { Agent } from "../lib/perkosApi";
+import { useConnection } from "wagmi";
+import {
+  useWalletAgents,
+  realtimeAgentStatus,
+  type AgentLiveStatus,
+} from "../lib/useWalletAgents";
 
 type Props = {
   agents: Agent[];
@@ -15,16 +21,16 @@ type Props = {
  * "Active Agents" rail on the dashboard. Surfaces the wallet's registered
  * agents at a glance: avatar (initials), name, runtime, status dot.
  *
- * Visual posture is borrowed from the futuristic mockup reference:
- *   - subtle primary-tinted glow on the panel + on the status dot
- *   - circular avatars in a horizontal scroll on narrow screens
- *
- * Kept restrained on purpose — we're inside the dark/purple PerkOS theme,
- * not chasing the over-saturated mockup. The glow lives in `.glow-card`
- * (globals.css) so other surfaces can opt in without re-implementing it.
+ * Status is REALTIME — derived from the live hibernation + heartbeat signals
+ * (via useWalletAgents), not the static `agent.status` field, so a hibernated
+ * or still-booting agent doesn't falsely read "Online".
  */
 export function ActiveAgentsPanel({ agents, isLoading }: Props) {
-  const online = agents.filter((a) => a.status === "ready").length;
+  const { address } = useConnection();
+  const { byName } = useWalletAgents(address);
+
+  const labelFor = (a: Agent) => realtimeAgentStatus(byName[a.name]).label;
+  const online = agents.filter((a) => labelFor(a) === "Online").length;
 
   return (
     <section className="glow-card flex flex-col gap-3 rounded-lg border border-primary/30 bg-card/60 px-4 py-4">
@@ -65,13 +71,13 @@ export function ActiveAgentsPanel({ agents, isLoading }: Props) {
         <>
           <ul className="flex gap-3 overflow-x-auto pb-1">
             {agents.slice(0, 10).map((a) => (
-              <AgentAvatar key={a.id} agent={a} />
+              <AgentAvatar key={a.id} agent={a} live={byName[a.name]} />
             ))}
           </ul>
 
           <footer className="flex items-center justify-between border-t border-border/50 pt-2 text-[10px] text-muted-foreground">
             <span>
-              {online} of {agents.length} ready
+              {online} of {agents.length} online
             </span>
             <span className="font-mono">
               {Math.round((online / Math.max(agents.length, 1)) * 100)}% online
@@ -83,10 +89,17 @@ export function ActiveAgentsPanel({ agents, isLoading }: Props) {
   );
 }
 
-function AgentAvatar({ agent }: { agent: Agent }) {
+function AgentAvatar({
+  agent,
+  live,
+}: {
+  agent: Agent;
+  live?: AgentLiveStatus;
+}) {
   const initial = (agent.name || "?").slice(0, 1).toUpperCase();
-  const isReady = agent.status === "ready";
-  const isFailed = agent.status === "failed";
+  const { color, label } = realtimeAgentStatus(live);
+  const isOnline = label === "Online";
+  const isError = label === "Error" || label === "Failed";
 
   return (
     <li className="flex shrink-0 flex-col items-center gap-1">
@@ -94,23 +107,19 @@ function AgentAvatar({ agent }: { agent: Agent }) {
         href={`/agents/${agent.id}`}
         className={cn(
           "relative grid h-12 w-12 place-items-center rounded-full border bg-card font-mono text-sm transition-shadow",
-          isReady
+          isOnline
             ? "border-emerald-500/50 text-emerald-200 shadow-[0_0_12px_-2px_rgba(16,185,129,0.4)] hover:shadow-[0_0_16px_-2px_rgba(16,185,129,0.6)]"
-            : isFailed
+            : isError
               ? "border-destructive/50 text-destructive"
               : "border-primary/30 text-foreground shadow-[0_0_12px_-2px_rgba(236,27,105,0.35)] hover:shadow-[0_0_16px_-2px_rgba(236,27,105,0.55)]",
         )}
-        aria-label={`${agent.name} (${agent.status})`}
+        aria-label={`${agent.name} (${label})`}
       >
         {initial}
         <span
           className={cn(
             "absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-card",
-            isReady
-              ? "bg-emerald-500"
-              : isFailed
-                ? "bg-destructive"
-                : "bg-amber-500",
+            color,
           )}
           aria-hidden
         />
@@ -119,13 +128,7 @@ function AgentAvatar({ agent }: { agent: Agent }) {
         {agent.name}
       </span>
       <span className="text-[9px] uppercase tracking-wide text-muted-foreground">
-        {agent.status === "ready"
-          ? "Online"
-          : agent.status === "failed"
-            ? "Failed"
-            : agent.status === "provisioning"
-              ? "Booting"
-              : "Unknown"}
+        {label}
       </span>
     </li>
   );

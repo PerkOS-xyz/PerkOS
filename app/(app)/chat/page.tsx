@@ -5,6 +5,11 @@ import Link from "next/link";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
+import {
+  useWalletAgents,
+  realtimeAgentStatus,
+  type AgentLiveStatus,
+} from "../../lib/useWalletAgents";
 import { ArrowRight, Bot, Folder, Plus, Sparkles } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +41,8 @@ export default function ChatHubPage() {
   const { address } = useConnection();
   const { setOpen } = useChatbot();
   const [query, setQuery] = useState("");
+  // Realtime per-agent status (live hibernation + heartbeat), keyed by name.
+  const { byName: liveAgents } = useWalletAgents(address);
 
   const agentsQuery = useQuery({
     queryKey: ["wallet-agents", address],
@@ -130,7 +137,7 @@ export default function ChatHubPage() {
         ) : (
           <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
             {agents.map((a) => (
-              <AgentChatRow key={a.id} agent={a} />
+              <AgentChatRow key={a.id} agent={a} live={liveAgents[a.name]} />
             ))}
           </ul>
         )}
@@ -233,13 +240,14 @@ function Section({
   );
 }
 
-function AgentChatRow({ agent }: { agent: Agent }) {
-  const presence =
-    agent.status === "ready"
-      ? "bg-emerald-400"
-      : agent.status === "failed"
-      ? "bg-destructive"
-      : "bg-amber-400";
+function AgentChatRow({
+  agent,
+  live,
+}: {
+  agent: Agent;
+  live?: AgentLiveStatus;
+}) {
+  const presence = realtimeAgentStatus(live).color;
 
   return (
     <li>
