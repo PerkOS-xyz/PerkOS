@@ -1083,7 +1083,7 @@ function ChatTab({
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_320px]">
-      <div className="flex h-[calc(100vh-18rem)] min-h-[420px] flex-col gap-3 rounded-md border border-[#1b1833] bg-[#0e0716] p-4">
+      <div className="flex h-[60vh] min-h-[480px] flex-col gap-3 rounded-md border border-[#1b1833] bg-[#0e0716] p-4">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-[#ececff]">
             # {detail.project.name}
@@ -1246,6 +1246,26 @@ function projectParticipants(
   return out;
 }
 
+/** Clean up the chat sender label. The board MCP currently stamps agent
+ * messages with the synthetic `mcp-<wallet>` conv id (and some legacy ones use
+ * the raw 0x… wallet); show a friendly label instead of the ugly hash until the
+ * bridge stamps the real agent name. `agent:<name>` → `<name>`. */
+function senderLabel(agentName?: string): string {
+  const v = (agentName ?? "").trim();
+  if (!v) return "Agent";
+  if (/^agent:/i.test(v)) return v.slice(v.indexOf(":") + 1) || "Agent";
+  if (/^(mcp-)?0x[0-9a-fA-F]{6,}$/.test(v)) return "Agent";
+  return v;
+}
+
+/** Short local time (HH:MM) for a message timestamp, or "" if absent. */
+function formatMsgTime(createdAt?: string): string {
+  if (!createdAt) return "";
+  const d = new Date(createdAt);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
 function ProjectMessageBubble({
   message,
   isMine,
@@ -1253,23 +1273,32 @@ function ProjectMessageBubble({
   message: ChatMessage;
   isMine: boolean;
 }) {
+  const time = formatMsgTime(message.createdAt);
   if (isMine) {
     return (
-      <li className="flex justify-end">
+      <li className="flex flex-col items-end gap-0.5">
         <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-primary/15 px-3 py-2 text-sm text-foreground">
           {message.text}
         </div>
+        {time ? (
+          <span className="px-1 text-[10px] text-muted-foreground">{time}</span>
+        ) : null}
       </li>
     );
   }
   return (
     <li className="flex items-start gap-2">
       <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#ec1b69]/20 text-[10px] font-medium text-[#ec1b69]">
-        {initials(message.agentName || "Agent")}
+        {initials(senderLabel(message.agentName))}
       </div>
-      <div className="flex flex-col gap-0.5">
-        <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-          {message.agentName || "Agent"}
+      <div className="flex min-w-0 flex-col gap-0.5">
+        <span className="flex items-center gap-2">
+          <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+            {senderLabel(message.agentName)}
+          </span>
+          {time ? (
+            <span className="text-[10px] text-muted-foreground/70">{time}</span>
+          ) : null}
         </span>
         <Markdown className="leading-relaxed">{message.text}</Markdown>
       </div>
