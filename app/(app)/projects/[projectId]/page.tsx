@@ -48,6 +48,8 @@ import type { SwarmDefinition } from "../../../lib/swarm";
 import { EmptyState } from "../../../components/EmptyState";
 import { formatAddress } from "../../../lib/format";
 import { useProjectMessages } from "../../../lib/useProjectMessages";
+import { useProjectTasks } from "../../../lib/useProjectTasks";
+import { useWalletAgents, agentStatusBadge } from "../../../lib/useWalletAgents";
 
 type Tab = "tasks" | "conductor" | "agents" | "chat";
 
@@ -88,6 +90,18 @@ export default function ProjectDetailPage({ params }: PageProps) {
     enabled: Boolean(address) && Boolean(projectId),
   });
 
+  // Live tasks: a realtime Firestore listener so the board + the In progress /
+  // Done counters move on their own as the PM/dispatcher/workers update tasks —
+  // no manual refresh. Once the first snapshot lands, it's the source of truth;
+  // until then we fall back to the one-shot query data.
+  const { tasks: liveTasks, loaded: tasksLoaded } = useProjectTasks(
+    address,
+    projectId
+  );
+  const liveDetail = data
+    ? { ...data, tasks: tasksLoaded ? liveTasks : data.tasks }
+    : null;
+
   return (
     <div className="flex flex-col gap-6">
       <Link
@@ -100,24 +114,24 @@ export default function ProjectDetailPage({ params }: PageProps) {
 
       {isLoading ? <DetailSkeleton /> : null}
       {error ? <ErrorBanner message={(error as Error).message} /> : null}
-      {data ? (
+      {liveDetail ? (
         <>
-          <DetailHeader detail={data} />
+          <DetailHeader detail={liveDetail} />
           <Tabs current={tab} onChange={setTab} />
           {tab === "tasks" ? (
-            <TasksTab tasks={data.tasks} projectId={projectId} />
+            <TasksTab tasks={liveDetail.tasks} projectId={projectId} />
           ) : null}
           {tab === "conductor" ? (
             <ConductorTab
-              tasks={data.tasks}
-              swarm={data.project.swarm}
+              tasks={liveDetail.tasks}
+              swarm={liveDetail.project.swarm}
               projectId={projectId}
             />
           ) : null}
-          {tab === "agents" ? <AgentsTab detail={data} /> : null}
+          {tab === "agents" ? <AgentsTab detail={liveDetail} /> : null}
           {tab === "chat" ? (
             <ChatTab
-              detail={data}
+              detail={liveDetail}
               projectId={projectId}
               onDesignatePm={() => setTab("agents")}
             />
@@ -753,6 +767,9 @@ function AgentsTab({ detail }: { detail: ProjectDetail }) {
   const agentNames = uniqueAgents(detail.tasks, detail.project.agentIds ?? []);
   const projectId = detail.project.id ?? "";
   const pmAgent = detail.project.pmAgent ?? null;
+  // Live per-agent status (Online / Starting / Hibernated / …) so the roster
+  // shows a state dot that updates on its own.
+  const { byName: agentStatus } = useWalletAgents(address);
 
   const setPmMut = useMutation({
     mutationFn: (name: string | null) =>
@@ -799,12 +816,31 @@ function AgentsTab({ detail }: { detail: ProjectDetail }) {
               className="flex items-center justify-between gap-3 rounded-md border border-[#1b1833] bg-[#0e0716] px-4 py-3"
             >
               <div className="flex min-w-0 items-center gap-3">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#ec1b69]/20 text-xs font-medium text-[#ec1b69]">
+                <span className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#ec1b69]/20 text-xs font-medium text-[#ec1b69]">
                   {initials(name)}
+                  {/* Live status dot (Online / Starting / Hibernated / …) */}
+                  <span
+                    className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#0e0716] ${agentStatusBadge(agentStatus[name]?.status).color}`}
+                    title={agentStatusBadge(agentStatus[name]?.status).label}
+                  />
                 </span>
                 <div className="flex min-w-0 flex-col">
                   <span className="truncate text-sm text-[#ececff]">{name}</span>
                   <span className="text-xs text-[#7975a8]">
+                    {agentStatus[name]?.runtime
+                      ? `${agentStatus[name]?.runtime} · `
+                      : ""}
+                    <span
+                      className={
+                        agentStatusBadge(agentStatus[name]?.status).label ===
+                        "Online"
+                          ? "text-emerald-400"
+                          : ""
+                      }
+                    >
+                      {agentStatusBadge(agentStatus[name]?.status).label}
+                    </span>
+                    {" · "}
                     {name === pmAgent ? "Orchestrator · " : "Worker · "}
                     {countTasksFor(name, detail.tasks)} task
                     {countTasksFor(name, detail.tasks) === 1 ? "" : "s"}
