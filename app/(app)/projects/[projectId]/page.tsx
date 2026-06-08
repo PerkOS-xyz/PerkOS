@@ -1266,6 +1266,24 @@ function formatMsgTime(createdAt?: string): string {
   return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+/**
+ * Resolve the displayed sender + body for an agent message. The board MCP still
+ * stamps `agentName` with the synthetic mcp-<wallet> id, but agents are now
+ * prompted to prefix their chat posts with their name ("Demo-W1: done — …").
+ * When the stamped name is generic, recover the real one from that prefix and
+ * strip it from the body so it isn't shown twice.
+ */
+function resolveAgentSender(
+  agentName: string | undefined,
+  text: string
+): { label: string; body: string } {
+  const fromStamp = senderLabel(agentName);
+  if (fromStamp !== "Agent") return { label: fromStamp, body: text };
+  const m = text.match(/^([A-Za-z0-9][A-Za-z0-9 _-]{1,31}):\s+([\s\S]+)$/);
+  if (m) return { label: m[1]!.trim(), body: m[2]! };
+  return { label: "Agent", body: text };
+}
+
 function ProjectMessageBubble({
   message,
   isMine,
@@ -1286,21 +1304,22 @@ function ProjectMessageBubble({
       </li>
     );
   }
+  const { label, body } = resolveAgentSender(message.agentName, message.text);
   return (
     <li className="flex items-start gap-2">
       <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#ec1b69]/20 text-[10px] font-medium text-[#ec1b69]">
-        {initials(senderLabel(message.agentName))}
+        {initials(label)}
       </div>
       <div className="flex min-w-0 flex-col gap-0.5">
         <span className="flex items-center gap-2">
           <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-            {senderLabel(message.agentName)}
+            {label}
           </span>
           {time ? (
             <span className="text-[10px] text-muted-foreground/70">{time}</span>
           ) : null}
         </span>
-        <Markdown className="leading-relaxed">{message.text}</Markdown>
+        <Markdown className="leading-relaxed">{body}</Markdown>
       </div>
     </li>
   );
