@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useConnection } from "wagmi";
 import { toast } from "sonner";
-import { Pencil, Trash2, Sparkles, Compass } from "lucide-react";
+import { Pencil, Trash2, Sparkles, Compass, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -120,6 +120,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
             detail={liveDetail}
             ownerWallet={ownerWallet ?? undefined}
             isShared={isShared}
+            onShowMembers={() => setTab("members")}
           />
           <Tabs current={tab} onChange={setTab} />
           {tab === "tasks" ? (
@@ -168,10 +169,12 @@ function DetailHeader({
   detail,
   ownerWallet,
   isShared,
+  onShowMembers,
 }: {
   detail: ProjectDetail;
   ownerWallet?: string;
   isShared?: boolean;
+  onShowMembers: () => void;
 }) {
   const { project, tasks } = detail;
   const inProgress = tasks.filter((t) => t.status === "In progress").length;
@@ -292,23 +295,38 @@ function DetailHeader({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setEditOpen(true)}
-            aria-label="Edit project"
-            title="Edit project"
+            className="gap-1.5"
+            onClick={onShowMembers}
+            aria-label="Manage members"
+            title="Share this project — invite wallets + manage access"
           >
-            <Pencil className="h-4 w-4" />
-            Edit
+            <Users className="h-4 w-4" />
+            Members
           </Button>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => setConfirmOpen(true)}
-            aria-label="Delete project"
-            title="Delete project"
-          >
-            <Trash2 className="h-4 w-4" />
-            Delete
-          </Button>
+          {!isShared ? (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setEditOpen(true)}
+                aria-label="Edit project"
+                title="Edit project"
+              >
+                <Pencil className="h-4 w-4" />
+                Edit
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setConfirmOpen(true)}
+                aria-label="Delete project"
+                title="Delete project"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </Button>
+            </>
+          ) : null}
         </div>
       </div>
       {project.goal ? (
