@@ -41,12 +41,12 @@ export const USDC_BY_CHAIN: Record<SupportedChainId, TokenInfo> = {
 export const PERKOS_BY_CHAIN: Record<SupportedChainId, TokenInfo> = {
   [base.id]: {
     address: "0xF714E60f85497D70508F7E356b5DB80e64539BA3",
-    symbol: "PRKS",
+    symbol: "PERKOS",
     decimals: 18,
   },
   [celo.id]: {
     address: "0xb7Ba43fBD4F2E85FCE929f7d4DFE3905Ae846A46",
-    symbol: "PRKS",
+    symbol: "PERKOS",
     decimals: 18,
   },
 };

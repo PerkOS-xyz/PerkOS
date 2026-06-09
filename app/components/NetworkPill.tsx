@@ -6,7 +6,10 @@
  * picking between Base mainnet and Celo mainnet.
  *
  * Pill body shape (left → right):
- *   [chain logo]  $usdc  ·  prks PRKS  [chevron|spinner]
+ *   [chain logo]  $usdc USDC  ·  perkos $PERKOS  [chevron|spinner]
+ *
+ * Large PERKOS balances render in compact notation (30.2M) rather
+ * than the exact token count — see formatBalance.
  *
  * Three contexts, controlled by the Mini App host:
  *
@@ -120,10 +123,18 @@ const NETWORKS: NetworkOption[] = [
   { id: celo.id, name: "Celo", logo: "/celo.png" },
 ];
 
+const compactFormatter = new Intl.NumberFormat("en-US", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
 /**
  * Format an ERC20 balance as a compact display string:
  *   - "0.00" when zero
- *   - "X,XXX" (comma-grouped, no decimals) when whole part ≥ 100
+ *   - "X.XM" / "X.XK" / "X.XB" (compact notation) when whole part ≥ 1,000
+ *     — large governance-token balances (PERKOS) would otherwise be an
+ *     unreadable run of digits; 30,225,719 → "30.2M"
+ *   - "X,XXX" (comma-grouped, no decimals) when 100 ≤ whole part < 1,000
  *   - "X.XX" (two decimals) when whole part < 100
  *
  * Callers compose the prefix ($ for USDC) and suffix (symbol for
@@ -136,6 +147,10 @@ function formatBalance(raw: bigint, decimals: number): string {
   const whole = raw / divisor;
   const fraction = raw % divisor;
   const wholeNum = Number(whole);
+
+  if (wholeNum >= 1000) {
+    return compactFormatter.format(wholeNum);
+  }
 
   if (wholeNum >= 100) {
     return wholeNum.toLocaleString("en-US");
@@ -260,10 +275,10 @@ export function NetworkPill() {
           : `$${usdcLabel} USDC`;
     const p =
       perkosLabel === null
-        ? "loading PRKS"
+        ? "loading PERKOS"
         : perkosLabel === "—"
-          ? "PRKS balance unavailable"
-          : `${perkosLabel} PRKS`;
+          ? "PERKOS balance unavailable"
+          : `${perkosLabel} PERKOS`;
     return `${u}, ${p}, on ${displayedNetwork.name}`;
   })();
 
@@ -381,7 +396,7 @@ function LogoMark({ network }: { network: NetworkOption }) {
 }
 
 /**
- * The "$usdc · prks PRKS" body. Each side handles its own
+ * The "$usdc USDC · perkos $PERKOS" body. Each side handles its own
  * loading / error state independently so a flaky RPC on one token
  * doesn't blank the other.
  */
@@ -394,11 +409,11 @@ function BalancesBody({
 }) {
   return (
     <span className="flex items-center gap-1.5 truncate">
-      <TokenSlot label={usdcLabel} prefix="$" loadingHint="USDC" />
+      <TokenSlot label={usdcLabel} prefix="$" suffix="USDC" loadingHint="USDC" />
       <span className="text-muted-foreground/60" aria-hidden>
         ·
       </span>
-      <TokenSlot label={perkosLabel} suffix="PRKS" loadingHint="PRKS" />
+      <TokenSlot label={perkosLabel} suffix="$PERKOS" loadingHint="PERKOS" />
     </span>
   );
 }
