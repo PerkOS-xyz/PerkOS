@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
-import { Archive, ArchiveRestore, Folder, Plus, Trash2, X } from "lucide-react";
+import { Archive, ArchiveRestore, Folder, Plus, Trash2, Users, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -136,7 +136,16 @@ export default function ProjectsPage() {
               : "Create your first project."}
           </p>
         </div>
-        <CreateProjectButton />
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href="/companies/new"
+            className="flex items-center justify-center gap-2 rounded-md border border-[#1b1833] px-4 py-2.5 text-sm font-medium text-[#ececff] transition-colors hover:border-[#7975a8]/50"
+          >
+            <Users className="h-4 w-4" />
+            Start a company
+          </Link>
+          <CreateProjectButton />
+        </div>
       </header>
 
       {hasProjects ? (
