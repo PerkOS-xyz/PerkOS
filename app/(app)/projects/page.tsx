@@ -216,6 +216,9 @@ export default function ProjectsPage() {
                 project={p}
                 checked={p.id ? selected.has(p.id) : false}
                 onToggle={(on) => p.id && toggle(p.id, on)}
+                ownerWallet={
+                  activeOrg?.shared ? activeOrg.ownerWallet : undefined
+                }
               />
             ))}
           </ul>
@@ -259,10 +262,14 @@ function ProjectCard({
   project,
   checked,
   onToggle,
+  ownerWallet,
 }: {
   project: Project;
   checked: boolean;
   onToggle: (on: boolean) => void;
+  /** Set when this project is in a SHARED org — links carry ?owner so the
+   *  detail page reads from the owner's subtree. */
+  ownerWallet?: string;
 }) {
   // Take the first letter of each significant word for the avatar
   // (max 2 chars). "DeFi Research" → "DR", "Welcome to PerkOS" → "WP".
@@ -293,7 +300,7 @@ function ProjectCard({
         aria-label={`Select ${project.name}`}
       />
       <Link
-        href={`/projects/${encodeURIComponent(project.id ?? "")}`}
+        href={`/projects/${encodeURIComponent(project.id ?? "")}${ownerWallet ? `?owner=${ownerWallet}` : ""}`}
         className="glow-card flex flex-1 items-center gap-3 rounded-lg px-2 py-3"
       >
         {/* Project avatar: tinted circle with initials. Glow halo on hover. */}

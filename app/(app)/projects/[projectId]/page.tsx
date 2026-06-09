@@ -50,8 +50,9 @@ import { formatAddress } from "../../../lib/format";
 import { useProjectMessages } from "../../../lib/useProjectMessages";
 import { useProjectTasks } from "../../../lib/useProjectTasks";
 import { useWalletAgents, realtimeAgentStatus } from "../../../lib/useWalletAgents";
+import { MembersPanel } from "../../../components/MembersPanel";
 
-type Tab = "tasks" | "conductor" | "agents" | "chat";
+type Tab = "tasks" | "conductor" | "agents" | "chat" | "members";
 
 type PageProps = {
   params: Promise<{ projectId: string }>;
@@ -61,33 +62,32 @@ export default function ProjectDetailPage({ params }: PageProps) {
   const { projectId } = use(params);
   const searchParams = useSearchParams();
   const { address, isConnected } = useConnection();
+  // For a SHARED project (owned by another wallet), the owner is passed as
+  // ?owner=. All reads then target the owner's subtree (the membership rules
+  // permit it). For own projects it's just the connected wallet.
+  const ownerParam = searchParams.get("owner");
+  const ownerWallet = ownerParam || address;
+  const isShared = Boolean(ownerParam && ownerParam.toLowerCase() !== (address ?? "").toLowerCase());
   const initialTab = (searchParams.get("tab") as Tab) || "tasks";
+  const TABS: Tab[] = ["tasks", "conductor", "agents", "chat", "members"];
   const [tab, setTab] = useState<Tab>(
-    initialTab === "agents" ||
-      initialTab === "chat" ||
-      initialTab === "conductor"
-      ? initialTab
-      : "tasks"
+    TABS.includes(initialTab) ? initialTab : "tasks"
   );
 
   // Keep tab in sync if user lands via a deep link.
   useEffect(() => {
-    const next = searchParams.get("tab");
-    if (
-      next === "tasks" ||
-      next === "conductor" ||
-      next === "agents" ||
-      next === "chat"
-    ) {
+    const next = searchParams.get("tab") as Tab | null;
+    if (next && TABS.includes(next)) {
       setTab(next);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["wallet-project", address, projectId],
+    queryKey: ["wallet-project", ownerWallet, projectId],
     queryFn: () =>
-      getWalletProject({ walletAddress: address!, projectId }),
-    enabled: Boolean(address) && Boolean(projectId),
+      getWalletProject({ walletAddress: ownerWallet!, projectId }),
+    enabled: Boolean(ownerWallet) && Boolean(projectId),
   });
 
   // Live tasks: a realtime Firestore listener so the board + the In progress /
@@ -95,7 +95,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
   // no manual refresh. Once the first snapshot lands, it's the source of truth;
   // until then we fall back to the one-shot query data.
   const { tasks: liveTasks, loaded: tasksLoaded } = useProjectTasks(
-    address,
+    ownerWallet,
     projectId
   );
   const liveDetail = data
@@ -133,8 +133,22 @@ export default function ProjectDetailPage({ params }: PageProps) {
             <ChatTab
               detail={liveDetail}
               projectId={projectId}
+              ownerWallet={ownerWallet ?? undefined}
               onDesignatePm={() => setTab("agents")}
             />
+          ) : null}
+          {tab === "members" ? (
+            <div className="flex flex-col gap-3">
+              <p className="text-sm text-muted-foreground">
+                People with access to this project. Editors can edit the board +
+                chat; viewers are read-only. (Org members already have access.)
+              </p>
+              <MembersPanel
+                kind="project"
+                id={projectId}
+                canManage={!isShared}
+              />
+            </div>
           ) : null}
         </>
       ) : null}
@@ -370,6 +384,7 @@ function Tabs({
     { id: "conductor", label: "Conductor" },
     { id: "agents", label: "Agents" },
     { id: "chat", label: "Project chat" },
+    { id: "members", label: "Members" },
   ];
 
   return (
@@ -1004,13 +1019,17 @@ function AddAgentToProjectDialog({
 function ChatTab({
   detail,
   projectId,
+  ownerWallet,
   onDesignatePm,
 }: {
   detail: ProjectDetail;
   projectId: string;
+  ownerWallet?: string;
   onDesignatePm: () => void;
 }) {
   const { address, isConnected } = useConnection();
+  // For a shared project, the chat lives under the owner's subtree.
+  const chatWallet = ownerWallet ?? address;
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState("");
 
@@ -1027,7 +1046,7 @@ function ChatTab({
 
   // Realtime subscription to the messages subcollection — no manual refetch
   // needed after a send, the snapshot listener delivers the new doc.
-  const { messages } = useProjectMessages(address, projectId);
+  const { messages } = useProjectMessages(chatWallet, projectId);
 
   const setPmMut = useMutation({
     mutationFn: (name: string) => {

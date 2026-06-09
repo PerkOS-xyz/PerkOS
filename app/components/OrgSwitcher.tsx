@@ -224,7 +224,11 @@ export function ProjectPicker() {
                   type="button"
                   onClick={() => {
                     setOpen(false);
-                    router.push(`/projects/${p.id}`);
+                    const ownerQ =
+                      activeOrg?.shared && activeOrg.ownerWallet
+                        ? `?owner=${activeOrg.ownerWallet}`
+                        : "";
+                    router.push(`/projects/${p.id}${ownerQ}`);
                   }}
                   className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm text-foreground hover:bg-muted/40"
                 >
