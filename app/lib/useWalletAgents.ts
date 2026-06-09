@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { firebaseDb } from "./firebase";
 
 export type AgentLiveStatus = {
+  id: string; // the agent doc id (for wake/hibernate calls)
   name: string;
   status: string; // top-level provision/heartbeat status (ready | provisioning | …)
   runtime?: string;
@@ -68,6 +69,7 @@ export function useWalletAgents(
           const name = (data.name as string) ?? d.id;
           const hib = (data.hibernation ?? {}) as Record<string, unknown>;
           byName[name] = {
+            id: d.id,
             name,
             status: (data.status as string) ?? "unknown",
             runtime: (data.runtime as string | undefined) ?? undefined,

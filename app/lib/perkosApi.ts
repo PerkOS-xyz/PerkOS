@@ -103,10 +103,31 @@ export type Task = {
 };
 
 // ---------------------------------------------------------------------------
-// Collaborative plan doc ("Notes")
+// Collaborative docs workspace ("Notes")
 // ---------------------------------------------------------------------------
 
-/** Lifecycle of a project's plan doc. */
+/** A doc's kind. A `plan` doc carries plan blocks + a status banner. */
+export type DocType = "note" | "plan" | "spec";
+
+/** One doc in a project's docs tree. */
+export type Doc = {
+  id?: string;
+  type: DocType | string;
+  title?: string | null;
+  /** plan docs only: the lifecycle status. */
+  status?: PlanStatus | string | null;
+  /** Parent doc/folder id for nesting (flat at MVP → usually null). */
+  parentId?: string | null;
+  /** PM-created docs land as drafts until a human promotes them. */
+  draft?: boolean;
+  order?: number;
+  createdBy?: string | null;
+  revision?: number;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+/** Lifecycle of a plan doc. */
 export type PlanStatus =
   | "draft"
   | "under_discussion"
@@ -426,50 +447,46 @@ function messagesCol(walletAddress: string, projectId: string) {
   ).withConverter(messageConverter);
 }
 
-function planCol(walletAddress: string, projectId: string) {
+function docsCol(walletAddress: string, projectId: string) {
   return collection(
     firebaseDb(),
     "wallets",
     normalize(walletAddress),
     "projects",
     projectId,
-    "plan"
+    "docs"
   );
 }
 
-function planDoc(walletAddress: string, projectId: string, planId: string) {
+function docDoc(walletAddress: string, projectId: string, docId: string) {
   return doc(
     firebaseDb(),
     "wallets",
     normalize(walletAddress),
     "projects",
     projectId,
-    "plan",
-    planId
+    "docs",
+    docId
   );
 }
 
-function planBlocksCol(
-  walletAddress: string,
-  projectId: string,
-  planId: string
-) {
+function docBlocksCol(walletAddress: string, projectId: string, docId: string) {
   return collection(
     firebaseDb(),
     "wallets",
     normalize(walletAddress),
     "projects",
     projectId,
-    "plan",
-    planId,
+    "docs",
+    docId,
     "blocks"
   );
 }
 
-function planBlockDoc(
+function docBlockDoc(
   walletAddress: string,
   projectId: string,
-  planId: string,
+  docId: string,
   blockId: string
 ) {
   return doc(
@@ -478,10 +495,27 @@ function planBlockDoc(
     normalize(walletAddress),
     "projects",
     projectId,
-    "plan",
-    planId,
+    "docs",
+    docId,
     "blocks",
     blockId
+  );
+}
+
+function docMessagesCol(
+  walletAddress: string,
+  projectId: string,
+  docId: string
+) {
+  return collection(
+    firebaseDb(),
+    "wallets",
+    normalize(walletAddress),
+    "projects",
+    projectId,
+    "docs",
+    docId,
+    "messages"
   );
 }
 
@@ -1145,10 +1179,10 @@ export async function addProjectMessage(input: {
 }
 
 // ---------------------------------------------------------------------------
-// Collaborative plan doc ("Notes")
+// Collaborative docs workspace ("Notes")
 // ---------------------------------------------------------------------------
 
-/** Read the project's active plan id (project.activePlanId), if any. */
+/** Read the project's active plan doc id (project.activePlanId), if any. */
 export async function getActivePlanId(
   walletAddress: string,
   projectId: string
@@ -1160,10 +1194,10 @@ export async function getActivePlanId(
 }
 
 /**
- * Ensure an active plan doc exists for the project, creating one (and
- * pointing project.activePlanId at it) if missing. Mirrors the server-side
- * `ensurePlan` so humans can start a plan from the app — the PM tools use
- * the same activePlanId. Returns the plan id.
+ * Ensure the project's active PLAN doc exists, creating one (and pointing
+ * project.activePlanId at it) if missing. Mirrors the server-side ensureDoc
+ * so humans can start the plan from the app — the PM tools target the same
+ * activePlanId. Returns the doc id.
  */
 export async function ensureProjectPlan(input: {
   walletAddress: string;
@@ -1173,14 +1207,18 @@ export async function ensureProjectPlan(input: {
   const existing = await getActivePlanId(input.walletAddress, input.projectId);
   if (existing) {
     const snap = await getDoc(
-      planDoc(input.walletAddress, input.projectId, existing)
+      docDoc(input.walletAddress, input.projectId, existing)
     );
     if (snap.exists()) return existing;
   }
-  const ref = doc(planCol(input.walletAddress, input.projectId));
+  const ref = doc(docsCol(input.walletAddress, input.projectId));
   await setDoc(ref, {
+    type: "plan",
+    title: "Sprint plan",
     status: "draft",
-    title: null,
+    parentId: null,
+    draft: false,
+    order: 0,
     createdBy: input.createdBy ?? null,
     revision: 0,
     createdAt: serverTimestamp(),
@@ -1193,17 +1231,77 @@ export async function ensureProjectPlan(input: {
   return ref.id;
 }
 
-/** Append a human-owned `note` block to the end of the plan. */
-export async function addPlanNote(input: {
+/** Create a new doc in the project's docs tree. Returns the new doc id. */
+export async function createDoc(input: {
   walletAddress: string;
   projectId: string;
-  planId: string;
+  type: DocType;
+  title: string;
+  parentId?: string | null;
+  createdBy?: string;
+  draft?: boolean;
+}): Promise<{ id: string }> {
+  const ref = doc(docsCol(input.walletAddress, input.projectId));
+  await setDoc(ref, {
+    type: input.type,
+    title: input.title,
+    status: input.type === "plan" ? "draft" : null,
+    parentId: input.parentId ?? null,
+    draft: input.draft ?? false,
+    order: Date.now(),
+    createdBy: input.createdBy ?? null,
+    revision: 0,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  return { id: ref.id };
+}
+
+/** Rename a doc. */
+export async function renameDoc(input: {
+  walletAddress: string;
+  projectId: string;
+  docId: string;
+  title: string;
+}): Promise<void> {
+  await updateDoc(docDoc(input.walletAddress, input.projectId, input.docId), {
+    title: input.title,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+/** Promote a PM-drafted doc into the main tree (draft → false). */
+export async function promoteDoc(input: {
+  walletAddress: string;
+  projectId: string;
+  docId: string;
+}): Promise<void> {
+  await updateDoc(docDoc(input.walletAddress, input.projectId, input.docId), {
+    draft: false,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+/** Delete a doc (its blocks/messages subcollections are orphaned in MVP). */
+export async function deleteProjectDoc(input: {
+  walletAddress: string;
+  projectId: string;
+  docId: string;
+}): Promise<void> {
+  await deleteDoc(docDoc(input.walletAddress, input.projectId, input.docId));
+}
+
+/** Append a human-owned `note` block to the end of a doc. */
+export async function addDocNote(input: {
+  walletAddress: string;
+  projectId: string;
+  docId: string;
   text: string;
   owner: string;
   order: number;
 }): Promise<{ id: string }> {
   const ref = doc(
-    planBlocksCol(input.walletAddress, input.projectId, input.planId)
+    docBlocksCol(input.walletAddress, input.projectId, input.docId)
   );
   await setDoc(ref, {
     type: "note",
@@ -1217,39 +1315,48 @@ export async function addPlanNote(input: {
 }
 
 /** Edit a `note` block's text (last-writer-wins at block level). */
-export async function updatePlanNote(input: {
+export async function updateDocNote(input: {
   walletAddress: string;
   projectId: string;
-  planId: string;
+  docId: string;
   blockId: string;
   text: string;
 }): Promise<void> {
   await updateDoc(
-    planBlockDoc(
-      input.walletAddress,
-      input.projectId,
-      input.planId,
-      input.blockId
-    ),
+    docBlockDoc(input.walletAddress, input.projectId, input.docId, input.blockId),
     { text: input.text, updatedAt: serverTimestamp() }
   );
 }
 
 /** Delete a block (humans may remove their own notes). */
-export async function deletePlanBlock(input: {
+export async function deleteDocBlock(input: {
   walletAddress: string;
   projectId: string;
-  planId: string;
+  docId: string;
   blockId: string;
 }): Promise<void> {
   await deleteDoc(
-    planBlockDoc(
-      input.walletAddress,
-      input.projectId,
-      input.planId,
-      input.blockId
-    )
+    docBlockDoc(input.walletAddress, input.projectId, input.docId, input.blockId)
   );
+}
+
+/** Post a human message into a doc's own discussion. */
+export async function addDocMessage(input: {
+  walletAddress: string;
+  projectId: string;
+  docId: string;
+  text: string;
+  from?: "user" | "agent";
+}): Promise<{ id: string }> {
+  const ref = doc(
+    docMessagesCol(input.walletAddress, input.projectId, input.docId)
+  );
+  await setDoc(ref, {
+    from: input.from ?? "user",
+    text: input.text,
+    createdAt: serverTimestamp(),
+  });
+  return { id: ref.id };
 }
 
 // ---------------------------------------------------------------------------

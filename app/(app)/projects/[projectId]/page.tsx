@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useConnection } from "wagmi";
 import { toast } from "sonner";
-import { Pencil, Trash2, Sparkles, Compass, Users, Zap, FileText, Check } from "lucide-react";
+import { Pencil, Trash2, Sparkles, Compass, Users, Zap, FileText, Check, Play, Pause } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -22,10 +22,12 @@ import {
   ensureProjectPlan,
   getWalletAgents,
   getWalletProject,
+  hibernateAgentApi,
   pmTurn,
   setProjectPm,
   updatePlanNote,
   updateTask,
+  wakeAgentApi,
   wakeProjectTeam,
   type ChatMessage,
   type PlanBlock,
@@ -57,7 +59,7 @@ import { formatAddress } from "../../../lib/format";
 import { useProjectMessages } from "../../../lib/useProjectMessages";
 import { usePlanDoc, useActivePlanId } from "../../../lib/usePlanDoc";
 import { useProjectTasks } from "../../../lib/useProjectTasks";
-import { useWalletAgents, realtimeAgentStatus } from "../../../lib/useWalletAgents";
+import { useWalletAgents, realtimeAgentStatus, type AgentLiveStatus } from "../../../lib/useWalletAgents";
 import { MembersPanel } from "../../../components/MembersPanel";
 
 type Tab = "tasks" | "plan" | "conductor" | "agents" | "chat" | "members";
@@ -968,22 +970,25 @@ function AgentsTab({ detail }: { detail: ProjectDetail }) {
                   </span>
                 </div>
               </div>
-              {name === pmAgent ? (
-                <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                  <Compass className="h-3 w-3" /> PM
-                </span>
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  className="shrink-0 text-[#7975a8] hover:text-primary"
-                  disabled={setPmMut.isPending || !address}
-                  onClick={() => setPmMut.mutate(name)}
-                  title="Make this agent the project's PM"
-                >
-                  Make PM
-                </Button>
-              )}
+              <div className="flex shrink-0 items-center gap-2">
+                <ProjectAgentPower live={agentStatus[name]} />
+                {name === pmAgent ? (
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                    <Compass className="h-3 w-3" /> PM
+                  </span>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    className="shrink-0 text-[#7975a8] hover:text-primary"
+                    disabled={setPmMut.isPending || !address}
+                    onClick={() => setPmMut.mutate(name)}
+                    title="Make this agent the project's PM"
+                  >
+                    Make PM
+                  </Button>
+                )}
+              </div>
             </li>
           ))}
         </ul>
@@ -996,6 +1001,46 @@ function AgentsTab({ detail }: { detail: ProjectDetail }) {
         existingNames={agentNames}
       />
     </div>
+  );
+}
+
+// Per-agent power toggle for the project Agents tab rows. Derives the control
+// from the SAME realtime label the dot shows (so an agent whose hibernation
+// state lingers at "waking" but has reconnected reads as Online → Pause). The
+// onSnapshot listener reflects the change automatically — no invalidation.
+function ProjectAgentPower({ live }: { live?: AgentLiveStatus }) {
+  const mut = useMutation({
+    mutationFn: (hibernated: boolean) =>
+      hibernated
+        ? wakeAgentApi({ agentId: live!.id })
+        : hibernateAgentApi({ agentId: live!.id }),
+    onError: (e: Error) =>
+      toast.error("Couldn't change power state", { description: e.message }),
+  });
+
+  if (!live?.id) return null;
+  const label = realtimeAgentStatus(live).label;
+  const isHibernated = label === "Hibernated";
+  const isOnline = label === "Online";
+  const isTransitioning = label === "Starting" || label === "Hibernating";
+  // Only show for controllable PerkOS-infra states.
+  if (!isHibernated && !isOnline && !isTransitioning) return null;
+
+  const busy = mut.isPending || isTransitioning;
+  const Icon = busy ? Loader2 : isHibernated ? Play : Pause;
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        if (!busy) mut.mutate(isHibernated);
+      }}
+      disabled={busy}
+      aria-label={isHibernated ? `Wake ${live.name}` : `Hibernate ${live.name}`}
+      title={busy ? "Working…" : isHibernated ? "Wake agent" : "Hibernate agent"}
+      className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-[#1b1833] text-[#7975a8] transition-colors hover:border-[#530922] hover:text-[#ececff] disabled:opacity-60"
+    >
+      <Icon className={`h-3.5 w-3.5 ${busy ? "animate-spin" : ""}`} />
+    </button>
   );
 }
 
