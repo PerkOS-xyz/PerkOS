@@ -1,6 +1,6 @@
 "use client";
 
-import { Mic, MicOff, Send } from "lucide-react";
+import { Mic, Pause, Send } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -119,8 +119,8 @@ export function ConversationComposer({
             variant={speech.listening ? "default" : "outline"}
             size="sm"
             disabled={disabled}
-            aria-label={speech.listening ? "Stop dictation" : "Start dictation"}
-            title={speech.listening ? "Stop dictation" : "Dictate with microphone"}
+            aria-label={speech.listening ? "Pause dictation" : "Start dictation"}
+            title={speech.listening ? "Pause dictation" : "Dictate with microphone"}
             onClick={speech.toggle}
             className={cn(
               "h-9 w-9 p-0",
@@ -128,7 +128,7 @@ export function ConversationComposer({
             )}
           >
             {speech.listening ? (
-              <MicOff className="h-3.5 w-3.5" />
+              <Pause className="h-3.5 w-3.5" />
             ) : (
               <Mic className="h-3.5 w-3.5" />
             )}

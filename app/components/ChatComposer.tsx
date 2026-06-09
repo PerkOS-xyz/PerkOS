@@ -15,6 +15,7 @@ import {
   ListTodo,
   Loader2,
   Mic,
+  Pause,
   Plus,
   Sparkles,
   Trash2,
@@ -251,27 +252,37 @@ export function ChatComposer({
             disabled={disabled}
             className="flex-1 resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
           />
-          {speech.supported && value.trim().length === 0 ? (
-            <Button
-              type="button"
-              size="icon"
-              variant="ghost"
-              onClick={speech.toggle}
-              disabled={disabled || sending}
-              className={cn(
-                "h-8 w-8 rounded-full text-muted-foreground hover:text-primary",
-                speech.listening && "animate-pulse text-primary",
-              )}
-              aria-label={speech.listening ? "Stop dictation" : "Dictate"}
-              title={speech.listening ? "Stop dictation" : "Dictate with microphone"}
-            >
-              <Mic className="h-4 w-4" />
-            </Button>
-          ) : (
+          <div className="flex shrink-0 items-center gap-1">
+            {speech.supported ? (
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                onClick={speech.toggle}
+                disabled={disabled || sending}
+                className={cn(
+                  "h-8 w-8 rounded-full text-muted-foreground hover:text-primary",
+                  speech.listening &&
+                    "animate-pulse bg-primary/10 text-primary",
+                )}
+                aria-label={speech.listening ? "Pause dictation" : "Dictate"}
+                title={
+                  speech.listening
+                    ? "Pause dictation"
+                    : "Dictate with microphone"
+                }
+              >
+                {speech.listening ? (
+                  <Pause className="h-4 w-4" />
+                ) : (
+                  <Mic className="h-4 w-4" />
+                )}
+              </Button>
+            ) : null}
             <Button
               type="submit"
               size="icon"
-              disabled={disabled || sending}
+              disabled={disabled || sending || value.trim().length === 0}
               className="h-8 w-8 rounded-full"
               aria-label="Send"
             >
@@ -281,7 +292,7 @@ export function ChatComposer({
                 <ArrowUp className="h-4 w-4" />
               )}
             </Button>
-          )}
+          </div>
         </div>
       </form>
     </div>
