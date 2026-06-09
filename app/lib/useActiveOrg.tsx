@@ -17,6 +17,32 @@ import {
 } from "./perkosApi";
 
 const LS_KEY = "perkos.activeOrgId";
+// Pre-orgs localStorage placeholder (the old /organizations stub). We migrate
+// its name onto the new default org once, then drop it.
+const LEGACY_ORG_KEY = "swarm.organization.saved.v1";
+
+function readLegacyOrgName(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  try {
+    const raw = localStorage.getItem(LEGACY_ORG_KEY);
+    if (!raw) return undefined;
+    const parsed = JSON.parse(raw) as { name?: unknown };
+    return typeof parsed?.name === "string" && parsed.name.trim()
+      ? parsed.name.trim()
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function clearLegacyOrg() {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.removeItem(LEGACY_ORG_KEY);
+  } catch {
+    // ignore
+  }
+}
 
 type ActiveOrgState = {
   orgs: Organization[];
@@ -60,7 +86,13 @@ export function ActiveOrgProvider({ children }: { children: ReactNode }) {
     }
     setLoading(true);
     try {
-      const list = await ensureDefaultOrg(address);
+      // One-shot: carry over the name the user set in the old localStorage org
+      // stub (if any) onto the new default org, then drop the stale stub.
+      const migratedName = readLegacyOrgName();
+      const list = await ensureDefaultOrg(address, {
+        defaultName: migratedName,
+      });
+      if (migratedName) clearLegacyOrg();
       setOrgs(list);
       setActiveOrgIdState((cur) =>
         cur && list.some((o) => o.id === cur) ? cur : pickActive(list)

@@ -550,15 +550,19 @@ export async function updateOrgName(input: {
  * onto it. Idempotent — safe to call on every app load. Returns all orgs.
  */
 export async function ensureDefaultOrg(
-  walletAddress: string
+  walletAddress: string,
+  opts?: { defaultName?: string }
 ): Promise<Organization[]> {
   let orgs = await getWalletOrgs(walletAddress);
   if (orgs.length > 0) return orgs;
 
   const last4 = normalize(walletAddress).slice(-4);
+  // Name the default org from the migrated legacy name (if the caller found
+  // one), else the wallet-derived fallback.
+  const name = opts?.defaultName?.trim() || `Org 0x…${last4}`;
   const def = await createOrg({
     walletAddress,
-    name: `Org 0x…${last4}`,
+    name,
     isDefault: true,
   });
   orgs = [def];
