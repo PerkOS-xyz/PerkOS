@@ -9,7 +9,7 @@ import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
   deleteProject,
-  getWalletProjects,
+  getOrgProjects,
   updateProject,
   type Project,
 } from "../../lib/perkosApi";
@@ -35,11 +35,15 @@ export default function ProjectsPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["wallet-projects", address, activeOrgId],
     queryFn: () =>
-      getWalletProjects(address!, activeOrgId ?? undefined, defaultOrgId ?? undefined),
-    enabled: Boolean(address) && Boolean(activeOrgId),
+      getOrgProjects({
+        org: activeOrg!,
+        myWallet: address!,
+        defaultOrgId: defaultOrgId ?? undefined,
+      }),
+    enabled: Boolean(address) && Boolean(activeOrg),
   });
 
-  const allProjects = data?.projects ?? [];
+  const allProjects = data ?? [];
   const statusFiltered =
     statusFilter === "active"
       ? allProjects.filter((p) => (p.status ?? "").toLowerCase() === "active")

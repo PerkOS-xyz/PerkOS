@@ -25,7 +25,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 
 import { useActiveOrg } from "../lib/useActiveOrg";
-import { getWalletProjects, updateOrgName } from "../lib/perkosApi";
+import { getOrgProjects, updateOrgName } from "../lib/perkosApi";
 
 /** Header org chip: shows the active org, switches between orgs, renames it,
  *  and links to create / manage organizations. */
@@ -177,15 +177,20 @@ export function OrgSwitcher() {
 export function ProjectPicker() {
   const { address } = useConnection();
   const router = useRouter();
-  const { activeOrgId, defaultOrgId } = useActiveOrg();
+  const { activeOrg, activeOrgId, defaultOrgId } = useActiveOrg();
   const [open, setOpen] = useState(false);
 
   const projectsQuery = useQuery({
     queryKey: ["wallet-projects", address, activeOrgId],
-    queryFn: () => getWalletProjects(address!, activeOrgId!, defaultOrgId ?? undefined),
-    enabled: Boolean(address) && Boolean(activeOrgId),
+    queryFn: () =>
+      getOrgProjects({
+        org: activeOrg!,
+        myWallet: address!,
+        defaultOrgId: defaultOrgId ?? undefined,
+      }),
+    enabled: Boolean(address) && Boolean(activeOrg),
   });
-  const projects = projectsQuery.data?.projects ?? [];
+  const projects = projectsQuery.data ?? [];
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

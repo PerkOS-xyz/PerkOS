@@ -20,6 +20,39 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == walletAddress;
     }
 
+    // Membership / sharing helpers (GitHub-like) ------------------------
+    //
+    // Members are recorded (Admin SDK, via PerkOS-API) at
+    //   /wallets/{owner}/organizations/{orgId}/members/{memberUid}
+    //   /wallets/{owner}/projects/{projectId}/members/{memberUid}
+    // keyed by the member's uid (= their wallet, lowercased). These helpers
+    // let a member READ (and, with editor/owner role, WRITE) the owner's org /
+    // project subtree. Rules are ADDITIVE (Firestore grants if ANY match
+    // allows), so the owner keeps full access via the workspace wildcard.
+
+    function isOrgMember(w, orgId) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/wallets/$(w)/organizations/$(orgId)/members/$(request.auth.uid));
+    }
+    function orgMemberRole(w, orgId) {
+      return get(/databases/$(database)/documents/wallets/$(w)/organizations/$(orgId)/members/$(request.auth.uid)).data.role;
+    }
+    function isProjectMember(w, pid) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/wallets/$(w)/projects/$(pid)/members/$(request.auth.uid));
+    }
+    function projectMemberRole(w, pid) {
+      return get(/databases/$(database)/documents/wallets/$(w)/projects/$(pid)/members/$(request.auth.uid)).data.role;
+    }
+    function projectOrgId(w, pid) {
+      return get(/databases/$(database)/documents/wallets/$(w)/projects/$(pid)).data.orgId;
+    }
+    // Editors/owners (by project role OR org role) may write the project subtree.
+    function canWriteProject(w, pid) {
+      return (isProjectMember(w, pid) && projectMemberRole(w, pid) in ['owner', 'editor'])
+        || (isOrgMember(w, projectOrgId(w, pid)) && orgMemberRole(w, projectOrgId(w, pid)) in ['owner', 'editor']);
+    }
+
     // Alpha-access allowlist --------------------------------------------
     //
     // A wallet holder can read their own allowlist doc to discover whether
@@ -129,6 +162,54 @@ service cloud.firestore {
         allow read: if request.auth != null
                     && request.auth.uid == get(/databases/$(database)/documents/provision_jobs/$(jobId)).data.walletAddress;
         allow write: if false;
+      }
+    }
+
+    // Membership / sharing access (cross-wallet) ------------------------
+    //
+    // Additive grants on top of the owner's workspace wildcard. An ORG member
+    // can read the org + the member roster, and read ALL projects in that org
+    // (incl. tasks + project chat). A PROJECT member can read that one project.
+    // Editors/owners can also write the project subtree (tasks, board, chat).
+    // Discovery happens via the member's own /wallets/{me}/sharedOrgs +
+    // /sharedProjects pointers (covered by the workspace wildcard above).
+
+    match /wallets/{w}/organizations/{orgId} {
+      allow read: if isSelf(w) || isOrgMember(w, orgId);
+      match /members/{memberUid} {
+        allow read: if isSelf(w) || isOrgMember(w, orgId);
+      }
+    }
+
+    match /wallets/{w}/projects/{pid} {
+      allow read: if isSelf(w)
+        || isProjectMember(w, pid)
+        || (resource != null && isOrgMember(w, resource.data.orgId));
+      // The owner or an editor/owner-role member may update the project doc.
+      allow write: if isSelf(w) || canWriteProject(w, pid);
+
+      // Tasks + chat: readable by any member, writable by editors/owners. These
+      // are listed explicitly (NOT a `{document=**}` write) so editor write
+      // CANNOT reach the `members` subcollection — membership changes go only
+      // through the owner / the server API (privilege-escalation guard).
+      match /tasks/{tid} {
+        allow read: if isSelf(w)
+          || isProjectMember(w, pid)
+          || isOrgMember(w, projectOrgId(w, pid));
+        allow write: if isSelf(w) || canWriteProject(w, pid);
+      }
+      match /messages/{mid} {
+        allow read: if isSelf(w)
+          || isProjectMember(w, pid)
+          || isOrgMember(w, projectOrgId(w, pid));
+        allow write: if isSelf(w) || canWriteProject(w, pid);
+      }
+      // Member roster: readable by members; writes are owner-only (via the
+      // workspace wildcard's isSelf) — never granted to editors.
+      match /members/{memberUid} {
+        allow read: if isSelf(w)
+          || isProjectMember(w, pid)
+          || isOrgMember(w, projectOrgId(w, pid));
       }
     }
 

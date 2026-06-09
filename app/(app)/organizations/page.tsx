@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useConnection } from "wagmi";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Building2, Check, Pencil, Plus } from "lucide-react";
+import { Building2, Check, Pencil, Plus, Users } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -155,18 +155,30 @@ export default function OrganizationsPage() {
                         Set active
                       </Button>
                     ) : null}
-                    <Button
-                      size="xs"
-                      variant="ghost"
-                      className="gap-1.5 text-muted-foreground hover:text-foreground"
-                      onClick={() => {
-                        setEditingId(o.id ?? null);
-                        setDraftName(o.name);
-                      }}
+                    <Link
+                      href={`/organizations/${o.id}/settings`}
+                      className={cn(
+                        buttonVariants({ size: "xs", variant: "ghost" }),
+                        "gap-1.5 text-muted-foreground hover:text-foreground"
+                      )}
                     >
-                      <Pencil className="h-3.5 w-3.5" />
-                      Rename
-                    </Button>
+                      <Users className="h-3.5 w-3.5" />
+                      Members
+                    </Link>
+                    {!o.shared ? (
+                      <Button
+                        size="xs"
+                        variant="ghost"
+                        className="gap-1.5 text-muted-foreground hover:text-foreground"
+                        onClick={() => {
+                          setEditingId(o.id ?? null);
+                          setDraftName(o.name);
+                        }}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                        Rename
+                      </Button>
+                    ) : null}
                   </div>
                 ) : null}
               </li>

@@ -12,6 +12,7 @@ import { useConnection } from "wagmi";
 
 import {
   ensureDefaultOrg,
+  getSharedOrgs,
   getWalletOrgs,
   type Organization,
 } from "./perkosApi";
@@ -89,10 +90,13 @@ export function ActiveOrgProvider({ children }: { children: ReactNode }) {
       // One-shot: carry over the name the user set in the old localStorage org
       // stub (if any) onto the new default org, then drop the stale stub.
       const migratedName = readLegacyOrgName();
-      const list = await ensureDefaultOrg(address, {
+      const own = await ensureDefaultOrg(address, {
         defaultName: migratedName,
       });
       if (migratedName) clearLegacyOrg();
+      // Merge in orgs shared with this wallet (owned by others).
+      const shared = await getSharedOrgs(address).catch(() => []);
+      const list = [...own, ...shared];
       setOrgs(list);
       setActiveOrgIdState((cur) =>
         cur && list.some((o) => o.id === cur) ? cur : pickActive(list)
@@ -115,7 +119,11 @@ export function ActiveOrgProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     if (!address) return [];
-    const list = await getWalletOrgs(address);
+    const [own, shared] = await Promise.all([
+      getWalletOrgs(address),
+      getSharedOrgs(address).catch(() => []),
+    ]);
+    const list = [...own, ...shared];
     setOrgs(list);
     return list;
   }, [address]);

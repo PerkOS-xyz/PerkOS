@@ -32,6 +32,7 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
+  where,
   type FirestoreDataConverter,
   type Timestamp,
 } from "firebase/firestore";
@@ -462,6 +463,8 @@ export async function getWalletOverview(
 // `wallets/{w}/organizations/{orgId}`.
 // ---------------------------------------------------------------------------
 
+export type OrgRole = "owner" | "editor" | "viewer";
+
 export type Organization = {
   id?: string;
   name: string;
@@ -469,6 +472,10 @@ export type Organization = {
   /** The auto-created default org for the wallet (can't be deleted). */
   isDefault?: boolean;
   createdAt?: string;
+  /** Set for orgs SHARED with the current user (owned by another wallet). */
+  shared?: boolean;
+  /** The current user's role in this org (owner for own orgs). */
+  role?: OrgRole;
 };
 
 const organizationConverter: FirestoreDataConverter<Organization> = {
@@ -507,16 +514,104 @@ function orgDoc(walletAddress: string, orgId: string) {
   ).withConverter(organizationConverter);
 }
 
-/** All of the wallet's organizations, default org first. */
+/** All of the wallet's OWN organizations, default org first. */
 export async function getWalletOrgs(
   walletAddress: string
 ): Promise<Organization[]> {
   const snap = await getDocs(orgsCol(walletAddress));
   return snap.docs
-    .map((d) => d.data())
+    .map((d) => ({ ...d.data(), role: "owner" as OrgRole, shared: false }))
     .sort((a, b) =>
       a.isDefault === b.isDefault ? a.name.localeCompare(b.name) : a.isDefault ? -1 : 1
     );
+}
+
+/**
+ * Organizations SHARED with this wallet (owned by others). Reads the member's
+ * own `sharedOrgs` discovery pointers, then loads each owner's live org doc
+ * (allowed by the membership rules). Skips any the user can no longer access.
+ */
+export async function getSharedOrgs(
+  walletAddress: string
+): Promise<Organization[]> {
+  const ptrs = await getDocs(
+    collection(firebaseDb(), "wallets", normalize(walletAddress), "sharedOrgs")
+  );
+  const out = await Promise.all(
+    ptrs.docs.map(async (d) => {
+      const p = d.data() as { ownerWallet?: string; orgId?: string; role?: string; orgName?: string };
+      const owner = p.ownerWallet;
+      const orgId = p.orgId ?? d.id;
+      if (!owner) return null;
+      try {
+        const snap = await getDoc(orgDoc(owner, orgId));
+        const name = snap.exists() ? snap.data().name : p.orgName ?? "Shared org";
+        return {
+          id: orgId,
+          name,
+          ownerWallet: owner,
+          isDefault: false,
+          shared: true,
+          role: (p.role as OrgRole) ?? "viewer",
+        } as Organization;
+      } catch {
+        return null; // access revoked — skip
+      }
+    })
+  );
+  return out.filter((o): o is Organization => o !== null);
+}
+
+/**
+ * Projects for an org — works for both OWN orgs (read all + client-filter,
+ * handles legacy no-orgId) and SHARED orgs (a cross-wallet `where orgId==`
+ * query on the owner's projects, which the membership rules permit).
+ */
+export async function getOrgProjects(input: {
+  org: Pick<Organization, "id" | "ownerWallet" | "shared">;
+  myWallet: string;
+  defaultOrgId?: string;
+}): Promise<Project[]> {
+  const orgId = input.org.id;
+  const owner = input.org.ownerWallet || input.myWallet;
+  if (input.org.shared && owner.toLowerCase() !== input.myWallet.toLowerCase()) {
+    const snap = await getDocs(
+      query(projectsCol(owner), where("orgId", "==", orgId))
+    );
+    return snap.docs.map((d) => d.data());
+  }
+  const snap = await getDocs(projectsCol(owner));
+  return snap.docs
+    .map((d) => d.data())
+    .filter((p) => (p.orgId ?? input.defaultOrgId) === orgId);
+}
+
+/**
+ * Stand-alone projects shared directly with this wallet (not via an org).
+ * Reads the member's `sharedProjects` pointers + loads each owner's project.
+ */
+export async function getSharedProjects(
+  walletAddress: string
+): Promise<Array<Project & { ownerWallet: string }>> {
+  const ptrs = await getDocs(
+    collection(firebaseDb(), "wallets", normalize(walletAddress), "sharedProjects")
+  );
+  const out = await Promise.all(
+    ptrs.docs.map(async (d) => {
+      const p = d.data() as { ownerWallet?: string; projectId?: string };
+      const owner = p.ownerWallet;
+      const pid = p.projectId ?? d.id;
+      if (!owner) return null;
+      try {
+        const snap = await getDoc(projectDoc(owner, pid));
+        if (!snap.exists()) return null;
+        return { ...snap.data(), ownerWallet: owner };
+      } catch {
+        return null;
+      }
+    })
+  );
+  return out.filter((p): p is Project & { ownerWallet: string } => p !== null);
 }
 
 export async function createOrg(input: {
