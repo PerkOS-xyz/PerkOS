@@ -217,6 +217,30 @@ service cloud.firestore {
           || isProjectMember(w, pid)
           || isOrgMember(w, projectOrgId(w, pid));
       }
+      // Collaborative plan doc ("Notes") + its blocks. Same access as tasks:
+      // readable by any member, writable by editors/owners. The PM agent
+      // writes planGroup/planTask blocks server-side via the Tools-API (Admin
+      // SDK, which bypasses these rules); these client rules govern humans
+      // editing `note` blocks. Listed explicitly (not `{document=**}`) so the
+      // editor grant cannot reach `members`.
+      match /plan/{planId} {
+        allow read: if isSelf(w)
+          || isProjectMember(w, pid)
+          || isOrgMember(w, projectOrgId(w, pid));
+        allow write: if isSelf(w) || canWriteProject(w, pid);
+        match /blocks/{blockId} {
+          allow read: if isSelf(w)
+            || isProjectMember(w, pid)
+            || isOrgMember(w, projectOrgId(w, pid));
+          allow write: if isSelf(w) || canWriteProject(w, pid);
+        }
+        match /revisions/{rev} {
+          allow read: if isSelf(w)
+            || isProjectMember(w, pid)
+            || isOrgMember(w, projectOrgId(w, pid));
+          allow write: if isSelf(w) || canWriteProject(w, pid);
+        }
+      }
     }
 
     // Default deny -------------------------------------------------------

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
-import { Bot, FolderPlus, Loader2, Moon, Play, Plus, Trash2, UserPlus } from "lucide-react";
+import { Bot, FolderPlus, Loader2, Moon, Pause, Play, Plus, Trash2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -376,6 +376,12 @@ function AgentCard({
     queryKey: ["agent-hibernation", agent.id],
     queryFn: () => getHibernationStatusApi({ agentId: agent.id }),
     enabled: agent.status === "ready" && !agent.external,
+    // While a wake/hibernate is mid-flight, poll so the badge + power button
+    // converge to the settled state without a manual refresh.
+    refetchInterval: (q) => {
+      const s = q.state.data?.state;
+      return s === "waking" || s === "hibernating" ? 5000 : false;
+    },
   });
   const hibState = hibQuery.data?.state;
   const syncing = agent.status === "ready" && hibQuery.isLoading;
@@ -403,6 +409,7 @@ function AgentCard({
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <AgentPowerToggle agent={agent} hibState={hibState} />
             {agent.external ? (
               <span
                 className="rounded border border-[#1b1833] px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-[#7975a8]"
@@ -439,6 +446,67 @@ function AgentCard({
         </div>
       </Link>
     </li>
+  );
+}
+
+// Per-agent power control. Play = wake (scale 0→1), Pause = hibernate
+// (scale 1→0). Only shown for PerkOS-infra agents that finished provisioning;
+// external/BYOK agents (no ECS) get no control. Lives inside the card's Link,
+// so it stops propagation like the Checkbox already does.
+function AgentPowerToggle({
+  agent,
+  hibState,
+}: {
+  agent: AgentRow;
+  hibState?: HibernationApiState;
+}) {
+  const qc = useQueryClient();
+  const controllable = agent.status === "ready" && !agent.external;
+  const transitioning = hibState === "waking" || hibState === "hibernating";
+  const hibernated = hibState === "hibernated";
+
+  const mut = useMutation({
+    mutationFn: () =>
+      hibernated
+        ? wakeAgentApi({ agentId: agent.id })
+        : hibernateAgentApi({ agentId: agent.id }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["agent-hibernation", agent.id] });
+      toast.success(
+        hibernated ? `Waking ${agent.name}…` : `Hibernating ${agent.name}…`,
+        {
+          description: hibernated
+            ? "Boots + connects in ~2–3 min."
+            : "Scaling down to save cost.",
+        },
+      );
+    },
+    onError: (e: Error) =>
+      toast.error("Couldn't change power state", { description: e.message }),
+  });
+
+  if (!controllable) return null;
+
+  const busy = mut.isPending || transitioning;
+  const Icon = busy ? Loader2 : hibernated ? Play : Pause;
+
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!busy) mut.mutate();
+      }}
+      disabled={busy}
+      aria-label={hibernated ? `Wake ${agent.name}` : `Hibernate ${agent.name}`}
+      title={
+        busy ? "Working…" : hibernated ? "Wake agent" : "Hibernate agent"
+      }
+      className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-[#1b1833] text-[#7975a8] transition-colors hover:border-[#530922] hover:text-[#ececff] disabled:opacity-60"
+    >
+      <Icon className={`h-3.5 w-3.5 ${busy ? "animate-spin" : ""}`} />
+    </button>
   );
 }
 

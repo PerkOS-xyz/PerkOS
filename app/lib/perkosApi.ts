@@ -102,6 +102,55 @@ export type Task = {
   updatedAt?: string;
 };
 
+// ---------------------------------------------------------------------------
+// Collaborative plan doc ("Notes")
+// ---------------------------------------------------------------------------
+
+/** Lifecycle of a project's plan doc. */
+export type PlanStatus =
+  | "draft"
+  | "under_discussion"
+  | "plan_proposed"
+  | "approved"
+  | "materialized";
+
+export type PlanBlockType = "note" | "planGroup" | "planTask";
+
+/**
+ * One block of a plan doc. Block-level ownership (not a CRDT): humans own
+ * `note` blocks; the PM agent owns `planGroup`/`planTask` blocks. `owner` is
+ * "user:0x…" or "agent:<name>". Only the fields relevant to `type` are set.
+ */
+export type PlanBlock = {
+  id?: string;
+  type: PlanBlockType;
+  order: number;
+  owner?: string | null;
+  // note
+  text?: string | null;
+  // planGroup / planTask
+  title?: string | null;
+  // planTask
+  groupId?: string | null;
+  desc?: string | null;
+  suggestedAgent?: string | null;
+  acceptance?: string | null;
+  deps?: string[];
+  materializedTaskId?: string | null;
+  updatedAt?: string;
+};
+
+export type PlanDoc = {
+  id?: string;
+  status: PlanStatus | string;
+  title?: string | null;
+  revision?: number;
+  approvedBy?: string | null;
+  approvedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 /**
  * @deprecated Project group chat messages no longer live in Firestore.
  * The new chat layer uses the `Conversation` model in `conversationsApi.ts`
@@ -375,6 +424,65 @@ function messagesCol(walletAddress: string, projectId: string) {
     projectId,
     "messages"
   ).withConverter(messageConverter);
+}
+
+function planCol(walletAddress: string, projectId: string) {
+  return collection(
+    firebaseDb(),
+    "wallets",
+    normalize(walletAddress),
+    "projects",
+    projectId,
+    "plan"
+  );
+}
+
+function planDoc(walletAddress: string, projectId: string, planId: string) {
+  return doc(
+    firebaseDb(),
+    "wallets",
+    normalize(walletAddress),
+    "projects",
+    projectId,
+    "plan",
+    planId
+  );
+}
+
+function planBlocksCol(
+  walletAddress: string,
+  projectId: string,
+  planId: string
+) {
+  return collection(
+    firebaseDb(),
+    "wallets",
+    normalize(walletAddress),
+    "projects",
+    projectId,
+    "plan",
+    planId,
+    "blocks"
+  );
+}
+
+function planBlockDoc(
+  walletAddress: string,
+  projectId: string,
+  planId: string,
+  blockId: string
+) {
+  return doc(
+    firebaseDb(),
+    "wallets",
+    normalize(walletAddress),
+    "projects",
+    projectId,
+    "plan",
+    planId,
+    "blocks",
+    blockId
+  );
 }
 
 function agentsCol(walletAddress: string) {
@@ -1034,6 +1142,114 @@ export async function addProjectMessage(input: {
     createdAt: serverTimestamp(),
   });
   return { message: { ...payload, id: ref.id } };
+}
+
+// ---------------------------------------------------------------------------
+// Collaborative plan doc ("Notes")
+// ---------------------------------------------------------------------------
+
+/** Read the project's active plan id (project.activePlanId), if any. */
+export async function getActivePlanId(
+  walletAddress: string,
+  projectId: string
+): Promise<string | null> {
+  const snap = await getDoc(projectDoc(walletAddress, projectId));
+  if (!snap.exists()) return null;
+  const data = snap.data() as Project & { activePlanId?: string };
+  return typeof data.activePlanId === "string" ? data.activePlanId : null;
+}
+
+/**
+ * Ensure an active plan doc exists for the project, creating one (and
+ * pointing project.activePlanId at it) if missing. Mirrors the server-side
+ * `ensurePlan` so humans can start a plan from the app — the PM tools use
+ * the same activePlanId. Returns the plan id.
+ */
+export async function ensureProjectPlan(input: {
+  walletAddress: string;
+  projectId: string;
+  createdBy?: string;
+}): Promise<string> {
+  const existing = await getActivePlanId(input.walletAddress, input.projectId);
+  if (existing) {
+    const snap = await getDoc(
+      planDoc(input.walletAddress, input.projectId, existing)
+    );
+    if (snap.exists()) return existing;
+  }
+  const ref = doc(planCol(input.walletAddress, input.projectId));
+  await setDoc(ref, {
+    status: "draft",
+    title: null,
+    createdBy: input.createdBy ?? null,
+    revision: 0,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  await updateDoc(projectDoc(input.walletAddress, input.projectId), {
+    activePlanId: ref.id,
+    updatedAt: serverTimestamp(),
+  });
+  return ref.id;
+}
+
+/** Append a human-owned `note` block to the end of the plan. */
+export async function addPlanNote(input: {
+  walletAddress: string;
+  projectId: string;
+  planId: string;
+  text: string;
+  owner: string;
+  order: number;
+}): Promise<{ id: string }> {
+  const ref = doc(
+    planBlocksCol(input.walletAddress, input.projectId, input.planId)
+  );
+  await setDoc(ref, {
+    type: "note",
+    text: input.text,
+    order: input.order,
+    owner: input.owner,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  });
+  return { id: ref.id };
+}
+
+/** Edit a `note` block's text (last-writer-wins at block level). */
+export async function updatePlanNote(input: {
+  walletAddress: string;
+  projectId: string;
+  planId: string;
+  blockId: string;
+  text: string;
+}): Promise<void> {
+  await updateDoc(
+    planBlockDoc(
+      input.walletAddress,
+      input.projectId,
+      input.planId,
+      input.blockId
+    ),
+    { text: input.text, updatedAt: serverTimestamp() }
+  );
+}
+
+/** Delete a block (humans may remove their own notes). */
+export async function deletePlanBlock(input: {
+  walletAddress: string;
+  projectId: string;
+  planId: string;
+  blockId: string;
+}): Promise<void> {
+  await deleteDoc(
+    planBlockDoc(
+      input.walletAddress,
+      input.projectId,
+      input.planId,
+      input.blockId
+    )
+  );
 }
 
 // ---------------------------------------------------------------------------

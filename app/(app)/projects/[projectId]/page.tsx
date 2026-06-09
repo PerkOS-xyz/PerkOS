@@ -6,24 +6,30 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useConnection } from "wagmi";
 import { toast } from "sonner";
-import { Pencil, Trash2, Sparkles, Compass, Users, Zap } from "lucide-react";
+import { Pencil, Trash2, Sparkles, Compass, Users, Zap, FileText, Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
 import {
+  addPlanNote,
   addProjectMessage,
   assignAgentsToProject,
+  deletePlanBlock,
   deleteProject,
   deleteTask,
+  ensureProjectPlan,
   getWalletAgents,
   getWalletProject,
   pmTurn,
   setProjectPm,
+  updatePlanNote,
   updateTask,
   wakeProjectTeam,
   type ChatMessage,
+  type PlanBlock,
+  type PlanStatus,
   type ProjectDetail,
   type Task,
   type TaskStatus,
@@ -49,11 +55,12 @@ import type { SwarmDefinition } from "../../../lib/swarm";
 import { EmptyState } from "../../../components/EmptyState";
 import { formatAddress } from "../../../lib/format";
 import { useProjectMessages } from "../../../lib/useProjectMessages";
+import { usePlanDoc, useActivePlanId } from "../../../lib/usePlanDoc";
 import { useProjectTasks } from "../../../lib/useProjectTasks";
 import { useWalletAgents, realtimeAgentStatus } from "../../../lib/useWalletAgents";
 import { MembersPanel } from "../../../components/MembersPanel";
 
-type Tab = "tasks" | "conductor" | "agents" | "chat" | "members";
+type Tab = "tasks" | "plan" | "conductor" | "agents" | "chat" | "members";
 
 type PageProps = {
   params: Promise<{ projectId: string }>;
@@ -70,7 +77,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
   const ownerWallet = ownerParam || address;
   const isShared = Boolean(ownerParam && ownerParam.toLowerCase() !== (address ?? "").toLowerCase());
   const initialTab = (searchParams.get("tab") as Tab) || "tasks";
-  const TABS: Tab[] = ["tasks", "conductor", "agents", "chat", "members"];
+  const TABS: Tab[] = ["tasks", "plan", "conductor", "agents", "chat", "members"];
   const [tab, setTab] = useState<Tab>(
     TABS.includes(initialTab) ? initialTab : "tasks"
   );
@@ -127,6 +134,13 @@ export default function ProjectDetailPage({ params }: PageProps) {
           {tab === "tasks" ? (
             <TasksTab
               tasks={liveDetail.tasks}
+              projectId={projectId}
+              ownerWallet={ownerWallet ?? undefined}
+            />
+          ) : null}
+          {tab === "plan" ? (
+            <PlanTab
+              detail={liveDetail}
               projectId={projectId}
               ownerWallet={ownerWallet ?? undefined}
             />
@@ -462,6 +476,7 @@ function Tabs({
 }) {
   const items: { id: Tab; label: string }[] = [
     { id: "tasks", label: "Tasks" },
+    { id: "plan", label: "Plan" },
     { id: "conductor", label: "Conductor" },
     { id: "agents", label: "Agents" },
     { id: "chat", label: "Project chat" },
@@ -1104,6 +1119,333 @@ function AddAgentToProjectDialog({
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+const PLAN_STATUS_META: Record<string, { label: string; cls: string }> = {
+  draft: { label: "Draft", cls: "border-[#1b1833] text-[#7975a8]" },
+  under_discussion: {
+    label: "Under discussion",
+    cls: "border-sky-500/30 bg-sky-500/10 text-sky-200",
+  },
+  plan_proposed: {
+    label: "Plan proposed",
+    cls: "border-amber-500/30 bg-amber-500/10 text-amber-200",
+  },
+  approved: {
+    label: "Approved",
+    cls: "border-emerald-500/30 bg-emerald-500/10 text-emerald-200",
+  },
+  materialized: {
+    label: "Materialized",
+    cls: "border-emerald-500/30 bg-emerald-500/10 text-emerald-200",
+  },
+};
+
+function planOwnerLabel(owner?: string | null): string {
+  if (!owner) return "someone";
+  if (owner.startsWith("agent:")) return owner.slice("agent:".length);
+  if (owner.startsWith("user:")) return formatAddress(owner.slice("user:".length));
+  return owner;
+}
+
+/**
+ * Plan tab — the collaborative "Notes" doc. Humans write `note` blocks; the
+ * PM agent proposes `planGroup`/`planTask` blocks (read-only here). Blocks
+ * render in `order`. No approve/materialize yet — that's Phase E.
+ */
+function PlanTab({
+  detail,
+  projectId,
+  ownerWallet,
+}: {
+  detail: ProjectDetail;
+  projectId: string;
+  ownerWallet?: string;
+}) {
+  const { address } = useConnection();
+  const planWallet = ownerWallet ?? address;
+  const planId = useActivePlanId(planWallet, projectId);
+  const { plan, blocks, loading } = usePlanDoc(planWallet, projectId, planId);
+  const [draft, setDraft] = useState("");
+  const [busy, setBusy] = useState(false);
+  const me = address ? `user:${address.toLowerCase()}` : null;
+
+  const startPlan = async () => {
+    if (!address) {
+      toast.error("Connect a wallet first.");
+      return;
+    }
+    setBusy(true);
+    try {
+      await ensureProjectPlan({
+        walletAddress: planWallet ?? address,
+        projectId,
+        createdBy: me ?? undefined,
+      });
+    } catch (e) {
+      toast.error("Couldn't start a plan", {
+        description: (e as Error).message,
+      });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const addNote = async () => {
+    const text = draft.trim();
+    if (!text || !address || !planId || !me) return;
+    setBusy(true);
+    try {
+      const order = blocks.length
+        ? Math.max(...blocks.map((b) => b.order)) + 1
+        : 0;
+      await addPlanNote({
+        walletAddress: planWallet ?? address,
+        projectId,
+        planId,
+        text,
+        owner: me,
+        order,
+      });
+      setDraft("");
+    } catch (e) {
+      toast.error("Couldn't add note", { description: (e as Error).message });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (loading && blocks.length === 0) {
+    return (
+      <div className="flex items-center gap-2 px-1 py-8 text-sm text-[#7975a8]">
+        <Loader2 className="h-4 w-4 animate-spin" /> Loading plan…
+      </div>
+    );
+  }
+
+  if (!planId) {
+    return (
+      <EmptyState
+        icon={FileText}
+        title="No plan yet"
+        description="Start a plan to discuss the sprint with your team. The PM agent proposes task groups + draft tasks here; you add notes and context. Once approved, the PM materializes it into the board."
+        actions={[
+          { label: busy ? "Starting…" : "Start a plan", onClick: startPlan, icon: Plus },
+        ]}
+      />
+    );
+  }
+
+  const status = (plan?.status as string) ?? "draft";
+  const statusMeta = PLAN_STATUS_META[status] ?? PLAN_STATUS_META.draft;
+  const groupCount = blocks.filter((b) => b.type === "planGroup").length;
+  const taskCount = blocks.filter((b) => b.type === "planTask").length;
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span
+            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs ${statusMeta.cls}`}
+          >
+            {statusMeta.label}
+          </span>
+          <span className="text-xs text-[#7975a8]">
+            {taskCount} draft task{taskCount === 1 ? "" : "s"} · {groupCount}{" "}
+            group{groupCount === 1 ? "" : "s"}
+          </span>
+        </div>
+        {status === "plan_proposed" ? (
+          <span className="text-xs text-amber-200/80">
+            Proposed — review the draft tasks, then approve (coming soon) to
+            create them on the board.
+          </span>
+        ) : null}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        {blocks.length === 0 ? (
+          <p className="rounded-md border border-dashed border-[#1b1833] bg-[#0e0716] px-4 py-6 text-center text-sm text-[#7975a8]">
+            Empty plan. Add a note below, or ask the PM in chat to draft the
+            plan.
+          </p>
+        ) : (
+          blocks.map((b) =>
+            b.type === "note" ? (
+              <PlanNoteBlock
+                key={b.id}
+                block={b}
+                canEdit={Boolean(me) && b.owner === me}
+                onSave={async (text) => {
+                  if (!planId || !address) return;
+                  await updatePlanNote({
+                    walletAddress: planWallet ?? address,
+                    projectId,
+                    planId,
+                    blockId: b.id!,
+                    text,
+                  });
+                }}
+                onDelete={async () => {
+                  if (!planId || !address) return;
+                  await deletePlanBlock({
+                    walletAddress: planWallet ?? address,
+                    projectId,
+                    planId,
+                    blockId: b.id!,
+                  });
+                }}
+              />
+            ) : b.type === "planGroup" ? (
+              <div key={b.id} className="pt-2">
+                <h3 className="text-sm font-semibold text-[#ececff]">
+                  {b.title || "Untitled group"}
+                </h3>
+                <div className="mt-1 h-px bg-[#1b1833]" />
+              </div>
+            ) : (
+              <PlanTaskBlock key={b.id} block={b} />
+            )
+          )
+        )}
+      </div>
+
+      {/* Human note composer */}
+      <div className="flex flex-col gap-2 rounded-md border border-[#1b1833] bg-[#0e0716] p-3">
+        <textarea
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          placeholder="Add a note for the team (context, constraints, feedback on the plan)…"
+          rows={3}
+          className="w-full resize-y rounded-md border border-[#1b1833] bg-[#0a0511] px-3 py-2 text-sm text-[#ececff] outline-none placeholder:text-[#4f4b6e] focus:border-[#ec1b69]/50"
+        />
+        <div className="flex justify-end">
+          <Button size="sm" onClick={addNote} disabled={busy || !draft.trim()}>
+            <Plus className="h-4 w-4" /> Add note
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PlanNoteBlock({
+  block,
+  canEdit,
+  onSave,
+  onDelete,
+}: {
+  block: PlanBlock;
+  canEdit: boolean;
+  onSave: (text: string) => Promise<void>;
+  onDelete: () => Promise<void>;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [val, setVal] = useState(block.text ?? "");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!editing) setVal(block.text ?? "");
+  }, [block.text, editing]);
+
+  const save = async () => {
+    setBusy(true);
+    try {
+      await onSave(val.trim());
+      setEditing(false);
+    } catch (e) {
+      toast.error("Couldn't save note", { description: (e as Error).message });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="group rounded-md border border-[#1b1833] bg-[#0e0716] px-3 py-2.5">
+      {editing ? (
+        <div className="flex flex-col gap-2">
+          <textarea
+            value={val}
+            onChange={(e) => setVal(e.target.value)}
+            rows={3}
+            className="w-full resize-y rounded-md border border-[#1b1833] bg-[#0a0511] px-3 py-2 text-sm text-[#ececff] outline-none focus:border-[#ec1b69]/50"
+          />
+          <div className="flex justify-end gap-2">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setEditing(false)}
+              disabled={busy}
+            >
+              Cancel
+            </Button>
+            <Button size="sm" onClick={save} disabled={busy || !val.trim()}>
+              <Check className="h-4 w-4" /> Save
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1 text-sm text-[#cfcbef]">
+            <Markdown>{block.text ?? ""}</Markdown>
+            <p className="mt-1 text-[11px] text-[#4f4b6e]">
+              {planOwnerLabel(block.owner)}
+            </p>
+          </div>
+          {canEdit ? (
+            <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+              <button
+                type="button"
+                onClick={() => setEditing(true)}
+                className="rounded p-1 text-[#7975a8] hover:text-[#ececff]"
+                aria-label="Edit note"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onDelete().catch(() => {})}
+                className="rounded p-1 text-[#7975a8] hover:text-red-400"
+                aria-label="Delete note"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ) : null}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PlanTaskBlock({ block }: { block: PlanBlock }) {
+  return (
+    <div className="ml-3 rounded-md border border-[#1b1833] bg-[#0c0613] px-3 py-2.5">
+      <div className="flex items-start justify-between gap-2">
+        <span className="text-sm font-medium text-[#ececff]">
+          {block.title || "Untitled task"}
+        </span>
+        {block.suggestedAgent ? (
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[#1b1833] px-2 py-0.5 text-[11px] text-[#a9a4d4]">
+            <Bot className="h-3 w-3" /> {block.suggestedAgent}
+          </span>
+        ) : null}
+      </div>
+      {block.desc ? (
+        <p className="mt-1 whitespace-pre-wrap text-xs text-[#a9a4d4]">
+          {block.desc}
+        </p>
+      ) : null}
+      {block.acceptance ? (
+        <p className="mt-1.5 text-[11px] text-[#7975a8]">
+          <span className="text-[#a9a4d4]">Done when:</span> {block.acceptance}
+        </p>
+      ) : null}
+      <p className="mt-1 text-[11px] text-[#4f4b6e]">
+        Proposed by {planOwnerLabel(block.owner)} · draft
+      </p>
+    </div>
   );
 }
 
