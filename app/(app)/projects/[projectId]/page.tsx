@@ -218,10 +218,22 @@ function DetailHeader({
     },
   });
 
+  // A PM run has no explicit "done" signal in the agent model, so an active
+  // session ("working"/…) would otherwise stay set forever and wrongly keep the
+  // Run-with-PM button disabled + the banner showing. Time-box it: only treat
+  // the session as live if its last run was recent (the live board is the real
+  // progress indicator after that).
+  const pmRunRecent = (() => {
+    const t = project.pmSession?.lastRunAt;
+    if (!t) return false;
+    const ms = new Date(t).getTime();
+    return !Number.isNaN(ms) && Date.now() - ms < 15 * 60_000;
+  })();
   const pmActive =
-    project.pmSession?.status === "planning" ||
-    project.pmSession?.status === "working" ||
-    project.pmSession?.status === "reviewing";
+    pmRunRecent &&
+    (project.pmSession?.status === "planning" ||
+      project.pmSession?.status === "working" ||
+      project.pmSession?.status === "reviewing");
 
   const runPmMutation = useMutation({
     mutationFn: () => {
@@ -334,7 +346,9 @@ function DetailHeader({
       ) : null}
 
       {project.pmSession ? (
+        pmRunRecent ? (
         <PmSessionBanner session={project.pmSession} pmAgent={project.pmAgent} />
+        ) : null
       ) : null}
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
