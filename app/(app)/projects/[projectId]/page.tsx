@@ -123,7 +123,11 @@ export default function ProjectDetailPage({ params }: PageProps) {
           />
           <Tabs current={tab} onChange={setTab} />
           {tab === "tasks" ? (
-            <TasksTab tasks={liveDetail.tasks} projectId={projectId} />
+            <TasksTab
+              tasks={liveDetail.tasks}
+              projectId={projectId}
+              ownerWallet={ownerWallet ?? undefined}
+            />
           ) : null}
           {tab === "conductor" ? (
             <ConductorTab
@@ -451,11 +455,16 @@ const KANBAN_TO_BACKEND: Record<"todo" | "in_progress" | "done", string> = {
 function TasksTab({
   tasks,
   projectId,
+  ownerWallet,
 }: {
   tasks: Task[];
   projectId: string;
+  /** For a SHARED project, the owner wallet — task writes target it (editors
+   *  are permitted by the rules). Falls back to the connected wallet. */
+  ownerWallet?: string;
 }) {
   const { address } = useConnection();
+  const effWallet = ownerWallet ?? address;
   const queryClient = useQueryClient();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -488,14 +497,14 @@ function TasksTab({
   };
   const invalidate = () =>
     queryClient.invalidateQueries({
-      queryKey: ["wallet-project", address, projectId],
+      queryKey: ["wallet-project", effWallet, projectId],
     });
 
   const moveMut = useMutation({
     mutationFn: (status: TaskStatus) =>
       Promise.allSettled(
         selectedIds.map((id) =>
-          updateTask({ walletAddress: address!, projectId, taskId: id, patch: { status } })
+          updateTask({ walletAddress: effWallet!, projectId, taskId: id, patch: { status } })
         )
       ),
     onSuccess: (results) => {
@@ -512,7 +521,7 @@ function TasksTab({
     mutationFn: () =>
       Promise.allSettled(
         selectedIds.map((id) =>
-          deleteTask({ walletAddress: address!, projectId, taskId: id })
+          deleteTask({ walletAddress: effWallet!, projectId, taskId: id })
         )
       ),
     onSuccess: (results) => {
@@ -589,6 +598,7 @@ function TasksTab({
             selectable
             checked={selected.has(item.id)}
             onToggle={(on) => toggle(item.id, on)}
+            ownerWallet={ownerWallet}
           />
         )}
       />
@@ -651,30 +661,34 @@ function TaskCard({
   selectable,
   checked,
   onToggle,
+  ownerWallet,
 }: {
   task: Task;
   projectId: string;
   selectable?: boolean;
   checked?: boolean;
   onToggle?: (on: boolean) => void;
+  /** Owner wallet for a SHARED project (editors write to it). */
+  ownerWallet?: string;
 }) {
   const queryClient = useQueryClient();
   const { address } = useConnection();
+  const effWallet = ownerWallet ?? address;
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
   const deleteMutation = useMutation({
     mutationFn: () => {
-      if (!address || !task.id) throw new Error("Missing wallet or task id.");
+      if (!effWallet || !task.id) throw new Error("Missing wallet or task id.");
       return deleteTask({
-        walletAddress: address,
+        walletAddress: effWallet,
         projectId,
         taskId: task.id,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["wallet-project", address, projectId],
+        queryKey: ["wallet-project", effWallet, projectId],
       });
       toast.success("Task deleted");
       setConfirmOpen(false);
@@ -754,13 +768,13 @@ function TaskCard({
           <Trash2 className="h-3.5 w-3.5" />
         </button>
       </div>
-      {address ? (
+      {effWallet ? (
         <EditTaskDialog
           open={editOpen}
           onOpenChange={setEditOpen}
           task={task}
           projectId={projectId}
-          walletAddress={address}
+          walletAddress={effWallet}
         />
       ) : null}
       <ConfirmDialog
