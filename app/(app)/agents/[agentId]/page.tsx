@@ -53,6 +53,7 @@ import { formatAddress } from "../../../lib/format";
 import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import { EditAgentDialog } from "../../../components/EditAgentDialog";
 import { HibernationPanel } from "./HibernationPanel";
+import { InvitedCredentialPanel } from "./InvitedCredentialPanel";
 import { UpgradePanel } from "./UpgradePanel";
 import { AutoWakeBanner } from "./AutoWakeBanner";
 import { AgentChatPanel } from "./AgentChatPanel";
@@ -235,6 +236,8 @@ export default function AgentDetailPage({ params }: PageProps) {
       </section>
 
       <ChannelsSection channels={channels} runtime={agent.runtime} />
+
+      {agent.invited ? <InvitedCredentialPanel agent={agent} /> : null}
 
       {!isExternalAgent(agent) ? (
         <HibernationPanel

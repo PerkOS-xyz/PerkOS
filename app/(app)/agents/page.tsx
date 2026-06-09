@@ -15,7 +15,6 @@ import {
   getWalletProjects,
   hibernateAgentApi,
   wakeAgentApi,
-  type Agent,
   type AgentRow,
   type HibernationApiState,
 } from "../../lib/perkosApi";
@@ -359,6 +358,18 @@ function AssignToProjectDialog({
   );
 }
 
+/**
+ * An invited agent that has never connected within ~30 min reads as stale —
+ * surface it so a broken bridge setup doesn't masquerade as a fresh invite.
+ * Kept out of the render body so it doesn't trip the react-hooks/purity rule.
+ */
+function isInvitedStale(agent: AgentRow): boolean {
+  if (agent.invited !== true || agent.revoked) return false;
+  if (agent.bridgeConnected === true || agent.lastBridgeSeenAt) return false;
+  if (!agent.createdAt) return false;
+  return Date.now() - Date.parse(agent.createdAt) > 30 * 60 * 1000;
+}
+
 function AgentCard({
   agent,
   checked,
@@ -422,6 +433,9 @@ function AgentCard({
               status={agent.status}
               hibernationState={hibState}
               syncing={syncing}
+              invited={agent.invited}
+              revoked={agent.revoked}
+              invitedStale={isInvitedStale(agent)}
             />
           </div>
         </div>
@@ -514,11 +528,39 @@ function StatusBadge({
   status,
   hibernationState,
   syncing,
+  invited,
+  revoked,
+  invitedStale,
 }: {
-  status: Agent["status"];
+  status: AgentRow["status"];
   hibernationState?: HibernationApiState;
   syncing?: boolean;
+  invited?: boolean;
+  revoked?: boolean;
+  invitedStale?: boolean;
 }) {
+  // Invited external agents: their lifecycle is "invited" → (connect) → "ready",
+  // or "revoked" if the owner killed the credential. Surface those explicitly
+  // instead of letting them fall through to a meaningless "Unknown". (These
+  // states live in flags, not `status`, since the shared enum omits them.)
+  if (revoked) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-[#ec1b69]/20 px-2 py-0.5 text-xs font-medium text-[#ec1b69]">
+        Revoked
+      </span>
+    );
+  }
+  if (invited && status !== "ready") {
+    return invitedStale ? (
+      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-medium text-amber-300">
+        Never connected
+      </span>
+    ) : (
+      <span className="inline-flex items-center gap-1 rounded-full bg-sky-500/20 px-2 py-0.5 text-xs font-medium text-sky-300">
+        Invited
+      </span>
+    );
+  }
   // Live hibernation status still loading — don't assert "Online".
   if (syncing) {
     return (

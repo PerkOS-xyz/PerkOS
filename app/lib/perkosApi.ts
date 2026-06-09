@@ -358,6 +358,21 @@ const messageConverter: FirestoreDataConverter<ChatMessage> = {
  */
 export type AgentRow = Agent & {
   external?: boolean;
+  /**
+   * True for agents registered via the "invite" flow (deployMode "invited").
+   * The shared `deployMode` enum omits "invited", so we surface it as its own
+   * flag — it gates the relay-key credential panel + stale-invite detection.
+   * (`bridgeConnected` / `lastBridgeSeenAt` already live on the shared `Agent`.)
+   */
+  invited?: boolean;
+  /**
+   * True once the owner revoked the credential. The raw Firestore `status`
+   * holds "revoked", but the shared `Agent.status` enum doesn't model it, so we
+   * normalize `status` to "unknown" and expose this flag instead.
+   */
+  revoked?: boolean;
+  /** Owner-supplied context shown in the invite prompt. */
+  note?: string | null;
 };
 
 const agentConverter: FirestoreDataConverter<AgentRow> = {
@@ -368,11 +383,18 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
   fromFirestore(snap) {
     const data = snap.data();
     const rawDeployMode = typeof data.deployMode === "string" ? data.deployMode : undefined;
+    const rawStatus = typeof data.status === "string" ? data.status : "unknown";
+    // The shared `Agent.status` enum only models the ECS lifecycle. Invited
+    // agents add "invited"/"revoked" — fold those into "unknown" for the typed
+    // field and surface them via the `invited`/`revoked` flags below.
+    const status = (["provisioning", "ready", "failed", "unknown"].includes(rawStatus)
+      ? rawStatus
+      : "unknown") as Agent["status"];
     return {
       id: snap.id,
       name: (data.name as string) ?? "",
       runtime: (data.runtime as AgentRuntime) ?? "Hermes",
-      status: (data.status as Agent["status"]) ?? "unknown",
+      status,
       walletAddress: (data.walletAddress as string) ?? "",
       plugins: (data.plugins as string[] | undefined) ?? [],
       taskArn: (data.taskArn as string | undefined) ?? undefined,
@@ -390,6 +412,12 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
         rawDeployMode === "invited" ||
         rawDeployMode === "self-hosted" ||
         rawDeployMode === "imported",
+      invited: rawDeployMode === "invited",
+      revoked: rawStatus === "revoked",
+      bridgeConnected:
+        typeof data.bridgeConnected === "boolean" ? data.bridgeConnected : undefined,
+      lastBridgeSeenAt: tsToIso(data.lastBridgeSeenAt),
+      note: typeof data.note === "string" ? data.note : null,
     };
   },
 };
@@ -2015,6 +2043,55 @@ export async function inviteAgent(input: {
   const payload = await parseJson(response);
   if (!response.ok) throw new Error(apiError(payload, "Invite failed"));
   return payload as unknown as InviteAgentResult;
+}
+
+export type RelayKeyInfo = {
+  /** Global registry status: "active" | "revoked" | "unknown". */
+  status: string;
+  /** Whether a usable relayApiKey currently exists (false once revoked). */
+  hasKey: boolean;
+  /** Re-rendered onboarding prompt, or null when the key is revoked. */
+  invitePrompt: string | null;
+};
+
+/**
+ * GET /api/agents/<id>/relay-key — re-show an invited agent's credential +
+ * onboarding prompt. Owner-only; the prompt is no longer one-shot.
+ */
+export async function getRelayKeyInfo(agentId: string): Promise<RelayKeyInfo> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(`/api/agents/${agentId}/relay-key`, { method: "GET" });
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't load credential"));
+  return payload as unknown as RelayKeyInfo;
+}
+
+/**
+ * POST /api/agents/<id>/relay-key/rotate — issue a fresh relayApiKey (the old
+ * one stops authenticating immediately) and return a new onboarding prompt.
+ */
+export async function rotateRelayKey(
+  agentId: string,
+): Promise<{ ok: boolean; relayApiKey: string; invitePrompt: string }> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(`/api/agents/${agentId}/relay-key/rotate`, { method: "POST" });
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't rotate credential"));
+  return payload as unknown as { ok: boolean; relayApiKey: string; invitePrompt: string };
+}
+
+/**
+ * POST /api/agents/<id>/relay-key/revoke — kill the credential (bridge auth +
+ * tools-token stop accepting it). Reversible via rotate.
+ */
+export async function revokeRelayKey(
+  agentId: string,
+): Promise<{ ok: boolean; status: string }> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(`/api/agents/${agentId}/relay-key/revoke`, { method: "POST" });
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't revoke credential"));
+  return payload as unknown as { ok: boolean; status: string };
 }
 
 /**
