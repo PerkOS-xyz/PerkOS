@@ -1463,6 +1463,30 @@ export async function pmTurn(input: {
   return (payload.data ?? payload) as PmTurnResult;
 }
 
+/** Wake every agent on a project (ECS scale-up). `owner` is the project owner
+ *  wallet for a SHARED project. Returns how many were woken. */
+export async function wakeProjectTeam(input: {
+  projectId: string;
+  owner?: string;
+}): Promise<{ woke: number; total: number }> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/projects/${input.projectId}/wake`,
+    {
+      method: "POST",
+      body: JSON.stringify({ owner: input.owner }),
+    },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) {
+    throw new Error(apiError(payload, "Couldn't wake the team"));
+  }
+  return {
+    woke: (payload.woke as number) ?? 0,
+    total: (payload.total as number) ?? 0,
+  };
+}
+
 export async function assistantChatStream(input: {
   walletAddress: string;
   message: string;

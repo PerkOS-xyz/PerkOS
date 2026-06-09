@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useConnection } from "wagmi";
 import { toast } from "sonner";
-import { Pencil, Trash2, Sparkles, Compass, Users } from "lucide-react";
+import { Pencil, Trash2, Sparkles, Compass, Users, Zap } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -22,6 +22,7 @@ import {
   pmTurn,
   setProjectPm,
   updateTask,
+  wakeProjectTeam,
   type ChatMessage,
   type ProjectDetail,
   type Task,
@@ -266,6 +267,23 @@ function DetailHeader({
       toast.error("Couldn't start the PM", { description: err.message }),
   });
 
+  const wakeTeamMutation = useMutation({
+    mutationFn: () => {
+      if (!project.id) throw new Error("Missing project id.");
+      return wakeProjectTeam({
+        projectId: project.id,
+        owner: isShared ? ownerWallet : undefined,
+      });
+    },
+    onSuccess: (res) =>
+      toast.success(
+        `Waking ${res.woke} agent${res.woke === 1 ? "" : "s"}…`,
+        { description: "They take ~2–3 min to boot + connect." },
+      ),
+    onError: (err: Error) =>
+      toast.error("Couldn't wake the team", { description: err.message }),
+  });
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -300,6 +318,17 @@ function DetailHeader({
               <Sparkles className="h-4 w-4" />
             )}
             {pmActive ? "PM running…" : "Run with PM"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            disabled={wakeTeamMutation.isPending || project.agents === 0}
+            onClick={() => wakeTeamMutation.mutate()}
+            title="Scale up all of this project's agents now (pre-warm the team)"
+          >
+            <Zap className="h-4 w-4" />
+            {wakeTeamMutation.isPending ? "Waking…" : "Wake team"}
           </Button>
           <span className="mr-1 text-xs text-[#7975a8]">
             {project.budget || "0 USDC"}
