@@ -91,7 +91,7 @@ export default function OrganizationsPage() {
                   </span>
                   {editing ? (
                     <form
-                      className="flex items-center gap-1"
+                      className="flex flex-wrap items-center gap-1"
                       onSubmit={(e) => {
                         e.preventDefault();
                         if (draftName.trim() && o.id) renameMut.mutate(o.id);
@@ -101,7 +101,7 @@ export default function OrganizationsPage() {
                         autoFocus
                         value={draftName}
                         onChange={(e) => setDraftName(e.target.value)}
-                        className="h-8 w-48 text-sm"
+                        className="h-8 min-w-0 flex-1 text-sm"
                         maxLength={60}
                       />
                       <Button
@@ -145,7 +145,7 @@ export default function OrganizationsPage() {
                 </div>
 
                 {!editing ? (
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     {!isActive ? (
                       <Button
                         size="xs"

@@ -74,7 +74,7 @@ export function OrgSwitcher() {
             variant="ghost"
             size="sm"
             aria-label="Switch organization"
-            className="max-w-[180px] gap-2 px-2 hover:bg-muted/40"
+            className="min-w-0 max-w-[180px] gap-2 px-2 hover:bg-muted/40"
           />
         }
       >
@@ -82,7 +82,7 @@ export function OrgSwitcher() {
         <span className="truncate text-sm text-foreground">{label}</span>
         <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-72 border-border bg-card p-2">
+      <PopoverContent align="start" className="w-72 max-w-[calc(100vw-2rem)] border-border bg-card p-2">
         <p className="px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
           Organizations
         </p>
@@ -200,7 +200,7 @@ export function ProjectPicker() {
             variant="ghost"
             size="sm"
             aria-label="Pick a project"
-            className="max-w-[180px] gap-2 px-2 hover:bg-muted/40"
+            className="min-w-0 max-w-[180px] gap-2 px-2 hover:bg-muted/40"
           />
         }
       >
@@ -208,7 +208,7 @@ export function ProjectPicker() {
         <span className="truncate text-sm text-foreground">Projects</span>
         <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-72 border-border bg-card p-2">
+      <PopoverContent align="start" className="w-72 max-w-[calc(100vw-2rem)] border-border bg-card p-2">
         <p className="px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
           Projects in this org
         </p>

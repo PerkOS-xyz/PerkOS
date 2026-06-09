@@ -170,10 +170,14 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </header>
 
           {/* Mobile org + project bar */}
-          <div className="flex items-center gap-1 border-b border-border px-5 py-2 md:hidden">
-            <OrgSwitcher />
-            <span className="text-muted-foreground/50">/</span>
-            <ProjectPicker />
+          <div className="flex min-w-0 items-center gap-1 overflow-hidden border-b border-border px-3 py-2 md:hidden">
+            <div className="min-w-0 flex-1">
+              <OrgSwitcher />
+            </div>
+            <span className="shrink-0 text-muted-foreground/50">/</span>
+            <div className="min-w-0 flex-1">
+              <ProjectPicker />
+            </div>
           </div>
 
           <div id="main-content" className="p-5 pb-44 md:p-8 md:pb-8">

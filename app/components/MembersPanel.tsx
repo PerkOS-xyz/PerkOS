@@ -99,25 +99,27 @@ export function MembersPanel({
               value={wallet}
               onChange={(e) => setWallet(e.target.value)}
               placeholder="0x… wallet address"
-              className="h-9 min-w-[260px] flex-1 font-mono text-xs"
+              className="h-9 min-w-0 flex-1 font-mono text-xs"
             />
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value as "editor" | "viewer")}
-              className="h-9 rounded-md border border-border bg-card px-2 text-sm text-foreground"
-            >
-              <option value="editor">Editor</option>
-              <option value="viewer">Viewer</option>
-            </select>
-            <Button
-              type="submit"
-              size="sm"
-              className="gap-1.5"
-              disabled={!isWallet || inviteMut.isPending}
-            >
-              <UserPlus className="h-3.5 w-3.5" />
-              {inviteMut.isPending ? "Inviting…" : "Invite"}
-            </Button>
+            <div className="flex shrink-0 items-center gap-2">
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value as "editor" | "viewer")}
+                className="h-9 rounded-md border border-border bg-card px-2 text-sm text-foreground"
+              >
+                <option value="editor">Editor</option>
+                <option value="viewer">Viewer</option>
+              </select>
+              <Button
+                type="submit"
+                size="sm"
+                className="gap-1.5"
+                disabled={!isWallet || inviteMut.isPending}
+              >
+                <UserPlus className="h-3.5 w-3.5" />
+                {inviteMut.isPending ? "Inviting…" : "Invite"}
+              </Button>
+            </div>
           </div>
           {wallet.trim() && !isWallet ? (
             <p className="text-xs text-destructive">

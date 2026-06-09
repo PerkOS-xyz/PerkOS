@@ -49,12 +49,12 @@ export default function OrgSettingsPage() {
         Back to organizations
       </Link>
 
-      <div className="flex items-center gap-3">
-        <span className="grid h-10 w-10 place-items-center rounded-full bg-primary/15 text-primary">
+      <div className="flex min-w-0 items-center gap-3">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
           <Building2 className="h-5 w-5" />
         </span>
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground">
+        <div className="min-w-0">
+          <h1 className="truncate text-2xl font-semibold text-foreground">
             {org?.name ?? "Organization"} settings
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -69,7 +69,7 @@ export default function OrgSettingsPage() {
         <section className="flex max-w-lg flex-col gap-2">
           <Label htmlFor="org-name">Name</Label>
           <form
-            className="flex items-center gap-2"
+            className="flex flex-wrap items-center gap-2"
             onSubmit={(e) => {
               e.preventDefault();
               if (name.trim()) renameMut.mutate();
@@ -79,10 +79,12 @@ export default function OrgSettingsPage() {
               id="org-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              className="min-w-0 flex-1"
               maxLength={60}
             />
             <Button
               type="submit"
+              className="shrink-0"
               disabled={renameMut.isPending || !name.trim() || name === org?.name}
             >
               Save

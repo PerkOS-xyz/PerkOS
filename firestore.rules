@@ -198,6 +198,12 @@ service cloud.firestore {
           || isOrgMember(w, projectOrgId(w, pid));
         allow write: if isSelf(w) || canWriteProject(w, pid);
       }
+      // Project (board) chat. NOTE: this is a DIFFERENT collection from
+      // `conversations/{convId}/messages` (the C-hybrid DM/channel bodies that
+      // are denied above + stored off-Firestore). Project board messages —
+      // postProjectMessage status updates from agents + human posts — are
+      // intentionally Firestore-resident and in-scope for project/org members;
+      // editors/owners may write them.
       match /messages/{mid} {
         allow read: if isSelf(w)
           || isProjectMember(w, pid)
