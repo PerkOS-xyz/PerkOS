@@ -13,6 +13,7 @@ import {
   updateProject,
   type Project,
 } from "../../lib/perkosApi";
+import { useActiveOrg } from "../../lib/useActiveOrg";
 import { SearchInput, matchesQuery } from "../../components/SearchInput";
 import { EmptyState } from "../../components/EmptyState";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
@@ -21,6 +22,7 @@ import { Button } from "@/components/ui/button";
 
 export default function ProjectsPage() {
   const { address } = useConnection();
+  const { activeOrgId, defaultOrgId, activeOrg } = useActiveOrg();
   const qc = useQueryClient();
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -31,9 +33,10 @@ export default function ProjectsPage() {
   const statusFilter = searchParams.get("status");
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["wallet-projects", address],
-    queryFn: () => getWalletProjects(address!),
-    enabled: Boolean(address),
+    queryKey: ["wallet-projects", address, activeOrgId],
+    queryFn: () =>
+      getWalletProjects(address!, activeOrgId ?? undefined, defaultOrgId ?? undefined),
+    enabled: Boolean(address) && Boolean(activeOrgId),
   });
 
   const allProjects = data?.projects ?? [];

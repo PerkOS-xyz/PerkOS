@@ -38,6 +38,7 @@ import {
   type Task,
 } from "../../lib/perkosApi";
 import { useOnboarding } from "../../lib/onboardingState";
+import { useActiveOrg } from "../../lib/useActiveOrg";
 import { formatAddress } from "../../lib/format";
 import { ActiveAgentsPanel } from "../../components/ActiveAgentsPanel";
 
@@ -103,6 +104,7 @@ const STAT_CARDS: {
 export default function DashboardPage() {
   const { address } = useConnection();
   const { workspaceName } = useOnboarding();
+  const { activeOrgId, defaultOrgId } = useActiveOrg();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["wallet-overview", address],
@@ -117,10 +119,15 @@ export default function DashboardPage() {
     activeTasks: 0,
     completedTasks: 0,
   };
-  const projects = (data?.projects ?? []).slice(0, 5);
+  // Scope the project list/count to the active org (agents/tasks stats stay
+  // workspace-wide — agents belong to the wallet, not an org).
+  const orgProjects = (data?.projects ?? []).filter(
+    (p) => !activeOrgId || (p.orgId ?? defaultOrgId) === activeOrgId
+  );
+  const projects = orgProjects.slice(0, 5);
   const tasks = (data?.tasks ?? []).slice(0, 5);
 
-  const totalProjects = data?.projects?.length ?? 0;
+  const totalProjects = orgProjects.length;
   const totalTasks = data?.tasks?.length ?? 0;
   const showStarter =
     !isLoading &&

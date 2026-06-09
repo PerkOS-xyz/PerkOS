@@ -7,6 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
 import { toast } from "sonner";
 import { createWalletProject } from "../../../lib/perkosApi";
+import { useActiveOrg } from "../../../lib/useActiveOrg";
 import { useOnboarding } from "../../../lib/onboardingState";
 import { useFormDraft } from "../../../lib/useFormDraft";
 import { fieldErrors, projectSchema } from "../../../lib/validators";
@@ -16,6 +17,7 @@ export default function CreateProjectPage() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { address, isConnected } = useConnection();
+  const { activeOrgId } = useActiveOrg();
   const { markProjectCreated } = useOnboarding();
 
   const fromOnboarding = searchParams.get("from") === "onboarding";
@@ -44,10 +46,12 @@ export default function CreateProjectPage() {
         walletAddress: address,
         name: name.trim(),
         goal: goal.trim(),
+        // Create the project inside the active organization.
+        orgId: activeOrgId ?? undefined,
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["wallet-projects", address] });
+      queryClient.invalidateQueries({ queryKey: ["wallet-projects"] });
       if (fromOnboarding) markProjectCreated();
       toast.success("Project created", {
         description: `"${name.trim()}" is ready.`,

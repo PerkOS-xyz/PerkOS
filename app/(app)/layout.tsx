@@ -30,6 +30,8 @@ import { NetworkPill } from "../components/NetworkPill";
 import { UserMenu } from "../components/UserMenu";
 import { RefreshButton } from "../components/RefreshButton";
 import { PullToRefresh } from "../components/PullToRefresh";
+import { OrgSwitcher, ProjectPicker } from "../components/OrgSwitcher";
+import { ActiveOrgProvider } from "../lib/useActiveOrg";
 import { formatAddress } from "../lib/format";
 import { useWalletSession } from "../lib/useWalletSession";
 
@@ -77,6 +79,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <ChatbotProvider>
+      <ActiveOrgProvider>
       <div className="flex min-h-screen w-full bg-background text-foreground">
         <a
           href="#main-content"
@@ -95,8 +98,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         <main className="flex-1 overflow-x-hidden">
           {/* Desktop topbar */}
           <header className="hidden items-center justify-between gap-2 border-b border-border px-8 py-3 md:flex">
-            <CommandHint />
+            <div className="flex min-w-0 items-center gap-1">
+              <OrgSwitcher />
+              <span className="text-muted-foreground/50">/</span>
+              <ProjectPicker />
+            </div>
             <div className="flex items-center gap-2">
+              <CommandHint />
               <RefreshButton />
               <NetworkPill />
               <NotificationsBell />
@@ -161,6 +169,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             </div>
           </header>
 
+          {/* Mobile org + project bar */}
+          <div className="flex items-center gap-1 border-b border-border px-5 py-2 md:hidden">
+            <OrgSwitcher />
+            <span className="text-muted-foreground/50">/</span>
+            <ProjectPicker />
+          </div>
+
           <div id="main-content" className="p-5 pb-44 md:p-8 md:pb-8">
             <PullToRefresh>{children}</PullToRefresh>
           </div>
@@ -170,6 +185,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         <ChatbotPanel />
         <CommandMenu />
       </div>
+      </ActiveOrgProvider>
     </ChatbotProvider>
   );
 }

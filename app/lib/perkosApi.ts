@@ -69,6 +69,8 @@ export type Project = {
   agents: number;
   tasks: number;
   budget: string;
+  /** The organization this project belongs to (wallets/{w}/organizations/{id}). */
+  orgId?: string;
   agentIds?: string[];
   /**
    * Optional swarm definition: declarative roster of agents + roles for
@@ -227,6 +229,7 @@ const projectConverter: FirestoreDataConverter<Project> = {
       agents: (data.agents as number) ?? 0,
       tasks: (data.tasks as number) ?? 0,
       budget: (data.budget as string) ?? "0 USDC",
+      orgId: (data.orgId as string | undefined) ?? undefined,
       agentIds: (data.agentIds as string[] | undefined) ?? [],
       swarm,
       pmAgent: (data.pmAgent as string | null | undefined) ?? null,
@@ -452,14 +455,146 @@ export async function getWalletOverview(
 }
 
 // ---------------------------------------------------------------------------
+// Organizations
+//
+// Every wallet has at least one org (a default "Org 0x…" created on first
+// login). Projects belong to an org via `project.orgId`. Orgs live at
+// `wallets/{w}/organizations/{orgId}`.
+// ---------------------------------------------------------------------------
+
+export type Organization = {
+  id?: string;
+  name: string;
+  ownerWallet: string;
+  /** The auto-created default org for the wallet (can't be deleted). */
+  isDefault?: boolean;
+  createdAt?: string;
+};
+
+const organizationConverter: FirestoreDataConverter<Organization> = {
+  toFirestore(org) {
+    const { id: _id, createdAt: _c, ...rest } = org;
+    return rest;
+  },
+  fromFirestore(snap) {
+    const d = snap.data();
+    return {
+      id: snap.id,
+      name: (d.name as string) ?? "",
+      ownerWallet: (d.ownerWallet as string) ?? "",
+      isDefault: (d.isDefault as boolean | undefined) ?? false,
+      createdAt: tsToIso(d.createdAt),
+    };
+  },
+};
+
+function orgsCol(walletAddress: string) {
+  return collection(
+    firebaseDb(),
+    "wallets",
+    normalize(walletAddress),
+    "organizations"
+  ).withConverter(organizationConverter);
+}
+
+function orgDoc(walletAddress: string, orgId: string) {
+  return doc(
+    firebaseDb(),
+    "wallets",
+    normalize(walletAddress),
+    "organizations",
+    orgId
+  ).withConverter(organizationConverter);
+}
+
+/** All of the wallet's organizations, default org first. */
+export async function getWalletOrgs(
+  walletAddress: string
+): Promise<Organization[]> {
+  const snap = await getDocs(orgsCol(walletAddress));
+  return snap.docs
+    .map((d) => d.data())
+    .sort((a, b) =>
+      a.isDefault === b.isDefault ? a.name.localeCompare(b.name) : a.isDefault ? -1 : 1
+    );
+}
+
+export async function createOrg(input: {
+  walletAddress: string;
+  name: string;
+  isDefault?: boolean;
+}): Promise<Organization> {
+  const ref = doc(orgsCol(input.walletAddress));
+  const payload: Organization = {
+    name: input.name.trim() || "Untitled org",
+    ownerWallet: normalize(input.walletAddress),
+    isDefault: input.isDefault ?? false,
+  };
+  await setDoc(ref, { ...payload, createdAt: serverTimestamp() });
+  return { ...payload, id: ref.id };
+}
+
+export async function updateOrgName(input: {
+  walletAddress: string;
+  orgId: string;
+  name: string;
+}): Promise<void> {
+  await updateDoc(orgDoc(input.walletAddress, input.orgId), {
+    name: input.name.trim() || "Untitled org",
+  });
+}
+
+/**
+ * Onboarding: guarantee the wallet has a default org. If none exist, create
+ * "Org 0x…{last4}" (isDefault) and backfill any existing org-less projects
+ * onto it. Idempotent — safe to call on every app load. Returns all orgs.
+ */
+export async function ensureDefaultOrg(
+  walletAddress: string
+): Promise<Organization[]> {
+  let orgs = await getWalletOrgs(walletAddress);
+  if (orgs.length > 0) return orgs;
+
+  const last4 = normalize(walletAddress).slice(-4);
+  const def = await createOrg({
+    walletAddress,
+    name: `Org 0x…${last4}`,
+    isDefault: true,
+  });
+  orgs = [def];
+
+  // Backfill existing projects that predate orgs onto the default org.
+  const projSnap = await getDocs(projectsCol(walletAddress));
+  await Promise.all(
+    projSnap.docs
+      .filter((d) => !d.data().orgId)
+      .map((d) =>
+        updateDoc(projectDoc(walletAddress, d.id), { orgId: def.id }).catch(
+          () => {}
+        )
+      )
+  );
+  return orgs;
+}
+
+// ---------------------------------------------------------------------------
 // Projects
 // ---------------------------------------------------------------------------
 
 export async function getWalletProjects(
-  walletAddress: string
+  walletAddress: string,
+  orgId?: string,
+  defaultOrgId?: string
 ): Promise<{ projects: Project[] }> {
   const snap = await getDocs(projectsCol(walletAddress));
-  return { projects: snap.docs.map((d) => d.data()) };
+  let projects = snap.docs.map((d) => d.data());
+  // Client-side org filter (alpha scale — no composite index needed). A
+  // project with no orgId is treated as belonging to the DEFAULT org, so
+  // legacy/unbackfilled projects show under the default org only.
+  if (orgId) {
+    projects = projects.filter((p) => (p.orgId ?? defaultOrgId) === orgId);
+  }
+  return { projects };
 }
 
 export async function getWalletProject(input: {
@@ -544,6 +679,8 @@ export async function createWalletProject(input: {
   goal: string;
   budget?: string;
   agentIds?: string[];
+  /** The organization this project belongs to. */
+  orgId?: string;
 }): Promise<{ project: Project }> {
   const ref = doc(projectsCol(input.walletAddress));
   const payload: Project = {
@@ -553,6 +690,7 @@ export async function createWalletProject(input: {
     agents: input.agentIds?.length ?? 0,
     tasks: 0,
     budget: input.budget ?? "0 USDC",
+    ...(input.orgId ? { orgId: input.orgId } : {}),
     agentIds: input.agentIds ?? [],
   };
   await setDoc(ref, {
