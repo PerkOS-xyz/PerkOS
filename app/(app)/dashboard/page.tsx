@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils";
 import {
   createProjectTasks,
   createWalletProject,
+  getOrgProjects,
   getWalletOverview,
   type Project,
   type Task,
@@ -104,7 +105,7 @@ const STAT_CARDS: {
 export default function DashboardPage() {
   const { address } = useConnection();
   const { workspaceName } = useOnboarding();
-  const { activeOrgId, defaultOrgId } = useActiveOrg();
+  const { activeOrg, activeOrgId, defaultOrgId } = useActiveOrg();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["wallet-overview", address],
@@ -113,17 +114,27 @@ export default function DashboardPage() {
     staleTime: 30_000,
   });
 
+  // Projects scoped to the active org (own OR shared — getOrgProjects reads
+  // from the org's owner). Agents/tasks stats stay workspace-wide (own).
+  const orgProjectsQuery = useQuery({
+    queryKey: ["dash-org-projects", address, activeOrgId],
+    queryFn: () =>
+      getOrgProjects({
+        org: activeOrg!,
+        myWallet: address!,
+        defaultOrgId: defaultOrgId ?? undefined,
+      }),
+    enabled: Boolean(address) && Boolean(activeOrg),
+    staleTime: 30_000,
+  });
+  const orgProjects = orgProjectsQuery.data ?? [];
+
   const stats = data?.stats ?? {
     activeProjects: 0,
     registeredAgents: 0,
     activeTasks: 0,
     completedTasks: 0,
   };
-  // Scope the project list/count to the active org (agents/tasks stats stay
-  // workspace-wide — agents belong to the wallet, not an org).
-  const orgProjects = (data?.projects ?? []).filter(
-    (p) => !activeOrgId || (p.orgId ?? defaultOrgId) === activeOrgId
-  );
   const projects = orgProjects.slice(0, 5);
   const tasks = (data?.tasks ?? []).slice(0, 5);
 

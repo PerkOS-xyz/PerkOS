@@ -1431,6 +1431,8 @@ export async function pmTurn(input: {
   projectId: string;
   trigger: PmTurnTrigger;
   userMessageId?: string;
+  /** For a SHARED project, the owner wallet (the project lives under it). */
+  owner?: string;
 }): Promise<PmTurnResult> {
   const { authedFetch } = await import("./apiClient");
   const response = await authedFetch(
@@ -1440,6 +1442,7 @@ export async function pmTurn(input: {
       body: JSON.stringify({
         trigger: input.trigger,
         userMessageId: input.userMessageId,
+        owner: input.owner,
       }),
     },
   );

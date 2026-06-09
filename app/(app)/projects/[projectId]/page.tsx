@@ -116,7 +116,11 @@ export default function ProjectDetailPage({ params }: PageProps) {
       {error ? <ErrorBanner message={(error as Error).message} /> : null}
       {liveDetail ? (
         <>
-          <DetailHeader detail={liveDetail} />
+          <DetailHeader
+            detail={liveDetail}
+            ownerWallet={ownerWallet ?? undefined}
+            isShared={isShared}
+          />
           <Tabs current={tab} onChange={setTab} />
           {tab === "tasks" ? (
             <TasksTab tasks={liveDetail.tasks} projectId={projectId} />
@@ -156,7 +160,15 @@ export default function ProjectDetailPage({ params }: PageProps) {
   );
 }
 
-function DetailHeader({ detail }: { detail: ProjectDetail }) {
+function DetailHeader({
+  detail,
+  ownerWallet,
+  isShared,
+}: {
+  detail: ProjectDetail;
+  ownerWallet?: string;
+  isShared?: boolean;
+}) {
   const { project, tasks } = detail;
   const inProgress = tasks.filter((t) => t.status === "In progress").length;
   const done = tasks.filter((t) => t.status === "Done").length;
@@ -207,7 +219,11 @@ function DetailHeader({ detail }: { detail: ProjectDetail }) {
   const runPmMutation = useMutation({
     mutationFn: () => {
       if (!project.id) throw new Error("Missing project id.");
-      return pmTurn({ projectId: project.id, trigger: "run-button" });
+      return pmTurn({
+        projectId: project.id,
+        trigger: "run-button",
+        owner: isShared ? ownerWallet : undefined,
+      });
     },
     onSuccess: (res) => {
       queryClient.invalidateQueries({
@@ -1065,13 +1081,18 @@ function ChatTab({
       toast.error("Couldn't set the PM", { description: e.message }),
   });
 
+  const sharedChat = Boolean(
+    ownerWallet && ownerWallet.toLowerCase() !== (address ?? "").toLowerCase()
+  );
+
   const sendMutation = useMutation({
     mutationFn: async (text: string) => {
       if (!isConnected || !address) {
         throw new Error("Connect a wallet to send messages.");
       }
+      // For a shared project the chat lives under the owner; editors can write.
       return addProjectMessage({
-        walletAddress: address,
+        walletAddress: chatWallet ?? address,
         projectId,
         text,
         from: "user",
@@ -1087,6 +1108,7 @@ function ChatTab({
           projectId,
           trigger: "chat",
           userMessageId: res?.message?.id,
+          owner: sharedChat ? ownerWallet : undefined,
         }).catch(() => {});
       } else {
         // No PM designated → nothing autonomous happens. Tell the user instead
