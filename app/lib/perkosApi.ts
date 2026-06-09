@@ -708,7 +708,7 @@ export async function getWalletProject(input: {
   }
   const project = projectSnap.data();
 
-  const [tasksSnap, messagesSnap, agentsSnap] = await Promise.all([
+  const [tasksSnap, messagesSnap] = await Promise.all([
     getDocs(tasksCol(input.walletAddress, input.projectId)),
     getDocs(
       query(
@@ -716,8 +716,16 @@ export async function getWalletProject(input: {
         orderBy("createdAt", "asc")
       )
     ),
-    getDocs(agentsCol(input.walletAddress)),
   ]);
+
+  // The wallet's /agents collection powers ONLY the roster self-heal below.
+  // A member viewing a SHARED project (walletAddress = the owner) can't read
+  // the owner's /agents (by design — members are scoped to the org/project,
+  // not the owner's agents), so read it tolerantly: a denial must not break
+  // the whole project load. null → skip the heal, keep agentIds as-is.
+  const agentsSnap = await getDocs(agentsCol(input.walletAddress)).catch(
+    () => null
+  );
 
   // Self-heal the denormalized task counter for projects created before
   // createProjectTasks / deleteTask started keeping it in sync. Cheap
@@ -742,27 +750,29 @@ export async function getWalletProject(input: {
   // below never lands (e.g. a mini-app webview where writes are flaky), so
   // the stat tile / agents tab render correctly regardless. task.agent is a
   // historical attribution and is intentionally left untouched.
-  const liveAgentNames = new Set(
-    agentsSnap.docs
-      .map((d) => (d.data().name ?? "").trim().toLowerCase())
-      .filter((n) => n.length > 0)
-  );
-  const roster = (project.agentIds as string[] | undefined) ?? [];
-  const reconciledRoster = roster.filter((name) =>
-    liveAgentNames.has(name.trim().toLowerCase())
-  );
-  if (
-    reconciledRoster.length !== roster.length ||
-    project.agents !== reconciledRoster.length
-  ) {
-    updateDoc(projectDoc(input.walletAddress, input.projectId), {
-      agentIds: reconciledRoster,
-      agents: reconciledRoster.length,
-    }).catch(() => {
-      // Best-effort, same rationale as the task counter above.
-    });
-    project.agentIds = reconciledRoster;
-    project.agents = reconciledRoster.length;
+  if (agentsSnap) {
+    const liveAgentNames = new Set(
+      agentsSnap.docs
+        .map((d) => (d.data().name ?? "").trim().toLowerCase())
+        .filter((n) => n.length > 0)
+    );
+    const roster = (project.agentIds as string[] | undefined) ?? [];
+    const reconciledRoster = roster.filter((name) =>
+      liveAgentNames.has(name.trim().toLowerCase())
+    );
+    if (
+      reconciledRoster.length !== roster.length ||
+      project.agents !== reconciledRoster.length
+    ) {
+      updateDoc(projectDoc(input.walletAddress, input.projectId), {
+        agentIds: reconciledRoster,
+        agents: reconciledRoster.length,
+      }).catch(() => {
+        // Best-effort, same rationale as the task counter above.
+      });
+      project.agentIds = reconciledRoster;
+      project.agents = reconciledRoster.length;
+    }
   }
 
   return {
