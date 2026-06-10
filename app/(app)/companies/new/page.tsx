@@ -51,6 +51,13 @@ import {
 } from "../../../lib/perkosApi";
 import { useActiveOrg } from "../../../lib/useActiveOrg";
 import { fetchActiveRuntimes } from "../../../lib/runtimeImages";
+import {
+  BRAND_ACCENT,
+  INDUSTRY_LABELS,
+  StarterCard,
+  TEMPLATE_ACCENTS,
+  TeamTemplateCard,
+} from "../../../components/TeamTemplateCard";
 
 const ICONS: Record<string, LucideIcon> = {
   Briefcase,
@@ -734,11 +741,17 @@ export default function NewCompanyPage() {
       </header>
 
       {/* Build-your-own starting points */}
-      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <li>
-          <button
-            type="button"
-            onClick={() => {
+          <StarterCard
+            title="Custom team"
+            kicker="Build your own"
+            blurb="Define the project and pick exactly the roles it needs — PM, researcher, marketer, builder… you choose who leads."
+            cta="Pick your roles"
+            icon={Users}
+            accent={BRAND_ACCENT}
+            emphasized
+            onSelect={() => {
               const pm = AGENT_PRESETS.find((p) => p.id === "pm");
               select(
                 "custom",
@@ -747,36 +760,18 @@ export default function NewCompanyPage() {
                   : [],
               );
             }}
-            className="glow-card flex h-full w-full flex-col gap-2 rounded-lg border border-primary/40 bg-card/60 p-4 text-left transition-colors hover:border-primary/70"
-          >
-            <div className="flex items-center gap-3">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
-                <Users className="h-5 w-5" />
-              </span>
-              <span className="text-base font-medium text-foreground">Custom team</span>
-            </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              Define the project and pick exactly the roles it needs — PM,
-              researcher, marketer, builder… you choose who leads.
-            </p>
-          </button>
+          />
         </li>
         <li>
-          <button
-            type="button"
-            onClick={() => select("empty", [])}
-            className="glow-card flex h-full w-full flex-col gap-2 rounded-lg border border-border bg-card/60 p-4 text-left transition-colors hover:border-primary/40"
-          >
-            <div className="flex items-center gap-3">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-muted text-muted-foreground">
-                <Briefcase className="h-5 w-5" />
-              </span>
-              <span className="text-base font-medium text-foreground">Empty project</span>
-            </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              Just the project — assign existing agents or add a team later.
-            </p>
-          </button>
+          <StarterCard
+            title="Empty project"
+            kicker="Start light"
+            blurb="Just the project — assign existing agents or add a team later."
+            cta="Create empty project"
+            icon={Briefcase}
+            accent="#8b87a8"
+            onSelect={() => select("empty", [])}
+          />
         </li>
       </ul>
 
@@ -786,40 +781,21 @@ export default function NewCompanyPage() {
           <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
             My templates
           </h2>
-          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
             {myTemplates.map((t) => {
               const roles = (t.roles as CompanyRole[]) ?? [];
               return (
                 <li key={t.id} className="relative">
-                  <button
-                    type="button"
-                    onClick={() => select(`my:${t.id}`, roles)}
-                    className="glow-card flex h-full w-full flex-col gap-3 rounded-lg border border-primary/25 bg-card/60 p-4 text-left transition-colors hover:border-primary/60"
-                  >
-                    <div className="flex items-center gap-3 pr-7">
-                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
-                        <Users className="h-5 w-5" />
-                      </span>
-                      <span className="min-w-0 truncate text-base font-medium text-foreground">
-                        {t.name}
-                      </span>
-                    </div>
-                    <div className="mt-auto flex flex-wrap gap-1.5 pt-1">
-                      {roles.map((r) => (
-                        <span
-                          key={r.role}
-                          className={cn(
-                            "rounded-full border px-2 py-0.5 text-[10px]",
-                            r.isPM
-                              ? "border-primary/40 bg-primary/10 text-primary"
-                              : "border-border text-muted-foreground",
-                          )}
-                        >
-                          {r.role}
-                        </span>
-                      ))}
-                    </div>
-                  </button>
+                  <TeamTemplateCard
+                    name={t.name}
+                    kicker="My template"
+                    blurb="Your saved team — tweak the roles and launch it on a new project."
+                    icon={Users}
+                    accent={BRAND_ACCENT}
+                    roles={roles}
+                    onSelect={() => select(`my:${t.id}`, roles)}
+                    titlePadding
+                  />
                   <button
                     type="button"
                     aria-label={`Delete template ${t.name}`}
@@ -833,7 +809,7 @@ export default function NewCompanyPage() {
                         )
                         .catch(() => toast.error("Couldn't delete the template"));
                     }}
-                    className="absolute right-3 top-3 text-muted-foreground hover:text-destructive"
+                    className="absolute right-3 top-3 p-1 text-muted-foreground hover:text-destructive"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
@@ -847,42 +823,20 @@ export default function NewCompanyPage() {
       <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
         PerkOS business templates
       </h2>
-      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {COMPANY_TEMPLATES.map((t) => {
-          const Icon = ICONS[t.icon] ?? Bot;
-          return (
-            <li key={t.id}>
-              <button
-                type="button"
-                onClick={() => select(t.id, t.roles)}
-                className="glow-card flex h-full w-full flex-col gap-3 rounded-lg border border-primary/25 bg-card/60 p-4 text-left transition-colors hover:border-primary/60"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/15 text-primary">
-                    <Icon className="h-5 w-5" />
-                  </span>
-                  <span className="text-base font-medium text-foreground">{t.name}</span>
-                </div>
-                <p className="text-xs leading-relaxed text-muted-foreground">{t.blurb}</p>
-                <div className="mt-auto flex flex-wrap gap-1.5 pt-1">
-                  {t.roles.map((r) => (
-                    <span
-                      key={r.role}
-                      className={cn(
-                        "rounded-full border px-2 py-0.5 text-[10px]",
-                        r.isPM
-                          ? "border-primary/40 bg-primary/10 text-primary"
-                          : "border-border text-muted-foreground",
-                      )}
-                    >
-                      {r.role}
-                    </span>
-                  ))}
-                </div>
-              </button>
-            </li>
-          );
-        })}
+      <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+        {COMPANY_TEMPLATES.map((t) => (
+          <li key={t.id}>
+            <TeamTemplateCard
+              name={t.name}
+              kicker={INDUSTRY_LABELS[t.industry] ?? t.industry}
+              blurb={t.blurb}
+              icon={ICONS[t.icon] ?? Bot}
+              accent={TEMPLATE_ACCENTS[t.industry] ?? BRAND_ACCENT}
+              roles={t.roles}
+              onSelect={() => select(t.id, t.roles)}
+            />
+          </li>
+        ))}
       </ul>
     </div>
   );

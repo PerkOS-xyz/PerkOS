@@ -3,6 +3,48 @@
 PerkOS App (`app.perkos.xyz`). One entry per release dated by deploy day.
 Phase numbering tracks `MIGRATION-PLAN-v2.md` in the workspace root.
 
+## 2026-06-10 — Backlog sweep: email, board persistence, attachments, plan approval
+
+A batch of pending items closed out:
+
+- **Header pill — `$PERKOS` + compact balances.** The network pill now shows
+  `$11.13 USDC · 30.2M $PERKOS`: large governance-token balances render in
+  compact notation (`30,225,719 → 30.2M`) instead of an unreadable digit run,
+  USDC carries an explicit label, and the token reads as `$PERKOS` everywhere
+  (the stale `PRKS` symbol is gone, incl. the `tokenAddresses.ts` config).
+- **Contact + access-request emails (Resend).** The two public forms still
+  persist to Firestore but now also notify the team via Resend
+  (`app/lib/email.ts`, `replyTo` set to the submitter). Tolerant by design — if
+  `RESEND_API` is unset the email step logs and no-ops instead of 500-ing.
+  New env: `RESEND_API`, `EMAIL_FROM`, `CONTACT_EMAIL_TO`, `ACCESS_EMAIL_TO`.
+- **Kanban drag now persists.** Dragging a card in the Tasks board *and* the
+  Conductor view writes the new status to Firestore (optimistic move, invalidate
+  on success, snap-back on error) — it was local-only before.
+- **Chat attachments (Firebase Storage).** The composer's attach button is live
+  in the agent chat, project chat, and the in-app assistant. Files upload to a
+  wallet-scoped Storage path (`attachments/{wallet}/{conversationId}/…`, 25 MB
+  cap) and travel with the message as markdown (image → inline, file → link),
+  which keeps the C-hybrid chat contract intact. New `storage.rules` (owner-only
+  upload) registered in `firebase.json` — **must be deployed** (`firebase deploy
+  --only storage`) or prod uploads fail with permission-denied.
+- **Approve a proposed plan → board tasks.** The Docs plan view replaces the
+  "approve (coming soon)" hint with a real **Approve & create N tasks** button.
+  It calls the new server endpoint (PerkOS-API `POST
+  /projects/:id/plans/:docId/approve`); materialization runs server-side and is
+  idempotent. See the PerkOS-API changelog.
+- **Retired provisioner worker removed.** `app/worker/provisioner.ts` is deleted
+  (the live provisioner runs in PerkOS-API since 2026-05-31); dangling
+  references in the Dockerfile/compose/curator comments were cleaned up.
+- **New-project wizard — template cards redesigned.** The `/companies/new`
+  gallery moves from icon-and-chips tiles to horizontal cards aimed at
+  non-technical owners: a portrait panel on the left (industry-tinted backdrop,
+  the recommended team as overlapping persona-head crops of the
+  `/public/avatars` art, PM ringed in the accent, "N agents" pill) and the
+  pitch on the right (industry kicker, blurb, "Led by …" + role list, "Use this
+  team" CTA). Cards extracted to `app/components/TeamTemplateCard.tsx`
+  (`TeamTemplateCard` + `StarterCard`), shared by the business templates, "My
+  templates", and the Custom/Empty starters.
+
 ## 2026-06-05 — Autonomous PM / orchestrator for projects
 
 Projects can now run themselves. Designate one project agent as the **PM**
