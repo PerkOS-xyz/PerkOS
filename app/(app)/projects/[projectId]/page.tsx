@@ -404,6 +404,72 @@ function DetailHeader({
         <StatTile label="Agents" value={project.agents} />
       </div>
 
+      {/* First-run guidance: a fresh team with an empty board is confusing —
+          tell the owner the next move instead of greeting them with 0s. */}
+      {tasks.length === 0 && project.agents > 0 && !pmActive ? (
+        <div className="glow-card flex flex-col gap-3 rounded-lg border border-primary/40 bg-primary/5 p-4">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-semibold text-foreground">
+              Your team is ready — here&apos;s how to start
+            </h2>
+          </div>
+          <ol className="flex flex-col gap-2 text-sm text-muted-foreground">
+            <li className="flex items-start gap-2">
+              <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/15 text-[11px] font-semibold text-primary">1</span>
+              <span>
+                <span className="font-medium text-foreground">Run with PM</span>
+                {project.pmAgent ? (
+                  <> — {project.pmAgent} reads your goal, plans the work into
+                  tasks, and the team executes them autonomously. This is the
+                  one-click way.</>
+                ) : (
+                  <> — designate a PM in the Agents tab first, then the PM
+                  plans and delegates the work for you.</>
+                )}
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/15 text-[11px] font-semibold text-primary">2</span>
+              <span>
+                Or tell the team what you need in{" "}
+                <span className="font-medium text-foreground">Project chat</span>
+                {" "}— they answer in persona, and you can @-mention anyone.
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/15 text-[11px] font-semibold text-primary">3</span>
+              <span>
+                Or add tasks yourself in the{" "}
+                <span className="font-medium text-foreground">Tasks</span> tab
+                and assign them to specific agents.
+              </span>
+            </li>
+          </ol>
+          {project.pmAgent ? (
+            <div className="flex items-center gap-3">
+              <Button
+                size="sm"
+                className="gap-1.5"
+                disabled={runPmMutation.isPending}
+                onClick={() => runPmMutation.mutate()}
+              >
+                {runPmMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )}
+                Run with PM
+              </Button>
+              <span className="text-xs text-muted-foreground">
+                Agents wake automatically when work is assigned — no need to
+                pre-warm anything.
+              </span>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
