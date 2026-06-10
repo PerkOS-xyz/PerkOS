@@ -21,6 +21,7 @@ import {
   getWalletAgents,
   getWalletProject,
   hibernateAgentApi,
+  notifyProjectMention,
   pmTurn,
   setProjectPm,
   updateTask,
@@ -1269,13 +1270,31 @@ function ChatTab({
         throw new Error("Connect a wallet to send messages.");
       }
       // For a shared project the chat lives under the owner; editors can write.
-      return addProjectMessage({
+      const mentions = extractMentions(text, participants);
+      const res = await addProjectMessage({
         walletAddress: chatWallet ?? address,
         projectId,
         text,
         from: "user",
-        mentions: extractMentions(text, participants),
+        mentions,
       });
+      // Ping any @-mentioned HUMAN teammate (≠ me) via a real Firestore
+      // notification (server-side, cross-user). Fire-and-forget.
+      const myLabel = myProfile?.username || formatAddress(address);
+      for (const id of mentions) {
+        if (!id.startsWith("user:")) continue;
+        const target = id.slice("user:".length);
+        if (target.toLowerCase() === address.toLowerCase()) continue;
+        notifyProjectMention({
+          projectId,
+          target,
+          title: `${myLabel} mentioned you`,
+          body: text.slice(0, 200),
+          href: `/projects/${projectId}?tab=chat`,
+          owner: sharedChat ? ownerWallet : undefined,
+        }).catch(() => {});
+      }
+      return res;
     },
     onSuccess: (res) => {
       setDraft("");

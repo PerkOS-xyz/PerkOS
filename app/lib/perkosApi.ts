@@ -1961,6 +1961,34 @@ export async function pmTurn(input: {
   return (payload.data ?? payload) as PmTurnResult;
 }
 
+/**
+ * Notify a human participant they were @-mentioned in a project chat/doc.
+ * Server (PerkOS-API) writes a Firestore notification to the target's
+ * subtree (Admin SDK) after authorizing the shared-project relationship.
+ * Best-effort — callers fire-and-forget.
+ */
+export async function notifyProjectMention(input: {
+  projectId: string;
+  target: string;
+  title: string;
+  body?: string;
+  href?: string;
+  /** For a SHARED project, the owner wallet (project lives under it). */
+  owner?: string;
+}): Promise<void> {
+  const { authedFetch } = await import("./apiClient");
+  await authedFetch(`/api/projects/${input.projectId}/notify`, {
+    method: "POST",
+    body: JSON.stringify({
+      target: input.target,
+      title: input.title,
+      body: input.body,
+      href: input.href,
+      owner: input.owner,
+    }),
+  });
+}
+
 export type ApprovePlanResult = {
   /** New status after approval (materialized when tasks were created). */
   status: PlanStatus | string;

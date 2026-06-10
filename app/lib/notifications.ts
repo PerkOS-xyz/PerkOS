@@ -1,6 +1,24 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useConnection } from "wagmi";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  limit,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  updateDoc,
+  writeBatch,
+  type Timestamp,
+} from "firebase/firestore";
+
+import { firebaseDb } from "./firebase";
 
 export type NotificationKind = "task" | "agent" | "project" | "mention" | "system";
 
@@ -14,100 +32,117 @@ export type Notification = {
   read: boolean;
 };
 
-const STORAGE_KEY = "swarm.notifications.v1";
-
-function isBrowser() {
-  return typeof window !== "undefined";
+function tsToMs(value: unknown): number {
+  if (!value) return Date.now();
+  if (typeof value === "number") return value;
+  if (typeof (value as Timestamp).toMillis === "function")
+    return (value as Timestamp).toMillis();
+  return Date.now();
 }
 
-function readStore(): Notification[] {
-  if (!isBrowser()) return [];
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as Notification[]) : [];
-  } catch {
-    return [];
-  }
+function notificationsCol(wallet: string) {
+  return collection(
+    firebaseDb(),
+    "wallets",
+    wallet.toLowerCase(),
+    "notifications"
+  );
 }
 
-function writeStore(value: Notification[]) {
-  if (!isBrowser()) return;
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
-  } catch {
-    // ignore quota / disabled storage
-  }
-}
-
-const STORE_EVENT = "perkos:notifications-changed";
-
-function notifyChange() {
-  if (!isBrowser()) return;
-  window.dispatchEvent(new Event(STORE_EVENT));
-}
-
+/**
+ * Firestore-backed in-app notifications, scoped to the connected wallet at
+ * /wallets/{wallet}/notifications. Real + persistent + cross-device — NOT
+ * browser localStorage. The server (PerkOS-API `writeWalletNotification`,
+ * e.g. provision outcomes + @-mention pings) writes here via the Admin SDK;
+ * this hook live-subscribes. The owner can read/write their own (firestore
+ * rules: workspace wildcard isSelf).
+ */
 export function useNotifications() {
-  const [items, setItems] = useState<Notification[]>(() => readStore());
+  const { address } = useConnection();
+  const wallet = address?.toLowerCase() ?? null;
+  const [items, setItems] = useState<Notification[]>([]);
 
   useEffect(() => {
-    function refresh() {
-      setItems(readStore());
+    if (!wallet) {
+      setItems([]);
+      return;
     }
-    window.addEventListener(STORE_EVENT, refresh);
-    window.addEventListener("storage", refresh);
-    return () => {
-      window.removeEventListener(STORE_EVENT, refresh);
-      window.removeEventListener("storage", refresh);
-    };
-  }, []);
-
-  const markRead = useCallback((id: string) => {
-    const next = readStore().map((n) =>
-      n.id === id ? { ...n, read: true } : n
+    const q = query(
+      notificationsCol(wallet),
+      orderBy("createdAt", "desc"),
+      limit(50)
     );
-    writeStore(next);
-    notifyChange();
-  }, []);
+    return onSnapshot(
+      q,
+      (snap) => {
+        setItems(
+          snap.docs.map((d) => {
+            const v = d.data();
+            return {
+              id: d.id,
+              kind: (v.kind as NotificationKind) ?? "system",
+              title: (v.title as string) ?? "",
+              body: (v.body as string | undefined) ?? undefined,
+              href: (v.href as string | undefined) ?? undefined,
+              createdAt: tsToMs(v.createdAt),
+              read: v.read === true,
+            };
+          })
+        );
+      },
+      () => setItems([])
+    );
+  }, [wallet]);
+
+  const markRead = useCallback(
+    (id: string) => {
+      if (!wallet) return;
+      void updateDoc(doc(notificationsCol(wallet), id), { read: true }).catch(
+        () => {}
+      );
+    },
+    [wallet]
+  );
 
   const markAllRead = useCallback(() => {
-    const next = readStore().map((n) => ({ ...n, read: true }));
-    writeStore(next);
-    notifyChange();
-  }, []);
+    if (!wallet) return;
+    const batch = writeBatch(firebaseDb());
+    for (const n of items) {
+      if (!n.read) batch.update(doc(notificationsCol(wallet), n.id), { read: true });
+    }
+    void batch.commit().catch(() => {});
+  }, [wallet, items]);
 
-  const remove = useCallback((id: string) => {
-    const next = readStore().filter((n) => n.id !== id);
-    writeStore(next);
-    notifyChange();
-  }, []);
+  const remove = useCallback(
+    (id: string) => {
+      if (!wallet) return;
+      void deleteDoc(doc(notificationsCol(wallet), id)).catch(() => {});
+    },
+    [wallet]
+  );
 
-  const clearAll = useCallback(() => {
-    writeStore([]);
-    notifyChange();
-  }, []);
+  const clearAll = useCallback(async () => {
+    if (!wallet) return;
+    const snap = await getDocs(notificationsCol(wallet));
+    const batch = writeBatch(firebaseDb());
+    snap.docs.forEach((d) => batch.delete(d.ref));
+    await batch.commit().catch(() => {});
+  }, [wallet]);
 
+  /** Add a notification to MY OWN feed (local-origin signals). */
   const add = useCallback(
     (input: Omit<Notification, "id" | "createdAt" | "read"> & { read?: boolean }) => {
-      const id =
-        typeof crypto !== "undefined" && "randomUUID" in crypto
-          ? crypto.randomUUID()
-          : Math.random().toString(36).slice(2, 10);
-      const next: Notification = {
-        id,
-        createdAt: Date.now(),
-        read: input.read ?? false,
+      if (!wallet) return;
+      void addDoc(notificationsCol(wallet), {
         kind: input.kind,
         title: input.title,
-        body: input.body,
-        href: input.href,
-      };
-      writeStore([next, ...readStore()]);
-      notifyChange();
-      return next;
+        body: input.body ?? null,
+        href: input.href ?? null,
+        read: input.read ?? false,
+        createdAt: serverTimestamp(),
+      }).catch(() => {});
     },
-    []
+    [wallet]
   );
 
   const unread = items.filter((n) => !n.read).length;
