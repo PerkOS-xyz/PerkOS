@@ -40,6 +40,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -211,6 +212,11 @@ function DetailHeader({
   const { address } = useConnection();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  // "Choose your coordinator" popup — the PM role is the USER's choice. Shown
+  // when an action needs a PM (Run with PM / the first-run guide) and none is
+  // designated. Selecting one sets project.pmAgent and continues the action.
+  const [choosePmOpen, setChoosePmOpen] = useState(false);
+  const [choosePmPick, setChoosePmPick] = useState<string>("");
 
   const deleteMutation = useMutation({
     mutationFn: () => {
@@ -284,6 +290,37 @@ function DetailHeader({
       toast.error("Couldn't start the PM", { description: err.message }),
   });
 
+  // Designate the coordinator the USER picked in the popup, then run the PM.
+  const choosePmMutation = useMutation({
+    mutationFn: (name: string) => {
+      if (!project.id) throw new Error("Missing project id.");
+      return setProjectPm({
+        walletAddress: ownerWallet!,
+        projectId: project.id,
+        pmAgent: name,
+      });
+    },
+    onSuccess: (_res, name) => {
+      queryClient.invalidateQueries({
+        queryKey: ["wallet-project", ownerWallet, project.id],
+      });
+      setChoosePmOpen(false);
+      toast.success(`${name} is now the project coordinator.`);
+      runPmMutation.mutate();
+    },
+    onError: (err: Error) =>
+      toast.error("Couldn't set the coordinator", { description: err.message }),
+  });
+
+  function requirePmThen(run: () => void) {
+    if (project.pmAgent) {
+      run();
+      return;
+    }
+    setChoosePmPick(project.agentIds?.[0] ?? "");
+    setChoosePmOpen(true);
+  }
+
   const wakeTeamMutation = useMutation({
     mutationFn: () => {
       if (!project.id) throw new Error("Missing project id.");
@@ -321,12 +358,14 @@ function DetailHeader({
           <Button
             size="sm"
             className="gap-1.5"
-            disabled={!project.pmAgent || runPmMutation.isPending || pmActive}
-            onClick={() => runPmMutation.mutate()}
+            disabled={
+              runPmMutation.isPending || pmActive || project.agents === 0
+            }
+            onClick={() => requirePmThen(() => runPmMutation.mutate())}
             title={
               project.pmAgent
                 ? "Let the PM plan the goal and delegate to your workers"
-                : "Designate a PM agent in the Agents tab first"
+                : "You'll pick which agent coordinates the project"
             }
           >
             {runPmMutation.isPending ? (
@@ -424,8 +463,9 @@ function DetailHeader({
                   tasks, and the team executes them autonomously. This is the
                   one-click way.</>
                 ) : (
-                  <> — designate a PM in the Agents tab first, then the PM
-                  plans and delegates the work for you.</>
+                  <> — you&apos;ll pick which agent coordinates the project,
+                  then they plan the goal into tasks and the team executes
+                  autonomously.</>
                 )}
               </span>
             </li>
@@ -446,29 +486,90 @@ function DetailHeader({
               </span>
             </li>
           </ol>
-          {project.pmAgent ? (
-            <div className="flex items-center gap-3">
-              <Button
-                size="sm"
-                className="gap-1.5"
-                disabled={runPmMutation.isPending}
-                onClick={() => runPmMutation.mutate()}
-              >
-                {runPmMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Sparkles className="h-4 w-4" />
-                )}
-                Run with PM
-              </Button>
-              <span className="text-xs text-muted-foreground">
-                Agents wake automatically when work is assigned — no need to
-                pre-warm anything.
-              </span>
-            </div>
-          ) : null}
+          <div className="flex items-center gap-3">
+            <Button
+              size="sm"
+              className="gap-1.5"
+              disabled={runPmMutation.isPending}
+              onClick={() => requirePmThen(() => runPmMutation.mutate())}
+            >
+              {runPmMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4" />
+              )}
+              {project.pmAgent ? "Run with PM" : "Choose coordinator & run"}
+            </Button>
+            <span className="text-xs text-muted-foreground">
+              Agents wake automatically when work is assigned — no need to
+              pre-warm anything.
+            </span>
+          </div>
         </div>
       ) : null}
+
+      {/* "Choose your coordinator" — the PM role is the user's pick. */}
+      <Dialog open={choosePmOpen} onOpenChange={setChoosePmOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Choose your coordinator</DialogTitle>
+            <DialogDescription>
+              Every project needs a coordinator (PM) — the agent who plans the
+              goal into tasks, delegates to the team, and reviews the results.
+              Pick who leads this project:
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex max-h-64 flex-col gap-1.5 overflow-y-auto">
+            {(project.agentIds ?? []).map((name) => (
+              <label
+                key={name}
+                className={`flex cursor-pointer items-center gap-2 rounded-md border p-2.5 text-sm transition-colors ${
+                  choosePmPick === name
+                    ? "border-primary/60 bg-primary/5 text-foreground"
+                    : "border-border text-muted-foreground hover:border-primary/40"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="choose-pm"
+                  className="h-3.5 w-3.5"
+                  checked={choosePmPick === name}
+                  onChange={() => setChoosePmPick(name)}
+                  disabled={choosePmMutation.isPending}
+                />
+                <Bot className="h-4 w-4 shrink-0 text-primary" />
+                {name}
+              </label>
+            ))}
+            {(project.agentIds ?? []).length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No agents on this project yet — add agents first (Agents tab).
+              </p>
+            ) : null}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setChoosePmOpen(false)}
+              disabled={choosePmMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              className="gap-1.5"
+              disabled={!choosePmPick || choosePmMutation.isPending}
+              onClick={() => choosePmMutation.mutate(choosePmPick)}
+            >
+              {choosePmMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : null}
+              Make coordinator & run PM
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <ConfirmDialog
         open={confirmOpen}
