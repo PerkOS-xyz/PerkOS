@@ -37,6 +37,7 @@ import {
   setProjectPm,
 } from "../../../lib/perkosApi";
 import { useActiveOrg } from "../../../lib/useActiveOrg";
+import { fetchActiveRuntimes } from "../../../lib/runtimeImages";
 
 const ICONS: Record<string, LucideIcon> = {
   Store,
@@ -107,6 +108,22 @@ export default function NewCompanyPage() {
     }
     setLaunching(true);
     try {
+      // Resolve the active runtime image per runtime FIRST — without an
+      // imageTag the launch route registers the agent but never provisions an
+      // ECS service ("no service"), so the whole team would be dead-on-arrival.
+      setProgress("Resolving runtime images…");
+      const runtimes = await fetchActiveRuntimes();
+      const tagFor = (rt: "OpenClaw" | "Hermes") =>
+        (rt === "Hermes" ? runtimes.hermes : runtimes.openclaw)[0]?.primaryTag ??
+        null;
+      for (const role of tmpl.roles) {
+        if (!tagFor(role.runtime)) {
+          throw new Error(
+            `No active ${role.runtime} runtime image is published — an admin needs to set one before launching.`,
+          );
+        }
+      }
+
       setProgress("Creating project…");
       const { project } = await createWalletProject({
         walletAddress: address,
@@ -138,6 +155,7 @@ export default function NewCompanyPage() {
           walletAddress: address,
           name: reqName,
           runtime: role.runtime,
+          imageTag: tagFor(role.runtime),
           soul: r.soul,
           plugins: r.plugins,
           skills: r.skills,
