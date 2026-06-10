@@ -17,6 +17,7 @@ import {
   assignAgentsToProject,
   deleteProject,
   deleteTask,
+  getUserProfile,
   getWalletAgents,
   getWalletProject,
   hibernateAgentApi,
@@ -52,6 +53,8 @@ import { EmptyState } from "../../../components/EmptyState";
 import { formatAddress } from "../../../lib/format";
 import { useProjectMessages } from "../../../lib/useProjectMessages";
 import { DocsTab } from "../../../components/DocsTab";
+import { MentionText } from "../../../components/MentionText";
+import { extractMentions, type MentionParticipant } from "../../../lib/mentions";
 import { uploadAttachment } from "../../../lib/uploadAttachment";
 import { useProjectTasks } from "../../../lib/useProjectTasks";
 import { useWalletAgents, realtimeAgentStatus, type AgentLiveStatus } from "../../../lib/useWalletAgents";
@@ -1218,7 +1221,13 @@ function ChatTab({
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState("");
 
-  const participants = projectParticipants(detail, address);
+  // My username (for the @-mention label of my own messages).
+  const { data: myProfile } = useQuery({
+    queryKey: ["user-profile", address],
+    queryFn: () => getUserProfile(address!),
+    enabled: Boolean(address),
+  });
+  const participants = projectParticipants(detail, address, myProfile?.username);
   const pmAgent = detail.project.pmAgent ?? null;
   const agentIds = detail.project.agentIds ?? [];
   // The most PM-like assigned agent, for a one-click "Make PM" right here.
@@ -1265,6 +1274,7 @@ function ChatTab({
         projectId,
         text,
         from: "user",
+        mentions: extractMentions(text, participants),
       });
     },
     onSuccess: (res) => {
@@ -1357,6 +1367,8 @@ function ChatTab({
                   key={m.id ?? idx}
                   message={m}
                   isMine={m.from === "user"}
+                  participants={participants}
+                  meWallet={address ?? undefined}
                 />
               ))}
               {sendMutation.isPending ? (
@@ -1436,16 +1448,11 @@ function ChatTab({
   );
 }
 
-type Participant = {
-  id: string;
-  label: string;
-  kind: "human" | "agent";
-};
-
 function projectParticipants(
   detail: ProjectDetail,
-  ownerWallet?: string
-): Participant[] {
+  ownerWallet?: string,
+  myUsername?: string | null
+): MentionParticipant[] {
   const agents = new Set<string>();
   for (const t of detail.tasks) {
     if (t.agent) agents.add(t.agent);
@@ -1453,11 +1460,13 @@ function projectParticipants(
   for (const a of detail.project.agentIds ?? []) {
     agents.add(a);
   }
-  const out: Participant[] = [];
+  const out: MentionParticipant[] = [];
   if (ownerWallet) {
+    // Identity is the wallet (collision-free); label is the username if set,
+    // else the short address. This is what people type after `@`.
     out.push({
-      id: `human:${ownerWallet}`,
-      label: `You (${formatAddress(ownerWallet)})`,
+      id: `user:${ownerWallet.toLowerCase()}`,
+      label: myUsername || formatAddress(ownerWallet),
       kind: "human",
     });
   }
@@ -1508,16 +1517,20 @@ function resolveAgentSender(
 function ProjectMessageBubble({
   message,
   isMine,
+  participants,
+  meWallet,
 }: {
   message: ChatMessage;
   isMine: boolean;
+  participants: MentionParticipant[];
+  meWallet?: string;
 }) {
   const time = formatMsgTime(message.createdAt);
   if (isMine) {
     return (
       <li className="flex flex-col items-end gap-0.5">
         <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-primary/15 px-3 py-2 text-sm text-foreground">
-          {message.text}
+          <MentionText text={message.text} participants={participants} meWallet={meWallet} />
         </div>
         {time ? (
           <span className="px-1 text-[10px] text-muted-foreground">{time}</span>
@@ -1540,7 +1553,12 @@ function ProjectMessageBubble({
             <span className="text-[10px] text-muted-foreground/70">{time}</span>
           ) : null}
         </span>
-        <Markdown className="leading-relaxed">{body}</Markdown>
+        <MentionText
+          text={body}
+          participants={participants}
+          meWallet={meWallet}
+          className="leading-relaxed text-sm"
+        />
       </div>
     </li>
   );

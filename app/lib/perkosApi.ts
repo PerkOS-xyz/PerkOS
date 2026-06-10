@@ -29,6 +29,7 @@ import {
   increment,
   orderBy,
   query,
+  runTransaction,
   serverTimestamp,
   setDoc,
   updateDoc,
@@ -38,6 +39,7 @@ import {
 } from "firebase/firestore";
 
 import { firebaseDb } from "./firebase";
+import { formatAddress } from "./format";
 import { validateSwarm, type SwarmDefinition } from "./swarm";
 
 export type PmSessionStatus =
@@ -185,6 +187,8 @@ export type ChatMessage = {
   from: "agent" | "user";
   text: string;
   agentName?: string;
+  /** Structured @-mention identities: "user:0x…" / "agent:Name". */
+  mentions?: string[];
   createdAt?: string;
 };
 
@@ -1210,12 +1214,17 @@ export async function addProjectMessage(input: {
   projectId: string;
   text: string;
   from?: "user" | "agent";
+  /** Structured @-mentions: "user:0x…" / "agent:Name" identities. */
+  mentions?: string[];
 }): Promise<{ message: ChatMessage }> {
   const col = messagesCol(input.walletAddress, input.projectId);
   const ref = doc(col);
   const payload: ChatMessage = {
     from: input.from ?? "user",
     text: input.text,
+    ...(input.mentions && input.mentions.length
+      ? { mentions: input.mentions }
+      : {}),
   };
   await setDoc(ref, {
     ...payload,
@@ -1393,6 +1402,8 @@ export async function addDocMessage(input: {
   docId: string;
   text: string;
   from?: "user" | "agent";
+  /** Structured @-mentions: "user:0x…" / "agent:Name" identities. */
+  mentions?: string[];
 }): Promise<{ id: string }> {
   const ref = doc(
     docMessagesCol(input.walletAddress, input.projectId, input.docId)
@@ -1400,9 +1411,127 @@ export async function addDocMessage(input: {
   await setDoc(ref, {
     from: input.from ?? "user",
     text: input.text,
+    ...(input.mentions && input.mentions.length
+      ? { mentions: input.mentions }
+      : {}),
     createdAt: serverTimestamp(),
   });
   return { id: ref.id };
+}
+
+// ---------------------------------------------------------------------------
+// User profile / username (stable, collision-free @-mention identity)
+// ---------------------------------------------------------------------------
+//
+// @-mentions store a STRUCTURED identity that is already unique — `user:0x…`
+// (the wallet) for humans, `agent:Name` for agents — so mentions never
+// collide. The username here is only a human-readable LABEL for that
+// identity (and what people type after `@`). Resolution priority for a
+// human's label: chosen username → (ENS / Base name — future) → 0x…abcd.
+//
+// Storage:
+//   /wallets/{w}/profile/main            { username, displayName, updatedAt }
+//   /usernames/{lowercased}              { wallet }   (top-level uniqueness registry)
+
+export type UserProfile = {
+  username?: string | null;
+  displayName?: string | null;
+  updatedAt?: string;
+};
+
+/** A username is 3–20 chars, [a-z0-9_-], compared case-insensitively. */
+export function normalizeUsername(raw: string): string {
+  return raw.trim().toLowerCase();
+}
+export function isValidUsername(raw: string): boolean {
+  return /^[a-z0-9_-]{3,20}$/.test(normalizeUsername(raw));
+}
+
+function profileDoc(walletAddress: string) {
+  return doc(
+    firebaseDb(),
+    "wallets",
+    normalize(walletAddress),
+    "profile",
+    "main"
+  );
+}
+function usernameDoc(username: string) {
+  return doc(firebaseDb(), "usernames", normalizeUsername(username));
+}
+
+export async function getUserProfile(
+  walletAddress: string
+): Promise<UserProfile | null> {
+  const snap = await getDoc(profileDoc(walletAddress));
+  if (!snap.exists()) return null;
+  const d = snap.data() as Record<string, unknown>;
+  return {
+    username: (d.username as string | null) ?? null,
+    displayName: (d.displayName as string | null) ?? null,
+  };
+}
+
+/** Which wallet owns a username (for availability checks). null = free. */
+export async function getUsernameOwner(
+  username: string
+): Promise<string | null> {
+  if (!isValidUsername(username)) return null;
+  const snap = await getDoc(usernameDoc(username));
+  if (!snap.exists()) return null;
+  return ((snap.data() as { wallet?: string }).wallet ?? null) as string | null;
+}
+
+/**
+ * Claim (or change) the caller's username. Transactional against the
+ * top-level /usernames registry so two wallets can't take the same handle.
+ * Frees the previous handle on a rename. Throws "taken" if held by another.
+ */
+export async function setUsername(input: {
+  walletAddress: string;
+  username: string;
+}): Promise<void> {
+  const wallet = normalize(input.walletAddress);
+  const uname = normalizeUsername(input.username);
+  if (!isValidUsername(uname)) {
+    throw new Error("Username must be 3–20 chars: letters, numbers, _ or -.");
+  }
+  const db = firebaseDb();
+  await runTransaction(db, async (tx) => {
+    const regRef = usernameDoc(uname);
+    const reg = await tx.get(regRef);
+    if (reg.exists()) {
+      const owner = (reg.data() as { wallet?: string }).wallet;
+      if (owner && owner !== wallet) throw new Error("That username is taken.");
+    }
+    const pRef = profileDoc(wallet);
+    const prev = await tx.get(pRef);
+    const prevName = prev.exists()
+      ? ((prev.data() as { username?: string }).username ?? null)
+      : null;
+    if (prevName && normalizeUsername(prevName) !== uname) {
+      tx.delete(usernameDoc(prevName)); // free the old handle
+    }
+    tx.set(regRef, { wallet });
+    tx.set(
+      pRef,
+      { username: uname, updatedAt: serverTimestamp() },
+      { merge: true }
+    );
+  });
+}
+
+/**
+ * Human-readable label for a wallet, given its (optional, prefetched)
+ * profile. username → 0x…abcd. (ENS/Base name resolution is a future hook.)
+ */
+export function resolveUserLabel(
+  walletAddress: string,
+  profile?: UserProfile | null
+): string {
+  if (profile?.username) return profile.username;
+  if (profile?.displayName) return profile.displayName;
+  return formatAddress(walletAddress);
 }
 
 // ---------------------------------------------------------------------------

@@ -16,6 +16,7 @@ import {
   AlertTriangle,
   RotateCcw,
   Info,
+  AtSign,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ import { useOnboarding } from "../../lib/onboardingState";
 import { formatAddress } from "../../lib/format";
 import { perkosApiBaseUrl } from "../../lib/perkosApi";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
+import { UsernameCard } from "../../components/UsernameCard";
 
 const ORG_DRAFT_KEY = "swarm.organization.draft.v1";
 
@@ -160,6 +162,23 @@ export default function SettingsPage() {
               <LogOut className="h-4 w-4" />
               Disconnect wallet
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* Username */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <AtSign className="h-4 w-4 text-primary" />
+              Username
+            </CardTitle>
+            <CardDescription>
+              Your @handle — what teammates type to mention you in chats. Unique;
+              falls back to your wallet address when unset.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <UsernameCard address={address} />
           </CardContent>
         </Card>
 

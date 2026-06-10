@@ -64,6 +64,28 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Username registry (unique handles) --------------------------------
+    //
+    // /usernames/{lowercased} → { wallet } maps a chosen handle to its owner.
+    // Used to give humans a collision-free @-mention label. Anyone signed in
+    // can READ (availability checks + resolving a mention). A handle can be
+    // CREATED only when free (the doc doesn't exist yet) and stamped with the
+    // caller's own wallet; UPDATE/DELETE only by the current owner (so a
+    // rename frees the old handle). Because a taken handle already exists,
+    // another wallet's attempt falls under `update` and is denied — that's
+    // the uniqueness guarantee. Profile itself lives at
+    // /wallets/{w}/profile/main (owner-only via the workspace wildcard).
+
+    match /usernames/{uname} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && request.resource.data.wallet == request.auth.uid;
+      allow update: if isSignedIn()
+        && resource.data.wallet == request.auth.uid
+        && request.resource.data.wallet == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.wallet == request.auth.uid;
+    }
+
     // Per-wallet workspace ----------------------------------------------
     //
     // /wallets/{addr}/** is owned by the wallet holder. Reads + writes

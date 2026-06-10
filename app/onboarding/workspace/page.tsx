@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useConnection } from "wagmi";
 import { OnboardingShell } from "../../components/OnboardingShell";
+import { UsernameCard } from "../../components/UsernameCard";
 import { useOnboarding } from "../../lib/onboardingState";
 import { formatAddress } from "../../lib/format";
 
@@ -40,6 +41,17 @@ export default function WorkspacePage() {
           placeholder="Software Workspace"
           className="rounded-md border border-[#1b1833] bg-[#0e0716] px-4 py-3 text-base text-[#ececff] placeholder:text-[#7975a8]/60 focus:border-[#ec1b69] focus:outline-none focus:ring-1 focus:ring-[#ec1b69]"
         />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label className="text-xs uppercase tracking-wide text-[#7975a8]">
+          Your username <span className="normal-case text-[#4f4b6e]">(optional)</span>
+        </label>
+        <UsernameCard address={address} />
+        <p className="text-xs leading-relaxed text-[#7975a8]">
+          Your @handle is how teammates and agents mention you in chats. You can
+          skip and set it later, or keep your wallet address.
+        </p>
       </div>
 
       <div className="flex flex-col gap-1 text-xs text-[#7975a8]">

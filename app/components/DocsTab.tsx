@@ -25,6 +25,7 @@ import {
   deleteDocBlock,
   deleteProjectDoc,
   ensureProjectPlan,
+  getUserProfile,
   promoteDoc,
   updateDocNote,
   type Doc,
@@ -34,6 +35,9 @@ import {
 } from "../lib/perkosApi";
 import { EmptyState } from "./EmptyState";
 import { Markdown } from "./Markdown";
+import { MentionText } from "./MentionText";
+import { MentionInput } from "./MentionInput";
+import { extractMentions, type MentionParticipant } from "../lib/mentions";
 import { formatAddress } from "../lib/format";
 import {
   useDoc,
@@ -105,6 +109,28 @@ export function DocsTab({
 
   const liveDocs = useMemo(() => docs.filter((d) => !d.draft), [docs]);
   const pmDrafts = useMemo(() => docs.filter((d) => d.draft), [docs]);
+
+  // @-mention participants for the per-doc chat: the current human (label =
+  // username if set, else short address) + the project's agents.
+  const [myUsername, setMyUsername] = useState<string | null>(null);
+  useEffect(() => {
+    if (!address) return;
+    getUserProfile(address)
+      .then((p) => setMyUsername(p?.username ?? null))
+      .catch(() => {});
+  }, [address]);
+  const participants: MentionParticipant[] = useMemo(() => {
+    const list: MentionParticipant[] = [];
+    if (address)
+      list.push({
+        id: `user:${address.toLowerCase()}`,
+        label: myUsername || formatAddress(address),
+        kind: "human",
+      });
+    for (const n of detail.project.agentIds ?? [])
+      list.push({ id: `agent:${n}`, label: n, kind: "agent" });
+    return list;
+  }, [address, myUsername, detail.project.agentIds]);
 
   // Default selection: the active plan, else the first live doc.
   useEffect(() => {
@@ -255,6 +281,8 @@ export function DocsTab({
           projectId={projectId}
           docId={selectedId}
           me={address ? `user:${address.toLowerCase()}` : null}
+          meWallet={address ?? undefined}
+          participants={participants}
           onDeleted={() => setSelectedId(null)}
         />
       ) : (
@@ -362,12 +390,16 @@ function DocEditor({
   projectId,
   docId,
   me,
+  meWallet,
+  participants,
   onDeleted,
 }: {
   wallet?: string;
   projectId: string;
   docId: string;
   me: string | null;
+  meWallet?: string;
+  participants: MentionParticipant[];
   onDeleted: () => void;
 }) {
   const { doc, blocks, loading } = useDoc(wallet, projectId, docId);
@@ -588,6 +620,8 @@ function DocEditor({
         projectId={projectId}
         docId={docId}
         docTitle={doc?.title ?? "Doc"}
+        participants={participants}
+        meWallet={meWallet}
         onClose={() => setShowChat(false)}
       />
     </div>
@@ -709,12 +743,16 @@ function DocChat({
   projectId,
   docId,
   docTitle,
+  participants,
+  meWallet,
   onClose,
 }: {
   wallet?: string;
   projectId: string;
   docId: string;
   docTitle: string;
+  participants: MentionParticipant[];
+  meWallet?: string;
   onClose: () => void;
 }) {
   const { address } = useConnection();
@@ -727,7 +765,14 @@ function DocChat({
     if (!text || !wallet) return;
     setBusy(true);
     try {
-      await addDocMessage({ walletAddress: wallet, projectId, docId, text, from: "user" });
+      await addDocMessage({
+        walletAddress: wallet,
+        projectId,
+        docId,
+        text,
+        from: "user",
+        mentions: extractMentions(text, participants),
+      });
       setDraft("");
     } catch (e) {
       toast.error("Couldn't send", { description: (e as Error).message });
@@ -778,7 +823,11 @@ function DocChat({
                       : "bg-[#ec1b69]/15 text-[#ececff]"
                   }`}
                 >
-                  <Markdown>{m.text}</Markdown>
+                  <MentionText
+                    text={m.text}
+                    participants={participants}
+                    meWallet={meWallet}
+                  />
                 </div>
               </div>
             );
@@ -786,19 +835,17 @@ function DocChat({
         )}
       </div>
       <div className="flex items-end gap-2 border-t border-[#1b1833] p-2">
-        <textarea
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder="Message…"
-          rows={1}
-          className="min-h-[38px] w-full resize-y rounded-md border border-[#1b1833] bg-[#0a0511] px-2.5 py-2 text-sm text-[#ececff] outline-none placeholder:text-[#4f4b6e] focus:border-[#ec1b69]/50"
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              send();
-            }
-          }}
-        />
+        <div className="flex-1">
+          <MentionInput
+            value={draft}
+            onChange={setDraft}
+            onSend={send}
+            participants={participants}
+            placeholder="Message…  (type @ to mention)"
+            rows={1}
+            className="min-h-[38px] w-full resize-y rounded-md border border-[#1b1833] bg-[#0a0511] px-2.5 py-2 text-sm text-[#ececff] outline-none placeholder:text-[#4f4b6e] focus:border-[#ec1b69]/50"
+          />
+        </div>
         <Button size="sm" onClick={send} disabled={busy || !draft.trim()}>
           Send
         </Button>
