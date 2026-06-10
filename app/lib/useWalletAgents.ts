@@ -115,9 +115,13 @@ export function realtimeAgentStatus(a?: AgentLiveStatus): {
     return { color: "bg-amber-400 animate-pulse", label: "Starting" };
 
   // Connected: phoned home, and — if it was ever woken — since that wake.
+  // "Online" REQUIRES a real bridge heartbeat — do NOT infer it from
+  // status:"ready" alone. A registered-but-never-provisioned doc (no ECS
+  // service, e.g. a launch that didn't enqueue a provision job) sits at
+  // status:"ready" forever with no bridge; treating that as Online showed
+  // ghost agents as live (and made hibernation look broken). Such agents now
+  // correctly read "Offline" until a bridge actually connects.
   if (a.bridgeConnected && seen > 0 && seen >= woke)
-    return { color: "bg-emerald-400", label: "Online" };
-  if ((a.status ?? "").toLowerCase() === "ready" && woke === 0)
     return { color: "bg-emerald-400", label: "Online" };
 
   if ((a.status ?? "").toLowerCase() === "provision-failed" ||
