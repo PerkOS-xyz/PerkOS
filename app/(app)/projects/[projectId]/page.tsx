@@ -17,10 +17,10 @@ import {
   assignAgentsToProject,
   deleteProject,
   deleteTask,
-  getUserProfile,
   getWalletAgents,
   getWalletProject,
   hibernateAgentApi,
+  mentionAgent,
   notifyProjectMention,
   pmTurn,
   setProjectPm,
@@ -56,6 +56,7 @@ import { useProjectMessages } from "../../../lib/useProjectMessages";
 import { DocsTab } from "../../../components/DocsTab";
 import { MentionText } from "../../../components/MentionText";
 import { extractMentions, type MentionParticipant } from "../../../lib/mentions";
+import { useMentionParticipants } from "../../../lib/useMentionParticipants";
 import { uploadAttachment } from "../../../lib/uploadAttachment";
 import { useProjectTasks } from "../../../lib/useProjectTasks";
 import { useWalletAgents, realtimeAgentStatus, type AgentLiveStatus } from "../../../lib/useWalletAgents";
@@ -1222,13 +1223,12 @@ function ChatTab({
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState("");
 
-  // My username (for the @-mention label of my own messages).
-  const { data: myProfile } = useQuery({
-    queryKey: ["user-profile", address],
-    queryFn: () => getUserProfile(address!),
-    enabled: Boolean(address),
-  });
-  const participants = projectParticipants(detail, address, myProfile?.username);
+  // @-mention participants: human members (owner + teammates, by username) +
+  // the project's agents. Collision-free structured identities.
+  const participants = useMentionParticipants(detail, projectId);
+  const myLabel =
+    participants.find((p) => p.id === `user:${(address ?? "").toLowerCase()}`)
+      ?.label || formatAddress(address);
   const pmAgent = detail.project.pmAgent ?? null;
   const agentIds = detail.project.agentIds ?? [];
   // The most PM-like assigned agent, for a one-click "Make PM" right here.
@@ -1278,9 +1278,9 @@ function ChatTab({
         from: "user",
         mentions,
       });
+      const ownerArg = sharedChat ? ownerWallet : undefined;
       // Ping any @-mentioned HUMAN teammate (≠ me) via a real Firestore
       // notification (server-side, cross-user). Fire-and-forget.
-      const myLabel = myProfile?.username || formatAddress(address);
       for (const id of mentions) {
         if (!id.startsWith("user:")) continue;
         const target = id.slice("user:".length);
@@ -1291,16 +1291,32 @@ function ChatTab({
           title: `${myLabel} mentioned you`,
           body: text.slice(0, 200),
           href: `/projects/${projectId}?tab=chat`,
-          owner: sharedChat ? ownerWallet : undefined,
+          owner: ownerArg,
         }).catch(() => {});
       }
-      return res;
+      // Route @-mentioned AGENTS directly: wake + deliver to each. This is the
+      // direct path — when you @ specific agents, the PM is NOT auto-woken.
+      const mentionedAgents = mentions
+        .filter((id) => id.startsWith("agent:"))
+        .map((id) => id.slice("agent:".length));
+      for (const agentName of mentionedAgents) {
+        mentionAgent({ projectId, agentName, text, owner: ownerArg }).catch(
+          () => {}
+        );
+      }
+      return { res, mentionedAgents };
     },
-    onSuccess: (res) => {
+    onSuccess: ({ res, mentionedAgents }) => {
       setDraft("");
-      // If this project has a PM, wake it to read + react to the message
-      // (plan/delegate or just reply). Fire-and-forget — never block the send;
-      // the PM's reply lands via the realtime messages subscription.
+      // @-mentioned a specific agent → it was directed; don't also wake the PM.
+      if (mentionedAgents.length) {
+        toast.success(
+          `Sent to ${mentionedAgents.map((a) => `@${a}`).join(", ")}`
+        );
+        return;
+      }
+      // Otherwise: if this project has a PM, wake it to read + react (fire-and-
+      // forget; the PM's reply lands via the realtime messages subscription).
       if (pmAgent) {
         pmTurn({
           projectId,
@@ -1465,34 +1481,6 @@ function ChatTab({
       </aside>
     </div>
   );
-}
-
-function projectParticipants(
-  detail: ProjectDetail,
-  ownerWallet?: string,
-  myUsername?: string | null
-): MentionParticipant[] {
-  const agents = new Set<string>();
-  for (const t of detail.tasks) {
-    if (t.agent) agents.add(t.agent);
-  }
-  for (const a of detail.project.agentIds ?? []) {
-    agents.add(a);
-  }
-  const out: MentionParticipant[] = [];
-  if (ownerWallet) {
-    // Identity is the wallet (collision-free); label is the username if set,
-    // else the short address. This is what people type after `@`.
-    out.push({
-      id: `user:${ownerWallet.toLowerCase()}`,
-      label: myUsername || formatAddress(ownerWallet),
-      kind: "human",
-    });
-  }
-  for (const name of agents) {
-    out.push({ id: `agent:${name}`, label: name, kind: "agent" });
-  }
-  return out;
 }
 
 /** Clean up the chat sender label. The board MCP currently stamps agent

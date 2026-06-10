@@ -1460,6 +1460,19 @@ function usernameDoc(username: string) {
   return doc(firebaseDb(), "usernames", normalizeUsername(username));
 }
 
+/** Batch-resolve profiles for several wallets (parallel single reads). */
+export async function getUserProfiles(
+  wallets: string[]
+): Promise<Record<string, UserProfile | null>> {
+  const uniq = Array.from(new Set(wallets.map((w) => normalize(w))));
+  const entries = await Promise.all(
+    uniq.map(
+      async (w) => [w, await getUserProfile(w).catch(() => null)] as const
+    )
+  );
+  return Object.fromEntries(entries);
+}
+
 export async function getUserProfile(
   walletAddress: string
 ): Promise<UserProfile | null> {
@@ -1984,6 +1997,28 @@ export async function notifyProjectMention(input: {
       title: input.title,
       body: input.body,
       href: input.href,
+      owner: input.owner,
+    }),
+  });
+}
+
+/**
+ * Direct an @-mentioned WORKER agent: the server wakes it + delivers the chat
+ * message so it replies in the project chat (postProjectMessage). Used to
+ * route "@AgentName" to that agent instead of the PM. Fire-and-forget.
+ */
+export async function mentionAgent(input: {
+  projectId: string;
+  agentName: string;
+  text: string;
+  owner?: string;
+}): Promise<void> {
+  const { authedFetch } = await import("./apiClient");
+  await authedFetch(`/api/projects/${input.projectId}/mention-agent`, {
+    method: "POST",
+    body: JSON.stringify({
+      agentName: input.agentName,
+      text: input.text,
       owner: input.owner,
     }),
   });

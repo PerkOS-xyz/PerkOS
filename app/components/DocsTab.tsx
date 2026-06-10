@@ -25,7 +25,6 @@ import {
   deleteDocBlock,
   deleteProjectDoc,
   ensureProjectPlan,
-  getUserProfile,
   promoteDoc,
   updateDocNote,
   type Doc,
@@ -38,6 +37,7 @@ import { Markdown } from "./Markdown";
 import { MentionText } from "./MentionText";
 import { MentionInput } from "./MentionInput";
 import { extractMentions, type MentionParticipant } from "../lib/mentions";
+import { useMentionParticipants } from "../lib/useMentionParticipants";
 import { formatAddress } from "../lib/format";
 import {
   useDoc,
@@ -110,27 +110,8 @@ export function DocsTab({
   const liveDocs = useMemo(() => docs.filter((d) => !d.draft), [docs]);
   const pmDrafts = useMemo(() => docs.filter((d) => d.draft), [docs]);
 
-  // @-mention participants for the per-doc chat: the current human (label =
-  // username if set, else short address) + the project's agents.
-  const [myUsername, setMyUsername] = useState<string | null>(null);
-  useEffect(() => {
-    if (!address) return;
-    getUserProfile(address)
-      .then((p) => setMyUsername(p?.username ?? null))
-      .catch(() => {});
-  }, [address]);
-  const participants: MentionParticipant[] = useMemo(() => {
-    const list: MentionParticipant[] = [];
-    if (address)
-      list.push({
-        id: `user:${address.toLowerCase()}`,
-        label: myUsername || formatAddress(address),
-        kind: "human",
-      });
-    for (const n of detail.project.agentIds ?? [])
-      list.push({ id: `agent:${n}`, label: n, kind: "agent" });
-    return list;
-  }, [address, myUsername, detail.project.agentIds]);
+  // @-mention participants: human members (by username) + project agents.
+  const participants = useMentionParticipants(detail, projectId);
 
   // Default selection: the active plan, else the first live doc.
   useEffect(() => {
