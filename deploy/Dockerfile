@@ -55,10 +55,11 @@ COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 COPY --from=build /app/public ./public
 
-# Provisioning worker — a separate process that doesn't run as part of
-# the Next.js server. We ship the TypeScript source + tsx so the same
-# image can be started with `tsx app/worker/provisioner.ts` (used by
-# the miniapp-worker docker-compose service).
+# Worker sidecars — separate processes that don't run as part of the
+# Next.js server. The live provisioner was retired (it now runs in
+# PerkOS-API); the curator (`tsx app/worker/curator.ts`) remains and is
+# what the optional worker docker-compose service starts. We ship the
+# TypeScript source + tsx so the same image can run it.
 #
 # Next.js standalone trace only includes deps reachable from a route.
 # After the launch route was refactored to enqueue jobs (PR #55), the

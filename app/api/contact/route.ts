@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 
 import { adminDb } from "../../lib/firebaseAdmin";
+import {
+  CONTACT_EMAIL_TO,
+  escapeHtml,
+  sendEmail,
+} from "../../lib/email";
 
 type Payload = {
   name: string;
@@ -38,18 +43,32 @@ export async function POST(request: Request) {
     );
   }
 
+  const trimmedMessage = message.slice(0, 5000);
+
   await adminDb()
     .collection("contact_messages")
     .add({
       name,
       email,
       subject,
-      message: message.slice(0, 5000),
+      message: trimmedMessage,
       status: "new",
       createdAt: FieldValue.serverTimestamp(),
     });
 
-  // TODO(email): forward to contact@perkos.xyz via Resend.
+  // Notify the team. Non-fatal: the message is already persisted, so a
+  // delivery failure shouldn't fail the request.
+  await sendEmail({
+    to: CONTACT_EMAIL_TO,
+    subject: `[Contact] ${subject}`,
+    replyTo: email,
+    html: `
+      <p><strong>From:</strong> ${escapeHtml(name)} &lt;${escapeHtml(email)}&gt;</p>
+      <p><strong>Subject:</strong> ${escapeHtml(subject)}</p>
+      <hr />
+      <p style="white-space:pre-wrap">${escapeHtml(trimmedMessage)}</p>
+    `,
+  });
 
   return NextResponse.json({ ok: true });
 }

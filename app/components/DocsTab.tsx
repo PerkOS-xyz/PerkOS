@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import {
   addDocMessage,
   addDocNote,
+  approvePlan,
   createDoc,
   deleteDocBlock,
   deleteProjectDoc,
@@ -82,7 +83,8 @@ function ownerLabel(owner?: string | null): string {
  * Docs workspace tab — a tree of docs (note|plan|spec), each with its own
  * editor + discussion. Humans write note blocks; the PM proposes
  * planGroup/planTask blocks (read-only here). PM-created docs sit under "PM
- * Drafts" until promoted. No approve/materialize yet (Phase E).
+ * Drafts" until promoted. A proposed plan can be approved → its planTask
+ * blocks materialize into board tasks server-side (see approvePlan).
  */
 export function DocsTab({
   detail,
@@ -418,6 +420,35 @@ function DocEditor({
     }
   };
 
+  const [approving, setApproving] = useState(false);
+  // planTask blocks not yet turned into board tasks.
+  const unmaterializedTasks = blocks.filter(
+    (b) => b.type === "planTask" && !b.materializedTaskId,
+  ).length;
+  const canApprove =
+    isPlan &&
+    unmaterializedTasks > 0 &&
+    (status === "plan_proposed" || status === "approved");
+
+  const approve = async () => {
+    if (!wallet) return;
+    setApproving(true);
+    try {
+      const res = await approvePlan({ projectId, docId, owner: wallet });
+      toast.success(
+        res.created > 0
+          ? `Created ${res.created} task${res.created === 1 ? "" : "s"} on the board`
+          : "Plan approved",
+      );
+    } catch (e) {
+      toast.error("Couldn't approve the plan", {
+        description: (e as Error).message,
+      });
+    } finally {
+      setApproving(false);
+    }
+  };
+
   const editor = (
     <div className="flex flex-col gap-3">
       <div className="flex items-start justify-between gap-2">
@@ -464,9 +495,26 @@ function DocEditor({
           <span className="text-xs text-[#7975a8]">
             {taskCount} draft task{taskCount === 1 ? "" : "s"}
           </span>
-          {status === "plan_proposed" ? (
+          {canApprove ? (
+            <Button size="xs" onClick={approve} disabled={approving}>
+              {approving ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Approving…
+                </>
+              ) : (
+                <>
+                  <Check className="h-3.5 w-3.5" /> Approve &amp; create{" "}
+                  {unmaterializedTasks} task{unmaterializedTasks === 1 ? "" : "s"}
+                </>
+              )}
+            </Button>
+          ) : status === "materialized" ? (
+            <span className="text-xs text-emerald-200/80">
+              Tasks created on the board.
+            </span>
+          ) : status === "plan_proposed" ? (
             <span className="text-xs text-amber-200/80">
-              Proposed — approve (coming soon) to create these on the board.
+              Proposed — no draft tasks to create yet.
             </span>
           ) : null}
         </div>

@@ -52,6 +52,7 @@ import { EmptyState } from "../../../components/EmptyState";
 import { formatAddress } from "../../../lib/format";
 import { useProjectMessages } from "../../../lib/useProjectMessages";
 import { DocsTab } from "../../../components/DocsTab";
+import { uploadAttachment } from "../../../lib/uploadAttachment";
 import { useProjectTasks } from "../../../lib/useProjectTasks";
 import { useWalletAgents, realtimeAgentStatus, type AgentLiveStatus } from "../../../lib/useWalletAgents";
 import { MembersPanel } from "../../../components/MembersPanel";
@@ -146,6 +147,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
               tasks={liveDetail.tasks}
               swarm={liveDetail.project.swarm}
               projectId={projectId}
+              ownerWallet={ownerWallet ?? undefined}
             />
           ) : null}
           {tab === "agents" ? <AgentsTab detail={liveDetail} /> : null}
@@ -518,7 +520,7 @@ const BACKEND_TO_KANBAN: Record<string, "todo" | "in_progress" | "done"> = {
   Done: "done",
 };
 
-const KANBAN_TO_BACKEND: Record<"todo" | "in_progress" | "done", string> = {
+const KANBAN_TO_BACKEND: Record<"todo" | "in_progress" | "done", TaskStatus> = {
   todo: "Backlog",
   in_progress: "In progress",
   done: "Done",
@@ -610,6 +612,29 @@ function TasksTab({
     },
   });
 
+  // Single-card drag persistence. The board moves the card optimistically;
+  // we persist the new status and, on failure, invalidate to snap it back.
+  const dragMoveMut = useMutation({
+    mutationFn: ({ taskId, status }: { taskId: string; status: TaskStatus }) =>
+      updateTask({ walletAddress: effWallet!, projectId, taskId, patch: { status } }),
+    onSuccess: () => invalidate(),
+    onError: (e: Error) => {
+      toast.error("Couldn't move task", { description: e.message });
+      invalidate();
+    },
+  });
+
+  const handleDragMove = (taskId: string, status: TaskStatus) => {
+    const current = tasks.find((t) => t.id === taskId);
+    if (current && current.status === status) return; // dropped on same column
+    if (!effWallet) {
+      toast.error("Connect your wallet to move tasks.");
+      invalidate(); // revert the optimistic card move
+      return;
+    }
+    dragMoveMut.mutate({ taskId, status });
+  };
+
   const mutating = moveMut.isPending || deleteMut.isPending;
 
   const createTaskCtaByColumn = {
@@ -654,15 +679,9 @@ function TasksTab({
         items={kanbanItems}
         emptyMessage="Drag a task here or create one."
         columnExtras={createTaskCtaByColumn}
-        onMove={(itemId, nextStatus) => {
-          // Local-only for now. Will wire to `PATCH /tasks/:id/status` later.
-          // eslint-disable-next-line no-console
-          console.info("[Kanban] move", {
-            projectId,
-            taskId: itemId,
-            nextStatus: KANBAN_TO_BACKEND[nextStatus],
-          });
-        }}
+        onMove={(itemId, nextStatus) =>
+          handleDragMove(itemId, KANBAN_TO_BACKEND[nextStatus])
+        }
         renderCard={({ item }) => (
           <TaskCard
             task={item.task}
@@ -674,10 +693,6 @@ function TasksTab({
           />
         )}
       />
-      <p className="text-[10px] text-muted-foreground">
-        Drag-and-drop is local for now. Backend sync coming with the next
-        release.
-      </p>
 
       <ConfirmDialog
         open={confirmDelete}
@@ -697,31 +712,56 @@ function ConductorTab({
   tasks,
   swarm,
   projectId,
+  ownerWallet,
 }: {
   tasks: Task[];
   swarm?: SwarmDefinition;
   projectId: string;
+  /** Owner wallet for a SHARED project (editors write to it). */
+  ownerWallet?: string;
 }) {
+  const { address } = useConnection();
+  const effWallet = ownerWallet ?? address;
+  const queryClient = useQueryClient();
+
+  const invalidate = () =>
+    queryClient.invalidateQueries({
+      queryKey: ["wallet-project", effWallet, projectId],
+    });
+
+  const dragMoveMut = useMutation({
+    mutationFn: ({ taskId, status }: { taskId: string; status: TaskStatus }) =>
+      updateTask({ walletAddress: effWallet!, projectId, taskId, patch: { status } }),
+    onSuccess: () => invalidate(),
+    onError: (e: Error) => {
+      toast.error("Couldn't move task", { description: e.message });
+      invalidate();
+    },
+  });
+
+  const handleDragMove = (taskId: string, status: TaskStatus) => {
+    const current = tasks.find((t) => t.id === taskId);
+    if (current && current.status === status) return;
+    if (!effWallet) {
+      toast.error("Connect your wallet to move tasks.");
+      invalidate();
+      return;
+    }
+    dragMoveMut.mutate({ taskId, status });
+  };
+
   return (
     <div className="flex flex-col gap-3">
       <ConductorBoard
         tasks={tasks}
         swarm={swarm}
         projectId={projectId}
-        onMove={(taskId, nextStatus) => {
-          // Local-only for now — same posture as TasksTab. Wire to a real
-          // PATCH once the conductor view's drag actions are committed.
-          // eslint-disable-next-line no-console
-          console.info("[Conductor] move", {
-            projectId,
-            taskId,
-            nextStatus: KANBAN_TO_BACKEND[nextStatus],
-          });
-        }}
+        onMove={(taskId, nextStatus) =>
+          handleDragMove(taskId, KANBAN_TO_BACKEND[nextStatus])
+        }
       />
       <p className="text-[10px] text-muted-foreground">
-        Roster surfaces the active workers and their in-progress load. Drag-
-        and-drop is local for now.
+        Roster surfaces the active workers and their in-progress load.
       </p>
     </div>
   );
@@ -1342,6 +1382,17 @@ function ChatTab({
           onSend={(text) => sendMutation.mutate(text)}
           sending={sendMutation.isPending}
           placeholder={`Message #${detail.project.name}…`}
+          uploadFile={
+            address
+              ? (file, index) =>
+                  uploadAttachment({
+                    file,
+                    walletAddress: address,
+                    conversationId: projectId,
+                    index,
+                  })
+              : undefined
+          }
         />
       </div>
 

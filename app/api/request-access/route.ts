@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 
 import { adminDb } from "../../lib/firebaseAdmin";
+import {
+  ACCESS_EMAIL_TO,
+  escapeHtml,
+  sendEmail,
+} from "../../lib/email";
 
 type Payload = {
   walletAddress: string;
@@ -35,19 +40,38 @@ export async function POST(request: Request) {
     );
   }
 
+  const username = body.username?.trim().slice(0, 120) || null;
+  const company = body.company?.trim().slice(0, 200) || null;
+  const website = body.website?.trim().slice(0, 300) || null;
+
   await adminDb()
     .collection("access_requests")
     .add({
       walletAddress,
       email,
-      username: body.username?.trim().slice(0, 120) || null,
-      company: body.company?.trim().slice(0, 200) || null,
-      website: body.website?.trim().slice(0, 300) || null,
+      username,
+      company,
+      website,
       status: "pending",
       createdAt: FieldValue.serverTimestamp(),
     });
 
-  // TODO(email): notify access@perkos.xyz via Resend.
+  // Notify the team. Non-fatal: the request is already persisted.
+  await sendEmail({
+    to: ACCESS_EMAIL_TO,
+    subject: `[Access request] ${username ?? walletAddress}`,
+    replyTo: email,
+    html: `
+      <p><strong>New private-beta access request</strong></p>
+      <ul>
+        <li><strong>Wallet:</strong> ${escapeHtml(walletAddress)}</li>
+        <li><strong>Email:</strong> ${escapeHtml(email)}</li>
+        <li><strong>Username:</strong> ${username ? escapeHtml(username) : "—"}</li>
+        <li><strong>Company:</strong> ${company ? escapeHtml(company) : "—"}</li>
+        <li><strong>Website:</strong> ${website ? escapeHtml(website) : "—"}</li>
+      </ul>
+    `,
+  });
 
   return NextResponse.json({ ok: true });
 }

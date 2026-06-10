@@ -217,6 +217,16 @@ service cloud.firestore {
           || isProjectMember(w, pid)
           || isOrgMember(w, projectOrgId(w, pid));
       }
+      // Agent roster edge (agent membership, gap #2). Readable by any member;
+      // writes go through the server API (Admin SDK) so the forward edge + the
+      // /agents/{name}/assignments reverse index stay consistent — clients
+      // never write it directly (no `allow write`, so editors are denied; the
+      // owner could via the workspace wildcard but the app uses the server).
+      match /agentMembers/{agentName} {
+        allow read: if isSelf(w)
+          || isProjectMember(w, pid)
+          || isOrgMember(w, projectOrgId(w, pid));
+      }
       // Collaborative docs workspace ("Notes"): a tree of docs (note|plan|spec),
       // each with ordered blocks, a revisions log, and its OWN discussion
       // (messages). Same access as tasks: readable by any member, writable by

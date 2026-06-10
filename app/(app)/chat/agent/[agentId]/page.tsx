@@ -23,6 +23,7 @@ import {
 } from "../../../../lib/useAgentChatHistory";
 import { ChatComposer } from "../../../../components/ChatComposer";
 import { Markdown } from "../../../../components/Markdown";
+import { uploadAttachment } from "../../../../lib/uploadAttachment";
 
 type PageProps = {
   params: Promise<{ agentId: string }>;
@@ -157,6 +158,17 @@ export default function AgentChatPage({ params }: PageProps) {
         onSend={send}
         sending={mutation.isPending}
         placeholder={`Message ${agent.name}…`}
+        uploadFile={
+          address
+            ? (file, index) =>
+                uploadAttachment({
+                  file,
+                  walletAddress: address,
+                  conversationId: agentId,
+                  index,
+                })
+            : undefined
+        }
       />
     </div>
   );

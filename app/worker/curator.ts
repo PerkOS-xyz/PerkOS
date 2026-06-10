@@ -1,10 +1,9 @@
 /**
  * PerkOS curator worker.
  *
- * Long-running process — runs the curator tick on a schedule. Same
- * shape as provisioner.ts (separate Docker container, same image,
- * graceful SIGTERM). Pulls from Firestore, calls hibernate on idle
- * agents, logs every decision.
+ * Long-running process — runs the curator tick on a schedule
+ * (separate Docker container, same image, graceful SIGTERM). Pulls
+ * from Firestore, calls hibernate on idle agents, logs every decision.
  *
  * Run with:
  *   npx tsx app/worker/curator.ts

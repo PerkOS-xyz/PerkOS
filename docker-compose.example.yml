@@ -69,7 +69,10 @@ services:
 #       - perkos-knowledge_default
 #     depends_on:
 #       - miniapp
-#     command: ["tsx", "/app/app/worker/provisioner.ts"]
+#     # NOTE: the provisioner worker was retired (it runs in PerkOS-API now).
+#     # This retired service is kept commented for reference; the curator is
+#     # the only worker the image still ships.
+#     command: ["tsx", "/app/app/worker/curator.ts"]
 #     environment:
 #       FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
 #       FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}

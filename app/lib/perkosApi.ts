@@ -1031,27 +1031,45 @@ export async function setProjectSwarm(input: {
 }
 
 /**
- * Add one or more agents (by name — the project roster + "Lead" use agent
- * names, see project.agentIds) to a project. Merges with the existing roster
- * (dedup) and keeps the denormalized `agents` count in sync. Read-merge-write
- * (not a transaction) — fine at workspace scale, bulk-assign tolerant.
+ * Add one or more agents (by name) to a project's roster. Goes through the
+ * server (`POST /projects/:pid/agents`) which writes the agentMembers edge +
+ * the /agents/{name}/assignments reverse index + the denormalized agentIds
+ * cache atomically (Phase A, gap #2). `walletAddress` is the project OWNER —
+ * passed as `owner` so a member of a shared project can assign too (the server
+ * authorizes via project membership).
  */
 export async function assignAgentsToProject(input: {
   walletAddress: string;
   projectId: string;
   agentNames: string[];
-}): Promise<{ added: number; total: number }> {
-  const ref = projectDoc(input.walletAddress, input.projectId);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) throw new Error("Project not found.");
-  const existing = (snap.data().agentIds as string[] | undefined) ?? [];
-  const merged = Array.from(new Set([...existing, ...input.agentNames]));
-  await updateDoc(ref, {
-    agentIds: merged,
-    agents: merged.length,
-    updatedAt: serverTimestamp(),
+}): Promise<{ added: number; total: number; skipped?: string[] }> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(`/projects/${input.projectId}/agents`, {
+    method: "POST",
+    body: JSON.stringify({ agentNames: input.agentNames, owner: input.walletAddress }),
   });
-  return { added: merged.length - existing.length, total: merged.length };
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't assign agents"));
+  return payload as unknown as { added: number; total: number; skipped?: string[] };
+}
+
+/**
+ * Remove one agent from a project's roster — drops the edge + reverse index +
+ * denormalized cache server-side (`DELETE /projects/:pid/agents/:name`).
+ */
+export async function unassignAgentFromProject(input: {
+  walletAddress: string;
+  projectId: string;
+  agentName: string;
+}): Promise<{ total: number }> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/projects/${input.projectId}/agents/${encodeURIComponent(input.agentName)}?owner=${input.walletAddress}`,
+    { method: "DELETE" },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't remove agent"));
+  return payload as unknown as { total: number };
 }
 
 /**
@@ -1064,21 +1082,21 @@ export async function setProjectPm(input: {
   projectId: string;
   pmAgent: string | null;
 }): Promise<void> {
-  const ref = projectDoc(input.walletAddress, input.projectId);
-  const patch: Record<string, unknown> = {
+  // A PM is always a roster member — ensure the membership edge (+ reverse
+  // index + denorm) via the server route before flipping the pmAgent flag.
+  if (input.pmAgent) {
+    await assignAgentsToProject({
+      walletAddress: input.walletAddress,
+      projectId: input.projectId,
+      agentNames: [input.pmAgent],
+    }).catch(() => {
+      /* best-effort — the pmAgent designation below is what matters */
+    });
+  }
+  await updateDoc(projectDoc(input.walletAddress, input.projectId), {
     pmAgent: input.pmAgent,
     updatedAt: serverTimestamp(),
-  };
-  if (input.pmAgent) {
-    const snap = await getDoc(ref);
-    const existing = (snap.data()?.agentIds as string[] | undefined) ?? [];
-    if (!existing.includes(input.pmAgent)) {
-      const merged = [...existing, input.pmAgent];
-      patch.agentIds = merged;
-      patch.agents = merged.length;
-    }
-  }
-  await updateDoc(ref, patch);
+  });
 }
 
 export async function deleteProject(input: {
@@ -1812,6 +1830,50 @@ export async function pmTurn(input: {
     throw new Error(apiError(payload, "PM unavailable"));
   }
   return (payload.data ?? payload) as PmTurnResult;
+}
+
+export type ApprovePlanResult = {
+  /** New status after approval (materialized when tasks were created). */
+  status: PlanStatus | string;
+  /** Number of planTask blocks turned into board tasks. */
+  created: number;
+  /** Ids of the tasks created on the board. */
+  taskIds: string[];
+};
+
+/**
+ * Approve a proposed plan and materialize its planTask blocks into real
+ * board tasks. Server-side (PerkOS-API, Admin SDK): it reads the plan's
+ * planTask blocks, creates one task per block (skipping any already
+ * materialized), stamps each block with its `materializedTaskId`, and
+ * flips the plan status to "materialized". Idempotent — re-approving only
+ * creates tasks for blocks not yet materialized.
+ *
+ * `owner` is the project owner wallet for a SHARED project.
+ */
+export async function approvePlan(input: {
+  projectId: string;
+  docId: string;
+  owner?: string;
+}): Promise<ApprovePlanResult> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/projects/${input.projectId}/plans/${input.docId}/approve`,
+    {
+      method: "POST",
+      body: JSON.stringify({ owner: input.owner }),
+    },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) {
+    throw new Error(apiError(payload, "Couldn't approve the plan"));
+  }
+  const data = (payload.data ?? payload) as Partial<ApprovePlanResult>;
+  return {
+    status: data.status ?? "materialized",
+    created: data.created ?? 0,
+    taskIds: data.taskIds ?? [],
+  };
 }
 
 /** Wake every agent on a project (ECS scale-up). `owner` is the project owner

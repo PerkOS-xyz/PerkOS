@@ -13,6 +13,7 @@
 import { initFirebase } from "@perkos/shared-client";
 import type { Auth } from "firebase/auth";
 import type { Firestore } from "firebase/firestore";
+import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 function handles() {
   return initFirebase({
@@ -32,4 +33,8 @@ export function firebaseAuth(): Auth {
 
 export function firebaseDb(): Firestore {
   return handles().db;
+}
+
+export function firebaseStorage(): FirebaseStorage {
+  return getStorage(handles().app);
 }

@@ -24,8 +24,10 @@ import {
   ThumbsUp,
   ThumbsDown,
   Mic,
+  Paperclip,
   Pause,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -33,6 +35,11 @@ import { useChatPerkosClient } from "../lib/useChatPerkosClient";
 import { useSpeechToText } from "../lib/useSpeechToText";
 import { useChatbot, type ChatBubble } from "./ChatbotProvider";
 import { Markdown } from "./Markdown";
+import {
+  attachmentMarkdown,
+  uploadAttachment,
+  type Attachment,
+} from "../lib/uploadAttachment";
 
 type QuickAction = {
   id: string;
@@ -66,6 +73,9 @@ export function ChatbotPanel() {
   const router = useRouter();
   const { address, isConnected } = useConnection();
   const [draft, setDraft] = useState("");
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   // Track which message ids the user just sent so the server echo
   // (chat_message broadcast back to all participants, including us)
   // doesn't render a duplicate bubble.
@@ -155,9 +165,38 @@ export function ChatbotPanel() {
     if (!chat.authed) setAwaitingReply(false);
   }, [chat.authed]);
 
+  async function onPickFiles(files: FileList | null) {
+    if (!files || files.length === 0 || !address || !convId) return;
+    setUploading(true);
+    try {
+      const uploaded = await Promise.all(
+        Array.from(files).map((file, i) =>
+          uploadAttachment({
+            file,
+            walletAddress: address,
+            conversationId: convId,
+            index: i,
+          }),
+        ),
+      );
+      setAttachments((prev) => [...prev, ...uploaded]);
+    } catch (err) {
+      toast.error("Upload failed", {
+        description: err instanceof Error ? err.message : "Unknown error",
+      });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  function removeAttachment(url: string) {
+    setAttachments((prev) => prev.filter((a) => a.url !== url));
+  }
+
   function send(text: string) {
     const trimmed = text.trim();
-    if (!trimmed) return;
+    if (!trimmed && attachments.length === 0) return;
     if (!isConnected || !address) {
       appendMessage({
         id: genId(),
@@ -182,13 +221,18 @@ export function ChatbotPanel() {
       });
       return;
     }
+    // Compose the outgoing body: text + each attachment as markdown.
+    const body = [trimmed, ...attachments.map(attachmentMarkdown)]
+      .filter(Boolean)
+      .join("\n\n");
     // Optimistically render the user's bubble immediately; the WS
     // server-echo carries the same id which the onMessage handler
     // de-dupes against sentIdsRef.
-    const id = chat.send(trimmed);
+    const id = chat.send(body);
     sentIdsRef.current.add(id);
-    appendMessage({ id, role: "user", text: trimmed });
+    appendMessage({ id, role: "user", text: body });
     setDraft("");
+    setAttachments([]);
     setAwaitingReply(true);
   }
 
@@ -280,16 +324,55 @@ export function ChatbotPanel() {
             </p>
           ) : null}
 
+          {attachments.length > 0 ? (
+            <div className="mb-2 flex flex-wrap gap-1.5">
+              {attachments.map((a) => (
+                <span
+                  key={a.url}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2 py-1 text-xs text-foreground"
+                >
+                  {a.isImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={a.url} alt="" className="h-5 w-5 rounded object-cover" />
+                  ) : (
+                    <Paperclip className="h-3.5 w-3.5 text-muted-foreground" />
+                  )}
+                  <span className="max-w-[160px] truncate">{a.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeAttachment(a.url)}
+                    aria-label={`Remove ${a.name}`}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          ) : null}
+
           <form onSubmit={onSubmit}>
             <div className="flex items-end gap-2 rounded-lg border border-input bg-background px-3 py-2 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary">
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                className="hidden"
+                onChange={(e) => onPickFiles(e.target.files)}
+              />
               <button
                 type="button"
-                aria-label="Attach"
-                disabled
-                className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-muted-foreground/60"
-                title="Attachments coming soon"
+                aria-label="Attach files"
+                disabled={uploading || !convId}
+                onClick={() => fileInputRef.current?.click()}
+                className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:text-primary disabled:opacity-50"
+                title="Attach files"
               >
-                <Plus className="h-4 w-4" />
+                {uploading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
               </button>
               <textarea
                 value={draft}
