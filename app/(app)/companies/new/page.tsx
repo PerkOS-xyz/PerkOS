@@ -8,14 +8,18 @@ import {
   ArrowLeft,
   Bot,
   Briefcase,
+  Calculator,
   Check,
+  GraduationCap,
+  Hammer,
+  HeartPulse,
   Home,
   Link2,
   Loader2,
   Palette,
   Plus,
-  Scissors,
-  Store,
+  ShoppingCart,
+  Sparkles,
   Trash2,
   UtensilsCrossed,
   Users,
@@ -49,12 +53,16 @@ import { useActiveOrg } from "../../../lib/useActiveOrg";
 import { fetchActiveRuntimes } from "../../../lib/runtimeImages";
 
 const ICONS: Record<string, LucideIcon> = {
-  Store,
-  Scissors,
   Briefcase,
-  UtensilsCrossed,
-  Palette,
+  Calculator,
+  GraduationCap,
+  Hammer,
+  HeartPulse,
   Home,
+  Palette,
+  ShoppingCart,
+  Sparkles,
+  UtensilsCrossed,
 };
 
 // Resolve a role to the launch payload: reused presets pull their soul +
