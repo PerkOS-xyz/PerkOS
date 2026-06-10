@@ -85,7 +85,7 @@ export const COMPANY_TEMPLATES: CompanyTemplate[] = [
   {
     id: "retail-store",
     industry: "retail",
-    name: "Tienda / Bodega",
+    name: "Retail Store",
     icon: "Store",
     blurb: "Corner store or warehouse: stock, sales, and the books — run by a manager.",
     roles: [
@@ -115,7 +115,7 @@ export const COMPANY_TEMPLATES: CompanyTemplate[] = [
   {
     id: "apparel-workshop",
     industry: "apparel",
-    name: "Taller de Confección",
+    name: "Apparel Workshop",
     icon: "Scissors",
     blurb: "Clothing maker: design, production planning, and orders — led by a workshop lead.",
     roles: [
@@ -158,7 +158,7 @@ export const COMPANY_TEMPLATES: CompanyTemplate[] = [
   {
     id: "service-business",
     industry: "services",
-    name: "Negocio de Servicios",
+    name: "Service Business",
     icon: "Briefcase",
     blurb: "Generic small business: operations, sales/marketing, and finance under an owner-manager.",
     roles: [
@@ -171,7 +171,7 @@ export const COMPANY_TEMPLATES: CompanyTemplate[] = [
   {
     id: "restaurant",
     industry: "food",
-    name: "Restaurante",
+    name: "Restaurant",
     icon: "UtensilsCrossed",
     blurb: "Food service: menu, orders, and suppliers — coordinated by the manager.",
     roles: [
@@ -214,7 +214,7 @@ export const COMPANY_TEMPLATES: CompanyTemplate[] = [
   {
     id: "creative-agency",
     industry: "marketing",
-    name: "Agencia Creativa",
+    name: "Creative Agency",
     icon: "Palette",
     blurb: "Marketing/creative shop: content, design, and social — under an account lead.",
     roles: [
@@ -257,7 +257,7 @@ export const COMPANY_TEMPLATES: CompanyTemplate[] = [
   {
     id: "real-estate",
     industry: "real-estate",
-    name: "Inmobiliaria",
+    name: "Real Estate",
     icon: "Home",
     blurb: "Property shop: listings, client relations, and docs/finance — run by a broker.",
     roles: [
