@@ -47,6 +47,16 @@ export async function getPublicMode(): Promise<boolean> {
 export async function checkWalletAccess(address: string): Promise<AccessDecision> {
   const normalized = address.toLowerCase();
 
+  // Fetch the allowlist doc once — it carries both membership AND the
+  // admin "pause" flag (`suspended`).
+  const snap = await adminDb().collection("allowlist").doc(normalized).get();
+
+  // Admin-paused wallet: a hard block that overrides public-mode + allowlist,
+  // so the admin can suspend a user's access to the app at any time.
+  if (snap.exists && snap.data()?.suspended === true) {
+    return { allowed: false, reason: "not-allowlisted" };
+  }
+
   if (await getPublicMode()) {
     return { allowed: true, reason: "public-mode" };
   }
@@ -55,7 +65,6 @@ export async function checkWalletAccess(address: string): Promise<AccessDecision
     return { allowed: true, reason: "env-allowlist" };
   }
 
-  const snap = await adminDb().collection("allowlist").doc(normalized).get();
   if (snap.exists) {
     return { allowed: true, reason: "firestore-allowlist" };
   }
