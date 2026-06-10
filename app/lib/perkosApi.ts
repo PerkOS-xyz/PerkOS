@@ -2377,3 +2377,72 @@ export async function fetchAgent(agentId: string): Promise<{
   if (!response.ok) throw new Error(apiError(payload, "Failed to load agent"));
   return payload as never;
 }
+
+// ---------------------------------------------------------------------------
+// Personal team templates ("My templates")
+// ---------------------------------------------------------------------------
+
+/** A user-saved team composition, reusable from the New Project wizard.
+ *  Roles serialize the same shape the wizard launches (`CompanyRole`):
+ *  preset-backed roles carry `presetId`; authored roles carry `soul` fields. */
+export type TeamTemplate = {
+  id: string;
+  name: string;
+  /** The PerkOS business template this started from, if any. */
+  baseTemplateId: string | null;
+  roles: unknown[];
+  createdAt?: string;
+};
+
+function teamTemplatesCol(walletAddress: string) {
+  return collection(
+    firebaseDb(),
+    "wallets",
+    normalize(walletAddress),
+    "team_templates"
+  );
+}
+
+export async function listTeamTemplates(
+  walletAddress: string
+): Promise<TeamTemplate[]> {
+  const snap = await getDocs(
+    query(teamTemplatesCol(walletAddress), orderBy("createdAt", "desc"))
+  );
+  return snap.docs.map((d) => {
+    const data = d.data() as Record<string, unknown>;
+    return {
+      id: d.id,
+      name: (data.name as string) ?? "Untitled team",
+      baseTemplateId: (data.baseTemplateId as string | null) ?? null,
+      roles: Array.isArray(data.roles) ? data.roles : [],
+      createdAt:
+        typeof data.createdAt === "string" ? data.createdAt : undefined,
+    };
+  });
+}
+
+export async function saveTeamTemplate(input: {
+  walletAddress: string;
+  name: string;
+  baseTemplateId?: string | null;
+  roles: unknown[];
+}): Promise<{ id: string }> {
+  const ref = doc(teamTemplatesCol(input.walletAddress));
+  await setDoc(ref, {
+    name: input.name,
+    baseTemplateId: input.baseTemplateId ?? null,
+    roles: input.roles,
+    createdAt: new Date().toISOString(),
+  });
+  return { id: ref.id };
+}
+
+export async function deleteTeamTemplate(input: {
+  walletAddress: string;
+  templateId: string;
+}): Promise<void> {
+  await deleteDoc(
+    doc(teamTemplatesCol(input.walletAddress), input.templateId)
+  );
+}
