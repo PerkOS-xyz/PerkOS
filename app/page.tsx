@@ -3,38 +3,55 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import {
   ArrowRight,
-  Bot,
   Briefcase,
+  Calculator,
   Check,
-  Clock,
-  CreditCard,
+  Coffee,
+  GraduationCap,
+  Hammer,
   Handshake,
-  Layers,
-  Lock,
+  HeartPulse,
+  Home,
   Mail,
   MessageSquare,
-  Phone,
-  Server,
-  Shield,
+  Moon,
+  Palette,
+  ShieldCheck,
+  ShoppingCart,
   Sparkles,
-  TrendingDown,
-  Zap,
+  UtensilsCrossed,
+  Wand2,
+  type LucideIcon,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { AgentOrb } from "./components/AgentOrb";
 import { ContactForm } from "./components/landing/ContactForm";
 import { LandingAutoRoute } from "./components/LandingAutoRoute";
 import { SmartCTA } from "./components/SmartCTA";
 
 export const metadata: Metadata = {
-  title: "PerkOS — Cut operational costs by 60–80% with reliable AI agents",
+  title: "PerkOS — Your business just hired its first team",
   description:
-    "Replace repetitive work in support, sales, and operations with AI agents that handle real volume, process payments, and escalate to humans only when necessary. Managed or self-hosted. Private beta — invitation only.",
+    "Pick your type of business and in two minutes you have a small AI team that handles the busywork — marketing, customer replies, research, the books — and checks with you first. They draft, you approve. No tech skills needed.",
 };
 
 // ============================================================================
-// Page
+// Page — the PerkOS landing (replacing perkos.xyz).
+//
+// Audience: NON-TECHNICAL small-business owners first (anxious about AI —
+// user testing showed robot imagery + tech jargon scared them), investors /
+// partners / developers second (one contained strip).
+//
+// Structure (strategy blueprint): hero → fear-killer → templates (the
+// conversion centerpiece) → meet your team → how it works → expertise
+// (authority without jargon) → beyond teams (AI services in general) →
+// pricing teaser → builders strip → talk to us → final CTA.
+//
+// Vocabulary contract: teammates/team, drafts, you approve, set up, ready in
+// minutes. Banned on this page: agent (as a buyer-facing noun), bot, robot,
+// deploy, provision, infrastructure, blockchain/x402/token, LLM. "Agentic AI"
+// appears exactly once — explained in plain words (expertise section).
 // ============================================================================
 
 export default function LandingPage() {
@@ -44,16 +61,15 @@ export default function LandingPage() {
       <TopNav />
       <main className="flex-1">
         <Hero />
-        <MetricsBand />
-        <EnterpriseUseCases />
-        <DeploymentComparison />
-        <PlatformCapabilities />
-        <PricingAndToken />
-        <TokenUtility />
-        <WhyPekos />
-        <Testimonials />
+        <FearKillers />
+        <Templates />
+        <MeetYourTeam />
         <HowItWorks />
-        <RequestAccess />
+        <Expertise />
+        <BeyondTeams />
+        <PricingTeaser />
+        <BuildersStrip />
+        <TalkToUs />
         <FinalCTA />
       </main>
       <Footer />
@@ -73,40 +89,36 @@ function TopNav() {
           <Image src="/perkos-header.png" alt="PerkOS" width={130} height={28} priority />
         </Link>
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-          <Link href="#use-cases" className="hover:text-foreground transition-colors">
-            Use cases
+          <Link href="#templates" className="transition-colors hover:text-foreground">
+            For your business
           </Link>
-          <Link href="#how-it-works" className="hover:text-foreground transition-colors">
+          <Link href="#how-it-works" className="transition-colors hover:text-foreground">
             How it works
           </Link>
-          <Link href="#pricing" className="hover:text-foreground transition-colors">
-            Pricing
+          <Link href="#expertise" className="transition-colors hover:text-foreground">
+            Why PerkOS
           </Link>
-          <Link href="#token" className="hover:text-foreground transition-colors">
-            $PEKOS
-          </Link>
-          <Link href="#request-access" className="hover:text-foreground transition-colors">
-            Contact
+          <Link href="#talk-to-us" className="transition-colors hover:text-foreground">
+            Talk to us
           </Link>
         </nav>
         <div className="flex items-center gap-2">
-          {/* Wallet sign-in — visible on ALL viewports. In a mini-app (Base App /
-              Farcaster) the wallet is already connected, so SmartCTA signs in and
-              routes to /continue → dashboard/welcome; on web it goes to /sign-in. */}
+          {/* Sign-in — works on web (email/wallet) and inside Base App /
+              Farcaster, where SmartCTA picks up the host wallet. */}
           <SmartCTA
             href="/sign-in"
             className="inline-flex items-center rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/40"
           >
             Sign in
           </SmartCTA>
-          <Link
-            href="#request-access"
+          <SmartCTA
+            href="/sign-in"
             className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 sm:px-4"
           >
-            <span className="hidden sm:inline">Join the private beta</span>
-            <span className="sm:hidden">Join beta</span>
+            <span className="hidden sm:inline">Meet your team</span>
+            <span className="sm:hidden">Start</span>
             <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+          </SmartCTA>
         </div>
       </div>
     </header>
@@ -114,7 +126,7 @@ function TopNav() {
 }
 
 // ============================================================================
-// Hero (Version B)
+// Hero
 // ============================================================================
 
 function Hero() {
@@ -133,31 +145,30 @@ function Hero() {
           variant="secondary"
           className="border-primary/30 bg-primary/10 text-xs uppercase tracking-wider text-primary"
         >
-          Private beta · Invitation only
+          Early access · Free to start
         </Badge>
 
         <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight text-foreground md:text-6xl">
-          Cut operational costs by{" "}
+          Your business just hired its{" "}
           <span className="bg-gradient-to-r from-primary to-amber-300 bg-clip-text text-transparent">
-            60–80%
-          </span>{" "}
-          with reliable AI agents.
+            first team
+          </span>
+          .
         </h1>
 
         <p className="max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
-          Replace repetitive work in support, sales, and operations with AI
-          agents that handle real volume, process payments, and escalate to
-          humans only when necessary.
+          Pick your type of business, and in two minutes you have a small team
+          that handles the busywork — and checks with you first.
         </p>
 
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <Link
-            href="#request-access"
+        <div className="flex flex-col items-center gap-3 sm:flex-row">
+          <SmartCTA
+            href="/sign-in"
             className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-[0_0_24px_rgba(236,27,105,0.3)] transition-opacity hover:opacity-90"
           >
-            Join the private beta
+            Meet your team
             <ArrowRight className="h-4 w-4" />
-          </Link>
+          </SmartCTA>
           <Link
             href="#how-it-works"
             className="inline-flex items-center justify-center rounded-md border border-border bg-card px-6 py-3 text-sm text-foreground transition-colors hover:border-primary/40"
@@ -167,663 +178,130 @@ function Hero() {
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 pt-2 text-xs text-muted-foreground">
-          <InlineProof Icon={Server} label="Managed or self-hosted" />
-          <InlineProof Icon={Clock} label="24/7 coverage" />
-          <InlineProof Icon={Zap} label="x402 instant settlement" />
-          <InlineProof Icon={Lock} label="Data residency options" />
+          <TrustChip label="You approve everything" />
+          <TrustChip label="Ready in 2 minutes" />
+          <TrustChip label="No tech skills needed" />
+          <TrustChip label="Cancel anytime" />
         </div>
       </div>
     </section>
   );
 }
 
-function InlineProof({
-  Icon,
-  label,
-}: {
-  Icon: React.ComponentType<{ className?: string }>;
-  label: string;
-}) {
+function TrustChip({ label }: { label: string }) {
   return (
     <span className="inline-flex items-center gap-1.5">
-      <Icon className="h-3.5 w-3.5 text-primary" />
+      <Check className="h-3.5 w-3.5 text-primary" />
       {label}
     </span>
   );
 }
 
 // ============================================================================
-// Metrics band — proof before pitch (aspirational; disclosed as pilot results)
+// Fear-killer strip — disarm AI anxiety before asking for anything.
 // ============================================================================
 
-function MetricsBand() {
-  const metrics = [
-    { value: "68%", label: "Less ticket handling time" },
-    { value: "5×", label: "More conversations per agent" },
-    { value: "24/7", label: "Coverage, zero added headcount" },
-    { value: "< 2 wks", label: "Pilot to production" },
-    { value: "Zero", label: "Chargebacks via x402" },
-  ];
-  return (
-    <section className="border-b border-border bg-card/60">
-      <div className="mx-auto max-w-6xl px-4 py-12 md:px-8 md:py-14">
-        <dl className="grid grid-cols-2 gap-y-8 sm:grid-cols-3 md:grid-cols-5 md:gap-0">
-          {metrics.map((m, i) => (
-            <div
-              key={m.label}
-              className={cn(
-                "flex flex-col items-center gap-1 px-4 text-center",
-                i < metrics.length - 1 && "md:border-r md:border-border"
-              )}
-            >
-              <dd className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-                {m.value}
-              </dd>
-              <dt className="text-xs text-muted-foreground md:text-sm">{m.label}</dt>
-            </div>
-          ))}
-        </dl>
-        <p className="mt-8 text-center text-xs text-muted-foreground">
-          Early results from private-beta pilots. Your numbers will vary by
-          process and volume.
-        </p>
-      </div>
-    </section>
-  );
-}
-
-// ============================================================================
-// Enterprise use cases
-// ============================================================================
-
-type UseCase = {
-  Icon: React.ComponentType<{ className?: string }>;
-  eyebrow: string;
-  title: string;
-  bullets: string[];
-  tag: string;
-};
-
-const USE_CASES: UseCase[] = [
-  {
-    Icon: Phone,
-    eyebrow: "Customer support",
-    title: "AI call center & customer support",
-    bullets: [
-      "Handle inbound across WhatsApp, Telegram, Discord, Email, and web",
-      "Resolve 70–85% of tickets without human intervention",
-      "Escalate complex cases to your team with full context",
-      "24/7 coverage at a fraction of traditional call-center cost",
-    ],
-    tag: "70–85% resolved",
-  },
-  {
-    Icon: Handshake,
-    eyebrow: "Revenue",
-    title: "Sales & lead qualification",
-    bullets: [
-      "Qualify inbound leads 24/7 across every channel",
-      "Book meetings directly into your calendar",
-      "Follow up persistently without sounding robotic",
-      "Hand off warm leads with the full conversation history",
-    ],
-    tag: "24/7 pipeline",
-  },
-  {
-    Icon: Layers,
-    eyebrow: "Operations",
-    title: "Internal operations automation",
-    bullets: [
-      "Process invoices, approvals, data entry, and reporting",
-      "Maintain compliance and audit trails automatically",
-      "Reduce back-office headcount while increasing speed",
-      "Full traceability on every action",
-    ],
-    tag: "Compliance + audit",
-  },
-  {
-    Icon: Briefcase,
-    eyebrow: "Enterprise scale",
-    title: "Multi-department orchestration",
-    bullets: [
-      "Coordinate agents across support → sales → operations → finance",
-      "One workspace. One source of truth.",
-      "Full visibility for your team",
-      "Agents keep identity and memory across departments",
-    ],
-    tag: "One workspace",
-  },
-];
-
-function EnterpriseUseCases() {
-  return (
-    <section id="use-cases" className="border-b border-border py-20 md:py-28">
-      <div className="mx-auto max-w-6xl px-4 md:px-8">
-        <div className="mb-12 flex flex-col items-center gap-3 text-center md:mb-16">
-          <span className="text-xs font-semibold uppercase tracking-wider text-primary">
-            Enterprise use cases
-          </span>
-          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
-            Where PerkOS agents go to work.
-          </h2>
-          <p className="max-w-2xl text-base text-muted-foreground">
-            Four high-volume processes where AI agents cut costs and scale
-            without adding headcount.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          {USE_CASES.map((uc) => (
-            <UseCaseCard key={uc.title} uc={uc} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function UseCaseCard({ uc }: { uc: UseCase }) {
-  const { Icon, eyebrow, title, bullets, tag } = uc;
-  return (
-    <div className="group relative flex flex-col gap-4 overflow-hidden rounded-xl border border-border bg-card p-6 transition-colors hover:border-primary/40">
-      <div
-        className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-primary/40 to-transparent"
-        aria-hidden
-      />
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <span className="grid h-11 w-11 place-items-center rounded-xl bg-primary/15 text-primary">
-            <Icon className="h-5 w-5" />
-          </span>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">
-              {eyebrow}
-            </span>
-            <span className="text-base font-semibold text-foreground">{title}</span>
-          </div>
-        </div>
-        <Badge variant="secondary" className="shrink-0 border-0 bg-muted text-[10px] text-muted-foreground">
-          {tag}
-        </Badge>
-      </div>
-      <ul className="flex flex-col gap-2.5">
-        {bullets.map((b) => (
-          <li key={b} className="flex items-start gap-2.5 text-sm">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-            <span className="text-muted-foreground">{b}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-// ============================================================================
-// Managed vs self-hosted
-// ============================================================================
-
-function DeploymentComparison() {
-  return (
-    <section className="border-b border-border bg-card/30 py-20 md:py-28">
-      <div className="mx-auto max-w-5xl px-4 md:px-8">
-        <div className="mb-12 flex flex-col items-center gap-3 text-center">
-          <span className="text-xs font-semibold uppercase tracking-wider text-primary">
-            Deployment
-          </span>
-          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
-            You choose how it runs.
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          <div className="flex flex-col gap-4 rounded-xl border border-primary/30 bg-card p-6">
-            <Badge variant="secondary" className="w-fit border-0 bg-emerald-500/15 text-[10px] uppercase text-emerald-300">
-              Fully managed
-            </Badge>
-            <h3 className="text-xl font-semibold text-foreground">Managed by PerkOS</h3>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              We run the infrastructure, monitor performance, handle updates,
-              and scale your agents. You focus on results — production processes
-              without DevOps overhead.
-            </p>
-            <ul className="flex flex-col gap-2">
-              {["Monitored 24/7", "Auto-scaling", "Updates included", "No DevOps required"].map((b) => (
-                <li key={b} className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                  <Check className="h-4 w-4 shrink-0 text-primary" />
-                  {b}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-6">
-            <Badge variant="secondary" className="w-fit border-0 bg-muted text-[10px] uppercase text-muted-foreground">
-              Self-hosted
-            </Badge>
-            <h3 className="text-xl font-semibold text-foreground">Run on your infrastructure</h3>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              Run everything on your own cloud, VPS, or on-prem. Full control,
-              same enterprise capabilities. Built for strict data residency or
-              compliance requirements.
-            </p>
-            <ul className="flex flex-col gap-2">
-              {["Your cloud / VPS / on-prem", "Full data residency", "Same capabilities", "Bring your own keys (BYOK)"].map((b) => (
-                <li key={b} className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                  <Check className="h-4 w-4 shrink-0 text-primary" />
-                  {b}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ============================================================================
-// Platform capabilities (condensed — replaces the 5 feature deep-dives)
-// ============================================================================
-
-function PlatformCapabilities() {
-  const caps = [
-    {
-      Icon: Bot,
-      title: "Any runtime, any host",
-      copy: "Connect an existing Hermes or OpenClaw agent, or let the launcher provision one on managed infra or your VPS.",
-    },
-    {
-      Icon: MessageSquare,
-      title: "Every channel",
-      copy: "WhatsApp, Telegram, Discord, Slack, Email, and web — one agent, same memory, wherever the conversation lives.",
-    },
-    {
-      Icon: Briefcase,
-      title: "Project rooms & boards",
-      copy: "Humans and agents work side by side — kanban boards that move as agents complete tasks, with full logs.",
-    },
-    {
-      Icon: Sparkles,
-      title: "A co-pilot for your team",
-      copy: "Every workspace ships with an assistant that knows your projects, agents, and tasks. Ask it in plain English.",
-    },
-  ];
-  return (
-    <section id="features" className="border-b border-border py-20 md:py-28">
-      <div className="mx-auto max-w-6xl px-4 md:px-8">
-        <div className="mb-12 flex flex-col items-center gap-3 text-center md:mb-16">
-          <span className="text-xs font-semibold uppercase tracking-wider text-primary">
-            The platform
-          </span>
-          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
-            A real workspace behind every agent.
-          </h2>
-          <p className="max-w-2xl text-base text-muted-foreground">
-            Not a chatbot widget — a workspace where your agents run real
-            processes and your team stays in control.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-4">
-          {caps.map(({ Icon, title, copy }) => (
-            <div
-              key={title}
-              className="flex flex-col gap-3 rounded-xl border border-border bg-card p-6 transition-colors hover:border-primary/40"
-            >
-              <span className="grid h-10 w-10 place-items-center rounded-full bg-primary/15 text-primary">
-                <Icon className="h-4 w-4" />
-              </span>
-              <h3 className="text-base font-medium text-foreground">{title}</h3>
-              <p className="text-sm text-muted-foreground">{copy}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ============================================================================
-// Pricing + $PEKOS token
-// ============================================================================
-
-type Tier = {
-  name: string;
-  tag: string;
-  bullets: string[];
-  featured?: boolean;
-  cta: string;
-};
-
-const TIERS: Tier[] = [
-  {
-    name: "Starter",
-    tag: "For teams that want to test",
-    bullets: ["Up to 5 active agents", "Basic channels", "Community support", "Pay-as-you-go or monthly"],
-    cta: "Request access",
-  },
-  {
-    name: "Growth",
-    tag: "For startups and mid-size companies",
-    bullets: ["Unlimited agents", "All channels + advanced routing", "Full PerkOS workspace", "Priority support"],
-    featured: true,
-    cta: "Join the private beta",
-  },
-  {
-    name: "Enterprise",
-    tag: "For large organizations",
-    bullets: ["Custom processes (call center, sales, ops)", "Dedicated success manager", "SLA + compliance support", "Onboarding + training + Managed Services"],
-    cta: "Talk to our team",
-  },
-];
-
-function PricingAndToken() {
-  return (
-    <section id="pricing" className="border-b border-border py-20 md:py-28">
-      <div className="mx-auto max-w-6xl px-4 md:px-8">
-        <div className="mb-12 flex flex-col items-center gap-3 text-center md:mb-16">
-          <span className="text-xs font-semibold uppercase tracking-wider text-primary">
-            Pricing
-          </span>
-          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
-            Simple plans. Real results.
-          </h2>
-          <Badge
-            variant="secondary"
-            className="border-primary/30 bg-primary/10 text-xs uppercase tracking-wider text-primary"
-          >
-            Private beta · Invitation only
-          </Badge>
-          <p className="max-w-2xl text-base text-muted-foreground">
-            Access is invitation-only during the private beta — request access
-            and we&apos;ll match you to the right plan.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-          {TIERS.map((t) => (
-            <div
-              key={t.name}
-              className={cn(
-                "relative flex flex-col gap-4 rounded-xl border bg-card p-6",
-                t.featured
-                  ? "border-primary/60 shadow-[0_0_32px_rgba(236,27,105,0.12)]"
-                  : "border-border"
-              )}
-            >
-              {t.featured ? (
-                <>
-                  <div
-                    className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-primary/50 to-transparent"
-                    aria-hidden
-                  />
-                  <Badge className="absolute -top-2.5 left-6 bg-primary text-[10px] uppercase text-primary-foreground">
-                    Most popular
-                  </Badge>
-                </>
-              ) : null}
-              <div className="flex flex-col gap-1">
-                <span className="text-lg font-semibold text-foreground">{t.name}</span>
-                <span className="text-xs text-muted-foreground">{t.tag}</span>
-              </div>
-              <ul className="flex flex-col gap-2.5">
-                {t.bullets.map((b) => (
-                  <li key={b} className="flex items-start gap-2.5 text-sm">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    <span className="text-muted-foreground">{b}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="#request-access"
-                className={cn(
-                  "mt-auto inline-flex items-center justify-center gap-1.5 rounded-md px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-90",
-                  t.featured
-                    ? "bg-primary text-primary-foreground"
-                    : "border border-border bg-background text-foreground hover:border-primary/40"
-                )}
-              >
-                {t.cta}
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ============================================================================
-// $PEKOS token utility (dedicated section)
-// ============================================================================
-
-function TokenUtility() {
-  const benefits = [
-    {
-      Icon: CreditCard,
-      title: "15–25% discount",
-      copy: "Pay for Growth and Enterprise plans with $PEKOS and save 15–25% versus fiat.",
-    },
-    {
-      Icon: Shield,
-      title: "Staking benefits",
-      copy: "Stake $PEKOS for permanent discounts, priority support, and early access to new AI processes.",
-    },
-    {
-      Icon: TrendingDown,
-      title: "Future revenue share",
-      copy: "Stakers are positioned for revenue share in selected cases as the platform scales.",
-    },
-    {
-      Icon: Zap,
-      title: "Agent micropayments",
-      copy: "Agents settle usage in micropayments via x402 — the same rail that powers instant, chargeback-free billing.",
-    },
-  ];
-  return (
-    <section id="token" className="border-b border-border py-20 md:py-28">
-      <div className="mx-auto max-w-6xl px-4 md:px-8">
-        <div className="mb-12 flex flex-col items-center gap-3 text-center md:mb-16">
-          <span className="text-xs font-semibold uppercase tracking-wider text-primary">
-            $PEKOS token
-          </span>
-          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
-            $PEKOS Token Utility
-          </h2>
-          <p className="max-w-2xl text-base text-muted-foreground">
-            <b className="text-foreground">Pay with $PEKOS — save up to 25%.</b>{" "}
-            Organizations that pay with $PEKOS receive 15–25% off Growth and
-            Enterprise plans. Stakers also unlock permanent discounts, priority
-            support, and early access to new AI processes. The token aligns
-            incentives between PerkOS and the companies running real operations
-            on the platform.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-4">
-          {benefits.map(({ Icon, title, copy }) => (
-            <div
-              key={title}
-              className="flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/5 p-6"
-            >
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/15 text-primary">
-                <Icon className="h-4 w-4" />
-              </span>
-              <h3 className="text-base font-medium text-foreground">{title}</h3>
-              <p className="text-sm text-muted-foreground">{copy}</p>
-            </div>
-          ))}
-        </div>
-
-        <p className="mt-8 text-center text-xs text-muted-foreground">
-          $PEKOS settles on <b className="text-foreground">Base</b> and{" "}
-          <b className="text-foreground">Celo</b> via USDC using the x402
-          protocol — low-fee, instant, multi-chain payments for agents and
-          organizations.
-        </p>
-
-        <div className="mx-auto mt-5 flex max-w-2xl flex-col items-stretch gap-2 sm:flex-row sm:justify-center">
-          {[
-            { chain: "Base", ca: "0xF714E60f85497D70508F7E356b5DB80e64539BA3" },
-            { chain: "Celo", ca: "0xb7Ba43fBD4F2E85FCE929f7d4DFE3905Ae846A46" },
-          ].map(({ chain, ca }) => (
-            <div
-              key={chain}
-              className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2"
-            >
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">
-                CA · {chain}
-              </span>
-              <span className="break-all font-mono text-[11px] text-muted-foreground">
-                {ca}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ============================================================================
-// Why $PEKOS — investor narrative
-// ============================================================================
-
-function WhyPekos() {
-  const points = [
-    {
-      Icon: Zap,
-      title: "Token demand flywheel",
-      copy: "Every organization paying or staking with $PEKOS to cut costs adds recurring demand for the token — usage and value reinforce each other.",
-    },
-    {
-      Icon: Briefcase,
-      title: "Revenue-share potential",
-      copy: "As platform revenue grows, stakers are positioned to share in it — aligning long-term holders with real operational usage, not speculation.",
-    },
-    {
-      Icon: Layers,
-      title: "Multi-chain strategy",
-      copy: "Settlement on Base + Celo via x402 gives $PEKOS reach across ecosystems and instant, chargeback-free micropayments at agent scale.",
-    },
-  ];
-  return (
-    <section
-      id="investors"
-      className="relative overflow-hidden border-b border-border bg-card/30 py-20 md:py-28"
-    >
-      <div
-        aria-hidden
-        className="absolute inset-0 -z-10"
-        style={{
-          backgroundImage:
-            "radial-gradient(ellipse 50% 40% at 50% 50%, rgba(236,27,105,0.08) 0%, transparent 70%)",
-        }}
-      />
-      <div className="mx-auto max-w-6xl px-4 md:px-8">
-        <div className="mb-12 flex flex-col items-center gap-3 text-center md:mb-16">
-          <Badge
-            variant="secondary"
-            className="border-primary/30 bg-primary/10 text-xs uppercase tracking-wider text-primary"
-          >
-            For investors
-          </Badge>
-          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
-            Why $PEKOS — value for long-term holders.
-          </h2>
-          <p className="max-w-2xl text-base text-muted-foreground">
-            $PEKOS isn&apos;t a side feature — it&apos;s the alignment layer
-            between the platform&apos;s growth and the people backing it.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-          {points.map(({ Icon, title, copy }) => (
-            <div
-              key={title}
-              className="flex flex-col gap-3 rounded-xl border border-border bg-card p-6"
-            >
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/15 text-primary">
-                <Icon className="h-4 w-4" />
-              </span>
-              <h3 className="text-base font-medium text-foreground">{title}</h3>
-              <p className="text-sm text-muted-foreground">{copy}</p>
-            </div>
-          ))}
-        </div>
-        <div className="mt-10 text-center">
-          <a
-            href="mailto:invest@perkos.xyz"
-            className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-5 py-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40"
-          >
-            <Briefcase className="h-4 w-4 text-primary" />
-            Investor inquiries — invest@perkos.xyz
-          </a>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ============================================================================
-// Testimonials (aspirational — company names withheld during private beta)
-// ============================================================================
-
-function Testimonials() {
+function FearKillers() {
   const items = [
     {
-      quote:
-        "We replaced 12 night-shift support agents with 3 PerkOS agents. First-contact resolution increased to 78%. Our human team now only handles complex cases.",
-      role: "Head of Customer Success",
-      monogram: "CS",
-      useCase: "AI call center",
+      Icon: ShieldCheck,
+      title: "Nothing happens without your OK.",
+      body: "Your team drafts and suggests — you review every piece before it goes anywhere.",
     },
     {
-      quote:
-        "Before, it took us 4 days to process internal requests. Now PerkOS agents do it in under 4 hours with full traceability.",
-      role: "COO",
-      monogram: "OP",
-      useCase: "Internal operations",
+      Icon: Coffee,
+      title: "If you can text, you can do this.",
+      body: "Tell your team what you need in plain English. That's the whole job.",
+    },
+    {
+      Icon: Moon,
+      title: "Costs less than one hour of help.",
+      body: "No contracts, no setup fees. When your team isn't working, you're barely paying.",
     },
   ];
   return (
-    <section className="border-b border-border bg-card/30 py-20 md:py-28">
-      <div className="mx-auto max-w-5xl px-4 md:px-8">
+    <section className="border-b border-border bg-card/30 py-12 md:py-16">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-4 md:grid-cols-3 md:px-8">
+        {items.map(({ Icon, title, body }) => (
+          <div key={title} className="flex flex-col gap-2 rounded-lg border border-border bg-card p-5">
+            <span className="grid h-10 w-10 place-items-center rounded-md bg-primary/15 text-primary">
+              <Icon className="h-5 w-5" />
+            </span>
+            <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+            <p className="text-sm leading-relaxed text-muted-foreground">{body}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ============================================================================
+// Templates — the conversion centerpiece: self-identification.
+// ============================================================================
+
+type TemplatePitch = {
+  name: string;
+  pitch: string;
+  Icon: LucideIcon;
+  accent: string;
+};
+
+const TEMPLATE_PITCHES: TemplatePitch[] = [
+  { name: "Restaurant", pitch: "For owners who'd rather cook than post: full tables, less screen time.", Icon: UtensilsCrossed, accent: "#fbbf24" },
+  { name: "Real Estate", pitch: "For agents: listings polished and follow-ups sent while you're showing homes.", Icon: Home, accent: "#34d399" },
+  { name: "Marketing Agency", pitch: "For agency owners: more client work delivered without more late nights.", Icon: Palette, accent: "#ec1b69" },
+  { name: "Online Store", pitch: "For shop owners: product pages, promos, and customer replies handled.", Icon: ShoppingCart, accent: "#f97316" },
+  { name: "Consulting Practice", pitch: "For consultants: proposals and research done while you're with clients.", Icon: Briefcase, accent: "#60a5fa" },
+  { name: "Health & Wellness", pitch: "For studios and clinics: full classes and clients who come back.", Icon: HeartPulse, accent: "#2dd4bf" },
+  { name: "Coaching & Courses", pitch: "For coaches: more students enrolled, less time promoting yourself.", Icon: GraduationCap, accent: "#a78bfa" },
+  { name: "Trades & Contracting", pitch: "For contractors: quotes out fast and paperwork off your truck.", Icon: Hammer, accent: "#eab308" },
+  { name: "Finance & Bookkeeping", pitch: "For bookkeepers: more clients served, every ledger still spotless.", Icon: Calculator, accent: "#22d3ee" },
+  { name: "Local Services", pitch: "For salons, cleaners, and shops: a steady stream of bookings.", Icon: Sparkles, accent: "#e879f9" },
+];
+
+function Templates() {
+  return (
+    <section id="templates" className="border-b border-border py-20 md:py-28">
+      <div className="mx-auto max-w-6xl px-4 md:px-8">
         <div className="mb-12 flex flex-col items-center gap-3 text-center">
-          <span className="text-xs font-semibold uppercase tracking-wider text-primary">
-            Results
-          </span>
           <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
-            What early organizations are seeing.
+            Built for businesses like yours.
           </h2>
+          <p className="max-w-2xl text-base text-muted-foreground">
+            Pick the one that sounds like you — your team arrives already
+            knowing your kind of work.
+          </p>
         </div>
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          {items.map((t) => (
-            <figure
-              key={t.role}
-              className="flex flex-col gap-5 rounded-xl border border-border bg-card p-6"
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {TEMPLATE_PITCHES.map(({ name, pitch, Icon, accent }) => (
+            <SmartCTA
+              key={name}
+              href="/sign-in"
+              className="group flex h-full flex-col gap-3 rounded-xl border border-border bg-card/60 p-5 text-left transition-colors hover:border-primary/50"
             >
-              <blockquote className="text-base leading-relaxed text-foreground">
-                “{t.quote}”
-              </blockquote>
-              <figcaption className="mt-auto flex items-center gap-3">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/15 text-xs font-medium text-primary">
-                  {t.monogram}
-                </span>
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-foreground">{t.role}</span>
-                  <span className="text-xs text-muted-foreground">{t.useCase}</span>
-                </div>
-                <Badge
-                  variant="secondary"
-                  aria-label="Company name withheld"
-                  className="ml-auto border-0 bg-muted/60 text-[10px] italic text-muted-foreground"
-                >
-                  Company withheld
-                </Badge>
-              </figcaption>
-            </figure>
+              <span
+                className="grid h-11 w-11 place-items-center rounded-xl"
+                style={{ background: `${accent}22`, color: accent }}
+              >
+                <Icon className="h-5 w-5" />
+              </span>
+              <span className="text-base font-semibold text-foreground">{name}</span>
+              <span className="text-sm leading-relaxed text-muted-foreground">{pitch}</span>
+              <span className="mt-auto inline-flex items-center gap-1 pt-1 text-xs font-medium text-primary opacity-70 transition-opacity group-hover:opacity-100">
+                Meet this team
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+              </span>
+            </SmartCTA>
           ))}
         </div>
         <p className="mt-8 text-center text-xs text-muted-foreground">
-          Company names are withheld at the organization&apos;s request during
-          the private beta.
+          Don&apos;t see your business? Build a custom team in the same two
+          minutes — or{" "}
+          <Link href="#talk-to-us" className="text-primary underline-offset-2 hover:underline">
+            tell us what you need
+          </Link>
+          .
         </p>
       </div>
     </section>
@@ -831,60 +309,285 @@ function Testimonials() {
 }
 
 // ============================================================================
-// How it works (pilot → production)
+// Meet your team — roles as job descriptions, badges not robots.
+// ============================================================================
+
+function MeetYourTeam() {
+  const roles = [
+    {
+      name: "Team Lead",
+      presetId: "pm",
+      blurb:
+        "Takes your goal, breaks it into a plan, hands out the work, and double-checks everything before it reaches you.",
+    },
+    {
+      name: "Marketing teammate",
+      presetId: "marketing",
+      blurb:
+        "Drafts your posts, emails, and promotions — in your voice — so something good goes out every week.",
+    },
+    {
+      name: "Research teammate",
+      presetId: "researcher",
+      blurb:
+        "Looks into competitors, prices, and trends, then hands you the short version you can act on.",
+    },
+    {
+      name: "Bookkeeping teammate",
+      presetId: "analyst",
+      blurb:
+        "Keeps your numbers tidy and flags what needs attention, so tax season stops being a surprise.",
+    },
+  ];
+  return (
+    <section className="border-b border-border bg-card/30 py-20 md:py-28">
+      <div className="mx-auto max-w-6xl px-4 md:px-8">
+        <div className="mb-12 flex flex-col items-center gap-3 text-center">
+          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+            Here&apos;s who shows up on day one.
+          </h2>
+          <p className="max-w-2xl text-base text-muted-foreground">
+            Every team comes with the people a small business actually needs.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {roles.map((r) => (
+            <div
+              key={r.name}
+              className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card p-6 text-center"
+            >
+              <AgentOrb name={r.name} presetId={r.presetId} size={64} />
+              <span className="text-sm font-semibold text-foreground">{r.name}</span>
+              <p className="text-sm leading-relaxed text-muted-foreground">{r.blurb}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-8 text-center text-sm text-muted-foreground">
+          Chat with any of them, swap them out, or add your own. It&apos;s your
+          team.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================================
+// How it works — three steps, zero diagrams.
 // ============================================================================
 
 function HowItWorks() {
   const steps = [
     {
-      n: "01",
-      Icon: TrendingDown,
-      title: "Pick a process",
-      copy: "Tell us the workflow draining your team — support, sales, or back-office operations.",
+      n: "1",
+      title: "Pick your business.",
+      body: "Choose the template that matches what you do — your team is ready in about two minutes.",
     },
     {
-      n: "02",
-      Icon: Bot,
-      title: "We configure your agents",
-      copy: "PerkOS deploys and tunes agents for your channels and volume — managed by us or on your infra.",
+      n: "2",
+      title: "Say what you need.",
+      body: "Type a goal in plain English, like “get more weekday lunch customers.” Your Team Lead turns it into a plan.",
     },
     {
-      n: "03",
-      Icon: MessageSquare,
-      title: "Connect your channels",
-      copy: "WhatsApp, Email, Slack, Telegram — your agents go where your customers and team already are.",
-    },
-    {
-      n: "04",
-      Icon: Shield,
-      title: "Monitor, escalate, scale",
-      copy: "Agents handle the volume; your team reviews escalations with full context. Pilot to production in under 2 weeks.",
+      n: "3",
+      title: "Review and approve.",
+      body: "The team does the work and sends you drafts. You say yes, ask for changes, or say no. Always.",
     },
   ];
   return (
-    <section id="how-it-works" className="border-b border-border bg-card/50 py-20 md:py-28">
+    <section id="how-it-works" className="border-b border-border py-20 md:py-28">
       <div className="mx-auto max-w-6xl px-4 md:px-8">
-        <div className="mb-12 flex flex-col items-center gap-3 text-center md:mb-16">
-          <span className="text-xs font-semibold uppercase tracking-wider text-primary">
-            How it works
-          </span>
+        <div className="mb-12 flex flex-col items-center gap-3 text-center">
           <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
-            From pilot to production in under two weeks.
+            Up and running in minutes.
           </h2>
         </div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-          {steps.map(({ n, Icon, title, copy }) => (
-            <div
-              key={n}
-              className="relative flex flex-col gap-3 rounded-xl border border-border bg-card p-6 transition-colors hover:border-primary/40"
-            >
-              <span className="text-xs font-mono text-muted-foreground">{n}</span>
-              <div className="grid h-10 w-10 place-items-center rounded-full bg-primary/15 text-primary shadow-[0_0_12px_rgba(236,27,105,0.25)]">
-                <Icon className="h-4 w-4" />
-              </div>
-              <h3 className="text-base font-medium text-foreground">{title}</h3>
-              <p className="text-sm text-muted-foreground">{copy}</p>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          {steps.map((s) => (
+            <div key={s.n} className="flex flex-col gap-3 rounded-lg border border-border bg-card p-6">
+              <span className="grid h-9 w-9 place-items-center rounded-full bg-primary/15 text-sm font-semibold text-primary">
+                {s.n}
+              </span>
+              <h3 className="text-base font-semibold text-foreground">{s.title}</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground">{s.body}</p>
             </div>
+          ))}
+        </div>
+        <div className="mt-10 flex justify-center">
+          <SmartCTA
+            href="/sign-in"
+            className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+          >
+            Try it free
+            <ArrowRight className="h-4 w-4" />
+          </SmartCTA>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================================
+// Expertise — authority shown, not claimed. "Agentic AI" appears ONCE,
+// explained in plain words; a sophisticated reader sees the depth between
+// the lines (autonomous planning, automated QA, scale-to-zero economics).
+// ============================================================================
+
+function Expertise() {
+  const proofs = [
+    {
+      title: "They plan like a real team.",
+      body: "Give one goal, and your Team Lead breaks it into tasks, assigns each to the right teammate, and tracks it through to done — no babysitting required.",
+    },
+    {
+      title: "Weak work never reaches you.",
+      body: "Every piece is checked before you see it. If something isn't good enough, it gets sent back and redone — automatically. You only review work worth reviewing.",
+    },
+    {
+      title: "They work while you sleep — without running up a bill.",
+      body: "Your team keeps making progress overnight, then rests when there's nothing to do. Resting time costs you almost nothing.",
+    },
+  ];
+  return (
+    <section id="expertise" className="border-b border-border bg-card/30 py-20 md:py-28">
+      <div className="mx-auto max-w-6xl px-4 md:px-8">
+        <div className="mb-12 flex flex-col items-center gap-3 text-center">
+          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+            Behind the friendly faces: serious AI.
+          </h2>
+          <p className="max-w-2xl text-base text-muted-foreground">
+            PerkOS is built on <span className="text-foreground">agentic AI</span> —
+            teams of AI workers that can plan, divide up a job, and finish it on
+            their own, instead of waiting for instructions at every step.
+            Here&apos;s what that means for you:
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          {proofs.map((p) => (
+            <div key={p.title} className="flex flex-col gap-2 rounded-lg border border-border bg-card p-6">
+              <Wand2 className="h-5 w-5 text-primary" />
+              <h3 className="text-base font-semibold text-foreground">{p.title}</h3>
+              <p className="text-sm leading-relaxed text-muted-foreground">{p.body}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mx-auto mt-10 max-w-2xl text-center text-sm text-muted-foreground">
+          This isn&apos;t a demo — the team that runs PerkOS is partly AI, on
+          this same platform. And it&apos;s built on real research: 73% of small
+          businesses say they want help getting AI to actually work.
+          That&apos;s exactly what we built.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================================
+// Beyond teams — AI services in general ("whatever AI your business needs").
+// ============================================================================
+
+function BeyondTeams() {
+  return (
+    <section className="border-b border-border py-20 md:py-28">
+      <div className="mx-auto flex max-w-3xl flex-col items-center gap-5 px-4 text-center">
+        <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+          Whatever AI your business needs, we set it up.
+        </h2>
+        <p className="text-base leading-relaxed text-muted-foreground">
+          Ready-made teams are just the start. We also build custom AI for
+          businesses with bigger or more unusual needs — answering your
+          customers, connecting the tools you already use, automating the work
+          that eats your week. Already using AI somewhere else? Bring it with
+          you; it&apos;ll fit right in.
+        </p>
+        <p className="text-base text-muted-foreground">
+          You don&apos;t need to know what to ask for. Tell us the problem —
+          we&apos;ll handle the rest.
+        </p>
+        <Link
+          href="#talk-to-us"
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-primary/40 bg-primary/10 px-6 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/15"
+        >
+          <MessageSquare className="h-4 w-4" />
+          Talk to us
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================================
+// Pricing teaser — remove cost fear; no tiers, no token.
+// ============================================================================
+
+function PricingTeaser() {
+  return (
+    <section className="border-b border-border bg-card/30 py-14 md:py-16">
+      <div className="mx-auto flex max-w-3xl flex-col items-center gap-3 px-4 text-center">
+        <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
+          Start free. It stays affordable.
+        </h2>
+        <p className="text-base text-muted-foreground">
+          Free to start. Most teams cost a few dollars a month to run — and a
+          resting team costs almost nothing.
+        </p>
+        <SmartCTA
+          href="/sign-in"
+          className="mt-2 inline-flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+        >
+          Start free
+          <ArrowRight className="h-4 w-4" />
+        </SmartCTA>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================================
+// Builders strip — the ONE contained place for secondary audiences.
+// ============================================================================
+
+function BuildersStrip() {
+  const links = [
+    {
+      Icon: Briefcase,
+      title: "For investors",
+      desc: "The agentic-economy thesis, traction, and the deck.",
+      href: "mailto:invest@perkos.xyz",
+    },
+    {
+      Icon: Handshake,
+      title: "For partners",
+      desc: "Integrations, runtimes, and bring-your-own AI.",
+      href: "mailto:partner@perkos.xyz",
+    },
+    {
+      Icon: Mail,
+      title: "For developers",
+      desc: "The platform under the hood — APIs, payment rails, docs.",
+      href: "mailto:contact@perkos.xyz",
+    },
+  ];
+  return (
+    <section className="border-b border-border py-12">
+      <div className="mx-auto max-w-6xl px-4 md:px-8">
+        <p className="mb-5 text-center text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          Building something bigger?
+        </p>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {links.map(({ Icon, title, desc, href }) => (
+            <a
+              key={title}
+              href={href}
+              className="flex items-center gap-3 rounded-md border border-border bg-card px-4 py-3 transition-colors hover:border-primary/40"
+            >
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-primary/10 text-primary">
+                <Icon className="h-4 w-4" />
+              </span>
+              <span className="flex flex-col">
+                <span className="text-sm font-medium text-foreground">{title}</span>
+                <span className="text-xs text-muted-foreground">{desc}</span>
+              </span>
+            </a>
           ))}
         </div>
       </div>
@@ -893,10 +596,10 @@ function HowItWorks() {
 }
 
 // ============================================================================
-// Request access (private-beta capture — reuses ContactForm)
+// Talk to us — the human safety valve (form + contacts).
 // ============================================================================
 
-function RequestAccess() {
+function TalkToUs() {
   const contacts = [
     { Icon: Mail, title: "General inquiries", value: "contact@perkos.xyz", href: "mailto:contact@perkos.xyz" },
     { Icon: Handshake, title: "Partnerships", value: "partner@perkos.xyz", href: "mailto:partner@perkos.xyz" },
@@ -904,7 +607,7 @@ function RequestAccess() {
   ];
 
   return (
-    <section id="request-access" className="relative overflow-hidden border-b border-border py-20 md:py-28">
+    <section id="talk-to-us" className="relative overflow-hidden border-b border-border py-20 md:py-28">
       <div
         aria-hidden
         className="absolute inset-0 -z-10"
@@ -915,19 +618,13 @@ function RequestAccess() {
       />
       <div className="mx-auto max-w-6xl px-4 md:px-8">
         <div className="mb-12 flex flex-col items-center gap-3 text-center md:mb-16">
-          <Badge
-            variant="secondary"
-            className="border-primary/30 bg-primary/10 text-xs uppercase tracking-wider text-primary"
-          >
-            Private beta · Invitation only
-          </Badge>
           <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
-            Request access.
+            Rather talk to a person first?
           </h2>
           <p className="max-w-2xl text-base text-muted-foreground">
-            PerkOS is open to a select group of organizations. Tell us about
-            your use case and we&apos;ll be in touch about the next round of
-            invitations.
+            Totally fair. Tell us about your business and what&apos;s eating
+            your week — we&apos;ll tell you honestly whether (and how) AI can
+            help.
           </p>
         </div>
 
@@ -989,33 +686,27 @@ function FinalCTA() {
         }}
       />
       <div className="mx-auto flex max-w-3xl flex-col items-center gap-7 px-4 text-center">
-        <Badge
-          variant="secondary"
-          className="border-primary/30 bg-primary/10 text-xs uppercase tracking-wider text-primary"
-        >
-          Private beta · Invitation only
-        </Badge>
         <h2 className="text-3xl font-semibold leading-tight tracking-tight md:text-5xl">
-          Ready to reduce operational costs with AI agents that deliver?
+          You&apos;ve been the whole team long enough.
         </h2>
         <p className="max-w-xl text-base text-muted-foreground">
-          Join the private beta or talk to our team — we&apos;ll help you
-          identify the right process to start.
+          Two minutes from now, you could have help — help that drafts,
+          suggests, and always asks before acting.
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Link
-            href="#request-access"
+          <SmartCTA
+            href="/sign-in"
             className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-[0_0_24px_rgba(236,27,105,0.35)] transition-opacity hover:opacity-90"
           >
-            Join the private beta
+            Meet your team — free to start
             <ArrowRight className="h-4 w-4" />
-          </Link>
-          <a
-            href="mailto:contact@perkos.xyz"
+          </SmartCTA>
+          <Link
+            href="#talk-to-us"
             className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-card px-6 py-3 text-sm text-foreground transition-colors hover:border-primary/40"
           >
-            Talk to our team
-          </a>
+            Talk to us first
+          </Link>
         </div>
       </div>
     </section>
@@ -1030,90 +721,35 @@ function Footer() {
   return (
     <footer className="border-t border-border bg-card/40 py-12 md:py-16">
       <div className="mx-auto max-w-7xl px-4 md:px-8">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-5">
-          <div className="col-span-2 flex flex-col gap-4 md:col-span-2">
+        <div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
+          <div className="flex flex-col gap-3">
             <Link href="/" className="inline-flex items-center gap-2">
               <Image src="/perkos-header.png" alt="PerkOS" width={130} height={28} />
             </Link>
             <p className="max-w-xs text-sm text-muted-foreground">
-              AI agents for enterprise operations. Cut operational costs 60–80%.
-              Managed or self-hosted.
+              AI teams for small businesses. They draft, you approve.
             </p>
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              <Badge variant="secondary" className="border-0 bg-amber-500/15 text-amber-300">
-                Private beta
-              </Badge>
-              <Badge variant="secondary" className="border-0 bg-muted">
-                Managed or self-hosted
-              </Badge>
-            </div>
           </div>
-
-          <FooterColumn
-            title="Platform"
-            links={[
-              { label: "Use cases", href: "#use-cases" },
-              { label: "How it works", href: "#how-it-works" },
-              { label: "Pricing", href: "#pricing" },
-              { label: "$PEKOS token", href: "#token" },
-              { label: "For investors", href: "#investors" },
-              { label: "Request access", href: "#request-access" },
-            ]}
-          />
-
-          <FooterColumn
-            title="Ecosystem"
-            links={[
-              { label: "Stack — payments ↗", href: "https://stack.perkos.xyz", external: true },
-              { label: "Spark — single agent ↗", href: "https://spark.perkos.xyz", external: true },
-            ]}
-          />
-
-          <FooterColumn
-            title="Resources"
-            links={[
-              { label: "Contact enterprise team", href: "mailto:contact@perkos.xyz", external: true },
-              { label: "GitHub", href: "https://github.com/PerkOS-xyz", external: true },
-              { label: "x402 Protocol", href: "https://www.x402.org/", external: true },
-              { label: "X / Twitter", href: "https://x.com/perk_os", external: true },
-              { label: "LinkedIn", href: "https://www.linkedin.com/company/perkos/", external: true },
-            ]}
-          />
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+            <Link href="#templates" className="transition-colors hover:text-foreground">
+              For your business
+            </Link>
+            <Link href="#how-it-works" className="transition-colors hover:text-foreground">
+              How it works
+            </Link>
+            <Link href="#expertise" className="transition-colors hover:text-foreground">
+              Why PerkOS
+            </Link>
+            <Link href="#talk-to-us" className="transition-colors hover:text-foreground">
+              Contact
+            </Link>
+          </div>
         </div>
-
-        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground md:flex-row">
-          <p>© {new Date().getFullYear()} PerkOS · Enterprise AI agents for operations.</p>
-          <p>Managed or self-hosted · Settlement via x402 on Base + Celo</p>
-        </div>
+        <p className="mt-8 text-xs text-muted-foreground">
+          © {new Date().getFullYear()} PerkOS. Works in your browser, in Base
+          App, and on Farcaster.
+        </p>
       </div>
     </footer>
-  );
-}
-
-function FooterColumn({
-  title,
-  links,
-}: {
-  title: string;
-  links: { label: string; href: string; external?: boolean }[];
-}) {
-  return (
-    <div className="flex flex-col gap-3">
-      <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">{title}</h4>
-      <ul className="flex flex-col gap-2">
-        {links.map(({ label, href, external }) => (
-          <li key={label}>
-            <Link
-              href={href}
-              target={external ? "_blank" : undefined}
-              rel={external ? "noopener noreferrer" : undefined}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {label}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
   );
 }
