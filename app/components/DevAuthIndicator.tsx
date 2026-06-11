@@ -17,10 +17,11 @@
  *                 sees. Includes anything wagmi discovered via EIP-6963.
  *   - ua     :    last 36 chars of navigator.userAgent.
  *
- * Tap the "hide" button to collapse to a single status dot anchored
- * top-center: green when signed-in, amber while loading/syncing or
- * connect is in flight, rose otherwise. The minimised state persists
- * across page loads via localStorage.
+ * Anchored in the bottom-right corner (footer area) and MINIMIZED by
+ * default: a single status dot — green when signed-in, amber while
+ * loading/syncing or connect is in flight, rose otherwise. Tap it to
+ * expand the full panel; the preference persists via localStorage so
+ * the public landing only ever shows the unobtrusive dot.
  *
  * Remove or gate behind an env flag once the alpha auth flow stabilises.
  */
@@ -121,7 +122,7 @@ export function DevAuthIndicator() {
         type="button"
         onClick={toggle}
         aria-label="Show auth debug indicator"
-        className="fixed left-1/2 top-2 z-[100] flex h-7 w-7 -translate-x-1/2 items-center justify-center rounded-full border border-primary/30 bg-black/70 shadow-lg backdrop-blur-sm"
+        className="fixed bottom-3 right-3 z-[100] flex h-7 w-7 items-center justify-center rounded-full border border-primary/30 bg-black/70 shadow-lg backdrop-blur-sm"
       >
         <span className={`h-2.5 w-2.5 rounded-full ${dotColor}`} />
       </button>
@@ -129,7 +130,7 @@ export function DevAuthIndicator() {
   }
 
   return (
-    <div className="fixed left-1/2 top-2 z-[100] flex max-w-[260px] -translate-x-1/2 flex-col gap-0.5 rounded-md border border-primary/30 bg-black/70 px-2 py-1.5 font-mono text-[10px] leading-tight text-white shadow-lg backdrop-blur-sm">
+    <div className="fixed bottom-3 right-3 z-[100] flex max-w-[260px] flex-col gap-0.5 rounded-md border border-primary/30 bg-black/70 px-2 py-1.5 font-mono text-[10px] leading-tight text-white shadow-lg backdrop-blur-sm">
       <button
         type="button"
         onClick={toggle}
