@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useConnection, useDisconnect } from "wagmi";
 import { Menu, LogOut } from "lucide-react";
 
@@ -33,6 +33,7 @@ import { PullToRefresh } from "../components/PullToRefresh";
 import { OrgSwitcher, ProjectPicker } from "../components/OrgSwitcher";
 import { ActiveOrgProvider } from "../lib/useActiveOrg";
 import { formatAddress } from "../lib/format";
+import { useIsInMiniApp } from "../lib/useIsInMiniApp";
 import { useWalletSession } from "../lib/useWalletSession";
 
 const NAV_ITEMS = [
@@ -51,10 +52,23 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const { address } = useConnection();
   const { disconnect } = useDisconnect();
   const session = useWalletSession();
+  // Inside a Mini App host (Base App / Farcaster) the wallet IS the host's
+  // identity — there is no meaningful "log out", so the button is hidden.
+  // In a regular browser, logging out returns to the public landing page.
+  const inMiniApp = useIsInMiniApp();
+  // Intentional logout goes to the LANDING page; the signed-out effect below
+  // otherwise bounces to /sign-in (its job for unexpected session loss).
+  const loggingOut = useRef(false);
+  const logout = () => {
+    loggingOut.current = true;
+    disconnect();
+    router.push("/");
+  };
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (session.status === "signed-out") router.replace("/sign-in");
+    if (session.status === "signed-out" && !loggingOut.current)
+      router.replace("/sign-in");
   }, [session.status, router]);
 
   // Close the mobile drawer when the route changes.
@@ -92,7 +106,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         <aside className="hidden w-60 shrink-0 flex-col gap-6 border-r border-border bg-card p-6 md:flex">
           <Brand />
           <NavList pathname={pathname} />
-          <WalletFooter address={address} onDisconnect={() => disconnect()} />
+          <WalletFooter address={address} onDisconnect={inMiniApp ? null : logout} />
         </aside>
 
         <main className="flex-1 overflow-x-hidden">
@@ -162,7 +176,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
                   <WalletFooter
                     address={address}
-                    onDisconnect={() => disconnect()}
+                    onDisconnect={inMiniApp ? null : logout}
                   />
                 </SheetContent>
               </Sheet>
@@ -272,7 +286,8 @@ function WalletFooter({
   onDisconnect,
 }: {
   address?: string;
-  onDisconnect: () => void;
+  /** null → no logout affordance (Mini App hosts own the identity). */
+  onDisconnect: (() => void) | null;
 }) {
   return (
     <div className="flex flex-col gap-2 border-t border-border pt-4">
@@ -284,14 +299,16 @@ function WalletFooter({
           {formatAddress(address)}
         </p>
       ) : null}
-      <Button
-        variant="outline"
-        onClick={onDisconnect}
-        className="justify-start gap-2"
-      >
-        <LogOut className="h-4 w-4" />
-        Disconnect
-      </Button>
+      {onDisconnect ? (
+        <Button
+          variant="outline"
+          onClick={onDisconnect}
+          className="justify-start gap-2"
+        >
+          <LogOut className="h-4 w-4" />
+          Log out
+        </Button>
+      ) : null}
     </div>
   );
 }
