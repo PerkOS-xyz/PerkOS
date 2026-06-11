@@ -570,8 +570,8 @@ const TIERS: Tier[] = [
     bullets: [
       "We run your team — nothing to install",
       "Bring your own AI key (OpenAI & more)",
+      "50 team working hours / month",
       "You pay your AI provider directly",
-      "Fair use: up to 500 team tasks / month",
     ],
     cta: "Start your team",
     ctaHref: "/sign-in",
@@ -585,13 +585,28 @@ const TIERS: Tier[] = [
     bullets: [
       "We run your team AND the AI — zero setup",
       "No AI account needed",
-      "Everything in Starter + priority support",
-      "Fair use: up to 500 team tasks / month",
+      "150 team working hours / month",
+      "Priority support",
     ],
     cta: "Start your team",
     ctaHref: "/sign-in",
     smart: true,
     featured: true,
+  },
+  {
+    name: "Scale",
+    price: "$79.99",
+    cadence: "/ month",
+    tag: "For teams running all day",
+    bullets: [
+      "Everything in Pro",
+      "500 team working hours / month",
+      "Top up anytime if you need more",
+      "Onboarding & a real human",
+    ],
+    cta: "Start your team",
+    ctaHref: "/sign-in",
+    smart: true,
   },
 ];
 
@@ -609,7 +624,7 @@ function Pricing() {
             hire.
           </p>
         </div>
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {TIERS.map((t) => (
             <div
               key={t.name}
@@ -668,8 +683,11 @@ function Pricing() {
             </div>
           ))}
         </div>
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          Prefer to pay with $PERKOS? Save 15–25% —{" "}
+        <p className="mx-auto mt-6 max-w-2xl text-center text-xs text-muted-foreground">
+          You only pay for the hours your team actually works. Reach your
+          monthly hours and your team simply pauses — top up or upgrade to keep
+          going. You never get a surprise bill. Prefer to pay with $PERKOS?
+          Save 15–25% —{" "}
           <Link href="#token" className="text-primary underline-offset-2 hover:underline">
             see the token
           </Link>
