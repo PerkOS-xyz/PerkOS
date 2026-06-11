@@ -410,10 +410,15 @@ function BalancesBody({
   return (
     <span className="flex items-center gap-1.5 truncate">
       <TokenSlot label={usdcLabel} prefix="$" suffix="USDC" loadingHint="USDC" />
-      <span className="text-muted-foreground/60" aria-hidden>
-        ·
+      {/* Tablet portrait (md→lg) runs the pill compact — USDC only — so the
+          topbar fits on one row. $PERKOS returns on desktop and stays on
+          mobile (its own header has room). */}
+      <span className="flex items-center gap-1.5 md:max-lg:hidden">
+        <span className="text-muted-foreground/60" aria-hidden>
+          ·
+        </span>
+        <TokenSlot label={perkosLabel} suffix="$PERKOS" loadingHint="PERKOS" />
       </span>
-      <TokenSlot label={perkosLabel} suffix="$PERKOS" loadingHint="PERKOS" />
     </span>
   );
 }

@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useConnection, useDisconnect } from "wagmi";
-import { Menu, LogOut } from "lucide-react";
+import { Menu, LogOut, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -121,14 +121,16 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         </aside>
 
         <main className="flex-1 overflow-x-hidden">
-          {/* Desktop topbar */}
-          <header className="hidden items-center justify-between gap-2 border-b border-border px-8 py-3 md:flex">
-            <div className="flex min-w-0 items-center gap-1">
+          {/* Desktop/tablet topbar. Tablet (md→lg) runs compact: the search
+              hint collapses to an icon and the balance pill drops $PERKOS —
+              one row, nothing wraps or overlaps. Full layout returns at lg. */}
+          <header className="hidden items-center justify-between gap-2 border-b border-border px-4 py-3 md:flex lg:px-8">
+            <div className="flex min-w-0 flex-1 items-center gap-1">
               <OrgSwitcher />
-              <span className="text-muted-foreground/50">/</span>
+              <span className="shrink-0 text-muted-foreground/50">/</span>
               <ProjectPicker />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-1.5 lg:gap-2">
               <CommandHint />
               <RefreshButton />
               <NetworkPill />
@@ -325,27 +327,45 @@ function WalletFooter({
 }
 
 function CommandHint() {
+  const openCommandMenu = () => {
+    if (typeof window === "undefined") return;
+    const isMac = /mac/i.test(navigator.userAgent);
+    const ev = new KeyboardEvent("keydown", {
+      key: "k",
+      ctrlKey: !isMac,
+      metaKey: isMac,
+      bubbles: true,
+    });
+    window.dispatchEvent(ev);
+  };
+
   return (
-    <button
-      type="button"
-      onClick={() => {
-        if (typeof window === "undefined") return;
-        const isMac = /mac/i.test(navigator.userAgent);
-        const ev = new KeyboardEvent("keydown", {
-          key: "k",
-          ctrlKey: !isMac,
-          metaKey: isMac,
-          bubbles: true,
-        });
-        window.dispatchEvent(ev);
-      }}
-      className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
-    >
-      <span>Search projects, agents, commands…</span>
-      <span className="flex items-center gap-0.5">
-        <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono text-[10px]">⌘</kbd>
+    <>
+      {/* Tablet (md→lg): icon only — the full hint doesn't fit next to the
+          org/project picker in portrait and used to wrap on top of it. */}
+      <button
+        type="button"
+        onClick={openCommandMenu}
+        aria-label="Search projects, agents, commands"
+        title="Search (⌘K)"
+        className="grid h-8 w-8 shrink-0 place-items-center rounded-md border border-border bg-card text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground lg:hidden"
+      >
+        <Search className="h-3.5 w-3.5" />
+      </button>
+
+      {/* Desktop (≥lg): full hint. whitespace-nowrap so it can never wrap
+          into a multi-line block when space gets tight. */}
+      <button
+        type="button"
+        onClick={openCommandMenu}
+        className="hidden items-center gap-2 whitespace-nowrap rounded-md border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground lg:inline-flex"
+      >
+        <span>Search projects, agents, commands…</span>
+        <span className="flex items-center gap-0.5">
+          <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono text-[10px]">⌘</kbd>
         <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono text-[10px]">K</kbd>
-      </span>
-    </button>
+        </span>
+      </button>
+    </>
   );
 }

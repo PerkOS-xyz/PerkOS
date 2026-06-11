@@ -60,7 +60,7 @@ import { extractMentions, type MentionParticipant } from "../../../lib/mentions"
 import { useMentionParticipants } from "../../../lib/useMentionParticipants";
 import { uploadAttachment } from "../../../lib/uploadAttachment";
 import { useProjectTasks } from "../../../lib/useProjectTasks";
-import { useWalletAgents, realtimeAgentStatus, STATUS_RESTING, STATUS_GETTING_READY, STATUS_GOING_TO_REST, type AgentLiveStatus } from "../../../lib/useWalletAgents";
+import { useWalletAgents, realtimeAgentStatus, STATUS_AVAILABLE, STATUS_RESTING, STATUS_GETTING_READY, STATUS_GOING_TO_REST, type AgentLiveStatus } from "../../../lib/useWalletAgents";
 import { MembersPanel } from "../../../components/MembersPanel";
 import { ProjectInsights } from "../../../components/ProjectInsights";
 import { ProjectContextMap } from "../../../components/ProjectContextMap";
@@ -1257,7 +1257,7 @@ function AgentsTab({ detail }: { detail: ProjectDetail }) {
                     <span
                       className={
                         realtimeAgentStatus(agentStatus[name]).label ===
-                        "Online"
+                        STATUS_AVAILABLE
                           ? "text-emerald-400"
                           : ""
                       }
@@ -1322,7 +1322,7 @@ function ProjectAgentPower({ live }: { live?: AgentLiveStatus }) {
   if (!live?.id) return null;
   const label = realtimeAgentStatus(live).label;
   const isHibernated = label === STATUS_RESTING;
-  const isOnline = label === "Online";
+  const isOnline = label === STATUS_AVAILABLE;
   const isTransitioning = label === STATUS_GETTING_READY || label === STATUS_GOING_TO_REST;
   // Only show for controllable PerkOS-infra states.
   if (!isHibernated && !isOnline && !isTransitioning) return null;

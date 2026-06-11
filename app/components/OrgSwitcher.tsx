@@ -74,7 +74,7 @@ export function OrgSwitcher() {
             variant="ghost"
             size="sm"
             aria-label="Switch organization"
-            className="min-w-0 max-w-[180px] gap-2 px-2 hover:bg-muted/40"
+            className="min-w-0 max-w-[140px] gap-2 px-2 hover:bg-muted/40 lg:max-w-[180px]"
           />
         }
       >
@@ -200,7 +200,7 @@ export function ProjectPicker() {
             variant="ghost"
             size="sm"
             aria-label="Pick a project"
-            className="min-w-0 max-w-[180px] gap-2 px-2 hover:bg-muted/40"
+            className="min-w-0 max-w-[140px] gap-2 px-2 hover:bg-muted/40 lg:max-w-[180px]"
           />
         }
       >

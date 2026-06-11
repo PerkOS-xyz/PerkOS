@@ -10,6 +10,7 @@ import { formatRelativeShort } from "../lib/format";
 import {
   useWalletAgents,
   realtimeAgentStatus,
+  STATUS_AVAILABLE,
   type AgentLiveStatus,
 } from "../lib/useWalletAgents";
 
@@ -31,7 +32,7 @@ export function ActiveAgentsPanel({ agents, isLoading }: Props) {
   const { byName } = useWalletAgents(address);
 
   const labelFor = (a: Agent) => realtimeAgentStatus(byName[a.name]).label;
-  const online = agents.filter((a) => labelFor(a) === "Online").length;
+  const online = agents.filter((a) => labelFor(a) === STATUS_AVAILABLE).length;
 
   return (
     <section className="glow-card flex flex-col gap-3 rounded-lg border border-primary/30 bg-card/60 px-4 py-4">
@@ -78,10 +79,10 @@ export function ActiveAgentsPanel({ agents, isLoading }: Props) {
 
           <footer className="flex items-center justify-between border-t border-border/50 pt-2 text-[10px] text-muted-foreground">
             <span>
-              {online} of {agents.length} online
+              {online} of {agents.length} available
             </span>
             <span className="font-mono">
-              {Math.round((online / Math.max(agents.length, 1)) * 100)}% online
+              {Math.round((online / Math.max(agents.length, 1)) * 100)}% available
             </span>
           </footer>
         </>
@@ -99,8 +100,8 @@ function AgentAvatar({
 }) {
   const initial = (agent.name || "?").slice(0, 1).toUpperCase();
   const { color, label } = realtimeAgentStatus(live);
-  const isOnline = label === "Online";
-  const isError = label === "Error" || label === "Failed";
+  const isOnline = label === STATUS_AVAILABLE;
+  const isError = label === "Needs attention" || label === "Failed";
 
   return (
     <li className="flex shrink-0 flex-col items-center gap-1">

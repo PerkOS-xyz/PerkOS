@@ -2,7 +2,11 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 
 import { ActiveAgentsPanel } from "../app/components/ActiveAgentsPanel";
-import type { AgentLiveStatus } from "../app/lib/useWalletAgents";
+import {
+  STATUS_AVAILABLE,
+  STATUS_RESTING,
+  type AgentLiveStatus,
+} from "../app/lib/useWalletAgents";
 import type { Agent } from "../app/lib/perkosApi";
 
 vi.mock("next/link", () => ({
@@ -75,7 +79,7 @@ describe("ActiveAgentsPanel", () => {
     expect(screen.getByText("Loki")).toBeInTheDocument();
   });
 
-  it("counts online from the live heartbeat, not the static status", () => {
+  it("counts available agents from the live heartbeat, not the static status", () => {
     // 2 of 3 have a real bridge heartbeat; the third is status:"ready" but
     // never connected (a ghost) — it must NOT count as online.
     mockByName = {
@@ -92,8 +96,8 @@ describe("ActiveAgentsPanel", () => {
         ]}
       />,
     );
-    expect(screen.getByText(/2 of 3 online/)).toBeInTheDocument();
-    expect(screen.getByText(/67% online/)).toBeInTheDocument();
+    expect(screen.getByText(/2 of 3 available/)).toBeInTheDocument();
+    expect(screen.getByText(/67% available/)).toBeInTheDocument();
   });
 
   it("shows a loading state when isLoading", () => {
@@ -117,8 +121,8 @@ describe("ActiveAgentsPanel", () => {
         ]}
       />,
     );
-    expect(screen.getByText("Online")).toBeInTheDocument();
-    expect(screen.getByText("Hibernated")).toBeInTheDocument();
+    expect(screen.getByText(STATUS_AVAILABLE)).toBeInTheDocument();
+    expect(screen.getByText(STATUS_RESTING)).toBeInTheDocument();
     expect(screen.getByText("Unknown")).toBeInTheDocument();
   });
 
