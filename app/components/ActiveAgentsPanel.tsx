@@ -6,6 +6,7 @@ import { Bot, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Agent } from "../lib/perkosApi";
 import { useConnection } from "wagmi";
+import { formatRelativeShort } from "../lib/format";
 import {
   useWalletAgents,
   realtimeAgentStatus,
@@ -130,6 +131,12 @@ function AgentAvatar({
       <span className="text-[9px] uppercase tracking-wide text-muted-foreground">
         {label}
       </span>
+      {/* Temporal context: when was this agent last heard from. */}
+      {!isOnline && live?.lastBridgeSeenMs ? (
+        <span className="text-[9px] text-muted-foreground/70">
+          {formatRelativeShort(new Date(live.lastBridgeSeenMs))}
+        </span>
+      ) : null}
     </li>
   );
 }

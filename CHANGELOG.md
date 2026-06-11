@@ -1,5 +1,44 @@
 # Changelog
 
+## 2026-06-10 (evening) — Visibility: activity feed, KPIs, charts, context map
+
+Implements the full P0→P3 roadmap from `PerkOS-App/UX-VISIBILITY-ANALYSIS.md` —
+the app now answers "what is happening with my projects and agents?", not just
+"what state are they in".
+
+- **P0 — temporal context everywhere.** Existing-but-never-rendered timestamps
+  now show: "Last active Xm ago" on agent cards/detail/chat-hub rows +
+  dashboard roster, "active Xm ago" on project rows + project header, task
+  updated-ago on kanban cards + dashboard task rows, "last run Xm ago" on the
+  PM banner. Fixes: hardcoded "Projects: 0" on agent cards (real membership
+  count), project-detail header gains the status badge, chat hub presence dots
+  gain labels, Done kanban cards show a one-line result preview.
+- **P1 — `activity_events` stream + dashboard widgets.** New per-wallet
+  Firestore collection (owner-only via the workspace wildcard; no rules
+  change). Writers: PerkOS-API (PM planned/created tasks, goal done, dispatcher
+  started/completed/retried via judge, heartbeat offline→online, provisioning
+  launched/failed, plan approve) + Platform-Tools-API (worker status updates,
+  PM createTask, proposePlan) + the app itself (manual kanban moves, task/
+  project creation). Dashboard gets: **KPI strip** (agents online, tasks in
+  flight, needs attention, done this week), **live plain-language activity
+  feed** (`ActivityFeedCard`), **"Waiting on you" queue** (proposed plans,
+  Review tasks, failed agents), and the old 4 stat tiles are replaced.
+- **P2 — charts + pipelines (no chart lib — hand-rolled SVG/CSS).**
+  `charts.tsx`: donut, bar list, GitHub-style activity heatmap. Project detail
+  gains **Team workload** (per-agent donut + done-per-agent bars + completion
+  %). Dashboard gains the 12-week heatmap. `ProvisionPipeline` renders the
+  numbered "what happens next" boot sequence (infra → runtime → connect) on
+  agent cards + detail; the PM banner now shows the Plan → Work → Review →
+  Done phase pipeline.
+- **P3 — entity graph + model usage.** New `edges` collection (typed
+  from/rel/to with deterministic ids): @-mentions in project chat and task
+  assignments are materialized as edges. `BacklinksPanel` ("Linked from") on
+  agent detail; **Map tab** on projects — a curated one-hop context map
+  (project center, agents in orbit with live presence, tasks on the edge,
+  assignment lines) + project-scoped feed. `ModelUsagePanel` on the dashboard
+  shows each agent's brain (PerkOS LLM vs BYOK) + done/total tasks. Agent
+  detail gains a per-agent "Recent activity" section.
+
 PerkOS App (`app.perkos.xyz`). One entry per release dated by deploy day.
 Phase numbering tracks `MIGRATION-PLAN-v2.md` in the workspace root.
 

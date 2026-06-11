@@ -40,6 +40,8 @@ import {
 
 import { firebaseDb } from "./firebase";
 import { formatAddress } from "./format";
+import { logActivity } from "./activityEvents";
+import { entityKey, writeEdge } from "./edges";
 import { validateSwarm, type SwarmDefinition } from "./swarm";
 
 export type PmSessionStatus =
@@ -981,6 +983,14 @@ export async function createWalletProject(input: {
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
+  logActivity(input.walletAddress, {
+    actorType: "user",
+    actor: "You",
+    verb: "created_project",
+    object: input.name,
+    objectType: "project",
+    projectId: ref.id,
+  });
   return { project: { ...payload, id: ref.id } };
 }
 
@@ -1151,6 +1161,30 @@ export async function createProjectTasks(input: {
       updatedAt: serverTimestamp(),
     });
     created.push({ ...payload, id: ref.id });
+  }
+  // Activity + graph trail (fire-and-forget): one feed event per task, plus
+  // an assigned_to edge when the task starts life with an agent.
+  for (const t of created) {
+    logActivity(input.walletAddress, {
+      actorType: "user",
+      actor: "You",
+      verb: "created_task",
+      object: t.name,
+      objectType: "task",
+      projectId: input.projectId,
+      taskId: t.id,
+      detail: t.agent && t.agent !== "App Agent" ? `for ${t.agent}` : undefined,
+    });
+    if (t.id && t.agent && t.agent !== "App Agent") {
+      writeEdge(input.walletAddress, {
+        fromKey: entityKey.agent(t.agent),
+        toKey: entityKey.task(input.projectId, t.id),
+        rel: "assigned_to",
+        projectId: input.projectId,
+        sourceRef: t.id,
+        sourceLabel: t.name,
+      });
+    }
   }
   // Keep the denormalized counter on the project doc in sync — the
   // /projects list reads `project.tasks` directly (not the subcollection

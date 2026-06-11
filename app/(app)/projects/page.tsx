@@ -14,6 +14,7 @@ import {
   type Project,
 } from "../../lib/perkosApi";
 import { useActiveOrg } from "../../lib/useActiveOrg";
+import { formatRelativeShort } from "../../lib/format";
 import { SearchInput, matchesQuery } from "../../components/SearchInput";
 import { EmptyState } from "../../components/EmptyState";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
@@ -327,6 +328,12 @@ function ProjectCard({
             {project.agents} agent{project.agents === 1 ? "" : "s"}
             <span className="px-1.5">·</span>
             {project.tasks} task{project.tasks === 1 ? "" : "s"}
+            {project.updatedAt ? (
+              <>
+                <span className="px-1.5">·</span>
+                active {formatRelativeShort(project.updatedAt)}
+              </>
+            ) : null}
           </p>
         </div>
 

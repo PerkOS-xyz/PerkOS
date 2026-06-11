@@ -49,8 +49,12 @@ import {
   type HibernationStatus,
   type Task,
 } from "../../../lib/perkosApi";
-import { formatAddress } from "../../../lib/format";
+import { formatAddress, formatRelativeShort } from "../../../lib/format";
 import { ConfirmDialog } from "../../../components/ConfirmDialog";
+import { BacklinksPanel } from "../../../components/BacklinksPanel";
+import { ProvisionPipeline } from "../../../components/ProvisionPipeline";
+import { entityKey } from "../../../lib/edges";
+import { useActivityFeed, verbPhrase } from "../../../lib/activityEvents";
 import { EditAgentDialog } from "../../../components/EditAgentDialog";
 import { HibernationPanel } from "./HibernationPanel";
 import { InvitedCredentialPanel } from "./InvitedCredentialPanel";
@@ -216,6 +220,20 @@ export default function AgentDetailPage({ params }: PageProps) {
         walletAddress={address ?? ""}
       />
 
+      {agent.status === "provisioning" ||
+      agent.status === "failed" ||
+      (agent.status === "ready" && !agent.bridgeConnected && !agent.invited) ? (
+        <section className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
+          <h2 className="mb-2 text-sm font-medium text-foreground">
+            What happens next
+          </h2>
+          <ProvisionPipeline
+            status={agent.status}
+            bridgeConnected={agent.bridgeConnected}
+          />
+        </section>
+      ) : null}
+
       {!isExternalAgent(agent) ? (
         <AutoWakeBanner
           agentId={agent.id}
@@ -259,6 +277,13 @@ export default function AgentDetailPage({ params }: PageProps) {
         tasks={assignedTasks}
         ready={projectDetailsReady}
         agentName={agent.name}
+      />
+
+      <AgentActivitySection agentName={agent.name} walletAddress={address} />
+
+      <BacklinksPanel
+        walletAddress={address}
+        entityKey={entityKey.agent(agent.name)}
       />
 
       <ActionsPanel agent={agent} />
@@ -505,6 +530,48 @@ function StatusBadge({
   );
 }
 
+/**
+ * The agent's slice of the workspace activity stream — what THIS agent did
+ * recently, in plain language. Client-side filter over the latest events
+ * (no composite index needed at this volume).
+ */
+function AgentActivitySection({
+  agentName,
+  walletAddress,
+}: {
+  agentName: string;
+  walletAddress?: string;
+}) {
+  const { events } = useActivityFeed(walletAddress, 150);
+  const mine = events.filter((e) => e.actor === agentName).slice(0, 8);
+  if (mine.length === 0) return null;
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Recent activity</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ul className="flex flex-col">
+          {mine.map((e) => (
+            <li
+              key={e.id}
+              className="flex items-baseline gap-1.5 border-b border-border/40 py-2 text-xs last:border-0"
+            >
+              <span className="text-muted-foreground">{verbPhrase(e.verb)}</span>
+              <span className="min-w-0 flex-1 truncate text-foreground/90">
+                {e.object}
+              </span>
+              <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
+                {e.tsMs ? formatRelativeShort(new Date(e.tsMs)) : ""}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
 function MetadataCard({ agent }: { agent: Agent }) {
   return (
     <Card>
@@ -520,6 +587,18 @@ function MetadataCard({ agent }: { agent: Agent }) {
         </MetaRow>
         <MetaRow Icon={Calendar} label="Created">
           {formatDate(agent.createdAt)}
+        </MetaRow>
+        <MetaRow Icon={Calendar} label="Last active">
+          {agent.lastBridgeSeenAt ? (
+            <span title={agent.lastBridgeSeenAt}>
+              {formatRelativeShort(agent.lastBridgeSeenAt)}
+              {agent.bridgeConnected ? (
+                <span className="ml-1.5 text-emerald-300">· connected now</span>
+              ) : null}
+            </span>
+          ) : (
+            <span className="text-muted-foreground">Never connected</span>
+          )}
         </MetaRow>
         <MetaRow Icon={Server} label="Endpoint">
           {agent.endpoint ? (

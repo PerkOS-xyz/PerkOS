@@ -23,6 +23,7 @@ import {
   type Project,
 } from "../../lib/perkosApi";
 import { useChatbot } from "../../components/ChatbotProvider";
+import { formatRelativeShort } from "../../lib/format";
 import {
   SearchInput,
   matchesQuery,
@@ -247,7 +248,7 @@ function AgentChatRow({
   agent: Agent;
   live?: AgentLiveStatus;
 }) {
-  const presence = realtimeAgentStatus(live).color;
+  const { color: presence, label: presenceLabel } = realtimeAgentStatus(live);
 
   return (
     <li>
@@ -269,7 +270,23 @@ function AgentChatRow({
         </div>
         <div className="flex min-w-0 flex-1 flex-col">
           <span className="truncate text-sm text-foreground">{agent.name}</span>
-          <span className="text-xs text-muted-foreground">{agent.runtime}</span>
+          <span className="text-xs text-muted-foreground">
+            {agent.runtime}
+            <span className="px-1.5">·</span>
+            <span
+              className={
+                presenceLabel === "Online" ? "text-emerald-400" : undefined
+              }
+            >
+              {presenceLabel}
+            </span>
+            {presenceLabel !== "Online" && live?.lastBridgeSeenMs ? (
+              <span className="text-muted-foreground/70">
+                {" "}
+                — seen {formatRelativeShort(new Date(live.lastBridgeSeenMs))}
+              </span>
+            ) : null}
+          </span>
         </div>
         <Bot className="h-4 w-4 text-muted-foreground" />
       </Link>

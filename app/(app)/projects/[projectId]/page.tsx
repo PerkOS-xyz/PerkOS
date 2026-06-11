@@ -62,8 +62,14 @@ import { uploadAttachment } from "../../../lib/uploadAttachment";
 import { useProjectTasks } from "../../../lib/useProjectTasks";
 import { useWalletAgents, realtimeAgentStatus, type AgentLiveStatus } from "../../../lib/useWalletAgents";
 import { MembersPanel } from "../../../components/MembersPanel";
+import { ProjectInsights } from "../../../components/ProjectInsights";
+import { ProjectContextMap } from "../../../components/ProjectContextMap";
+import { ActivityFeedCard } from "../../../components/ActivityFeedCard";
+import { formatRelativeShort } from "../../../lib/format";
+import { logActivity } from "../../../lib/activityEvents";
+import { entityKey, writeEdge } from "../../../lib/edges";
 
-type Tab = "tasks" | "docs" | "conductor" | "agents" | "chat" | "members";
+type Tab = "tasks" | "docs" | "conductor" | "agents" | "map" | "chat" | "members";
 
 type PageProps = {
   params: Promise<{ projectId: string }>;
@@ -80,7 +86,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
   const ownerWallet = ownerParam || address;
   const isShared = Boolean(ownerParam && ownerParam.toLowerCase() !== (address ?? "").toLowerCase());
   const initialTab = (searchParams.get("tab") as Tab) || "tasks";
-  const TABS: Tab[] = ["tasks", "docs", "conductor", "agents", "chat", "members"];
+  const TABS: Tab[] = ["tasks", "docs", "conductor", "agents", "map", "chat", "members"];
   const [tab, setTab] = useState<Tab>(
     TABS.includes(initialTab) ? initialTab : "tasks"
   );
@@ -157,6 +163,9 @@ export default function ProjectDetailPage({ params }: PageProps) {
             />
           ) : null}
           {tab === "agents" ? <AgentsTab detail={liveDetail} /> : null}
+          {tab === "map" ? (
+            <MapTab detail={liveDetail} projectId={projectId} ownerWallet={ownerWallet ?? undefined} />
+          ) : null}
           {tab === "chat" ? (
             <ChatTab
               detail={liveDetail}
@@ -344,13 +353,28 @@ function DetailHeader({
         <div className="flex items-center gap-3">
           <PrimaryAgentAvatar name={primaryAgent} />
           <div className="flex flex-col">
-            <h1 className="text-3xl font-medium text-[#ececff]">
-              {project.name}
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-3xl font-medium text-[#ececff]">
+                {project.name}
+              </h1>
+              <span
+                className={cn(
+                  "rounded-full border-0 px-2 py-0.5 text-[10px] font-medium",
+                  project.status?.toLowerCase() === "active"
+                    ? "bg-emerald-500/20 text-emerald-300"
+                    : "bg-muted text-muted-foreground",
+                )}
+              >
+                {project.status || "—"}
+              </span>
+            </div>
             <span className="text-xs text-muted-foreground">
               {primaryAgent
                 ? `Lead: ${primaryAgent}`
                 : "No primary agent assigned"}
+              {project.updatedAt ? (
+                <> · active {formatRelativeShort(project.updatedAt)}</>
+              ) : null}
             </span>
           </div>
         </div>
@@ -442,6 +466,9 @@ function DetailHeader({
         <StatTile label="Done" value={done} />
         <StatTile label="Agents" value={project.agents} />
       </div>
+
+      {/* Who's doing the work + how it's going — only once there's a board. */}
+      {tasks.length > 0 ? <ProjectInsights tasks={tasks} /> : null}
 
       {/* First-run guidance: a fresh team with an empty board is confusing —
           tell the owner the next move instead of greeting them with 0s. */}
@@ -649,6 +676,7 @@ function Tabs({
     { id: "docs", label: "Docs" },
     { id: "conductor", label: "Conductor" },
     { id: "agents", label: "Agents" },
+    { id: "map", label: "Map" },
     { id: "chat", label: "Project chat" },
     { id: "members", label: "Members" },
   ];
@@ -805,6 +833,16 @@ function TasksTab({
       return;
     }
     dragMoveMut.mutate({ taskId, status });
+    logActivity(effWallet, {
+      actorType: "user",
+      actor: "You",
+      verb: status === "Done" ? "completed_task" : "moved_task",
+      object: current?.name ?? taskId,
+      objectType: "task",
+      projectId,
+      taskId,
+      detail: status === "Done" ? undefined : `→ ${status}`,
+    });
   };
 
   const mutating = moveMut.isPending || deleteMut.isPending;
@@ -986,6 +1024,13 @@ function TaskCard({
   const cardClass =
     "glow-card relative flex flex-col gap-2 rounded-md border border-primary/25 bg-[#0e0716] px-4 py-3 transition-colors hover:border-primary/50";
 
+  // Done cards get a one-line peek at the deliverable — saves a click into
+  // detail just to confirm the agent actually produced something.
+  const resultPreview =
+    task.status === "Done" && task.result
+      ? task.result.replace(/[#*`>\-|]/g, "").replace(/\s+/g, " ").trim().slice(0, 120)
+      : null;
+
   const inner = (
     <>
       <div className="flex items-start justify-between gap-2 pr-14">
@@ -994,7 +1039,17 @@ function TaskCard({
       </div>
       <div className="flex flex-wrap items-center gap-3 text-xs text-[#7975a8]">
         <span>Agent: {task.agent || "—"}</span>
+        {task.updatedAt ? (
+          <span title={task.updatedAt}>
+            {formatRelativeShort(task.updatedAt)}
+          </span>
+        ) : null}
       </div>
+      {resultPreview ? (
+        <p className="line-clamp-2 text-[11px] leading-relaxed text-emerald-200/70">
+          {resultPreview}
+        </p>
+      ) : null}
     </>
   );
 
@@ -1086,6 +1141,43 @@ function PriorityBadge({ priority }: { priority: string }) {
     <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs ${tone}`}>
       {priority}
     </span>
+  );
+}
+
+/**
+ * Map tab — the project's context map (one-hop: project → agents → tasks)
+ * plus the project-scoped activity feed underneath. The same node identity
+ * as everywhere else: clicking an agent or task navigates to it.
+ */
+function MapTab({
+  detail,
+  projectId,
+  ownerWallet,
+}: {
+  detail: ProjectDetail;
+  projectId: string;
+  ownerWallet?: string;
+}) {
+  const { address } = useConnection();
+  const { byName } = useWalletAgents(ownerWallet ?? address);
+  const agentNames = uniqueAgents(detail.tasks, detail.project.agentIds ?? []);
+  return (
+    <div className="flex flex-col gap-4">
+      <ProjectContextMap
+        projectId={projectId}
+        projectName={detail.project.name}
+        pmAgent={detail.project.pmAgent}
+        agentNames={agentNames}
+        tasks={detail.tasks}
+        liveAgents={byName}
+      />
+      <ActivityFeedCard
+        walletAddress={ownerWallet ?? address}
+        projectId={projectId}
+        max={15}
+        title="Project activity"
+      />
+    </div>
   );
 }
 
@@ -1445,6 +1537,18 @@ function ChatTab({
         from: "user",
         mentions,
       });
+      // Materialize each structured @-mention as a graph edge (idempotent,
+      // fire-and-forget) — feeds the backlinks panel + context map.
+      for (const id of mentions) {
+        writeEdge(chatWallet ?? address, {
+          fromKey: entityKey.user(address),
+          toKey: id,
+          rel: "mentions",
+          projectId,
+          sourceRef: res.message.id,
+          sourceLabel: text.slice(0, 80),
+        });
+      }
       const ownerArg = sharedChat ? ownerWallet : undefined;
       // Ping any @-mentioned HUMAN teammate (≠ me) via a real Firestore
       // notification (server-side, cross-user). Fire-and-forget.

@@ -21,6 +21,8 @@ import {
 import { SearchInput, matchesQuery } from "../../components/SearchInput";
 import { EmptyState } from "../../components/EmptyState";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
+import { ProvisionPipeline } from "../../components/ProvisionPipeline";
+import { formatRelativeShort } from "../../lib/format";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
@@ -50,6 +52,23 @@ export default function AgentsPage() {
     refetchInterval: (q) =>
       (q.state.data ?? []).some((a) => a.status === "provisioning") ? 4000 : false,
   });
+
+  // Project membership per agent — replaces the old hardcoded "Projects: 0".
+  const projectsQuery = useQuery({
+    queryKey: ["wallet-projects", address],
+    queryFn: () => getWalletProjects(address!),
+    enabled: Boolean(address),
+    staleTime: 60_000,
+  });
+  const projectCountByAgent = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const p of projectsQuery.data?.projects ?? []) {
+      for (const name of p.agentIds ?? []) {
+        counts.set(name, (counts.get(name) ?? 0) + 1);
+      }
+    }
+    return counts;
+  }, [projectsQuery.data]);
 
   const allAgents = useMemo(() => data ?? [], [data]);
   const agents = allAgents.filter((a) =>
@@ -237,6 +256,7 @@ export default function AgentsPage() {
                 agent={a}
                 checked={selected.has(a.id)}
                 onToggle={(on) => toggle(a.id, on)}
+                projectCount={projectCountByAgent.get(a.name) ?? 0}
               />
             ))}
           </ul>
@@ -374,10 +394,12 @@ function AgentCard({
   agent,
   checked,
   onToggle,
+  projectCount,
 }: {
   agent: AgentRow;
   checked: boolean;
   onToggle: (on: boolean) => void;
+  projectCount: number;
 }) {
   // Cross-reference the live hibernation status so a scaled-to-0 agent shows
   // "Hibernated" instead of a stale "Online" (agent.status stays "ready").
@@ -441,11 +463,11 @@ function AgentCard({
         </div>
 
         {agent.status === "provisioning" ? (
-          <p className="flex items-center gap-1.5 text-xs text-amber-300/90">
-            <Loader2 className="h-3 w-3 shrink-0 animate-spin" />
-            Setting up your agent — usually under a minute. This updates on its
-            own.
-          </p>
+          <ProvisionPipeline
+            status={agent.status}
+            bridgeConnected={agent.bridgeConnected}
+            className="rounded-md border border-amber-500/20 bg-amber-500/5 p-2.5"
+          />
         ) : null}
 
         <p className="text-xs leading-relaxed text-[#7975a8]">
@@ -455,8 +477,16 @@ function AgentCard({
         </p>
 
         <div className="flex items-center justify-between text-xs text-[#7975a8]">
-          <span>Projects: 0</span>
-          <span>Capabilities: {agent.plugins.length}</span>
+          <span>
+            Projects: {projectCount}
+          </span>
+          <span>
+            {agent.lastBridgeSeenAt
+              ? `Active ${formatRelativeShort(agent.lastBridgeSeenAt)}`
+              : agent.createdAt
+                ? `Created ${formatRelativeShort(agent.createdAt)}`
+                : `Capabilities: ${agent.plugins.length}`}
+          </span>
         </div>
       </Link>
     </li>

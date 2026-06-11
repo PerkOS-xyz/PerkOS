@@ -11,9 +11,6 @@ import {
   Bot,
   Plus,
   ArrowRight,
-  Briefcase,
-  CheckCircle2,
-  Clock,
   Loader2,
   Sparkles,
 } from "lucide-react";
@@ -40,8 +37,21 @@ import {
 } from "../../lib/perkosApi";
 import { useOnboarding } from "../../lib/onboardingState";
 import { useActiveOrg } from "../../lib/useActiveOrg";
-import { formatAddress } from "../../lib/format";
+import { formatAddress, formatRelativeShort } from "../../lib/format";
+import { useActivityFeed } from "../../lib/activityEvents";
+import {
+  realtimeAgentStatus,
+  useWalletAgents,
+} from "../../lib/useWalletAgents";
 import { ActiveAgentsPanel } from "../../components/ActiveAgentsPanel";
+import { ActivityFeedCard } from "../../components/ActivityFeedCard";
+import { ActivityHeatmap } from "../../components/charts";
+import { KpiStrip } from "../../components/KpiStrip";
+import { ModelUsagePanel } from "../../components/ModelUsagePanel";
+import {
+  WaitingOnYouCard,
+  type WaitingItem,
+} from "../../components/WaitingOnYouCard";
 
 const QUICK_ACTIONS = [
   {
@@ -64,44 +74,6 @@ const QUICK_ACTIONS = [
   },
 ];
 
-const STAT_CARDS: {
-  key: "activeProjects" | "registeredAgents" | "activeTasks" | "completedTasks";
-  label: string;
-  hint: string;
-  Icon: typeof Briefcase;
-  /** Where clicking the card lands. Includes the appropriate ?status= filter. */
-  href: string;
-}[] = [
-  {
-    key: "activeProjects",
-    label: "Active projects",
-    hint: "in progress",
-    Icon: Briefcase,
-    href: "/projects?status=active",
-  },
-  {
-    key: "registeredAgents",
-    label: "Registered agents",
-    hint: "on your roster",
-    Icon: Bot,
-    href: "/agents",
-  },
-  {
-    key: "activeTasks",
-    label: "Active tasks",
-    hint: "in flight",
-    Icon: Clock,
-    href: "/tasks?status=active",
-  },
-  {
-    key: "completedTasks",
-    label: "Completed tasks",
-    hint: "shipped",
-    Icon: CheckCircle2,
-    href: "/tasks?status=done",
-  },
-];
-
 export default function DashboardPage() {
   const { address } = useConnection();
   const { workspaceName } = useOnboarding();
@@ -113,6 +85,11 @@ export default function DashboardPage() {
     enabled: Boolean(address),
     staleTime: 30_000,
   });
+
+  // Live agent presence + the activity stream feed the KPI strip, the
+  // "waiting on you" worklist, and the heatmap.
+  const { byName: liveAgents } = useWalletAgents(address);
+  const { events } = useActivityFeed(address, 200);
 
   // Projects scoped to the active org (own OR shared — getOrgProjects reads
   // from the org's owner). Agents/tasks stats stay workspace-wide (own).
@@ -137,6 +114,80 @@ export default function DashboardPage() {
   };
   const projects = orgProjects.slice(0, 5);
   const tasks = (data?.tasks ?? []).slice(0, 5);
+
+  // ---- KPI strip inputs ----------------------------------------------------
+  const allAgents = data?.agents ?? [];
+  const allTasks = data?.tasks ?? [];
+  const online = allAgents.filter(
+    (a) => realtimeAgentStatus(liveAgents[a.name]).label === "Online",
+  ).length;
+  const failedAgents = allAgents.filter((a) =>
+    ["failed", "provision-failed", "error"].includes(String(a.status)),
+  );
+  const reviewTasks = allTasks.filter((t) => t.status === "Review");
+  // Anchor "now" to the latest event so the derivation stays pure in render;
+  // event timestamps are server-stamped, so the newest one ≈ now.
+  const newestTs = events.length > 0 ? events[0].tsMs : 0;
+  const weekAgo = newestTs - 7 * 24 * 60 * 60 * 1000;
+  const doneThisWeek = events.filter(
+    (e) =>
+      (e.verb === "completed_task" || e.verb === "goal_done") && e.tsMs >= weekAgo,
+  ).length;
+
+  // Plans proposed recently and not yet approved (resolved via later events).
+  const approvedProjects = new Set(
+    events.filter((e) => e.verb === "approved_plan").map((e) => e.projectId),
+  );
+  const proposedPlans = events.filter(
+    (e) =>
+      e.verb === "proposed_plan" &&
+      e.tsMs >= weekAgo &&
+      !approvedProjects.has(e.projectId),
+  );
+  const planProjects = [...new Set(proposedPlans.map((e) => e.projectId))].filter(
+    (pid): pid is string => Boolean(pid),
+  );
+
+  const waitingItems: WaitingItem[] = [
+    ...planProjects.map((pid): WaitingItem => {
+      const ev = proposedPlans.find((e) => e.projectId === pid);
+      return {
+        key: `plan-${pid}`,
+        kind: "plan",
+        label: `Plan awaiting your approval${ev?.object ? ` — ${ev.object}` : ""}`,
+        hint: ev?.actor ? `Proposed by ${ev.actor}` : undefined,
+        href: `/projects/${encodeURIComponent(pid)}?tab=docs`,
+      };
+    }),
+    ...reviewTasks.slice(0, 4).map(
+      (t): WaitingItem => ({
+        key: `review-${t.id}`,
+        kind: "review",
+        label: t.name,
+        hint: `In review · ${t.agent || "unassigned"}`,
+        href: "/tasks?status=active",
+      }),
+    ),
+    ...failedAgents.map(
+      (a): WaitingItem => ({
+        key: `failed-${a.id}`,
+        kind: "agent-failed",
+        label: `${a.name} failed to start`,
+        hint: "Open the agent to retry or delete it",
+        href: `/agents/${encodeURIComponent(a.id)}`,
+      }),
+    ),
+  ];
+
+  const needsAttention = waitingItems.length;
+
+  // Heatmap: events per day (local dates) for the last 12 weeks.
+  const heatmapCounts: Record<string, number> = {};
+  for (const e of events) {
+    if (!e.tsMs) continue;
+    const key = new Date(e.tsMs).toISOString().slice(0, 10);
+    heatmapCounts[key] = (heatmapCounts[key] ?? 0) + 1;
+  }
 
   const totalProjects = orgProjects.length;
   const totalTasks = data?.tasks?.length ?? 0;
@@ -165,23 +216,37 @@ export default function DashboardPage() {
           </p>
         ) : null}
 
-        <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          {STAT_CARDS.map(({ key, label, hint, Icon, href }) => (
-            <StatCard
-              key={key}
-              label={label}
-              value={isLoading ? "—" : stats[key]}
-              hint={hint}
-              Icon={Icon}
-              href={href}
-            />
-          ))}
-        </section>
+        <KpiStrip
+          online={online}
+          agentsTotal={stats.registeredAgents}
+          inFlight={stats.activeTasks}
+          needsAttention={needsAttention}
+          doneThisWeek={doneThisWeek}
+          isLoading={isLoading}
+        />
 
         <ActiveAgentsPanel
           agents={data?.agents ?? []}
           isLoading={isLoading}
         />
+
+        <WaitingOnYouCard items={waitingItems} />
+
+        <ActivityFeedCard walletAddress={address} max={12} />
+
+        {events.length > 0 ? (
+          <section className="glow-card flex flex-col gap-3 rounded-lg border border-primary/25 bg-card/60 px-4 py-4">
+            <header className="flex items-center justify-between">
+              <h2 className="text-sm font-medium text-foreground">
+                Team activity — last 12 weeks
+              </h2>
+              <span className="text-[10px] text-muted-foreground">
+                {events.length >= 200 ? "200+" : events.length} recent events
+              </span>
+            </header>
+            <ActivityHeatmap counts={heatmapCounts} />
+          </section>
+        ) : null}
 
         {showStarter && address ? <StarterCallout address={address} /> : null}
 
@@ -252,6 +317,7 @@ export default function DashboardPage() {
       {/* Quick Actions — desktop sidebar */}
       <aside className="hidden flex-col gap-4 lg:flex">
         <QuickActionsCard />
+        <ModelUsagePanel agents={allAgents} tasks={allTasks} />
       </aside>
     </div>
   );
@@ -400,59 +466,6 @@ function WorkspaceCard({
   );
 }
 
-function StatCard({
-  label,
-  value,
-  hint,
-  Icon,
-  href,
-}: {
-  label: string;
-  value: number | string;
-  hint: string;
-  Icon: typeof Briefcase;
-  href?: string;
-}) {
-  // h-full + justify-between makes every card stretch to the height of the
-  // tallest sibling and pins the value+hint row to the bottom — so a
-  // 2-line label (e.g. "REGISTERED AGENTS" wrapping at md breakpoints)
-  // doesn't push that card taller than its neighbours.
-  const content = (
-    <div
-      className={cn(
-        "glow-card flex h-full flex-col justify-between gap-2 rounded-md border border-primary/20 bg-gradient-to-br from-primary/8 to-transparent p-4",
-        href && "cursor-pointer hover:border-primary/40",
-      )}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <span className="text-xs uppercase tracking-wide text-muted-foreground">
-          {label}
-        </span>
-        <Icon className="h-4 w-4 shrink-0 text-primary" />
-      </div>
-      <div className="flex items-baseline gap-2">
-        <span className="text-3xl font-semibold leading-none text-foreground">
-          {value}
-        </span>
-        <span className="text-xs text-muted-foreground">{hint}</span>
-      </div>
-    </div>
-  );
-
-  if (href) {
-    return (
-      <Link
-        href={href}
-        className="block h-full rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-        aria-label={`${label}: ${value} ${hint}`}
-      >
-        {content}
-      </Link>
-    );
-  }
-  return content;
-}
-
 function SectionHeader({
   title,
   actionHref,
@@ -494,6 +507,12 @@ function ProjectRow({ project }: { project: Project }) {
             {project.agents} agent{project.agents === 1 ? "" : "s"}
             <span className="px-2">·</span>
             {project.tasks} task{project.tasks === 1 ? "" : "s"}
+            {project.updatedAt ? (
+              <>
+                <span className="px-2">·</span>
+                active {formatRelativeShort(project.updatedAt)}
+              </>
+            ) : null}
           </span>
         </div>
         <Badge
@@ -521,6 +540,12 @@ function TaskRow({ task }: { task: Task }) {
           Agent: {task.agent || "—"}
           <span className="px-2">·</span>
           {task.priority || "Medium"}
+          {task.updatedAt ? (
+            <>
+              <span className="px-2">·</span>
+              {formatRelativeShort(task.updatedAt)}
+            </>
+          ) : null}
         </span>
       </div>
       <TaskStatusBadge status={task.status} />
