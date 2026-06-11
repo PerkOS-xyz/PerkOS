@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   useEffect,
@@ -31,6 +30,8 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+import { AgentOrb } from "./AgentOrb";
 import { useChatPerkosClient } from "../lib/useChatPerkosClient";
 import { useSpeechToText } from "../lib/useSpeechToText";
 import { useChatbot, type ChatBubble } from "./ChatbotProvider";
@@ -446,12 +447,7 @@ function Header({
     <div className="flex items-center justify-between border-b border-border px-5 py-3">
       <div className="flex items-center gap-2">
         <div className="relative">
-          <Image
-            src="/avatar.png"
-            alt=""
-            width={28}
-            height={28}
-          />
+          <AgentOrb name="PerkOS Assistant" presetId="assistant" size={28} />
           <span className="absolute -bottom-0.5 -right-0.5 grid h-2.5 w-2.5 place-items-center rounded-full bg-emerald-500 ring-2 ring-card" />
         </div>
         <div className="flex flex-col">
@@ -494,14 +490,7 @@ function EmptyState({ onAction }: { onAction: (href: string) => void }) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-start gap-3">
-        <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-primary/85">
-          <Image
-            src="/avatar.png"
-            alt=""
-            width={36}
-            height={36}
-          />
-        </div>
+        <AgentOrb name="PerkOS Assistant" presetId="assistant" size={56} className="shrink-0" />
         <div className="flex flex-col gap-1.5">
           <h2 className="text-lg font-medium leading-snug text-foreground">
             Hi, how can I help you today?

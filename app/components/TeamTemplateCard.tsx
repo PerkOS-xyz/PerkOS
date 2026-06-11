@@ -10,12 +10,11 @@
  * muted so the brand pink stays the loudest color on the page.
  */
 
-import Image from "next/image";
 import { ArrowRight, Crown, type LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-import { AGENT_PRESETS } from "../lib/agentPresets";
+import { AgentOrb } from "./AgentOrb";
 import type { CompanyRole } from "../lib/companyTemplates";
 
 export const TEMPLATE_ACCENTS: Record<string, string> = {
@@ -53,66 +52,32 @@ function withAlpha(hex: string, alpha: number): string {
     .padStart(2, "0")}`;
 }
 
-// Authored roles (no presetId) get a portrait by what the role does.
-// Order matters: first match wins.
-const ROLE_AVATAR_RULES: [RegExp, string][] = [
-  [/social|marketing|promo|launch/i, "/avatars/13.Marketing.png"],
-  [/seo|research/i, "/avatars/05.Researcher.png"],
-  [/review|reputation/i, "/avatars/03.QA.png"],
-  [/support|patient|communication|community/i, "/avatars/04.Support.png"],
-  [/front desk|booking|schedul|concierge/i, "/avatars/11.Concierge.png"],
-  [/menu|kitchen|build/i, "/avatars/01.Builder.png"],
-  [/quote|invoice|bookkeep/i, "/avatars/09.Trader.png"],
-  [/writer|copy|content|proposal|report/i, "/avatars/07.Knowledge.png"],
-  [/analyst|data/i, "/avatars/06.Analyst.png"],
-  [/sales|lead/i, "/avatars/12.Sales.png"],
-];
-
-function roleAvatar(role: CompanyRole): string {
-  // The PM preset's avatar is the logo — use the orchestrator portrait instead.
-  if (role.presetId && role.presetId !== "pm") {
-    const a = AGENT_PRESETS.find((p) => p.id === role.presetId)?.avatar;
-    if (a?.startsWith("/avatars/")) return a;
-  }
-  if (!role.presetId || role.presetId === "pm") {
-    for (const [re, src] of ROLE_AVATAR_RULES) {
-      if (re.test(role.role)) return src;
-    }
-  }
-  return "/avatars/08.Workflow.png";
-}
-
 /**
- * Circular head crop of a persona poster: the robot heads sit at ~(50%, 22%)
- * in every avatar, so a 2.1x zoom anchored there frames the face.
+ * Role badge — the AgentOrb (role-tinted gradient + role glyph), replacing the
+ * robot head crops (user testing: robot imagery scared non-technical users).
  */
 function RoleHead({
   role,
   isPM,
   accent,
-  className,
+  size = 44,
 }: {
   role: CompanyRole;
   isPM: boolean;
   accent: string;
-  className?: string;
+  size?: number;
 }) {
   return (
     <span
       title={role.role}
-      className={cn(
-        "relative block shrink-0 overflow-hidden rounded-full bg-[#1a1228]",
-        isPM && "z-10",
-        className,
-      )}
-      style={{ boxShadow: `0 0 0 2px ${isPM ? accent : "#241a35"}` }}
+      className={cn("relative inline-grid shrink-0 rounded-full", isPM && "z-10")}
+      style={{ boxShadow: `0 0 0 2px ${isPM ? accent : "#241a35"}`, borderRadius: 9999 }}
     >
-      <Image
-        src={roleAvatar(role)}
-        alt={role.role}
-        fill
-        sizes="48px"
-        className="origin-[50%_22%] scale-[2.1] object-cover"
+      <AgentOrb
+        name={role.role}
+        presetId={role.presetId ?? null}
+        role={role.role}
+        size={size}
       />
     </span>
   );
@@ -177,12 +142,11 @@ export function TeamTemplateCard({
               role={r}
               isPM={r === pm}
               accent={accent}
-              className="h-9 w-9 sm:h-12 sm:w-12"
             />
           ))}
           {overflow > 0 ? (
             <span
-              className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#1a1228] text-[10px] font-semibold text-muted-foreground sm:h-12 sm:w-12 sm:text-xs"
+              className="relative grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#1a1228] text-xs font-semibold text-muted-foreground"
               style={{ boxShadow: "0 0 0 2px #241a35" }}
             >
               +{overflow}
@@ -197,7 +161,7 @@ export function TeamTemplateCard({
             background: withAlpha(accent, 0.08),
           }}
         >
-          {stack.length} agent{stack.length === 1 ? "" : "s"}
+          {stack.length} teammate{stack.length === 1 ? "" : "s"}
         </span>
       </div>
 

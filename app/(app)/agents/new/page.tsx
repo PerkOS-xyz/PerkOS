@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -51,6 +50,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
+import { AgentOrb } from "../../../components/AgentOrb";
+import { agentVisual } from "../../../lib/agentVisuals";
 import {
   launchAgent,
   saveAgentGateway,
@@ -756,32 +757,15 @@ function Step1Persona({
           Change persona
         </button>
 
-        {/* Hero — large 240px avatar centered, name as bold label. */}
+        {/* Hero — "teammate ID card": role-tinted orb + credential layout.
+            Replaces the 240px robot portrait (user testing: robot imagery
+            scared non-technical users — a colleague badge, not a machine). */}
         <div className="flex flex-col items-center gap-3">
-          <div
-            className={cn(
-              "relative h-60 w-60 overflow-hidden rounded-2xl bg-muted/30 ring-4 ring-primary shadow-[0_0_28px_rgba(236,27,105,0.28)]",
-              preset.avatarFit === "contain" && "p-8"
-            )}
-          >
-            {preset.avatar ? (
-              <Image
-                src={preset.avatar}
-                alt={`${preset.name} portrait`}
-                fill
-                sizes="240px"
-                className={
-                  preset.avatarFit === "contain"
-                    ? "object-contain p-4"
-                    : "object-cover"
-                }
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-7xl">
-                {preset.emoji}
-              </div>
-            )}
-          </div>
+          <TeammateIdCard
+            name={preset.name}
+            presetId={preset.id}
+            tagline={`Your ${preset.name.toLowerCase()} teammate`}
+          />
           <p className="text-xl font-semibold text-foreground">{preset.name}</p>
           <p className="-mt-1 text-center text-xs text-muted-foreground">
             {preset.blurb}
@@ -919,24 +903,14 @@ function Step1Persona({
               "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             )}
           >
-            <div className="relative aspect-square w-full bg-muted/20">
-              {p.avatar ? (
-                <Image
-                  src={p.avatar}
-                  alt={`${p.name} — ${p.blurb}`}
-                  fill
-                  sizes="(min-width: 1024px) 22vw, (min-width: 768px) 30vw, 48vw"
-                  className={
-                    p.avatarFit === "contain"
-                      ? "object-contain p-6"
-                      : "object-cover"
-                  }
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-4xl">
-                  {p.emoji}
-                </div>
-              )}
+            {/* Role badge — orb instead of robot art (colleague, not machine). */}
+            <div
+              className="grid aspect-square w-full place-items-center"
+              style={{
+                background: `linear-gradient(160deg, hsla(${agentVisual({ presetId: p.id }).hue}, 55%, 18%, 0.35) 0%, hsla(${agentVisual({ presetId: p.id }).hue}, 40%, 10%, 0.12) 100%)`,
+              }}
+            >
+              <AgentOrb name={p.name} presetId={p.id} size={64} />
             </div>
             <span className="w-full truncate px-2 py-1.5 text-center text-xs font-medium text-foreground">
               {p.name}
@@ -2353,5 +2327,38 @@ function SelectableCard({
     >
       {children}
     </button>
+  );
+}
+
+/** "Teammate ID card" — the wizard hero: a credential, not a robot portrait. */
+function TeammateIdCard({
+  name,
+  presetId,
+  tagline,
+}: {
+  name: string;
+  presetId: string;
+  tagline: string;
+}) {
+  const { hue } = agentVisual({ presetId, name });
+  return (
+    <div
+      className="flex h-60 w-60 flex-col items-center justify-center gap-3 rounded-2xl border"
+      style={{
+        background: `linear-gradient(160deg, hsla(${hue}, 60%, 20%, 0.35) 0%, hsla(${hue}, 40%, 10%, 0.15) 100%)`,
+        borderColor: `hsla(${hue}, 60%, 50%, 0.25)`,
+      }}
+    >
+      <AgentOrb name={name} presetId={presetId} size={96} />
+      <span
+        className="text-[11px] font-semibold uppercase tracking-widest"
+        style={{ color: `hsla(${hue}, 80%, 75%, 0.95)` }}
+      >
+        {name}
+      </span>
+      <span className="px-6 text-center text-[11px] text-muted-foreground">
+        {tagline}
+      </span>
+    </div>
   );
 }

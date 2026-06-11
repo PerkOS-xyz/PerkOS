@@ -95,6 +95,15 @@ export function useWalletAgents(
  * hasn't phoned home SINCE the wake is "Starting" (not "Online"); only a
  * heartbeat that post-dates the last wake counts as truly connected.
  */
+// Customer-facing status labels use TEAM language, not infra language
+// ("Resting", not "Hibernated") — part of the fear-reduction redesign for
+// non-technical users. Code that branches on a status must compare against
+// these exported constants, never string literals.
+export const STATUS_AVAILABLE = "Available";
+export const STATUS_RESTING = "Resting";
+export const STATUS_GOING_TO_REST = "Going to rest";
+export const STATUS_GETTING_READY = "Getting ready";
+
 export function realtimeAgentStatus(a?: AgentLiveStatus): {
   color: string;
   label: string;
@@ -102,30 +111,30 @@ export function realtimeAgentStatus(a?: AgentLiveStatus): {
   if (!a) return { color: "bg-[#7975a8]", label: "Unknown" };
   const hs = (a.hibernationState ?? "").toLowerCase();
   if (hs === "hibernated")
-    return { color: "bg-[#7975a8]", label: "Hibernated" };
+    return { color: "bg-[#7975a8]", label: STATUS_RESTING };
   if (hs === "hibernating")
-    return { color: "bg-amber-400", label: "Hibernating" };
+    return { color: "bg-amber-400", label: STATUS_GOING_TO_REST };
 
   const seen = a.lastBridgeSeenMs ?? 0;
   const woke = a.wakeStartedMs ?? 0;
   // Woken from sleep but the bridge hasn't reconnected since → still booting.
   if (hs === "waking" && seen <= woke)
-    return { color: "bg-amber-400 animate-pulse", label: "Starting" };
+    return { color: "bg-amber-400 animate-pulse", label: STATUS_GETTING_READY };
   if ((a.status ?? "").toLowerCase() === "provisioning")
-    return { color: "bg-amber-400 animate-pulse", label: "Starting" };
+    return { color: "bg-amber-400 animate-pulse", label: STATUS_GETTING_READY };
 
   // Connected: phoned home, and — if it was ever woken — since that wake.
-  // "Online" REQUIRES a real bridge heartbeat — do NOT infer it from
+  // "Available" REQUIRES a real bridge heartbeat — do NOT infer it from
   // status:"ready" alone. A registered-but-never-provisioned doc (no ECS
   // service, e.g. a launch that didn't enqueue a provision job) sits at
-  // status:"ready" forever with no bridge; treating that as Online showed
+  // status:"ready" forever with no bridge; treating that as available showed
   // ghost agents as live (and made hibernation look broken). Such agents now
   // correctly read "Offline" until a bridge actually connects.
   if (a.bridgeConnected && seen > 0 && seen >= woke)
-    return { color: "bg-emerald-400", label: "Online" };
+    return { color: "bg-emerald-400", label: STATUS_AVAILABLE };
 
   if ((a.status ?? "").toLowerCase() === "provision-failed" ||
       (a.status ?? "").toLowerCase() === "error")
-    return { color: "bg-red-500", label: "Error" };
+    return { color: "bg-red-500", label: "Needs attention" };
   return { color: "bg-[#7975a8]", label: "Offline" };
 }

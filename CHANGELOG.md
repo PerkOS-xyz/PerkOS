@@ -2,6 +2,19 @@
 
 ## 2026-06-10 (evening) — Visibility: activity feed, KPIs, charts, context map
 
+- **"Team Lead" naming completed.** The wizard persona preset formerly named
+  "PM" is now **Team Lead** (same id `pm`; newly launched leads slugify as
+  `<project>-team-lead`). The PerkOS-Admin template-editor catalog mirror was
+  re-synced to match.
+- **Test suite expanded + fully green (231 tests).** The 5 long-failing
+  `ActiveAgentsPanel` tests were rewritten against the live-heartbeat behavior
+  (wagmi + useWalletAgents stubbed) incl. a ghost-agent regression case; new
+  suites cover `activityEvents` (verb phrasing + never-throws contract),
+  `edges` (entity keys + never-throws), the SVG charts, and every visibility
+  widget (KpiStrip, WaitingOnYouCard, ProvisionPipeline, PmSessionBanner
+  team-lead copy, ProjectInsights rates, ModelUsagePanel). PerkOS-API and the
+  Tools-API gained matching `logActivity` contract tests (396 + 35 green).
+
 Implements the full P0→P3 roadmap from `PerkOS-App/UX-VISIBILITY-ANALYSIS.md` —
 the app now answers "what is happening with my projects and agents?", not just
 "what state are they in".

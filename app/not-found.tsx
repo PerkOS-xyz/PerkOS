@@ -1,5 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
+
+import { AgentOrb } from "./components/AgentOrb";
 
 export default function NotFound() {
   return (
@@ -12,13 +13,7 @@ export default function NotFound() {
       }}
     >
       <div className="flex max-w-md flex-col items-center gap-6 rounded-lg border border-[#530922] bg-[#0e0716] p-8 text-center shadow-[0_0_5px_rgba(236,27,105,0.3)]">
-        <Image
-          src="/avatar.png"
-          alt=""
-          width={72}
-          height={72}
-          priority
-        />
+        <AgentOrb name="PerkOS Assistant" presetId="assistant" size={72} />
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-medium text-[#ececff]">
             This page slipped past the swarm

@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -22,6 +21,7 @@ import {
   type Agent,
   type Project,
 } from "../../lib/perkosApi";
+import { AgentOrb } from "../../components/AgentOrb";
 import { useChatbot } from "../../components/ChatbotProvider";
 import { formatRelativeShort } from "../../lib/format";
 import {
@@ -182,9 +182,7 @@ function PerkOSAgentRow({ onOpen }: { onOpen: () => void }) {
       className="glow-card flex w-full items-center gap-3 rounded-md border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent px-4 py-3 text-left transition-colors hover:border-primary/50"
     >
       <div className="relative shrink-0">
-        <div className="grid h-10 w-10 place-items-center rounded-full bg-primary/85">
-          <Image src="/avatar.png" alt="" width={24} height={24} />
-        </div>
+        <AgentOrb name="PerkOS Assistant" presetId="assistant" size={40} />
         <span
           className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-card"
           aria-hidden

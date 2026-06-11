@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { use, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -21,6 +20,7 @@ import {
   useAgentChatHistory,
   type AgentChatMessage,
 } from "../../../../lib/useAgentChatHistory";
+import { AgentOrb } from "../../../../components/AgentOrb";
 import { ChatComposer } from "../../../../components/ChatComposer";
 import { Markdown } from "../../../../components/Markdown";
 import { uploadAttachment } from "../../../../lib/uploadAttachment";
@@ -298,18 +298,7 @@ function TypingBubble() {
 function EmptyConversation({ agent }: { agent: Agent }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-      <div className="relative">
-        <div className="grid h-14 w-14 place-items-center rounded-full bg-primary/15 text-sm font-medium text-primary">
-          {initials(agent.name)}
-        </div>
-        <Image
-          src="/avatar.png"
-          alt=""
-          width={20}
-          height={20}
-          className="absolute -bottom-1 -right-1 rounded-full bg-card p-0.5"
-        />
-      </div>
+      <AgentOrb name={agent.name} size={56} />
       <h2 className="text-base font-medium text-foreground">
         Chat with {agent.name}
       </h2>

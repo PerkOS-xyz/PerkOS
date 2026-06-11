@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
@@ -44,6 +43,7 @@ import {
   useWalletAgents,
 } from "../../lib/useWalletAgents";
 import { ActiveAgentsPanel } from "../../components/ActiveAgentsPanel";
+import { AgentOrb } from "../../components/AgentOrb";
 import { ActivityFeedCard } from "../../components/ActivityFeedCard";
 import { ActivityHeatmap } from "../../components/charts";
 import { KpiStrip } from "../../components/KpiStrip";
@@ -412,14 +412,7 @@ function GreetingBanner({ address }: { address?: string }) {
     <div className="relative overflow-hidden rounded-xl border border-primary/30 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent p-5">
       <div className="flex items-start gap-3">
         <div className="relative">
-          <div className="grid h-12 w-12 place-items-center rounded-full bg-primary/75">
-            <Image
-              src="/avatar.png"
-              alt=""
-              width={45}
-              height={45}
-            />
-          </div>
+          <AgentOrb name="PerkOS Assistant" presetId="assistant" size={48} />
           <span className="absolute -bottom-0.5 -right-0.5 grid h-3 w-3 place-items-center rounded-full bg-emerald-400 ring-2 ring-background" />
         </div>
         <div className="flex flex-col gap-1">

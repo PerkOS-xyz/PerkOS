@@ -192,8 +192,8 @@ const EMPTY_SOUL: SoulFields = {
 export const AGENT_PRESETS: AgentPreset[] = [
   {
     id: "pm",
-    name: "PM",
-    blurb: "Plans the goal, splits it into tasks, and delegates to your workers.",
+    name: "Team Lead",
+    blurb: "Plans the goal, splits it into tasks, and hands them to your team.",
     emoji: "🧭",
     avatar: "/logo.png",
     avatarFit: "contain",
