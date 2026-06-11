@@ -202,7 +202,7 @@ export default function DashboardPage() {
   const displayWorkspace = workspaceName.trim() || "Personal Workspace";
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_280px]">
       <div className="flex flex-col gap-6">
         <GreetingBanner address={address} />
 
