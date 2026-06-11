@@ -120,7 +120,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           <WalletFooter address={address} onDisconnect={hideLogout ? null : logout} />
         </aside>
 
-        <main className="flex-1 overflow-x-hidden">
+        <main className="min-w-0 flex-1 overflow-x-hidden">
           {/* Desktop/tablet topbar. Tablet (md→lg) runs compact: the search
               hint collapses to an icon and the balance pill drops $PERKOS —
               one row, nothing wraps or overlaps. Full layout returns at lg. */}

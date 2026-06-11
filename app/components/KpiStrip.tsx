@@ -27,7 +27,7 @@ export function KpiStrip({
 }) {
   const v = (n: number) => (isLoading ? "—" : String(n));
   return (
-    <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
+    <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
       <KpiTile
         label="Agents online"
         value={isLoading ? "—" : `${online}/${agentsTotal}`}
