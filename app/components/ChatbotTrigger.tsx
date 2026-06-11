@@ -1,14 +1,15 @@
 "use client";
 
-import { Sparkles } from "lucide-react";
+import Image from "next/image";
 
 import { useChatbot } from "./ChatbotProvider";
 import { cn } from "@/lib/utils";
 
 /**
- * Floating assistant button. A sparkle badge — NOT a robot icon: this button
- * is on every page, and user testing showed robot imagery scared
- * non-technical users.
+ * Floating assistant button. Shows the PerkOS logo (the brand mark reads as
+ * "us", not a robot — user testing showed robot avatars scared non-technical
+ * users) inside a circle, with a soft pulsing ring around it so people notice
+ * the live chat is there.
  */
 export function ChatbotTrigger() {
   const { open, toggle } = useChatbot();
@@ -20,15 +21,27 @@ export function ChatbotTrigger() {
       aria-label={open ? "Close your PerkOS assistant" : "Open your PerkOS assistant"}
       title="Your PerkOS assistant"
       className={cn(
-        "fixed bottom-32 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full border border-primary/40 backdrop-blur-xs shadow-[0_0_24px_rgba(236,27,105,0.4)] transition-transform hover:scale-105 active:scale-95 md:bottom-[62px] md:right-8 md:h-16 md:w-16",
+        "fixed bottom-32 right-5 z-30 h-14 w-14 rounded-full transition-transform hover:scale-105 active:scale-95 md:bottom-[62px] md:right-8 md:h-16 md:w-16",
         open && "opacity-0 pointer-events-none"
       )}
-      style={{
-        background:
-          "radial-gradient(circle at 30% 30%, hsla(280, 70%, 60%, 0.55), hsla(280, 70%, 35%, 0.3))",
-      }}
     >
-      <Sparkles className="h-6 w-6 md:h-7 md:w-7" style={{ color: "hsla(280, 90%, 88%, 0.95)" }} />
+      {/* Active pulse — radar ring radiating out (not clipped). */}
+      <span
+        aria-hidden
+        className="absolute inset-0 rounded-full bg-primary/30 animate-ping"
+        style={{ animationDuration: "2.2s" }}
+      />
+      {/* Logo disc. */}
+      <span className="absolute inset-0 overflow-hidden rounded-full border border-primary/50 ring-2 ring-primary/40 shadow-[0_0_24px_rgba(236,27,105,0.5)]">
+        <Image
+          src="/logo.png"
+          alt="PerkOS"
+          fill
+          sizes="64px"
+          className="object-cover"
+          priority
+        />
+      </span>
     </button>
   );
 }
