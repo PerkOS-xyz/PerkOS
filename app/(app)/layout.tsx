@@ -49,13 +49,24 @@ const NAV_ITEMS = [
 export default function AppLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { address } = useConnection();
+  const { address, connector } = useConnection();
   const { disconnect } = useDisconnect();
   const session = useWalletSession();
   // Inside a Mini App host (Base App / Farcaster) the wallet IS the host's
   // identity — there is no meaningful "log out", so the button is hidden.
   // In a regular browser, logging out returns to the public landing page.
   const inMiniApp = useIsInMiniApp();
+  // Base App's in-app BROWSER is not a Mini App host (sdk.isInMiniApp() is
+  // false there) — it connects through the injected Coinbase provider
+  // (rdns com.coinbase.wallet, see AutoConnect). The wallet is still the
+  // host app's identity, so it gets no logout either. Note: the baseAccount
+  // connector alone is NOT a signal — it's also "Sign in with email" in a
+  // regular browser, where logout must exist.
+  const isBaseAppBrowser =
+    !!connector &&
+    (connector.id === "com.coinbase.wallet" ||
+      (connector as { rdns?: string }).rdns === "com.coinbase.wallet");
+  const hideLogout = inMiniApp === true || isBaseAppBrowser;
   // Intentional logout goes to the LANDING page; the signed-out effect below
   // otherwise bounces to /sign-in (its job for unexpected session loss).
   const loggingOut = useRef(false);
@@ -106,7 +117,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         <aside className="hidden w-60 shrink-0 flex-col gap-6 border-r border-border bg-card p-6 md:flex">
           <Brand />
           <NavList pathname={pathname} />
-          <WalletFooter address={address} onDisconnect={inMiniApp ? null : logout} />
+          <WalletFooter address={address} onDisconnect={hideLogout ? null : logout} />
         </aside>
 
         <main className="flex-1 overflow-x-hidden">
@@ -176,7 +187,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
                   <WalletFooter
                     address={address}
-                    onDisconnect={inMiniApp ? null : logout}
+                    onDisconnect={hideLogout ? null : logout}
                   />
                 </SheetContent>
               </Sheet>
