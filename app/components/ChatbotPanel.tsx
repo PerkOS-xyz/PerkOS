@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -20,6 +21,7 @@ import {
   Bot,
   Loader2,
   Copy,
+  History,
   RefreshCw,
   ThumbsUp,
   ThumbsDown,
@@ -134,24 +136,19 @@ export function ChatbotPanel() {
     },
   });
 
-  // Pull conversation history once per WS auth — when the user opens the
-  // panel and we get authed, request the most recent 50 messages from
-  // the historyHost agent (PerkOS Assistant) and prepend them. Subsequent
-  // re-auths within the same session don't re-pull because the messages
-  // array already has them (and the de-dupe in prependMessages would
-  // drop them anyway).
-  const historyPulledRef = useRef(false);
-  useEffect(() => {
-    if (!chat.authed || historyPulledRef.current) return;
-    if (chat.requestHistory({ limit: 50 })) {
-      historyPulledRef.current = true;
-    }
-  }, [chat.authed, chat.requestHistory]);
+  // History is OPT-IN: the panel always opens to a fresh conversation
+  // (we no longer auto-pull the server history on auth). The user loads
+  // the previous messages on demand via the History button; "Clear" wipes
+  // the current view back to the greeting.
+  const [historyLoaded, setHistoryLoaded] = useState(false);
+  const loadHistory = useCallback(() => {
+    if (chat.requestHistory({ limit: 50 })) setHistoryLoaded(true);
+  }, [chat]);
 
-  // Reset the history-pulled flag when the convId or panel closes so a
-  // wallet switch (different convId) or a fresh panel open pulls again.
+  // Re-enable history loading after a wallet switch (new convId) or a
+  // fresh panel open, so the button works again on the next session.
   useEffect(() => {
-    if (!open || !convId) historyPulledRef.current = false;
+    if (!open || !convId) setHistoryLoaded(false);
   }, [open, convId]);
 
   useEffect(() => {
@@ -296,6 +293,7 @@ export function ChatbotPanel() {
           }
           onClose={() => setOpen(false)}
           onReset={isEmpty ? undefined : resetConversation}
+          onHistory={chat.authed && !historyLoaded ? loadHistory : undefined}
         />
 
         <div
@@ -437,11 +435,13 @@ function Header({
   subtitle,
   onClose,
   onReset,
+  onHistory,
 }: {
   title: string;
   subtitle?: string;
   onClose: () => void;
   onReset?: () => void;
+  onHistory?: () => void;
 }) {
   return (
     <div className="flex items-center justify-between border-b border-border px-5 py-3">
@@ -464,13 +464,24 @@ function Header({
         </div>
       </div>
       <div className="flex items-center gap-1">
+        {onHistory ? (
+          <button
+            type="button"
+            onClick={onHistory}
+            className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:text-foreground"
+            aria-label="Load previous conversation"
+            title="Load previous conversation"
+          >
+            <History className="h-4 w-4" />
+          </button>
+        ) : null}
         {onReset ? (
           <button
             type="button"
             onClick={onReset}
             className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:text-foreground"
-            aria-label="Reset conversation"
-            title="Start a new conversation"
+            aria-label="Clear conversation"
+            title="Clear — start a new conversation"
           >
             <RefreshCw className="h-4 w-4" />
           </button>
