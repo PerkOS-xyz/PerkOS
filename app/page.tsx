@@ -700,8 +700,16 @@ const TOKEN_BENEFITS = [
 ];
 
 const TOKEN_CONTRACTS = [
-  { chain: "Base", ca: "0xF714E60f85497D70508F7E356b5DB80e64539BA3" },
-  { chain: "Celo", ca: "0xb7Ba43fBD4F2E85FCE929f7d4DFE3905Ae846A46" },
+  {
+    chain: "Base",
+    ca: "0xF714E60f85497D70508F7E356b5DB80e64539BA3",
+    buy: "https://app.uniswap.org/explore/tokens/base/0xf714e60f85497d70508f7e356b5db80e64539ba3",
+  },
+  {
+    chain: "Celo",
+    ca: "0xb7Ba43fBD4F2E85FCE929f7d4DFE3905Ae846A46",
+    buy: "https://app.uniswap.org/explore/tokens/celo/0xb7ba43fbd4f2e85fce929f7d4dfe3905ae846a46",
+  },
 ];
 
 function InvestorsAndToken() {
@@ -760,16 +768,27 @@ function InvestorsAndToken() {
           ))}
         </div>
 
-        <p className="mt-8 text-center text-xs text-muted-foreground">
-          $PERKOS settles on <b className="text-foreground">Base</b> and{" "}
-          <b className="text-foreground">Celo</b> via USDC — low-fee, instant,
-          multi-chain.
+        <p className="mt-8 text-center text-sm text-muted-foreground">
+          Get <b className="text-foreground">$PERKOS</b> on Uniswap — settles on{" "}
+          <b className="text-foreground">Base</b> and{" "}
+          <b className="text-foreground">Celo</b> via USDC, low-fee and instant.
         </p>
-        <div className="mx-auto mt-4 flex max-w-2xl flex-col items-stretch gap-2 sm:flex-row sm:justify-center">
-          {TOKEN_CONTRACTS.map(({ chain, ca }) => (
-            <div key={chain} className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">CA · {chain}</span>
-              <span className="break-all font-mono text-[11px] text-muted-foreground">{ca}</span>
+        <div className="mx-auto mt-4 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-2">
+          {TOKEN_CONTRACTS.map(({ chain, ca, buy }) => (
+            <div key={chain} className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4">
+              <a
+                href={buy}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                <Coins className="h-4 w-4" />
+                Buy $PERKOS on {chain} ↗
+              </a>
+              <span className="flex items-center gap-1.5">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">CA</span>
+                <span className="break-all font-mono text-[11px] text-muted-foreground">{ca}</span>
+              </span>
             </div>
           ))}
         </div>
