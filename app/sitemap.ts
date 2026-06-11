@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 const SITE =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://perkos.xyz";
+  process.env.NEXT_PUBLIC_CANONICAL_URL ?? "https://perkos.xyz";
 
 /**
  * Public sitemap. Only the marketing landing is indexable — the app routes

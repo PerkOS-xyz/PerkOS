@@ -12,15 +12,25 @@ const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
 });
 
+// Two distinct domains, deliberately decoupled:
+//  - SITE_URL: the Mini App launch domain (Base App / Farcaster register the app
+//    at app.perkos.xyz, baked via NEXT_PUBLIC_SITE_URL). Used ONLY by the
+//    fc:frame embed + base:app_id below.
+//  - CANONICAL_URL: the public marketing domain for SEO. The landing serves on
+//    both perkos.xyz and app.perkos.xyz, so we declare perkos.xyz canonical
+//    (metadataBase, canonical link, og:url) to avoid duplicate content and to
+//    brand the Google result as perkos.xyz.
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://perkos.xyz";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://app.perkos.xyz";
+const CANONICAL_URL =
+  process.env.NEXT_PUBLIC_CANONICAL_URL ?? "https://perkos.xyz";
 
 const OG_TITLE = "PerkOS — Your business just hired its first team";
 const OG_DESC =
   "Pick your type of business and in two minutes you have a small AI team that handles the busywork — marketing, customer replies, research, the books. They draft, you approve. No tech skills needed.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
+  metadataBase: new URL(CANONICAL_URL),
   title: {
     default: "PerkOS — AI teams that run your small business",
     template: "%s · PerkOS",
@@ -41,7 +51,7 @@ export const metadata: Metadata = {
     "no-code AI",
     "PerkOS",
   ],
-  authors: [{ name: "PerkOS", url: SITE_URL }],
+  authors: [{ name: "PerkOS", url: CANONICAL_URL }],
   icons: {
     icon: [{ url: "/icon.png", type: "image/png", sizes: "380x380" }],
     shortcut: "/icon.png",
@@ -52,7 +62,7 @@ export const metadata: Metadata = {
     siteName: "PerkOS",
     title: OG_TITLE,
     description: OG_DESC,
-    url: SITE_URL,
+    url: CANONICAL_URL,
     images: [
       { url: "/banner.png", width: 2371, height: 1421, alt: "PerkOS — AI teams for small businesses" },
     ],

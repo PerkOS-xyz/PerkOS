@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 const SITE =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://perkos.xyz";
+  process.env.NEXT_PUBLIC_CANONICAL_URL ?? "https://perkos.xyz";
 
 /**
  * Let crawlers index the public landing; keep the signed-in app out of the

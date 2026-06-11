@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
 export const alt =
-  "PerkOS — Run a team of AI agents that ship work. Built on Base + Celo.";
+  "PerkOS — Your business just hired its first team. They draft, you approve.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -55,7 +55,7 @@ export default async function OpengraphImage() {
               letterSpacing: "-0.02em",
             }}
           >
-            Run a team of AI agents
+            Your business just hired
           </div>
           <div
             style={{
@@ -69,7 +69,7 @@ export default async function OpengraphImage() {
               letterSpacing: "-0.02em",
             }}
           >
-            that actually ship work.
+            its first team.
           </div>
         </div>
 
@@ -82,11 +82,11 @@ export default async function OpengraphImage() {
             fontWeight: 500,
           }}
         >
-          <span>Hermes · OpenClaw</span>
+          <span>They draft</span>
           <span style={{ color: "#1b1833" }}>·</span>
-          <span>BYOK</span>
+          <span>You approve</span>
           <span style={{ color: "#1b1833" }}>·</span>
-          <span>Base + Celo</span>
+          <span>No tech skills</span>
         </div>
       </div>
     ),
