@@ -56,7 +56,9 @@ export function DevAuthIndicator() {
   const connectors = useConnectors();
   const { isPending: isConnectPending, error: connectError } = useConnect();
   const [ua, setUa] = useState<string>("");
-  const [minimized, setMinimized] = useState<boolean>(false);
+  // Default to MINIMIZED so the public landing only shows the tiny status
+  // dot, never the full debug card. Expanding it persists the preference.
+  const [minimized, setMinimized] = useState<boolean>(true);
 
   useEffect(() => {
     if (typeof navigator !== "undefined") {
@@ -67,9 +69,12 @@ export function DevAuthIndicator() {
     }
     if (typeof window !== "undefined") {
       try {
-        setMinimized(window.localStorage.getItem(STORAGE_KEY) === "1");
+        // Absence of a stored preference → stay minimized (the default).
+        // Only an explicit "0" (the user expanded it) keeps it open.
+        const stored = window.localStorage.getItem(STORAGE_KEY);
+        setMinimized(stored === null ? true : stored === "1");
       } catch {
-        // localStorage unavailable (private mode / iframe) — stay expanded.
+        // localStorage unavailable (private mode / iframe) — stay minimized.
       }
     }
   }, []);
