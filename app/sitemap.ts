@@ -1,28 +1,22 @@
 import type { MetadataRoute } from "next";
 
-const SITE_URL =
+const SITE =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://perkos.xyz";
 
+/**
+ * Public sitemap. Only the marketing landing is indexable — the app routes
+ * (dashboard/projects/agents/…) sit behind sign-in and are disallowed in
+ * robots. Section anchors live on the landing; Google may surface them as
+ * sitelinks over time from the page structure + the WebSite/Organization
+ * schema in app/page.tsx.
+ */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date();
   return [
     {
-      url: SITE_URL,
-      lastModified: now,
+      url: SITE,
+      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 1,
-    },
-    {
-      url: `${SITE_URL}/sign-in`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${SITE_URL}/sign-up`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.6,
     },
   ];
 }

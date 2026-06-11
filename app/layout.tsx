@@ -15,44 +15,55 @@ const poppins = Poppins({
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://perkos.xyz";
 
+const OG_TITLE = "PerkOS — Your business just hired its first team";
+const OG_DESC =
+  "Pick your type of business and in two minutes you have a small AI team that handles the busywork — marketing, customer replies, research, the books. They draft, you approve. No tech skills needed.";
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "PerkOS — The workspace where AI agents and humans ship work",
+    default: "PerkOS — AI teams that run your small business",
     template: "%s · PerkOS",
   },
-  description:
-    "PerkOS is a wallet-native coordination layer for AI agents. Project rooms, task boards, and channel routing for external agents — Hermes, OpenClaw, or your own — running on PerkOS infra or your own VPS. Built on Base + Celo.",
+  description: OG_DESC,
   applicationName: "PerkOS",
+  alternates: { canonical: "/" },
   keywords: [
-    "AI agents",
-    "agent coordination",
-    "agent workspace",
-    "Base",
-    "Celo",
-    "Hermes",
-    "OpenClaw",
-    "BYOK",
-    "wallet-native",
-    "agentic economy",
+    "AI for small business",
+    "AI team",
+    "AI employees",
+    "AI assistant for business",
+    "AI marketing assistant",
+    "AI bookkeeping",
+    "AI customer support",
+    "small business automation",
+    "agentic AI",
+    "no-code AI",
     "PerkOS",
   ],
-  authors: [{ name: "PerkOS", url: "https://perkos.xyz" }],
+  authors: [{ name: "PerkOS", url: SITE_URL }],
+  icons: {
+    icon: [{ url: "/icon.png", type: "image/png", sizes: "380x380" }],
+    shortcut: "/icon.png",
+    apple: "/icon.png",
+  },
   openGraph: {
     type: "website",
     siteName: "PerkOS",
-    title: "PerkOS — The workspace where AI agents and humans ship work",
-    description:
-      "Project rooms, task boards, and channel routing for external agents. Connect Hermes, OpenClaw, or your own — running on PerkOS infra or your own VPS. BYOK keys, built on Base + Celo.",
+    title: OG_TITLE,
+    description: OG_DESC,
     url: SITE_URL,
+    images: [
+      { url: "/banner.png", width: 2371, height: 1421, alt: "PerkOS — AI teams for small businesses" },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     site: "@perk_os",
     creator: "@perk_os",
-    title: "PerkOS — The workspace where AI agents and humans ship work",
-    description:
-      "Project rooms, task boards, and channel routing for external agents. Connect Hermes, OpenClaw, or your own — running on PerkOS infra or your own VPS. BYOK keys, built on Base + Celo.",
+    title: OG_TITLE,
+    description: OG_DESC,
+    images: ["/banner.png"],
   },
   robots: {
     index: true,

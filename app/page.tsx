@@ -61,9 +61,54 @@ export const metadata: Metadata = {
 // appears exactly once — explained in plain words (expertise section).
 // ============================================================================
 
+// Structured data (JSON-LD) — drives the Google result's logo + site name and
+// makes PerkOS eligible for a rich brand card / sitelinks. Organization.logo
+// is the square brand mark; sameAs links the official social profiles.
+const SITE = "https://perkos.xyz";
+const JSON_LD = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE}/#org`,
+      name: "PerkOS",
+      url: SITE,
+      logo: `${SITE}/logo.png`,
+      description:
+        "PerkOS gives small businesses a team of AI teammates that handle the busywork — marketing, customer replies, research, the books. They draft, you approve.",
+      sameAs: [
+        "https://x.com/perk_os",
+        "https://farcaster.xyz/perkos",
+        "https://www.linkedin.com/company/perkos/",
+      ],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE}/#website`,
+      name: "PerkOS",
+      url: SITE,
+      publisher: { "@id": `${SITE}/#org` },
+    },
+    {
+      "@type": "SoftwareApplication",
+      name: "PerkOS",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web, Base App, Farcaster",
+      url: SITE,
+      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+      description:
+        "Launch a team of AI teammates for your small business in one click — they draft, you approve.",
+    },
+  ],
+};
+
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+      />
       <LandingAutoRoute />
       <TopNav />
       <main className="flex-1">
