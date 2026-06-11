@@ -67,7 +67,7 @@ function stateTone(state: HibernationApiState): {
     case "hibernated":
       return {
         badgeClass: "bg-slate-500/20 text-slate-300",
-        label: "Hibernated",
+        label: "Resting",
       };
     case "waking":
       return {

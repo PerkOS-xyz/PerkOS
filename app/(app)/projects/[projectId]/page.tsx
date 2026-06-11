@@ -60,7 +60,7 @@ import { extractMentions, type MentionParticipant } from "../../../lib/mentions"
 import { useMentionParticipants } from "../../../lib/useMentionParticipants";
 import { uploadAttachment } from "../../../lib/uploadAttachment";
 import { useProjectTasks } from "../../../lib/useProjectTasks";
-import { useWalletAgents, realtimeAgentStatus, type AgentLiveStatus } from "../../../lib/useWalletAgents";
+import { useWalletAgents, realtimeAgentStatus, STATUS_RESTING, STATUS_GETTING_READY, STATUS_GOING_TO_REST, type AgentLiveStatus } from "../../../lib/useWalletAgents";
 import { MembersPanel } from "../../../components/MembersPanel";
 import { ProjectInsights } from "../../../components/ProjectInsights";
 import { ProjectContextMap } from "../../../components/ProjectContextMap";
@@ -528,8 +528,8 @@ function DetailHeader({
               {project.pmAgent ? "Put the team to work" : "Choose a team lead & start"}
             </Button>
             <span className="text-xs text-muted-foreground">
-              Agents wake automatically when work is assigned — no need to
-              pre-warm anything.
+              Your team drafts and suggests — nothing happens without your OK.
+              Teammates wake automatically when work is assigned.
             </span>
           </div>
         </div>
@@ -1321,9 +1321,9 @@ function ProjectAgentPower({ live }: { live?: AgentLiveStatus }) {
 
   if (!live?.id) return null;
   const label = realtimeAgentStatus(live).label;
-  const isHibernated = label === "Hibernated";
+  const isHibernated = label === STATUS_RESTING;
   const isOnline = label === "Online";
-  const isTransitioning = label === "Starting" || label === "Hibernating";
+  const isTransitioning = label === STATUS_GETTING_READY || label === STATUS_GOING_TO_REST;
   // Only show for controllable PerkOS-infra states.
   if (!isHibernated && !isOnline && !isTransitioning) return null;
 

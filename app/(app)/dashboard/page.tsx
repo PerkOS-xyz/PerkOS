@@ -41,6 +41,7 @@ import { useActivityFeed } from "../../lib/activityEvents";
 import {
   realtimeAgentStatus,
   useWalletAgents,
+  STATUS_AVAILABLE,
 } from "../../lib/useWalletAgents";
 import { ActiveAgentsPanel } from "../../components/ActiveAgentsPanel";
 import { AgentOrb } from "../../components/AgentOrb";
@@ -119,7 +120,7 @@ export default function DashboardPage() {
   const allAgents = data?.agents ?? [];
   const allTasks = data?.tasks ?? [];
   const online = allAgents.filter(
-    (a) => realtimeAgentStatus(liveAgents[a.name]).label === "Online",
+    (a) => realtimeAgentStatus(liveAgents[a.name]).label === STATUS_AVAILABLE,
   ).length;
   const failedAgents = allAgents.filter((a) =>
     ["failed", "provision-failed", "error"].includes(String(a.status)),

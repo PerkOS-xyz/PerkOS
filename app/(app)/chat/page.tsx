@@ -7,6 +7,7 @@ import { useConnection } from "wagmi";
 import {
   useWalletAgents,
   realtimeAgentStatus,
+  STATUS_AVAILABLE,
   type AgentLiveStatus,
 } from "../../lib/useWalletAgents";
 import { ArrowRight, Bot, Folder, Plus, Sparkles } from "lucide-react";
@@ -273,12 +274,12 @@ function AgentChatRow({
             <span className="px-1.5">·</span>
             <span
               className={
-                presenceLabel === "Online" ? "text-emerald-400" : undefined
+                presenceLabel === STATUS_AVAILABLE ? "text-emerald-400" : undefined
               }
             >
               {presenceLabel}
             </span>
-            {presenceLabel !== "Online" && live?.lastBridgeSeenMs ? (
+            {presenceLabel !== STATUS_AVAILABLE && live?.lastBridgeSeenMs ? (
               <span className="text-muted-foreground/70">
                 {" "}
                 — seen {formatRelativeShort(new Date(live.lastBridgeSeenMs))}

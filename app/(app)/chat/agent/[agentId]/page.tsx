@@ -228,7 +228,7 @@ function ChatHeader({
         <span className="text-xs text-muted-foreground">
           {agent.runtime}
           <span className="px-1.5">·</span>
-          {agent.status === "ready" ? "Online" : agent.status}
+          {agent.status === "ready" ? "Available" : agent.status}
         </span>
       </div>
       {hasMessages ? (

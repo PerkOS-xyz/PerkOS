@@ -404,7 +404,7 @@ export default function NewCompanyPage() {
         {mode !== "empty" ? (
           <section className="flex flex-col gap-2">
             <h2 className="text-sm font-medium text-foreground">
-              Your team ({teamRoles.length} agent{teamRoles.length === 1 ? "" : "s"})
+              Your team ({teamRoles.length} teammate{teamRoles.length === 1 ? "" : "s"})
             </h2>
             <p className="text-xs text-muted-foreground">
               {mode === "template"
@@ -708,8 +708,8 @@ export default function NewCompanyPage() {
               : mode === "empty"
                 ? "Create project"
                 : agentSource === "invite"
-                  ? `Create + invite ${teamRoles.length} agent${teamRoles.length === 1 ? "" : "s"}`
-                  : `Launch team (${teamRoles.length})`}
+                  ? `Create + invite ${teamRoles.length} teammate${teamRoles.length === 1 ? "" : "s"}`
+                  : `Start your team (${teamRoles.length})`}
           </Button>
           {launching ? (
             <span className="text-xs text-muted-foreground">
@@ -728,7 +728,8 @@ export default function NewCompanyPage() {
         <h1 className="text-3xl font-medium text-foreground">New project</h1>
         <p className="max-w-2xl text-sm text-muted-foreground">
           Start from a business template, pick your own team of roles, or
-          create an empty project. Prefer a single agent? {""}
+          create an empty project. Your team drafts and suggests — nothing
+          happens without your OK. Prefer a single agent? {""}
           <button
             type="button"
             onClick={() => router.push("/agents/new")}
