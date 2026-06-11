@@ -13,7 +13,7 @@ const REASON_LABEL: Record<string, string> = {
   "bad-plan": "Couldn't form a valid plan",
   "empty-plan": "No work to do",
   "llm-error": "The model errored",
-  "no-pm": "No PM designated",
+  "no-pm": "No team lead designated",
 };
 
 // The PM loop's phases, in order — rendered as a mini pipeline so the owner
@@ -62,7 +62,7 @@ export function PmSessionBanner({
       <Icon className={cn("h-4 w-4 shrink-0", active && "animate-spin")} />
       <span className="inline-flex items-center gap-1 font-medium">
         <Compass className="h-3.5 w-3.5" />
-        {pmAgent ? `${pmAgent}` : "PM"}
+        {pmAgent ? `${pmAgent}` : "Team lead"}
       </span>
 
       {/* Phase pipeline: Plan → Work → Review → Done */}

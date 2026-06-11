@@ -282,21 +282,21 @@ function DetailHeader({
         queryKey: ["wallet-project", address, project.id],
       });
       if (res.reason === "no-pm") {
-        toast.error("Designate a PM agent first — see the Agents tab.");
+        toast.error("Pick a team lead first — see the Agents tab.");
       } else if (res.reason === "already-active") {
-        toast.info("The PM is already running on this project.");
+        toast.info("The team is already working on this project.");
       } else if (res.status === "working") {
         toast.success(
-          `PM assigned ${res.created ?? 0} task${res.created === 1 ? "" : "s"}.`,
+          `Your team lead assigned ${res.created ?? 0} task${res.created === 1 ? "" : "s"}.`,
         );
       } else if (res.status === "done") {
-        toast.success("PM says the goal is already complete.");
+        toast.success("Your team lead says the goal is already complete.");
       } else {
-        toast.success("PM is on it.");
+        toast.success("The team is on it.");
       }
     },
     onError: (err: Error) =>
-      toast.error("Couldn't start the PM", { description: err.message }),
+      toast.error("Couldn't start the team", { description: err.message }),
   });
 
   // Designate the coordinator the USER picked in the popup, then run the PM.
@@ -314,11 +314,11 @@ function DetailHeader({
         queryKey: ["wallet-project", ownerWallet, project.id],
       });
       setChoosePmOpen(false);
-      toast.success(`${name} is now the project coordinator.`);
+      toast.success(`${name} is now the team lead.`);
       runPmMutation.mutate();
     },
     onError: (err: Error) =>
-      toast.error("Couldn't set the coordinator", { description: err.message }),
+      toast.error("Couldn't set the team lead", { description: err.message }),
   });
 
   function requirePmThen(run: () => void) {
@@ -388,8 +388,8 @@ function DetailHeader({
             onClick={() => requirePmThen(() => runPmMutation.mutate())}
             title={
               project.pmAgent
-                ? "Let the PM plan the goal and delegate to your workers"
-                : "You'll pick which agent coordinates the project"
+                ? "Your team lead plans the goal and hands out the work"
+                : "You'll pick which agent leads the team"
             }
           >
             {runPmMutation.isPending ? (
@@ -397,7 +397,7 @@ function DetailHeader({
             ) : (
               <Sparkles className="h-4 w-4" />
             )}
-            {pmActive ? "PM running…" : "Run with PM"}
+            {pmActive ? "Team working…" : "Put the team to work"}
           </Button>
           <Button
             variant="outline"
@@ -484,15 +484,15 @@ function DetailHeader({
             <li className="flex items-start gap-2">
               <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-primary/15 text-[11px] font-semibold text-primary">1</span>
               <span>
-                <span className="font-medium text-foreground">Run with PM</span>
+                <span className="font-medium text-foreground">Put the team to work</span>
                 {project.pmAgent ? (
                   <> — {project.pmAgent} reads your goal, plans the work into
-                  tasks, and the team executes them autonomously. This is the
+                  tasks, and the team gets it done on its own. This is the
                   one-click way.</>
                 ) : (
-                  <> — you&apos;ll pick which agent coordinates the project,
-                  then they plan the goal into tasks and the team executes
-                  autonomously.</>
+                  <> — you&apos;ll pick which agent leads the team, then they
+                  plan the goal into tasks and the team gets it done on its
+                  own.</>
                 )}
               </span>
             </li>
@@ -525,7 +525,7 @@ function DetailHeader({
               ) : (
                 <Sparkles className="h-4 w-4" />
               )}
-              {project.pmAgent ? "Run with PM" : "Choose coordinator & run"}
+              {project.pmAgent ? "Put the team to work" : "Choose a team lead & start"}
             </Button>
             <span className="text-xs text-muted-foreground">
               Agents wake automatically when work is assigned — no need to
@@ -535,14 +535,14 @@ function DetailHeader({
         </div>
       ) : null}
 
-      {/* "Choose your coordinator" — the PM role is the user's pick. */}
+      {/* "Choose your team lead" — the lead (pmAgent) is the user's pick. */}
       <Dialog open={choosePmOpen} onOpenChange={setChoosePmOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Choose your coordinator</DialogTitle>
+            <DialogTitle>Choose your team lead</DialogTitle>
             <DialogDescription>
-              Every project needs a coordinator (PM) — the agent who plans the
-              goal into tasks, delegates to the team, and reviews the results.
+              Every project needs a team lead — the agent who plans the goal
+              into tasks, hands them to the team, and reviews the results.
               Pick who leads this project:
             </DialogDescription>
           </DialogHeader>
@@ -592,7 +592,7 @@ function DetailHeader({
               {choosePmMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : null}
-              Make coordinator & run PM
+              Make team lead & start
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1197,10 +1197,12 @@ function AgentsTab({ detail }: { detail: ProjectDetail }) {
       setProjectPm({ walletAddress: address!, projectId, pmAgent: name }),
     onSuccess: (_d, name) => {
       qc.invalidateQueries({ queryKey: ["wallet-project", address, projectId] });
-      toast.success(name ? `${name} is now the PM` : "Cleared the project's PM");
+      toast.success(
+        name ? `${name} is now the team lead` : "Cleared the project's team lead",
+      );
     },
     onError: (e: Error) =>
-      toast.error("Couldn't update the PM", { description: e.message }),
+      toast.error("Couldn't update the team lead", { description: e.message }),
   });
 
   return (
@@ -1215,8 +1217,9 @@ function AgentsTab({ detail }: { detail: ProjectDetail }) {
       </div>
 
       <p className="-mt-1 text-xs text-[#7975a8]">
-        Designate one agent as the <span className="text-primary">PM</span> — it
-        plans the goal and delegates tasks to the others when you Run with PM.
+        Pick one agent as the <span className="text-primary">team lead</span> —
+        it plans the goal and hands tasks to the others when you put the team
+        to work.
       </p>
 
       {agentNames.length === 0 ? (
@@ -1262,7 +1265,7 @@ function AgentsTab({ detail }: { detail: ProjectDetail }) {
                       {realtimeAgentStatus(agentStatus[name]).label}
                     </span>
                     {" · "}
-                    {name === pmAgent ? "Orchestrator · " : "Worker · "}
+                    {name === pmAgent ? "Team lead · " : "Worker · "}
                     {countTasksFor(name, detail.tasks)} task
                     {countTasksFor(name, detail.tasks) === 1 ? "" : "s"}
                   </span>
@@ -1272,7 +1275,7 @@ function AgentsTab({ detail }: { detail: ProjectDetail }) {
                 <ProjectAgentPower live={agentStatus[name]} />
                 {name === pmAgent ? (
                   <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                    <Compass className="h-3 w-3" /> PM
+                    <Compass className="h-3 w-3" /> Lead
                   </span>
                 ) : (
                   <Button
@@ -1281,9 +1284,9 @@ function AgentsTab({ detail }: { detail: ProjectDetail }) {
                     className="shrink-0 text-[#7975a8] hover:text-primary"
                     disabled={setPmMut.isPending || !address}
                     onClick={() => setPmMut.mutate(name)}
-                    title="Make this agent the project's PM"
+                    title="Make this agent the team lead"
                   >
-                    Make PM
+                    Make lead
                   </Button>
                 )}
               </div>
@@ -1511,12 +1514,13 @@ function ChatTab({
       queryClient.invalidateQueries({
         queryKey: ["wallet-project", address, projectId],
       });
-      toast.success(`${name} is now the PM`, {
-        description: "Send your goal in the chat and the PM will plan + delegate.",
+      toast.success(`${name} is now the team lead`, {
+        description:
+          "Send your goal in the chat and your team lead will plan + hand out the work.",
       });
     },
     onError: (e: Error) =>
-      toast.error("Couldn't set the PM", { description: e.message }),
+      toast.error("Couldn't set the team lead", { description: e.message }),
   });
 
   const sharedChat = Boolean(
@@ -1598,10 +1602,10 @@ function ChatTab({
       } else {
         // No PM designated → nothing autonomous happens. Tell the user instead
         // of silently swallowing the goal (the message still posts to chat).
-        toast.info("No PM on this project yet", {
+        toast.info("No team lead on this project yet", {
           description: agentIds.length
-            ? "Designate a PM agent so it can plan your goal and delegate to the others."
-            : "Add agents and designate a PM to let it plan + delegate.",
+            ? "Pick a team lead so it can plan your goal and hand out the work."
+            : "Add agents and pick a team lead to plan + hand out the work.",
         });
       }
     },
@@ -1624,9 +1628,9 @@ function ChatTab({
             <div className="flex items-start gap-2">
               <Compass className="mt-0.5 h-3.5 w-3.5 shrink-0" />
               <p>
-                No PM on this project yet. Messages here won&apos;t start any
-                work until you designate a PM agent — it plans your goal and
-                delegates tasks to the other agents.
+                No team lead on this project yet. Messages here won&apos;t
+                start any work until you pick a team lead — it plans your goal
+                and hands tasks to the other agents.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -1636,14 +1640,14 @@ function ChatTab({
                   className="h-7"
                   disabled={setPmMut.isPending || !address}
                   onClick={() => setPmMut.mutate(pmCandidate)}
-                  title={`Make ${pmCandidate} the project's PM`}
+                  title={`Make ${pmCandidate} the team lead`}
                 >
                   {setPmMut.isPending ? (
                     <Loader2 className="h-3 w-3 animate-spin" />
                   ) : (
                     <Compass className="h-3 w-3" />
                   )}
-                  Make {pmCandidate} the PM
+                  Make {pmCandidate} the team lead
                 </Button>
               ) : null}
               <Button

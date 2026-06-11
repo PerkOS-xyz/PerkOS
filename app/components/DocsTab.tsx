@@ -180,7 +180,7 @@ export function DocsTab({
       <EmptyState
         icon={FileText}
         title="No docs yet"
-        description="Docs are where your team and the PM agent think together — a sprint plan, a spec, meeting notes. Start the sprint plan, or create a free-form note."
+        description="Docs are where your team and your team lead think together — a sprint plan, a spec, meeting notes. Start the sprint plan, or create a free-form note."
         actions={[
           { label: busy ? "Starting…" : "Start sprint plan", onClick: startPlan, icon: ListChecks },
           { label: "New note", onClick: () => setCreating(true), variant: "outline", icon: Plus },
@@ -239,7 +239,7 @@ export function DocsTab({
         {pmDrafts.length > 0 ? (
           <div className="mt-3 flex flex-col gap-1.5">
             <span className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-[#7975a8]">
-              <Bot className="h-3 w-3" /> PM Drafts
+              <Bot className="h-3 w-3" /> Team lead drafts
             </span>
             {pmDrafts.map((d) => (
               <DocTreeItem
@@ -471,7 +471,7 @@ function DocEditor({
           </h2>
           <span className="text-[11px] uppercase tracking-wide text-[#7975a8]">
             {DOC_TYPE_LABEL[doc?.type ?? "note"] ?? "Note"}
-            {doc?.draft ? " · PM draft" : ""}
+            {doc?.draft ? " · lead's draft" : ""}
           </span>
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
@@ -541,7 +541,7 @@ function DocEditor({
         <div className="flex flex-col gap-2">
           {blocks.length === 0 ? (
             <p className="rounded-md border border-dashed border-[#1b1833] bg-[#0e0716] px-4 py-6 text-center text-sm text-[#7975a8]">
-              Empty doc. Add a note below{isPlan ? ", or ask the PM in the discussion to draft the plan." : "."}
+              Empty doc. Add a note below{isPlan ? ", or ask your team lead in the discussion to draft the plan." : "."}
             </p>
           ) : (
             blocks.map((b) =>
@@ -780,7 +780,7 @@ function DocChat({
       <div className="flex-1 space-y-2 overflow-y-auto p-3">
         {messages.length === 0 ? (
           <p className="py-6 text-center text-xs text-[#4f4b6e]">
-            Discuss this doc with your team + the PM. The PM posts here when it
+            Discuss this doc with your team + your team lead. The lead posts here when it
             edits the doc.
           </p>
         ) : (

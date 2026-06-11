@@ -409,7 +409,7 @@ export default function NewCompanyPage() {
             <p className="text-xs text-muted-foreground">
               {mode === "template"
                 ? "Recommended for this business — remove what you don't need, add more roles below, and pick who leads."
-                : "Add or remove roles and pick who leads (the PM plans the work and coordinates the team)."}
+                : "Add or remove roles and pick who leads (the team lead plans the work and coordinates the team)."}
             </p>
             <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {teamRoles.map((role) => (
@@ -426,7 +426,7 @@ export default function NewCompanyPage() {
                         ? "border-primary/40 bg-primary/10 text-primary"
                         : "border-border text-muted-foreground hover:border-primary/40",
                     )}
-                    title="The PM plans the work and coordinates the team"
+                    title="The team lead plans the work and coordinates the team"
                   >
                     <input
                       type="radio"
@@ -436,7 +436,7 @@ export default function NewCompanyPage() {
                       onChange={() => setPm(role.role)}
                       disabled={launching}
                     />
-                    PM
+                    Lead
                   </label>
                   <button
                     type="button"
@@ -516,7 +516,7 @@ export default function NewCompanyPage() {
           />
           {teamSize > 0 ? (
             <p className="text-xs text-muted-foreground">
-              The PM uses this goal to plan the board and brief the team.
+              Your team lead uses this goal to plan the board and brief the team.
             </p>
           ) : null}
         </section>

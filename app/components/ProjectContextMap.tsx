@@ -190,8 +190,8 @@ export function ProjectContextMap({
         </div>
       </div>
       <p className="text-[10px] text-muted-foreground">
-        Project at the center, agents in orbit (PM ringed), their tasks on the
-        edge — solid lines are active assignments, dashed are done.
+        Project at the center, agents in orbit (team lead ringed), their tasks
+        on the edge — solid lines are active assignments, dashed are done.
         {hiddenTasks > 0 ? ` ${hiddenTasks} older task${hiddenTasks === 1 ? "" : "s"} not shown.` : ""}
       </p>
     </div>
@@ -246,7 +246,7 @@ function MapNodeCard({ node }: { node: MapNode }) {
             {node.label}
           </span>
           <span className="text-[9px] uppercase tracking-wide text-muted-foreground">
-            {node.isPM ? "PM · " : ""}
+            {node.isPM ? "Lead · " : ""}
             {label}
           </span>
         </div>
