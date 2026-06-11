@@ -3,10 +3,13 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import {
   ArrowRight,
+  BarChart3,
   Briefcase,
   Calculator,
   Check,
   Coffee,
+  Coins,
+  CreditCard,
   GraduationCap,
   Hammer,
   Handshake,
@@ -16,15 +19,19 @@ import {
   MessageSquare,
   Moon,
   Palette,
+  Shield,
   ShieldCheck,
   ShoppingCart,
   Sparkles,
+  TrendingUp,
   UtensilsCrossed,
   Wand2,
+  Zap,
   type LucideIcon,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { AgentOrb } from "./components/AgentOrb";
 import { ContactForm } from "./components/landing/ContactForm";
 import { LandingAutoRoute } from "./components/LandingAutoRoute";
@@ -67,7 +74,8 @@ export default function LandingPage() {
         <HowItWorks />
         <Expertise />
         <BeyondTeams />
-        <PricingTeaser />
+        <Pricing />
+        <InvestorsAndToken />
         <BuildersStrip />
         <TalkToUs />
         <FinalCTA />
@@ -97,6 +105,12 @@ function TopNav() {
           </Link>
           <Link href="#expertise" className="transition-colors hover:text-foreground">
             Why PerkOS
+          </Link>
+          <Link href="#pricing" className="transition-colors hover:text-foreground">
+            Pricing
+          </Link>
+          <Link href="#token" className="transition-colors hover:text-foreground">
+            $PERKOS
           </Link>
           <Link href="#talk-to-us" className="transition-colors hover:text-foreground">
             Talk to us
@@ -516,27 +530,263 @@ function BeyondTeams() {
 }
 
 // ============================================================================
-// Pricing teaser — remove cost fear; no tiers, no token.
+// Pricing — value-framed plans. Serves BOTH audiences: cost transparency for
+// the SMB owner (reassurance) and the revenue model for investors.
 // ============================================================================
 
-function PricingTeaser() {
+type Tier = {
+  name: string;
+  price: string;
+  cadence: string;
+  tag: string;
+  bullets: string[];
+  cta: string;
+  ctaHref: string;
+  smart?: boolean;
+  featured?: boolean;
+};
+
+const TIERS: Tier[] = [
+  {
+    name: "Starter",
+    price: "Free",
+    cadence: "to begin",
+    tag: "Try your first team",
+    bullets: [
+      "1 business team (up to 4 teammates)",
+      "Marketing, support, research & more",
+      "They draft, you approve — always",
+      "Pay only for what your team runs",
+    ],
+    cta: "Start free",
+    ctaHref: "/sign-in",
+    smart: true,
+  },
+  {
+    name: "Growth",
+    price: "$29",
+    cadence: "/ month",
+    tag: "For a busy small business",
+    bullets: [
+      "Unlimited teams & teammates",
+      "Your own saved team templates",
+      "Docs, chat, and the full workspace",
+      "Priority support",
+    ],
+    cta: "Start your team",
+    ctaHref: "/sign-in",
+    smart: true,
+    featured: true,
+  },
+  {
+    name: "Custom",
+    price: "Let's talk",
+    cadence: "",
+    tag: "Built around your business",
+    bullets: [
+      "Custom AI built for your needs",
+      "Connect the tools you already use",
+      "Bring your own AI model",
+      "Onboarding, training & a real human",
+    ],
+    cta: "Talk to us",
+    ctaHref: "#talk-to-us",
+  },
+];
+
+function Pricing() {
   return (
-    <section className="border-b border-border bg-card/30 py-14 md:py-16">
-      <div className="mx-auto flex max-w-3xl flex-col items-center gap-3 px-4 text-center">
-        <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">
-          Start free. It stays affordable.
-        </h2>
-        <p className="text-base text-muted-foreground">
-          Free to start. Most teams cost a few dollars a month to run — and a
-          resting team costs almost nothing.
+    <section id="pricing" className="border-b border-border bg-card/30 py-20 md:py-28">
+      <div className="mx-auto max-w-6xl px-4 md:px-8">
+        <div className="mb-10 flex flex-col items-center gap-3 text-center">
+          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+            Start free. It stays affordable.
+          </h2>
+          <p className="max-w-2xl text-base text-muted-foreground">
+            A full team for the price of a streaming subscription — and a
+            resting team costs almost nothing. Compare that to one part-time
+            hire.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+          {TIERS.map((t) => (
+            <div
+              key={t.name}
+              className={cn(
+                "relative flex flex-col gap-4 rounded-xl border bg-card p-6",
+                t.featured
+                  ? "border-primary/60 shadow-[0_0_32px_rgba(236,27,105,0.12)]"
+                  : "border-border",
+              )}
+            >
+              {t.featured ? (
+                <Badge className="absolute -top-2.5 left-6 bg-primary text-[10px] uppercase text-primary-foreground">
+                  Most popular
+                </Badge>
+              ) : null}
+              <div className="flex flex-col gap-1">
+                <span className="text-lg font-semibold text-foreground">{t.name}</span>
+                <span className="text-xs text-muted-foreground">{t.tag}</span>
+              </div>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-3xl font-bold tracking-tight text-foreground">{t.price}</span>
+                {t.cadence ? (
+                  <span className="text-sm text-muted-foreground">{t.cadence}</span>
+                ) : null}
+              </div>
+              <ul className="flex flex-col gap-2.5">
+                {t.bullets.map((b) => (
+                  <li key={b} className="flex items-start gap-2.5 text-sm">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    <span className="text-muted-foreground">{b}</span>
+                  </li>
+                ))}
+              </ul>
+              {t.smart ? (
+                <SmartCTA
+                  href={t.ctaHref}
+                  className={cn(
+                    "mt-auto inline-flex items-center justify-center gap-1.5 rounded-md px-4 py-2.5 text-sm font-medium transition-opacity hover:opacity-90",
+                    t.featured
+                      ? "bg-primary text-primary-foreground"
+                      : "border border-border bg-background text-foreground hover:border-primary/40",
+                  )}
+                >
+                  {t.cta}
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </SmartCTA>
+              ) : (
+                <Link
+                  href={t.ctaHref}
+                  className="mt-auto inline-flex items-center justify-center gap-1.5 rounded-md border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:border-primary/40"
+                >
+                  {t.cta}
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              )}
+            </div>
+          ))}
+        </div>
+        <p className="mt-6 text-center text-xs text-muted-foreground">
+          Prefer to pay with $PERKOS? Save 15–25% —{" "}
+          <Link href="#token" className="text-primary underline-offset-2 hover:underline">
+            see the token
+          </Link>
+          .
         </p>
-        <SmartCTA
-          href="/sign-in"
-          className="mt-2 inline-flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-        >
-          Start free
-          <ArrowRight className="h-4 w-4" />
-        </SmartCTA>
+      </div>
+    </section>
+  );
+}
+
+// ============================================================================
+// Investors & $PERKOS holders — ROI proof + the token (investment vehicle +
+// in-app utility). A clearly self-selecting section: the scared SMB owner has
+// already converted above; this serves the secondary audience honestly.
+// ============================================================================
+
+const ROI_METRICS = [
+  { value: "68%", label: "Less time on repetitive work" },
+  { value: "5×", label: "More output per person" },
+  { value: "24/7", label: "Coverage, zero added headcount" },
+  { value: "~$0.02", label: "Cost of an idle teammate / month" },
+];
+
+const TOKEN_BENEFITS = [
+  { Icon: CreditCard, title: "15–25% off with $PERKOS", copy: "Pay for Growth and Custom plans with $PERKOS and save versus card — usage flows back to the token." },
+  { Icon: Shield, title: "Stake for perks", copy: "Stake $PERKOS for permanent discounts, priority support, and early access to new capabilities." },
+  { Icon: TrendingUp, title: "Aligned with growth", copy: "Stakers are positioned for revenue share in selected cases as the platform scales." },
+  { Icon: Zap, title: "Powers the platform", copy: "Teammates settle usage in instant micropayments on Base — the same rail that makes idle cost near-zero." },
+];
+
+const TOKEN_CONTRACTS = [
+  { chain: "Base", ca: "0xF714E60f85497D70508F7E356b5DB80e64539BA3" },
+  { chain: "Celo", ca: "0xb7Ba43fBD4F2E85FCE929f7d4DFE3905Ae846A46" },
+];
+
+function InvestorsAndToken() {
+  return (
+    <section id="token" className="border-b border-border py-20 md:py-28">
+      <div className="mx-auto max-w-6xl px-4 md:px-8">
+        <div className="mb-10 flex flex-col items-center gap-3 text-center">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+            <Coins className="h-3.5 w-3.5" />
+            For investors & $PERKOS holders
+          </span>
+          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+            A real market, real economics, and a token to own it.
+          </h2>
+          <p className="max-w-2xl text-base text-muted-foreground">
+            58–76% of small businesses now use AI, but only 14% have it truly
+            working and 73% want help getting there. PerkOS turns that gap into
+            recurring revenue — and $PERKOS lets the community own a piece of it.
+          </p>
+        </div>
+
+        {/* ROI proof */}
+        <dl className="mb-12 grid grid-cols-2 gap-y-8 rounded-xl border border-border bg-card/60 py-10 md:grid-cols-4 md:gap-0">
+          {ROI_METRICS.map((m, i) => (
+            <div
+              key={m.label}
+              className={cn(
+                "flex flex-col items-center gap-1 px-4 text-center",
+                i < ROI_METRICS.length - 1 && "md:border-r md:border-border",
+              )}
+            >
+              <dd className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">{m.value}</dd>
+              <dt className="text-xs text-muted-foreground md:text-sm">{m.label}</dt>
+            </div>
+          ))}
+        </dl>
+
+        {/* Token utility */}
+        <div className="mb-6 flex flex-col items-center gap-2 text-center">
+          <h3 className="text-xl font-semibold text-foreground">$PERKOS — pay, stake, and grow with the platform</h3>
+          <p className="max-w-2xl text-sm text-muted-foreground">
+            The token aligns PerkOS with the businesses running on it: pay with
+            $PERKOS to save, stake to unlock perks, and share in the upside as
+            the platform scales.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-4">
+          {TOKEN_BENEFITS.map(({ Icon, title, copy }) => (
+            <div key={title} className="flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/5 p-6">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/15 text-primary">
+                <Icon className="h-4 w-4" />
+              </span>
+              <h4 className="text-base font-medium text-foreground">{title}</h4>
+              <p className="text-sm text-muted-foreground">{copy}</p>
+            </div>
+          ))}
+        </div>
+
+        <p className="mt-8 text-center text-xs text-muted-foreground">
+          $PERKOS settles on <b className="text-foreground">Base</b> and{" "}
+          <b className="text-foreground">Celo</b> via USDC — low-fee, instant,
+          multi-chain.
+        </p>
+        <div className="mx-auto mt-4 flex max-w-2xl flex-col items-stretch gap-2 sm:flex-row sm:justify-center">
+          {TOKEN_CONTRACTS.map(({ chain, ca }) => (
+            <div key={chain} className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">CA · {chain}</span>
+              <span className="break-all font-mono text-[11px] text-muted-foreground">{ca}</span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-6 flex justify-center">
+          <a
+            href="mailto:invest@perkos.xyz"
+            className="inline-flex items-center justify-center gap-2 rounded-md border border-primary/40 bg-primary/10 px-6 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/15"
+          >
+            <BarChart3 className="h-4 w-4" />
+            Investor inquiries & the deck
+          </a>
+        </div>
+        <p className="mt-4 text-center text-[11px] text-muted-foreground">
+          ROI figures are early pilot results — your numbers vary by business
+          and volume. $PERKOS is a utility token; nothing here is financial
+          advice.
+        </p>
       </div>
     </section>
   );
@@ -548,12 +798,6 @@ function PricingTeaser() {
 
 function BuildersStrip() {
   const links = [
-    {
-      Icon: Briefcase,
-      title: "For investors",
-      desc: "The agentic-economy thesis, traction, and the deck.",
-      href: "mailto:invest@perkos.xyz",
-    },
     {
       Icon: Handshake,
       title: "For partners",
@@ -573,7 +817,7 @@ function BuildersStrip() {
         <p className="mb-5 text-center text-xs font-semibold uppercase tracking-widest text-muted-foreground">
           Building something bigger?
         </p>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {links.map(({ Icon, title, desc, href }) => (
             <a
               key={title}
