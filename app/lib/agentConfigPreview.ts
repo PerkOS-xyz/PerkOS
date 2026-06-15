@@ -20,9 +20,6 @@ import type { AgentRuntime } from "./perkosApi";
 
 export type LLMSource = "perkos" | "byok" | "skip";
 
-export type OpenClawByokProvider = "anthropic" | "openai" | "openrouter";
-export type HermesByokProvider = "openai" | "anthropic" | "openrouter" | "ollama";
-
 export type ConfigPreviewInput = {
   runtime: AgentRuntime;
   agentName: string;
@@ -82,24 +79,33 @@ export function buildOpenClawPreview(input: ConfigPreviewInput): string {
     ].join("\n");
   }
 
-  // BYOK — provider-specific block
-  const provider = (byokProvider ?? "anthropic") as OpenClawByokProvider;
-  const envName = `${provider.toUpperCase()}_API_KEY`;
-  const defaultModel =
-    modelId ??
-    (provider === "anthropic"
-      ? "claude-sonnet-4-5"
-      : provider === "openai"
-        ? "gpt-4o-mini"
-        : "openai/gpt-4o-mini");
+  // BYOK — mirrors what PerkOS actually provisions (PerkOS-API
+  // services/ecs/provision.ts). The provider is keyed "byok", NOT the vendor
+  // name: a provider that normalizes to "openai" + the official api.openai.com
+  // baseUrl makes OpenClaw route through the Codex/Responses runtime, which
+  // expects an OAuth profile and IGNORES the config apiKey → posts to
+  // /v1/responses with no bearer → 401 (verified in the latest source,
+  // src/agents/openai-routing.ts → openAIProviderUsesCodexRuntimeByDefault).
+  // The "byok" name skips Codex routing and uses the plain openai-completions
+  // client: Authorization: Bearer <key> → <baseUrl>/chat/completions. The
+  // model is referenced on the wire as "byok/<id>" → stripped to "<id>".
+  // Custom providers must declare baseUrl + a models[] array (zod-enforced:
+  // src/config/zod-schema.core.ts) — defaultModel is NOT a valid field.
+  const provider = byokProvider ?? "openai";
+  const baseUrl = byokBaseUrl(provider);
+  const model = byokDefaultModel(provider, modelId);
 
   return [
     "{",
     '  "models": {',
     '    "providers": {',
-    `      "${provider}": {`,
-    `        "apiKey": "$${envName}",`,
-    `        "defaultModel": "${defaultModel}"`,
+    '      "byok": {',
+    `        "baseUrl": "${baseUrl}",`,
+    '        "api": "openai-completions",',
+    '        "apiKey": "$PERKOS_LLM_API_KEY",',
+    '        "models": [',
+    `          { "id": "${model}", "name": "${model}", "contextWindow": 128000 }`,
+    "        ]",
     "      }",
     "    }",
     "  }",
@@ -139,27 +145,25 @@ export function buildHermesPreview(input: ConfigPreviewInput): string {
     ].join("\n");
   }
 
-  // BYOK — provider-specific block
-  const provider = (byokProvider ?? "openai") as HermesByokProvider;
-  const envName = `${provider.toUpperCase()}_API_KEY`;
-  const defaultModel =
-    modelId ??
-    (provider === "openai"
-      ? "gpt-4o-mini"
-      : provider === "anthropic"
-        ? "claude-sonnet-4-5"
-        : provider === "openrouter"
-          ? "openai/gpt-4o-mini"
-          : "qwen2.5:7b");
+  // BYOK — mirrors what PerkOS actually provisions (PerkOS-API
+  // services/ecs/provision.ts). Hermes resolves a custom provider's key from an
+  // inline api_key (or a host-derived <VENDOR>_API_KEY env), NOT from
+  // api_key_env, so the key is set inline. api_mode is PINNED to
+  // chat_completions: Hermes auto-detects the wire protocol from base_url and
+  // maps api.openai.com → codex_responses (latest source:
+  // hermes_cli/runtime_provider.py _detect_api_mode_for_url), which would break
+  // an OpenAI-compatible BYOK key. Pinning it forces /chat/completions.
+  const provider = byokProvider ?? "openai";
+  const baseUrl = byokBaseUrl(provider);
+  const model = byokDefaultModel(provider, modelId);
 
   return [
-    "provider:",
-    `  name: ${provider}`,
-    `  api_key_env: ${envName}`,
     "model:",
-    `  default: ${defaultModel}`,
-    "secrets:",
-    `  ${envName}: <your-key-here>`,
+    `  default: ${model}`,
+    "  provider: custom",
+    `  base_url: ${baseUrl}`,
+    "  api_mode: chat_completions",
+    "  api_key: $PERKOS_LLM_API_KEY",
   ].join("\n");
 }
 
@@ -183,8 +187,13 @@ export function buildConfigPreview(input: ConfigPreviewInput): {
 }
 
 /**
- * Per-runtime BYOK provider options. Different sets because each
- * runtime ships different model-provider plugins out of the box.
+ * Per-runtime BYOK provider options. All entries are OpenAI-compatible,
+ * because that's the only wire protocol PerkOS provisions for BYOK
+ * (provider "byok" + openai-completions / Hermes provider:custom +
+ * api_mode:chat_completions). Anthropic-direct is intentionally NOT offered:
+ * its native API is /v1/messages, not /chat/completions, so forcing the
+ * OpenAI-compatible wire fails — Claude is reachable via OpenRouter, which IS
+ * OpenAI-compatible. Ollama also exposes /v1/chat/completions, so it fits.
  */
 export function byokProviderOptions(runtime: AgentRuntime): {
   id: string;
@@ -193,15 +202,13 @@ export function byokProviderOptions(runtime: AgentRuntime): {
 }[] {
   if (runtime === "OpenClaw") {
     return [
-      { id: "anthropic", label: "Anthropic", defaultModel: "claude-sonnet-4-5" },
       { id: "openai", label: "OpenAI", defaultModel: "gpt-4o-mini" },
-      { id: "openrouter", label: "OpenRouter", defaultModel: "openai/gpt-4o-mini" },
+      { id: "openrouter", label: "OpenRouter (incl. Claude)", defaultModel: "openai/gpt-4o-mini" },
     ];
   }
   return [
     { id: "openai", label: "OpenAI", defaultModel: "gpt-4o-mini" },
-    { id: "anthropic", label: "Anthropic", defaultModel: "claude-sonnet-4-5" },
-    { id: "openrouter", label: "OpenRouter", defaultModel: "openai/gpt-4o-mini" },
+    { id: "openrouter", label: "OpenRouter (incl. Claude)", defaultModel: "openai/gpt-4o-mini" },
     { id: "ollama", label: "Local Ollama", defaultModel: "qwen2.5:7b" },
   ];
 }
@@ -227,5 +234,25 @@ export function byokBaseUrl(provider: string): string {
       return "http://127.0.0.1:11434/v1";
     default:
       return "https://api.openai.com/v1";
+  }
+}
+
+/**
+ * Default model id per BYOK provider, unless the user typed one. Mirrors the
+ * defaults the wizard seeds in byokProviderOptions; the launch route forwards
+ * the chosen id as `llmModel`, which provision.ts writes as the provider's
+ * model (OpenClaw `models[].id` / Hermes `model.default`).
+ */
+export function byokDefaultModel(provider: string, modelId?: string): string {
+  if (modelId && modelId.trim()) return modelId.trim();
+  switch (provider) {
+    case "anthropic":
+      return "claude-sonnet-4-5";
+    case "openrouter":
+      return "openai/gpt-4o-mini";
+    case "ollama":
+      return "qwen2.5:7b";
+    default:
+      return "gpt-4o-mini"; // openai + unknown
   }
 }
