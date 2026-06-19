@@ -3,13 +3,10 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import {
   ArrowRight,
-  BarChart3,
   Briefcase,
   Calculator,
   Check,
   Coffee,
-  Coins,
-  CreditCard,
   GraduationCap,
   Hammer,
   Handshake,
@@ -19,14 +16,11 @@ import {
   MessageSquare,
   Moon,
   Palette,
-  Shield,
   ShieldCheck,
   ShoppingCart,
   Sparkles,
-  TrendingUp,
   UtensilsCrossed,
   Wand2,
-  Zap,
   type LucideIcon,
 } from "lucide-react";
 
@@ -93,7 +87,7 @@ const JSON_LD = {
       "@type": "SoftwareApplication",
       name: "PerkOS",
       applicationCategory: "BusinessApplication",
-      operatingSystem: "Web, Base App, Farcaster",
+      operatingSystem: "Web",
       url: SITE,
       offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
       description:
@@ -120,7 +114,6 @@ export default function LandingPage() {
         <Expertise />
         <BeyondTeams />
         <Pricing />
-        <InvestorsAndToken />
         <BuildersStrip />
         <TalkToUs />
         <FinalCTA />
@@ -154,16 +147,13 @@ function TopNav() {
           <Link href="#pricing" className="transition-colors hover:text-foreground">
             Pricing
           </Link>
-          <Link href="#token" className="transition-colors hover:text-foreground">
-            $PERKOS
-          </Link>
           <Link href="#talk-to-us" className="transition-colors hover:text-foreground">
             Talk to us
           </Link>
         </nav>
         <div className="flex items-center gap-2">
-          {/* Sign-in — works on web (email/wallet) and inside Base App /
-              Farcaster, where SmartCTA picks up the host wallet. */}
+          {/* Sign-in — works on the web and inside supported host apps,
+              where SmartCTA picks up the host account automatically. */}
           <SmartCTA
             href="/sign-in"
             className="inline-flex items-center rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/40"
@@ -731,144 +721,7 @@ function Pricing() {
         <p className="mx-auto mt-6 max-w-2xl text-center text-xs text-muted-foreground">
           You only pay for the hours your team actually works. Reach your
           monthly hours and your team simply pauses — top up or upgrade to keep
-          going. You never get a surprise bill. Prefer to pay with $PERKOS?
-          Save 15–25% —{" "}
-          <Link href="#token" className="text-primary underline-offset-2 hover:underline">
-            see the token
-          </Link>
-          .
-        </p>
-      </div>
-    </section>
-  );
-}
-
-// ============================================================================
-// Investors & $PERKOS holders — ROI proof + the token (investment vehicle +
-// in-app utility). A clearly self-selecting section: the scared SMB owner has
-// already converted above; this serves the secondary audience honestly.
-// ============================================================================
-
-const ROI_METRICS = [
-  { value: "68%", label: "Less time on repetitive work" },
-  { value: "5×", label: "More output per person" },
-  { value: "24/7", label: "Coverage, zero added headcount" },
-  { value: "~$0.02", label: "Cost of an idle teammate / month" },
-];
-
-const TOKEN_BENEFITS = [
-  { Icon: CreditCard, title: "15–25% off with $PERKOS", copy: "Pay for Growth and Custom plans with $PERKOS and save versus card — usage flows back to the token." },
-  { Icon: Shield, title: "Stake for perks", copy: "Stake $PERKOS for permanent discounts, priority support, and early access to new capabilities." },
-  { Icon: TrendingUp, title: "Aligned with growth", copy: "Stakers are positioned for revenue share in selected cases as the platform scales." },
-  { Icon: Zap, title: "Powers the platform", copy: "Teammates settle usage in instant micropayments on Base — the same rail that makes idle cost near-zero." },
-];
-
-const TOKEN_CONTRACTS = [
-  {
-    chain: "Base",
-    ca: "0xF714E60f85497D70508F7E356b5DB80e64539BA3",
-    buy: "https://app.uniswap.org/explore/tokens/base/0xf714e60f85497d70508f7e356b5db80e64539ba3",
-  },
-  {
-    chain: "Celo",
-    ca: "0xb7Ba43fBD4F2E85FCE929f7d4DFE3905Ae846A46",
-    buy: "https://app.uniswap.org/explore/tokens/celo/0xb7ba43fbd4f2e85fce929f7d4dfe3905ae846a46",
-  },
-];
-
-function InvestorsAndToken() {
-  return (
-    <section id="token" className="border-b border-border py-20 md:py-28">
-      <div className="mx-auto max-w-6xl px-4 md:px-8">
-        <div className="mb-10 flex flex-col items-center gap-3 text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
-            <Coins className="h-3.5 w-3.5" />
-            For investors & $PERKOS holders
-          </span>
-          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
-            A real market, real economics, and a token to own it.
-          </h2>
-          <p className="max-w-2xl text-base text-muted-foreground">
-            58–76% of small businesses now use AI, but only 14% have it truly
-            working and 73% want help getting there. PerkOS turns that gap into
-            recurring revenue — and $PERKOS lets the community own a piece of it.
-          </p>
-        </div>
-
-        {/* ROI proof */}
-        <dl className="mb-12 grid grid-cols-2 gap-y-8 rounded-xl border border-border bg-card/60 py-10 md:grid-cols-4 md:gap-0">
-          {ROI_METRICS.map((m, i) => (
-            <div
-              key={m.label}
-              className={cn(
-                "flex flex-col items-center gap-1 px-4 text-center",
-                i < ROI_METRICS.length - 1 && "md:border-r md:border-border",
-              )}
-            >
-              <dd className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">{m.value}</dd>
-              <dt className="text-xs text-muted-foreground md:text-sm">{m.label}</dt>
-            </div>
-          ))}
-        </dl>
-
-        {/* Token utility */}
-        <div className="mb-6 flex flex-col items-center gap-2 text-center">
-          <h3 className="text-xl font-semibold text-foreground">$PERKOS — pay, stake, and grow with the platform</h3>
-          <p className="max-w-2xl text-sm text-muted-foreground">
-            The token aligns PerkOS with the businesses running on it: pay with
-            $PERKOS to save, stake to unlock perks, and share in the upside as
-            the platform scales.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-4">
-          {TOKEN_BENEFITS.map(({ Icon, title, copy }) => (
-            <div key={title} className="flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/5 p-6">
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/15 text-primary">
-                <Icon className="h-4 w-4" />
-              </span>
-              <h4 className="text-base font-medium text-foreground">{title}</h4>
-              <p className="text-sm text-muted-foreground">{copy}</p>
-            </div>
-          ))}
-        </div>
-
-        <p className="mt-8 text-center text-sm text-muted-foreground">
-          Get <b className="text-foreground">$PERKOS</b> on Uniswap — settles on{" "}
-          <b className="text-foreground">Base</b> and{" "}
-          <b className="text-foreground">Celo</b> via USDC, low-fee and instant.
-        </p>
-        <div className="mx-auto mt-4 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-2">
-          {TOKEN_CONTRACTS.map(({ chain, ca, buy }) => (
-            <div key={chain} className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4">
-              <a
-                href={buy}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-              >
-                <Coins className="h-4 w-4" />
-                Buy $PERKOS on {chain} ↗
-              </a>
-              <span className="flex items-center gap-1.5">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">CA</span>
-                <span className="break-all font-mono text-[11px] text-muted-foreground">{ca}</span>
-              </span>
-            </div>
-          ))}
-        </div>
-        <div className="mt-6 flex justify-center">
-          <a
-            href="mailto:invest@perkos.xyz"
-            className="inline-flex items-center justify-center gap-2 rounded-md border border-primary/40 bg-primary/10 px-6 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/15"
-          >
-            <BarChart3 className="h-4 w-4" />
-            Investor inquiries & the deck
-          </a>
-        </div>
-        <p className="mt-4 text-center text-[11px] text-muted-foreground">
-          ROI figures are early pilot results — your numbers vary by business
-          and volume. $PERKOS is a utility token; nothing here is financial
-          advice.
+          going. You never get a surprise bill.
         </p>
       </div>
     </section>
@@ -1070,11 +923,14 @@ function Footer() {
             <Link href="#talk-to-us" className="transition-colors hover:text-foreground">
               Contact
             </Link>
+            <Link href="/investors" className="transition-colors hover:text-foreground">
+              Investors
+            </Link>
           </div>
         </div>
         <p className="mt-8 text-xs text-muted-foreground">
-          © {new Date().getFullYear()} PerkOS. Works in your browser, in Base
-          App, and on Farcaster.
+          © {new Date().getFullYear()} PerkOS. AI teams for small businesses —
+          they draft, you approve.
         </p>
       </div>
     </footer>
