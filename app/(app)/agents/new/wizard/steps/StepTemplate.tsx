@@ -11,7 +11,6 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 
 import { AgentOrb } from "@/app/components/AgentOrb";
-import { agentVisual } from "@/app/lib/agentVisuals";
 import { findPreset, presetSystemPrompt, type AgentPreset } from "@/app/lib/agentPresets";
 import type { AgentRuntime } from "@/app/lib/perkosApi";
 import { fetchActiveRuntimes } from "@/app/lib/runtimeImages";
@@ -64,6 +63,19 @@ const RUNTIME_HINT: Record<AgentRuntime, string> = {
   OpenClaw: "Autonomous — multi-step work & tools",
   Hermes: "Conversational — fast, chat-driven",
 };
+
+// Card description. Community blurbs are raw 2nd-person SOUL.md first sentences
+// ("You are Sentinel, an AI churn … agent.") — normalize to an outcome line with
+// no internal name leak. PerkOS blurbs (no "You are") pass through unchanged.
+function displayBlurb(p: AgentPreset): string {
+  let b = (p.blurb || "").trim();
+  b = b.replace(/^you are\s+[^,.]+,\s*an?\s+/i, ""); // "You are Sentinel, an " → ""
+  b = b.replace(/^you are\s+an?\s+/i, ""); // "You are a technical " → "technical "
+  b = b.replace(/^you are\s+/i, "");
+  b = b.trim();
+  if (b) b = b.charAt(0).toUpperCase() + b.slice(1);
+  return b.length < 12 ? p.blurb || p.name : b;
+}
 
 function OriginBadge({ origin }: { origin: Origin }) {
   const m = ORIGIN_META[origin];
@@ -411,7 +423,7 @@ export function StepTemplate({
           role="radiogroup"
           aria-label="Choose an agent persona"
           aria-live="polite"
-          className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4"
+          className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4"
         >
           {filtered.map((p) => {
             const o = originOf(p);
@@ -419,33 +431,35 @@ export function StepTemplate({
             return (
               // Wrapper is the hover group; the source link is a SIBLING overlay
               // (not nested in the radio button — that would be invalid HTML).
-              <div key={p.id} className="group relative">
+              <div key={p.id} className="group relative h-full">
                 <button
                   role="radio"
                   aria-checked={selected}
                   type="button"
                   onClick={() => pickTemplate(p)}
                   className={cn(
-                    "flex w-full flex-col overflow-hidden rounded-xl border bg-card transition-colors",
+                    "flex h-full w-full flex-col gap-2 rounded-xl border bg-card p-3 text-left transition-colors",
                     selected
                       ? "border-primary/60 ring-1 ring-primary/30"
                       : "border-border hover:border-primary/40",
                     "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
                   )}
                 >
-                  <div
-                    className="grid aspect-square w-full place-items-center"
-                    style={{
-                      background: `linear-gradient(160deg, hsla(${agentVisual({ presetId: p.id }).hue}, 55%, 18%, 0.35) 0%, hsla(${agentVisual({ presetId: p.id }).hue}, 40%, 10%, 0.12) 100%)`,
-                    }}
-                  >
-                    <AgentOrb name={p.name} presetId={p.id} size={64} />
-                  </div>
-                  <div className="flex w-full items-center gap-1 px-2 pb-2 pt-1">
-                    <OriginBadge origin={o} />
-                    <span className="min-w-0 flex-1 truncate text-right text-xs font-medium text-foreground">
+                  {/* Header: small orb identifies the role; the NAME is the label. */}
+                  <div className="flex items-center gap-2">
+                    <AgentOrb name={p.name} presetId={p.id} size={32} />
+                    <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
                       {p.name}
                     </span>
+                  </div>
+                  {/* Description: the "what it does" — the actual decision driver.
+                      Clamped to 2 lines with a reserved height so the grid aligns. */}
+                  <p className="line-clamp-2 min-h-[2.25rem] text-xs leading-snug text-muted-foreground">
+                    {displayBlurb(p)}
+                  </p>
+                  {/* Footer: provenance, lowest priority — pinned to the bottom. */}
+                  <div className="mt-auto">
+                    <OriginBadge origin={o} />
                   </div>
                 </button>
                 {p.sourceUrl ? (
