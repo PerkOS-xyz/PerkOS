@@ -1383,7 +1383,7 @@ export const AGENT_PRESETS: AgentPreset[] = [
   // -------------------------------------------------------------------
   {
     id: "marketing",
-    name: "Marketing",
+    name: "Promoter",
     blurb: "Creates campaigns, SEO briefs, posts, email variants.",
     emoji: "🎨",
     avatar: "/avatars/13.Marketing.png",
