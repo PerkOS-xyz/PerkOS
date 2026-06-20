@@ -17,7 +17,7 @@ import {
 import { useOnboarding } from "@/app/lib/onboardingState";
 import { validateApiKey } from "@/app/lib/validators";
 import {
-  AGENT_PRESETS,
+  ALL_PRESETS,
   findPreset,
   presetSystemPrompt,
 } from "@/app/lib/agentPresets";
@@ -66,7 +66,7 @@ export function useAgentWizard() {
     queryFn: fetchVisiblePresets,
     staleTime: 60_000,
   });
-  const visiblePresets = presetsQuery.data ?? AGENT_PRESETS;
+  const visiblePresets = presetsQuery.data ?? ALL_PRESETS;
 
   // ---- wizard state --------------------------------------------------------
   // Intentionally NOT persisted to localStorage — each visit starts clean.
@@ -317,7 +317,9 @@ export function useAgentWizard() {
       case "runtime":
         return state.runtime !== null;
       case "template":
-        return state.personaId !== null;
+        // Template picked AND its engine resolved (locked by origin, or chosen
+        // for portable PerkOS/Custom templates — see StepTemplate).
+        return state.personaId !== null && state.runtime !== null;
       case "llm":
         if (state.llmSource === "perkos") return llmAllowed;
         if (state.llmSource === "skip") return true;

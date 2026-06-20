@@ -1,7 +1,7 @@
 "use client";
 
 import { authedFetch } from "./apiClient";
-import { AGENT_PRESETS, type AgentPreset, type SoulFields } from "./agentPresets";
+import { ALL_PRESETS, type AgentPreset, type SoulFields } from "./agentPresets";
 
 /** Per-preset admin overlay decision for the current viewer. */
 type ViewerPreset = {
@@ -33,10 +33,10 @@ type ViewerPreset = {
 export async function fetchVisiblePresets(): Promise<AgentPreset[]> {
   try {
     const res = await authedFetch("/api/presets");
-    if (!res.ok) return AGENT_PRESETS;
+    if (!res.ok) return ALL_PRESETS;
     const { presets } = (await res.json()) as { presets: ViewerPreset[] };
     const byId = new Map(presets.map((p) => [p.id, p]));
-    return AGENT_PRESETS.filter((p) => {
+    return ALL_PRESETS.filter((p) => {
       const o = byId.get(p.id);
       // No overlay → public default (show). Overlay → respect `allowed`.
       return !o || o.allowed;
@@ -56,6 +56,6 @@ export async function fetchVisiblePresets(): Promise<AgentPreset[]> {
       };
     });
   } catch {
-    return AGENT_PRESETS;
+    return ALL_PRESETS;
   }
 }

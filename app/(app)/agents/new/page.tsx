@@ -12,7 +12,6 @@ import { DeployBundleScreen } from "@/app/components/DeployBundleScreen";
 import { useAgentWizard } from "./wizard/useAgentWizard";
 import { Stepper } from "./wizard/ui/Stepper";
 import { StepMethod } from "./wizard/steps/StepMethod";
-import { StepRuntime } from "./wizard/steps/StepRuntime";
 import { StepTemplate } from "./wizard/steps/StepTemplate";
 import { StepLLM } from "./wizard/steps/StepLLM";
 import { StepCapabilities } from "./wizard/steps/StepCapabilities";
@@ -73,7 +72,6 @@ export default function AddAgentPage() {
         {currentStepKey === "method" && (
           <StepMethod state={state} onChange={update} ecsAllowed={ecsAllowed} />
         )}
-        {currentStepKey === "runtime" && <StepRuntime state={state} onChange={update} />}
         {currentStepKey === "template" && (
           <StepTemplate state={state} onChange={update} presets={visiblePresets} />
         )}

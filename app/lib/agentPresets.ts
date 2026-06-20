@@ -17,6 +17,8 @@
  * portable.
  */
 
+import { COMMUNITY_PRESETS } from "./communityTemplates";
+
 // ---------------------------------------------------------------------------
 // Soul schema
 // ---------------------------------------------------------------------------
@@ -176,6 +178,13 @@ export type AgentPreset = {
   recommendedPlugins: string[];
   /** Recommended skill-pack ids from skillsCatalog — wizard pre-selects these. */
   recommendedSkills: string[];
+  /** Provenance for the template-card badge. Defaults to "perkos". */
+  origin?: "perkos" | "hermes" | "openclaw";
+  /** Raw SOUL.md markdown for imported (community) templates — used instead of
+   *  the structured `soul`. When set, presetSystemPrompt returns it verbatim. */
+  soulMarkdown?: string;
+  /** GitHub URL the imported template was sourced from (shown on the card). */
+  sourceUrl?: string;
 };
 
 const EMPTY_SOUL: SoulFields = {
@@ -1669,9 +1678,13 @@ export const AGENT_PRESETS: AgentPreset[] = [
   },
 ];
 
+/** Full wizard catalogue: PerkOS presets + imported community templates
+ *  (Hermes / OpenClaw), each tagged with `origin` + (for imported) `sourceUrl`. */
+export const ALL_PRESETS: AgentPreset[] = [...AGENT_PRESETS, ...COMMUNITY_PRESETS];
+
 export function findPreset(id: string | null | undefined): AgentPreset | null {
   if (!id) return null;
-  return AGENT_PRESETS.find((p) => p.id === id) ?? null;
+  return ALL_PRESETS.find((p) => p.id === id) ?? null;
 }
 
 /**
@@ -1683,5 +1696,8 @@ export function presetSystemPrompt(
   preset: AgentPreset,
   overrideName?: string,
 ): string {
+  // Imported (community) templates ship a complete authored SOUL.md — use it
+  // verbatim instead of rendering the (empty) structured soul.
+  if (preset.soulMarkdown) return preset.soulMarkdown;
   return renderSoulMd(overrideName || preset.name, preset.soul);
 }

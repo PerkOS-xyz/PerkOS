@@ -143,7 +143,10 @@ export function methodToDeployMode(method: LaunchMethod | null): DeployMode | nu
 export function stepsForMethod(method: LaunchMethod | null): StepKey[] {
   if (method === "external") return ["method", "external"];
   if (method === "perkos" || method === "vps") {
-    return ["method", "runtime", "template", "llm", "capabilities", "review"];
+    // Runtime (Hermes/OpenClaw) is no longer a standalone step — it's resolved
+    // inside the template step: locked by origin for community templates,
+    // or chosen by the user for portable (PerkOS/Custom) ones.
+    return ["method", "template", "llm", "capabilities", "review"];
   }
   return ["method"]; // nothing picked yet
 }
