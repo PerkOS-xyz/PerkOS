@@ -145,9 +145,10 @@ export function useAgentWizard() {
       }
       if (!state.runtime) throw new Error("Pick a runtime.");
       const finalName = state.agentName.trim() || preset?.name || "Untitled agent";
-      const finalPlugins = Array.from(
-        new Set([...state.plugins, ...state.channels.map((c) => `channel:${c}`)]),
-      );
+      // Channels are now their own step (native messaging gateways, posted
+      // after launch). plugins[] carries the preset's recommended capability
+      // tags for record-keeping only — see the capability-wiring follow-up.
+      const finalPlugins = Array.from(new Set(state.plugins));
       const wireMode: "perkos-managed" | "self-hosted" | "imported" =
         state.deployMode === "perkos-ecs"
           ? "perkos-managed"
@@ -213,7 +214,7 @@ export function useAgentWizard() {
             });
           }
         }
-        if (state.gatewayFarcasterEnabled) {
+        if (state.gatewayFarcasterEnabled && state.runtime === "Hermes") {
           try {
             await saveAgentGateway(agentId, {
               type: "farcaster",
@@ -327,6 +328,8 @@ export function useAgentWizard() {
           return state.byokApiKey.trim().length > 0 && !apiKeyError;
         return false;
       case "capabilities":
+        return true;
+      case "channels":
         return true;
       case "review":
         return !launchMutation.isPending && !launchMutation.isSuccess;

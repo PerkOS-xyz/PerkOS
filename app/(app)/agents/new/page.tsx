@@ -15,6 +15,7 @@ import { StepMethod } from "./wizard/steps/StepMethod";
 import { StepTemplate } from "./wizard/steps/StepTemplate";
 import { StepLLM } from "./wizard/steps/StepLLM";
 import { StepCapabilities } from "./wizard/steps/StepCapabilities";
+import { StepChannels } from "./wizard/steps/StepChannels";
 import { StepReview } from "./wizard/steps/StepReview";
 import { StepExternal } from "./wizard/steps/StepExternal";
 
@@ -85,6 +86,9 @@ export default function AddAgentPage() {
         )}
         {currentStepKey === "capabilities" && (
           <StepCapabilities state={state} onChange={update} />
+        )}
+        {currentStepKey === "channels" && (
+          <StepChannels state={state} onChange={update} />
         )}
         {currentStepKey === "review" && <StepReview state={state} onChange={update} />}
         {currentStepKey === "external" && (

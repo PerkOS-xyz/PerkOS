@@ -41,6 +41,7 @@ export type StepKey =
   | "template"
   | "llm"
   | "capabilities"
+  | "channels"
   | "review"
   | "external";
 
@@ -144,9 +145,10 @@ export function stepsForMethod(method: LaunchMethod | null): StepKey[] {
   if (method === "external") return ["method", "external"];
   if (method === "perkos" || method === "vps") {
     // Runtime (Hermes/OpenClaw) is no longer a standalone step — it's resolved
-    // inside the template step: locked by origin for community templates,
-    // or chosen by the user for portable (PerkOS/Custom) ones.
-    return ["method", "template", "llm", "capabilities", "review"];
+    // inside the template step. Capabilities (built-in tools + skills) and
+    // Channels (native messaging gateways) are separate steps, mirroring how
+    // both runtimes split tools vs gateways in their own setup flows.
+    return ["method", "template", "llm", "capabilities", "channels", "review"];
   }
   return ["method"]; // nothing picked yet
 }

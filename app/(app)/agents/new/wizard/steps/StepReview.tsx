@@ -85,17 +85,25 @@ export function StepReview({ state, onChange }: StepProps) {
             }
           />
           <SummaryRow
-            label="Plugins"
+            label="Skills"
             value={
-              state.plugins.length === 0
-                ? "None"
-                : `${state.plugins.length} plugin${state.plugins.length === 1 ? "" : "s"}`
+              state.skills.length === 0
+                ? "Built-in tools only"
+                : `${state.skills.length} skill pack${state.skills.length === 1 ? "" : "s"}`
             }
             icon={Layers}
           />
           <SummaryRow
             label="Channels"
-            value={state.channels.length === 0 ? "PerkOS only" : state.channels.join(", ")}
+            value={
+              [
+                state.gatewayTelegramEnabled ? "Telegram" : null,
+                state.gatewaySlackEnabled ? "Slack" : null,
+                state.gatewayFarcasterEnabled && state.runtime === "Hermes" ? "Farcaster" : null,
+              ]
+                .filter(Boolean)
+                .join(", ") || "PerkOS only"
+            }
             icon={MessageSquare}
           />
         </CardContent>
