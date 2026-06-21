@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowLeft, ChevronDown, ChevronUp, ExternalLink, Search, X } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, ExternalLink, Plus, Search, X } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -145,7 +145,9 @@ export function StepTemplate({
     if (filter !== "all") r = r.filter((p) => originOf(p) === filter);
     const q = search.trim().toLowerCase();
     if (q) r = r.filter((p) => p.name.toLowerCase().includes(q) || p.blurb.toLowerCase().includes(q));
-    return r;
+    // Pin the "build your own" tile to the front so the create-from-scratch
+    // path is always the first card, never buried among the templates.
+    return [...r].sort((a, b) => Number(b.id === "custom") - Number(a.id === "custom"));
   }, [presets, filter, search]);
 
   if (preset) {
@@ -428,6 +430,7 @@ export function StepTemplate({
           {filtered.map((p) => {
             const o = originOf(p);
             const selected = state.personaId === p.id;
+            const isCustom = p.id === "custom";
             return (
               // Wrapper is the hover group; the source link is a SIBLING overlay
               // (not nested in the radio button — that would be invalid HTML).
@@ -438,16 +441,27 @@ export function StepTemplate({
                   type="button"
                   onClick={() => pickTemplate(p)}
                   className={cn(
-                    "flex h-full w-full flex-col gap-2 rounded-xl border bg-card p-3 text-left transition-colors",
-                    selected
-                      ? "border-primary/60 ring-1 ring-primary/30"
-                      : "border-border hover:border-primary/40",
-                    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                    "flex h-full w-full flex-col gap-2 rounded-xl border p-3 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                    selected && "border-primary/60 bg-primary/5 ring-1 ring-primary/30",
+                    // The "build your own" tile is a create ACTION, not a template:
+                    // a dashed purple border + "+" set it apart so it reads as the
+                    // escape hatch from the ready-made roster.
+                    !selected &&
+                      isCustom &&
+                      "border-dashed border-[hsla(280,55%,60%,0.55)] bg-[hsla(280,55%,60%,0.05)] hover:border-[hsl(280,60%,70%)]",
+                    !selected && !isCustom && "border-border bg-card hover:border-primary/40",
                   )}
                 >
-                  {/* Header: small orb identifies the role; the NAME is the label. */}
+                  {/* Header: an orb identifies a template; the custom tile shows a
+                      "+" so it reads as "start a new one". The NAME is the label. */}
                   <div className="flex items-center gap-2">
-                    <AgentOrb name={p.name} presetId={p.id} size={32} />
+                    {isCustom ? (
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-dashed border-[hsl(280,55%,62%)] text-[hsl(280,60%,80%)]">
+                        <Plus className="h-4 w-4" aria-hidden />
+                      </span>
+                    ) : (
+                      <AgentOrb name={p.name} presetId={p.id} size={32} />
+                    )}
                     <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
                       {p.name}
                     </span>
