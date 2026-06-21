@@ -145,9 +145,13 @@ export function StepTemplate({
     if (filter !== "all") r = r.filter((p) => originOf(p) === filter);
     const q = search.trim().toLowerCase();
     if (q) r = r.filter((p) => p.name.toLowerCase().includes(q) || p.blurb.toLowerCase().includes(q));
-    // Pin the "build your own" tile to the front so the create-from-scratch
-    // path is always the first card, never buried among the templates.
-    return [...r].sort((a, b) => Number(b.id === "custom") - Number(a.id === "custom"));
+    // "Build your own" pinned first (create-from-scratch is always the first
+    // card); every other template sorted alphabetically by name.
+    return [...r].sort((a, b) => {
+      if (a.id === "custom") return -1;
+      if (b.id === "custom") return 1;
+      return a.name.localeCompare(b.name);
+    });
   }, [presets, filter, search]);
 
   if (preset) {
