@@ -323,8 +323,10 @@ export function resolveSkillFiles(packIds: string[]): SkillFileRef[] {
     for (const skill of pack.source.skills) {
       const url = skillUrl(pack.source, skill);
       if (seen.has(url)) continue;
+      const name = sanitizeSkillName(`${pack.id}-${skill}`);
+      if (!name) continue; // never resolve to `<skillsdir>//SKILL.md`
       seen.add(url);
-      out.push({ name: sanitizeSkillName(`${pack.id}-${skill}`), url });
+      out.push({ name, url });
     }
   }
   return out;
@@ -366,8 +368,6 @@ export function parseUserRepo(input: string): SkillPack | null {
       if (m) {
         rawUrl = `https://raw.githubusercontent.com/${m[1]}/${m[2]}/${m[3]}`;
       }
-    } else if (u.hostname === "ethskills.com") {
-      rawUrl = u.toString();
     }
   } catch {
     return null;

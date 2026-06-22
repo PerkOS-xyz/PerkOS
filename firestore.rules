@@ -207,8 +207,16 @@ service cloud.firestore {
       allow read: if isSelf(w)
         || isProjectMember(w, pid)
         || (resource != null && isOrgMember(w, resource.data.orgId));
-      // The owner or an editor/owner-role member may update the project doc.
-      allow write: if isSelf(w) || canWriteProject(w, pid);
+      // The owner may write anything; an editor/owner-role member may update
+      // the project doc but MUST NOT change `orgId` — it is load-bearing for
+      // the read rules (this doc's org-member branch at :209 + projectOrgId()
+      // used by the tasks/messages/members read rules), so a writable orgId
+      // would let an editor re-point which org's members can see the project.
+      // `.get(...,null)` keeps legacy (no-orgId) projects writable and avoids
+      // missing-field errors.
+      allow write: if isSelf(w)
+        || (canWriteProject(w, pid)
+            && request.resource.data.get('orgId', null) == resource.data.get('orgId', null));
 
       // Tasks + chat: readable by any member, writable by editors/owners. These
       // are listed explicitly (NOT a `{document=**}` write) so editor write

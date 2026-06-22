@@ -135,7 +135,7 @@ function OpenSourceSkills({
     const pack = parseUserRepo(repoInput);
     if (!pack) {
       setRepoError(
-        "Only github.com / raw.githubusercontent.com / ethskills.com SKILL.md URLs are allowed.",
+        "Only github.com / raw.githubusercontent.com SKILL.md URLs are allowed.",
       );
       return;
     }

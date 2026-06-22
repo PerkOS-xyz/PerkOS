@@ -12,6 +12,7 @@ import { NextResponse } from "next/server";
 import { randomBytes } from "node:crypto";
 
 import { adminDb } from "../../../lib/firebaseAdmin";
+import { rateLimit, clientIp } from "../../../lib/rateLimit";
 
 const NONCE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -28,6 +29,10 @@ function buildMessage(address: string, nonce: string, issuedAt: string): string 
 }
 
 export async function GET(request: Request) {
+  // Unauthenticated + writes a Firestore doc per call → throttle per IP.
+  const limited = rateLimit(`nonce:${clientIp(request)}`, 30, 60_000);
+  if (limited) return limited;
+
   const url = new URL(request.url);
   const rawAddress = url.searchParams.get("address");
 

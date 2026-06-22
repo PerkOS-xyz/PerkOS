@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 
 import { adminDb } from "../../lib/firebaseAdmin";
+import { rateLimit, clientIp } from "../../lib/rateLimit";
 import {
   CONTACT_EMAIL_TO,
   escapeHtml,
@@ -18,6 +19,10 @@ type Payload = {
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: Request) {
+  // Unauthenticated; writes Firestore + sends an email per call → throttle per IP.
+  const limited = rateLimit(`contact:${clientIp(request)}`, 5, 60_000);
+  if (limited) return limited;
+
   let body: Partial<Payload>;
   try {
     body = (await request.json()) as Partial<Payload>;
