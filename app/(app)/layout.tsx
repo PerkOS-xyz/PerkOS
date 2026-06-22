@@ -31,6 +31,7 @@ import { UserMenu } from "../components/UserMenu";
 import { RefreshButton } from "../components/RefreshButton";
 import { PullToRefresh } from "../components/PullToRefresh";
 import { OrgSwitcher, ProjectPicker } from "../components/OrgSwitcher";
+import { ActiveSessionsBar } from "../components/ActiveSessionsBar";
 import { ActiveOrgProvider } from "../lib/useActiveOrg";
 import { formatAddress } from "../lib/format";
 import { useIsInMiniApp } from "../lib/useIsInMiniApp";
@@ -206,6 +207,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               <ProjectPicker />
             </div>
           </div>
+
+          {/* Live "who's working right now" strip — self-vanishing when idle. */}
+          <ActiveSessionsBar />
 
           <div id="main-content" className="p-5 pb-44 md:p-8 md:pb-8">
             <PullToRefresh>{children}</PullToRefresh>
