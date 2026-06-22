@@ -14,6 +14,8 @@ export type AgentLiveStatus = {
   bridgeConnected?: boolean;
   lastBridgeSeenMs?: number; // last heartbeat (epoch ms)
   wakeStartedMs?: number; // last wake-from-sleep (epoch ms)
+  presetId?: string; // role preset — drives the AgentOrb hue/glyph
+  role?: string; // role label — keyword-matched orb when no presetId
 };
 
 type State = {
@@ -78,6 +80,9 @@ export function useWalletAgents(
             bridgeConnected: data.bridgeConnected === true,
             lastBridgeSeenMs: toMs(data.lastBridgeSeenAt),
             wakeStartedMs: toMs(hib.wakeStartedAt),
+            presetId:
+              typeof data.presetId === "string" ? (data.presetId as string) : undefined,
+            role: typeof data.role === "string" ? (data.role as string) : undefined,
           };
         });
         setState({ byName, loaded: true });

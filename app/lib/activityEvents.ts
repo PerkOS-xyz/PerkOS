@@ -40,7 +40,8 @@ export type ActivityVerb =
   | "launched_agent"
   | "agent_online"
   | "agent_failed"
-  | "created_project";
+  | "created_project"
+  | "flagged_contention";
 
 export type ActivityEvent = {
   id: string;
@@ -186,6 +187,8 @@ export function verbPhrase(verb: string): string {
       return "failed to start";
     case "created_project":
       return "created";
+    case "flagged_contention":
+      return "flagged an overlap on";
     default:
       return verb.replace(/_/g, " ");
   }
