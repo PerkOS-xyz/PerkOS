@@ -77,7 +77,14 @@ service cloud.firestore {
     // /wallets/{w}/profile/main (owner-only via the workspace wildcard).
 
     match /usernames/{uname} {
-      allow read: if isSignedIn();
+      // GET a known handle (availability check + @-mention resolution) is fine;
+      // LIST is denied so a signed-in caller can't dump the whole registry and
+      // harvest the full handle→wallet map (deanonymization / enumeration). The
+      // client only ever getDoc()s by exact handle — never lists/queries — so
+      // this loses no functionality. Revisit if a server-mediated autocomplete
+      // ever needs search.
+      allow get: if isSignedIn();
+      allow list: if false;
       allow create: if isSignedIn()
         && request.resource.data.wallet == request.auth.uid;
       allow update: if isSignedIn()
