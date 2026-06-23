@@ -87,9 +87,12 @@ export function StepReview({ state, onChange }: StepProps) {
           <SummaryRow
             label="Skills"
             value={
-              state.skills.length === 0
-                ? "Built-in tools only"
-                : `${state.skills.length} skill pack${state.skills.length === 1 ? "" : "s"}`
+              (state.skills.length === 0
+                ? "Built-in tools"
+                : `${state.skills.length} skill pack${state.skills.length === 1 ? "" : "s"}`) +
+              (state.disabledTools.length > 0
+                ? ` · ${state.disabledTools.length} tool${state.disabledTools.length === 1 ? "" : "s"} off`
+                : "")
             }
             icon={Layers}
           />
