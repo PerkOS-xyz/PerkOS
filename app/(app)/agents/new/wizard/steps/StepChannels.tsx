@@ -133,6 +133,22 @@ export function StepChannels({ state, onChange }: StepProps) {
           blurb="Hermes only. Your agent replies to mentions on Farcaster via Neynar. You need a Neynar-managed signer for the agent's identity."
         >
           <div className="grid gap-3">
+            {/* Where to point the Neynar webhook. Your agent has no public IP
+                and hibernates, so Neynar POSTs here and PerkOS relays the cast
+                to the agent over its existing connection. */}
+            <div className="grid gap-1.5 rounded-md border border-border bg-card/50 p-2.5">
+              <Label className="text-xs text-muted-foreground">
+                Neynar webhook URL — set this as your Neynar webhook&rsquo;s target URL
+              </Label>
+              <code className="select-all break-all rounded bg-background px-2 py-1 font-mono text-xs text-foreground">
+                {`https://chat.perkos.xyz/webhooks/farcaster/${state.agentName?.trim() || "<your-agent-name>"}`}
+              </code>
+              <span className="text-[11px] text-muted-foreground">
+                Use the webhook secret below as the webhook&rsquo;s signature secret. If the agent
+                name is taken it gets a suffix on launch — use the final name (shown after launch)
+                in the URL.
+              </span>
+            </div>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <div className="grid gap-1.5">
                 <Label htmlFor="fc-fid">FID</Label>
