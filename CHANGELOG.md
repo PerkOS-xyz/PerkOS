@@ -645,7 +645,7 @@ produces in production.
 ### Verified
 
 - `POST /agents/launch` with `deployMode: "self-hosted"` returns a
-  bundle that bakes `PERKOS_LLM_API_KEY=allowlisted-vps-temporary`
+  bundle that bakes `PERKOS_LLM_API_KEY=<redacted>`
   (PerkOS-managed LLM source default) and pins the bridge image to
   `0.12.3`. Both regressions were on `0.12.2`.
 - Bridge boot fires `POST <api>/agents/<id>/heartbeat` and lands a
@@ -666,8 +666,8 @@ produces in production.
   (the Assistant's specific compose network) to `172.16.0.0/12`
   (covers every Docker default-bridge subnet). Without this, each new
   BYO launch picks a fresh `/16` and 403s on the LLM gateway. The
-  magic key `allowlisted-vps-temporary` still gates on source IP, so
-  no untrusted process outside this single host can use it.
+  PerkOS-managed magic key still gates on source IP, so no untrusted
+  process outside this single host can use it.
 
 ## 2026-05-29 — BYO (bring-your-own infra) agent wizard
 

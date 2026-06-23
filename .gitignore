@@ -43,3 +43,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# internal ops/runbooks — keep OUT of the public repo
+/ops/
+/docs/perkos-assistant/
+_perkos-internal-docs/
