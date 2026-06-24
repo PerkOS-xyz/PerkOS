@@ -1856,6 +1856,28 @@ export async function deleteAgent(input: {
 }
 
 // ---------------------------------------------------------------------------
+// Billing — the user's OWN usage + payments for the dashboard Billing section.
+// User-safe by design: the server (/billing/me) never returns the platform's
+// raw cost or profit, only this wallet's usage + what it has paid.
+// ---------------------------------------------------------------------------
+
+export type MyBilling = {
+  month: string;
+  usage: { agentCount: number; activeHours: number; llmTokens: number };
+  paymentsUsd: number;
+  llmWindowHours: number;
+  generatedAt: string;
+};
+
+export async function getMyBilling(): Promise<MyBilling> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch("/billing/me");
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Failed to load billing"));
+  return payload as unknown as MyBilling;
+}
+
+// ---------------------------------------------------------------------------
 // Backend services — served by Next.js API routes with the Admin SDK.
 // The client calls our own /api/* endpoints which validate the caller's
 // Firebase idToken and either provision infra (launchAgent) or call the
