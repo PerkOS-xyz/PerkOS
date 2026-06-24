@@ -8,12 +8,14 @@
  * charging engine + prepaid credits land.
  */
 
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Banknote, Clock, Bot, Sparkles } from "lucide-react";
+import { Banknote, Clock, Bot, Sparkles, Plus } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 import { getMyBilling } from "../lib/perkosApi";
+import { DepositDialog } from "./DepositDialog";
 
 function fmtHours(h: number): string {
   return h.toLocaleString(undefined, { maximumFractionDigits: 1 });
@@ -28,6 +30,7 @@ export function BillingCard({ address }: { address: string }) {
   });
 
   const b = query.data;
+  const [showDeposit, setShowDeposit] = useState(false);
 
   return (
     <section className="glow-card flex flex-col gap-3 rounded-lg border border-primary/25 bg-card/60 px-4 py-4">
@@ -71,15 +74,29 @@ export function BillingCard({ address }: { address: string }) {
 
           <div className="flex items-center justify-between rounded-md border border-primary/30 bg-primary/5 px-3 py-2">
             <span className="text-xs text-muted-foreground">Credit balance</span>
-            <span
-              className={cn(
-                "font-mono text-sm font-medium",
-                b.creditsUsd > 0 ? "text-foreground" : "text-muted-foreground",
-              )}
-            >
-              {b.creditsUsd.toLocaleString(undefined, { style: "currency", currency: "USD" })}
-            </span>
+            <div className="flex items-center gap-2">
+              <span
+                className={cn(
+                  "font-mono text-sm font-medium",
+                  b.creditsUsd > 0 ? "text-foreground" : "text-muted-foreground",
+                )}
+              >
+                {b.creditsUsd.toLocaleString(undefined, { style: "currency", currency: "USD" })}
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowDeposit((v) => !v)}
+                className="inline-flex items-center gap-0.5 rounded border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/20"
+              >
+                <Plus className="h-3 w-3" />
+                Add
+              </button>
+            </div>
           </div>
+
+          {showDeposit ? (
+            <DepositDialog address={address} onDeposited={() => query.refetch()} />
+          ) : null}
 
           {b.enrolled ? (
             <p className="text-[11px] leading-snug text-muted-foreground">
