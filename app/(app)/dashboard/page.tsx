@@ -49,6 +49,7 @@ import { ActivityFeedCard } from "../../components/ActivityFeedCard";
 import { ActivityHeatmap } from "../../components/charts";
 import { KpiStrip } from "../../components/KpiStrip";
 import { ModelUsagePanel } from "../../components/ModelUsagePanel";
+import { BillingCard } from "../../components/BillingCard";
 import {
   WaitingOnYouCard,
   type WaitingItem,
@@ -318,6 +319,7 @@ export default function DashboardPage() {
       {/* Quick Actions — desktop sidebar */}
       <aside className="hidden flex-col gap-4 lg:flex">
         <QuickActionsCard />
+        {address ? <BillingCard address={address} /> : null}
         <ModelUsagePanel agents={allAgents} tasks={allTasks} />
       </aside>
     </div>
