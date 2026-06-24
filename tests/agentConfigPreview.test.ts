@@ -29,15 +29,21 @@ describe("buildOpenClawPreview", () => {
     expect(out).toContain('"x-agent-id": "$PERKOS_AGENT_ID"');
   });
 
-  it("renders an anthropic block for byok with anthropic provider", () => {
+  it("renders the byok provider block (key 'byok' + PERKOS key) and maps the chosen provider", () => {
+    // BYOK always keys the provider "byok" (not the vendor name) + reuses the
+    // managed $PERKOS_LLM_API_KEY env, while baseUrl/model are mapped from the
+    // chosen provider. anthropic still maps (free-form), even though it's not a
+    // dropdown option — see byokProviderOptions.
     const out = buildOpenClawPreview({
       runtime: "OpenClaw",
       agentName: "a",
       llmSource: "byok",
       byokProvider: "anthropic",
     });
-    expect(out).toContain('"anthropic"');
-    expect(out).toContain("$ANTHROPIC_API_KEY");
+    expect(out).toContain('"byok"');
+    expect(out).toContain('"apiKey": "$PERKOS_LLM_API_KEY"');
+    expect(out).toContain('"api": "openai-completions"');
+    expect(out).toContain("https://api.anthropic.com/v1");
     expect(out).toContain("claude-sonnet-4-5");
   });
 
@@ -49,7 +55,8 @@ describe("buildOpenClawPreview", () => {
       byokProvider: "openai",
       modelId: "gpt-4o",
     });
-    expect(out).toContain('"defaultModel": "gpt-4o"');
+    // Custom providers declare a models[] array (no `defaultModel` field).
+    expect(out).toContain('"id": "gpt-4o"');
   });
 
   it("emits a JSONC skip stub when llmSource=skip", () => {
@@ -76,15 +83,18 @@ describe("buildHermesPreview", () => {
     expect(out).toContain("PERKOS_AGENT_ID: ag_xyz");
   });
 
-  it("renders an openai block with default model when byok+openai", () => {
+  it("renders a custom-provider block (chat_completions) with default model when byok+openai", () => {
     const out = buildHermesPreview({
       runtime: "Hermes",
       agentName: "a",
       llmSource: "byok",
       byokProvider: "openai",
     });
-    expect(out).toContain("name: openai");
-    expect(out).toContain("api_key_env: OPENAI_API_KEY");
+    // BYOK pins provider:custom + api_mode:chat_completions + inline api_key
+    // (the documented OpenAI-compatible BYOK shape — see project_byok_openai_runtime_config).
+    expect(out).toContain("provider: custom");
+    expect(out).toContain("api_mode: chat_completions");
+    expect(out).toContain("base_url: https://api.openai.com/v1");
     expect(out).toContain("default: gpt-4o-mini");
   });
 
@@ -95,7 +105,9 @@ describe("buildHermesPreview", () => {
       llmSource: "byok",
       byokProvider: "ollama",
     });
-    expect(out).toContain("name: ollama");
+    expect(out).toContain("provider: custom");
+    expect(out).toContain("base_url: http://127.0.0.1:11434/v1");
+    expect(out).toContain("default: qwen2.5:7b");
   });
 });
 
@@ -122,18 +134,19 @@ describe("buildConfigPreview", () => {
 });
 
 describe("byokProviderOptions", () => {
-  it("offers 3 cloud providers for OpenClaw", () => {
+  it("offers the OpenAI-compatible cloud providers for OpenClaw (no anthropic-direct)", () => {
+    // anthropic-direct is intentionally NOT offered: its native API is
+    // /v1/messages, not /chat/completions. Claude is reachable via OpenRouter.
     const opts = byokProviderOptions("OpenClaw");
-    expect(opts.map((o) => o.id).sort()).toEqual([
-      "anthropic",
-      "openai",
-      "openrouter",
-    ]);
+    expect(opts.map((o) => o.id).sort()).toEqual(["openai", "openrouter"]);
   });
 
   it("offers cloud providers + local Ollama for Hermes", () => {
     const opts = byokProviderOptions("Hermes");
-    expect(opts.map((o) => o.id)).toContain("ollama");
-    expect(opts.length).toBeGreaterThan(3);
+    expect(opts.map((o) => o.id).sort()).toEqual([
+      "ollama",
+      "openai",
+      "openrouter",
+    ]);
   });
 });
