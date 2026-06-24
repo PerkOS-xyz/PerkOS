@@ -1864,6 +1864,8 @@ export async function deleteAgent(input: {
 export type MyBilling = {
   month: string;
   usage: { agentCount: number; activeHours: number; llmTokens: number };
+  creditsUsd: number;
+  enrolled: boolean;
   paymentsUsd: number;
   llmWindowHours: number;
   generatedAt: string;
