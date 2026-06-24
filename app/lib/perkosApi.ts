@@ -2275,6 +2275,10 @@ export async function launchAgent(input: {
   soul?: string;
   /** Selected skill pack ids; server resolves to raw SKILL.md URLs. */
   skills?: string[];
+  /** Built-in capabilities the wallet turned OFF in the wizard's Capabilities
+   *  step (e.g. "code-execution", "browser"). Server validates against the
+   *  known set + threads it to provisioning as PERKOS_DISABLED_TOOLS. */
+  disabledTools?: string[];
 }): Promise<LaunchAgentResponse> {
   const { authedFetch } = await import("./apiClient");
   const response = await authedFetch("/api/agents/launch", {
@@ -2293,6 +2297,7 @@ export async function launchAgent(input: {
       hermesApiUrl: input.hermesApiUrl,
       soul: input.soul,
       skills: input.skills,
+      disabledTools: input.disabledTools,
     }),
   });
   const payload = await parseJson(response);

@@ -9,6 +9,11 @@ import {
   ExternalLink,
   ShieldAlert,
   ShieldCheck,
+  Search,
+  SquareTerminal,
+  AppWindow,
+  Brain,
+  type LucideIcon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -29,17 +34,76 @@ import {
 import type { StepProps } from "../types";
 import { StepHeader } from "../ui/StepHeader";
 
-// Tools BOTH runtimes ship with, verified against OpenClaw extensions (exec,
-// browser enabledByDefault, web_search, memory) + Hermes toolsets (web,
-// code_execution, browser, memory). Shown read-only — they're on by default,
-// not user-toggled, so we don't present fake toggles that don't wire anywhere.
-// Real per-tool toggles need runtime-entrypoint support (a later phase).
-const BUILT_IN_TOOLS: { label: string; description: string }[] = [
-  { label: "Web search", description: "Find and read pages on the public web." },
-  { label: "Code execution", description: "Run Python / shell in a sandbox." },
-  { label: "Headless browser", description: "Navigate sites and capture content." },
-  { label: "Memory", description: "Keep context across the conversation." },
+// Built-in tools BOTH runtimes ship with, on by default. These are now REAL
+// toggles: turning one off sends its id in the launch payload's `disabledTools`,
+// and each runtime entrypoint translates it to that runtime's native disable —
+// OpenClaw `tools.deny`, Hermes a custom toolset bundle. The ids here are the
+// contract; they must match CAPABILITY_IDS in PerkOS-API provision.ts + the
+// case arms in both docker-entrypoint.sh scripts.
+const BUILT_IN_TOOLS: {
+  id: string;
+  label: string;
+  description: string;
+  icon: LucideIcon;
+}[] = [
+  {
+    id: "web-search",
+    label: "Web search",
+    description: "Find and read pages on the public web.",
+    icon: Search,
+  },
+  {
+    id: "code-execution",
+    label: "Code execution",
+    description: "Run Python / shell in a sandbox.",
+    icon: SquareTerminal,
+  },
+  {
+    id: "browser",
+    label: "Headless browser",
+    description: "Navigate sites and capture content.",
+    icon: AppWindow,
+  },
+  {
+    id: "memory",
+    label: "Memory",
+    description: "Store and recall facts across the conversation.",
+    icon: Brain,
+  },
 ];
+
+// A small on/off switch (no Switch primitive in the design system yet — this
+// mirrors the clickable-toggle pattern GatewayCard already uses).
+function ToolSwitch({
+  enabled,
+  onToggle,
+  label,
+}: {
+  enabled: boolean;
+  onToggle: (next: boolean) => void;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={enabled}
+      aria-label={`${label}: ${enabled ? "on" : "off"}`}
+      onClick={() => onToggle(!enabled)}
+      className={cn(
+        "relative h-5 w-9 shrink-0 rounded-full transition-colors",
+        enabled ? "bg-primary" : "bg-muted",
+      )}
+    >
+      <span
+        className={cn(
+          "absolute top-0.5 h-4 w-4 rounded-full bg-background shadow transition-transform",
+          enabled ? "translate-x-4" : "translate-x-0.5",
+        )}
+      />
+    </button>
+  );
+}
 
 export function StepCapabilities({ state, onChange }: StepProps) {
   const preset = findPreset(state.personaId);
@@ -51,15 +115,27 @@ export function StepCapabilities({ state, onChange }: StepProps) {
     onChange({ skills: next });
   };
 
+  const disabled = new Set(state.disabledTools);
+  const setToolEnabled = (id: string, enabled: boolean) => {
+    const next = enabled
+      ? state.disabledTools.filter((t) => t !== id)
+      : state.disabledTools.includes(id)
+        ? state.disabledTools
+        : [...state.disabledTools, id];
+    onChange({ disabledTools: next });
+  };
+  const anyDisabled = state.disabledTools.length > 0;
+
   return (
     <div className="flex flex-col gap-6">
       <StepHeader
         title="Capabilities & skills"
-        description="Your agent ships with core tools built in. Add open-source skill packs to give it domain expertise — they work on both Hermes and OpenClaw."
+        description="Your agent ships with core tools on by default. Turn off anything it shouldn't have, then add open-source skill packs for domain expertise — both work on Hermes and OpenClaw."
       />
 
-      {/* Built-in tools — real, enabled by default on both runtimes. Read-only:
-          these aren't toggles because both runtimes already include them. */}
+      {/* Built-in tools — real per-tool toggles. On by default; turning one off
+          sends its id in disabledTools, which each runtime entrypoint maps to
+          its native disable (OpenClaw tools.deny / Hermes custom toolset). */}
       <div className="flex flex-col gap-3 rounded-lg border border-border bg-card/50 p-4">
         <div className="flex items-center gap-2">
           <Layers className="h-4 w-4 text-primary" />
@@ -69,19 +145,63 @@ export function StepCapabilities({ state, onChange }: StepProps) {
           </Badge>
         </div>
         <p className="text-xs text-muted-foreground">
-          Every agent can already do these — included by default, no setup needed.
+          On by default. Turn off what this agent doesn&rsquo;t need — a narrower
+          tool set is safer and cheaper for focused agents. Your project board
+          tools aren&rsquo;t affected.
         </p>
-        <div className="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
-          {BUILT_IN_TOOLS.map((t) => (
-            <div key={t.label} className="flex items-start gap-2">
-              <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-              <div className="flex flex-col">
-                <span className="text-sm text-foreground">{t.label}</span>
-                <span className="text-xs text-muted-foreground">{t.description}</span>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {BUILT_IN_TOOLS.map((t) => {
+            const enabled = !disabled.has(t.id);
+            const Icon = t.icon;
+            return (
+              <div
+                key={t.id}
+                className={cn(
+                  "flex items-center gap-3 rounded-md border p-3 transition-colors",
+                  enabled
+                    ? "border-border bg-card"
+                    : "border-dashed border-border bg-muted/30",
+                )}
+              >
+                <Icon
+                  className={cn(
+                    "h-4 w-4 shrink-0",
+                    enabled ? "text-primary" : "text-muted-foreground",
+                  )}
+                />
+                <div className="flex flex-1 flex-col">
+                  <span
+                    className={cn(
+                      "text-sm",
+                      enabled ? "text-foreground" : "text-muted-foreground",
+                    )}
+                  >
+                    {t.label}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {t.description}
+                  </span>
+                </div>
+                <ToolSwitch
+                  enabled={enabled}
+                  onToggle={(v) => setToolEnabled(t.id, v)}
+                  label={t.label}
+                />
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
+        {anyDisabled ? (
+          <p className="text-[11px] text-muted-foreground">
+            Turned off:{" "}
+            <span className="text-foreground">
+              {state.disabledTools
+                .map((id) => BUILT_IN_TOOLS.find((t) => t.id === id)?.label ?? id)
+                .join(", ")}
+            </span>
+            . Takes effect when the agent next provisions.
+          </p>
+        ) : null}
       </div>
 
       <OpenSourceSkills
