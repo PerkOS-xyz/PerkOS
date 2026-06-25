@@ -72,44 +72,56 @@ export function BillingCard({ address }: { address: string }) {
             />
           </div>
 
-          <div className="flex items-center justify-between rounded-md border border-primary/30 bg-primary/5 px-3 py-2">
-            <span className="text-xs text-muted-foreground">Credit balance</span>
-            <div className="flex items-center gap-2">
-              <span
-                className={cn(
-                  "font-mono text-sm font-medium",
-                  b.creditsUsd > 0 ? "text-foreground" : "text-muted-foreground",
-                )}
-              >
-                {b.creditsUsd.toLocaleString(undefined, { style: "currency", currency: "USD" })}
-              </span>
-              <button
-                type="button"
-                onClick={() => setShowDeposit((v) => !v)}
-                className="inline-flex items-center gap-0.5 rounded border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/20"
-              >
-                <Plus className="h-3 w-3" />
-                Add
-              </button>
+          {b.exempt ? (
+            <div className="rounded-md border border-sky-500/30 bg-sky-500/5 px-3 py-2">
+              <span className="text-xs font-medium text-sky-300">Sponsored — runs free</span>
+              <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
+                This is a PerkOS internal / tester wallet. Your team is never
+                charged or paused.
+              </p>
             </div>
-          </div>
-
-          {showDeposit ? (
-            <DepositDialog address={address} onDeposited={() => query.refetch()} />
-          ) : null}
-
-          {b.enrolled ? (
-            <p className="text-[11px] leading-snug text-muted-foreground">
-              You only pay for the hours your team actually works ($
-              {/* meter price */}0.15 / team-hour). Top up your USDC balance to keep
-              your team running; at $0 it pauses until you add more.
-            </p>
           ) : (
-            <p className="text-[11px] leading-snug text-muted-foreground">
-              Your team runs free for now. Add USDC credits to switch to
-              pay-as-you-go ($0.15 / team-hour) — you only pay for the hours your
-              team actually works.
-            </p>
+            <>
+              <div className="flex items-center justify-between rounded-md border border-primary/30 bg-primary/5 px-3 py-2">
+                <span className="text-xs text-muted-foreground">Credit balance</span>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={cn(
+                      "font-mono text-sm font-medium",
+                      b.creditsUsd > 0 ? "text-foreground" : "text-muted-foreground",
+                    )}
+                  >
+                    {b.creditsUsd.toLocaleString(undefined, { style: "currency", currency: "USD" })}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowDeposit((v) => !v)}
+                    className="inline-flex items-center gap-0.5 rounded border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/20"
+                  >
+                    <Plus className="h-3 w-3" />
+                    Add
+                  </button>
+                </div>
+              </div>
+
+              {showDeposit ? (
+                <DepositDialog address={address} onDeposited={() => query.refetch()} />
+              ) : null}
+
+              {b.enrolled ? (
+                <p className="text-[11px] leading-snug text-muted-foreground">
+                  You only pay for the hours your team actually works ($0.15 /
+                  team-hour). Top up your USDC balance to keep your team running; at
+                  $0 it pauses until you add more.
+                </p>
+              ) : (
+                <p className="text-[11px] leading-snug text-muted-foreground">
+                  Your team runs free for now. Add USDC credits to switch to
+                  pay-as-you-go ($0.15 / team-hour) — you only pay for the hours
+                  your team actually works.
+                </p>
+              )}
+            </>
           )}
         </>
       )}
