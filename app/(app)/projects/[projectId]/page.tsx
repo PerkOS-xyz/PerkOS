@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useConnection } from "wagmi";
@@ -19,6 +19,7 @@ import {
   deleteTask,
   getWalletAgents,
   getWalletProject,
+  warmAgent,
   hibernateAgentApi,
   mentionAgent,
   notifyProjectMention,
@@ -118,6 +119,27 @@ export default function ProjectDetailPage({ params }: PageProps) {
   const liveDetail = data
     ? { ...data, tasks: tasksLoaded ? liveTasks : data.tasks }
     : null;
+
+  // Speculative pre-warm: opening a project wakes its PM agent in the background
+  // (if it's resting) so it's ready by the time you start working — the
+  // always-on concierge covers you meanwhile. Own projects only (can't warm
+  // another wallet's agent), once per open, and only when actually hibernated so
+  // we never stamp `warmedAt` on an active PM. The curator gives a warmed-but-
+  // unused PM a short idle (config/curator.warmIdleMinutes, default 10m).
+  const { byName: myAgents } = useWalletAgents(address);
+  const warmedForProject = useRef<string | null>(null);
+  useEffect(() => {
+    if (isShared || !projectId) return;
+    const pm = data?.project?.pmAgent;
+    if (!pm) return;
+    const a = myAgents?.[pm];
+    if (!a?.id) return;
+    const sleeping =
+      a.hibernationState === "hibernated" || a.hibernationState === "hibernating";
+    if (!sleeping || warmedForProject.current === projectId) return;
+    warmedForProject.current = projectId;
+    void warmAgent(a.id);
+  }, [data?.project?.pmAgent, myAgents, isShared, projectId]);
 
   return (
     <div className="flex flex-col gap-6">

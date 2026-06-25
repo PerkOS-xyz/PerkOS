@@ -1873,6 +1873,25 @@ export type MyBilling = {
   generatedAt: string;
 };
 
+/**
+ * Speculative pre-warm: trigger a wake for an agent (fire-and-forget) so it's
+ * ready by the time the user interacts. Used to warm a project's PM agent on
+ * project-open. Best-effort — never throws to the caller (a failed warm just
+ * means the first real message pays the normal cold-start). Idempotent server
+ * side; safe to call repeatedly.
+ */
+export async function warmAgent(agentId: string): Promise<void> {
+  try {
+    const { authedFetch } = await import("./apiClient");
+    await authedFetch(`/api/agents/${encodeURIComponent(agentId)}/warm`, {
+      method: "POST",
+      keepalive: true,
+    });
+  } catch {
+    /* best-effort */
+  }
+}
+
 export async function getMyBilling(): Promise<MyBilling> {
   const { authedFetch } = await import("./apiClient");
   const response = await authedFetch("/billing/me");
