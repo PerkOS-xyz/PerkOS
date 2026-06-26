@@ -17,7 +17,8 @@ export function StepMethod({
   state,
   onChange,
   ecsAllowed,
-}: StepProps & { ecsAllowed: boolean }) {
+  vpsAllowed,
+}: StepProps & { ecsAllowed: boolean; vpsAllowed: boolean }) {
   const chainId = useChainId();
   const networkName =
     chainId === base.id ? "Base" : chainId === celo.id ? "Celo" : null;
@@ -35,6 +36,7 @@ export function StepMethod({
         value={state.method ?? ""}
         onValueChange={(v) => {
           if (v === "perkos" && !ecsAllowed) return;
+          if (v === "vps" && !vpsAllowed) return;
           pick(v as LaunchMethod);
         }}
         className="flex flex-col gap-3"
@@ -83,7 +85,8 @@ export function StepMethod({
 
         <SelectableCard
           selected={state.method === "vps"}
-          onClick={() => pick("vps")}
+          onClick={() => vpsAllowed && pick("vps")}
+          disabled={!vpsAllowed}
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-1">
@@ -92,15 +95,30 @@ export function StepMethod({
                 <span className="text-base font-medium text-foreground">
                   Your VPS (self-hosted)
                 </span>
+                {!vpsAllowed ? (
+                  <Badge
+                    variant="secondary"
+                    className="border-amber-500/40 bg-amber-500/15 text-amber-300"
+                  >
+                    Coming soon
+                  </Badge>
+                ) : null}
               </div>
               <p className="text-sm text-muted-foreground">
                 We generate a docker-compose bundle (runtime + bridge sidecar).
                 Run <code className="rounded bg-muted px-1 font-mono text-[11px]">docker compose up -d</code>{" "}
-                on any host with Docker — the bridge dials OUT, no inbound ports
-                or SSH access needed.
+                on any host with Docker (Hetzner, AWS EC2, anywhere) — the bridge
+                dials OUT, no inbound ports or SSH access needed.
               </p>
+              {!vpsAllowed ? (
+                <p className="text-xs text-muted-foreground">
+                  Invite-only while we test self-hosting. Pick &ldquo;I already
+                  have one&rdquo; for now, or contact an admin to be added to the
+                  early-access list.
+                </p>
+              ) : null}
             </div>
-            <RadioGroupItem value="vps" id="method-vps" />
+            <RadioGroupItem value="vps" id="method-vps" disabled={!vpsAllowed} />
           </div>
         </SelectableCard>
 

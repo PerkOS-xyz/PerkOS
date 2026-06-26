@@ -30,6 +30,7 @@ export default function AddAgentPage() {
     visiblePresets,
     ecsAllowed,
     llmAllowed,
+    vpsAllowed,
     apiKeyError,
     steps,
     stepIndex,
@@ -71,7 +72,7 @@ export default function AddAgentPage() {
 
       <div className="mt-2">
         {currentStepKey === "method" && (
-          <StepMethod state={state} onChange={update} ecsAllowed={ecsAllowed} />
+          <StepMethod state={state} onChange={update} ecsAllowed={ecsAllowed} vpsAllowed={vpsAllowed} />
         )}
         {currentStepKey === "template" && (
           <StepTemplate state={state} onChange={update} presets={visiblePresets} />
