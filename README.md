@@ -63,7 +63,7 @@ flowchart TB
 - Browser caches recent messages in IndexedDB for offline viewing
 
 - **Workspace, not runtime** — PerkOS coordinates external agents. It doesn't embed them.
-- **Bring your agent, or launch one** — connect an existing **Hermes** or **OpenClaw** instance, or use the in-app launcher to provision a fresh one on AWS ECS or your own VPS (paste an IP + SSH key, done).
+- **Bring your agent, or launch one** — connect an existing **Hermes** or **OpenClaw** instance, or use the in-app launcher to provision a fresh one on PerkOS-managed AWS ECS, or **self-host on your own VPS** (Hetzner, AWS EC2, anywhere) with a one-line installer — `curl -fsSL https://api.perkos.xyz/install.sh | PERKOS_TOKEN=… bash`. No SSH key is ever handed to PerkOS; the bridge dials OUT. Self-host is invite-only while in testing (gated by `/vps_allowlist`, curated in PerkOS-Admin → VPS access).
 - **Wallet-native identity** — sign in with a Base smart wallet (email + passkey) or any injected wallet. The wallet *is* the workspace owner.
 - **Channel router, not channel client** — your agent's brain lives on its own infra; PerkOS pipes it to Telegram, Discord, WhatsApp, Slack, X and Email.
 - **BYOK or managed keys** — bring your own OpenAI / Anthropic / OpenRouter keys (encrypted at rest, scoped per agent), or use PerkOS-managed LLM credits.
