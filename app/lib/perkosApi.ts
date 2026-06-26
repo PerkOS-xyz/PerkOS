@@ -237,6 +237,12 @@ export type LaunchAgentResponse = {
   credentials?: LaunchAgentCredentials;
   /** Present on self-hosted / imported deploys; absent for perkos-managed. */
   deployBundle?: DeployBundle;
+  /**
+   * Self-hosted only: a ready-to-paste one-line installer
+   * (`curl … | PERKOS_TOKEN=… bash`) backed by a one-shot token. Lets a
+   * non-technical user run a single command instead of pasting the bundle.
+   */
+  installCommand?: string;
   result: {
     mode?: string;
     status?: string;

@@ -144,6 +144,8 @@ export function useAgentWizard() {
     agentName: string;
     deployMode: "self-hosted" | "imported";
     relayApiKey: string;
+    /** Self-hosted one-line installer command, when the API minted a token. */
+    installCommand?: string;
   } | null>(null);
   const [inviteResult, setInviteResult] = useState<InviteAgentResult | null>(null);
 
@@ -289,6 +291,7 @@ export function useAgentWizard() {
           agentName: response.credentials.agentName,
           deployMode: "self-hosted",
           relayApiKey: response.credentials.relayApiKey,
+          installCommand: response.installCommand,
         });
         return;
       }
