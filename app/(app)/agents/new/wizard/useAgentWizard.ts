@@ -25,6 +25,7 @@ import { fetchVisiblePresets } from "@/app/lib/agentPresetAccess";
 import { byokBaseUrl, byokProviderOptions } from "@/app/lib/agentConfigPreview";
 import { fetchEcsAccess } from "@/app/lib/ecsAccess";
 import { fetchLlmAccess } from "@/app/lib/llmAccess";
+import { fetchVpsAccess } from "@/app/lib/vpsAccess";
 
 import {
   EXTERNAL_NAME_RE,
@@ -60,6 +61,15 @@ export function useAgentWizard() {
     staleTime: 60_000,
   });
   const llmAllowed = llmAccessQuery.data?.allowed === true;
+
+  // "Your VPS" (self-hosted) is gated like ECS — shown-but-blocked until the
+  // wallet is in /vps_allowlist (or super-admin), while the flow is tested.
+  const vpsAccessQuery = useQuery({
+    queryKey: ["access", "vps"],
+    queryFn: fetchVpsAccess,
+    staleTime: 60_000,
+  });
+  const vpsAllowed = vpsAccessQuery.data?.allowed === true;
 
   const presetsQuery = useQuery({
     queryKey: ["wizard", "presets"],
@@ -373,6 +383,7 @@ export function useAgentWizard() {
     // access
     ecsAllowed,
     llmAllowed,
+    vpsAllowed,
     apiKeyError,
     // step machine
     steps,
