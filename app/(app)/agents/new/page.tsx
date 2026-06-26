@@ -155,6 +155,7 @@ export default function AddAgentPage() {
           agentName={issuedBundle.agentName}
           deployMode={issuedBundle.deployMode}
           relayApiKey={issuedBundle.relayApiKey}
+          installCommand={issuedBundle.installCommand}
           onDone={closeOverlay}
         />
       ) : null}

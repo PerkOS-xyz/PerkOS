@@ -31,6 +31,12 @@ type Props = {
   deployMode: "self-hosted" | "imported";
   /** Shown once, just like the legacy key-reveal dialog, in a "secret" card. */
   relayApiKey: string;
+  /**
+   * Self-hosted only: the one-line installer (`curl … | PERKOS_TOKEN=… bash`)
+   * backed by a one-shot token. When present we lead with it and demote the
+   * paste-the-bundle tabs to a manual fallback.
+   */
+  installCommand?: string;
   onDone: () => void;
 };
 
@@ -59,10 +65,11 @@ export function DeployBundleScreen({
   agentName,
   deployMode,
   relayApiKey,
+  installCommand,
   onDone,
 }: Props) {
   const [tab, setTab] = useState<Tab>("compose");
-  const [copied, setCopied] = useState<null | Tab | "key">(null);
+  const [copied, setCopied] = useState<null | Tab | "key" | "install">(null);
   const [acknowledged, setAcknowledged] = useState(false);
   const [connected, setConnected] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
@@ -108,7 +115,7 @@ export function DeployBundleScreen({
     };
   }, [agentId, pollEpoch]);
 
-  const copyText = useCallback(async (text: string, kind: Tab | "key") => {
+  const copyText = useCallback(async (text: string, kind: Tab | "key" | "install") => {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(kind);
@@ -174,6 +181,48 @@ export function DeployBundleScreen({
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
+          {installCommand ? (
+            <Card className="border-primary/40 bg-primary/5">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-sm font-medium">
+                  <Terminal className="h-4 w-4 text-primary" />
+                  Fastest way — run one command on your server
+                </CardTitle>
+                <CardDescription>
+                  SSH into your fresh Ubuntu box (Hetzner, AWS EC2, anywhere)
+                  and paste this. It installs Docker if needed, creates the
+                  agent, and connects it to PerkOS — no other setup. The link
+                  is one-shot and expires in ~30 min.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="flex items-start gap-2 rounded-md border border-border bg-background/60 p-2 font-mono text-[11px]">
+                  <span className="min-w-0 flex-1 whitespace-pre-wrap break-all text-foreground">
+                    {installCommand}
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 shrink-0 gap-1.5"
+                    onClick={() => copyText(installCommand, "install")}
+                  >
+                    {copied === "install" ? (
+                      <Check className="h-3.5 w-3.5" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" />
+                    )}
+                    {copied === "install" ? "Copied" : "Copy"}
+                  </Button>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Prefer to do it by hand? The full bundle is below — the
+                  command just automates pasting those files and running{" "}
+                  <code className="font-mono">docker compose up -d</code>.
+                </p>
+              </CardContent>
+            </Card>
+          ) : null}
+
           <Card className="border-dashed">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
