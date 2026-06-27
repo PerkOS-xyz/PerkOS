@@ -44,6 +44,7 @@ const NAV_ITEMS = [
   { href: "/agents", label: "Agents" },
   { href: "/chat", label: "Chat" },
   { href: "/organizations", label: "Organization" },
+  { href: "/wallet", label: "Wallet" },
   { href: "/settings", label: "Settings" },
 ];
 
