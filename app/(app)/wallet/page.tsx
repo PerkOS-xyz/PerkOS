@@ -20,6 +20,7 @@ import {
   fetchWalletBalances,
   chainLabel,
 } from "@/app/lib/serverWallet";
+import { SendForm } from "./SendForm";
 
 function shortAddr(a: string): string {
   return `${a.slice(0, 6)}…${a.slice(-4)}`;
@@ -122,10 +123,13 @@ export default function WalletPage() {
               <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <ArrowDownToLine className="h-3.5 w-3.5" />
                 Deposit: send USDC or $PERKOS to {shortAddr(wallet.address)} from
-                any wallet. Sending out arrives soon.
+                any wallet.
               </p>
             </CardContent>
           </Card>
+
+          {/* Send */}
+          <SendForm address={wallet.address} />
 
           {/* Balances */}
           <Card>
