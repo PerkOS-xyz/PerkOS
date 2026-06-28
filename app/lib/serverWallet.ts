@@ -59,3 +59,41 @@ const CHAIN_LABELS: Record<string, string> = { base: "Base", celo: "Celo" };
 export function chainLabel(chain: string): string {
   return CHAIN_LABELS[chain] ?? chain;
 }
+
+export type TransferInput = {
+  chain: "base" | "celo";
+  /** "USDC" | "PERKOS" | "native" */
+  token: string;
+  to: string;
+  /** human amount, e.g. "1.5" */
+  amount: string;
+};
+
+export type TransferResult = {
+  hash: string;
+  chain: string;
+  chainId: number;
+  token: string;
+  to: string;
+  amount: string;
+};
+
+/** Send tokens OUT of the server wallet (MPC-signed + broadcast server-side). */
+export async function transferOut(input: TransferInput): Promise<TransferResult> {
+  const res = await authedFetch("/api/wallet/transfer", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as { error?: { message?: string } };
+    throw new Error(body.error?.message ?? `Transfer failed (${res.status})`);
+  }
+  return (await res.json()) as TransferResult;
+}
+
+/** Block explorer tx URL for a chain. */
+export function explorerTxUrl(chain: string, hash: string): string {
+  const base = chain === "celo" ? "https://celoscan.io/tx/" : "https://basescan.org/tx/";
+  return base + hash;
+}
