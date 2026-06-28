@@ -8,6 +8,8 @@ import { useConnect, useConnection, useDisconnect } from "wagmi";
 import { formatAddress } from "../../lib/format";
 import { useWalletSession } from "../../lib/useWalletSession";
 import { useIsInMiniApp } from "../../lib/useIsInMiniApp";
+import { dynamicBrowserEnabled } from "../../lib/dynamicBrowser";
+import { DynamicSignInButton } from "../../components/DynamicSignInButton";
 import { AccessGate } from "../../components/AccessGate";
 
 export default function SignInPage() {
@@ -17,6 +19,9 @@ export default function SignInPage() {
   const { disconnect } = useDisconnect();
   const session = useWalletSession();
   const isInMiniApp = useIsInMiniApp();
+  // In a browser (with Dynamic configured) offer Dynamic's connect modal
+  // instead of the baseAccount / injected buttons. Off everywhere else.
+  const dynamicEnabled = dynamicBrowserEnabled(isInMiniApp);
 
   const baseAccountConnector = connectors.find((c) => c.id === "baseAccount");
   const injectedConnector = connectors.find((c) => c.id === "injected");
@@ -134,6 +139,13 @@ export default function SignInPage() {
           <p className="text-center text-xs text-[#7975a8]">
             Restoring your session…
           </p>
+        ) : dynamicEnabled ? (
+          // Browser + Dynamic configured → Dynamic's connect modal (email /
+          // social / external + embedded wallet). On connect, the wallet syncs
+          // into wagmi and this view flips to the "Continue as 0x…" branch.
+          <div className="flex w-full flex-col gap-4">
+            <DynamicSignInButton />
+          </div>
         ) : (
           <div className="flex w-full flex-col gap-4">
             <button

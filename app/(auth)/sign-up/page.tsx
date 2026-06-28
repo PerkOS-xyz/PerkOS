@@ -10,12 +10,15 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Mail, Wallet } from "lucide-react";
 
 import { useIsInMiniApp } from "../../lib/useIsInMiniApp";
+import { dynamicBrowserEnabled } from "../../lib/dynamicBrowser";
+import { DynamicSignInButton } from "../../components/DynamicSignInButton";
 
 export default function SignUpPage() {
   const router = useRouter();
   const { connectors, connect, isPending } = useConnect();
   const { status, address } = useConnection();
   const isInMiniApp = useIsInMiniApp();
+  const dynamicEnabled = dynamicBrowserEnabled(isInMiniApp);
 
   const baseAccountConnector = connectors.find((c) => c.id === "baseAccount");
   const injectedConnector = connectors.find((c) => c.id === "injected");
@@ -77,31 +80,39 @@ export default function SignUpPage() {
       </div>
 
       <div className="flex w-full flex-col gap-4">
-        <Button
-          type="button"
-          onClick={() =>
-            baseAccountConnector &&
-            connect({ connector: baseAccountConnector })
-          }
-          disabled={!baseAccountConnector || isPending || isReconnecting}
-          className="h-12 gap-2 text-base"
-        >
-          <Mail className="h-4 w-4" />
-          Sign up with email
-        </Button>
+        {dynamicEnabled ? (
+          // Browser + Dynamic configured → one connect modal covers email /
+          // social / external + embedded wallet for new accounts too.
+          <DynamicSignInButton />
+        ) : (
+          <>
+            <Button
+              type="button"
+              onClick={() =>
+                baseAccountConnector &&
+                connect({ connector: baseAccountConnector })
+              }
+              disabled={!baseAccountConnector || isPending || isReconnecting}
+              className="h-12 gap-2 text-base"
+            >
+              <Mail className="h-4 w-4" />
+              Sign up with email
+            </Button>
 
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() =>
-            injectedConnector && connect({ connector: injectedConnector })
-          }
-          disabled={!injectedConnector || isPending || isReconnecting}
-          className="h-12 gap-2 text-base"
-        >
-          <Wallet className="h-4 w-4" />
-          Sign up with wallet
-        </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() =>
+                injectedConnector && connect({ connector: injectedConnector })
+              }
+              disabled={!injectedConnector || isPending || isReconnecting}
+              className="h-12 gap-2 text-base"
+            >
+              <Wallet className="h-4 w-4" />
+              Sign up with wallet
+            </Button>
+          </>
+        )}
 
         {isReconnecting ? (
           <p className="text-center text-xs text-[#7975a8]">
