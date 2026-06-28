@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useConnect, useConnection } from "wagmi";
@@ -11,7 +12,20 @@ import { ArrowLeft, ArrowRight, Mail, Wallet } from "lucide-react";
 
 import { useIsInMiniApp } from "../../lib/useIsInMiniApp";
 import { dynamicBrowserEnabled } from "../../lib/dynamicBrowser";
-import { DynamicSignInButton } from "../../components/DynamicSignInButton";
+
+// Code-split: @dynamic-labs loads only when the Dynamic browser button renders.
+const DynamicSignInButton = dynamic(
+  () =>
+    import("../../components/DynamicSignInButton").then(
+      (m) => m.DynamicSignInButton,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-12 w-full animate-pulse rounded-lg bg-primary/30" />
+    ),
+  },
+);
 
 export default function SignUpPage() {
   const router = useRouter();
