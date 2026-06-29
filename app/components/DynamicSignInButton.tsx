@@ -5,9 +5,9 @@ import { useDynamicContext } from "@dynamic-labs/sdk-react-core";
 
 /**
  * Browser-only "Continue with email or wallet" button that opens Dynamic's
- * auth flow. Once the user connects, DynamicWagmiConnector syncs the wallet
- * into wagmi → `useConnection` flips to connected and the normal sign-in flow
- * (Continue as 0x… → Firebase) proceeds.
+ * auth flow. Once the user connects, DynamicWalletBridge publishes the wallet
+ * to DynamicWalletContext → useWalletSession flips to connected and the normal
+ * sign-in flow (sign nonce → Firebase) proceeds, signing via Dynamic natively.
  *
  * Render ONLY when `dynamicBrowserEnabled()` is true — `useDynamicContext`
  * throws if the DynamicContextProvider isn't mounted.
