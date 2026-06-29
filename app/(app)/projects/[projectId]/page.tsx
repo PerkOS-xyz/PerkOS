@@ -1634,8 +1634,8 @@ function ChatTab({
   });
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_320px]">
-      <div className="flex h-[60vh] min-h-[480px] flex-col gap-3 rounded-md border border-[#1b1833] bg-[#0e0716] p-4">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="flex h-[60vh] min-h-[480px] min-w-0 flex-col gap-3 rounded-md border border-[#1b1833] bg-[#0e0716] p-4">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-[#ececff]">
             # {detail.project.name}

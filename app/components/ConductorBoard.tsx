@@ -76,8 +76,8 @@ export function ConductorBoard({
   const counts = inProgressCountByHandle(items);
 
   return (
-    <div className="grid gap-4 md:grid-cols-[1fr_240px]">
-      <div>
+    <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_240px]">
+      <div className="min-w-0">
         <KanbanBoard
           items={items}
           emptyMessage="No tasks yet. Add one to get started."
