@@ -10,6 +10,7 @@ import { OnboardingProvider } from "./lib/onboardingState";
 import { AutoConnect } from "./components/AutoConnect";
 import { useIsInMiniApp } from "./lib/useIsInMiniApp";
 import { dynamicBrowserEnabled } from "./lib/dynamicBrowser";
+import { prepareFirestore } from "./lib/firebase";
 
 // Code-split: the @dynamic-labs SDK ships only to the browser host, never to
 // Farcaster / Base App. ssr:false — Dynamic is browser-only and the plain tree
@@ -22,6 +23,14 @@ const DynamicProviders = dynamic(() => import("./components/DynamicProviders"), 
 });
 
 export function Providers({ children }: { children: ReactNode }) {
+  // Configure Firestore (auto-detect long-polling) before any descendant's
+  // useFirebaseUser calls getFirestore — a lazy-init runs once, during this
+  // root render, ahead of child renders. Kills the benign /Listen/channel 400s.
+  useState(() => {
+    prepareFirestore();
+    return null;
+  });
+
   const [queryClient] = useState(() => new QueryClient());
 
   // Only wrap with Dynamic in a real browser tab (and only when an env id is
