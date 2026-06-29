@@ -22,6 +22,7 @@ import { base, baseSepolia } from "viem/chains";
 
 import { adminAuth, adminDb } from "../../../lib/firebaseAdmin";
 import { checkWalletAccess } from "../../../lib/accessControl";
+import { recordUserLogin } from "../../../lib/userLogins";
 
 // We try Base mainnet first, then Base Sepolia, in case the smart wallet only
 // exists on testnet during alpha.
@@ -131,6 +132,10 @@ export async function POST(request: Request) {
     { consumed: true, consumedAt: new Date().toISOString() },
     { merge: true }
   );
+
+  // 6. Record IP + geolocation for the Admin user log (best-effort,
+  //    fire-and-forget — never blocks or fails sign-in).
+  void recordUserLogin(address, request);
 
   return NextResponse.json({ token });
 }
