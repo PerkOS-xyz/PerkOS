@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useConnection, useSignMessage } from "wagmi";
 import { signOut } from "firebase/auth";
 
 import { firebaseAuth } from "./firebase";
 import { signInWithWallet } from "./walletAuth";
 import { useFirebaseUser } from "./useFirebaseUser";
+import { DynamicWalletContext } from "./dynamicWallet";
 
 /**
  * Module-level mutex shared by every useWalletSession() consumer in
@@ -14,7 +15,7 @@ import { useFirebaseUser } from "./useFirebaseUser";
  * during a typical flow (landing's LandingAutoRoute, /continue, the
  * (app) layout guard, /sign-in), and each call is an independent React
  * instance with its own state. Without a shared promise, each instance
- * fires its own signInWithWallet → MetaMask receives multiple
+ * fires its own signInWithWallet → the wallet receives multiple
  * personal_sign requests with different nonces queued up.
  *
  * `pendingSignIn` holds the in-flight Promise so all instances await
@@ -24,9 +25,9 @@ import { useFirebaseUser } from "./useFirebaseUser";
 let pendingSignIn: Promise<unknown> | null = null;
 
 export type WalletSessionStatus =
-  /** waiting for wagmi or Firebase to settle */
+  /** waiting for the wallet or Firebase to settle */
   | "loading"
-  /** wagmi disconnected, no Firebase session — user must sign in */
+  /** wallet disconnected, no Firebase session — user must sign in */
   | "signed-out"
   /** wallet connected, Firebase signed in, addresses match */
   | "signed-in"
@@ -46,21 +47,49 @@ type Result = {
 };
 
 /**
- * Glue layer between wagmi and Firebase Auth.
+ * Glue layer between the connected wallet and Firebase Auth.
  *
- *  - When wagmi has an address but Firebase has no matching session, we
- *    automatically run `signInWithWallet` to upgrade the wagmi session
- *    into a Firebase custom-token session.
- *  - We expose a coarse `status` so guarded routes can decide what to
- *    render (loading skeleton vs AccessGate vs the app itself).
+ *  - When the wallet has an address but Firebase has no matching session, we
+ *    automatically run `signInWithWallet` to upgrade it into a Firebase
+ *    custom-token session.
+ *  - We expose a coarse `status` so guarded routes can decide what to render
+ *    (loading skeleton vs AccessGate vs the app itself).
  *
- * Components that just need to know "is this user authorized?" should
- * check `status === "signed-in"`.
+ * Wallet source depends on the host:
+ *  - Mini App hosts (Farcaster / Base App): wagmi (`useConnection`), connected
+ *    by AutoConnect through the host connector.
+ *  - Regular browser tab: Dynamic, via DynamicWalletContext. We do NOT bridge
+ *    Dynamic into wagmi (`@dynamic-labs/wagmi-connector` drops the connection
+ *    on wagmi v3 → ConnectorNotConnectedError on sign-in), so the browser path
+ *    reads address + connection + signer straight from Dynamic.
+ *
+ * Components that just need "is this user authorized?" check `status === "signed-in"`.
  */
 export function useWalletSession(): Result {
-  const { address, isConnected, status: wagmiStatus } = useConnection();
+  const {
+    address: wagmiAddress,
+    isConnected: wagmiIsConnected,
+    status: wagmiStatus,
+  } = useConnection();
   const { signMessageAsync } = useSignMessage();
   const { user: firebaseUser, loading: firebaseLoading } = useFirebaseUser();
+
+  // Browser/Dynamic path: when the context is present, Dynamic owns the wallet
+  // and we read everything from it. In Mini App hosts it's null → use wagmi.
+  const dyn = useContext(DynamicWalletContext);
+  const address = dyn ? dyn.address : wagmiAddress;
+  const isConnected = dyn ? dyn.isConnected : wagmiIsConnected;
+
+  // Active signer (Dynamic-native or wagmi) held in a ref so runSignIn's
+  // callback doesn't churn its deps when the source flips.
+  const signMessageRef = useRef<(message: string) => Promise<string>>(
+    (message) => signMessageAsync({ message }),
+  );
+  useEffect(() => {
+    signMessageRef.current = dyn
+      ? dyn.signMessage
+      : (message: string) => signMessageAsync({ message });
+  }, [dyn, signMessageAsync]);
 
   const [syncing, setSyncing] = useState(false);
   const [denial, setDenial] = useState<"not-allowlisted" | "error" | null>(null);
@@ -75,18 +104,16 @@ export function useWalletSession(): Result {
   const runSignIn = useCallback(async () => {
     if (!address || !normalizedAddress) return;
 
-    // If another hook instance is already running the sign-in, join
-    // its Promise instead of starting our own. Only the first caller
-    // shows the wallet's signature prompt; everyone else just awaits
-    // the result and lets useFirebaseUser propagate the success.
+    // If another hook instance is already running the sign-in, join its
+    // Promise instead of starting our own. Only the first caller shows the
+    // wallet's signature prompt; everyone else awaits the result and lets
+    // useFirebaseUser propagate the success.
     if (pendingSignIn) {
       setSyncing(true);
       try {
         await pendingSignIn;
       } catch {
-        // The owning instance handled the error and set its own denial
-        // state; ours is in the same render tree so it will rerender
-        // alongside it. Nothing extra to do here.
+        // The owning instance handled the error and set its own denial state.
       } finally {
         setSyncing(false);
       }
@@ -99,7 +126,7 @@ export function useWalletSession(): Result {
 
     const promise = signInWithWallet({
       address,
-      signMessage: (message) => signMessageAsync({ message }),
+      signMessage: (message) => signMessageRef.current(message),
     });
     pendingSignIn = promise;
 
@@ -114,16 +141,15 @@ export function useWalletSession(): Result {
         setErrorMessage(msg);
       }
     } finally {
-      // Only clear the mutex if we're still the owner — a follow-up
-      // call could have already swapped in a new promise after we
-      // resolved (e.g. wallet disconnect + reconnect).
+      // Only clear the mutex if we're still the owner — a follow-up call could
+      // have already swapped in a new promise after we resolved.
       if (pendingSignIn === promise) pendingSignIn = null;
       setSyncing(false);
     }
-  }, [address, normalizedAddress, signMessageAsync]);
+  }, [address, normalizedAddress]);
 
-  // If wagmi has an address and we have no matching Firebase session, run
-  // the sign-in flow exactly once. The user can `retry()` if it failed.
+  // When the wallet has an address and there's no matching Firebase session,
+  // run the sign-in flow exactly once. The user can `retry()` if it failed.
   useEffect(() => {
     if (firebaseLoading) return;
     if (!isConnected || !normalizedAddress) return;
@@ -141,17 +167,18 @@ export function useWalletSession(): Result {
     runSignIn,
   ]);
 
-  // If wagmi disconnects, drop the Firebase session too so the next wallet
-  // doesn't inherit it.
+  // If wagmi disconnects, drop the Firebase session too. Mini App path only —
+  // in the browser (Dynamic) path wagmi is always disconnected (no bridge),
+  // which would spuriously sign the user out.
   useEffect(() => {
-    if (wagmiStatus === "disconnected" && firebaseUser) {
+    if (!dyn && wagmiStatus === "disconnected" && firebaseUser) {
       void signOut(firebaseAuth());
     }
-  }, [wagmiStatus, firebaseUser]);
+  }, [dyn, wagmiStatus, firebaseUser]);
 
   const status: WalletSessionStatus = (() => {
     if (firebaseLoading) return "loading";
-    if (wagmiStatus === "connecting" || wagmiStatus === "reconnecting") {
+    if (!dyn && (wagmiStatus === "connecting" || wagmiStatus === "reconnecting")) {
       return "loading";
     }
     if (!isConnected) return "signed-out";
