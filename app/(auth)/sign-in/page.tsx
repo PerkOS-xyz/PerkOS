@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -204,13 +203,6 @@ export default function SignInPage() {
             {session.error}
           </p>
         ) : null}
-
-        <div className="flex h-11 w-full items-center justify-center gap-2 text-sm">
-          <span className="text-[#7975a8] opacity-90">Don&apos;t have an account?</span>
-          <Link href="/sign-up" className="text-[#ececff] opacity-90 hover:opacity-100">
-            Sign up
-          </Link>
-        </div>
       </div>
     </div>
   );
