@@ -124,10 +124,12 @@ function FeedRow({ event }: { event: ActivityEvent }) {
       <span className="shrink-0 font-medium text-foreground">{event.actor}</span>
       <span className="shrink-0 text-muted-foreground">{verbPhrase(event.verb)}</span>
       {event.object ? (
-        <span className="truncate text-foreground/90">{event.object}</span>
+        <span className="min-w-0 truncate text-foreground/90">{event.object}</span>
       ) : null}
       {event.detail ? (
-        <span className="shrink-0 text-muted-foreground">· {event.detail}</span>
+        <span className="min-w-0 truncate text-muted-foreground">
+          · {event.detail}
+        </span>
       ) : null}
     </div>
   );
