@@ -2438,6 +2438,45 @@ export async function revokeRelayKey(
   return payload as unknown as { ok: boolean; status: string };
 }
 
+export type WebhookInfo = { hasToken: boolean; url: string | null };
+
+/**
+ * GET /api/agents/<id>/webhook — the agent's inbound webhook URL (an external
+ * event POSTed here wakes the agent + hands it the payload). Owner-only.
+ */
+export async function getWebhookInfo(agentId: string): Promise<WebhookInfo> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(`/api/agents/${agentId}/webhook`, { method: "GET" });
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't load webhook URL"));
+  return payload as unknown as WebhookInfo;
+}
+
+/**
+ * POST /api/agents/<id>/webhook/rotate — mint a fresh webhook URL. Any previous
+ * URL stops working immediately.
+ */
+export async function rotateWebhook(
+  agentId: string,
+): Promise<{ ok: boolean; webhookToken: string; url: string }> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(`/api/agents/${agentId}/webhook/rotate`, { method: "POST" });
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't generate webhook URL"));
+  return payload as unknown as { ok: boolean; webhookToken: string; url: string };
+}
+
+/**
+ * POST /api/agents/<id>/webhook/disable — delete the token so the URL 404s.
+ */
+export async function disableWebhook(agentId: string): Promise<{ ok: boolean }> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(`/api/agents/${agentId}/webhook/disable`, { method: "POST" });
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't disable webhook"));
+  return payload as unknown as { ok: boolean };
+}
+
 /**
  * GET /api/agents/<id> — returns the per-wallet agent projection
  * including the 0.2.0 BYO fields (`bridgeConnected`, `deployMode`,

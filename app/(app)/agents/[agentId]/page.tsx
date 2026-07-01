@@ -58,6 +58,7 @@ import { useActivityFeed, verbPhrase } from "../../../lib/activityEvents";
 import { EditAgentDialog } from "../../../components/EditAgentDialog";
 import { HibernationPanel } from "./HibernationPanel";
 import { InvitedCredentialPanel } from "./InvitedCredentialPanel";
+import { WebhookPanel } from "./WebhookPanel";
 import { UpgradePanel } from "./UpgradePanel";
 import { AutoWakeBanner } from "./AutoWakeBanner";
 import { AgentChatPanel } from "./AgentChatPanel";
@@ -256,6 +257,8 @@ export default function AgentDetailPage({ params }: PageProps) {
       <ChannelsSection channels={channels} runtime={agent.runtime} />
 
       {agent.invited ? <InvitedCredentialPanel agent={agent} /> : null}
+
+      <WebhookPanel agent={agent} />
 
       {!isExternalAgent(agent) ? (
         <HibernationPanel
