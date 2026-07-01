@@ -346,6 +346,10 @@ export function useAgentWizard() {
       case "channels":
         return true;
       case "review":
+        // A PerkOS-hosted launch needs a concrete runtime image, else the
+        // server rejects it (IMAGE_TAG_REQUIRED) and we'd strand a doc. Block
+        // the launch button until an image is resolved.
+        if (state.deployMode === "perkos-ecs" && !state.imageTag) return false;
         return !launchMutation.isPending && !launchMutation.isSuccess;
       case "external":
         return (
