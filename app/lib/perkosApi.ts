@@ -385,6 +385,9 @@ export type AgentRow = Agent & {
   revoked?: boolean;
   /** Owner-supplied context shown in the invite prompt. */
   note?: string | null;
+  /** When set, this agent is a CO-RESIDENT running inside the host agent named
+   *  here (Phase 1 multi-agent), not on its own runtime. */
+  hostAgent?: string | null;
 };
 
 const agentConverter: FirestoreDataConverter<AgentRow> = {
@@ -430,6 +433,7 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
         typeof data.bridgeConnected === "boolean" ? data.bridgeConnected : undefined,
       lastBridgeSeenAt: tsToIso(data.lastBridgeSeenAt),
       note: typeof data.note === "string" ? data.note : null,
+      hostAgent: typeof data.hostAgent === "string" ? data.hostAgent : null,
     };
   },
 };
@@ -2475,6 +2479,26 @@ export async function disableWebhook(agentId: string): Promise<{ ok: boolean }> 
   const payload = await parseJson(response);
   if (!response.ok) throw new Error(apiError(payload, "Couldn't disable webhook"));
   return payload as unknown as { ok: boolean };
+}
+
+/**
+ * POST /api/agents/<id>/team — add this agent to a host's team as a co-resident
+ * (hostAgentId), or leave it (null → back to a standalone runtime). Phase 1
+ * multi-agent. Reprovisions the host so one runtime serves the whole team.
+ */
+export async function setAgentHost(
+  agentId: string,
+  hostAgentId: string | null,
+): Promise<{ ok: boolean; hostAgent: string | null }> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(`/api/agents/${agentId}/team`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ hostAgentId }),
+  });
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't update the agent's team"));
+  return payload as unknown as { ok: boolean; hostAgent: string | null };
 }
 
 /**

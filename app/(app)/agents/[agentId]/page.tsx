@@ -59,6 +59,7 @@ import { EditAgentDialog } from "../../../components/EditAgentDialog";
 import { HibernationPanel } from "./HibernationPanel";
 import { InvitedCredentialPanel } from "./InvitedCredentialPanel";
 import { WebhookPanel } from "./WebhookPanel";
+import { TeamPanel } from "./TeamPanel";
 import { UpgradePanel } from "./UpgradePanel";
 import { AutoWakeBanner } from "./AutoWakeBanner";
 import { AgentChatPanel } from "./AgentChatPanel";
@@ -259,6 +260,8 @@ export default function AgentDetailPage({ params }: PageProps) {
       {agent.invited ? <InvitedCredentialPanel agent={agent} /> : null}
 
       <WebhookPanel agent={agent} />
+
+      <TeamPanel agent={agent} />
 
       {!isExternalAgent(agent) ? (
         <HibernationPanel
