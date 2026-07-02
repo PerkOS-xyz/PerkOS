@@ -426,5 +426,297 @@
       "toastSuccessDesc": "Bienvenido a PerkOS. Se agregaron 3 tareas de demostración.",
       "toastErrorTitle": "No se pudo crear el proyecto de prueba"
     }
+  },
+  "projects": {
+    "header": {
+      "title": "Proyectos",
+      "countInWorkspace_one": "{{count}} proyecto en tu espacio de trabajo.",
+      "countInWorkspace_other": "{{count}} proyectos en tu espacio de trabajo.",
+      "createFirst": "Crea tu primer proyecto.",
+      "newProject": "Nuevo proyecto"
+    },
+    "search": {
+      "placeholder": "Busca proyectos por nombre, objetivo o estado…",
+      "noResults": "Ningún proyecto coincide con \"{{query}}\"."
+    },
+    "filter": {
+      "clearStatusAria": "Quitar filtro de estado",
+      "statusPill": "estado: {{status}}"
+    },
+    "bulk": {
+      "selectAllAria": "Seleccionar todos los proyectos",
+      "selectAll": "Seleccionar todo",
+      "selectedCount": "{{count}} seleccionados",
+      "archive": "Archivar",
+      "unarchive": "Desarchivar",
+      "delete": "Eliminar",
+      "clear": "Limpiar"
+    },
+    "card": {
+      "selectAria": "Seleccionar {{name}}",
+      "agentCount_one": "{{count}} agente",
+      "agentCount_other": "{{count}} agentes",
+      "taskCount_one": "{{count}} tarea",
+      "taskCount_other": "{{count}} tareas",
+      "active": "activo {{time}}"
+    },
+    "empty": {
+      "title": "Todavía no hay proyectos",
+      "description": "Los proyectos agrupan tus agentes, tareas y chats alrededor de un objetivo. Empieza creando uno.",
+      "action": "Crear proyecto"
+    },
+    "confirmDelete": {
+      "title_one": "¿Eliminar {{count}} proyecto?",
+      "title_other": "¿Eliminar {{count}} proyectos?",
+      "description": "Esto elimina permanentemente los proyectos seleccionados y los quita de tu espacio de trabajo. Esta acción no se puede deshacer.",
+      "confirmLabel": "Eliminar"
+    },
+    "toast": {
+      "archivedSomeFailed": "Se archivaron {{ok}}, {{failed}} fallaron",
+      "archivedSuccess_one": "Se archivó {{count}} proyecto",
+      "archivedSuccess_other": "Se archivaron {{count}} proyectos",
+      "unarchivedSomeFailed": "Se desarchivaron {{ok}}, {{failed}} fallaron",
+      "unarchivedSuccess_one": "Se desarchivó {{count}} proyecto",
+      "unarchivedSuccess_other": "Se desarchivaron {{count}} proyectos",
+      "bulkUpdateFailed": "Falló la actualización masiva",
+      "deletedSomeFailed": "Se eliminaron {{ok}}, {{failed}} fallaron",
+      "deletedSuccess_one": "Se eliminó {{count}} proyecto",
+      "deletedSuccess_other": "Se eliminaron {{count}} proyectos",
+      "bulkDeleteFailed": "Falló la eliminación masiva"
+    }
+  },
+  "agents": {
+    "header": {
+      "title": "Equipo de agentes",
+      "subtitle": "Conecta tus agentes, asígnalos a proyectos y ponlos a trabajar.",
+      "addAgent": "Agregar agente"
+    },
+    "search": {
+      "placeholder": "Busca agentes por nombre, entorno de ejecución o capacidad…",
+      "noResults": "Ningún agente coincide con \"{{query}}\"."
+    },
+    "bulk": {
+      "selectAllAria": "Seleccionar todos los agentes",
+      "selectAll": "Seleccionar todo",
+      "selectedCount": "{{count}} seleccionados",
+      "assignToProject": "Asignar a proyecto",
+      "hibernate": "Hibernar",
+      "wake": "Despertar",
+      "delete": "Eliminar",
+      "clear": "Limpiar"
+    },
+    "confirmDelete": {
+      "title_one": "¿Eliminar {{count}} agente?",
+      "title_other": "¿Eliminar {{count}} agentes?",
+      "description": "Elimina cada contenedor en ejecución, revoca su clave de LLM y borra sus registros (incluido el registro del relay). La facturación se detiene de inmediato. Esta acción no se puede deshacer.",
+      "confirmLabel": "Eliminar"
+    },
+    "toast": {
+      "deletedSomeFailed": "Se eliminaron {{ok}}, {{failed}} fallaron",
+      "deletedSuccess_one": "Se eliminó {{count}} agente",
+      "deletedSuccess_other": "Se eliminaron {{count}} agentes",
+      "bulkDeleteFailed": "Falló la eliminación masiva",
+      "hibernatedSomeFailed": "Se hibernaron {{ok}}, {{failed}} fallaron",
+      "hibernatedSomeFailedDesc": "Los agentes que no están desplegados en la infraestructura de PerkOS no pueden hibernar.",
+      "hibernatedSuccess_one": "Se hibernó {{count}} agente",
+      "hibernatedSuccess_other": "Se hibernaron {{count}} agentes",
+      "bulkHibernateFailed": "Falló la hibernación masiva",
+      "wokeSomeFailed": "Se despertaron {{ok}}, {{failed}} fallaron",
+      "wokeSomeFailedDesc": "Los agentes que no están desplegados en la infraestructura de PerkOS no pueden despertar.",
+      "wokeSuccess_one": "Se despertó {{count}} agente",
+      "wokeSuccess_other": "Se despertaron {{count}} agentes",
+      "bulkWakeFailed": "Falló el despertar masivo"
+    },
+    "assignDialog": {
+      "title": "Asignar a proyecto",
+      "description_one": "Agrega {{count}} agente seleccionado a la lista de un proyecto.",
+      "description_other": "Agrega {{count}} agentes seleccionados a la lista de un proyecto.",
+      "projectLabel": "Proyecto",
+      "selectPlaceholder": "Selecciona un proyecto…",
+      "cancel": "Cancelar",
+      "assign": "Asignar",
+      "assigning": "Asignando…",
+      "projectFallback": "proyecto",
+      "assignedSuccess_one": "Se asignó {{count}} agente a {{name}}",
+      "assignedSuccess_other": "Se asignaron {{count}} agentes a {{name}}",
+      "alreadyOn": "Ya está en {{name}}, no hay nada que agregar",
+      "assignFailed": "Falló la asignación"
+    },
+    "card": {
+      "selectAria": "Seleccionar {{name}}",
+      "externalTitle": "Se ejecuta en tu propia infraestructura (invitado o autoalojado), PerkOS no puede hibernarlo",
+      "external": "Externo",
+      "capabilities": "Capacidades: {{list}}",
+      "noCapabilities": "Todavía no hay capacidades configuradas.",
+      "projects": "Proyectos: {{count}}",
+      "active": "Activo {{time}}",
+      "created": "Creado {{time}}",
+      "capabilitiesCount": "Capacidades: {{count}}"
+    },
+    "power": {
+      "waking": "Despertando a {{name}}…",
+      "wakingDesc": "Arranca y se conecta en unos 2 a 3 min.",
+      "hibernating": "Hibernando a {{name}}…",
+      "hibernatingDesc": "Reduciendo recursos para ahorrar costos.",
+      "error": "No se pudo cambiar el estado",
+      "wakeAria": "Despertar a {{name}}",
+      "hibernateAria": "Hibernar a {{name}}",
+      "working": "Trabajando…",
+      "wakeTitle": "Despertar agente",
+      "hibernateTitle": "Hibernar agente"
+    },
+    "status": {
+      "revoked": "Revocado",
+      "neverConnected": "Nunca se conectó",
+      "invited": "Invitado",
+      "syncing": "Sincronizando…",
+      "hibernated": "Hibernado",
+      "hibernating": "Hibernando…",
+      "waking": "Despertando…",
+      "online": "En línea",
+      "failed": "Falló",
+      "provisioning": "Aprovisionando",
+      "unknown": "Desconocido"
+    },
+    "empty": {
+      "title": "Todavía no hay agentes",
+      "description": "Agrega un agente: crea un agente Hermes u OpenClaw en PerkOS, ejecuta uno en tu propio VPS, o invita a un agente que ya tengas corriendo en otro lado a tu organización.",
+      "action": "Agregar agente"
+    }
+  },
+  "tasks": {
+    "header": {
+      "title": "Tareas",
+      "subtitle": "Todo lo que está en curso en tus proyectos.",
+      "createTask": "Crear tarea"
+    },
+    "search": {
+      "placeholder": "Busca tareas por nombre, agente, proyecto o estado…",
+      "noResults": "Ninguna tarea coincide con \"{{query}}\"."
+    },
+    "filter": {
+      "statusPill": "estado: {{status}}",
+      "inProgress": "en curso",
+      "projectPill": "proyecto: {{project}}",
+      "clearAria": "Quitar {{label}}"
+    },
+    "emptyProjects": {
+      "title": "Todavía no hay proyectos",
+      "description": "Las tareas viven dentro de los proyectos. Crea uno primero.",
+      "action": "Crear proyecto"
+    },
+    "empty": {
+      "title": "Todavía no hay tareas",
+      "description": "Agrega tareas a un proyecto y asígnalas a tus agentes.",
+      "action": "Crear tarea"
+    },
+    "bulk": {
+      "selectedCount": "{{count}} seleccionadas",
+      "moveTo": "Mover a:",
+      "toDo": "Por hacer",
+      "inProgress": "En curso",
+      "done": "Hecho",
+      "delete": "Eliminar",
+      "clear": "Limpiar"
+    },
+    "card": {
+      "selectAria": "Seleccionar {{name}}",
+      "agent": "Agente: {{agent}}"
+    },
+    "dragHint": "Arrastrar y soltar es local por ahora. La sincronización con el servidor llega en la próxima versión.",
+    "projectFilter": {
+      "aria": "Filtrar tareas por proyecto",
+      "all": "Todos los proyectos"
+    },
+    "confirmDelete": {
+      "title_one": "¿Eliminar {{count}} tarea?",
+      "title_other": "¿Eliminar {{count}} tareas?",
+      "description": "Se eliminarán las tareas seleccionadas (de todos los proyectos) junto con su historial. Esta acción no se puede deshacer.",
+      "confirmLabel": "Eliminar"
+    },
+    "toast": {
+      "movedSomeFailed": "Se movieron {{ok}}, {{failed}} fallaron",
+      "movedSuccess_one": "Se movió {{count}} tarea",
+      "movedSuccess_other": "Se movieron {{count}} tareas",
+      "bulkMoveFailed": "Falló el movimiento masivo",
+      "deletedSomeFailed": "Se eliminaron {{ok}}, {{failed}} fallaron",
+      "deletedSuccess_one": "Se eliminó {{count}} tarea",
+      "deletedSuccess_other": "Se eliminaron {{count}} tareas",
+      "bulkDeleteFailed": "Falló la eliminación masiva"
+    }
+  },
+  "settings": {
+    "header": {
+      "title": "Ajustes",
+      "subtitle": "Administra tu billetera, tu espacio de trabajo y tus integraciones."
+    },
+    "account": {
+      "title": "Cuenta",
+      "description": "Iniciaste sesión con esta billetera de Base / Solana.",
+      "connectedWallet": "Billetera conectada",
+      "notConnected": "No conectada",
+      "copied": "Copiado",
+      "copyFull": "Copiar completa",
+      "noKeys": "Nunca te pedimos claves privadas ni frases semilla.",
+      "disconnect": "Desconectar billetera"
+    },
+    "username": {
+      "title": "Nombre de usuario",
+      "description": "Tu @usuario: lo que tus compañeros escriben para mencionarte en los chats. Es único, y si no lo configuras, se usa la dirección de tu billetera."
+    },
+    "workspace": {
+      "title": "Espacio de trabajo",
+      "description": "Nombre que se muestra en el panel y durante la configuración inicial.",
+      "nameLabel": "Nombre del espacio de trabajo",
+      "namePlaceholder": "Espacio de Software",
+      "storedLocally": "Se guarda localmente hasta que PerkOS agregue persistencia de espacios de trabajo en el servidor.",
+      "save": "Guardar cambios",
+      "toastUpdated": "Nombre del espacio de trabajo actualizado"
+    },
+    "llm": {
+      "title": "Claves de proveedores de LLM",
+      "description": "Por ahora, las claves de API se configuran por agente dentro del asistente de creación (Paso 3 → BYOK). El almacenamiento global de claves está en el roadmap.",
+      "infoBefore": "Por ahora, cada agente se configura con su propio BYOK. Usa el",
+      "infoLink": "asistente de creación de agentes",
+      "infoAfter": "para conectar credenciales de OpenAI, Anthropic u OpenRouter.",
+      "infoNote": "Una bóveda de claves unificada, vinculada a tu billetera, está planeada para una futura versión."
+    },
+    "network": {
+      "title": "Red",
+      "description": "Los endpoints del servidor y de blockchain con los que se comunica esta app.",
+      "perkosApi": "PerkOS API",
+      "defaultChain": "Cadena predeterminada",
+      "solanaCluster": "Clúster de Solana",
+      "testnet": "Testnet"
+    },
+    "danger": {
+      "title": "Zona de peligro",
+      "description": "Acciones solo locales. Nada de esto afecta el servidor de PerkOS.",
+      "clearDraft": {
+        "title": "Borrar borrador de organización",
+        "description": "Borra el formulario de organización en progreso guardado en este dispositivo.",
+        "action": "Borrar borrador"
+      },
+      "reset": {
+        "title": "Reiniciar estado de configuración inicial",
+        "description": "Olvida el nombre del espacio de trabajo, el marcador de proyecto y el marcador de agente guardados localmente.",
+        "action": "Reiniciar"
+      },
+      "disconnect": {
+        "title": "Desconectar billetera",
+        "description": "Cierra tu sesión en este dispositivo. Tus agentes y proyectos en el servidor permanecen intactos.",
+        "action": "Desconectar"
+      }
+    },
+    "resetDialog": {
+      "title": "¿Reiniciar el estado de configuración inicial?",
+      "description": "Esto borra el nombre de tu espacio de trabajo, el borrador de proyecto y los marcadores de configuración de agente guardados localmente. Tus datos en el servidor no se ven afectados.",
+      "confirmLabel": "Reiniciar estado"
+    },
+    "toast": {
+      "draftCleared": "Borrador de organización eliminado",
+      "draftClearFailed": "No se pudo borrar el borrador",
+      "stateReset": "Estado del espacio de trabajo reiniciado"
+    }
   }
 }

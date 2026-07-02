@@ -426,5 +426,297 @@
       "toastSuccessDesc": "欢迎使用 PerkOS,已添加 3 个演示任务。",
       "toastErrorTitle": "无法创建入门项目"
     }
+  },
+  "projects": {
+    "header": {
+      "title": "项目",
+      "countInWorkspace_one": "你的工作空间中有 {{count}} 个项目。",
+      "countInWorkspace_other": "你的工作空间中有 {{count}} 个项目。",
+      "createFirst": "创建你的第一个项目。",
+      "newProject": "新建项目"
+    },
+    "search": {
+      "placeholder": "按名称、目标或状态搜索项目…",
+      "noResults": "没有与“{{query}}”匹配的项目。"
+    },
+    "filter": {
+      "clearStatusAria": "清除状态筛选",
+      "statusPill": "状态:{{status}}"
+    },
+    "bulk": {
+      "selectAllAria": "选择所有项目",
+      "selectAll": "全选",
+      "selectedCount": "已选择 {{count}} 个",
+      "archive": "归档",
+      "unarchive": "取消归档",
+      "delete": "删除",
+      "clear": "清除"
+    },
+    "card": {
+      "selectAria": "选择 {{name}}",
+      "agentCount_one": "{{count}} 个智能体",
+      "agentCount_other": "{{count}} 个智能体",
+      "taskCount_one": "{{count}} 个任务",
+      "taskCount_other": "{{count}} 个任务",
+      "active": "活跃 {{time}}"
+    },
+    "empty": {
+      "title": "暂时还没有项目",
+      "description": "项目会把你的智能体、任务和聊天围绕一个目标组织起来。先创建一个开始吧。",
+      "action": "创建项目"
+    },
+    "confirmDelete": {
+      "title_one": "删除 {{count}} 个项目?",
+      "title_other": "删除 {{count}} 个项目?",
+      "description": "此操作会永久删除所选项目,并将其从你的工作空间中移除。此操作无法撤销。",
+      "confirmLabel": "删除"
+    },
+    "toast": {
+      "archivedSomeFailed": "已归档 {{ok}} 个,{{failed}} 个失败",
+      "archivedSuccess_one": "已归档 {{count}} 个项目",
+      "archivedSuccess_other": "已归档 {{count}} 个项目",
+      "unarchivedSomeFailed": "已取消归档 {{ok}} 个,{{failed}} 个失败",
+      "unarchivedSuccess_one": "已取消归档 {{count}} 个项目",
+      "unarchivedSuccess_other": "已取消归档 {{count}} 个项目",
+      "bulkUpdateFailed": "批量更新失败",
+      "deletedSomeFailed": "已删除 {{ok}} 个,{{failed}} 个失败",
+      "deletedSuccess_one": "已删除 {{count}} 个项目",
+      "deletedSuccess_other": "已删除 {{count}} 个项目",
+      "bulkDeleteFailed": "批量删除失败"
+    }
+  },
+  "agents": {
+    "header": {
+      "title": "智能体团队",
+      "subtitle": "连接你的智能体,把它们分配到项目中,并让它们开始工作。",
+      "addAgent": "添加智能体"
+    },
+    "search": {
+      "placeholder": "按名称、运行环境或能力搜索智能体…",
+      "noResults": "没有与“{{query}}”匹配的智能体。"
+    },
+    "bulk": {
+      "selectAllAria": "选择所有智能体",
+      "selectAll": "全选",
+      "selectedCount": "已选择 {{count}} 个",
+      "assignToProject": "分配到项目",
+      "hibernate": "休眠",
+      "wake": "唤醒",
+      "delete": "删除",
+      "clear": "清除"
+    },
+    "confirmDelete": {
+      "title_one": "删除 {{count}} 个智能体?",
+      "title_other": "删除 {{count}} 个智能体?",
+      "description": "将拆除每个正在运行的容器,撤销其 LLM 密钥,并清除其相关记录(包括中继注册表)。计费会立即停止。此操作无法撤销。",
+      "confirmLabel": "删除"
+    },
+    "toast": {
+      "deletedSomeFailed": "已删除 {{ok}} 个,{{failed}} 个失败",
+      "deletedSuccess_one": "已删除 {{count}} 个智能体",
+      "deletedSuccess_other": "已删除 {{count}} 个智能体",
+      "bulkDeleteFailed": "批量删除失败",
+      "hibernatedSomeFailed": "已休眠 {{ok}} 个,{{failed}} 个失败",
+      "hibernatedSomeFailedDesc": "未部署在 PerkOS 基础设施上的智能体无法休眠。",
+      "hibernatedSuccess_one": "已休眠 {{count}} 个智能体",
+      "hibernatedSuccess_other": "已休眠 {{count}} 个智能体",
+      "bulkHibernateFailed": "批量休眠失败",
+      "wokeSomeFailed": "已唤醒 {{ok}} 个,{{failed}} 个失败",
+      "wokeSomeFailedDesc": "未部署在 PerkOS 基础设施上的智能体无法唤醒。",
+      "wokeSuccess_one": "已唤醒 {{count}} 个智能体",
+      "wokeSuccess_other": "已唤醒 {{count}} 个智能体",
+      "bulkWakeFailed": "批量唤醒失败"
+    },
+    "assignDialog": {
+      "title": "分配到项目",
+      "description_one": "把已选择的 {{count}} 个智能体添加到某个项目的成员名单中。",
+      "description_other": "把已选择的 {{count}} 个智能体添加到某个项目的成员名单中。",
+      "projectLabel": "项目",
+      "selectPlaceholder": "选择一个项目…",
+      "cancel": "取消",
+      "assign": "分配",
+      "assigning": "分配中…",
+      "projectFallback": "项目",
+      "assignedSuccess_one": "已将 {{count}} 个智能体分配到 {{name}}",
+      "assignedSuccess_other": "已将 {{count}} 个智能体分配到 {{name}}",
+      "alreadyOn": "已经在 {{name}} 中,无需再添加",
+      "assignFailed": "分配失败"
+    },
+    "card": {
+      "selectAria": "选择 {{name}}",
+      "externalTitle": "运行在你自己的基础设施上(受邀 / 自托管),PerkOS 无法使其休眠",
+      "external": "外部",
+      "capabilities": "能力:{{list}}",
+      "noCapabilities": "尚未配置任何能力。",
+      "projects": "项目:{{count}}",
+      "active": "活跃于 {{time}}",
+      "created": "创建于 {{time}}",
+      "capabilitiesCount": "能力:{{count}}"
+    },
+    "power": {
+      "waking": "正在唤醒 {{name}}…",
+      "wakingDesc": "启动并连接大约需要 2-3 分钟。",
+      "hibernating": "正在休眠 {{name}}…",
+      "hibernatingDesc": "正在缩减规模以节省成本。",
+      "error": "无法更改电源状态",
+      "wakeAria": "唤醒 {{name}}",
+      "hibernateAria": "休眠 {{name}}",
+      "working": "处理中…",
+      "wakeTitle": "唤醒智能体",
+      "hibernateTitle": "休眠智能体"
+    },
+    "status": {
+      "revoked": "已撤销",
+      "neverConnected": "从未连接",
+      "invited": "已邀请",
+      "syncing": "同步中…",
+      "hibernated": "已休眠",
+      "hibernating": "休眠中…",
+      "waking": "唤醒中…",
+      "online": "在线",
+      "failed": "失败",
+      "provisioning": "配置中",
+      "unknown": "未知"
+    },
+    "empty": {
+      "title": "暂时还没有智能体",
+      "description": "添加一个智能体:在 PerkOS 上创建 Hermes 或 OpenClaw 智能体,在你自己的 VPS 上运行一个,或者邀请一个你已经在其他地方运行的智能体加入你的组织。",
+      "action": "添加智能体"
+    }
+  },
+  "tasks": {
+    "header": {
+      "title": "任务",
+      "subtitle": "你所有项目中正在进行的一切。",
+      "createTask": "创建任务"
+    },
+    "search": {
+      "placeholder": "按名称、智能体、项目或状态搜索任务…",
+      "noResults": "没有与“{{query}}”匹配的任务。"
+    },
+    "filter": {
+      "statusPill": "状态:{{status}}",
+      "inProgress": "进行中",
+      "projectPill": "项目:{{project}}",
+      "clearAria": "清除 {{label}}"
+    },
+    "emptyProjects": {
+      "title": "暂时还没有项目",
+      "description": "任务存在于项目之中,请先创建一个项目。",
+      "action": "创建项目"
+    },
+    "empty": {
+      "title": "暂时还没有任务",
+      "description": "为一个项目添加任务,并将其分配给你的智能体。",
+      "action": "创建任务"
+    },
+    "bulk": {
+      "selectedCount": "已选择 {{count}} 个",
+      "moveTo": "移动到:",
+      "toDo": "待办",
+      "inProgress": "进行中",
+      "done": "已完成",
+      "delete": "删除",
+      "clear": "清除"
+    },
+    "card": {
+      "selectAria": "选择 {{name}}",
+      "agent": "智能体:{{agent}}"
+    },
+    "dragHint": "拖放功能目前仅在本地生效,后端同步将在下个版本推出。",
+    "projectFilter": {
+      "aria": "按项目筛选任务",
+      "all": "所有项目"
+    },
+    "confirmDelete": {
+      "title_one": "删除 {{count}} 个任务?",
+      "title_other": "删除 {{count}} 个任务?",
+      "description": "所选任务(跨所有项目)及其历史记录都将被移除。此操作无法撤销。",
+      "confirmLabel": "删除"
+    },
+    "toast": {
+      "movedSomeFailed": "已移动 {{ok}} 个,{{failed}} 个失败",
+      "movedSuccess_one": "已移动 {{count}} 个任务",
+      "movedSuccess_other": "已移动 {{count}} 个任务",
+      "bulkMoveFailed": "批量移动失败",
+      "deletedSomeFailed": "已删除 {{ok}} 个,{{failed}} 个失败",
+      "deletedSuccess_one": "已删除 {{count}} 个任务",
+      "deletedSuccess_other": "已删除 {{count}} 个任务",
+      "bulkDeleteFailed": "批量删除失败"
+    }
+  },
+  "settings": {
+    "header": {
+      "title": "设置",
+      "subtitle": "管理你的钱包、工作空间和集成。"
+    },
+    "account": {
+      "title": "账户",
+      "description": "你使用这个 Base / Solana 钱包登录。",
+      "connectedWallet": "已连接的钱包",
+      "notConnected": "未连接",
+      "copied": "已复制",
+      "copyFull": "复制完整地址",
+      "noKeys": "我们绝不会索要私钥或助记词。",
+      "disconnect": "断开钱包连接"
+    },
+    "username": {
+      "title": "用户名",
+      "description": "你的 @用户名,团队成员在聊天中借此提到你。用户名是唯一的;未设置时会显示你的钱包地址。"
+    },
+    "workspace": {
+      "title": "工作空间",
+      "description": "在仪表盘和引导流程中显示的名称。",
+      "nameLabel": "工作空间名称",
+      "namePlaceholder": "软件工作空间",
+      "storedLocally": "在 PerkOS 增加后端工作空间持久化功能之前,该设置仅保存在本地。",
+      "save": "保存更改",
+      "toastUpdated": "工作空间名称已更新"
+    },
+    "llm": {
+      "title": "LLM 提供商密钥",
+      "description": "目前 API 密钥是在启动器内按智能体单独配置的(第 3 步 → BYOK)。全局密钥存储功能已在规划中。",
+      "infoBefore": "目前,每个智能体都自带独立的 BYOK 配置。请使用",
+      "infoLink": "智能体启动器",
+      "infoAfter": "来关联 OpenAI、Anthropic 或 OpenRouter 的凭证。",
+      "infoNote": "计划在未来版本中推出与你的钱包绑定的统一密钥库。"
+    },
+    "network": {
+      "title": "网络",
+      "description": "本应用所对接的后端与链上端点。",
+      "perkosApi": "PerkOS API",
+      "defaultChain": "默认链",
+      "solanaCluster": "Solana 集群",
+      "testnet": "Testnet"
+    },
+    "danger": {
+      "title": "危险操作区",
+      "description": "仅在本地生效的操作,不会影响 PerkOS 后端。",
+      "clearDraft": {
+        "title": "清除组织草稿",
+        "description": "清除保存在此设备上、尚在进行中的组织表单。",
+        "action": "清除草稿"
+      },
+      "reset": {
+        "title": "重置引导状态",
+        "description": "清除本地保存的工作空间名称、项目标记和智能体标记。",
+        "action": "重置"
+      },
+      "disconnect": {
+        "title": "断开钱包连接",
+        "description": "将你从此设备上登出。你在后端的智能体和项目不受影响,仍会保留。",
+        "action": "断开连接"
+      }
+    },
+    "resetDialog": {
+      "title": "重置引导状态?",
+      "description": "这会清除你本地保存的工作空间名称、项目草稿以及智能体设置标记。你在后端的数据不受影响。",
+      "confirmLabel": "重置状态"
+    },
+    "toast": {
+      "draftCleared": "组织草稿已清除",
+      "draftClearFailed": "无法清除草稿",
+      "stateReset": "工作空间状态已重置"
+    }
   }
 }

@@ -426,5 +426,297 @@
       "toastSuccessDesc": "Benvenuto su PerkOS: 3 attività dimostrative aggiunte.",
       "toastErrorTitle": "Impossibile creare il progetto dimostrativo"
     }
+  },
+  "projects": {
+    "header": {
+      "title": "Progetti",
+      "countInWorkspace_one": "{{count}} progetto nel tuo spazio di lavoro.",
+      "countInWorkspace_other": "{{count}} progetti nel tuo spazio di lavoro.",
+      "createFirst": "Crea il tuo primo progetto.",
+      "newProject": "Nuovo progetto"
+    },
+    "search": {
+      "placeholder": "Cerca progetti per nome, obiettivo o stato…",
+      "noResults": "Nessun progetto corrisponde a \"{{query}}\"."
+    },
+    "filter": {
+      "clearStatusAria": "Cancella filtro per stato",
+      "statusPill": "stato: {{status}}"
+    },
+    "bulk": {
+      "selectAllAria": "Seleziona tutti i progetti",
+      "selectAll": "Seleziona tutto",
+      "selectedCount": "{{count}} selezionati",
+      "archive": "Archivia",
+      "unarchive": "Ripristina",
+      "delete": "Elimina",
+      "clear": "Cancella"
+    },
+    "card": {
+      "selectAria": "Seleziona {{name}}",
+      "agentCount_one": "{{count}} agente",
+      "agentCount_other": "{{count}} agenti",
+      "taskCount_one": "{{count}} attività",
+      "taskCount_other": "{{count}} attività",
+      "active": "attivo {{time}}"
+    },
+    "empty": {
+      "title": "Ancora nessun progetto",
+      "description": "I progetti raccolgono agenti, attività e chat attorno a un obiettivo. Inizia creandone uno.",
+      "action": "Crea progetto"
+    },
+    "confirmDelete": {
+      "title_one": "Eliminare {{count}} progetto?",
+      "title_other": "Eliminare {{count}} progetti?",
+      "description": "Questa azione elimina definitivamente i progetti selezionati e li rimuove dal tuo spazio di lavoro. Non può essere annullata.",
+      "confirmLabel": "Elimina"
+    },
+    "toast": {
+      "archivedSomeFailed": "Archiviati {{ok}}, {{failed}} non riusciti",
+      "archivedSuccess_one": "Archiviato {{count}} progetto",
+      "archivedSuccess_other": "Archiviati {{count}} progetti",
+      "unarchivedSomeFailed": "Ripristinati {{ok}}, {{failed}} non riusciti",
+      "unarchivedSuccess_one": "Ripristinato {{count}} progetto",
+      "unarchivedSuccess_other": "Ripristinati {{count}} progetti",
+      "bulkUpdateFailed": "Aggiornamento in blocco non riuscito",
+      "deletedSomeFailed": "Eliminati {{ok}}, {{failed}} non riusciti",
+      "deletedSuccess_one": "Eliminato {{count}} progetto",
+      "deletedSuccess_other": "Eliminati {{count}} progetti",
+      "bulkDeleteFailed": "Eliminazione in blocco non riuscita"
+    }
+  },
+  "agents": {
+    "header": {
+      "title": "Team di agenti",
+      "subtitle": "Collega i tuoi agenti, assegnali ai progetti e mettili al lavoro.",
+      "addAgent": "Aggiungi agente"
+    },
+    "search": {
+      "placeholder": "Cerca agenti per nome, runtime o capacità…",
+      "noResults": "Nessun agente corrisponde a \"{{query}}\"."
+    },
+    "bulk": {
+      "selectAllAria": "Seleziona tutti gli agenti",
+      "selectAll": "Seleziona tutto",
+      "selectedCount": "{{count}} selezionati",
+      "assignToProject": "Assegna a un progetto",
+      "hibernate": "Iberna",
+      "wake": "Riattiva",
+      "delete": "Elimina",
+      "clear": "Cancella"
+    },
+    "confirmDelete": {
+      "title_one": "Eliminare {{count}} agente?",
+      "title_other": "Eliminare {{count}} agenti?",
+      "description": "Arresta ogni container in esecuzione, revoca la sua chiave LLM ed elimina i suoi dati (incluso il registro relay). La fatturazione si interrompe immediatamente. Non può essere annullata.",
+      "confirmLabel": "Elimina"
+    },
+    "toast": {
+      "deletedSomeFailed": "Eliminati {{ok}}, {{failed}} non riusciti",
+      "deletedSuccess_one": "Eliminato {{count}} agente",
+      "deletedSuccess_other": "Eliminati {{count}} agenti",
+      "bulkDeleteFailed": "Eliminazione in blocco non riuscita",
+      "hibernatedSomeFailed": "Ibernati {{ok}}, {{failed}} non riusciti",
+      "hibernatedSomeFailedDesc": "Gli agenti non distribuiti sull'infrastruttura PerkOS non possono essere ibernati.",
+      "hibernatedSuccess_one": "Ibernato {{count}} agente",
+      "hibernatedSuccess_other": "Ibernati {{count}} agenti",
+      "bulkHibernateFailed": "Ibernazione in blocco non riuscita",
+      "wokeSomeFailed": "Riattivati {{ok}}, {{failed}} non riusciti",
+      "wokeSomeFailedDesc": "Gli agenti non distribuiti sull'infrastruttura PerkOS non possono essere riattivati.",
+      "wokeSuccess_one": "Riattivato {{count}} agente",
+      "wokeSuccess_other": "Riattivati {{count}} agenti",
+      "bulkWakeFailed": "Riattivazione in blocco non riuscita"
+    },
+    "assignDialog": {
+      "title": "Assegna a un progetto",
+      "description_one": "Aggiungi {{count}} agente selezionato alla lista di un progetto.",
+      "description_other": "Aggiungi {{count}} agenti selezionati alla lista di un progetto.",
+      "projectLabel": "Progetto",
+      "selectPlaceholder": "Seleziona un progetto…",
+      "cancel": "Annulla",
+      "assign": "Assegna",
+      "assigning": "Assegnazione in corso…",
+      "projectFallback": "progetto",
+      "assignedSuccess_one": "Assegnato {{count}} agente a {{name}}",
+      "assignedSuccess_other": "Assegnati {{count}} agenti a {{name}}",
+      "alreadyOn": "Già presente su {{name}}: nulla da aggiungere",
+      "assignFailed": "Assegnazione non riuscita"
+    },
+    "card": {
+      "selectAria": "Seleziona {{name}}",
+      "externalTitle": "Funziona sulla tua infrastruttura (invitato / self-hosted): PerkOS non può ibernarlo",
+      "external": "Esterno",
+      "capabilities": "Capacità: {{list}}",
+      "noCapabilities": "Nessuna capacità configurata ancora.",
+      "projects": "Progetti: {{count}}",
+      "active": "Attivo {{time}}",
+      "created": "Creato {{time}}",
+      "capabilitiesCount": "Capacità: {{count}}"
+    },
+    "power": {
+      "waking": "Riattivazione di {{name}}…",
+      "wakingDesc": "Si avvia e si connette in circa 2-3 minuti.",
+      "hibernating": "Ibernazione di {{name}}…",
+      "hibernatingDesc": "Riduzione delle risorse per risparmiare sui costi.",
+      "error": "Impossibile cambiare lo stato di alimentazione",
+      "wakeAria": "Riattiva {{name}}",
+      "hibernateAria": "Iberna {{name}}",
+      "working": "In corso…",
+      "wakeTitle": "Riattiva agente",
+      "hibernateTitle": "Iberna agente"
+    },
+    "status": {
+      "revoked": "Revocato",
+      "neverConnected": "Mai connesso",
+      "invited": "Invitato",
+      "syncing": "Sincronizzazione…",
+      "hibernated": "Ibernato",
+      "hibernating": "Ibernazione…",
+      "waking": "Riattivazione…",
+      "online": "Online",
+      "failed": "Non riuscito",
+      "provisioning": "Provisioning",
+      "unknown": "Sconosciuto"
+    },
+    "empty": {
+      "title": "Ancora nessun agente",
+      "description": "Aggiungi un agente: crea un agente Hermes o OpenClaw su PerkOS, avvialo sul tuo VPS, oppure invita un agente che usi già altrove nella tua organizzazione.",
+      "action": "Aggiungi agente"
+    }
+  },
+  "tasks": {
+    "header": {
+      "title": "Attività",
+      "subtitle": "Tutto ciò che è in corso nei tuoi progetti.",
+      "createTask": "Crea attività"
+    },
+    "search": {
+      "placeholder": "Cerca attività per nome, agente, progetto o stato…",
+      "noResults": "Nessuna attività corrisponde a \"{{query}}\"."
+    },
+    "filter": {
+      "statusPill": "stato: {{status}}",
+      "inProgress": "in corso",
+      "projectPill": "progetto: {{project}}",
+      "clearAria": "Cancella {{label}}"
+    },
+    "emptyProjects": {
+      "title": "Ancora nessun progetto",
+      "description": "Le attività vivono all'interno dei progetti. Creane uno prima.",
+      "action": "Crea progetto"
+    },
+    "empty": {
+      "title": "Ancora nessuna attività",
+      "description": "Aggiungi attività a un progetto e assegnale ai tuoi agenti.",
+      "action": "Crea attività"
+    },
+    "bulk": {
+      "selectedCount": "{{count}} selezionate",
+      "moveTo": "Sposta in:",
+      "toDo": "Da fare",
+      "inProgress": "In corso",
+      "done": "Fatto",
+      "delete": "Elimina",
+      "clear": "Cancella"
+    },
+    "card": {
+      "selectAria": "Seleziona {{name}}",
+      "agent": "Agente: {{agent}}"
+    },
+    "dragHint": "Il trascinamento è locale per ora. La sincronizzazione con il backend arriverà nella prossima versione.",
+    "projectFilter": {
+      "aria": "Filtra attività per progetto",
+      "all": "Tutti i progetti"
+    },
+    "confirmDelete": {
+      "title_one": "Eliminare {{count}} attività?",
+      "title_other": "Eliminare {{count}} attività?",
+      "description": "Le attività selezionate (in tutti i progetti) e la loro cronologia verranno rimosse. Non può essere annullata.",
+      "confirmLabel": "Elimina"
+    },
+    "toast": {
+      "movedSomeFailed": "Spostate {{ok}}, {{failed}} non riuscite",
+      "movedSuccess_one": "Spostata {{count}} attività",
+      "movedSuccess_other": "Spostate {{count}} attività",
+      "bulkMoveFailed": "Spostamento in blocco non riuscito",
+      "deletedSomeFailed": "Eliminate {{ok}}, {{failed}} non riuscite",
+      "deletedSuccess_one": "Eliminata {{count}} attività",
+      "deletedSuccess_other": "Eliminate {{count}} attività",
+      "bulkDeleteFailed": "Eliminazione in blocco non riuscita"
+    }
+  },
+  "settings": {
+    "header": {
+      "title": "Impostazioni",
+      "subtitle": "Gestisci il tuo portafoglio, lo spazio di lavoro e le integrazioni."
+    },
+    "account": {
+      "title": "Account",
+      "description": "Hai effettuato l'accesso con questo portafoglio Base / Solana.",
+      "connectedWallet": "Portafoglio connesso",
+      "notConnected": "Non connesso",
+      "copied": "Copiato",
+      "copyFull": "Copia per intero",
+      "noKeys": "Non chiediamo mai chiavi private o seed phrase.",
+      "disconnect": "Disconnetti portafoglio"
+    },
+    "username": {
+      "title": "Nome utente",
+      "description": "Il tuo @handle: quello che i compagni di team digitano per menzionarti nelle chat. Univoco; se non impostato, viene usato l'indirizzo del tuo portafoglio."
+    },
+    "workspace": {
+      "title": "Spazio di lavoro",
+      "description": "Nome visualizzato nella dashboard e nell'onboarding.",
+      "nameLabel": "Nome dello spazio di lavoro",
+      "namePlaceholder": "Spazio di Lavoro Software",
+      "storedLocally": "Salvato localmente finché PerkOS non aggiunge la persistenza dello spazio di lavoro sul backend.",
+      "save": "Salva modifiche",
+      "toastUpdated": "Nome dello spazio di lavoro aggiornato"
+    },
+    "llm": {
+      "title": "Chiavi dei provider LLM",
+      "description": "Le chiavi API vengono attualmente configurate per ogni agente all'interno del launcher (Step 3 → BYOK). L'archiviazione globale delle chiavi è nella roadmap.",
+      "infoBefore": "Per ora, ogni agente ha la propria configurazione BYOK. Usa il",
+      "infoLink": "launcher dell'agente",
+      "infoAfter": "per collegare le credenziali di OpenAI, Anthropic o OpenRouter.",
+      "infoNote": "Un archivio unico delle chiavi, associato al tuo portafoglio, è previsto per una prossima versione."
+    },
+    "network": {
+      "title": "Rete",
+      "description": "Endpoint del backend e on-chain con cui comunica questa app.",
+      "perkosApi": "API PerkOS",
+      "defaultChain": "Chain predefinita",
+      "solanaCluster": "Cluster Solana",
+      "testnet": "Testnet"
+    },
+    "danger": {
+      "title": "Zona pericolosa",
+      "description": "Azioni solo locali. Nessuna di queste tocca il backend di PerkOS.",
+      "clearDraft": {
+        "title": "Cancella bozza organizzazione",
+        "description": "Cancella il modulo dell'organizzazione in corso, salvato su questo dispositivo.",
+        "action": "Cancella bozza"
+      },
+      "reset": {
+        "title": "Ripristina lo stato dell'onboarding",
+        "description": "Dimentica il nome dello spazio di lavoro, il marcatore di progetto e il marcatore di agente salvati localmente.",
+        "action": "Ripristina"
+      },
+      "disconnect": {
+        "title": "Disconnetti portafoglio",
+        "description": "Ti disconnette da questo dispositivo. I tuoi agenti e progetti sul backend restano intatti.",
+        "action": "Disconnetti"
+      }
+    },
+    "resetDialog": {
+      "title": "Ripristinare lo stato dell'onboarding?",
+      "description": "Questo cancella il nome locale dello spazio di lavoro, la bozza del progetto e i marcatori di configurazione dell'agente. I tuoi dati sul backend restano invariati.",
+      "confirmLabel": "Ripristina stato"
+    },
+    "toast": {
+      "draftCleared": "Bozza organizzazione cancellata",
+      "draftClearFailed": "Impossibile cancellare la bozza",
+      "stateReset": "Stato dello spazio di lavoro ripristinato"
+    }
   }
 }

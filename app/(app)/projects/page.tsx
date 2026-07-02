@@ -7,6 +7,7 @@ import { useConnection } from "wagmi";
 import { Archive, ArchiveRestore, Folder, Plus, Trash2, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import {
   deleteProject,
   getOrgProjects,
@@ -22,6 +23,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
 export default function ProjectsPage() {
+  const { t } = useTranslation();
   const { address } = useConnection();
   const { activeOrgId, defaultOrgId, activeOrg } = useActiveOrg();
   const qc = useQueryClient();
@@ -98,12 +100,17 @@ export default function ProjectsPage() {
       ),
     onSuccess: ({ ok, failed }, status) => {
       qc.invalidateQueries({ queryKey: ["wallet-projects", address] });
-      const verb = status === "Archived" ? "Archived" : "Unarchived";
-      if (failed) toast.error(`${verb} ${ok}, ${failed} failed`);
-      else toast.success(`${verb} ${ok} project${ok === 1 ? "" : "s"}`);
+      if (status === "Archived") {
+        if (failed) toast.error(t("projects.toast.archivedSomeFailed", { ok, failed }));
+        else toast.success(t("projects.toast.archivedSuccess", { count: ok }));
+      } else {
+        if (failed) toast.error(t("projects.toast.unarchivedSomeFailed", { ok, failed }));
+        else toast.success(t("projects.toast.unarchivedSuccess", { count: ok }));
+      }
       clear();
     },
-    onError: (e: Error) => toast.error("Bulk update failed", { description: e.message }),
+    onError: (e: Error) =>
+      toast.error(t("projects.toast.bulkUpdateFailed"), { description: e.message }),
   });
 
   const deleteMut = useMutation({
@@ -113,13 +120,13 @@ export default function ProjectsPage() {
       ),
     onSuccess: ({ ok, failed }) => {
       qc.invalidateQueries({ queryKey: ["wallet-projects", address] });
-      if (failed) toast.error(`Deleted ${ok}, ${failed} failed`);
-      else toast.success(`Deleted ${ok} project${ok === 1 ? "" : "s"}`);
+      if (failed) toast.error(t("projects.toast.deletedSomeFailed", { ok, failed }));
+      else toast.success(t("projects.toast.deletedSuccess", { count: ok }));
       setConfirmDelete(false);
       clear();
     },
     onError: (e: Error) => {
-      toast.error("Bulk delete failed", { description: e.message });
+      toast.error(t("projects.toast.bulkDeleteFailed"), { description: e.message });
       setConfirmDelete(false);
     },
   });
@@ -130,11 +137,11 @@ export default function ProjectsPage() {
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-medium text-[#ececff]">Projects</h1>
+          <h1 className="text-3xl font-medium text-[#ececff]">{t("projects.header.title")}</h1>
           <p className="text-sm text-[#7975a8]">
             {hasProjects
-              ? `${allProjects.length} project${allProjects.length === 1 ? "" : "s"} in your workspace.`
-              : "Create your first project."}
+              ? t("projects.header.countInWorkspace", { count: allProjects.length })
+              : t("projects.header.createFirst")}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -146,7 +153,7 @@ export default function ProjectsPage() {
         <SearchInput
           value={query}
           onChange={setQuery}
-          placeholder="Search projects by name, goal, or status…"
+          placeholder={t("projects.search.placeholder")}
         />
       ) : null}
 
@@ -154,9 +161,9 @@ export default function ProjectsPage() {
         <Link
           href="/projects"
           className="inline-flex w-fit items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs text-primary hover:bg-primary/15"
-          aria-label="Clear status filter"
+          aria-label={t("projects.filter.clearStatusAria")}
         >
-          status: {statusFilter}
+          {t("projects.filter.statusPill", { status: statusFilter })}
           <X className="h-3 w-3" aria-hidden />
         </Link>
       ) : null}
@@ -172,14 +179,14 @@ export default function ProjectsPage() {
               <Checkbox
                 checked={allChecked ? true : someChecked ? "indeterminate" : false}
                 onCheckedChange={toggleAll}
-                aria-label="Select all projects"
+                aria-label={t("projects.bulk.selectAllAria")}
               />
-              Select all
+              {t("projects.bulk.selectAll")}
             </label>
             {selectedVisible.length > 0 ? (
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs font-medium text-foreground">
-                  {selectedVisible.length} selected
+                  {t("projects.bulk.selectedCount", { count: selectedVisible.length })}
                 </span>
                 <Button
                   size="xs"
@@ -187,7 +194,7 @@ export default function ProjectsPage() {
                   disabled={mutating}
                   onClick={() => archiveMut.mutate("Archived")}
                 >
-                  <Archive className="h-3.5 w-3.5" /> Archive
+                  <Archive className="h-3.5 w-3.5" /> {t("projects.bulk.archive")}
                 </Button>
                 <Button
                   size="xs"
@@ -195,7 +202,7 @@ export default function ProjectsPage() {
                   disabled={mutating}
                   onClick={() => archiveMut.mutate("Active")}
                 >
-                  <ArchiveRestore className="h-3.5 w-3.5" /> Unarchive
+                  <ArchiveRestore className="h-3.5 w-3.5" /> {t("projects.bulk.unarchive")}
                 </Button>
                 <Button
                   size="xs"
@@ -203,10 +210,10 @@ export default function ProjectsPage() {
                   disabled={mutating}
                   onClick={() => setConfirmDelete(true)}
                 >
-                  <Trash2 className="h-3.5 w-3.5" /> Delete
+                  <Trash2 className="h-3.5 w-3.5" /> {t("projects.bulk.delete")}
                 </Button>
                 <Button size="xs" variant="ghost" disabled={mutating} onClick={clear}>
-                  Clear
+                  {t("projects.bulk.clear")}
                 </Button>
               </div>
             ) : null}
@@ -230,7 +237,7 @@ export default function ProjectsPage() {
 
       {!isLoading && !error && noResults ? (
         <p className="rounded-md border border-dashed border-[#1b1833] px-6 py-10 text-center text-sm text-[#7975a8]">
-          No projects match &quot;{query}&quot;.
+          {t("projects.search.noResults", { query })}
         </p>
       ) : null}
       {!isLoading && !error && !hasProjects ? <EmptyHint /> : null}
@@ -238,9 +245,9 @@ export default function ProjectsPage() {
       <ConfirmDialog
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title={`Delete ${selectedVisible.length} project${selectedVisible.length === 1 ? "" : "s"}?`}
-        description="This permanently deletes the selected projects and removes them from your workspace. This can't be undone."
-        confirmLabel="Delete"
+        title={t("projects.confirmDelete.title", { count: selectedVisible.length })}
+        description={t("projects.confirmDelete.description")}
+        confirmLabel={t("projects.confirmDelete.confirmLabel")}
         destructive
         pending={deleteMut.isPending}
         onConfirm={() => deleteMut.mutate()}
@@ -250,13 +257,14 @@ export default function ProjectsPage() {
 }
 
 function CreateProjectButton() {
+  const { t } = useTranslation();
   return (
     <Link
       href="/companies/new"
       className="flex items-center justify-center gap-2 rounded-md bg-[#ec1b69] px-5 py-2.5 text-sm font-medium text-[#ececff] transition-opacity hover:opacity-90"
     >
       <PlusIcon />
-      <span>New project</span>
+      <span>{t("projects.header.newProject")}</span>
     </Link>
   );
 }
@@ -274,6 +282,7 @@ function ProjectCard({
    *  detail page reads from the owner's subtree. */
   ownerWallet?: string;
 }) {
+  const { t } = useTranslation();
   // Take the first letter of each significant word for the avatar
   // (max 2 chars). "DeFi Research" → "DR", "Welcome to PerkOS" → "WP".
   const initials =
@@ -300,7 +309,7 @@ function ProjectCard({
       <Checkbox
         checked={checked}
         onCheckedChange={onToggle}
-        aria-label={`Select ${project.name}`}
+        aria-label={t("projects.card.selectAria", { name: project.name })}
       />
       <Link
         href={`/projects/${encodeURIComponent(project.id ?? "")}${ownerWallet ? `?owner=${ownerWallet}` : ""}`}
@@ -325,13 +334,13 @@ function ProjectCard({
             </span>
           </div>
           <p className="text-[11px] text-muted-foreground">
-            {project.agents} agent{project.agents === 1 ? "" : "s"}
+            {t("projects.card.agentCount", { count: project.agents })}
             <span className="px-1.5">·</span>
-            {project.tasks} task{project.tasks === 1 ? "" : "s"}
+            {t("projects.card.taskCount", { count: project.tasks })}
             {project.updatedAt ? (
               <>
                 <span className="px-1.5">·</span>
-                active {formatRelativeShort(project.updatedAt)}
+                {t("projects.card.active", { time: formatRelativeShort(project.updatedAt) })}
               </>
             ) : null}
           </p>
@@ -381,14 +390,15 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function EmptyHint() {
+  const { t } = useTranslation();
   return (
     <EmptyState
       icon={Folder}
-      title="No projects yet"
-      description="Projects group your agents, tasks, and chats around a goal. Start by creating one."
+      title={t("projects.empty.title")}
+      description={t("projects.empty.description")}
       actions={[
         {
-          label: "Create project",
+          label: t("projects.empty.action"),
           href: "/projects/new",
           icon: Plus,
         },

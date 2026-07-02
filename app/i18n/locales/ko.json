@@ -426,5 +426,297 @@
       "toastSuccessDesc": "PerkOS에 오신 것을 환영해요. 데모 작업 3개가 추가되었어요.",
       "toastErrorTitle": "스타터 프로젝트를 만들지 못했어요"
     }
+  },
+  "projects": {
+    "header": {
+      "title": "프로젝트",
+      "countInWorkspace_one": "워크스페이스에 프로젝트 {{count}}개가 있어요.",
+      "countInWorkspace_other": "워크스페이스에 프로젝트 {{count}}개가 있어요.",
+      "createFirst": "첫 프로젝트를 만들어보세요.",
+      "newProject": "새 프로젝트"
+    },
+    "search": {
+      "placeholder": "이름, 목표, 상태로 프로젝트 검색…",
+      "noResults": "\"{{query}}\"와 일치하는 프로젝트가 없어요."
+    },
+    "filter": {
+      "clearStatusAria": "상태 필터 지우기",
+      "statusPill": "상태: {{status}}"
+    },
+    "bulk": {
+      "selectAllAria": "모든 프로젝트 선택",
+      "selectAll": "전체 선택",
+      "selectedCount": "{{count}}개 선택됨",
+      "archive": "보관",
+      "unarchive": "보관 해제",
+      "delete": "삭제",
+      "clear": "선택 해제"
+    },
+    "card": {
+      "selectAria": "{{name}} 선택",
+      "agentCount_one": "에이전트 {{count}}명",
+      "agentCount_other": "에이전트 {{count}}명",
+      "taskCount_one": "작업 {{count}}개",
+      "taskCount_other": "작업 {{count}}개",
+      "active": "{{time}} 활동 중"
+    },
+    "empty": {
+      "title": "아직 프로젝트가 없어요",
+      "description": "프로젝트는 목표를 중심으로 에이전트, 작업, 채팅을 한데 모아줘요. 하나 만들어서 시작해보세요.",
+      "action": "프로젝트 만들기"
+    },
+    "confirmDelete": {
+      "title_one": "프로젝트 {{count}}개를 삭제할까요?",
+      "title_other": "프로젝트 {{count}}개를 삭제할까요?",
+      "description": "선택한 프로젝트를 영구적으로 삭제하고 워크스페이스에서 제거해요. 되돌릴 수 없어요.",
+      "confirmLabel": "삭제"
+    },
+    "toast": {
+      "archivedSomeFailed": "{{ok}}개 보관, {{failed}}개 실패",
+      "archivedSuccess_one": "프로젝트 {{count}}개를 보관했어요",
+      "archivedSuccess_other": "프로젝트 {{count}}개를 보관했어요",
+      "unarchivedSomeFailed": "{{ok}}개 보관 해제, {{failed}}개 실패",
+      "unarchivedSuccess_one": "프로젝트 {{count}}개를 보관 해제했어요",
+      "unarchivedSuccess_other": "프로젝트 {{count}}개를 보관 해제했어요",
+      "bulkUpdateFailed": "일괄 업데이트에 실패했어요",
+      "deletedSomeFailed": "{{ok}}개 삭제, {{failed}}개 실패",
+      "deletedSuccess_one": "프로젝트 {{count}}개를 삭제했어요",
+      "deletedSuccess_other": "프로젝트 {{count}}개를 삭제했어요",
+      "bulkDeleteFailed": "일괄 삭제에 실패했어요"
+    }
+  },
+  "agents": {
+    "header": {
+      "title": "에이전트 팀",
+      "subtitle": "에이전트를 연결하고 프로젝트에 배정해서 일을 맡겨보세요.",
+      "addAgent": "에이전트 추가"
+    },
+    "search": {
+      "placeholder": "이름, 런타임, 기능으로 에이전트 검색…",
+      "noResults": "\"{{query}}\"와 일치하는 에이전트가 없어요."
+    },
+    "bulk": {
+      "selectAllAria": "모든 에이전트 선택",
+      "selectAll": "전체 선택",
+      "selectedCount": "{{count}}개 선택됨",
+      "assignToProject": "프로젝트에 배정",
+      "hibernate": "휴면 전환",
+      "wake": "깨우기",
+      "delete": "삭제",
+      "clear": "선택 해제"
+    },
+    "confirmDelete": {
+      "title_one": "에이전트 {{count}}개를 삭제할까요?",
+      "title_other": "에이전트 {{count}}개를 삭제할까요?",
+      "description": "실행 중인 컨테이너를 모두 종료하고, LLM 키를 취소하고, 관련 기록(릴레이 레지스트리 포함)을 모두 지워요. 요금 청구도 즉시 중단돼요. 되돌릴 수 없어요.",
+      "confirmLabel": "삭제"
+    },
+    "toast": {
+      "deletedSomeFailed": "{{ok}}개 삭제, {{failed}}개 실패",
+      "deletedSuccess_one": "에이전트 {{count}}개를 삭제했어요",
+      "deletedSuccess_other": "에이전트 {{count}}개를 삭제했어요",
+      "bulkDeleteFailed": "일괄 삭제에 실패했어요",
+      "hibernatedSomeFailed": "{{ok}}개 휴면 전환, {{failed}}개 실패",
+      "hibernatedSomeFailedDesc": "PerkOS 인프라에 배포되지 않은 에이전트는 휴면 전환할 수 없어요.",
+      "hibernatedSuccess_one": "에이전트 {{count}}개를 휴면 전환했어요",
+      "hibernatedSuccess_other": "에이전트 {{count}}개를 휴면 전환했어요",
+      "bulkHibernateFailed": "일괄 휴면 전환에 실패했어요",
+      "wokeSomeFailed": "{{ok}}개 깨움, {{failed}}개 실패",
+      "wokeSomeFailedDesc": "PerkOS 인프라에 배포되지 않은 에이전트는 깨울 수 없어요.",
+      "wokeSuccess_one": "에이전트 {{count}}개를 깨웠어요",
+      "wokeSuccess_other": "에이전트 {{count}}개를 깨웠어요",
+      "bulkWakeFailed": "일괄 깨우기에 실패했어요"
+    },
+    "assignDialog": {
+      "title": "프로젝트에 배정",
+      "description_one": "선택한 에이전트 {{count}}개를 프로젝트 명단에 추가해요.",
+      "description_other": "선택한 에이전트 {{count}}개를 프로젝트 명단에 추가해요.",
+      "projectLabel": "프로젝트",
+      "selectPlaceholder": "프로젝트 선택…",
+      "cancel": "취소",
+      "assign": "배정",
+      "assigning": "배정 중…",
+      "projectFallback": "프로젝트",
+      "assignedSuccess_one": "에이전트 {{count}}개를 {{name}}에 배정했어요",
+      "assignedSuccess_other": "에이전트 {{count}}개를 {{name}}에 배정했어요",
+      "alreadyOn": "이미 {{name}}에 있어서 추가할 항목이 없어요",
+      "assignFailed": "배정에 실패했어요"
+    },
+    "card": {
+      "selectAria": "{{name}} 선택",
+      "externalTitle": "직접 준비한 인프라에서 실행돼요(초대됨 / 자체 호스팅). PerkOS가 휴면 전환할 수 없어요",
+      "external": "외부",
+      "capabilities": "기능: {{list}}",
+      "noCapabilities": "아직 설정된 기능이 없어요.",
+      "projects": "프로젝트: {{count}}",
+      "active": "{{time}} 활동 중",
+      "created": "{{time}} 생성됨",
+      "capabilitiesCount": "기능: {{count}}개"
+    },
+    "power": {
+      "waking": "{{name}} 깨우는 중…",
+      "wakingDesc": "부팅과 연결까지 약 2~3분 걸려요.",
+      "hibernating": "{{name}} 휴면 전환 중…",
+      "hibernatingDesc": "비용 절감을 위해 리소스를 줄이는 중이에요.",
+      "error": "전원 상태를 바꾸지 못했어요",
+      "wakeAria": "{{name}} 깨우기",
+      "hibernateAria": "{{name}} 휴면 전환",
+      "working": "처리 중…",
+      "wakeTitle": "에이전트 깨우기",
+      "hibernateTitle": "에이전트 휴면 전환"
+    },
+    "status": {
+      "revoked": "취소됨",
+      "neverConnected": "연결된 적 없음",
+      "invited": "초대됨",
+      "syncing": "동기화 중…",
+      "hibernated": "휴면 중",
+      "hibernating": "휴면 전환 중…",
+      "waking": "깨우는 중…",
+      "online": "온라인",
+      "failed": "실패",
+      "provisioning": "준비 중",
+      "unknown": "알 수 없음"
+    },
+    "empty": {
+      "title": "아직 에이전트가 없어요",
+      "description": "에이전트를 추가해보세요. PerkOS에서 Hermes나 OpenClaw 에이전트를 만들거나, 직접 준비한 VPS에서 실행하거나, 이미 다른 곳에서 운영 중인 에이전트를 조직에 초대할 수 있어요.",
+      "action": "에이전트 추가"
+    }
+  },
+  "tasks": {
+    "header": {
+      "title": "작업",
+      "subtitle": "모든 프로젝트에서 진행 중인 작업을 한눈에 볼 수 있어요.",
+      "createTask": "작업 만들기"
+    },
+    "search": {
+      "placeholder": "이름, 에이전트, 프로젝트, 상태로 작업 검색…",
+      "noResults": "\"{{query}}\"와 일치하는 작업이 없어요."
+    },
+    "filter": {
+      "statusPill": "상태: {{status}}",
+      "inProgress": "진행 중",
+      "projectPill": "프로젝트: {{project}}",
+      "clearAria": "{{label}} 지우기"
+    },
+    "emptyProjects": {
+      "title": "아직 프로젝트가 없어요",
+      "description": "작업은 프로젝트 안에 속해 있어요. 먼저 프로젝트를 만들어주세요.",
+      "action": "프로젝트 만들기"
+    },
+    "empty": {
+      "title": "아직 작업이 없어요",
+      "description": "프로젝트에 작업을 추가하고 에이전트에게 배정해보세요.",
+      "action": "작업 만들기"
+    },
+    "bulk": {
+      "selectedCount": "{{count}}개 선택됨",
+      "moveTo": "이동할 위치:",
+      "toDo": "할 일",
+      "inProgress": "진행 중",
+      "done": "완료",
+      "delete": "삭제",
+      "clear": "선택 해제"
+    },
+    "card": {
+      "selectAria": "{{name}} 선택",
+      "agent": "에이전트: {{agent}}"
+    },
+    "dragHint": "드래그 앤 드롭은 아직 이 기기에서만 적용돼요. 서버 동기화는 다음 업데이트에서 지원될 예정이에요.",
+    "projectFilter": {
+      "aria": "프로젝트별로 작업 필터링",
+      "all": "모든 프로젝트"
+    },
+    "confirmDelete": {
+      "title_one": "작업 {{count}}개를 삭제할까요?",
+      "title_other": "작업 {{count}}개를 삭제할까요?",
+      "description": "선택한 작업(여러 프로젝트에 걸쳐)과 관련 기록이 모두 삭제돼요. 되돌릴 수 없어요.",
+      "confirmLabel": "삭제"
+    },
+    "toast": {
+      "movedSomeFailed": "{{ok}}개 이동, {{failed}}개 실패",
+      "movedSuccess_one": "작업 {{count}}개를 이동했어요",
+      "movedSuccess_other": "작업 {{count}}개를 이동했어요",
+      "bulkMoveFailed": "일괄 이동에 실패했어요",
+      "deletedSomeFailed": "{{ok}}개 삭제, {{failed}}개 실패",
+      "deletedSuccess_one": "작업 {{count}}개를 삭제했어요",
+      "deletedSuccess_other": "작업 {{count}}개를 삭제했어요",
+      "bulkDeleteFailed": "일괄 삭제에 실패했어요"
+    }
+  },
+  "settings": {
+    "header": {
+      "title": "설정",
+      "subtitle": "지갑, 워크스페이스, 연동을 관리하세요."
+    },
+    "account": {
+      "title": "계정",
+      "description": "이 Base / Solana 지갑으로 로그인했어요.",
+      "connectedWallet": "연결된 지갑",
+      "notConnected": "연결되지 않음",
+      "copied": "복사됨",
+      "copyFull": "전체 복사",
+      "noKeys": "저희는 개인 키나 시드 문구를 절대 요청하지 않아요.",
+      "disconnect": "지갑 연결 해제"
+    },
+    "username": {
+      "title": "사용자 이름",
+      "description": "@핸들은 채팅에서 팀원들이 사장님을 언급할 때 입력하는 이름이에요. 다른 사람과 겹칠 수 없고, 설정하지 않으면 지갑 주소로 대신 표시돼요."
+    },
+    "workspace": {
+      "title": "워크스페이스",
+      "description": "대시보드와 온보딩 전체에 표시되는 이름이에요.",
+      "nameLabel": "워크스페이스 이름",
+      "namePlaceholder": "소프트웨어 워크스페이스",
+      "storedLocally": "PerkOS가 서버에 워크스페이스 저장 기능을 추가하기 전까지는 이 기기에만 저장돼요.",
+      "save": "변경 사항 저장",
+      "toastUpdated": "워크스페이스 이름이 업데이트됐어요"
+    },
+    "llm": {
+      "title": "LLM 제공업체 키",
+      "description": "현재 API 키는 실행 마법사 안에서 에이전트별로 설정해요(3단계 → BYOK). 전역 키 저장 기능은 추후 지원될 예정이에요.",
+      "infoBefore": "지금은 각 에이전트가 자체 BYOK 설정으로 제공돼요.",
+      "infoLink": "에이전트 실행 마법사",
+      "infoAfter": "에서 OpenAI, Anthropic, OpenRouter 자격 증명을 연결할 수 있어요.",
+      "infoNote": "지갑 단위로 통합된 키 보관함은 다음 업데이트에서 계획하고 있어요."
+    },
+    "network": {
+      "title": "네트워크",
+      "description": "이 앱이 통신하는 백엔드와 온체인 엔드포인트예요.",
+      "perkosApi": "PerkOS API",
+      "defaultChain": "기본 체인",
+      "solanaCluster": "Solana 클러스터",
+      "testnet": "테스트넷"
+    },
+    "danger": {
+      "title": "위험 구역",
+      "description": "이 기기에서만 적용되는 작업이에요. PerkOS 서버에는 영향을 주지 않아요.",
+      "clearDraft": {
+        "title": "조직 임시 저장 데이터 지우기",
+        "description": "이 기기에 저장된 진행 중인 조직 생성 양식을 지워요.",
+        "action": "임시 저장 데이터 지우기"
+      },
+      "reset": {
+        "title": "온보딩 상태 초기화",
+        "description": "이 기기에 저장된 워크스페이스 이름, 프로젝트 표시, 에이전트 표시를 초기화해요.",
+        "action": "초기화"
+      },
+      "disconnect": {
+        "title": "지갑 연결 해제",
+        "description": "이 기기에서 로그아웃돼요. 서버에 있는 에이전트와 프로젝트는 그대로 유지돼요.",
+        "action": "연결 해제"
+      }
+    },
+    "resetDialog": {
+      "title": "온보딩 상태를 초기화할까요?",
+      "description": "이 기기에 저장된 워크스페이스 이름, 프로젝트 임시 저장 데이터, 에이전트 설정 표시가 모두 지워져요. 서버에 있는 데이터는 그대로 유지돼요.",
+      "confirmLabel": "상태 초기화"
+    },
+    "toast": {
+      "draftCleared": "조직 임시 저장 데이터를 지웠어요",
+      "draftClearFailed": "임시 저장 데이터를 지우지 못했어요",
+      "stateReset": "워크스페이스 상태가 초기화됐어요"
+    }
   }
 }
