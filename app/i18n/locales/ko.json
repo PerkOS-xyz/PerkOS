@@ -1496,5 +1496,109 @@
         "noLeadDescAdd": "에이전트를 추가하고 팀장을 지정하면 목표를 계획하고 작업을 나눠줄 수 있어요."
       }
     }
+  },
+  "components": {
+    "kanban": {
+      "todo": "할 일",
+      "inProgress": "진행 중",
+      "done": "완료",
+      "moveTaskAria": "작업 이동. 왼쪽/오른쪽 화살표로 열을 바꾸고, 스페이스바로 드래그하세요."
+    },
+    "conductor": {
+      "emptyMessage": "아직 작업이 없어요. 하나 추가해서 시작해보세요.",
+      "roster": "명단",
+      "noSwarm": "아직 이 프로젝트에 구성된 팀이 없어요. 에이전트를 추가해 명단을 채워보세요.",
+      "inProgressCount": "{{count}}개 진행 중"
+    },
+    "members": {
+      "inviteLabel": "이 {{kind}}에 지갑 초대하기",
+      "kindOrg": "조직",
+      "kindProject": "프로젝트",
+      "walletPlaceholder": "0x… 지갑 주소",
+      "roleEditor": "편집자",
+      "roleViewer": "뷰어",
+      "inviting": "초대하는 중…",
+      "invite": "초대",
+      "invalidWallet": "올바른 0x… 지갑 주소를 입력하세요(16진수 40자).",
+      "loadingMembers": "멤버를 불러오는 중…",
+      "noMembers": "아직 멤버가 없어요.",
+      "removeAria": "{{wallet}} 삭제",
+      "removeTitle": "멤버 삭제",
+      "memberInvited": "멤버를 초대했어요",
+      "memberInvitedDesc": "{{address}}이(가) 이제 이 {{kind}}에 접근할 수 있어요.",
+      "inviteFailed": "멤버를 초대하지 못했어요",
+      "memberRemoved": "멤버를 삭제했어요",
+      "removeFailed": "멤버를 삭제하지 못했어요"
+    },
+    "insights": {
+      "teamWorkload": "팀 작업량",
+      "percentComplete": "{{rate}}% 완료",
+      "taskLabel_one": "작업",
+      "taskLabel_other": "작업",
+      "donePerAgent": "에이전트별 완료",
+      "unassigned": "미배정"
+    },
+    "contextMap": {
+      "empty": "에이전트와 작업을 추가하면 지도가 채워져요.",
+      "caption": "가운데는 프로젝트, 궤도를 도는 것은 에이전트(팀장은 테두리로 표시돼요), 가장자리는 각 에이전트의 작업이에요. 실선은 진행 중인 배정, 점선은 완료된 작업을 나타내요.",
+      "hiddenTasks_one": " {{count}}개의 이전 작업은 표시되지 않았어요.",
+      "hiddenTasks_other": " {{count}}개의 이전 작업은 표시되지 않았어요.",
+      "leadPrefix": "팀장 · "
+    },
+    "activityFeed": {
+      "title": "최근 활동",
+      "live": "실시간",
+      "loading": "활동을 불러오는 중…",
+      "empty": "아직 없어요. 에이전트가 계획하고, 시작하고, 작업을 마치면 여기에 바로 표시돼요."
+    },
+    "pmBanner": {
+      "teamLead": "팀장",
+      "paused": "일시중지",
+      "round": "· {{current}}/{{max}}라운드",
+      "lastRun": "· 최근 실행 {{time}}",
+      "reasons": {
+        "goalMet": "목표 달성",
+        "noMoreWork": "더 이상 할 일이 없어요",
+        "maxRounds": "라운드 한도에 도달했어요. 계속하려면 다시 실행하세요",
+        "badPlan": "유효한 계획을 세우지 못했어요",
+        "emptyPlan": "할 일이 없어요",
+        "llmError": "모델에서 오류가 발생했어요",
+        "noPm": "팀장이 지정되지 않았어요"
+      },
+      "phases": {
+        "plan": "계획",
+        "work": "작업",
+        "review": "검토",
+        "done": "완료"
+      }
+    },
+    "confirmDialog": {
+      "confirm": "확인",
+      "cancel": "취소"
+    },
+    "editProject": {
+      "title": "프로젝트 수정",
+      "description": "이름과 목표를 수정하세요. 작업과 채팅 기록은 그대로 유지돼요.",
+      "name": "이름",
+      "goal": "목표",
+      "cancel": "취소",
+      "save": "변경 사항 저장",
+      "missingProjectId": "프로젝트 ID가 없어요.",
+      "updated": "프로젝트가 수정됐어요",
+      "updateFailed": "프로젝트를 수정하지 못했어요"
+    },
+    "editTask": {
+      "title": "작업 수정",
+      "description": "이름, 우선순위, 배정된 에이전트를 수정하세요. 상태 변경은 칸반 보드에서 할 수 있어요.",
+      "name": "이름",
+      "priority": "우선순위",
+      "assignedAgent": "배정된 에이전트",
+      "cancel": "취소",
+      "save": "변경 사항 저장",
+      "nameError": "작업 이름은 최소 2자 이상이어야 해요.",
+      "missingTaskId": "작업 ID가 없어요.",
+      "updated": "작업이 수정됐어요",
+      "updateFailed": "작업을 수정하지 못했어요"
+    }
   }
 }

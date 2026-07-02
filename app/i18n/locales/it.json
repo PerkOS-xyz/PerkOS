@@ -1505,5 +1505,109 @@
         "noLeadDescAdd": "Aggiungi agenti e scegli un Capo Team per pianificare e distribuire il lavoro."
       }
     }
+  },
+  "components": {
+    "kanban": {
+      "todo": "Da fare",
+      "inProgress": "In corso",
+      "done": "Fatto",
+      "moveTaskAria": "Sposta l'attività. Usa le frecce sinistra/destra per cambiare colonna, la barra spaziatrice per trascinare."
+    },
+    "conductor": {
+      "emptyMessage": "Ancora nessuna attività. Aggiungine una per iniziare.",
+      "roster": "Lista del team",
+      "noSwarm": "Ancora nessun team assegnato a questo progetto. Aggiungi agenti per popolare la lista del team.",
+      "inProgressCount": "{{count}} in corso"
+    },
+    "members": {
+      "inviteLabel": "Invita un portafoglio in questo {{kind}}",
+      "kindOrg": "spazio di lavoro",
+      "kindProject": "progetto",
+      "walletPlaceholder": "0x… indirizzo del portafoglio",
+      "roleEditor": "Editor",
+      "roleViewer": "Visualizzatore",
+      "inviting": "Invito in corso…",
+      "invite": "Invita",
+      "invalidWallet": "Inserisci un indirizzo del portafoglio 0x… valido (40 caratteri esadecimali).",
+      "loadingMembers": "Caricamento dei membri…",
+      "noMembers": "Ancora nessun membro.",
+      "removeAria": "Rimuovi {{wallet}}",
+      "removeTitle": "Rimuovi membro",
+      "memberInvited": "Membro invitato",
+      "memberInvitedDesc": "{{address}} ora può accedere a questo {{kind}}.",
+      "inviteFailed": "Impossibile invitare il membro",
+      "memberRemoved": "Membro rimosso",
+      "removeFailed": "Impossibile rimuovere il membro"
+    },
+    "insights": {
+      "teamWorkload": "Carico di lavoro del team",
+      "percentComplete": "{{rate}}% completato",
+      "taskLabel_one": "attività",
+      "taskLabel_other": "attività",
+      "donePerAgent": "Completate per agente",
+      "unassigned": "Non assegnato"
+    },
+    "contextMap": {
+      "empty": "La mappa si popola man mano che aggiungi agenti e attività a questo progetto.",
+      "caption": "Il progetto al centro, gli agenti in orbita (il Capo Team è cerchiato), le loro attività ai bordi: le linee continue sono assegnazioni attive, quelle tratteggiate sono completate.",
+      "hiddenTasks_one": " {{count}} attività meno recente non mostrata.",
+      "hiddenTasks_other": " {{count}} attività meno recenti non mostrate.",
+      "leadPrefix": "Capo Team · "
+    },
+    "activityFeed": {
+      "title": "Attività recente",
+      "live": "in diretta",
+      "loading": "Caricamento dell'attività…",
+      "empty": "Ancora nulla: quando i tuoi agenti pianificano, iniziano e completano il lavoro, comparirà qui in tempo reale."
+    },
+    "pmBanner": {
+      "teamLead": "Capo Team",
+      "paused": "In pausa",
+      "round": "· round {{current}}/{{max}}",
+      "lastRun": "· ultima esecuzione {{time}}",
+      "reasons": {
+        "goalMet": "Obiettivo raggiunto",
+        "noMoreWork": "Non c'è più nulla da fare",
+        "maxRounds": "Limite di round raggiunto: esegui di nuovo per continuare",
+        "badPlan": "Impossibile creare un piano valido",
+        "emptyPlan": "Nessun lavoro da fare",
+        "llmError": "Il modello ha restituito un errore",
+        "noPm": "Nessun Capo Team designato"
+      },
+      "phases": {
+        "plan": "Piano",
+        "work": "Lavoro",
+        "review": "Revisione",
+        "done": "Fatto"
+      }
+    },
+    "confirmDialog": {
+      "confirm": "Conferma",
+      "cancel": "Annulla"
+    },
+    "editProject": {
+      "title": "Modifica progetto",
+      "description": "Aggiorna il nome e l'obiettivo. Le attività e la cronologia della chat restano invariate.",
+      "name": "Nome",
+      "goal": "Obiettivo",
+      "cancel": "Annulla",
+      "save": "Salva modifiche",
+      "missingProjectId": "Id del progetto mancante.",
+      "updated": "Progetto aggiornato",
+      "updateFailed": "Impossibile aggiornare il progetto"
+    },
+    "editTask": {
+      "title": "Modifica attività",
+      "description": "Aggiorna il nome, la priorità o l'agente assegnato. I cambi di stato avvengono dalla bacheca kanban.",
+      "name": "Nome",
+      "priority": "Priorità",
+      "assignedAgent": "Agente assegnato",
+      "cancel": "Annulla",
+      "save": "Salva modifiche",
+      "nameError": "Il nome dell'attività deve avere almeno 2 caratteri.",
+      "missingTaskId": "Id dell'attività mancante.",
+      "updated": "Attività aggiornata",
+      "updateFailed": "Impossibile aggiornare l'attività"
+    }
   }
 }

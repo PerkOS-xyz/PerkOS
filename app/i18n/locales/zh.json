@@ -1505,5 +1505,109 @@
         "noLeadDescAdd": "添加智能体并选择一位团队负责人来规划和分配工作。"
       }
     }
+  },
+  "components": {
+    "kanban": {
+      "todo": "待办",
+      "inProgress": "进行中",
+      "done": "已完成",
+      "moveTaskAria": "移动任务。使用左右箭头键切换列,按空格键拖动。"
+    },
+    "conductor": {
+      "emptyMessage": "暂时还没有任务。添加一个开始吧。",
+      "roster": "名单",
+      "noSwarm": "此项目还没有配置智能体团队。添加智能体来填充名单。",
+      "inProgressCount": "{{count}} 个进行中"
+    },
+    "members": {
+      "inviteLabel": "邀请一个钱包加入此{{kind}}",
+      "kindOrg": "组织",
+      "kindProject": "项目",
+      "walletPlaceholder": "0x… 钱包地址",
+      "roleEditor": "编辑者",
+      "roleViewer": "查看者",
+      "inviting": "邀请中…",
+      "invite": "邀请",
+      "invalidWallet": "请输入有效的 0x… 钱包地址(40 位十六进制字符)。",
+      "loadingMembers": "正在加载成员…",
+      "noMembers": "还没有成员。",
+      "removeAria": "移除 {{wallet}}",
+      "removeTitle": "移除成员",
+      "memberInvited": "成员已邀请",
+      "memberInvitedDesc": "{{address}} 现在可以访问此{{kind}}了。",
+      "inviteFailed": "无法邀请成员",
+      "memberRemoved": "成员已移除",
+      "removeFailed": "无法移除成员"
+    },
+    "insights": {
+      "teamWorkload": "团队工作量",
+      "percentComplete": "已完成 {{rate}}%",
+      "taskLabel_one": "个任务",
+      "taskLabel_other": "个任务",
+      "donePerAgent": "各智能体完成数量",
+      "unassigned": "未分配"
+    },
+    "contextMap": {
+      "empty": "随着你为这个项目添加智能体和任务,地图会逐渐填满。",
+      "caption": "项目位于中心,智能体环绕四周(团队负责人带圆环标记),他们的任务分布在外圈。实线表示正在进行的分配,虚线表示已完成的分配。",
+      "hiddenTasks_one": " 还有 {{count}} 个更早的任务未显示。",
+      "hiddenTasks_other": " 还有 {{count}} 个更早的任务未显示。",
+      "leadPrefix": "负责人 · "
+    },
+    "activityFeed": {
+      "title": "近期动态",
+      "live": "实时",
+      "loading": "正在加载动态…",
+      "empty": "还没有任何动态。当你的智能体规划、开始并完成工作时,内容会实时显示在这里。"
+    },
+    "pmBanner": {
+      "teamLead": "团队负责人",
+      "paused": "已暂停",
+      "round": "· 第 {{current}}/{{max}} 轮",
+      "lastRun": "· 上次运行 {{time}}",
+      "reasons": {
+        "goalMet": "目标已达成",
+        "noMoreWork": "没有剩余工作了",
+        "maxRounds": "已达到轮次上限,再次运行以继续",
+        "badPlan": "无法制定有效的计划",
+        "emptyPlan": "没有工作要做",
+        "llmError": "模型出错了",
+        "noPm": "尚未指定团队负责人"
+      },
+      "phases": {
+        "plan": "计划",
+        "work": "工作",
+        "review": "审核",
+        "done": "已完成"
+      }
+    },
+    "confirmDialog": {
+      "confirm": "确认",
+      "cancel": "取消"
+    },
+    "editProject": {
+      "title": "编辑项目",
+      "description": "更新名称和目标。任务和聊天记录不受影响。",
+      "name": "名称",
+      "goal": "目标",
+      "cancel": "取消",
+      "save": "保存更改",
+      "missingProjectId": "缺少项目 ID。",
+      "updated": "项目已更新",
+      "updateFailed": "无法更新项目"
+    },
+    "editTask": {
+      "title": "编辑任务",
+      "description": "更新名称、优先级或分配的智能体。状态变更请在看板中进行。",
+      "name": "名称",
+      "priority": "优先级",
+      "assignedAgent": "分配的智能体",
+      "cancel": "取消",
+      "save": "保存更改",
+      "nameError": "任务名称至少需要 2 个字符。",
+      "missingTaskId": "缺少任务 ID。",
+      "updated": "任务已更新",
+      "updateFailed": "无法更新任务"
+    }
   }
 }

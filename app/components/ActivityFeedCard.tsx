@@ -23,6 +23,7 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 import { formatRelativeShort } from "../lib/format";
@@ -64,7 +65,7 @@ export function ActivityFeedCard({
   className,
   /** Show only events for one project. */
   projectId,
-  title = "Recent activity",
+  title,
 }: {
   walletAddress?: string | null;
   max?: number;
@@ -72,6 +73,7 @@ export function ActivityFeedCard({
   projectId?: string;
   title?: string;
 }) {
+  const { t } = useTranslation();
   const { events, loaded } = useActivityFeed(walletAddress, projectId ? 120 : max);
   const visible = (
     projectId ? events.filter((e) => e.projectId === projectId) : events
@@ -85,21 +87,22 @@ export function ActivityFeedCard({
       )}
     >
       <header className="flex items-center justify-between">
-        <h2 className="text-sm font-medium text-foreground">{title}</h2>
+        <h2 className="text-sm font-medium text-foreground">
+          {title ?? t("components.activityFeed.title")}
+        </h2>
         <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 font-mono text-[10px] text-primary">
-          live
+          {t("components.activityFeed.live")}
         </span>
       </header>
 
       {!loaded && walletAddress ? (
         <div className="flex items-center gap-2 py-4 text-xs text-muted-foreground">
           <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
-          Loading activity…
+          {t("components.activityFeed.loading")}
         </div>
       ) : visible.length === 0 ? (
         <p className="py-3 text-xs leading-relaxed text-muted-foreground">
-          Nothing yet — when your agents plan, start, and finish work it shows
-          up here as it happens.
+          {t("components.activityFeed.empty")}
         </p>
       ) : (
         <ul className="flex flex-col">

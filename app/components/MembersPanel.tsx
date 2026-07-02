@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { UserPlus, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,10 +35,16 @@ export function MembersPanel({
   id: string;
   canManage?: boolean;
 }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const key = ["members", kind, id];
   const [wallet, setWallet] = useState("");
   const [role, setRole] = useState<"editor" | "viewer">("editor");
+
+  const kindLabel =
+    kind === "org"
+      ? t("components.members.kindOrg")
+      : t("components.members.kindProject");
 
   const membersQuery = useQuery({
     queryKey: key,
@@ -61,12 +68,17 @@ export function MembersPanel({
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: key });
       setWallet("");
-      toast.success("Member invited", {
-        description: `${formatAddress(wallet.trim())} can now access this ${kind}.`,
+      toast.success(t("components.members.memberInvited"), {
+        description: t("components.members.memberInvitedDesc", {
+          address: formatAddress(wallet.trim()),
+          kind: kindLabel,
+        }),
       });
     },
     onError: (e: Error) =>
-      toast.error("Couldn't invite member", { description: e.message }),
+      toast.error(t("components.members.inviteFailed"), {
+        description: e.message,
+      }),
   });
 
   const removeMut = useMutation({
@@ -76,10 +88,12 @@ export function MembersPanel({
         : removeProjectMember({ projectId: id, memberWallet }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: key });
-      toast.success("Member removed");
+      toast.success(t("components.members.memberRemoved"));
     },
     onError: (e: Error) =>
-      toast.error("Couldn't remove member", { description: e.message }),
+      toast.error(t("components.members.removeFailed"), {
+        description: e.message,
+      }),
   });
 
   function onInvite(e: FormEvent<HTMLFormElement>) {
@@ -92,13 +106,13 @@ export function MembersPanel({
       {canManage ? (
         <form onSubmit={onInvite} className="flex flex-col gap-2">
           <label className="text-xs font-medium text-muted-foreground">
-            Invite a wallet to this {kind}
+            {t("components.members.inviteLabel", { kind: kindLabel })}
           </label>
           <div className="flex flex-wrap items-center gap-2">
             <Input
               value={wallet}
               onChange={(e) => setWallet(e.target.value)}
-              placeholder="0x… wallet address"
+              placeholder={t("components.members.walletPlaceholder")}
               className="h-9 min-w-0 flex-1 font-mono text-xs"
             />
             <div className="flex shrink-0 items-center gap-2">
@@ -107,8 +121,12 @@ export function MembersPanel({
                 onChange={(e) => setRole(e.target.value as "editor" | "viewer")}
                 className="h-9 rounded-md border border-border bg-card px-2 text-sm text-foreground"
               >
-                <option value="editor">Editor</option>
-                <option value="viewer">Viewer</option>
+                <option value="editor">
+                  {t("components.members.roleEditor")}
+                </option>
+                <option value="viewer">
+                  {t("components.members.roleViewer")}
+                </option>
               </select>
               <Button
                 type="submit"
@@ -117,13 +135,15 @@ export function MembersPanel({
                 disabled={!isWallet || inviteMut.isPending}
               >
                 <UserPlus className="h-3.5 w-3.5" />
-                {inviteMut.isPending ? "Inviting…" : "Invite"}
+                {inviteMut.isPending
+                  ? t("components.members.inviting")
+                  : t("components.members.invite")}
               </Button>
             </div>
           </div>
           {wallet.trim() && !isWallet ? (
             <p className="text-xs text-destructive">
-              Enter a valid 0x… wallet address (40 hex chars).
+              {t("components.members.invalidWallet")}
             </p>
           ) : null}
         </form>
@@ -132,7 +152,9 @@ export function MembersPanel({
       <ul className="flex flex-col divide-y divide-border overflow-hidden rounded-md border border-border bg-card">
         {members.length === 0 ? (
           <li className="px-4 py-3 text-sm text-muted-foreground">
-            {membersQuery.isLoading ? "Loading members…" : "No members yet."}
+            {membersQuery.isLoading
+              ? t("components.members.loadingMembers")
+              : t("components.members.noMembers")}
           </li>
         ) : (
           members.map((m) => (
@@ -159,8 +181,10 @@ export function MembersPanel({
                   type="button"
                   onClick={() => removeMut.mutate(m.wallet)}
                   disabled={removeMut.isPending}
-                  aria-label={`Remove ${m.wallet}`}
-                  title="Remove member"
+                  aria-label={t("components.members.removeAria", {
+                    wallet: m.wallet,
+                  })}
+                  title={t("components.members.removeTitle")}
                   className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-destructive"
                 >
                   <X className="h-4 w-4" />

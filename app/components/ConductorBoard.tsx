@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Bot } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 import type { Task } from "../lib/perkosApi";
@@ -47,6 +48,7 @@ export function ConductorBoard({
   swarm,
   onMove,
 }: Props) {
+  const { t } = useTranslation();
   const members = swarm?.roster ?? [];
   const byHandle = new Map<string, SwarmRosterMember>(
     members.map((m) => [m.handle, m]),
@@ -80,7 +82,7 @@ export function ConductorBoard({
       <div className="min-w-0">
         <KanbanBoard
           items={items}
-          emptyMessage="No tasks yet. Add one to get started."
+          emptyMessage={t("components.conductor.emptyMessage")}
           onMove={(taskId, next) => onMove?.(taskId, next)}
           renderCard={({ item }) => (
             <ConductorCard
@@ -94,12 +96,11 @@ export function ConductorBoard({
 
       <aside className="flex flex-col gap-2">
         <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Roster
+          {t("components.conductor.roster")}
         </h3>
         {members.length === 0 ? (
           <p className="rounded-md border border-dashed border-border px-3 py-4 text-xs text-muted-foreground">
-            No swarm defined for this project yet. Add agents to populate the
-            roster.
+            {t("components.conductor.noSwarm")}
           </p>
         ) : (
           <ul className="flex flex-col gap-1">
@@ -185,6 +186,10 @@ function RosterItem({
   member: SwarmRosterMember;
   inProgress: number;
 }) {
+  const { t } = useTranslation();
+  const inProgressLabel = t("components.conductor.inProgressCount", {
+    count: inProgress,
+  });
   return (
     <li className="rounded-md border border-border bg-card px-3 py-2">
       <div className="flex items-center justify-between gap-2">
@@ -198,8 +203,8 @@ function RosterItem({
               ? "border-amber-500/40 text-amber-300"
               : "border-border text-muted-foreground",
           )}
-          aria-label={`${inProgress} in progress`}
-          title={`${inProgress} in progress`}
+          aria-label={inProgressLabel}
+          title={inProgressLabel}
         >
           {inProgress}
         </span>

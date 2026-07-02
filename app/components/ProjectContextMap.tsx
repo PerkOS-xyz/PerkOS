@@ -13,6 +13,7 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { Bot, Compass, Folder } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 import type { Task } from "../lib/perkosApi";
@@ -58,6 +59,7 @@ export function ProjectContextMap({
   tasks: Task[];
   liveAgents: Record<string, AgentLiveStatus>;
 }) {
+  const { t } = useTranslation();
   const { nodes, edges } = useMemo(() => {
     const nodes: MapNode[] = [
       {
@@ -96,35 +98,35 @@ export function ProjectContextMap({
     });
 
     // Outer orbit: most recent non-done tasks first, then recent done ones.
-    const active = tasks.filter((t) => t.status !== "Done");
+    const active = tasks.filter((task) => task.status !== "Done");
     const doneRecent = tasks
-      .filter((t) => t.status === "Done")
+      .filter((task) => task.status === "Done")
       .sort(
         (a, b) =>
           Date.parse(b.updatedAt ?? "") - Date.parse(a.updatedAt ?? ""),
       );
     const shown = [...active, ...doneRecent].slice(0, MAX_TASKS);
     const taskR = 250;
-    shown.forEach((t, i) => {
-      if (!t.id) return;
+    shown.forEach((task, i) => {
+      if (!task.id) return;
       const angle = -Math.PI / 2 + (i / shown.length) * 2 * Math.PI + 0.18;
-      const key = `task:${t.id}`;
+      const key = `task:${task.id}`;
       nodes.push({
         key,
         kind: "task",
-        label: t.name,
+        label: task.name,
         x: CX + taskR * Math.cos(angle),
         y: CY + taskR * Math.sin(angle),
-        status: String(t.status),
-        href: `/projects/${encodeURIComponent(projectId)}/tasks/${encodeURIComponent(t.id)}`,
+        status: String(task.status),
+        href: `/projects/${encodeURIComponent(projectId)}/tasks/${encodeURIComponent(task.id)}`,
       });
-      const agent = t.agent?.trim();
+      const agent = task.agent?.trim();
       if (agent && orderedAgents.includes(agent)) {
         edges.push({
           from: `agent:${agent}`,
           to: key,
           color: agentColor(agent, 0.3),
-          dashed: t.status === "Done",
+          dashed: task.status === "Done",
         });
       } else {
         edges.push({ from: "project", to: key, color: "rgba(121,117,168,0.2)", dashed: true });
@@ -140,7 +142,7 @@ export function ProjectContextMap({
   if (agentNames.length === 0 && tasks.length === 0) {
     return (
       <p className="rounded-md border border-dashed border-border px-6 py-10 text-center text-sm text-muted-foreground">
-        The map fills in as you add agents and tasks to this project.
+        {t("components.contextMap.empty")}
       </p>
     );
   }
@@ -190,15 +192,17 @@ export function ProjectContextMap({
         </div>
       </div>
       <p className="text-[10px] text-muted-foreground">
-        Project at the center, agents in orbit (team lead ringed), their tasks
-        on the edge — solid lines are active assignments, dashed are done.
-        {hiddenTasks > 0 ? ` ${hiddenTasks} older task${hiddenTasks === 1 ? "" : "s"} not shown.` : ""}
+        {t("components.contextMap.caption")}
+        {hiddenTasks > 0
+          ? t("components.contextMap.hiddenTasks", { count: hiddenTasks })
+          : ""}
       </p>
     </div>
   );
 }
 
 function MapNodeCard({ node }: { node: MapNode }) {
+  const { t } = useTranslation();
   const style = {
     left: node.x,
     top: node.y,
@@ -246,7 +250,7 @@ function MapNodeCard({ node }: { node: MapNode }) {
             {node.label}
           </span>
           <span className="text-[9px] uppercase tracking-wide text-muted-foreground">
-            {node.isPM ? "Lead · " : ""}
+            {node.isPM ? t("components.contextMap.leadPrefix") : ""}
             {label}
           </span>
         </div>

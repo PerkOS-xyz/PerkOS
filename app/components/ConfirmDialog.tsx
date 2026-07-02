@@ -2,6 +2,7 @@
 
 import { type ReactNode } from "react";
 import { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -30,12 +31,13 @@ export function ConfirmDialog({
   onOpenChange,
   title,
   description,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
+  confirmLabel,
+  cancelLabel,
   destructive,
   pending,
   onConfirm,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
@@ -51,7 +53,7 @@ export function ConfirmDialog({
             onClick={() => onOpenChange(false)}
             disabled={pending}
           >
-            {cancelLabel}
+            {cancelLabel ?? t("components.confirmDialog.cancel")}
           </Button>
           <Button
             variant={destructive ? "destructive" : "default"}
@@ -60,7 +62,7 @@ export function ConfirmDialog({
             className="gap-2"
           >
             {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            {confirmLabel}
+            {confirmLabel ?? t("components.confirmDialog.confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

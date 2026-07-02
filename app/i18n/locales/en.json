@@ -1496,5 +1496,109 @@
         "noLeadDescAdd": "Add agents and pick a team lead to plan + hand out the work."
       }
     }
+  },
+  "components": {
+    "kanban": {
+      "todo": "To do",
+      "inProgress": "In progress",
+      "done": "Done",
+      "moveTaskAria": "Move task. Use arrow left/right to change column, space to drag."
+    },
+    "conductor": {
+      "emptyMessage": "No tasks yet. Add one to get started.",
+      "roster": "Roster",
+      "noSwarm": "No swarm defined for this project yet. Add agents to populate the roster.",
+      "inProgressCount": "{{count}} in progress"
+    },
+    "members": {
+      "inviteLabel": "Invite a wallet to this {{kind}}",
+      "kindOrg": "org",
+      "kindProject": "project",
+      "walletPlaceholder": "0x… wallet address",
+      "roleEditor": "Editor",
+      "roleViewer": "Viewer",
+      "inviting": "Inviting…",
+      "invite": "Invite",
+      "invalidWallet": "Enter a valid 0x… wallet address (40 hex chars).",
+      "loadingMembers": "Loading members…",
+      "noMembers": "No members yet.",
+      "removeAria": "Remove {{wallet}}",
+      "removeTitle": "Remove member",
+      "memberInvited": "Member invited",
+      "memberInvitedDesc": "{{address}} can now access this {{kind}}.",
+      "inviteFailed": "Couldn't invite member",
+      "memberRemoved": "Member removed",
+      "removeFailed": "Couldn't remove member"
+    },
+    "insights": {
+      "teamWorkload": "Team workload",
+      "percentComplete": "{{rate}}% complete",
+      "taskLabel_one": "task",
+      "taskLabel_other": "tasks",
+      "donePerAgent": "Done per agent",
+      "unassigned": "Unassigned"
+    },
+    "contextMap": {
+      "empty": "The map fills in as you add agents and tasks to this project.",
+      "caption": "Project at the center, agents in orbit (team lead ringed), their tasks on the edge — solid lines are active assignments, dashed are done.",
+      "hiddenTasks_one": " {{count}} older task not shown.",
+      "hiddenTasks_other": " {{count}} older tasks not shown.",
+      "leadPrefix": "Lead · "
+    },
+    "activityFeed": {
+      "title": "Recent activity",
+      "live": "live",
+      "loading": "Loading activity…",
+      "empty": "Nothing yet — when your agents plan, start, and finish work it shows up here as it happens."
+    },
+    "pmBanner": {
+      "teamLead": "Team lead",
+      "paused": "Paused",
+      "round": "· round {{current}}/{{max}}",
+      "lastRun": "· last run {{time}}",
+      "reasons": {
+        "goalMet": "Goal met",
+        "noMoreWork": "Nothing left to do",
+        "maxRounds": "Hit the round limit — run again to continue",
+        "badPlan": "Couldn't form a valid plan",
+        "emptyPlan": "No work to do",
+        "llmError": "The model errored",
+        "noPm": "No team lead designated"
+      },
+      "phases": {
+        "plan": "Plan",
+        "work": "Work",
+        "review": "Review",
+        "done": "Done"
+      }
+    },
+    "confirmDialog": {
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    },
+    "editProject": {
+      "title": "Edit project",
+      "description": "Update the name and goal. Tasks and chat history are untouched.",
+      "name": "Name",
+      "goal": "Goal",
+      "cancel": "Cancel",
+      "save": "Save changes",
+      "missingProjectId": "Missing project id.",
+      "updated": "Project updated",
+      "updateFailed": "Couldn't update project"
+    },
+    "editTask": {
+      "title": "Edit task",
+      "description": "Update the name, priority, or assigned agent. Status changes happen from the kanban board.",
+      "name": "Name",
+      "priority": "Priority",
+      "assignedAgent": "Assigned agent",
+      "cancel": "Cancel",
+      "save": "Save changes",
+      "nameError": "Task name must be at least 2 characters.",
+      "missingTaskId": "Missing task id.",
+      "updated": "Task updated",
+      "updateFailed": "Couldn't update task"
+    }
   }
 }

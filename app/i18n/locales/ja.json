@@ -1505,5 +1505,109 @@
         "noLeadDescAdd": "エージェントを追加してチームリーダーを選び、計画とタスクの割り振りを任せましょう。"
       }
     }
+  },
+  "components": {
+    "kanban": {
+      "todo": "未着手",
+      "inProgress": "進行中",
+      "done": "完了",
+      "moveTaskAria": "タスクを移動。左右の矢印キーで列を変更し、スペースキーでドラッグします。"
+    },
+    "conductor": {
+      "emptyMessage": "まだタスクがありません。追加して始めましょう。",
+      "roster": "担当リスト",
+      "noSwarm": "このプロジェクトにはまだエージェントチームが設定されていません。エージェントを追加すると担当リストに表示されます。",
+      "inProgressCount": "{{count}}件が進行中"
+    },
+    "members": {
+      "inviteLabel": "この{{kind}}にウォレットを招待",
+      "kindOrg": "組織",
+      "kindProject": "プロジェクト",
+      "walletPlaceholder": "0x…のウォレットアドレス",
+      "roleEditor": "編集者",
+      "roleViewer": "閲覧者",
+      "inviting": "招待中…",
+      "invite": "招待",
+      "invalidWallet": "有効な0x…ウォレットアドレス（16進数40桁）を入力してください。",
+      "loadingMembers": "メンバーを読み込み中…",
+      "noMembers": "まだメンバーがいません。",
+      "removeAria": "{{wallet}}を削除",
+      "removeTitle": "メンバーを削除",
+      "memberInvited": "メンバーを招待しました",
+      "memberInvitedDesc": "{{address}}はこの{{kind}}にアクセスできるようになりました。",
+      "inviteFailed": "メンバーを招待できませんでした",
+      "memberRemoved": "メンバーを削除しました",
+      "removeFailed": "メンバーを削除できませんでした"
+    },
+    "insights": {
+      "teamWorkload": "チームの作業量",
+      "percentComplete": "{{rate}}%完了",
+      "taskLabel_one": "タスク",
+      "taskLabel_other": "タスク",
+      "donePerAgent": "エージェント別の完了数",
+      "unassigned": "未割り当て"
+    },
+    "contextMap": {
+      "empty": "エージェントとタスクをこのプロジェクトに追加すると、マップが埋まっていきます。",
+      "caption": "中心にプロジェクト、その周りにエージェント（チームリーダーには枠線）、外側に各タスクを表示。実線は進行中の割り当て、破線は完了済みです。",
+      "hiddenTasks_one": " 表示されていない古いタスクが{{count}}件あります。",
+      "hiddenTasks_other": " 表示されていない古いタスクが{{count}}件あります。",
+      "leadPrefix": "リーダー・"
+    },
+    "activityFeed": {
+      "title": "最近のアクティビティ",
+      "live": "ライブ",
+      "loading": "アクティビティを読み込み中…",
+      "empty": "まだ何もありません。エージェントが計画・開始・完了すると、ここにリアルタイムで表示されます。"
+    },
+    "pmBanner": {
+      "teamLead": "チームリーダー",
+      "paused": "一時停止中",
+      "round": "・ラウンド{{current}}/{{max}}",
+      "lastRun": "・前回の実行 {{time}}",
+      "reasons": {
+        "goalMet": "目標達成",
+        "noMoreWork": "これ以上の作業はありません",
+        "maxRounds": "ラウンド上限に達しました。続けるにはもう一度実行してください",
+        "badPlan": "有効な計画を作成できませんでした",
+        "emptyPlan": "行う作業がありません",
+        "llmError": "モデルでエラーが発生しました",
+        "noPm": "チームリーダーが指定されていません"
+      },
+      "phases": {
+        "plan": "計画",
+        "work": "作業",
+        "review": "レビュー",
+        "done": "完了"
+      }
+    },
+    "confirmDialog": {
+      "confirm": "確認",
+      "cancel": "キャンセル"
+    },
+    "editProject": {
+      "title": "プロジェクトを編集",
+      "description": "名前と目標を更新します。タスクとチャット履歴はそのまま残ります。",
+      "name": "名前",
+      "goal": "目標",
+      "cancel": "キャンセル",
+      "save": "変更を保存",
+      "missingProjectId": "プロジェクトIDがありません。",
+      "updated": "プロジェクトを更新しました",
+      "updateFailed": "プロジェクトを更新できませんでした"
+    },
+    "editTask": {
+      "title": "タスクを編集",
+      "description": "名前、優先度、担当エージェントを更新します。ステータスの変更はかんばんボードから行います。",
+      "name": "名前",
+      "priority": "優先度",
+      "assignedAgent": "担当エージェント",
+      "cancel": "キャンセル",
+      "save": "変更を保存",
+      "nameError": "タスク名は2文字以上で入力してください。",
+      "missingTaskId": "タスクIDがありません。",
+      "updated": "タスクを更新しました",
+      "updateFailed": "タスクを更新できませんでした"
+    }
   }
 }

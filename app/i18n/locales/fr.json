@@ -1505,5 +1505,109 @@
         "noLeadDescAdd": "Ajoutez des agents et choisissez un chef d'équipe pour planifier et répartir le travail."
       }
     }
+  },
+  "components": {
+    "kanban": {
+      "todo": "À faire",
+      "inProgress": "En cours",
+      "done": "Terminé",
+      "moveTaskAria": "Déplacer la tâche. Utilisez les flèches gauche/droite pour changer de colonne, la barre d'espace pour glisser."
+    },
+    "conductor": {
+      "emptyMessage": "Pas encore de tâches. Ajoutez-en une pour commencer.",
+      "roster": "Équipe",
+      "noSwarm": "Aucune équipe définie pour ce projet pour le moment. Ajoutez des agents pour la compléter.",
+      "inProgressCount": "{{count}} en cours"
+    },
+    "members": {
+      "inviteLabel": "Inviter un portefeuille pour {{kind}}",
+      "kindOrg": "l'organisation",
+      "kindProject": "le projet",
+      "walletPlaceholder": "0x… adresse du portefeuille",
+      "roleEditor": "Éditeur",
+      "roleViewer": "Lecteur",
+      "inviting": "Invitation…",
+      "invite": "Inviter",
+      "invalidWallet": "Saisissez une adresse de portefeuille 0x… valide (40 caractères hexadécimaux).",
+      "loadingMembers": "Chargement des membres…",
+      "noMembers": "Pas encore de membres.",
+      "removeAria": "Retirer {{wallet}}",
+      "removeTitle": "Retirer le membre",
+      "memberInvited": "Membre invité",
+      "memberInvitedDesc": "{{address}} a maintenant accès : {{kind}}.",
+      "inviteFailed": "Impossible d'inviter le membre",
+      "memberRemoved": "Membre retiré",
+      "removeFailed": "Impossible de retirer le membre"
+    },
+    "insights": {
+      "teamWorkload": "Charge de travail de l'équipe",
+      "percentComplete": "{{rate}} % terminé",
+      "taskLabel_one": "tâche",
+      "taskLabel_other": "tâches",
+      "donePerAgent": "Terminées par agent",
+      "unassigned": "Non assigné"
+    },
+    "contextMap": {
+      "empty": "La carte se remplit au fur et à mesure que vous ajoutez des agents et des tâches à ce projet.",
+      "caption": "Le projet au centre, les agents en orbite (le chef d'équipe est entouré), leurs tâches en périphérie : les traits pleins sont des affectations actives, les pointillés sont terminées.",
+      "hiddenTasks_one": " {{count}} tâche plus ancienne non affichée.",
+      "hiddenTasks_other": " {{count}} tâches plus anciennes non affichées.",
+      "leadPrefix": "Chef · "
+    },
+    "activityFeed": {
+      "title": "Activité récente",
+      "live": "en direct",
+      "loading": "Chargement de l'activité…",
+      "empty": "Rien pour l'instant. Dès que vos agents planifient, démarrent et terminent du travail, ça apparaît ici en temps réel."
+    },
+    "pmBanner": {
+      "teamLead": "Chef d'équipe",
+      "paused": "En pause",
+      "round": "· tour {{current}}/{{max}}",
+      "lastRun": "· dernière exécution {{time}}",
+      "reasons": {
+        "goalMet": "Objectif atteint",
+        "noMoreWork": "Plus rien à faire",
+        "maxRounds": "Limite de tours atteinte : relancez pour continuer",
+        "badPlan": "Impossible d'établir un plan valide",
+        "emptyPlan": "Aucun travail à faire",
+        "llmError": "Le modèle a rencontré une erreur",
+        "noPm": "Aucun chef d'équipe désigné"
+      },
+      "phases": {
+        "plan": "Planification",
+        "work": "Travail",
+        "review": "Révision",
+        "done": "Terminé"
+      }
+    },
+    "confirmDialog": {
+      "confirm": "Confirmer",
+      "cancel": "Annuler"
+    },
+    "editProject": {
+      "title": "Modifier le projet",
+      "description": "Mettez à jour le nom et l'objectif. Les tâches et l'historique du chat restent inchangés.",
+      "name": "Nom",
+      "goal": "Objectif",
+      "cancel": "Annuler",
+      "save": "Enregistrer les modifications",
+      "missingProjectId": "Identifiant de projet manquant.",
+      "updated": "Projet mis à jour",
+      "updateFailed": "Impossible de mettre à jour le projet"
+    },
+    "editTask": {
+      "title": "Modifier la tâche",
+      "description": "Mettez à jour le nom, la priorité ou l'agent assigné. Les changements de statut se font depuis le tableau kanban.",
+      "name": "Nom",
+      "priority": "Priorité",
+      "assignedAgent": "Agent assigné",
+      "cancel": "Annuler",
+      "save": "Enregistrer les modifications",
+      "nameError": "Le nom de la tâche doit comporter au moins 2 caractères.",
+      "missingTaskId": "Identifiant de tâche manquant.",
+      "updated": "Tâche mise à jour",
+      "updateFailed": "Impossible de mettre à jour la tâche"
+    }
   }
 }
