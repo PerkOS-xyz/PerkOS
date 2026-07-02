@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 import type { SoulFields } from "@/app/lib/agentPresets";
 
@@ -9,21 +10,22 @@ import type { SoulFields } from "@/app/lib/agentPresets";
 // ---------------------------------------------------------------------------
 
 export function SoulDetailCard({ soul }: { soul: SoulFields }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border bg-muted/20 p-4">
       {soul.identity ? (
-        <SoulSection title="Identity">
+        <SoulSection title={t("wizard.template.soul.identity")}>
           <p className="text-sm italic text-foreground">{soul.identity}</p>
         </SoulSection>
       ) : null}
 
       {soul.coreTruths.length > 0 ? (
-        <SoulSection title="Core Truths">
+        <SoulSection title={t("wizard.template.soul.coreTruths")}>
           <ul className="flex flex-col gap-1.5 text-sm text-muted-foreground">
-            {soul.coreTruths.map((t) => (
-              <li key={t.principle}>
-                <span className="font-medium text-foreground">{t.principle}.</span>{" "}
-                {t.explanation}
+            {soul.coreTruths.map((truth) => (
+              <li key={truth.principle}>
+                <span className="font-medium text-foreground">{truth.principle}.</span>{" "}
+                {truth.explanation}
               </li>
             ))}
           </ul>
@@ -31,7 +33,7 @@ export function SoulDetailCard({ soul }: { soul: SoulFields }) {
       ) : null}
 
       {soul.worldview.length > 0 ? (
-        <SoulSection title="Worldview">
+        <SoulSection title={t("wizard.template.soul.worldview")}>
           <div className="flex flex-col gap-2">
             {soul.worldview.map((w) => (
               <div key={w.domain}>
@@ -50,7 +52,7 @@ export function SoulDetailCard({ soul }: { soul: SoulFields }) {
       ) : null}
 
       {soul.voice.length > 0 ? (
-        <SoulSection title="Communication Style">
+        <SoulSection title={t("wizard.template.soul.communicationStyle")}>
           <ul className="ml-4 list-disc text-sm text-muted-foreground">
             {soul.voice.map((v, i) => (
               <li key={i}>{v}</li>
@@ -62,23 +64,23 @@ export function SoulDetailCard({ soul }: { soul: SoulFields }) {
       {soul.expertise.primary ||
       soul.expertise.fluentIn.length > 0 ||
       soul.expertise.defersOn.length > 0 ? (
-        <SoulSection title="Expertise">
+        <SoulSection title={t("wizard.template.soul.expertise")}>
           <div className="flex flex-col gap-1 text-sm text-muted-foreground">
             {soul.expertise.primary ? (
               <p>
-                <span className="font-medium text-foreground">Primary:</span>{" "}
+                <span className="font-medium text-foreground">{t("wizard.template.soul.primary")}</span>{" "}
                 {soul.expertise.primary}
               </p>
             ) : null}
             {soul.expertise.fluentIn.length > 0 ? (
               <p>
-                <span className="font-medium text-foreground">Fluent in:</span>{" "}
+                <span className="font-medium text-foreground">{t("wizard.template.soul.fluentIn")}</span>{" "}
                 {soul.expertise.fluentIn.join(", ")}
               </p>
             ) : null}
             {soul.expertise.defersOn.length > 0 ? (
               <p>
-                <span className="font-medium text-foreground">Defers on:</span>{" "}
+                <span className="font-medium text-foreground">{t("wizard.template.soul.defersOn")}</span>{" "}
                 {soul.expertise.defersOn.join(", ")}
               </p>
             ) : null}
@@ -87,7 +89,7 @@ export function SoulDetailCard({ soul }: { soul: SoulFields }) {
       ) : null}
 
       {soul.boundaries.length > 0 ? (
-        <SoulSection title="Boundaries">
+        <SoulSection title={t("wizard.template.soul.boundaries")}>
           <ul className="ml-4 list-disc text-sm text-muted-foreground">
             {soul.boundaries.map((b, i) => (
               <li key={i}>{b}</li>
@@ -98,18 +100,18 @@ export function SoulDetailCard({ soul }: { soul: SoulFields }) {
 
       {soul.memoryPolicy.remember.length > 0 ||
       soul.memoryPolicy.dontRemember.length > 0 ? (
-        <SoulSection title="Memory Policy">
+        <SoulSection title={t("wizard.template.soul.memoryPolicy")}>
           <div className="flex flex-col gap-1 text-sm text-muted-foreground">
             {soul.memoryPolicy.remember.length > 0 ? (
               <p>
-                <span className="font-medium text-foreground">Remember:</span>{" "}
+                <span className="font-medium text-foreground">{t("wizard.template.soul.remember")}</span>{" "}
                 {soul.memoryPolicy.remember.join("; ")}.
               </p>
             ) : null}
             {soul.memoryPolicy.dontRemember.length > 0 ? (
               <p>
                 <span className="font-medium text-foreground">
-                  Don&apos;t remember:
+                  {t("wizard.template.soul.dontRemember")}
                 </span>{" "}
                 {soul.memoryPolicy.dontRemember.join("; ")}.
               </p>
@@ -119,7 +121,7 @@ export function SoulDetailCard({ soul }: { soul: SoulFields }) {
       ) : null}
 
       {soul.petPeeves.length > 0 ? (
-        <SoulSection title="Pet Peeves">
+        <SoulSection title={t("wizard.template.soul.petPeeves")}>
           <ul className="ml-4 list-disc text-sm text-muted-foreground">
             {soul.petPeeves.map((p, i) => (
               <li key={i}>{p}</li>

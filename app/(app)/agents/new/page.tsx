@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, ArrowRight, Loader2, Rocket, UserPlus } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -23,6 +24,7 @@ import { StepExternal } from "./wizard/steps/StepExternal";
 // screen is its own module under ./wizard/steps. The wizard's root fork
 // (method) drives which steps render — see stepsForMethod in ./wizard/types.
 export default function AddAgentPage() {
+  const { t } = useTranslation();
   const w = useAgentWizard();
   const {
     state,
@@ -58,13 +60,13 @@ export default function AddAgentPage() {
         className="inline-flex w-fit items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
-        Go back to Agent team
+        {t("wizard.common.goBack")}
       </Link>
 
       <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-medium text-foreground">Add agent</h1>
+        <h1 className="text-3xl font-medium text-foreground">{t("wizard.common.title")}</h1>
         <p className="text-sm text-muted-foreground">
-          Step {stepIndex + 1} of {steps.length}
+          {t("wizard.common.stepOf", { current: stepIndex + 1, total: steps.length })}
         </p>
       </div>
 
@@ -102,7 +104,7 @@ export default function AddAgentPage() {
       {externalDone ? (
         <div className="flex items-center justify-end">
           <Link href="/agents" className={buttonVariants()}>
-            Done — back to agents
+            {t("wizard.common.doneBackToAgents")}
           </Link>
         </div>
       ) : (
@@ -113,7 +115,7 @@ export default function AddAgentPage() {
             disabled={isFirstStep || launching || inviting}
           >
             <ArrowLeft className="mr-1 h-4 w-4" />
-            Back
+            {t("wizard.common.back")}
           </Button>
 
           {currentStepKey === "review" ? (
@@ -123,7 +125,7 @@ export default function AddAgentPage() {
               ) : (
                 <Rocket className="h-4 w-4" />
               )}
-              {launching ? "Launching…" : "Launch agent"}
+              {launching ? t("wizard.common.launching") : t("wizard.common.launch")}
             </Button>
           ) : currentStepKey === "external" ? (
             <Button onClick={() => inviteMutation.mutate()} disabled={!canAdvance} className="gap-2">
@@ -132,11 +134,13 @@ export default function AddAgentPage() {
               ) : (
                 <UserPlus className="h-4 w-4" />
               )}
-              {inviting ? "Creating invitation…" : "Generate invitation"}
+              {inviting
+                ? t("wizard.common.creatingInvitation")
+                : t("wizard.common.generateInvitation")}
             </Button>
           ) : (
             <Button onClick={goNext} disabled={!canAdvance}>
-              Continue
+              {t("wizard.common.continue")}
               <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           )}

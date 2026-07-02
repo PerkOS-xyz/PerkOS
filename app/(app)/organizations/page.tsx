@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useConnection } from "wagmi";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { Building2, Check, Pencil, Plus, Users } from "lucide-react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import { useActiveOrg } from "../../lib/useActiveOrg";
 import { getWalletProjects, updateOrgName } from "../../lib/perkosApi";
 
 export default function OrganizationsPage() {
+  const { t } = useTranslation();
   const { address } = useConnection();
   const {
     orgs,
@@ -45,20 +47,19 @@ export default function OrganizationsPage() {
     onSuccess: async () => {
       await refresh();
       setEditingId(null);
-      toast.success("Organization renamed");
+      toast.success(t("organizations.toast.renamed"));
     },
     onError: (e: Error) =>
-      toast.error("Couldn't rename", { description: e.message }),
+      toast.error(t("organizations.toast.renameFailed"), { description: e.message }),
   });
 
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-medium text-foreground">Organizations</h1>
+          <h1 className="text-3xl font-medium text-foreground">{t("organizations.header.title")}</h1>
           <p className="text-sm text-muted-foreground">
-            Group your projects and the agents that work on them. Switch the
-            active organization from the header.
+            {t("organizations.header.subtitle")}
           </p>
         </div>
         <Link
@@ -66,7 +67,7 @@ export default function OrganizationsPage() {
           className={cn(buttonVariants({ size: "sm" }), "gap-1.5")}
         >
           <Plus className="h-3.5 w-3.5" />
-          New organization
+          {t("organizations.header.newOrg")}
         </Link>
       </header>
 
@@ -109,7 +110,7 @@ export default function OrganizationsPage() {
                         size="xs"
                         disabled={renameMut.isPending || !draftName.trim()}
                       >
-                        Save
+                        {t("organizations.rename.save")}
                       </Button>
                       <Button
                         type="button"
@@ -117,7 +118,7 @@ export default function OrganizationsPage() {
                         variant="ghost"
                         onClick={() => setEditingId(null)}
                       >
-                        Cancel
+                        {t("organizations.rename.cancel")}
                       </Button>
                     </form>
                   ) : (
@@ -126,19 +127,18 @@ export default function OrganizationsPage() {
                         {o.name}
                         {o.isDefault ? (
                           <span className="rounded border border-border px-1 text-[9px] uppercase text-muted-foreground">
-                            default
+                            {t("organizations.card.default")}
                           </span>
                         ) : null}
                         {isActive ? (
                           <span className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-                            <Check className="h-3 w-3" /> active
+                            <Check className="h-3 w-3" /> {t("organizations.card.active")}
                           </span>
                         ) : null}
                       </span>
                       <span className="text-xs text-muted-foreground">
-                        {countFor(o.id ?? "")}{" "}
-                        {countFor(o.id ?? "") === 1 ? "project" : "projects"}
-                        {address ? ` · owner ${formatAddress(address)}` : ""}
+                        {t("organizations.card.projectCount", { count: countFor(o.id ?? "") })}
+                        {address ? t("organizations.card.ownerSuffix", { address: formatAddress(address) }) : ""}
                       </span>
                     </div>
                   )}
@@ -152,7 +152,7 @@ export default function OrganizationsPage() {
                         variant="outline"
                         onClick={() => o.id && setActiveOrgId(o.id)}
                       >
-                        Set active
+                        {t("organizations.card.setActive")}
                       </Button>
                     ) : null}
                     <Link
@@ -163,7 +163,7 @@ export default function OrganizationsPage() {
                       )}
                     >
                       <Users className="h-3.5 w-3.5" />
-                      Members
+                      {t("organizations.card.members")}
                     </Link>
                     {!o.shared ? (
                       <Button
@@ -176,7 +176,7 @@ export default function OrganizationsPage() {
                         }}
                       >
                         <Pencil className="h-3.5 w-3.5" />
-                        Rename
+                        {t("organizations.card.rename")}
                       </Button>
                     ) : null}
                   </div>

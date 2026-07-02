@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Sparkles, KeyRound, FileCode } from "lucide-react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,12 +26,13 @@ export function StepLLM({
   apiKeyError,
   llmAllowed,
 }: StepProps & { apiKeyError?: string; llmAllowed: boolean }) {
+  const { t } = useTranslation();
   const providerOpts = state.runtime ? byokProviderOptions(state.runtime) : [];
   return (
     <div className="flex flex-col gap-4">
       <StepHeader
-        title="LLM source"
-        description="Pick how the agent reaches its model. Each runtime gets a config block in its native shape — preview on the review step."
+        title={t("wizard.llm.title")}
+        description={t("wizard.llm.description")}
       />
       <RadioGroup
         value={state.llmSource ?? ""}
@@ -47,30 +49,27 @@ export function StepLLM({
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-primary" />
                 <span className="text-base font-medium text-foreground">
-                  PerkOS LLM service
+                  {t("wizard.llm.perkos.title")}
                 </span>
                 {!llmAllowed ? (
                   <Badge
                     variant="secondary"
                     className="border-amber-500/40 bg-amber-500/15 text-amber-300"
                   >
-                    Coming soon
+                    {t("wizard.llm.comingSoon")}
                   </Badge>
                 ) : null}
               </div>
               <p className="text-sm text-muted-foreground">
-                Managed Ollama-compatible gateway at{" "}
+                {t("wizard.llm.perkos.descBefore")}{" "}
                 <code className="rounded bg-muted px-1 font-mono text-[11px]">
                   api.llm.perkos.xyz
                 </code>{" "}
-                — kimi-k2.6:cloud + qwen 7B/14B. No key needed; we issue one
-                scoped to your agent.
+                {t("wizard.llm.perkos.descAfter")}
               </p>
               {!llmAllowed ? (
                 <p className="text-xs text-muted-foreground">
-                  Currently invite-only while we test. Pick BYOK or
-                  &ldquo;Configure later&rdquo; for now, or contact an admin to be
-                  added to the early access list.
+                  {t("wizard.llm.perkos.inviteOnly")}
                 </p>
               ) : null}
             </div>
@@ -87,12 +86,11 @@ export function StepLLM({
               <div className="flex items-center gap-2">
                 <KeyRound className="h-4 w-4 text-primary" />
                 <span className="text-base font-medium text-foreground">
-                  Bring your own key (BYOK)
+                  {t("wizard.llm.byok.title")}
                 </span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Use your own provider key. We forward it to the agent runtime —
-                never log or proxy your traffic.
+                {t("wizard.llm.byok.description")}
               </p>
             </div>
             <RadioGroupItem value="byok" id="llm-byok" />
@@ -108,12 +106,11 @@ export function StepLLM({
               <div className="flex items-center gap-2">
                 <FileCode className="h-4 w-4 text-primary" />
                 <span className="text-base font-medium text-foreground">
-                  Configure later
+                  {t("wizard.llm.skip.title")}
                 </span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Agent boots without an LLM source. Useful for testing transport +
-                tool calls only.
+                {t("wizard.llm.skip.description")}
               </p>
             </div>
             <RadioGroupItem value="skip" id="llm-skip" />
@@ -126,18 +123,18 @@ export function StepLLM({
           <CardHeader>
             <CardTitle className="text-base">
               {state.runtime === "OpenClaw"
-                ? "OpenClaw provider settings"
-                : "Hermes provider settings"}
+                ? t("wizard.llm.providerSettings.openclawTitle")
+                : t("wizard.llm.providerSettings.hermesTitle")}
             </CardTitle>
             <CardDescription>
               {state.runtime === "OpenClaw"
-                ? "Fields map 1:1 to a block under models.providers.* in openclaw.json."
-                : "Fields map to provider.* + secrets.* in your Hermes profile's config.yaml."}
+                ? t("wizard.llm.providerSettings.openclawDesc")
+                : t("wizard.llm.providerSettings.hermesDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="byok-provider">Provider</Label>
+              <Label htmlFor="byok-provider">{t("wizard.llm.providerSettings.provider")}</Label>
               <Select
                 value={state.byokProvider}
                 onValueChange={(v) => {
@@ -147,7 +144,7 @@ export function StepLLM({
                 }}
               >
                 <SelectTrigger id="byok-provider">
-                  <SelectValue placeholder="Pick a provider" />
+                  <SelectValue placeholder={t("wizard.llm.providerSettings.providerPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {providerOpts.map((p) => (
@@ -159,7 +156,7 @@ export function StepLLM({
               </Select>
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="byok-model">Default model</Label>
+              <Label htmlFor="byok-model">{t("wizard.llm.providerSettings.defaultModel")}</Label>
               <Input
                 id="byok-model"
                 value={state.byokModel}
@@ -169,7 +166,7 @@ export function StepLLM({
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="byok-key">API key</Label>
+              <Label htmlFor="byok-key">{t("wizard.llm.providerSettings.apiKey")}</Label>
               <Input
                 id="byok-key"
                 value={state.byokApiKey}

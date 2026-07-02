@@ -718,5 +718,363 @@
       "draftClearFailed": "Couldn't clear draft",
       "stateReset": "Workspace state reset"
     }
+  },
+  "wallet": {
+    "header": {
+      "title": "Wallet",
+      "subtitle": "Your PerkOS wallet — where your Loyalty rewards land and you can hold and move funds. PerkOS runs it for you; no seed phrase to manage."
+    },
+    "loading": "Loading your wallet…",
+    "error": {
+      "load": "Couldn't load your wallet."
+    },
+    "comingSoon": {
+      "title": "Coming soon",
+      "description": "Your wallet is being set up for this account. Check back shortly — it's where your Loyalty rewards will arrive."
+    },
+    "address": {
+      "title": "Your wallet address",
+      "description": "Send tokens here to fund your wallet — on Base or Celo.",
+      "copied": "Copied",
+      "copy": "Copy",
+      "deposit": "Deposit: send USDC or $PERKOS to {{addr}} from any wallet."
+    },
+    "balances": {
+      "title": "Balances",
+      "refresh": "Refresh",
+      "reading": "Reading balances…",
+      "error": "Couldn't read balances."
+    }
+  },
+  "notifications": {
+    "header": {
+      "title": "Notifications",
+      "subtitle": "Task completions, agent status changes, and project mentions."
+    },
+    "actions": {
+      "markAllRead": "Mark all read",
+      "clearAll": "Clear all"
+    },
+    "tabs": {
+      "filterAria": "Filter notifications",
+      "all": "All",
+      "allWithCount": "All ({{count}})",
+      "unread": "Unread",
+      "unreadWithCount": "Unread ({{count}})"
+    },
+    "emptyNone": {
+      "title": "No notifications yet",
+      "description": "When agents finish tasks or projects get activity, the events will show up here."
+    },
+    "emptyCaughtUp": {
+      "title": "You're all caught up",
+      "description": "No unread notifications. Switch to the All tab to review history."
+    },
+    "clearDialog": {
+      "title": "Clear all notifications?",
+      "description": "This removes every notification on this device. Cannot be undone.",
+      "confirmLabel": "Clear all"
+    },
+    "time": {
+      "justNow": "just now",
+      "minutesAgo": "{{count}}m ago",
+      "hoursAgo": "{{count}}h ago",
+      "daysAgo": "{{count}}d ago"
+    },
+    "row": {
+      "new": "New",
+      "dismissAria": "Dismiss notification",
+      "dismiss": "Dismiss"
+    }
+  },
+  "organizations": {
+    "header": {
+      "title": "Organizations",
+      "subtitle": "Group your projects and the agents that work on them. Switch the active organization from the header.",
+      "newOrg": "New organization"
+    },
+    "toast": {
+      "renamed": "Organization renamed",
+      "renameFailed": "Couldn't rename"
+    },
+    "rename": {
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "card": {
+      "default": "default",
+      "active": "active",
+      "projectCount_one": "{{count}} project",
+      "projectCount_other": "{{count}} projects",
+      "ownerSuffix": " · owner {{address}}",
+      "setActive": "Set active",
+      "members": "Members",
+      "rename": "Rename"
+    }
+  },
+  "wizard": {
+    "common": {
+      "goBack": "Go back to Agent team",
+      "title": "Add agent",
+      "stepOf": "Step {{current}} of {{total}}",
+      "back": "Back",
+      "continue": "Continue",
+      "launching": "Launching…",
+      "launch": "Launch agent",
+      "creatingInvitation": "Creating invitation…",
+      "generateInvitation": "Generate invitation",
+      "doneBackToAgents": "Done — back to agents"
+    },
+    "method": {
+      "title": "How do you want to run this agent?",
+      "description": "This is the one choice that shapes the rest. The bridge always dials OUT to PerkOS — no inbound ports needed for any option.",
+      "comingSoon": "Coming soon",
+      "recommended": "Recommended",
+      "perkos": {
+        "title": "PerkOS infra",
+        "descLead": "PerkOS provisions a managed container for your agent. From",
+        "onNetwork": " on {{network}}",
+        "descTail": "billed via x402{{onNetwork}}. Status flips to “ready” once the container is healthy (~30s).",
+        "inviteOnly": "Currently invite-only while we test. Pick your VPS or “I already have one” for now, or contact an admin to be added to the early access list."
+      },
+      "vps": {
+        "title": "Your VPS (self-hosted)",
+        "descLead": "We generate a docker-compose bundle (runtime + bridge sidecar). Run",
+        "descTail": "on any host with Docker (Hetzner, AWS EC2, anywhere) — the bridge dials OUT, no inbound ports or SSH access needed.",
+        "inviteOnly": "Invite-only while we test self-hosting. Pick “I already have one” for now, or contact an admin to be added to the early-access list."
+      },
+      "external": {
+        "title": "I already have an agent",
+        "description": "Already running your own Hermes / OpenClaw / custom agent — with its own knowledge? Invite it. PerkOS provisions nothing; you get a prompt to hand to your agent so it joins your org and works the board with parity to native agents."
+      }
+    },
+    "template": {
+      "filterAll": "All",
+      "pickTitle": "Pick your Agent",
+      "pickDescription": "Choose the agent you want to work with — from PerkOS, the OpenClaw and Hermes communities, or build your own. Each is editable later.",
+      "filterAria": "Filter agents by origin",
+      "searchSr": "Search agents",
+      "searchPlaceholder": "Search agents…",
+      "clearSearch": "Clear search",
+      "noMatchQuery": "No agents match “{{query}}”.",
+      "noMatchFilter": "No agents match this filter.",
+      "showAll": "Show all agents",
+      "chooseAria": "Choose an agent persona",
+      "viewSourceAria": "View {{origin}} source on GitHub (opens in new tab)",
+      "changePersona": "Change persona",
+      "teammateTagline": "Your {{name}} teammate",
+      "viewSourceLink": "View source on GitHub",
+      "handCrafted": "Hand-crafted by PerkOS",
+      "engine": "Engine",
+      "recommended": "recommended",
+      "runtimeHint": {
+        "OpenClaw": "Autonomous — multi-step work & tools",
+        "Hermes": "Conversational — fast, chat-driven"
+      },
+      "agentName": "Agent name",
+      "hidePrompt": "Hide system prompt",
+      "showPrompt": "Show system prompt",
+      "edited": "edited",
+      "systemPromptSr": "System prompt",
+      "systemPromptHelp": "Becomes SOUL.md / IDENTITY.md inside the runtime container.",
+      "systemPromptPlaceholder": "You are a …",
+      "resetToDefault": "Reset to the {{name}} default",
+      "advancedHide": "Advanced — hide full soul",
+      "advancedView": "Advanced — view full soul",
+      "soul": {
+        "identity": "Identity",
+        "coreTruths": "Core Truths",
+        "worldview": "Worldview",
+        "communicationStyle": "Communication Style",
+        "expertise": "Expertise",
+        "primary": "Primary:",
+        "fluentIn": "Fluent in:",
+        "defersOn": "Defers on:",
+        "boundaries": "Boundaries",
+        "memoryPolicy": "Memory Policy",
+        "remember": "Remember:",
+        "dontRemember": "Don't remember:",
+        "petPeeves": "Pet Peeves"
+      }
+    },
+    "capabilities": {
+      "title": "Capabilities & skills",
+      "description": "Your agent ships with core tools on by default. Turn off anything it shouldn't have, then add open-source skill packs for domain expertise — both work on Hermes and OpenClaw.",
+      "builtInTools": "Built-in tools",
+      "builtInHelp": "On by default. Turn off what this agent doesn’t need — a narrower tool set is safer and cheaper for focused agents. Your project board tools aren’t affected.",
+      "on": "on",
+      "off": "off",
+      "toolSwitchAria": "{{label}}: {{state}}",
+      "turnedOffLabel": "Turned off:",
+      "turnedOffEffect": ". Takes effect when the agent next provisions.",
+      "tools": {
+        "web-search": {
+          "label": "Web search",
+          "description": "Find and read pages on the public web."
+        },
+        "code-execution": {
+          "label": "Code execution",
+          "description": "Run Python / shell in a sandbox."
+        },
+        "browser": {
+          "label": "Headless browser",
+          "description": "Navigate sites and capture content."
+        },
+        "memory": {
+          "label": "Memory",
+          "description": "Store and recall facts across the conversation."
+        }
+      },
+      "openSourceTitle": "Open-source skills",
+      "openSourceHelp": "Markdown skill packs from public GitHub repos. They’re injected into your agent’s instructions. You can inspect each on GitHub.",
+      "recommended": "Recommended",
+      "unverified": "Unverified — review",
+      "openSource": "Open source",
+      "byAuthor": "by {{author}}",
+      "inspect": "Inspect",
+      "addGithubSkill": "Add a GitHub skill",
+      "repoError": "Only github.com / raw.githubusercontent.com SKILL.md URLs are allowed.",
+      "add": "Add"
+    },
+    "channels": {
+      "title": "Channels",
+      "description": "Optional. Let your agent receive and reply to messages from outside PerkOS, using each runtime's native messaging integration.",
+      "secretsNote": "Secrets are stored in a managed vault under your wallet’s namespace — never in the agent doc, never in this browser tab beyond the launch request. You can also add a channel later from the agent’s settings.",
+      "telegram": {
+        "blurb": "Your agent answers from a Telegram bot you create at @BotFather. Webhook mode is friendly to hibernation — no idle connection while the agent sleeps.",
+        "botToken": "Bot token",
+        "botTokenHelp": "From @BotFather. Stored in a managed secrets vault; never returned by the API.",
+        "webhookUrl": "Webhook URL (optional)",
+        "webhookHelp": "Leave blank to use long-polling. Setting a webhook URL is recommended for hibernation friendliness."
+      },
+      "slack": {
+        "blurb": "Your agent answers in Slack channels it's invited to. Webhook-mode (Events API), hibernation-friendly. You create a Slack app, install it to your workspace, copy the bot token + signing secret.",
+        "botToken": "Bot token (xoxb-...)",
+        "botTokenHelp": "Slack app → OAuth & Permissions → Bot User OAuth Token.",
+        "signingSecret": "Signing secret",
+        "signingSecretPlaceholder": "32-char hex from Slack app settings",
+        "signingSecretHelp": "Slack app → Basic Information → Signing Secret. Used to verify inbound webhook payloads.",
+        "channelId": "Channel id (optional)",
+        "channelIdHelp": "Restrict the agent to a single channel. Leave blank for mentions + DMs in every channel the bot is in."
+      },
+      "farcaster": {
+        "blurb": "Hermes only. Your agent replies to mentions on Farcaster via Neynar. You need a Neynar-managed signer for the agent's identity.",
+        "webhookLabel": "Neynar webhook URL — set this as your Neynar webhook’s target URL",
+        "webhookHelp": "Use the webhook secret below as the webhook’s signature secret. If the agent name is taken it gets a suffix on launch — use the final name (shown after launch) in the URL.",
+        "fid": "FID",
+        "replyVisibility": "Reply visibility",
+        "visibilityMentions": "mentions only (recommended)",
+        "visibilityAll": "all (requires parent channel)",
+        "neynarApiKey": "Neynar API key",
+        "signerUuid": "Signer UUID",
+        "webhookSecret": "Webhook secret",
+        "webhookSecretPlaceholder": "HMAC secret you set on the Neynar webhook",
+        "parentChannel": "Parent channel",
+        "parentChannelHelp": "Required when visibility is “all” — scopes the agent to one channel."
+      },
+      "farcasterUnavailableBefore": "Farcaster is available on Hermes agents. Your agent runs on",
+      "farcasterUnavailableAfter": ", which doesn’t have a native Farcaster channel."
+    },
+    "llm": {
+      "title": "LLM source",
+      "description": "Pick how the agent reaches its model. Each runtime gets a config block in its native shape — preview on the review step.",
+      "comingSoon": "Coming soon",
+      "perkos": {
+        "title": "PerkOS LLM service",
+        "descBefore": "Managed Ollama-compatible gateway at",
+        "descAfter": "— kimi-k2.6:cloud + qwen 7B/14B. No key needed; we issue one scoped to your agent.",
+        "inviteOnly": "Currently invite-only while we test. Pick BYOK or “Configure later” for now, or contact an admin to be added to the early access list."
+      },
+      "byok": {
+        "title": "Bring your own key (BYOK)",
+        "description": "Use your own provider key. We forward it to the agent runtime — never log or proxy your traffic."
+      },
+      "skip": {
+        "title": "Configure later",
+        "description": "Agent boots without an LLM source. Useful for testing transport + tool calls only."
+      },
+      "providerSettings": {
+        "openclawTitle": "OpenClaw provider settings",
+        "hermesTitle": "Hermes provider settings",
+        "openclawDesc": "Fields map 1:1 to a block under models.providers.* in openclaw.json.",
+        "hermesDesc": "Fields map to provider.* + secrets.* in your Hermes profile's config.yaml.",
+        "provider": "Provider",
+        "providerPlaceholder": "Pick a provider",
+        "defaultModel": "Default model",
+        "apiKey": "API key"
+      }
+    },
+    "external": {
+      "title": "Invite your existing agent",
+      "description": "Nothing about your runtime, memory, or tools changes — your agent just connects OUT to PerkOS (perkos-a2a + perkos-chat) and gains your org's chat and job board.",
+      "runtimeKinds": {
+        "hermes": { "label": "Hermes", "hint": "/v1/responses" },
+        "openclaw": { "label": "OpenClaw", "hint": "/v1/chat/completions" },
+        "custom": { "label": "Custom", "hint": "your own HTTP runtime" }
+      },
+      "nameLabel": "Agent name (handle)",
+      "nameHelp": "How it's known on the relay + in chat. Must be unique.",
+      "nameError": "2–32 chars, letters/numbers/_/- only",
+      "runtimeLabel": "Runtime",
+      "runtimeHelp": "What your agent speaks — sets the bridge endpoint in the prompt.",
+      "noteLabel": "Note for the agent (optional)",
+      "noteHelp": "Context the agent sees in its invitation prompt.",
+      "notePlaceholder": "You'll help the team with market research and weekly reports.",
+      "result": {
+        "registeredBefore": "registered in your org. It shows as",
+        "invited": "invited",
+        "registeredAfter": "until it connects.",
+        "invitationPrompt": "Invitation prompt",
+        "copyPrompt": "Copy prompt",
+        "pasteHelp": "Paste this to your agent. It contains its credential (relayApiKey) — treat it like a password and only give it to the agent you're inviting.",
+        "copyRelayKey": "Copy relayApiKey",
+        "copied": "Copied"
+      }
+    },
+    "review": {
+      "title": "Review + launch",
+      "description": "What we'll write to disk (or to your managed container) when you click Launch.",
+      "persona": "Persona",
+      "agentName": "Agent name",
+      "runtime": "Runtime",
+      "deploy": "Deploy",
+      "deployPerkos": "PerkOS infra",
+      "deployVps": "Self-hosted (your infra)",
+      "llm": "LLM",
+      "llmPerkos": "PerkOS LLM service",
+      "llmConfigureLater": "Configure later",
+      "skills": "Skills",
+      "builtInTools": "Built-in tools",
+      "skillPacks_one": "{{count}} skill pack",
+      "skillPacks_other": "{{count}} skill packs",
+      "toolsOff_one": " · {{count}} tool off",
+      "toolsOff_other": " · {{count}} tools off",
+      "channels": "Channels",
+      "channelsPerkosOnly": "PerkOS only",
+      "configPreview": "Config preview",
+      "configPreviewDescBefore": "This is the literal block that will be written to",
+      "configPreviewDescAfter": "on the agent host.",
+      "renameOrSkip": "Rename or skip",
+      "renameOrSkipDesc": "Pre-filled from the persona; tweak here for one-off launches.",
+      "agentNameLabel": "Agent name"
+    },
+    "toast": {
+      "launched": "Agent launched",
+      "launchedSavedAs": "Saved as \"{{launched}}\" — you already have an agent named \"{{requested}}\".",
+      "launchedReady": "{{name}} is ready.",
+      "telegramSaved": "Telegram gateway saved",
+      "telegramNotSaved": "Telegram gateway not saved",
+      "farcasterSaved": "Farcaster gateway saved",
+      "farcasterNotSaved": "Farcaster gateway not saved",
+      "slackSaved": "Slack gateway saved",
+      "slackNotSaved": "Slack gateway not saved",
+      "gatewayActivate": "Will activate on next agent restart.",
+      "launchFailed": "Launch failed",
+      "inviteFailed": "Invite failed"
+    },
+    "error": {
+      "connectWallet": "Connect a wallet before launching an agent.",
+      "pickRuntime": "Pick a runtime."
+    }
   }
 }

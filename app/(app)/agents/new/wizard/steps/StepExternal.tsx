@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Check, Copy } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -15,11 +16,9 @@ import { EXTERNAL_NAME_RE } from "../types";
 import { StepHeader } from "../ui/StepHeader";
 import { SelectableCard } from "../ui/SelectableCard";
 
-const RUNTIME_KINDS: { id: RuntimeKindChoice; label: string; hint: string }[] = [
-  { id: "hermes", label: "Hermes", hint: "/v1/responses" },
-  { id: "openclaw", label: "OpenClaw", hint: "/v1/chat/completions" },
-  { id: "custom", label: "Custom", hint: "your own HTTP runtime" },
-];
+// Labels + hints are resolved via i18n keyed by id
+// (wizard.external.runtimeKinds.<id>.*).
+const RUNTIME_KIND_IDS: RuntimeKindChoice[] = ["hermes", "openclaw", "custom"];
 
 // The external branch. The agent already exists — we register it + return an
 // onboarding prompt (inviteAgent). The page's primary button triggers the
@@ -29,27 +28,28 @@ export function StepExternal({
   onChange,
   result,
 }: StepProps & { result: InviteAgentResult | null }) {
+  const { t } = useTranslation();
   if (result) return <InviteResult result={result} />;
 
   const name = state.agentName;
   const nameError =
     name.length > 0 && !EXTERNAL_NAME_RE.test(name)
-      ? "2–32 chars, letters/numbers/_/- only"
+      ? t("wizard.external.nameError")
       : undefined;
 
   return (
     <div className="flex flex-col gap-5">
       <StepHeader
-        title="Invite your existing agent"
-        description="Nothing about your runtime, memory, or tools changes — your agent just connects OUT to PerkOS (perkos-a2a + perkos-chat) and gains your org's chat and job board."
+        title={t("wizard.external.title")}
+        description={t("wizard.external.description")}
       />
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="ext-name" className="text-sm text-foreground">
-          Agent name (handle)
+          {t("wizard.external.nameLabel")}
         </Label>
         <span className="text-xs text-muted-foreground">
-          How it&apos;s known on the relay + in chat. Must be unique.
+          {t("wizard.external.nameHelp")}
         </span>
         <Input
           id="ext-name"
@@ -62,27 +62,31 @@ export function StepExternal({
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label className="text-sm text-foreground">Runtime</Label>
+        <Label className="text-sm text-foreground">{t("wizard.external.runtimeLabel")}</Label>
         <span className="text-xs text-muted-foreground">
-          What your agent speaks — sets the bridge endpoint in the prompt.
+          {t("wizard.external.runtimeHelp")}
         </span>
         <RadioGroup
           value={state.runtimeKind ?? ""}
           onValueChange={(v) => onChange({ runtimeKind: v as RuntimeKindChoice })}
           className="grid grid-cols-1 gap-2 md:grid-cols-3"
         >
-          {RUNTIME_KINDS.map((r) => (
+          {RUNTIME_KIND_IDS.map((id) => (
             <SelectableCard
-              key={r.id}
-              selected={state.runtimeKind === r.id}
-              onClick={() => onChange({ runtimeKind: r.id })}
+              key={id}
+              selected={state.runtimeKind === id}
+              onClick={() => onChange({ runtimeKind: id })}
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-foreground">{r.label}</span>
-                  <span className="text-[10px] text-muted-foreground">{r.hint}</span>
+                  <span className="text-sm font-medium text-foreground">
+                    {t(`wizard.external.runtimeKinds.${id}.label`)}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {t(`wizard.external.runtimeKinds.${id}.hint`)}
+                  </span>
                 </div>
-                <RadioGroupItem value={r.id} id={`ext-rk-${r.id}`} />
+                <RadioGroupItem value={id} id={`ext-rk-${id}`} />
               </div>
             </SelectableCard>
           ))}
@@ -91,17 +95,17 @@ export function StepExternal({
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="ext-note" className="text-sm text-foreground">
-          Note for the agent (optional)
+          {t("wizard.external.noteLabel")}
         </Label>
         <span className="text-xs text-muted-foreground">
-          Context the agent sees in its invitation prompt.
+          {t("wizard.external.noteHelp")}
         </span>
         <Textarea
           id="ext-note"
           value={state.externalNote}
           onChange={(e) => onChange({ externalNote: e.target.value })}
           rows={3}
-          placeholder="You'll help the team with market research and weekly reports."
+          placeholder={t("wizard.external.notePlaceholder")}
         />
       </div>
     </div>
@@ -109,25 +113,26 @@ export function StepExternal({
 }
 
 function InviteResult({ result }: { result: InviteAgentResult }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
         <Check className="h-4 w-4 text-emerald-300" />
         <span>
-          <span className="font-medium">{result.agentName}</span> registered in your
-          org. It shows as <span className="font-medium">invited</span> until it
-          connects.
+          <span className="font-medium">{result.agentName}</span>{" "}
+          {t("wizard.external.result.registeredBefore")}{" "}
+          <span className="font-medium">{t("wizard.external.result.invited")}</span>{" "}
+          {t("wizard.external.result.registeredAfter")}
         </span>
       </div>
 
       <div className="rounded-md border border-border bg-card p-4">
         <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-sm font-medium text-foreground">Invitation prompt</h2>
-          <CopyButton text={result.invitePrompt} label="Copy prompt" />
+          <h2 className="text-sm font-medium text-foreground">{t("wizard.external.result.invitationPrompt")}</h2>
+          <CopyButton text={result.invitePrompt} label={t("wizard.external.result.copyPrompt")} />
         </div>
         <p className="mb-3 text-xs text-muted-foreground">
-          Paste this to your agent. It contains its credential (relayApiKey) — treat
-          it like a password and only give it to the agent you&apos;re inviting.
+          {t("wizard.external.result.pasteHelp")}
         </p>
         <pre className="max-h-96 overflow-auto whitespace-pre-wrap break-words rounded-md border border-border bg-muted/50 p-3 text-[11px] leading-relaxed text-foreground">
           {result.invitePrompt}
@@ -135,7 +140,7 @@ function InviteResult({ result }: { result: InviteAgentResult }) {
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <CopyButton text={result.relayApiKey} label="Copy relayApiKey" subtle />
+        <CopyButton text={result.relayApiKey} label={t("wizard.external.result.copyRelayKey")} subtle />
       </div>
     </div>
   );
@@ -150,6 +155,7 @@ function CopyButton({
   label: string;
   subtle?: boolean;
 }) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   return (
     <button
@@ -170,7 +176,7 @@ function CopyButton({
       }
     >
       {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-      {copied ? "Copied" : label}
+      {copied ? t("wizard.external.result.copied") : label}
     </button>
   );
 }

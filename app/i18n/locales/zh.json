@@ -718,5 +718,372 @@
       "draftClearFailed": "无法清除草稿",
       "stateReset": "工作空间状态已重置"
     }
+  },
+  "wallet": {
+    "header": {
+      "title": "钱包",
+      "subtitle": "这是你的 PerkOS 钱包,忠诚度奖励会存到这里,你也可以在这里持有和转移资金。PerkOS 会替你打理一切,无需管理助记词。"
+    },
+    "loading": "正在加载你的钱包…",
+    "error": {
+      "load": "无法加载你的钱包。"
+    },
+    "comingSoon": {
+      "title": "即将推出",
+      "description": "你的账户钱包正在设置中,请稍后再来查看,这里将是你的忠诚度奖励到账的地方。"
+    },
+    "address": {
+      "title": "你的钱包地址",
+      "description": "把代币发送到这里为钱包充值,支持 Base 或 Celo。",
+      "copied": "已复制",
+      "copy": "复制",
+      "deposit": "充值:从任意钱包向 {{addr}} 发送 USDC 或 $PERKOS。"
+    },
+    "balances": {
+      "title": "余额",
+      "refresh": "刷新",
+      "reading": "正在读取余额…",
+      "error": "无法读取余额。"
+    }
+  },
+  "notifications": {
+    "header": {
+      "title": "通知",
+      "subtitle": "任务完成、智能体状态变化,以及项目中被提及的消息。"
+    },
+    "actions": {
+      "markAllRead": "全部标为已读",
+      "clearAll": "全部清除"
+    },
+    "tabs": {
+      "filterAria": "筛选通知",
+      "all": "全部",
+      "allWithCount": "全部 ({{count}})",
+      "unread": "未读",
+      "unreadWithCount": "未读 ({{count}})"
+    },
+    "emptyNone": {
+      "title": "暂时还没有通知",
+      "description": "当智能体完成任务或项目有新动态时,相关事件会显示在这里。"
+    },
+    "emptyCaughtUp": {
+      "title": "全部已读",
+      "description": "没有未读通知。切换到“全部”标签可查看历史记录。"
+    },
+    "clearDialog": {
+      "title": "清除所有通知?",
+      "description": "此操作会移除此设备上的所有通知,且无法撤销。",
+      "confirmLabel": "全部清除"
+    },
+    "time": {
+      "justNow": "刚刚",
+      "minutesAgo": "{{count}} 分钟前",
+      "hoursAgo": "{{count}} 小时前",
+      "daysAgo": "{{count}} 天前"
+    },
+    "row": {
+      "new": "新",
+      "dismissAria": "关闭通知",
+      "dismiss": "关闭"
+    }
+  },
+  "organizations": {
+    "header": {
+      "title": "组织",
+      "subtitle": "把你的项目和负责它们的智能体归拢在一起。可以在顶部导航栏切换当前使用的组织。",
+      "newOrg": "新建组织"
+    },
+    "toast": {
+      "renamed": "组织已重命名",
+      "renameFailed": "无法重命名"
+    },
+    "rename": {
+      "save": "保存",
+      "cancel": "取消"
+    },
+    "card": {
+      "default": "默认",
+      "active": "使用中",
+      "projectCount_one": "{{count}} 个项目",
+      "projectCount_other": "{{count}} 个项目",
+      "ownerSuffix": " · 所有者 {{address}}",
+      "setActive": "设为当前",
+      "members": "成员",
+      "rename": "重命名"
+    }
+  },
+  "wizard": {
+    "common": {
+      "goBack": "返回智能体团队",
+      "title": "添加智能体",
+      "stepOf": "第 {{current}} 步,共 {{total}} 步",
+      "back": "上一步",
+      "continue": "继续",
+      "launching": "启动中…",
+      "launch": "启动智能体",
+      "creatingInvitation": "正在创建邀请…",
+      "generateInvitation": "生成邀请",
+      "doneBackToAgents": "完成,返回智能体列表"
+    },
+    "method": {
+      "title": "你想如何运行这个智能体?",
+      "description": "这是决定后续一切的关键选择。桥接始终由内向外连接到 PerkOS,任何方案都无需开放入站端口。",
+      "comingSoon": "即将推出",
+      "recommended": "推荐",
+      "perkos": {
+        "title": "PerkOS 基础设施",
+        "descLead": "PerkOS 会为你的智能体配置一个托管容器,价格从",
+        "onNetwork": "(在 {{network}} 网络上)",
+        "descTail": "起,通过 x402 计费{{onNetwork}}。容器进入健康状态(约 30 秒)后,状态会变为“就绪”。",
+        "inviteOnly": "目前处于测试阶段,仅限受邀用户使用。现在可以先选择“你的 VPS”或“我已经有一个”,或联系管理员申请加入早期访问名单。"
+      },
+      "vps": {
+        "title": "你的 VPS(自托管)",
+        "descLead": "我们会为你生成一份 docker-compose 配置包(运行环境 + 桥接边车容器)。运行",
+        "descTail": "即可在任何装有 Docker 的主机上运行(Hetzner、AWS EC2,任何地方都行),桥接由内向外连接,不需要开放入站端口或 SSH 访问权限。",
+        "inviteOnly": "自托管功能测试期间仅限受邀用户使用。现在可以先选择“我已经有一个”,或联系管理员申请加入早期访问名单。"
+      },
+      "external": {
+        "title": "我已经有一个智能体",
+        "description": "已经在运行自己的 Hermes / OpenClaw / 自定义智能体,而且它有自己的知识库?邀请它加入。PerkOS 不会为它配置任何基础设施,你只会得到一段提示词,交给你的智能体,它就能加入你的组织,并以和原生智能体同等的方式在看板上工作。"
+      }
+    },
+    "template": {
+      "filterAll": "全部",
+      "pickTitle": "选择你的智能体",
+      "pickDescription": "选择你想合作的智能体:来自 PerkOS、OpenClaw 和 Hermes 社区,或者自己创建一个。之后都可以随时编辑。",
+      "filterAria": "按来源筛选智能体",
+      "searchSr": "搜索智能体",
+      "searchPlaceholder": "搜索智能体…",
+      "clearSearch": "清除搜索",
+      "noMatchQuery": "没有与“{{query}}”匹配的智能体。",
+      "noMatchFilter": "没有符合此筛选条件的智能体。",
+      "showAll": "显示所有智能体",
+      "chooseAria": "选择一个智能体人设",
+      "viewSourceAria": "在 GitHub 上查看 {{origin}} 的源代码(在新标签页中打开)",
+      "changePersona": "更换人设",
+      "teammateTagline": "你的 {{name}} 团队成员",
+      "viewSourceLink": "在 GitHub 上查看源代码",
+      "handCrafted": "由 PerkOS 精心打造",
+      "engine": "引擎",
+      "recommended": "推荐",
+      "runtimeHint": {
+        "OpenClaw": "自主型,可完成多步骤工作并使用工具",
+        "Hermes": "对话型,响应快,以聊天驱动"
+      },
+      "agentName": "智能体名称",
+      "hidePrompt": "隐藏系统提示词",
+      "showPrompt": "显示系统提示词",
+      "edited": "已编辑",
+      "systemPromptSr": "系统提示词",
+      "systemPromptHelp": "会成为运行环境容器内的 SOUL.md / IDENTITY.md 文件。",
+      "systemPromptPlaceholder": "You are a …",
+      "resetToDefault": "恢复为 {{name}} 的默认设置",
+      "advancedHide": "高级选项,隐藏完整人设",
+      "advancedView": "高级选项,查看完整人设",
+      "soul": {
+        "identity": "身份",
+        "coreTruths": "核心信念",
+        "worldview": "世界观",
+        "communicationStyle": "沟通风格",
+        "expertise": "专长",
+        "primary": "主要:",
+        "fluentIn": "熟悉:",
+        "defersOn": "会请教他人:",
+        "boundaries": "边界",
+        "memoryPolicy": "记忆策略",
+        "remember": "会记住:",
+        "dontRemember": "不会记住:",
+        "petPeeves": "反感事项"
+      }
+    },
+    "capabilities": {
+      "title": "能力与技能",
+      "description": "你的智能体默认自带核心工具。关掉它不需要的功能,再添加开源技能包来获得领域专长,这两者在 Hermes 和 OpenClaw 上都能用。",
+      "builtInTools": "内置工具",
+      "builtInHelp": "默认开启。关掉这个智能体不需要的工具,工具集越精简,对专注型智能体来说越安全、成本也越低。项目看板工具不受影响。",
+      "on": "开",
+      "off": "关",
+      "toolSwitchAria": "{{label}}:{{state}}",
+      "turnedOffLabel": "已关闭:",
+      "turnedOffEffect": "。将在智能体下次配置时生效。",
+      "tools": {
+        "web-search": {
+          "label": "网页搜索",
+          "description": "在公开网络上查找并阅读网页。"
+        },
+        "code-execution": {
+          "label": "代码执行",
+          "description": "在沙盒环境中运行 Python / shell。"
+        },
+        "browser": {
+          "label": "无头浏览器",
+          "description": "访问网站并抓取内容。"
+        },
+        "memory": {
+          "label": "记忆",
+          "description": "在对话中存储并回忆信息。"
+        }
+      },
+      "openSourceTitle": "开源技能",
+      "openSourceHelp": "来自公开 GitHub 仓库的 Markdown 技能包,会被注入到你的智能体指令中。你可以在 GitHub 上逐一查看每个技能包。",
+      "recommended": "推荐",
+      "unverified": "未验证,请自行核查",
+      "openSource": "开源",
+      "byAuthor": "作者:{{author}}",
+      "inspect": "查看",
+      "addGithubSkill": "添加 GitHub 技能",
+      "repoError": "仅支持 github.com / raw.githubusercontent.com 上的 SKILL.md 链接。",
+      "add": "添加"
+    },
+    "channels": {
+      "title": "渠道",
+      "description": "可选。让你的智能体能够通过各运行环境原生的消息集成,接收并回复来自 PerkOS 之外的消息。",
+      "secretsNote": "密钥会存储在你钱包命名空间下的托管密钥库中,绝不会写入智能体文档,也不会在这个浏览器标签页中停留超过启动请求本身。你也可以之后在智能体设置中添加渠道。",
+      "telegram": {
+        "blurb": "你的智能体会通过你在 @BotFather 创建的 Telegram 机器人来回复消息。Webhook 模式对休眠很友好,智能体休眠期间不会保持空闲连接。",
+        "botToken": "机器人令牌",
+        "botTokenHelp": "来自 @BotFather。存储在托管密钥库中,API 绝不会返回它。",
+        "webhookUrl": "Webhook URL(可选)",
+        "webhookHelp": "留空则使用长轮询。为了更好地支持休眠,建议设置 webhook URL。"
+      },
+      "slack": {
+        "blurb": "你的智能体会在被邀请加入的 Slack 频道中回复消息。采用 webhook 模式(Events API),对休眠友好。你需要创建一个 Slack 应用,安装到你的工作空间,并复制机器人令牌和签名密钥。",
+        "botToken": "机器人令牌(xoxb-...)",
+        "botTokenHelp": "Slack 应用 → OAuth & Permissions → Bot User OAuth Token。",
+        "signingSecret": "签名密钥",
+        "signingSecretPlaceholder": "来自 Slack 应用设置的 32 位十六进制字符串",
+        "signingSecretHelp": "Slack 应用 → Basic Information → Signing Secret。用于验证入站 webhook 请求。",
+        "channelId": "频道 ID(可选)",
+        "channelIdHelp": "将智能体限制在单个频道内。留空则在机器人所在的每个频道及私信中都会响应提及。"
+      },
+      "farcaster": {
+        "blurb": "仅限 Hermes。你的智能体会通过 Neynar 回复 Farcaster 上对它的提及。你需要一个由 Neynar 托管的签名者来标识该智能体的身份。",
+        "webhookLabel": "Neynar webhook URL,将其设置为你的 Neynar webhook 的目标 URL",
+        "webhookHelp": "将下方的 webhook 密钥用作该 webhook 的签名密钥。如果智能体名称已被占用,启动时会自动加上后缀,请在 URL 中使用最终名称(启动后会显示)。",
+        "fid": "FID",
+        "replyVisibility": "回复可见范围",
+        "visibilityMentions": "仅提及(推荐)",
+        "visibilityAll": "全部(需要指定父频道)",
+        "neynarApiKey": "Neynar API 密钥",
+        "signerUuid": "Signer UUID",
+        "webhookSecret": "Webhook 密钥",
+        "webhookSecretPlaceholder": "你在 Neynar webhook 上设置的 HMAC 密钥",
+        "parentChannel": "父频道",
+        "parentChannelHelp": "当可见范围为“全部”时必填,用于将智能体限定在一个频道内。"
+      },
+      "farcasterUnavailableBefore": "Farcaster 渠道仅适用于 Hermes 智能体。你的智能体运行在",
+      "farcasterUnavailableAfter": "上,该运行环境没有原生的 Farcaster 渠道。"
+    },
+    "llm": {
+      "title": "LLM 来源",
+      "description": "选择智能体访问模型的方式。每种运行环境都会生成其原生格式的配置块,你可以在审核步骤中预览。",
+      "comingSoon": "即将推出",
+      "perkos": {
+        "title": "PerkOS LLM 服务",
+        "descBefore": "托管的 Ollama 兼容网关,地址为",
+        "descAfter": "提供 kimi-k2.6:cloud 以及 qwen 7B/14B 模型。无需自备密钥,我们会为你的智能体签发一个专属密钥。",
+        "inviteOnly": "目前处于测试阶段,仅限受邀用户使用。现在可以先选择 BYOK 或“稍后配置”,或联系管理员申请加入早期访问名单。"
+      },
+      "byok": {
+        "title": "自带密钥(BYOK)",
+        "description": "使用你自己的提供商密钥。我们只会把它转发给智能体运行环境,绝不会记录或代理你的流量。"
+      },
+      "skip": {
+        "title": "稍后配置",
+        "description": "智能体启动时不配置 LLM 来源,适合仅测试传输层和工具调用的场景。"
+      },
+      "providerSettings": {
+        "openclawTitle": "OpenClaw 提供商设置",
+        "hermesTitle": "Hermes 提供商设置",
+        "openclawDesc": "各字段与 openclaw.json 中 models.providers.* 下的配置块一一对应。",
+        "hermesDesc": "各字段对应 Hermes 配置文件 config.yaml 中的 provider.* 与 secrets.*。",
+        "provider": "提供商",
+        "providerPlaceholder": "选择一个提供商",
+        "defaultModel": "默认模型",
+        "apiKey": "API 密钥"
+      }
+    },
+    "external": {
+      "title": "邀请你现有的智能体",
+      "description": "你的运行环境、记忆和工具都不会有任何改变,你的智能体只是主动连接到 PerkOS(perkos-a2a + perkos-chat),从而获得你所在组织的聊天和任务看板。",
+      "runtimeKinds": {
+        "hermes": {
+          "label": "Hermes",
+          "hint": "/v1/responses"
+        },
+        "openclaw": {
+          "label": "OpenClaw",
+          "hint": "/v1/chat/completions"
+        },
+        "custom": {
+          "label": "自定义",
+          "hint": "你自己的 HTTP 运行环境"
+        }
+      },
+      "nameLabel": "智能体名称(用户名)",
+      "nameHelp": "它在中继和聊天中的显示名称,必须唯一。",
+      "nameError": "2-32 个字符,仅限字母、数字、_、-",
+      "runtimeLabel": "运行环境",
+      "runtimeHelp": "你的智能体使用的协议,决定提示词中桥接端点的设置。",
+      "noteLabel": "给智能体的备注(可选)",
+      "noteHelp": "智能体在其邀请提示词中会看到的背景信息。",
+      "notePlaceholder": "You'll help the team with market research and weekly reports.",
+      "result": {
+        "registeredBefore": "已注册到你的组织。在它连接之前,状态显示为",
+        "invited": "已邀请",
+        "registeredAfter": "。",
+        "invitationPrompt": "邀请提示词",
+        "copyPrompt": "复制提示词",
+        "pasteHelp": "把这段内容粘贴给你的智能体。其中包含它的凭证(relayApiKey),请像对待密码一样谨慎处理,只把它交给你正在邀请的智能体。",
+        "copyRelayKey": "复制 relayApiKey",
+        "copied": "已复制"
+      }
+    },
+    "review": {
+      "title": "审核并启动",
+      "description": "点击“启动”后,我们将写入磁盘(或你的托管容器)的内容。",
+      "persona": "人设",
+      "agentName": "智能体名称",
+      "runtime": "运行环境",
+      "deploy": "部署方式",
+      "deployPerkos": "PerkOS 基础设施",
+      "deployVps": "自托管(你自己的基础设施)",
+      "llm": "LLM",
+      "llmPerkos": "PerkOS LLM 服务",
+      "llmConfigureLater": "稍后配置",
+      "skills": "技能",
+      "builtInTools": "内置工具",
+      "skillPacks_one": "{{count}} 个技能包",
+      "skillPacks_other": "{{count}} 个技能包",
+      "toolsOff_one": " · {{count}} 个工具已关闭",
+      "toolsOff_other": " · {{count}} 个工具已关闭",
+      "channels": "渠道",
+      "channelsPerkosOnly": "仅限 PerkOS",
+      "configPreview": "配置预览",
+      "configPreviewDescBefore": "以下是将写入",
+      "configPreviewDescAfter": "(智能体主机上)的原始配置块。",
+      "renameOrSkip": "重命名或跳过",
+      "renameOrSkipDesc": "已根据人设预填,如果只是一次性启动,可以在这里调整。",
+      "agentNameLabel": "智能体名称"
+    },
+    "toast": {
+      "launched": "智能体已启动",
+      "launchedSavedAs": "已保存为“{{launched}}”,因为你已经有一个名为“{{requested}}”的智能体。",
+      "launchedReady": "{{name}} 已就绪。",
+      "telegramSaved": "Telegram 网关已保存",
+      "telegramNotSaved": "Telegram 网关未保存",
+      "farcasterSaved": "Farcaster 网关已保存",
+      "farcasterNotSaved": "Farcaster 网关未保存",
+      "slackSaved": "Slack 网关已保存",
+      "slackNotSaved": "Slack 网关未保存",
+      "gatewayActivate": "将在智能体下次重启时生效。",
+      "launchFailed": "启动失败",
+      "inviteFailed": "邀请失败"
+    },
+    "error": {
+      "connectWallet": "启动智能体前请先连接钱包。",
+      "pickRuntime": "请选择一个运行环境。"
+    }
   }
 }
