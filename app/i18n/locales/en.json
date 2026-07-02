@@ -1264,5 +1264,237 @@
       "sending": "Sending…",
       "send": "Send"
     }
+  },
+  "projectRoom": {
+    "backToProjects": "Go back to projects",
+    "membersTab": {
+      "note": "People with access to this project. Editors can edit the board + chat; viewers are read-only. (Org members already have access.)"
+    },
+    "tabs": {
+      "tasks": "Tasks",
+      "docs": "Docs",
+      "conductor": "Conductor",
+      "agents": "Agents",
+      "map": "Map",
+      "chat": "Project chat",
+      "members": "Members"
+    },
+    "header": {
+      "lead": "Lead: {{name}}",
+      "noPrimaryAgent": "No primary agent assigned",
+      "activeSuffix": "active {{time}}",
+      "runPmTitleWithPm": "Your team lead plans the goal and hands out the work",
+      "runPmTitleNoPm": "You'll pick which agent leads the team",
+      "teamWorking": "Team working…",
+      "putTeamToWork": "Put the team to work",
+      "wakeTeamTitle": "Scale up all of this project's agents now (pre-warm the team)",
+      "waking": "Waking…",
+      "wakeTeam": "Wake team",
+      "members": "Members",
+      "membersAria": "Manage members",
+      "membersTitle": "Share this project — invite wallets + manage access",
+      "edit": "Edit",
+      "editAria": "Edit project",
+      "editTitle": "Edit project",
+      "delete": "Delete",
+      "deleteAria": "Delete project",
+      "deleteTitle": "Delete project",
+      "stats": {
+        "totalTasks": "Total tasks",
+        "inProgress": "In progress",
+        "done": "Done",
+        "agents": "Agents"
+      },
+      "avatar": {
+        "noPrimaryAgent": "No primary agent assigned",
+        "primaryAgent": "Primary agent: {{name}}"
+      },
+      "firstRun": {
+        "title": "Your team is ready — here's how to start",
+        "step1Bold": "Put the team to work",
+        "step1WithPm": " — {{pmAgent}} reads your goal, plans the work into tasks, and the team gets it done on its own. This is the one-click way.",
+        "step1NoPm": " — you'll pick which agent leads the team, then they plan the goal into tasks and the team gets it done on its own.",
+        "step2Before": "Or tell the team what you need in ",
+        "step2Bold": "Project chat",
+        "step2After": " — they answer in persona, and you can @-mention anyone.",
+        "step3Before": "Or add tasks yourself in the ",
+        "step3Bold": "Tasks",
+        "step3After": " tab and assign them to specific agents.",
+        "ctaWithPm": "Put the team to work",
+        "ctaNoPm": "Choose a team lead & start",
+        "ctaHint": "Your team drafts and suggests — nothing happens without your OK. Teammates wake automatically when work is assigned."
+      },
+      "choosePm": {
+        "title": "Choose your team lead",
+        "description": "Every project needs a team lead — the agent who plans the goal into tasks, hands them to the team, and reviews the results. Pick who leads this project:",
+        "noAgents": "No agents on this project yet — add agents first (Agents tab).",
+        "cancel": "Cancel",
+        "confirm": "Make team lead & start"
+      },
+      "confirmDelete": {
+        "title": "Delete \"{{name}}\"?",
+        "description": "This will remove the project, its tasks, and its chat history. This action can't be undone.",
+        "confirmLabel": "Delete project"
+      },
+      "errors": {
+        "missingWalletOrProject": "Missing wallet or project id.",
+        "missingProjectId": "Missing project id."
+      },
+      "toast": {
+        "projectDeletedTitle": "Project deleted",
+        "projectDeletedDesc": "\"{{name}}\" was removed.",
+        "projectDeleteError": "Couldn't delete project",
+        "pickLeadFirst": "Pick a team lead first — see the Agents tab.",
+        "alreadyWorking": "The team is already working on this project.",
+        "leadAssigned_one": "Your team lead assigned {{count}} task.",
+        "leadAssigned_other": "Your team lead assigned {{count}} tasks.",
+        "goalComplete": "Your team lead says the goal is already complete.",
+        "teamOnIt": "The team is on it.",
+        "startTeamError": "Couldn't start the team",
+        "nowLead": "{{name}} is now the team lead.",
+        "setLeadError": "Couldn't set the team lead",
+        "wakingTeam_one": "Waking {{count}} agent…",
+        "wakingTeam_other": "Waking {{count}} agents…",
+        "wakingTeamDesc": "They take ~2–3 min to boot + connect.",
+        "wakeTeamError": "Couldn't wake the team"
+      }
+    },
+    "tasksTab": {
+      "createTask": "Create task",
+      "emptyMessage": "Drag a task here or create one.",
+      "bulk": {
+        "selectedCount": "{{count}} selected",
+        "moveTo": "Move to:",
+        "toDo": "To do",
+        "inProgress": "In progress",
+        "done": "Done",
+        "delete": "Delete",
+        "clear": "Clear"
+      },
+      "confirmDelete": {
+        "title_one": "Delete {{count}} task?",
+        "title_other": "Delete {{count}} tasks?",
+        "description": "The selected tasks and their history will be removed. This can't be undone.",
+        "confirmLabel": "Delete"
+      },
+      "toast": {
+        "movedSomeFailed": "Moved {{ok}}, {{failed}} failed",
+        "movedSuccess_one": "Moved {{count}} task",
+        "movedSuccess_other": "Moved {{count}} tasks",
+        "bulkMoveFailed": "Bulk move failed",
+        "deletedSomeFailed": "Deleted {{ok}}, {{failed}} failed",
+        "deletedSuccess_one": "Deleted {{count}} task",
+        "deletedSuccess_other": "Deleted {{count}} tasks",
+        "bulkDeleteFailed": "Bulk delete failed"
+      }
+    },
+    "board": {
+      "moveTaskError": "Couldn't move task",
+      "connectWalletMove": "Connect your wallet to move tasks."
+    },
+    "conductorTab": {
+      "rosterHint": "Roster surfaces the active workers and their in-progress load."
+    },
+    "taskCard": {
+      "agent": "Agent: {{agent}}",
+      "selectAria": "Select {{name}}",
+      "editTask": "Edit task",
+      "deleteTask": "Delete task",
+      "confirmDelete": {
+        "title": "Delete \"{{name}}\"?",
+        "description": "This task and its history will be removed.",
+        "confirmLabel": "Delete task"
+      },
+      "errors": {
+        "missingWalletOrTask": "Missing wallet or task id."
+      },
+      "toast": {
+        "taskDeleted": "Task deleted",
+        "deleteTaskError": "Couldn't delete task"
+      }
+    },
+    "mapTab": {
+      "activityTitle": "Project activity"
+    },
+    "agentsTab": {
+      "countOnProject_one": "{{count}} agent on this project",
+      "countOnProject_other": "{{count}} agents on this project",
+      "addAgent": "Add agent",
+      "pickLeadBefore": "Pick one agent as the ",
+      "pickLeadEmphasis": "team lead",
+      "pickLeadAfter": " — it plans the goal and hands tasks to the others when you put the team to work.",
+      "roleLead": "Team lead · ",
+      "roleWorker": "Worker · ",
+      "taskCount_one": "{{count}} task",
+      "taskCount_other": "{{count}} tasks",
+      "leadBadge": "Lead",
+      "makeLead": "Make lead",
+      "makeLeadTitle": "Make this agent the team lead",
+      "empty": {
+        "title": "No agents on this project",
+        "description": "Add an agent from your team, or launch a new one to start working on tasks.",
+        "addExisting": "Add existing agent",
+        "launch": "Launch agent"
+      },
+      "toast": {
+        "nowLead": "{{name}} is now the team lead",
+        "clearedLead": "Cleared the project's team lead",
+        "updateLeadError": "Couldn't update the team lead"
+      }
+    },
+    "power": {
+      "error": "Couldn't change power state",
+      "wakeAria": "Wake {{name}}",
+      "hibernateAria": "Hibernate {{name}}",
+      "working": "Working…",
+      "wakeTitle": "Wake agent",
+      "hibernateTitle": "Hibernate agent"
+    },
+    "addAgentDialog": {
+      "title": "Add agents to this project",
+      "description": "Pick agents from your team to add to this project's roster — then you can assign them tasks.",
+      "loading": "Loading your agents…",
+      "noAgentsYet": "You don't have any agents yet. Create or invite one first.",
+      "allOnProject": "All your agents are already on this project.",
+      "externalSuffix": " · external",
+      "cancel": "Cancel",
+      "add": "Add",
+      "toast": {
+        "added_one": "Added {{count}} agent to the project",
+        "added_other": "Added {{count}} agents to the project",
+        "alreadyOnProject": "Those agents are already on the project",
+        "addError": "Couldn't add agents"
+      }
+    },
+    "chat": {
+      "agentFallback": "Agent",
+      "memberCount_one": "{{count}} member",
+      "memberCount_other": "{{count}} members",
+      "noLeadWarning": "No team lead on this project yet. Messages here won't start any work until you pick a team lead — it plans your goal and hands tasks to the other agents.",
+      "makeLeadButton": "Make {{name}} the team lead",
+      "makeLeadTitle": "Make {{name}} the team lead",
+      "chooseAnother": "Choose another in Agents",
+      "designate": "Designate in Agents",
+      "emptyMessages": "No messages yet. Start the conversation with your team and the agents assigned to this project.",
+      "composerPlaceholder": "Message #{{name}}…",
+      "membersHeading": "Members",
+      "noMembers": "No members yet.",
+      "kindAgent": "Agent",
+      "kindHuman": "Human",
+      "errors": {
+        "connectWalletFirst": "Connect a wallet first.",
+        "connectWalletSend": "Connect a wallet to send messages."
+      },
+      "toast": {
+        "nowLead": "{{name}} is now the team lead",
+        "nowLeadDesc": "Send your goal in the chat and your team lead will plan + hand out the work.",
+        "setLeadError": "Couldn't set the team lead",
+        "mentionedYouTitle": "{{label}} mentioned you",
+        "sentTo": "Sent to {{agents}}",
+        "noLeadTitle": "No team lead on this project yet",
+        "noLeadDescPick": "Pick a team lead so it can plan your goal and hand out the work.",
+        "noLeadDescAdd": "Add agents and pick a team lead to plan + hand out the work."
+      }
+    }
   }
 }

@@ -1273,5 +1273,237 @@
       "sending": "Envoi en cours…",
       "send": "Envoyer"
     }
+  },
+  "projectRoom": {
+    "backToProjects": "Retour aux projets",
+    "membersTab": {
+      "note": "Les personnes ayant accès à ce projet. Les éditeurs peuvent modifier le tableau et le chat ; les lecteurs sont en lecture seule. (Les membres de l'organisation ont déjà accès.)"
+    },
+    "tabs": {
+      "tasks": "Tâches",
+      "docs": "Docs",
+      "conductor": "Chef d'orchestre",
+      "agents": "Agents",
+      "map": "Carte",
+      "chat": "Chat du projet",
+      "members": "Membres"
+    },
+    "header": {
+      "lead": "Chef d'équipe : {{name}}",
+      "noPrimaryAgent": "Aucun agent principal assigné",
+      "activeSuffix": "actif {{time}}",
+      "runPmTitleWithPm": "Votre chef d'équipe planifie l'objectif et répartit le travail",
+      "runPmTitleNoPm": "Vous choisirez quel agent dirige l'équipe",
+      "teamWorking": "L'équipe travaille…",
+      "putTeamToWork": "Mettre l'équipe au travail",
+      "wakeTeamTitle": "Réveiller dès maintenant tous les agents de ce projet (préchauffer l'équipe)",
+      "waking": "Réveil en cours…",
+      "wakeTeam": "Réveiller l'équipe",
+      "members": "Membres",
+      "membersAria": "Gérer les membres",
+      "membersTitle": "Partager ce projet : invitez des portefeuilles et gérez les accès",
+      "edit": "Modifier",
+      "editAria": "Modifier le projet",
+      "editTitle": "Modifier le projet",
+      "delete": "Supprimer",
+      "deleteAria": "Supprimer le projet",
+      "deleteTitle": "Supprimer le projet",
+      "stats": {
+        "totalTasks": "Tâches au total",
+        "inProgress": "En cours",
+        "done": "Terminé",
+        "agents": "Agents"
+      },
+      "avatar": {
+        "noPrimaryAgent": "Aucun agent principal assigné",
+        "primaryAgent": "Agent principal : {{name}}"
+      },
+      "firstRun": {
+        "title": "Votre équipe est prête : voici comment démarrer",
+        "step1Bold": "Mettre l'équipe au travail",
+        "step1WithPm": " : {{pmAgent}} lit votre objectif, le transforme en tâches, et l'équipe s'en charge seule. C'est la solution en un clic.",
+        "step1NoPm": " : vous choisirez quel agent dirige l'équipe, puis il transforme l'objectif en tâches et l'équipe s'en charge seule.",
+        "step2Before": "Ou dites à l'équipe ce dont vous avez besoin dans le ",
+        "step2Bold": "Chat du projet",
+        "step2After": " : ils répondent avec leur persona, et vous pouvez mentionner n'importe qui avec @.",
+        "step3Before": "Ou ajoutez vous-même des tâches dans l'onglet ",
+        "step3Bold": "Tâches",
+        "step3After": " et assignez-les à des agents précis.",
+        "ctaWithPm": "Mettre l'équipe au travail",
+        "ctaNoPm": "Choisir un chef d'équipe et démarrer",
+        "ctaHint": "Votre équipe rédige des brouillons et propose des idées : rien ne se passe sans votre accord. Les coéquipiers se réveillent automatiquement quand du travail leur est assigné."
+      },
+      "choosePm": {
+        "title": "Choisissez votre chef d'équipe",
+        "description": "Chaque projet a besoin d'un chef d'équipe : l'agent qui transforme l'objectif en tâches, les confie à l'équipe, et vérifie les résultats. Choisissez qui dirige ce projet :",
+        "noAgents": "Aucun agent sur ce projet pour le moment : ajoutez d'abord des agents (onglet Agents).",
+        "cancel": "Annuler",
+        "confirm": "Nommer chef d'équipe et démarrer"
+      },
+      "confirmDelete": {
+        "title": "Supprimer « {{name}} » ?",
+        "description": "Cela supprimera le projet, ses tâches et son historique de chat. Cette action est irréversible.",
+        "confirmLabel": "Supprimer le projet"
+      },
+      "errors": {
+        "missingWalletOrProject": "Portefeuille ou identifiant de projet manquant.",
+        "missingProjectId": "Identifiant de projet manquant."
+      },
+      "toast": {
+        "projectDeletedTitle": "Projet supprimé",
+        "projectDeletedDesc": "« {{name}} » a été retiré.",
+        "projectDeleteError": "Impossible de supprimer le projet",
+        "pickLeadFirst": "Choisissez d'abord un chef d'équipe : voir l'onglet Agents.",
+        "alreadyWorking": "L'équipe travaille déjà sur ce projet.",
+        "leadAssigned_one": "Votre chef d'équipe a assigné {{count}} tâche.",
+        "leadAssigned_other": "Votre chef d'équipe a assigné {{count}} tâches.",
+        "goalComplete": "Votre chef d'équipe indique que l'objectif est déjà atteint.",
+        "teamOnIt": "L'équipe s'en occupe.",
+        "startTeamError": "Impossible de démarrer l'équipe",
+        "nowLead": "{{name}} est maintenant le chef d'équipe.",
+        "setLeadError": "Impossible de définir le chef d'équipe",
+        "wakingTeam_one": "Réveil de {{count}} agent…",
+        "wakingTeam_other": "Réveil de {{count}} agents…",
+        "wakingTeamDesc": "Ils mettent environ 2 à 3 min à démarrer et se connecter.",
+        "wakeTeamError": "Impossible de réveiller l'équipe"
+      }
+    },
+    "tasksTab": {
+      "createTask": "Créer une tâche",
+      "emptyMessage": "Glissez une tâche ici ou créez-en une.",
+      "bulk": {
+        "selectedCount": "{{count}} sélectionné(s)",
+        "moveTo": "Déplacer vers :",
+        "toDo": "À faire",
+        "inProgress": "En cours",
+        "done": "Terminé",
+        "delete": "Supprimer",
+        "clear": "Effacer"
+      },
+      "confirmDelete": {
+        "title_one": "Supprimer {{count}} tâche ?",
+        "title_other": "Supprimer {{count}} tâches ?",
+        "description": "Les tâches sélectionnées et leur historique seront supprimés. Cette action est irréversible.",
+        "confirmLabel": "Supprimer"
+      },
+      "toast": {
+        "movedSomeFailed": "{{ok}} déplacées, {{failed}} en échec",
+        "movedSuccess_one": "{{count}} tâche déplacée",
+        "movedSuccess_other": "{{count}} tâches déplacées",
+        "bulkMoveFailed": "Échec du déplacement groupé",
+        "deletedSomeFailed": "{{ok}} supprimées, {{failed}} en échec",
+        "deletedSuccess_one": "{{count}} tâche supprimée",
+        "deletedSuccess_other": "{{count}} tâches supprimées",
+        "bulkDeleteFailed": "Échec de la suppression groupée"
+      }
+    },
+    "board": {
+      "moveTaskError": "Impossible de déplacer la tâche",
+      "connectWalletMove": "Connectez votre portefeuille pour déplacer des tâches."
+    },
+    "conductorTab": {
+      "rosterHint": "L'équipe affiche les travailleurs actifs et leur charge de travail en cours."
+    },
+    "taskCard": {
+      "agent": "Agent : {{agent}}",
+      "selectAria": "Sélectionner {{name}}",
+      "editTask": "Modifier la tâche",
+      "deleteTask": "Supprimer la tâche",
+      "confirmDelete": {
+        "title": "Supprimer « {{name}} » ?",
+        "description": "Cette tâche et son historique seront supprimés.",
+        "confirmLabel": "Supprimer la tâche"
+      },
+      "errors": {
+        "missingWalletOrTask": "Portefeuille ou identifiant de tâche manquant."
+      },
+      "toast": {
+        "taskDeleted": "Tâche supprimée",
+        "deleteTaskError": "Impossible de supprimer la tâche"
+      }
+    },
+    "mapTab": {
+      "activityTitle": "Activité du projet"
+    },
+    "agentsTab": {
+      "countOnProject_one": "{{count}} agent sur ce projet",
+      "countOnProject_other": "{{count}} agents sur ce projet",
+      "addAgent": "Ajouter un agent",
+      "pickLeadBefore": "Choisissez un seul agent comme ",
+      "pickLeadEmphasis": "chef d'équipe",
+      "pickLeadAfter": " : il planifie l'objectif et confie les tâches aux autres quand vous mettez l'équipe au travail.",
+      "roleLead": "Chef d'équipe · ",
+      "roleWorker": "Travailleur · ",
+      "taskCount_one": "{{count}} tâche",
+      "taskCount_other": "{{count}} tâches",
+      "leadBadge": "Chef",
+      "makeLead": "Nommer chef d'équipe",
+      "makeLeadTitle": "Nommer cet agent chef d'équipe",
+      "empty": {
+        "title": "Aucun agent sur ce projet",
+        "description": "Ajoutez un agent de votre équipe, ou lancez-en un nouveau pour commencer à travailler sur des tâches.",
+        "addExisting": "Ajouter un agent existant",
+        "launch": "Lancer un agent"
+      },
+      "toast": {
+        "nowLead": "{{name}} est maintenant le chef d'équipe",
+        "clearedLead": "Le chef d'équipe du projet a été retiré",
+        "updateLeadError": "Impossible de mettre à jour le chef d'équipe"
+      }
+    },
+    "power": {
+      "error": "Impossible de modifier l'état d'alimentation",
+      "wakeAria": "Réveiller {{name}}",
+      "hibernateAria": "Mettre {{name}} en veille",
+      "working": "Traitement en cours…",
+      "wakeTitle": "Réveiller l'agent",
+      "hibernateTitle": "Mettre l'agent en veille"
+    },
+    "addAgentDialog": {
+      "title": "Ajouter des agents à ce projet",
+      "description": "Choisissez des agents de votre équipe à ajouter à ce projet, puis assignez-leur des tâches.",
+      "loading": "Chargement de vos agents…",
+      "noAgentsYet": "Vous n'avez aucun agent pour le moment. Créez-en un ou invitez-en un d'abord.",
+      "allOnProject": "Tous vos agents sont déjà sur ce projet.",
+      "externalSuffix": " · externe",
+      "cancel": "Annuler",
+      "add": "Ajouter",
+      "toast": {
+        "added_one": "{{count}} agent ajouté au projet",
+        "added_other": "{{count}} agents ajoutés au projet",
+        "alreadyOnProject": "Ces agents sont déjà sur le projet",
+        "addError": "Impossible d'ajouter les agents"
+      }
+    },
+    "chat": {
+      "agentFallback": "Agent",
+      "memberCount_one": "{{count}} membre",
+      "memberCount_other": "{{count}} membres",
+      "noLeadWarning": "Aucun chef d'équipe sur ce projet pour le moment. Les messages ici ne déclencheront aucun travail tant que vous n'aurez pas choisi de chef d'équipe : il planifie votre objectif et confie les tâches aux autres agents.",
+      "makeLeadButton": "Nommer {{name}} chef d'équipe",
+      "makeLeadTitle": "Nommer {{name}} chef d'équipe",
+      "chooseAnother": "Choisir un autre dans Agents",
+      "designate": "Désigner dans Agents",
+      "emptyMessages": "Pas encore de messages. Démarrez la conversation avec votre équipe et les agents assignés à ce projet.",
+      "composerPlaceholder": "Message à #{{name}}…",
+      "membersHeading": "Membres",
+      "noMembers": "Pas encore de membres.",
+      "kindAgent": "Agent",
+      "kindHuman": "Humain",
+      "errors": {
+        "connectWalletFirst": "Connectez d'abord un portefeuille.",
+        "connectWalletSend": "Connectez un portefeuille pour envoyer des messages."
+      },
+      "toast": {
+        "nowLead": "{{name}} est maintenant le chef d'équipe",
+        "nowLeadDesc": "Envoyez votre objectif dans le chat et votre chef d'équipe planifiera le travail et le répartira.",
+        "setLeadError": "Impossible de définir le chef d'équipe",
+        "mentionedYouTitle": "{{label}} vous a mentionné",
+        "sentTo": "Envoyé à {{agents}}",
+        "noLeadTitle": "Aucun chef d'équipe sur ce projet pour le moment",
+        "noLeadDescPick": "Choisissez un chef d'équipe pour qu'il puisse planifier votre objectif et répartir le travail.",
+        "noLeadDescAdd": "Ajoutez des agents et choisissez un chef d'équipe pour planifier et répartir le travail."
+      }
+    }
   }
 }

@@ -1273,5 +1273,237 @@
       "sending": "送金しています…",
       "send": "送金"
     }
+  },
+  "projectRoom": {
+    "backToProjects": "プロジェクト一覧に戻る",
+    "membersTab": {
+      "note": "このプロジェクトにアクセスできる人たちです。編集者はボードとチャットを編集でき、閲覧者は閲覧のみ可能です（組織のメンバーはすでにアクセス権があります）。"
+    },
+    "tabs": {
+      "tasks": "タスク",
+      "docs": "ドキュメント",
+      "conductor": "コンダクター",
+      "agents": "エージェント",
+      "map": "マップ",
+      "chat": "プロジェクトチャット",
+      "members": "メンバー"
+    },
+    "header": {
+      "lead": "リーダー：{{name}}",
+      "noPrimaryAgent": "主担当エージェントが未割り当てです",
+      "activeSuffix": "{{time}}に活動",
+      "runPmTitleWithPm": "チームリーダーが目標を計画し、チームに仕事を割り振ります",
+      "runPmTitleNoPm": "どのエージェントがチームを率いるか選択します",
+      "teamWorking": "チームが作業中…",
+      "putTeamToWork": "チームに仕事を任せる",
+      "wakeTeamTitle": "このプロジェクトのエージェントを今すぐ全員起動します（チームを事前に準備しておきます）",
+      "waking": "起動中…",
+      "wakeTeam": "チームを起動",
+      "members": "メンバー",
+      "membersAria": "メンバーを管理",
+      "membersTitle": "このプロジェクトを共有（ウォレットを招待してアクセスを管理）",
+      "edit": "編集",
+      "editAria": "プロジェクトを編集",
+      "editTitle": "プロジェクトを編集",
+      "delete": "削除",
+      "deleteAria": "プロジェクトを削除",
+      "deleteTitle": "プロジェクトを削除",
+      "stats": {
+        "totalTasks": "タスク総数",
+        "inProgress": "進行中",
+        "done": "完了",
+        "agents": "エージェント"
+      },
+      "avatar": {
+        "noPrimaryAgent": "主担当エージェントが未割り当てです",
+        "primaryAgent": "主担当エージェント：{{name}}"
+      },
+      "firstRun": {
+        "title": "チームの準備ができました。始め方はこちら",
+        "step1Bold": "チームに仕事を任せる",
+        "step1WithPm": "。{{pmAgent}}が目標を読み取り、タスクに落とし込み、チームが自律的に完了させます。ワンクリックでできる方法です。",
+        "step1NoPm": "。どのエージェントがチームを率いるか選び、そのエージェントが目標をタスクに計画し、チームが自律的に完了させます。",
+        "step2Before": "または、必要なことを",
+        "step2Bold": "プロジェクトチャット",
+        "step2After": "で伝えましょう。エージェントたちがペルソナになりきって返信し、誰にでも@メンションできます。",
+        "step3Before": "または、",
+        "step3Bold": "タスク",
+        "step3After": "タブから自分でタスクを追加し、特定のエージェントに割り当てることもできます。",
+        "ctaWithPm": "チームに仕事を任せる",
+        "ctaNoPm": "チームリーダーを選んで開始",
+        "ctaHint": "チームは下書きと提案を行うだけで、あなたの承認なしには何も実行されません。仕事が割り当てられると、チームメイトは自動的に起動します。"
+      },
+      "choosePm": {
+        "title": "チームリーダーを選ぶ",
+        "description": "すべてのプロジェクトにはチームリーダーが必要です。目標をタスクに計画し、チームに割り振り、結果をレビューするエージェントです。このプロジェクトを率いるエージェントを選んでください：",
+        "noAgents": "このプロジェクトにはまだエージェントがいません。先にエージェントを追加してください（エージェントタブ）。",
+        "cancel": "キャンセル",
+        "confirm": "チームリーダーに設定して開始"
+      },
+      "confirmDelete": {
+        "title": "「{{name}}」を削除しますか？",
+        "description": "プロジェクト、タスク、チャット履歴がすべて削除されます。この操作は取り消せません。",
+        "confirmLabel": "プロジェクトを削除"
+      },
+      "errors": {
+        "missingWalletOrProject": "ウォレットまたはプロジェクトIDがありません。",
+        "missingProjectId": "プロジェクトIDがありません。"
+      },
+      "toast": {
+        "projectDeletedTitle": "プロジェクトを削除しました",
+        "projectDeletedDesc": "「{{name}}」を削除しました。",
+        "projectDeleteError": "プロジェクトを削除できませんでした",
+        "pickLeadFirst": "先にチームリーダーを選んでください（エージェントタブを確認）。",
+        "alreadyWorking": "チームはすでにこのプロジェクトに取り組んでいます。",
+        "leadAssigned_one": "チームリーダーが{{count}}件のタスクを割り当てました。",
+        "leadAssigned_other": "チームリーダーが{{count}}件のタスクを割り当てました。",
+        "goalComplete": "チームリーダーによると、目標はすでに達成済みです。",
+        "teamOnIt": "チームが対応中です。",
+        "startTeamError": "チームを開始できませんでした",
+        "nowLead": "{{name}}がチームリーダーになりました。",
+        "setLeadError": "チームリーダーを設定できませんでした",
+        "wakingTeam_one": "{{count}}件のエージェントを起動しています…",
+        "wakingTeam_other": "{{count}}件のエージェントを起動しています…",
+        "wakingTeamDesc": "起動から接続まで約2〜3分かかります。",
+        "wakeTeamError": "チームを起動できませんでした"
+      }
+    },
+    "tasksTab": {
+      "createTask": "タスクを作成",
+      "emptyMessage": "ここにタスクをドラッグするか、新規作成してください。",
+      "bulk": {
+        "selectedCount": "{{count}}件選択中",
+        "moveTo": "移動先：",
+        "toDo": "未着手",
+        "inProgress": "進行中",
+        "done": "完了",
+        "delete": "削除",
+        "clear": "クリア"
+      },
+      "confirmDelete": {
+        "title_one": "{{count}}件のタスクを削除しますか？",
+        "title_other": "{{count}}件のタスクを削除しますか？",
+        "description": "選択したタスクとその履歴が削除されます。この操作は取り消せません。",
+        "confirmLabel": "削除"
+      },
+      "toast": {
+        "movedSomeFailed": "{{ok}}件を移動しました。{{failed}}件は失敗しました",
+        "movedSuccess_one": "{{count}}件のタスクを移動しました",
+        "movedSuccess_other": "{{count}}件のタスクを移動しました",
+        "bulkMoveFailed": "一括移動に失敗しました",
+        "deletedSomeFailed": "{{ok}}件を削除しました。{{failed}}件は失敗しました",
+        "deletedSuccess_one": "{{count}}件のタスクを削除しました",
+        "deletedSuccess_other": "{{count}}件のタスクを削除しました",
+        "bulkDeleteFailed": "一括削除に失敗しました"
+      }
+    },
+    "board": {
+      "moveTaskError": "タスクを移動できませんでした",
+      "connectWalletMove": "タスクを移動するにはウォレットを接続してください。"
+    },
+    "conductorTab": {
+      "rosterHint": "担当リストには、稼働中のワーカーと進行中の作業量が表示されます。"
+    },
+    "taskCard": {
+      "agent": "エージェント：{{agent}}",
+      "selectAria": "{{name}}を選択",
+      "editTask": "タスクを編集",
+      "deleteTask": "タスクを削除",
+      "confirmDelete": {
+        "title": "「{{name}}」を削除しますか？",
+        "description": "このタスクとその履歴が削除されます。",
+        "confirmLabel": "タスクを削除"
+      },
+      "errors": {
+        "missingWalletOrTask": "ウォレットまたはタスクIDがありません。"
+      },
+      "toast": {
+        "taskDeleted": "タスクを削除しました",
+        "deleteTaskError": "タスクを削除できませんでした"
+      }
+    },
+    "mapTab": {
+      "activityTitle": "プロジェクトのアクティビティ"
+    },
+    "agentsTab": {
+      "countOnProject_one": "このプロジェクトに{{count}}名のエージェントがいます",
+      "countOnProject_other": "このプロジェクトに{{count}}名のエージェントがいます",
+      "addAgent": "エージェントを追加",
+      "pickLeadBefore": "1名のエージェントを",
+      "pickLeadEmphasis": "チームリーダー",
+      "pickLeadAfter": "に選びましょう。チームに仕事を任せると、目標を計画し、他のメンバーにタスクを割り振ります。",
+      "roleLead": "チームリーダー・",
+      "roleWorker": "ワーカー・",
+      "taskCount_one": "{{count}}件のタスク",
+      "taskCount_other": "{{count}}件のタスク",
+      "leadBadge": "リーダー",
+      "makeLead": "リーダーにする",
+      "makeLeadTitle": "このエージェントをチームリーダーにする",
+      "empty": {
+        "title": "このプロジェクトにはエージェントがいません",
+        "description": "チームからエージェントを追加するか、新しく起動してタスクに取り組み始めましょう。",
+        "addExisting": "既存のエージェントを追加",
+        "launch": "エージェントを起動"
+      },
+      "toast": {
+        "nowLead": "{{name}}がチームリーダーになりました",
+        "clearedLead": "プロジェクトのチームリーダーを解除しました",
+        "updateLeadError": "チームリーダーを更新できませんでした"
+      }
+    },
+    "power": {
+      "error": "電源状態を変更できませんでした",
+      "wakeAria": "{{name}}を起動",
+      "hibernateAria": "{{name}}を休止",
+      "working": "処理中…",
+      "wakeTitle": "エージェントを起動",
+      "hibernateTitle": "エージェントを休止"
+    },
+    "addAgentDialog": {
+      "title": "このプロジェクトにエージェントを追加",
+      "description": "チームからエージェントを選んでこのプロジェクトの担当リストに追加すると、タスクを割り当てられるようになります。",
+      "loading": "エージェントを読み込んでいます…",
+      "noAgentsYet": "まだエージェントがいません。先に作成するか招待してください。",
+      "allOnProject": "すべてのエージェントはすでにこのプロジェクトに含まれています。",
+      "externalSuffix": "・外部",
+      "cancel": "キャンセル",
+      "add": "追加",
+      "toast": {
+        "added_one": "{{count}}件のエージェントをプロジェクトに追加しました",
+        "added_other": "{{count}}件のエージェントをプロジェクトに追加しました",
+        "alreadyOnProject": "それらのエージェントはすでにプロジェクトに含まれています",
+        "addError": "エージェントを追加できませんでした"
+      }
+    },
+    "chat": {
+      "agentFallback": "エージェント",
+      "memberCount_one": "{{count}}名のメンバー",
+      "memberCount_other": "{{count}}名のメンバー",
+      "noLeadWarning": "このプロジェクトにはまだチームリーダーがいません。チームリーダーを選ぶまで、ここでのメッセージは作業を開始しません。チームリーダーは目標を計画し、他のエージェントにタスクを割り振ります。",
+      "makeLeadButton": "{{name}}をチームリーダーにする",
+      "makeLeadTitle": "{{name}}をチームリーダーにする",
+      "chooseAnother": "エージェントタブで別のエージェントを選ぶ",
+      "designate": "エージェントタブで指定する",
+      "emptyMessages": "まだメッセージがありません。チームやこのプロジェクトに割り当てられたエージェントと会話を始めましょう。",
+      "composerPlaceholder": "#{{name}}にメッセージ…",
+      "membersHeading": "メンバー",
+      "noMembers": "まだメンバーがいません。",
+      "kindAgent": "エージェント",
+      "kindHuman": "人間",
+      "errors": {
+        "connectWalletFirst": "先にウォレットを接続してください。",
+        "connectWalletSend": "メッセージを送信するにはウォレットを接続してください。"
+      },
+      "toast": {
+        "nowLead": "{{name}}がチームリーダーになりました",
+        "nowLeadDesc": "チャットで目標を送ると、チームリーダーが計画してタスクを割り振ります。",
+        "setLeadError": "チームリーダーを設定できませんでした",
+        "mentionedYouTitle": "{{label}}があなたにメンションしました",
+        "sentTo": "{{agents}}に送信しました",
+        "noLeadTitle": "このプロジェクトにはまだチームリーダーがいません",
+        "noLeadDescPick": "チームリーダーを選ぶと、目標を計画してタスクを割り振れるようになります。",
+        "noLeadDescAdd": "エージェントを追加してチームリーダーを選び、計画とタスクの割り振りを任せましょう。"
+      }
+    }
   }
 }
