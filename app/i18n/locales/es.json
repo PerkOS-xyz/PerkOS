@@ -718,5 +718,98 @@
       "draftClearFailed": "No se pudo borrar el borrador",
       "stateReset": "Estado del espacio de trabajo reiniciado"
     }
+  },
+  "wallet": {
+    "header": {
+      "title": "Billetera",
+      "subtitle": "Tu billetera de PerkOS: aquí llegan tus recompensas Loyalty y puedes guardar y mover tus fondos. PerkOS la administra por ti, no tienes que manejar ninguna frase semilla."
+    },
+    "loading": "Cargando tu billetera…",
+    "error": {
+      "load": "No se pudo cargar tu billetera."
+    },
+    "comingSoon": {
+      "title": "Próximamente",
+      "description": "Tu billetera se está configurando para esta cuenta. Vuelve a revisar en un momento: es donde van a llegar tus recompensas Loyalty."
+    },
+    "address": {
+      "title": "Tu dirección de billetera",
+      "description": "Envía tokens aquí para cargar tu billetera, en Base o Celo.",
+      "copied": "Copiado",
+      "copy": "Copiar",
+      "deposit": "Depósito: envía USDC o $PERKOS a {{addr}} desde cualquier billetera."
+    },
+    "balances": {
+      "title": "Saldos",
+      "refresh": "Actualizar",
+      "reading": "Leyendo saldos…",
+      "error": "No se pudieron leer los saldos."
+    }
+  },
+  "notifications": {
+    "header": {
+      "title": "Notificaciones",
+      "subtitle": "Tareas completadas, cambios de estado de los agentes y menciones en proyectos."
+    },
+    "actions": {
+      "markAllRead": "Marcar todo como leído",
+      "clearAll": "Borrar todo"
+    },
+    "tabs": {
+      "filterAria": "Filtrar notificaciones",
+      "all": "Todas",
+      "allWithCount": "Todas ({{count}})",
+      "unread": "No leídas",
+      "unreadWithCount": "No leídas ({{count}})"
+    },
+    "emptyNone": {
+      "title": "Todavía no hay notificaciones",
+      "description": "Cuando los agentes terminen tareas o haya actividad en tus proyectos, los eventos van a aparecer aquí."
+    },
+    "emptyCaughtUp": {
+      "title": "Ya estás al día",
+      "description": "No tienes notificaciones sin leer. Cambia a la pestaña Todas para revisar el historial."
+    },
+    "clearDialog": {
+      "title": "¿Borrar todas las notificaciones?",
+      "description": "Esto elimina todas las notificaciones de este dispositivo. Esta acción no se puede deshacer.",
+      "confirmLabel": "Borrar todo"
+    },
+    "time": {
+      "justNow": "ahora mismo",
+      "minutesAgo": "hace {{count}}m",
+      "hoursAgo": "hace {{count}}h",
+      "daysAgo": "hace {{count}}d"
+    },
+    "row": {
+      "new": "Nuevo",
+      "dismissAria": "Descartar notificación",
+      "dismiss": "Descartar"
+    }
+  },
+  "organizations": {
+    "header": {
+      "title": "Organizaciones",
+      "subtitle": "Agrupa tus proyectos y los agentes que trabajan en ellos. Cambia la organización activa desde el encabezado.",
+      "newOrg": "Nueva organización"
+    },
+    "toast": {
+      "renamed": "Organización renombrada",
+      "renameFailed": "No se pudo renombrar"
+    },
+    "rename": {
+      "save": "Guardar",
+      "cancel": "Cancelar"
+    },
+    "card": {
+      "default": "predeterminada",
+      "active": "activa",
+      "projectCount_one": "{{count}} proyecto",
+      "projectCount_other": "{{count}} proyectos",
+      "ownerSuffix": " · propietario {{address}}",
+      "setActive": "Establecer como activa",
+      "members": "Miembros",
+      "rename": "Renombrar"
+    }
   }
 }

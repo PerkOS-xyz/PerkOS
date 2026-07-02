@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Wallet, Copy, Check, RefreshCw, ArrowDownToLine, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ function shortAddr(a: string): string {
 }
 
 export default function WalletPage() {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   const walletQuery = useQuery({
@@ -59,11 +61,10 @@ export default function WalletPage() {
       <div className="flex flex-col gap-1">
         <h1 className="flex items-center gap-2 text-3xl font-medium text-foreground">
           <Wallet className="h-7 w-7 text-primary" />
-          Wallet
+          {t("wallet.header.title")}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Your PerkOS wallet — where your Loyalty rewards land and you can hold
-          and move funds. PerkOS runs it for you; no seed phrase to manage.
+          {t("wallet.header.subtitle")}
         </p>
       </div>
 
@@ -71,7 +72,7 @@ export default function WalletPage() {
       {walletQuery.isLoading ? (
         <Card>
           <CardContent className="flex items-center gap-3 p-6 text-sm text-muted-foreground">
-            <RefreshCw className="h-4 w-4 animate-spin" /> Loading your wallet…
+            <RefreshCw className="h-4 w-4 animate-spin" /> {t("wallet.loading")}
           </CardContent>
         </Card>
       ) : walletQuery.isError ? (
@@ -79,7 +80,7 @@ export default function WalletPage() {
           <CardContent className="p-6 text-sm text-destructive">
             {walletQuery.error instanceof Error
               ? walletQuery.error.message
-              : "Couldn't load your wallet."}
+              : t("wallet.error.load")}
           </CardContent>
         </Card>
       ) : !wallet ? (
@@ -87,11 +88,10 @@ export default function WalletPage() {
         <Card className="border-dashed">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Sparkles className="h-4 w-4 text-primary" /> Coming soon
+              <Sparkles className="h-4 w-4 text-primary" /> {t("wallet.comingSoon.title")}
             </CardTitle>
             <CardDescription>
-              Your wallet is being set up for this account. Check back shortly —
-              it&apos;s where your Loyalty rewards will arrive.
+              {t("wallet.comingSoon.description")}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -101,10 +101,10 @@ export default function WalletPage() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-                Your wallet address
+                {t("wallet.address.title")}
               </CardTitle>
               <CardDescription>
-                Send tokens here to fund your wallet — on Base or Celo.
+                {t("wallet.address.description")}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3 pt-0">
@@ -117,13 +117,12 @@ export default function WalletPage() {
                 </span>
                 <Button size="sm" variant="ghost" className="h-7 gap-1.5" onClick={copy}>
                   {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                  {copied ? "Copied" : "Copy"}
+                  {copied ? t("wallet.address.copied") : t("wallet.address.copy")}
                 </Button>
               </div>
               <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <ArrowDownToLine className="h-3.5 w-3.5" />
-                Deposit: send USDC or $PERKOS to {shortAddr(wallet.address)} from
-                any wallet.
+                {t("wallet.address.deposit", { addr: shortAddr(wallet.address) })}
               </p>
             </CardContent>
           </Card>
@@ -135,7 +134,7 @@ export default function WalletPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-                Balances
+                {t("wallet.balances.title")}
               </CardTitle>
               <Button
                 size="sm"
@@ -145,14 +144,14 @@ export default function WalletPage() {
                 onClick={() => balancesQuery.refetch()}
               >
                 <RefreshCw className={`h-3.5 w-3.5 ${balancesQuery.isFetching ? "animate-spin" : ""}`} />
-                Refresh
+                {t("wallet.balances.refresh")}
               </Button>
             </CardHeader>
             <CardContent className="flex flex-col gap-4 pt-0">
               {balancesQuery.isLoading ? (
-                <p className="text-sm text-muted-foreground">Reading balances…</p>
+                <p className="text-sm text-muted-foreground">{t("wallet.balances.reading")}</p>
               ) : balancesQuery.isError ? (
-                <p className="text-sm text-destructive">Couldn&apos;t read balances.</p>
+                <p className="text-sm text-destructive">{t("wallet.balances.error")}</p>
               ) : (
                 (balancesQuery.data?.chains ?? []).map((c) => (
                   <div key={c.chain} className="flex flex-col gap-2">

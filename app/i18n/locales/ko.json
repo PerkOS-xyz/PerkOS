@@ -718,5 +718,98 @@
       "draftClearFailed": "임시 저장 데이터를 지우지 못했어요",
       "stateReset": "워크스페이스 상태가 초기화됐어요"
     }
+  },
+  "wallet": {
+    "header": {
+      "title": "지갑",
+      "subtitle": "이곳은 PerkOS 지갑이에요. 적립된 리워드가 도착하고, 자금을 보관하고 옮길 수 있는 곳이죠. PerkOS가 대신 관리해서 시드 문구를 따로 챙기지 않아도 돼요."
+    },
+    "loading": "지갑을 불러오는 중…",
+    "error": {
+      "load": "지갑을 불러오지 못했어요."
+    },
+    "comingSoon": {
+      "title": "곧 준비돼요",
+      "description": "이 계정의 지갑을 준비하고 있어요. 잠시 후 다시 확인해 주세요. 적립된 리워드가 도착할 곳이에요."
+    },
+    "address": {
+      "title": "내 지갑 주소",
+      "description": "이 주소로 토큰을 보내면 지갑에 충전돼요. Base 또는 Celo에서 가능해요.",
+      "copied": "복사됨",
+      "copy": "복사",
+      "deposit": "충전: 어떤 지갑에서든 {{addr}}로 USDC 또는 $PERKOS를 보내주세요."
+    },
+    "balances": {
+      "title": "잔액",
+      "refresh": "새로고침",
+      "reading": "잔액을 불러오는 중…",
+      "error": "잔액을 불러오지 못했어요."
+    }
+  },
+  "notifications": {
+    "header": {
+      "title": "알림",
+      "subtitle": "작업 완료, 에이전트 상태 변경, 프로젝트 언급 소식이에요."
+    },
+    "actions": {
+      "markAllRead": "모두 읽음으로 표시",
+      "clearAll": "전체 지우기"
+    },
+    "tabs": {
+      "filterAria": "알림 필터링",
+      "all": "전체",
+      "allWithCount": "전체 ({{count}})",
+      "unread": "읽지 않음",
+      "unreadWithCount": "읽지 않음 ({{count}})"
+    },
+    "emptyNone": {
+      "title": "아직 알림이 없어요",
+      "description": "에이전트가 작업을 마치거나 프로젝트에 활동이 생기면 여기에 표시돼요."
+    },
+    "emptyCaughtUp": {
+      "title": "모두 확인했어요",
+      "description": "읽지 않은 알림이 없어요. 지난 내역을 보려면 전체 탭으로 전환하세요."
+    },
+    "clearDialog": {
+      "title": "모든 알림을 지울까요?",
+      "description": "이 기기에 있는 모든 알림이 삭제돼요. 되돌릴 수 없어요.",
+      "confirmLabel": "전체 지우기"
+    },
+    "time": {
+      "justNow": "방금 전",
+      "minutesAgo": "{{count}}분 전",
+      "hoursAgo": "{{count}}시간 전",
+      "daysAgo": "{{count}}일 전"
+    },
+    "row": {
+      "new": "새 알림",
+      "dismissAria": "알림 닫기",
+      "dismiss": "닫기"
+    }
+  },
+  "organizations": {
+    "header": {
+      "title": "조직",
+      "subtitle": "프로젝트와 그 프로젝트에서 일하는 에이전트를 조직으로 묶어보세요. 활성 조직은 상단 헤더에서 전환할 수 있어요.",
+      "newOrg": "새 조직"
+    },
+    "toast": {
+      "renamed": "조직 이름이 변경됐어요",
+      "renameFailed": "이름을 변경하지 못했어요"
+    },
+    "rename": {
+      "save": "저장",
+      "cancel": "취소"
+    },
+    "card": {
+      "default": "기본",
+      "active": "활성",
+      "projectCount_one": "프로젝트 {{count}}개",
+      "projectCount_other": "프로젝트 {{count}}개",
+      "ownerSuffix": " · 소유자 {{address}}",
+      "setActive": "활성으로 설정",
+      "members": "멤버",
+      "rename": "이름 변경"
+    }
   }
 }

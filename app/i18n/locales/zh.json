@@ -718,5 +718,98 @@
       "draftClearFailed": "无法清除草稿",
       "stateReset": "工作空间状态已重置"
     }
+  },
+  "wallet": {
+    "header": {
+      "title": "钱包",
+      "subtitle": "这是你的 PerkOS 钱包,忠诚度奖励会存到这里,你也可以在这里持有和转移资金。PerkOS 会替你打理一切,无需管理助记词。"
+    },
+    "loading": "正在加载你的钱包…",
+    "error": {
+      "load": "无法加载你的钱包。"
+    },
+    "comingSoon": {
+      "title": "即将推出",
+      "description": "你的账户钱包正在设置中,请稍后再来查看,这里将是你的忠诚度奖励到账的地方。"
+    },
+    "address": {
+      "title": "你的钱包地址",
+      "description": "把代币发送到这里为钱包充值,支持 Base 或 Celo。",
+      "copied": "已复制",
+      "copy": "复制",
+      "deposit": "充值:从任意钱包向 {{addr}} 发送 USDC 或 $PERKOS。"
+    },
+    "balances": {
+      "title": "余额",
+      "refresh": "刷新",
+      "reading": "正在读取余额…",
+      "error": "无法读取余额。"
+    }
+  },
+  "notifications": {
+    "header": {
+      "title": "通知",
+      "subtitle": "任务完成、智能体状态变化,以及项目中被提及的消息。"
+    },
+    "actions": {
+      "markAllRead": "全部标为已读",
+      "clearAll": "全部清除"
+    },
+    "tabs": {
+      "filterAria": "筛选通知",
+      "all": "全部",
+      "allWithCount": "全部 ({{count}})",
+      "unread": "未读",
+      "unreadWithCount": "未读 ({{count}})"
+    },
+    "emptyNone": {
+      "title": "暂时还没有通知",
+      "description": "当智能体完成任务或项目有新动态时,相关事件会显示在这里。"
+    },
+    "emptyCaughtUp": {
+      "title": "全部已读",
+      "description": "没有未读通知。切换到“全部”标签可查看历史记录。"
+    },
+    "clearDialog": {
+      "title": "清除所有通知?",
+      "description": "此操作会移除此设备上的所有通知,且无法撤销。",
+      "confirmLabel": "全部清除"
+    },
+    "time": {
+      "justNow": "刚刚",
+      "minutesAgo": "{{count}} 分钟前",
+      "hoursAgo": "{{count}} 小时前",
+      "daysAgo": "{{count}} 天前"
+    },
+    "row": {
+      "new": "新",
+      "dismissAria": "关闭通知",
+      "dismiss": "关闭"
+    }
+  },
+  "organizations": {
+    "header": {
+      "title": "组织",
+      "subtitle": "把你的项目和负责它们的智能体归拢在一起。可以在顶部导航栏切换当前使用的组织。",
+      "newOrg": "新建组织"
+    },
+    "toast": {
+      "renamed": "组织已重命名",
+      "renameFailed": "无法重命名"
+    },
+    "rename": {
+      "save": "保存",
+      "cancel": "取消"
+    },
+    "card": {
+      "default": "默认",
+      "active": "使用中",
+      "projectCount_one": "{{count}} 个项目",
+      "projectCount_other": "{{count}} 个项目",
+      "ownerSuffix": " · 所有者 {{address}}",
+      "setActive": "设为当前",
+      "members": "成员",
+      "rename": "重命名"
+    }
   }
 }
