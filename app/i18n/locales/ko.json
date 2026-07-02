@@ -1264,5 +1264,237 @@
       "sending": "보내는 중…",
       "send": "보내기"
     }
+  },
+  "projectRoom": {
+    "backToProjects": "프로젝트 목록으로 돌아가기",
+    "membersTab": {
+      "note": "이 프로젝트에 접근할 수 있는 사람들이에요. 편집자는 보드와 채팅을 수정할 수 있고, 뷰어는 보기만 할 수 있어요. (조직 멤버는 이미 접근 권한이 있어요.)"
+    },
+    "tabs": {
+      "tasks": "작업",
+      "docs": "문서",
+      "conductor": "운영",
+      "agents": "에이전트",
+      "map": "지도",
+      "chat": "프로젝트 채팅",
+      "members": "멤버"
+    },
+    "header": {
+      "lead": "팀장: {{name}}",
+      "noPrimaryAgent": "지정된 대표 에이전트가 없어요",
+      "activeSuffix": "{{time}} 활동 중",
+      "runPmTitleWithPm": "팀장이 목표를 계획하고 작업을 나눠줘요",
+      "runPmTitleNoPm": "어떤 에이전트가 팀을 이끌지 직접 선택하게 돼요",
+      "teamWorking": "팀이 작업 중…",
+      "putTeamToWork": "팀 작업 시작하기",
+      "wakeTeamTitle": "이 프로젝트의 모든 에이전트를 지금 깨워요 (팀 예열)",
+      "waking": "깨우는 중…",
+      "wakeTeam": "팀 깨우기",
+      "members": "멤버",
+      "membersAria": "멤버 관리",
+      "membersTitle": "이 프로젝트를 공유하세요. 지갑을 초대하고 접근 권한을 관리할 수 있어요.",
+      "edit": "수정",
+      "editAria": "프로젝트 수정",
+      "editTitle": "프로젝트 수정",
+      "delete": "삭제",
+      "deleteAria": "프로젝트 삭제",
+      "deleteTitle": "프로젝트 삭제",
+      "stats": {
+        "totalTasks": "전체 작업",
+        "inProgress": "진행 중",
+        "done": "완료",
+        "agents": "에이전트"
+      },
+      "avatar": {
+        "noPrimaryAgent": "지정된 대표 에이전트가 없어요",
+        "primaryAgent": "대표 에이전트: {{name}}"
+      },
+      "firstRun": {
+        "title": "팀이 준비됐어요. 이렇게 시작해보세요",
+        "step1Bold": "팀 작업 시작하기",
+        "step1WithPm": ", {{pmAgent}}가 목표를 읽고 작업을 계획한 뒤 팀이 알아서 끝내줘요. 가장 간편한 방법이에요.",
+        "step1NoPm": ", 어떤 에이전트가 팀을 이끌지 직접 고르면, 그 에이전트가 목표를 작업으로 계획하고 팀이 알아서 끝내줘요.",
+        "step2Before": "또는 ",
+        "step2Bold": "프로젝트 채팅",
+        "step2After": "에서 필요한 걸 팀에게 알려보세요. 다들 각자의 페르소나로 답하고, 아무나 @ 멘션할 수 있어요.",
+        "step3Before": "또는 ",
+        "step3Bold": "작업",
+        "step3After": " 탭에서 직접 작업을 추가하고 특정 에이전트에게 배정하세요.",
+        "ctaWithPm": "팀 작업 시작하기",
+        "ctaNoPm": "팀장 선택하고 시작하기",
+        "ctaHint": "팀은 초안을 만들고 제안할 뿐, 승인 없이는 아무 일도 진행되지 않아요. 작업이 배정되면 팀원이 자동으로 깨어나요."
+      },
+      "choosePm": {
+        "title": "팀장을 선택하세요",
+        "description": "모든 프로젝트에는 팀장이 필요해요. 목표를 작업으로 계획하고, 팀에 나눠주고, 결과를 검토하는 에이전트예요. 이 프로젝트를 이끌 에이전트를 선택하세요:",
+        "noAgents": "아직 이 프로젝트에 에이전트가 없어요. 에이전트 탭에서 먼저 추가하세요.",
+        "cancel": "취소",
+        "confirm": "팀장으로 지정하고 시작"
+      },
+      "confirmDelete": {
+        "title": "\"{{name}}\"을(를) 삭제할까요?",
+        "description": "프로젝트와 작업, 채팅 기록이 모두 삭제돼요. 되돌릴 수 없어요.",
+        "confirmLabel": "프로젝트 삭제"
+      },
+      "errors": {
+        "missingWalletOrProject": "지갑 또는 프로젝트 ID가 없어요.",
+        "missingProjectId": "프로젝트 ID가 없어요."
+      },
+      "toast": {
+        "projectDeletedTitle": "프로젝트 삭제됨",
+        "projectDeletedDesc": "\"{{name}}\"이(가) 삭제됐어요.",
+        "projectDeleteError": "프로젝트를 삭제하지 못했어요",
+        "pickLeadFirst": "먼저 팀장을 지정하세요. 에이전트 탭에서 설정할 수 있어요.",
+        "alreadyWorking": "팀이 이미 이 프로젝트에서 작업하고 있어요.",
+        "leadAssigned_one": "팀장이 작업 {{count}}개를 배정했어요.",
+        "leadAssigned_other": "팀장이 작업 {{count}}개를 배정했어요.",
+        "goalComplete": "팀장이 목표가 이미 완료됐다고 전했어요.",
+        "teamOnIt": "팀이 처리하고 있어요.",
+        "startTeamError": "팀을 시작하지 못했어요",
+        "nowLead": "{{name}}이(가) 이제 팀장이에요.",
+        "setLeadError": "팀장을 지정하지 못했어요",
+        "wakingTeam_one": "에이전트 {{count}}개를 깨우는 중…",
+        "wakingTeam_other": "에이전트 {{count}}개를 깨우는 중…",
+        "wakingTeamDesc": "부팅과 연결까지 약 2~3분 걸려요.",
+        "wakeTeamError": "팀을 깨우지 못했어요"
+      }
+    },
+    "tasksTab": {
+      "createTask": "작업 만들기",
+      "emptyMessage": "여기로 작업을 끌어놓거나 새로 만들어보세요.",
+      "bulk": {
+        "selectedCount": "{{count}}개 선택됨",
+        "moveTo": "이동할 위치:",
+        "toDo": "할 일",
+        "inProgress": "진행 중",
+        "done": "완료",
+        "delete": "삭제",
+        "clear": "선택 해제"
+      },
+      "confirmDelete": {
+        "title_one": "작업 {{count}}개를 삭제할까요?",
+        "title_other": "작업 {{count}}개를 삭제할까요?",
+        "description": "선택한 작업과 관련 기록이 모두 삭제돼요. 되돌릴 수 없어요.",
+        "confirmLabel": "삭제"
+      },
+      "toast": {
+        "movedSomeFailed": "{{ok}}개 이동, {{failed}}개 실패",
+        "movedSuccess_one": "작업 {{count}}개를 이동했어요",
+        "movedSuccess_other": "작업 {{count}}개를 이동했어요",
+        "bulkMoveFailed": "일괄 이동에 실패했어요",
+        "deletedSomeFailed": "{{ok}}개 삭제, {{failed}}개 실패",
+        "deletedSuccess_one": "작업 {{count}}개를 삭제했어요",
+        "deletedSuccess_other": "작업 {{count}}개를 삭제했어요",
+        "bulkDeleteFailed": "일괄 삭제에 실패했어요"
+      }
+    },
+    "board": {
+      "moveTaskError": "작업을 이동하지 못했어요",
+      "connectWalletMove": "작업을 이동하려면 지갑을 연결하세요."
+    },
+    "conductorTab": {
+      "rosterHint": "명단에서 활동 중인 팀원과 진행 중인 작업량을 확인할 수 있어요."
+    },
+    "taskCard": {
+      "agent": "에이전트: {{agent}}",
+      "selectAria": "{{name}} 선택",
+      "editTask": "작업 수정",
+      "deleteTask": "작업 삭제",
+      "confirmDelete": {
+        "title": "\"{{name}}\"을(를) 삭제할까요?",
+        "description": "이 작업과 관련 기록이 삭제돼요.",
+        "confirmLabel": "작업 삭제"
+      },
+      "errors": {
+        "missingWalletOrTask": "지갑 또는 작업 ID가 없어요."
+      },
+      "toast": {
+        "taskDeleted": "작업 삭제됨",
+        "deleteTaskError": "작업을 삭제하지 못했어요"
+      }
+    },
+    "mapTab": {
+      "activityTitle": "프로젝트 활동"
+    },
+    "agentsTab": {
+      "countOnProject_one": "이 프로젝트에 에이전트 {{count}}개",
+      "countOnProject_other": "이 프로젝트에 에이전트 {{count}}개",
+      "addAgent": "에이전트 추가",
+      "pickLeadBefore": "한 명을 ",
+      "pickLeadEmphasis": "팀장",
+      "pickLeadAfter": "으로 지정하세요. 팀 작업을 시작하면 목표를 계획하고 다른 팀원들에게 작업을 나눠줘요.",
+      "roleLead": "팀장 · ",
+      "roleWorker": "팀원 · ",
+      "taskCount_one": "작업 {{count}}개",
+      "taskCount_other": "작업 {{count}}개",
+      "leadBadge": "팀장",
+      "makeLead": "팀장으로 지정",
+      "makeLeadTitle": "이 에이전트를 팀장으로 지정해요",
+      "empty": {
+        "title": "이 프로젝트에 에이전트가 없어요",
+        "description": "팀에서 에이전트를 추가하거나, 새로 실행해서 작업을 시작해보세요.",
+        "addExisting": "기존 에이전트 추가",
+        "launch": "에이전트 실행하기"
+      },
+      "toast": {
+        "nowLead": "{{name}}이(가) 이제 팀장이에요",
+        "clearedLead": "프로젝트 팀장 지정을 해제했어요",
+        "updateLeadError": "팀장을 변경하지 못했어요"
+      }
+    },
+    "power": {
+      "error": "전원 상태를 바꾸지 못했어요",
+      "wakeAria": "{{name}} 깨우기",
+      "hibernateAria": "{{name}} 휴면 전환",
+      "working": "처리 중…",
+      "wakeTitle": "에이전트 깨우기",
+      "hibernateTitle": "에이전트 휴면 전환"
+    },
+    "addAgentDialog": {
+      "title": "이 프로젝트에 에이전트 추가",
+      "description": "팀에서 에이전트를 선택해 이 프로젝트 명단에 추가하세요. 추가한 뒤에는 작업을 배정할 수 있어요.",
+      "loading": "에이전트를 불러오는 중…",
+      "noAgentsYet": "아직 에이전트가 없어요. 먼저 에이전트를 만들거나 초대해보세요.",
+      "allOnProject": "내 에이전트가 모두 이미 이 프로젝트에 있어요.",
+      "externalSuffix": " · 외부",
+      "cancel": "취소",
+      "add": "추가",
+      "toast": {
+        "added_one": "프로젝트에 에이전트 {{count}}개를 추가했어요",
+        "added_other": "프로젝트에 에이전트 {{count}}개를 추가했어요",
+        "alreadyOnProject": "해당 에이전트는 이미 프로젝트에 있어요",
+        "addError": "에이전트를 추가하지 못했어요"
+      }
+    },
+    "chat": {
+      "agentFallback": "에이전트",
+      "memberCount_one": "멤버 {{count}}명",
+      "memberCount_other": "멤버 {{count}}명",
+      "noLeadWarning": "아직 이 프로젝트에 팀장이 없어요. 팀장을 지정하기 전까지는 여기서 보낸 메시지로 작업이 시작되지 않아요. 팀장이 목표를 계획하고 다른 에이전트에게 작업을 나눠줘요.",
+      "makeLeadButton": "{{name}}을(를) 팀장으로 지정",
+      "makeLeadTitle": "{{name}}을(를) 팀장으로 지정",
+      "chooseAnother": "에이전트 탭에서 다른 팀원 선택",
+      "designate": "에이전트 탭에서 지정",
+      "emptyMessages": "아직 메시지가 없어요. 팀원과 이 프로젝트에 배정된 에이전트와 대화를 시작해보세요.",
+      "composerPlaceholder": "#{{name}}에게 메시지…",
+      "membersHeading": "멤버",
+      "noMembers": "아직 멤버가 없어요.",
+      "kindAgent": "에이전트",
+      "kindHuman": "사람",
+      "errors": {
+        "connectWalletFirst": "먼저 지갑을 연결하세요.",
+        "connectWalletSend": "메시지를 보내려면 지갑을 연결하세요."
+      },
+      "toast": {
+        "nowLead": "{{name}}이(가) 이제 팀장이에요",
+        "nowLeadDesc": "채팅에 목표를 보내면 팀장이 계획하고 작업을 나눠줘요.",
+        "setLeadError": "팀장을 지정하지 못했어요",
+        "mentionedYouTitle": "{{label}}님이 나를 멘션했어요",
+        "sentTo": "{{agents}}에게 전송됨",
+        "noLeadTitle": "아직 이 프로젝트에 팀장이 없어요",
+        "noLeadDescPick": "팀장을 지정하면 목표를 계획하고 작업을 나눠줄 수 있어요.",
+        "noLeadDescAdd": "에이전트를 추가하고 팀장을 지정하면 목표를 계획하고 작업을 나눠줄 수 있어요."
+      }
+    }
   }
 }

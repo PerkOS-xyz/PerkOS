@@ -1264,5 +1264,237 @@
       "sending": "Enviando…",
       "send": "Enviar"
     }
+  },
+  "projectRoom": {
+    "backToProjects": "Volver a proyectos",
+    "membersTab": {
+      "note": "Personas con acceso a este proyecto. Los editores pueden editar el tablero y el chat; los espectadores solo pueden ver. (Los miembros de la organización ya tienen acceso.)"
+    },
+    "tabs": {
+      "tasks": "Tareas",
+      "docs": "Documentos",
+      "conductor": "Conductor",
+      "agents": "Agentes",
+      "map": "Mapa",
+      "chat": "Chat del proyecto",
+      "members": "Miembros"
+    },
+    "header": {
+      "lead": "Líder: {{name}}",
+      "noPrimaryAgent": "No hay un agente principal asignado",
+      "activeSuffix": "activo {{time}}",
+      "runPmTitleWithPm": "Tu líder de equipo planea el objetivo y reparte el trabajo",
+      "runPmTitleNoPm": "Vas a elegir qué agente lidera el equipo",
+      "teamWorking": "Equipo trabajando…",
+      "putTeamToWork": "Poner al equipo a trabajar",
+      "wakeTeamTitle": "Escala ahora a todos los agentes de este proyecto (precalienta al equipo)",
+      "waking": "Despertando…",
+      "wakeTeam": "Despertar equipo",
+      "members": "Miembros",
+      "membersAria": "Administrar miembros",
+      "membersTitle": "Comparte este proyecto: invita billeteras y administra el acceso",
+      "edit": "Editar",
+      "editAria": "Editar proyecto",
+      "editTitle": "Editar proyecto",
+      "delete": "Eliminar",
+      "deleteAria": "Eliminar proyecto",
+      "deleteTitle": "Eliminar proyecto",
+      "stats": {
+        "totalTasks": "Tareas totales",
+        "inProgress": "En curso",
+        "done": "Hecho",
+        "agents": "Agentes"
+      },
+      "avatar": {
+        "noPrimaryAgent": "No hay un agente principal asignado",
+        "primaryAgent": "Agente principal: {{name}}"
+      },
+      "firstRun": {
+        "title": "Tu equipo está listo: así puedes empezar",
+        "step1Bold": "Poner al equipo a trabajar",
+        "step1WithPm": ": {{pmAgent}} lee tu objetivo, lo convierte en tareas y el equipo lo resuelve por su cuenta. Es la forma más rápida, con un clic.",
+        "step1NoPm": ": vas a elegir qué agente lidera el equipo; luego planea el objetivo en tareas y el equipo lo resuelve por su cuenta.",
+        "step2Before": "O dile al equipo lo que necesitas en ",
+        "step2Bold": "Chat del proyecto",
+        "step2After": ": responden con su personalidad y puedes mencionar a cualquiera con @.",
+        "step3Before": "O agrega tareas tú mismo en la pestaña ",
+        "step3Bold": "Tareas",
+        "step3After": " y asígnalas a agentes específicos.",
+        "ctaWithPm": "Poner al equipo a trabajar",
+        "ctaNoPm": "Elige un líder de equipo y empieza",
+        "ctaHint": "Tu equipo redacta y propone: nada sucede sin tu aprobación. Los compañeros despiertan automáticamente cuando se les asigna trabajo."
+      },
+      "choosePm": {
+        "title": "Elige a tu líder de equipo",
+        "description": "Todo proyecto necesita un líder de equipo: el agente que convierte el objetivo en tareas, se las reparte al equipo y revisa los resultados. Elige quién lidera este proyecto:",
+        "noAgents": "Todavía no hay agentes en este proyecto: agrega agentes primero (pestaña Agentes).",
+        "cancel": "Cancelar",
+        "confirm": "Hazlo líder de equipo y empieza"
+      },
+      "confirmDelete": {
+        "title": "¿Eliminar \"{{name}}\"?",
+        "description": "Esto eliminará el proyecto, sus tareas y su historial de chat. Esta acción no se puede deshacer.",
+        "confirmLabel": "Eliminar proyecto"
+      },
+      "errors": {
+        "missingWalletOrProject": "Falta la billetera o el id del proyecto.",
+        "missingProjectId": "Falta el id del proyecto."
+      },
+      "toast": {
+        "projectDeletedTitle": "Proyecto eliminado",
+        "projectDeletedDesc": "\"{{name}}\" fue eliminado.",
+        "projectDeleteError": "No se pudo eliminar el proyecto",
+        "pickLeadFirst": "Primero elige un líder de equipo: revisa la pestaña Agentes.",
+        "alreadyWorking": "El equipo ya está trabajando en este proyecto.",
+        "leadAssigned_one": "Tu líder de equipo asignó {{count}} tarea.",
+        "leadAssigned_other": "Tu líder de equipo asignó {{count}} tareas.",
+        "goalComplete": "Tu líder de equipo dice que el objetivo ya está completo.",
+        "teamOnIt": "El equipo ya se está encargando.",
+        "startTeamError": "No se pudo poner en marcha al equipo",
+        "nowLead": "{{name}} ahora es el líder de equipo.",
+        "setLeadError": "No se pudo establecer el líder de equipo",
+        "wakingTeam_one": "Despertando a {{count}} agente…",
+        "wakingTeam_other": "Despertando a {{count}} agentes…",
+        "wakingTeamDesc": "Tardan unos 2 a 3 min en arrancar y conectarse.",
+        "wakeTeamError": "No se pudo despertar al equipo"
+      }
+    },
+    "tasksTab": {
+      "createTask": "Crear tarea",
+      "emptyMessage": "Arrastra una tarea aquí o crea una.",
+      "bulk": {
+        "selectedCount": "{{count}} seleccionadas",
+        "moveTo": "Mover a:",
+        "toDo": "Por hacer",
+        "inProgress": "En curso",
+        "done": "Hecho",
+        "delete": "Eliminar",
+        "clear": "Limpiar"
+      },
+      "confirmDelete": {
+        "title_one": "¿Eliminar {{count}} tarea?",
+        "title_other": "¿Eliminar {{count}} tareas?",
+        "description": "Se eliminarán las tareas seleccionadas junto con su historial. Esta acción no se puede deshacer.",
+        "confirmLabel": "Eliminar"
+      },
+      "toast": {
+        "movedSomeFailed": "Se movieron {{ok}}, {{failed}} fallaron",
+        "movedSuccess_one": "Se movió {{count}} tarea",
+        "movedSuccess_other": "Se movieron {{count}} tareas",
+        "bulkMoveFailed": "Falló el movimiento masivo",
+        "deletedSomeFailed": "Se eliminaron {{ok}}, {{failed}} fallaron",
+        "deletedSuccess_one": "Se eliminó {{count}} tarea",
+        "deletedSuccess_other": "Se eliminaron {{count}} tareas",
+        "bulkDeleteFailed": "Falló la eliminación masiva"
+      }
+    },
+    "board": {
+      "moveTaskError": "No se pudo mover la tarea",
+      "connectWalletMove": "Conecta tu billetera para mover tareas."
+    },
+    "conductorTab": {
+      "rosterHint": "La lista muestra a los trabajadores activos y su carga de trabajo en curso."
+    },
+    "taskCard": {
+      "agent": "Agente: {{agent}}",
+      "selectAria": "Seleccionar {{name}}",
+      "editTask": "Editar tarea",
+      "deleteTask": "Eliminar tarea",
+      "confirmDelete": {
+        "title": "¿Eliminar \"{{name}}\"?",
+        "description": "Esta tarea y su historial se eliminarán.",
+        "confirmLabel": "Eliminar tarea"
+      },
+      "errors": {
+        "missingWalletOrTask": "Falta la billetera o el id de la tarea."
+      },
+      "toast": {
+        "taskDeleted": "Tarea eliminada",
+        "deleteTaskError": "No se pudo eliminar la tarea"
+      }
+    },
+    "mapTab": {
+      "activityTitle": "Actividad del proyecto"
+    },
+    "agentsTab": {
+      "countOnProject_one": "{{count}} agente en este proyecto",
+      "countOnProject_other": "{{count}} agentes en este proyecto",
+      "addAgent": "Agregar agente",
+      "pickLeadBefore": "Elige a un agente como ",
+      "pickLeadEmphasis": "líder de equipo",
+      "pickLeadAfter": ": planea el objetivo y reparte las tareas a los demás cuando pones al equipo a trabajar.",
+      "roleLead": "Líder de equipo · ",
+      "roleWorker": "Trabajador · ",
+      "taskCount_one": "{{count}} tarea",
+      "taskCount_other": "{{count}} tareas",
+      "leadBadge": "Líder",
+      "makeLead": "Hacer líder",
+      "makeLeadTitle": "Hacer que este agente sea el líder de equipo",
+      "empty": {
+        "title": "No hay agentes en este proyecto",
+        "description": "Agrega un agente de tu equipo, o lanza uno nuevo para empezar a trabajar en tareas.",
+        "addExisting": "Agregar agente existente",
+        "launch": "Lanzar agente"
+      },
+      "toast": {
+        "nowLead": "{{name}} ahora es el líder de equipo",
+        "clearedLead": "Se quitó el líder de equipo del proyecto",
+        "updateLeadError": "No se pudo actualizar el líder de equipo"
+      }
+    },
+    "power": {
+      "error": "No se pudo cambiar el estado",
+      "wakeAria": "Despertar a {{name}}",
+      "hibernateAria": "Hibernar a {{name}}",
+      "working": "Trabajando…",
+      "wakeTitle": "Despertar agente",
+      "hibernateTitle": "Hibernar agente"
+    },
+    "addAgentDialog": {
+      "title": "Agrega agentes a este proyecto",
+      "description": "Elige agentes de tu equipo para agregarlos a la lista de este proyecto: luego puedes asignarles tareas.",
+      "loading": "Cargando tus agentes…",
+      "noAgentsYet": "Todavía no tienes agentes. Crea o invita a uno primero.",
+      "allOnProject": "Todos tus agentes ya están en este proyecto.",
+      "externalSuffix": " · externo",
+      "cancel": "Cancelar",
+      "add": "Agregar",
+      "toast": {
+        "added_one": "Se agregó {{count}} agente al proyecto",
+        "added_other": "Se agregaron {{count}} agentes al proyecto",
+        "alreadyOnProject": "Esos agentes ya están en el proyecto",
+        "addError": "No se pudieron agregar los agentes"
+      }
+    },
+    "chat": {
+      "agentFallback": "Agente",
+      "memberCount_one": "{{count}} miembro",
+      "memberCount_other": "{{count}} miembros",
+      "noLeadWarning": "Todavía no hay líder de equipo en este proyecto. Los mensajes aquí no van a iniciar ningún trabajo hasta que elijas un líder de equipo: planea tu objetivo y reparte tareas a los demás agentes.",
+      "makeLeadButton": "Hacer que {{name}} sea el líder de equipo",
+      "makeLeadTitle": "Hacer que {{name}} sea el líder de equipo",
+      "chooseAnother": "Elige otro en Agentes",
+      "designate": "Designar en Agentes",
+      "emptyMessages": "Todavía no hay mensajes. Empieza la conversación con tu equipo y los agentes asignados a este proyecto.",
+      "composerPlaceholder": "Mensaje para #{{name}}…",
+      "membersHeading": "Miembros",
+      "noMembers": "Todavía no hay miembros.",
+      "kindAgent": "Agente",
+      "kindHuman": "Humano",
+      "errors": {
+        "connectWalletFirst": "Conecta una billetera primero.",
+        "connectWalletSend": "Conecta una billetera para enviar mensajes."
+      },
+      "toast": {
+        "nowLead": "{{name}} ahora es el líder de equipo",
+        "nowLeadDesc": "Envía tu objetivo en el chat y tu líder de equipo va a planear y repartir el trabajo.",
+        "setLeadError": "No se pudo establecer el líder de equipo",
+        "mentionedYouTitle": "{{label}} te mencionó",
+        "sentTo": "Enviado a {{agents}}",
+        "noLeadTitle": "Todavía no hay líder de equipo en este proyecto",
+        "noLeadDescPick": "Elige un líder de equipo para que pueda planear tu objetivo y repartir el trabajo.",
+        "noLeadDescAdd": "Agrega agentes y elige un líder de equipo para planear y repartir el trabajo."
+      }
+    }
   }
 }

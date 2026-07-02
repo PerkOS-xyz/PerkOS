@@ -1273,5 +1273,237 @@
       "sending": "发送中…",
       "send": "发送"
     }
+  },
+  "projectRoom": {
+    "backToProjects": "返回项目列表",
+    "membersTab": {
+      "note": "有权访问此项目的人员。编辑者可以编辑看板和聊天;查看者仅可查看。(组织成员已自动拥有访问权限。)"
+    },
+    "tabs": {
+      "tasks": "任务",
+      "docs": "文档",
+      "conductor": "指挥台",
+      "agents": "智能体",
+      "map": "地图",
+      "chat": "项目聊天",
+      "members": "成员"
+    },
+    "header": {
+      "lead": "负责人:{{name}}",
+      "noPrimaryAgent": "尚未指定主要智能体",
+      "activeSuffix": "活跃于 {{time}}",
+      "runPmTitleWithPm": "你的团队负责人会规划目标并分配工作",
+      "runPmTitleNoPm": "你需要选择由哪个智能体来带领团队",
+      "teamWorking": "团队工作中…",
+      "putTeamToWork": "让团队开始工作",
+      "wakeTeamTitle": "立即扩容此项目的所有智能体(预热团队)",
+      "waking": "唤醒中…",
+      "wakeTeam": "唤醒团队",
+      "members": "成员",
+      "membersAria": "管理成员",
+      "membersTitle": "分享此项目,邀请钱包并管理访问权限",
+      "edit": "编辑",
+      "editAria": "编辑项目",
+      "editTitle": "编辑项目",
+      "delete": "删除",
+      "deleteAria": "删除项目",
+      "deleteTitle": "删除项目",
+      "stats": {
+        "totalTasks": "任务总数",
+        "inProgress": "进行中",
+        "done": "已完成",
+        "agents": "智能体"
+      },
+      "avatar": {
+        "noPrimaryAgent": "尚未指定主要智能体",
+        "primaryAgent": "主要智能体:{{name}}"
+      },
+      "firstRun": {
+        "title": "你的团队已经准备就绪,以下是开始方式",
+        "step1Bold": "让团队开始工作",
+        "step1WithPm": ":{{pmAgent}} 会阅读你的目标,把工作拆解成任务,团队会自主完成。这是最快捷的一键方式。",
+        "step1NoPm": ":你需要先选择由哪个智能体带领团队,然后它会把目标拆解成任务,交由团队自主完成。",
+        "step2Before": "或者在",
+        "step2Bold": "项目聊天",
+        "step2After": "中告诉团队你需要什么,他们会以各自的角色身份回复,你还可以 @ 任何人。",
+        "step3Before": "或者在",
+        "step3Bold": "任务",
+        "step3After": "标签页中自行添加任务,并分配给指定的智能体。",
+        "ctaWithPm": "让团队开始工作",
+        "ctaNoPm": "选择团队负责人并开始",
+        "ctaHint": "你的团队会起草和提议,但没有你的确认不会有任何实际操作。分配任务时,团队成员会自动被唤醒。"
+      },
+      "choosePm": {
+        "title": "选择你的团队负责人",
+        "description": "每个项目都需要一位团队负责人:由它把目标拆解成任务、分配给团队,并审核结果。请选择谁来负责这个项目:",
+        "noAgents": "此项目目前还没有智能体,请先添加智能体(智能体标签页)。",
+        "cancel": "取消",
+        "confirm": "设为团队负责人并开始"
+      },
+      "confirmDelete": {
+        "title": "删除“{{name}}”?",
+        "description": "这将移除该项目及其任务和聊天记录。此操作无法撤销。",
+        "confirmLabel": "删除项目"
+      },
+      "errors": {
+        "missingWalletOrProject": "缺少钱包地址或项目 ID。",
+        "missingProjectId": "缺少项目 ID。"
+      },
+      "toast": {
+        "projectDeletedTitle": "项目已删除",
+        "projectDeletedDesc": "“{{name}}” 已被移除。",
+        "projectDeleteError": "无法删除项目",
+        "pickLeadFirst": "请先选择团队负责人,详见智能体标签页。",
+        "alreadyWorking": "团队已经在处理此项目了。",
+        "leadAssigned_one": "你的团队负责人已分配 {{count}} 个任务。",
+        "leadAssigned_other": "你的团队负责人已分配 {{count}} 个任务。",
+        "goalComplete": "你的团队负责人表示目标已经完成。",
+        "teamOnIt": "团队正在处理。",
+        "startTeamError": "无法启动团队",
+        "nowLead": "{{name}} 现在是团队负责人。",
+        "setLeadError": "无法设置团队负责人",
+        "wakingTeam_one": "正在唤醒 {{count}} 个智能体…",
+        "wakingTeam_other": "正在唤醒 {{count}} 个智能体…",
+        "wakingTeamDesc": "启动并连接大约需要 2-3 分钟。",
+        "wakeTeamError": "无法唤醒团队"
+      }
+    },
+    "tasksTab": {
+      "createTask": "创建任务",
+      "emptyMessage": "把任务拖到这里,或者创建一个新任务。",
+      "bulk": {
+        "selectedCount": "已选择 {{count}} 个",
+        "moveTo": "移动到:",
+        "toDo": "待办",
+        "inProgress": "进行中",
+        "done": "已完成",
+        "delete": "删除",
+        "clear": "清除"
+      },
+      "confirmDelete": {
+        "title_one": "删除 {{count}} 个任务?",
+        "title_other": "删除 {{count}} 个任务?",
+        "description": "所选任务及其历史记录都将被移除。此操作无法撤销。",
+        "confirmLabel": "删除"
+      },
+      "toast": {
+        "movedSomeFailed": "已移动 {{ok}} 个,{{failed}} 个失败",
+        "movedSuccess_one": "已移动 {{count}} 个任务",
+        "movedSuccess_other": "已移动 {{count}} 个任务",
+        "bulkMoveFailed": "批量移动失败",
+        "deletedSomeFailed": "已删除 {{ok}} 个,{{failed}} 个失败",
+        "deletedSuccess_one": "已删除 {{count}} 个任务",
+        "deletedSuccess_other": "已删除 {{count}} 个任务",
+        "bulkDeleteFailed": "批量删除失败"
+      }
+    },
+    "board": {
+      "moveTaskError": "无法移动任务",
+      "connectWalletMove": "请先连接钱包才能移动任务。"
+    },
+    "conductorTab": {
+      "rosterHint": "名单会显示当前活跃的工作者及其进行中的任务量。"
+    },
+    "taskCard": {
+      "agent": "智能体:{{agent}}",
+      "selectAria": "选择 {{name}}",
+      "editTask": "编辑任务",
+      "deleteTask": "删除任务",
+      "confirmDelete": {
+        "title": "删除“{{name}}”?",
+        "description": "此任务及其历史记录将被移除。",
+        "confirmLabel": "删除任务"
+      },
+      "errors": {
+        "missingWalletOrTask": "缺少钱包地址或任务 ID。"
+      },
+      "toast": {
+        "taskDeleted": "任务已删除",
+        "deleteTaskError": "无法删除任务"
+      }
+    },
+    "mapTab": {
+      "activityTitle": "项目动态"
+    },
+    "agentsTab": {
+      "countOnProject_one": "此项目有 {{count}} 个智能体",
+      "countOnProject_other": "此项目有 {{count}} 个智能体",
+      "addAgent": "添加智能体",
+      "pickLeadBefore": "选择一个智能体作为",
+      "pickLeadEmphasis": "团队负责人",
+      "pickLeadAfter": ",当你让团队开始工作时,它会规划目标并把任务分配给其他人。",
+      "roleLead": "团队负责人 · ",
+      "roleWorker": "工作者 · ",
+      "taskCount_one": "{{count}} 个任务",
+      "taskCount_other": "{{count}} 个任务",
+      "leadBadge": "负责人",
+      "makeLead": "设为负责人",
+      "makeLeadTitle": "将此智能体设为团队负责人",
+      "empty": {
+        "title": "此项目还没有智能体",
+        "description": "从你的团队中添加一个智能体,或启动一个新的智能体来开始处理任务。",
+        "addExisting": "添加现有智能体",
+        "launch": "启动智能体"
+      },
+      "toast": {
+        "nowLead": "{{name}} 现在是团队负责人",
+        "clearedLead": "已清除该项目的团队负责人",
+        "updateLeadError": "无法更新团队负责人"
+      }
+    },
+    "power": {
+      "error": "无法更改电源状态",
+      "wakeAria": "唤醒 {{name}}",
+      "hibernateAria": "休眠 {{name}}",
+      "working": "处理中…",
+      "wakeTitle": "唤醒智能体",
+      "hibernateTitle": "休眠智能体"
+    },
+    "addAgentDialog": {
+      "title": "为此项目添加智能体",
+      "description": "从你的团队中选择智能体加入此项目的成员名单,之后即可为它们分配任务。",
+      "loading": "正在加载你的智能体…",
+      "noAgentsYet": "你还没有任何智能体,请先创建或邀请一个。",
+      "allOnProject": "你的所有智能体都已经在此项目中了。",
+      "externalSuffix": " · 外部",
+      "cancel": "取消",
+      "add": "添加",
+      "toast": {
+        "added_one": "已将 {{count}} 个智能体添加到项目中",
+        "added_other": "已将 {{count}} 个智能体添加到项目中",
+        "alreadyOnProject": "这些智能体已经在项目中了",
+        "addError": "无法添加智能体"
+      }
+    },
+    "chat": {
+      "agentFallback": "智能体",
+      "memberCount_one": "{{count}} 位成员",
+      "memberCount_other": "{{count}} 位成员",
+      "noLeadWarning": "此项目还没有团队负责人。在你选定团队负责人之前,这里的消息不会触发任何工作,团队负责人会负责规划目标并把任务分配给其他智能体。",
+      "makeLeadButton": "将 {{name}} 设为团队负责人",
+      "makeLeadTitle": "将 {{name}} 设为团队负责人",
+      "chooseAnother": "在智能体页面中选择其他人",
+      "designate": "在智能体页面中指定",
+      "emptyMessages": "还没有消息。和你的团队以及分配到此项目的智能体开始对话吧。",
+      "composerPlaceholder": "给 #{{name}} 发消息…",
+      "membersHeading": "成员",
+      "noMembers": "还没有成员。",
+      "kindAgent": "智能体",
+      "kindHuman": "人类",
+      "errors": {
+        "connectWalletFirst": "请先连接钱包。",
+        "connectWalletSend": "请连接钱包后再发送消息。"
+      },
+      "toast": {
+        "nowLead": "{{name}} 现在是团队负责人",
+        "nowLeadDesc": "在聊天中发送你的目标,团队负责人会负责规划并分配工作。",
+        "setLeadError": "无法设置团队负责人",
+        "mentionedYouTitle": "{{label}} 提到了你",
+        "sentTo": "已发送给 {{agents}}",
+        "noLeadTitle": "此项目还没有团队负责人",
+        "noLeadDescPick": "请选择一位团队负责人,以便规划目标并分配工作。",
+        "noLeadDescAdd": "添加智能体并选择一位团队负责人来规划和分配工作。"
+      }
+    }
   }
 }
