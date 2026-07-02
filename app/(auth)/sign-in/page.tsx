@@ -95,10 +95,16 @@ export default function SignInPage() {
     }
   }, [isInMiniApp, isConnected, address, sessionSettled, session.status, router]);
 
-  // Once the user has both wagmi + Firebase, send them on.
+  // Once the user has both wagmi + Firebase, send them on through /continue,
+  // the single post-auth dispatcher (→ /dashboard). Do NOT route straight to
+  // /onboarding/welcome: that forced the setup wizard on EVERY sign-in,
+  // including returning users with existing data (there's no reliable
+  // new-vs-returning signal here — the onboarding flag is local-only). New
+  // users land on the dashboard's empty state, which has a create-first-project
+  // CTA; the guided wizard stays available but isn't forced.
   useEffect(() => {
     if (session.status === "signed-in") {
-      router.replace("/onboarding/welcome");
+      router.replace("/continue");
     }
   }, [session.status, router]);
 
@@ -135,7 +141,7 @@ export default function SignInPage() {
             <button
               type="button"
               disabled={session.status !== "signed-in"}
-              onClick={() => router.replace("/onboarding/welcome")}
+              onClick={() => router.replace("/continue")}
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#ec1b69] px-6 py-4 font-medium text-[#ececff] transition-opacity hover:opacity-90 disabled:opacity-60"
             >
               <span className="text-base leading-none">
