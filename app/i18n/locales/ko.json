@@ -1076,5 +1076,193 @@
       "connectWallet": "에이전트를 실행하기 전에 지갑을 연결하세요.",
       "pickRuntime": "런타임을 선택하세요."
     }
+  },
+  "agentDetail": {
+    "backLink": "에이전트 팀으로 돌아가기",
+    "notFound": "팀에서 이 에이전트를 찾을 수 없어요.",
+    "whatHappensNext": "다음에 일어날 일",
+    "header": {
+      "stop": "중지",
+      "refresh": "새로고침",
+      "edit": "수정",
+      "alreadyStopped": "{{name}}이(가) 이미 중지됐어요.",
+      "stopping": "{{name}} 중지하는 중이에요 — 다음 메시지를 보내면 자동으로 다시 깨어나요.",
+      "stopError": "에이전트를 중지하지 못했어요"
+    },
+    "status": {
+      "syncing": "동기화 중…",
+      "hibernated": "휴면 중",
+      "hibernating": "휴면 전환 중…",
+      "waking": "깨우는 중…",
+      "online": "온라인",
+      "failed": "실패",
+      "provisioning": "준비 중",
+      "unknown": "알 수 없음"
+    },
+    "activity": {
+      "title": "최근 활동"
+    },
+    "metadata": {
+      "title": "런타임 메타데이터",
+      "agentId": "에이전트 ID",
+      "ownerWallet": "소유자 지갑",
+      "created": "생성일",
+      "lastActive": "마지막 활동",
+      "connectedNow": "· 지금 연결됨",
+      "neverConnected": "연결된 적 없음",
+      "endpoint": "엔드포인트",
+      "notProvisioned": "아직 프로비저닝되지 않음",
+      "runtimeVersion": "런타임 버전",
+      "modelKey": "모델 키",
+      "byok": "사용자 제공(BYOK)",
+      "perkosManaged": "PerkOS 관리"
+    },
+    "capabilities": {
+      "title": "기능",
+      "description": "이 에이전트가 작업을 수행하는 동안 사용할 수 있는 플러그인이에요.",
+      "empty": "아직 설정된 플러그인이 없어요. 수정을 눌러 추가하세요."
+    },
+    "channels": {
+      "title": "연결된 채널",
+      "description": "PerkOS 안에서뿐 아니라 사용자가 이 에이전트에게 연락할 수 있는 곳이에요.",
+      "none": "설정된 채널이 없어요. {{runtime}} 에이전트는 Telegram, Discord, Slack, WhatsApp 같은 채널에 연결할 수 있어요."
+    },
+    "tasks": {
+      "title": "{{name}}에게 배정된 작업",
+      "description": "모든 프로젝트를 통틀어서예요. 작업을 클릭하면 상세 정보를 볼 수 있어요.",
+      "empty": "아직 이 에이전트에게 배정된 작업이 없어요."
+    },
+    "lifecycle": {
+      "title": "라이프사이클",
+      "description": "이 에이전트를 팀에서 제거해요.",
+      "delete": "삭제",
+      "connectWallet": "지갑을 연결하세요.",
+      "deletedTitle": "에이전트 삭제됨",
+      "deletedWithWarnings": "{{name}}이(가) 제거됐어요. 일부 정리 작업에서 경고가 발생했어요(콘솔 확인).",
+      "deleted": "{{name}}이(가) 팀에서 제거됐어요.",
+      "deleteError": "에이전트를 삭제하지 못했어요",
+      "confirmTitle": "{{name}}을(를) 삭제할까요?",
+      "confirmDescription": "실행 중인 컨테이너를 종료하고, LLM 키를 취소하고, 관련 기록을 지워요. 요금 청구는 즉시 중단돼요. 이 에이전트가 맡았던 대화와 작업은 기록이 그대로 남지만 배정은 해제돼요. 되돌릴 수 없어요.",
+      "confirmLabel": "에이전트 삭제"
+    }
+  },
+  "companyNew": {
+    "gallery": {
+      "title": "새 프로젝트",
+      "intro": "업종별 템플릿에서 시작하거나, 원하는 역할로 직접 팀을 구성하거나, 빈 프로젝트를 만들어보세요. 팀은 초안을 작성하고 제안할 뿐, 사장님의 승인 없이는 아무 일도 진행되지 않아요. 에이전트 한 명이면 충분하신가요? ",
+      "introLink": "여기서 만들어보세요",
+      "introAfter": ".",
+      "customCard": {
+        "title": "커스텀 팀",
+        "kicker": "직접 구성하기",
+        "blurb": "프로젝트를 정의하고 필요한 역할만 정확히 고르세요 — PM, 리서처, 마케터, 빌더… 누가 이끌지도 직접 정하세요.",
+        "cta": "역할 선택하기"
+      },
+      "emptyCard": {
+        "title": "빈 프로젝트",
+        "kicker": "가볍게 시작하기",
+        "blurb": "프로젝트만 먼저 만들어요 — 기존 에이전트를 배정하거나 나중에 팀을 추가하세요.",
+        "cta": "빈 프로젝트 만들기"
+      },
+      "myTemplates": "내 템플릿",
+      "myTemplateKicker": "내 템플릿",
+      "myTemplateBlurb": "저장해둔 팀이에요 — 역할을 조정해서 새 프로젝트에서 실행해보세요.",
+      "deleteTemplateAria": "템플릿 {{name}} 삭제",
+      "deleteTemplateTitle": "템플릿 삭제",
+      "deleteTemplateConfirm": "템플릿 \"{{name}}\"을(를) 삭제할까요?",
+      "deleteTemplateError": "템플릿을 삭제하지 못했어요",
+      "businessTemplates": "PerkOS 업종별 템플릿"
+    },
+    "config": {
+      "back": "다른 시작점 선택하기",
+      "customTeamTitle": "커스텀 팀",
+      "emptyProjectTitle": "빈 프로젝트",
+      "myTeamSubtitle": "저장해둔 팀이에요 — 조정해서 실행하세요.",
+      "customTeamSubtitle": "프로젝트에 필요한 역할을 고르고 누가 이끌지 정하세요.",
+      "emptyProjectSubtitle": "프로젝트만 먼저 만들어요 — 에이전트는 나중에 언제든 추가할 수 있어요.",
+      "teamHeading_one": "내 팀 ({{count}}명)",
+      "teamHeading_other": "내 팀 ({{count}}명)",
+      "teamHintTemplate": "이 업종에 추천하는 구성이에요 — 필요 없는 역할은 지우고, 아래에서 역할을 더 추가한 뒤, 누가 이끌지 정하세요.",
+      "teamHintCustom": "역할을 추가하거나 지우고 누가 이끌지 정하세요(팀장이 업무를 계획하고 팀을 조율해요).",
+      "leadTitle": "팀장이 업무를 계획하고 팀을 조율해요",
+      "lead": "팀장",
+      "removeRoleAria": "{{role}} 제거",
+      "noRoles": "아직 역할이 없어요 — 아래에서 최소 하나를 추가하세요.",
+      "addRole": "역할 추가",
+      "nameLabel": "프로젝트 이름을 지어주세요",
+      "namePlaceholder": "예: Two-Table Cafe NY",
+      "goalLabelTeam": "이 팀이 무엇을 이루면 좋을까요?",
+      "goalLabelProject": "이 프로젝트가 무엇을 이루면 좋을까요?",
+      "goalPlaceholderDefault": "선택 사항 — 입력하지 않으면 기본값으로 사용돼요: \"{{blurb}}\"",
+      "goalPlaceholder": "예: 아이디어를 검증해요 — 시장을 조사하고, 출시 계획을 세우고, 대기자 명단을 만들어요.",
+      "goalHint": "팀장이 이 목표를 바탕으로 보드를 계획하고 팀에 브리핑해요.",
+      "sourceHeading": "누가 이 에이전트들을 운영하나요?",
+      "sourcePerkos": "PerkOS 에이전트",
+      "sourcePerkosDesc": "저희가 팀을 실행하고 호스팅해 드려요 — 몇 분 안에 온라인 상태가 돼요.",
+      "sourceInvite": "직접 운영하는 에이전트 초대하기",
+      "sourceInviteDesc": "역할마다 등록하고, 온보딩 프롬프트를 통해 이미 운영 중인 에이전트를 연결하세요. 인프라는 실행되지 않아요.",
+      "llmHeading": "AI는 어디서 실행되나요?",
+      "llmPerkos": "PerkOS LLM",
+      "llmPerkosDesc": "PerkOS 인프라에서 실행돼요 — API 키가 필요 없어요.",
+      "llmByok": "직접 준비한 모델 사용하기",
+      "llmByokDesc": "직접 준비한 OpenAI 호환 키를 사용하세요. PerkOS 인프라에 배포돼요.",
+      "modelPlaceholder": "모델 ID",
+      "keyPlaceholder": "sk-…(API 키 — 암호화되어 저장되며, 작업 데이터에는 절대 포함되지 않아요)",
+      "saveTemplateLabel": "이 팀을 내 템플릿으로 저장",
+      "saveTemplatePlaceholder": "{{name}} 팀",
+      "saveTemplatePlaceholderFallback": "내",
+      "saveTemplateHint": "추천 팀을 변경하셨네요 — 다음 프로젝트에서 재사용할 수 있도록 저장하세요.",
+      "launching": "실행하는 중…",
+      "createProject": "프로젝트 만들기",
+      "inviteButton_one": "만들기 + 팀원 {{count}}명 초대",
+      "inviteButton_other": "만들기 + 팀원 {{count}}명 초대",
+      "startTeam": "팀 시작하기 ({{count}})",
+      "dontClose": "완료될 때까지 이 탭을 닫지 마세요."
+    },
+    "launch": {
+      "pickRole": "팀에 넣을 역할을 최소 하나 이상 선택하세요.",
+      "enterKey": "모델 API 키를 입력하세요(또는 PerkOS LLM으로 전환하세요).",
+      "resolvingImages": "런타임 이미지를 확인하는 중…",
+      "noRuntimeImage": "활성화된 {{runtime}} 런타임 이미지가 없어요 — 실행 전에 관리자가 먼저 설정해야 해요.",
+      "creatingProject": "프로젝트 만드는 중…",
+      "projectNoId": "프로젝트가 ID 없이 생성됐어요.",
+      "registering": "{{role}} 등록하는 중 ({{current}}/{{total}})…",
+      "launchingRole": "{{role}} 실행하는 중 ({{current}}/{{total}})…",
+      "assigningTeam": "팀을 배정하는 중…",
+      "savingTemplate": "템플릿을 저장하는 중…",
+      "defaultTemplateName": "{{name}} 팀",
+      "templateSaveFailed": "팀은 실행됐지만, 템플릿은 저장하지 못했어요.",
+      "projectCreated": "프로젝트 생성 완료",
+      "invitesRegistered_one": "프로젝트 생성 완료 — 에이전트 초대 {{count}}건 등록됨",
+      "invitesRegistered_other": "프로젝트 생성 완료 — 에이전트 초대 {{count}}건 등록됨",
+      "teamLaunched": "{{name}} 실행 완료",
+      "yourTeamFallback": "내 팀",
+      "descNoAgents": "에이전트 탭에서 언제든 에이전트를 추가할 수 있어요.",
+      "descInvite": "각 에이전트를 열어 온보딩 프롬프트를 복사하고 직접 준비한 런타임을 연결하세요.",
+      "descPerkos": "팀이 부팅되고 있어요 — 몇 분 안에 온라인 상태가 될 거예요.",
+      "createError": "프로젝트를 만들지 못했어요"
+    }
+  },
+  "walletSend": {
+    "success": {
+      "title": "전송 완료",
+      "description": "{{chain}}에서 {{amount}} {{token}}을(를) 전송했어요.",
+      "view": "보기",
+      "sendAnother": "다시 보내기"
+    },
+    "form": {
+      "title": "보내기",
+      "description": "지갑에서 자금을 내보내요. PerkOS가 대신 서명하고 전송해 드려요.",
+      "network": "네트워크",
+      "token": "토큰",
+      "recipient": "받는 주소",
+      "recipientInvalid": "유효한 0x… 주소를 입력하세요.",
+      "recipientSelf": "참고하세요 — 본인의 지갑 주소예요.",
+      "amount": "금액 ({{token}})",
+      "amountInvalid": "0보다 큰 금액을 입력하세요.",
+      "transferFailed": "전송에 실패했어요.",
+      "sending": "보내는 중…",
+      "send": "보내기"
+    }
   }
 }

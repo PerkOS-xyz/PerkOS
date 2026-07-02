@@ -1008,9 +1008,18 @@
       "title": "Invita il tuo agente esistente",
       "description": "Nulla cambia nel tuo runtime, nella memoria o negli strumenti: il tuo agente si connette semplicemente in uscita verso PerkOS (perkos-a2a + perkos-chat) e ottiene la chat e la bacheca lavori della tua organizzazione.",
       "runtimeKinds": {
-        "hermes": { "label": "Hermes", "hint": "/v1/responses" },
-        "openclaw": { "label": "OpenClaw", "hint": "/v1/chat/completions" },
-        "custom": { "label": "Personalizzato", "hint": "il tuo runtime HTTP personale" }
+        "hermes": {
+          "label": "Hermes",
+          "hint": "/v1/responses"
+        },
+        "openclaw": {
+          "label": "OpenClaw",
+          "hint": "/v1/chat/completions"
+        },
+        "custom": {
+          "label": "Personalizzato",
+          "hint": "il tuo runtime HTTP personale"
+        }
       },
       "nameLabel": "Nome dell'agente (handle)",
       "nameHelp": "Come viene identificato sul relay e in chat. Deve essere univoco.",
@@ -1075,6 +1084,194 @@
     "error": {
       "connectWallet": "Connetti un portafoglio prima di avviare un agente.",
       "pickRuntime": "Scegli un runtime."
+    }
+  },
+  "agentDetail": {
+    "backLink": "Torna al team di agenti",
+    "notFound": "Agente non trovato nel tuo team.",
+    "whatHappensNext": "Cosa succede adesso",
+    "header": {
+      "stop": "Ferma",
+      "refresh": "Aggiorna",
+      "edit": "Modifica",
+      "alreadyStopped": "{{name}} era già fermo.",
+      "stopping": "{{name}} in arresto: si riattiva automaticamente al tuo prossimo messaggio.",
+      "stopError": "Impossibile fermare l'agente"
+    },
+    "status": {
+      "syncing": "Sincronizzazione…",
+      "hibernated": "Ibernato",
+      "hibernating": "Ibernazione…",
+      "waking": "Riattivazione…",
+      "online": "Online",
+      "failed": "Non riuscito",
+      "provisioning": "Provisioning",
+      "unknown": "Sconosciuto"
+    },
+    "activity": {
+      "title": "Attività recente"
+    },
+    "metadata": {
+      "title": "Metadati del runtime",
+      "agentId": "ID agente",
+      "ownerWallet": "Portafoglio del proprietario",
+      "created": "Creato",
+      "lastActive": "Ultima attività",
+      "connectedNow": "· connesso ora",
+      "neverConnected": "Mai connesso",
+      "endpoint": "Endpoint",
+      "notProvisioned": "Provisioning non ancora completato",
+      "runtimeVersion": "Versione del runtime",
+      "modelKey": "Chiave del modello",
+      "byok": "Fornita dall'utente (BYOK)",
+      "perkosManaged": "Gestita da PerkOS"
+    },
+    "capabilities": {
+      "title": "Capacità",
+      "description": "Plugin che questo agente può usare durante l'esecuzione delle attività.",
+      "empty": "Nessun plugin configurato ancora. Usa Modifica per aggiungerne."
+    },
+    "channels": {
+      "title": "Canali connessi",
+      "description": "Dove gli utenti possono raggiungere questo agente, oltre che dentro PerkOS.",
+      "none": "Nessuno configurato. Gli agenti {{runtime}} possono essere collegati a canali come Telegram, Discord, Slack o WhatsApp."
+    },
+    "tasks": {
+      "title": "Attività assegnate a {{name}}",
+      "description": "In tutti i tuoi progetti. Clicca su un'attività per vederne il dettaglio.",
+      "empty": "Ancora nessuna attività assegnata a questo agente."
+    },
+    "lifecycle": {
+      "title": "Ciclo di vita",
+      "description": "Rimuovi questo agente dal tuo team.",
+      "delete": "Elimina",
+      "connectWallet": "Connetti un portafoglio.",
+      "deletedTitle": "Agente eliminato",
+      "deletedWithWarnings": "{{name}} è stato rimosso. Alcune attività di pulizia hanno generato avvisi (vedi console).",
+      "deleted": "{{name}} è stato rimosso dal tuo team.",
+      "deleteError": "Impossibile eliminare l'agente",
+      "confirmTitle": "Eliminare {{name}}?",
+      "confirmDescription": "Arresta il container in esecuzione, revoca la sua chiave LLM ed elimina i suoi dati. La fatturazione si interrompe immediatamente. Le conversazioni e le attività a cui era assegnato mantengono la loro cronologia ma perdono questa assegnazione. Non può essere annullata.",
+      "confirmLabel": "Elimina agente"
+    }
+  },
+  "companyNew": {
+    "gallery": {
+      "title": "Nuovo progetto",
+      "intro": "Parti da un modello aziendale, scegli tu i ruoli del tuo team oppure crea un progetto vuoto. Il tuo team prepara bozze e proposte, non succede nulla senza il tuo okay. Preferisci un singolo agente? ",
+      "introLink": "Creane uno qui",
+      "introAfter": ".",
+      "customCard": {
+        "title": "Team personalizzato",
+        "kicker": "Costruisci il tuo",
+        "blurb": "Definisci il progetto e scegli esattamente i ruoli di cui ha bisogno: PM, ricercatore, marketer, builder... scegli tu chi guida.",
+        "cta": "Scegli i tuoi ruoli"
+      },
+      "emptyCard": {
+        "title": "Progetto vuoto",
+        "kicker": "Parti leggero",
+        "blurb": "Solo il progetto: assegna agenti già esistenti o aggiungi un team più tardi.",
+        "cta": "Crea progetto vuoto"
+      },
+      "myTemplates": "I miei modelli",
+      "myTemplateKicker": "Il mio modello",
+      "myTemplateBlurb": "Il tuo team salvato: modifica i ruoli e avvialo su un nuovo progetto.",
+      "deleteTemplateAria": "Elimina il modello {{name}}",
+      "deleteTemplateTitle": "Elimina questo modello",
+      "deleteTemplateConfirm": "Eliminare il modello \"{{name}}\"?",
+      "deleteTemplateError": "Impossibile eliminare il modello",
+      "businessTemplates": "Modelli aziendali PerkOS"
+    },
+    "config": {
+      "back": "Scegli un altro punto di partenza",
+      "customTeamTitle": "Team personalizzato",
+      "emptyProjectTitle": "Progetto vuoto",
+      "myTeamSubtitle": "Il tuo team salvato: modificalo e avvialo.",
+      "customTeamSubtitle": "Scegli i ruoli di cui il tuo progetto ha bisogno e decidi chi guida.",
+      "emptyProjectSubtitle": "Solo il progetto: aggiungi agenti quando vuoi.",
+      "teamHeading_one": "Il tuo team ({{count}} compagno di team)",
+      "teamHeading_other": "Il tuo team ({{count}} compagni di team)",
+      "teamHintTemplate": "Consigliato per questa attività: rimuovi ciò che non ti serve, aggiungi altri ruoli qui sotto e scegli chi guida.",
+      "teamHintCustom": "Aggiungi o rimuovi ruoli e scegli chi guida (chi guida pianifica il lavoro e coordina il team).",
+      "leadTitle": "Chi guida pianifica il lavoro e coordina il team",
+      "lead": "Guida",
+      "removeRoleAria": "Rimuovi {{role}}",
+      "noRoles": "Ancora nessun ruolo: aggiungine almeno uno qui sotto.",
+      "addRole": "Aggiungi un ruolo",
+      "nameLabel": "Dai un nome al tuo progetto",
+      "namePlaceholder": "ad es. Two-Table Cafe NY",
+      "goalLabelTeam": "Cosa deve raggiungere questo team?",
+      "goalLabelProject": "Cosa deve raggiungere questo progetto?",
+      "goalPlaceholderDefault": "Facoltativo: il valore predefinito è \"{{blurb}}\"",
+      "goalPlaceholder": "ad es. Convalida l'idea: fai una ricerca di mercato, scrivi la bozza del piano di lancio, crea una lista d'attesa.",
+      "goalHint": "Chi guida il team usa questo obiettivo per pianificare la bacheca e istruire il team.",
+      "sourceHeading": "Chi gestisce questi agenti?",
+      "sourcePerkos": "Agenti PerkOS",
+      "sourcePerkosDesc": "Avviamo e ospitiamo il team per te: online in pochi minuti.",
+      "sourceInvite": "Invita i miei agenti",
+      "sourceInviteDesc": "Registra ogni ruolo e collega gli agenti che già usi, tramite un prompt di onboarding. Nessuna infrastruttura viene avviata.",
+      "llmHeading": "Dove funziona l'AI?",
+      "llmPerkos": "LLM di PerkOS",
+      "llmPerkosDesc": "Funziona sull'infrastruttura di PerkOS: nessuna chiave API necessaria.",
+      "llmByok": "Usa il tuo modello",
+      "llmByokDesc": "Usa la tua chiave compatibile con OpenAI. Distribuito sull'infrastruttura di PerkOS.",
+      "modelPlaceholder": "id del modello",
+      "keyPlaceholder": "sk-… (la tua chiave API: viene salvata cifrata, mai inclusa nella richiesta di avvio)",
+      "saveTemplateLabel": "Salva questo team tra i miei modelli",
+      "saveTemplatePlaceholder": "Team {{name}}",
+      "saveTemplatePlaceholderFallback": "personale",
+      "saveTemplateHint": "Hai modificato il team consigliato: salvalo per riutilizzarlo nel prossimo progetto.",
+      "launching": "Avvio in corso…",
+      "createProject": "Crea progetto",
+      "inviteButton_one": "Crea e invita {{count}} compagno di team",
+      "inviteButton_other": "Crea e invita {{count}} compagni di team",
+      "startTeam": "Avvia il tuo team ({{count}})",
+      "dontClose": "Non chiudere questa scheda finché non termina."
+    },
+    "launch": {
+      "pickRole": "Scegli almeno un ruolo per il tuo team.",
+      "enterKey": "Inserisci la chiave API del tuo modello (oppure passa a LLM di PerkOS).",
+      "resolvingImages": "Risoluzione delle immagini del runtime…",
+      "noRuntimeImage": "Nessuna immagine {{runtime}} attiva pubblicata: un amministratore deve impostarne una prima di poter avviare.",
+      "creatingProject": "Creazione del progetto…",
+      "projectNoId": "Il progetto è stato creato senza un id.",
+      "registering": "Registrazione di {{role}} ({{current}}/{{total}})…",
+      "launchingRole": "Avvio di {{role}} ({{current}}/{{total}})…",
+      "assigningTeam": "Assegnazione del team…",
+      "savingTemplate": "Salvataggio del tuo modello…",
+      "defaultTemplateName": "Team {{name}}",
+      "templateSaveFailed": "Team avviato, ma non è stato possibile salvare il modello.",
+      "projectCreated": "Progetto creato",
+      "invitesRegistered_one": "Progetto creato: {{count}} invito agente registrato",
+      "invitesRegistered_other": "Progetto creato: {{count}} inviti agente registrati",
+      "teamLaunched": "{{name}} avviato",
+      "yourTeamFallback": "Il tuo team",
+      "descNoAgents": "Aggiungi agenti in qualsiasi momento dalla scheda Agenti.",
+      "descInvite": "Apri ogni agente per copiare il suo prompt di onboarding e collegare il tuo runtime.",
+      "descPerkos": "Il tuo team si sta avviando: sarà online tra qualche minuto.",
+      "createError": "Impossibile creare il progetto"
+    }
+  },
+  "walletSend": {
+    "success": {
+      "title": "Inviato",
+      "description": "{{amount}} {{token}} inviati su {{chain}}.",
+      "view": "Vedi",
+      "sendAnother": "Invia un altro"
+    },
+    "form": {
+      "title": "Invia",
+      "description": "Sposta fondi fuori dal tuo portafoglio. PerkOS firma e trasmette la transazione per te.",
+      "network": "Rete",
+      "token": "Token",
+      "recipient": "Indirizzo del destinatario",
+      "recipientInvalid": "Inserisci un indirizzo 0x… valido.",
+      "recipientSelf": "Attenzione: questo è l'indirizzo del tuo stesso portafoglio.",
+      "amount": "Importo ({{token}})",
+      "amountInvalid": "Inserisci un importo maggiore di 0.",
+      "transferFailed": "Trasferimento non riuscito.",
+      "sending": "Invio in corso…",
+      "send": "Invia"
     }
   }
 }

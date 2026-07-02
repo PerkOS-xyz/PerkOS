@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useConnection } from "wagmi";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
   Bot,
@@ -110,6 +111,7 @@ function withValidPm(roles: CompanyRole[]): CompanyRole[] {
 const PROVIDERS = byokProviderOptions("OpenClaw");
 
 export default function NewCompanyPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { address } = useConnection();
   const { activeOrgId } = useActiveOrg();
@@ -207,7 +209,7 @@ export default function NewCompanyPage() {
     if (!address || !mode || !projectName.trim()) return;
     const roles = teamRoles;
     if (mode !== "empty" && roles.length === 0) {
-      toast.error("Pick at least one role for your team.");
+      toast.error(t("companyNew.launch.pickRole"));
       return;
     }
     if (
@@ -216,7 +218,7 @@ export default function NewCompanyPage() {
       llmMode === "byok" &&
       !byokKey.trim()
     ) {
-      toast.error("Enter your model API key (or switch to PerkOS LLM).");
+      toast.error(t("companyNew.launch.enterKey"));
       return;
     }
     setLaunching(true);
@@ -226,7 +228,7 @@ export default function NewCompanyPage() {
       // ECS service ("no service"), so the whole team would be dead-on-arrival.
       let tagFor: (rt: "OpenClaw" | "Hermes") => string | null = () => null;
       if (roles.length > 0 && agentSource === "perkos") {
-        setProgress("Resolving runtime images…");
+        setProgress(t("companyNew.launch.resolvingImages"));
         const runtimes = await fetchActiveRuntimes();
         tagFor = (rt) =>
           (rt === "Hermes" ? runtimes.hermes : runtimes.openclaw)[0]
@@ -234,13 +236,13 @@ export default function NewCompanyPage() {
         for (const role of roles) {
           if (!tagFor(role.runtime)) {
             throw new Error(
-              `No active ${role.runtime} runtime image is published — an admin needs to set one before launching.`,
+              t("companyNew.launch.noRuntimeImage", { runtime: role.runtime }),
             );
           }
         }
       }
 
-      setProgress("Creating project…");
+      setProgress(t("companyNew.launch.creatingProject"));
       const { project } = await createWalletProject({
         walletAddress: address,
         name: projectName.trim(),
@@ -248,7 +250,7 @@ export default function NewCompanyPage() {
         orgId: activeOrgId ?? undefined,
       });
       const projectId = project.id;
-      if (!projectId) throw new Error("Project was created without an id.");
+      if (!projectId) throw new Error(t("companyNew.launch.projectNoId"));
 
       const llm =
         llmMode === "byok"
@@ -266,7 +268,13 @@ export default function NewCompanyPage() {
         i++;
         const reqName = `${slug}-${slugify(role.role)}`;
         if (agentSource === "invite") {
-          setProgress(`Registering ${role.role} (${i}/${roles.length})…`);
+          setProgress(
+            t("companyNew.launch.registering", {
+              role: role.role,
+              current: i,
+              total: roles.length,
+            }),
+          );
           const res = await inviteAgent({
             name: reqName,
             runtimeKind: "custom",
@@ -274,7 +282,13 @@ export default function NewCompanyPage() {
           });
           launched.push({ name: res.agentName, isPM: role.isPM });
         } else {
-          setProgress(`Launching ${role.role} (${i}/${roles.length})…`);
+          setProgress(
+            t("companyNew.launch.launchingRole", {
+              role: role.role,
+              current: i,
+              total: roles.length,
+            }),
+          );
           const r = resolveRole(role, reqName);
           const res = await launchAgent({
             walletAddress: address,
@@ -294,7 +308,7 @@ export default function NewCompanyPage() {
       }
 
       if (launched.length > 0) {
-        setProgress("Assigning the team…");
+        setProgress(t("companyNew.launch.assigningTeam"));
         await assignAgentsToProject({
           walletAddress: address,
           projectId,
@@ -313,37 +327,39 @@ export default function NewCompanyPage() {
       // Persist the edited team as a personal template (best-effort — a save
       // hiccup must not fail a launch that already happened).
       if (saveAsTemplate && roles.length > 0) {
-        setProgress("Saving your template…");
+        setProgress(t("companyNew.launch.savingTemplate"));
         await saveTeamTemplate({
           walletAddress: address,
           name:
             templateName.trim() ||
-            `${projectName.trim()} team`,
+            t("companyNew.launch.defaultTemplateName", { name: projectName.trim() }),
           baseTemplateId: tmpl?.id ?? myTmpl?.baseTemplateId ?? null,
           roles,
         }).catch(() => {
-          toast.warning("Team launched, but the template couldn't be saved.");
+          toast.warning(t("companyNew.launch.templateSaveFailed"));
         });
       }
 
       toast.success(
         launched.length === 0
-          ? "Project created"
+          ? t("companyNew.launch.projectCreated")
           : agentSource === "invite"
-            ? `Project created — ${launched.length} agent invite${launched.length === 1 ? "" : "s"} registered`
-            : `${tmpl?.name ?? myTmpl?.name ?? "Your team"} launched`,
+            ? t("companyNew.launch.invitesRegistered", { count: launched.length })
+            : t("companyNew.launch.teamLaunched", {
+                name: tmpl?.name ?? myTmpl?.name ?? t("companyNew.launch.yourTeamFallback"),
+              }),
         {
           description:
             launched.length === 0
-              ? "Add agents to it any time from the Agents tab."
+              ? t("companyNew.launch.descNoAgents")
               : agentSource === "invite"
-                ? "Open each agent to copy its onboarding prompt and connect your own runtime."
-                : "Your team is booting — they'll come online in a few minutes.",
+                ? t("companyNew.launch.descInvite")
+                : t("companyNew.launch.descPerkos"),
         },
       );
       router.push(`/projects/${projectId}`);
     } catch (e) {
-      toast.error("Couldn't create the project", {
+      toast.error(t("companyNew.launch.createError"), {
         description: e instanceof Error ? e.message : String(e),
       });
       setLaunching(false);
@@ -371,7 +387,7 @@ export default function NewCompanyPage() {
           className="inline-flex w-fit items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
-          Pick a different starting point
+          {t("companyNew.config.back")}
         </button>
 
         <header className="flex items-center gap-3">
@@ -385,17 +401,17 @@ export default function NewCompanyPage() {
                 : myTmpl
                   ? myTmpl.name
                   : mode === "custom"
-                    ? "Custom team"
-                    : "Empty project"}
+                    ? t("companyNew.config.customTeamTitle")
+                    : t("companyNew.config.emptyProjectTitle")}
             </h1>
             <p className="text-sm text-muted-foreground">
               {tmpl
                 ? tmpl.blurb
                 : myTmpl
-                  ? "Your saved team — tweak it and launch."
+                  ? t("companyNew.config.myTeamSubtitle")
                   : mode === "custom"
-                    ? "Pick the roles your project needs and choose who leads."
-                    : "Just the project — add agents any time later."}
+                    ? t("companyNew.config.customTeamSubtitle")
+                    : t("companyNew.config.emptyProjectSubtitle")}
             </p>
           </div>
         </header>
@@ -404,12 +420,12 @@ export default function NewCompanyPage() {
         {mode !== "empty" ? (
           <section className="flex flex-col gap-2">
             <h2 className="text-sm font-medium text-foreground">
-              Your team ({teamRoles.length} teammate{teamRoles.length === 1 ? "" : "s"})
+              {t("companyNew.config.teamHeading", { count: teamRoles.length })}
             </h2>
             <p className="text-xs text-muted-foreground">
               {mode === "template"
-                ? "Recommended for this business — remove what you don't need, add more roles below, and pick who leads."
-                : "Add or remove roles and pick who leads (the team lead plans the work and coordinates the team)."}
+                ? t("companyNew.config.teamHintTemplate")
+                : t("companyNew.config.teamHintCustom")}
             </p>
             <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {teamRoles.map((role) => (
@@ -426,7 +442,7 @@ export default function NewCompanyPage() {
                         ? "border-primary/40 bg-primary/10 text-primary"
                         : "border-border text-muted-foreground hover:border-primary/40",
                     )}
-                    title="The team lead plans the work and coordinates the team"
+                    title={t("companyNew.config.leadTitle")}
                   >
                     <input
                       type="radio"
@@ -436,13 +452,13 @@ export default function NewCompanyPage() {
                       onChange={() => setPm(role.role)}
                       disabled={launching}
                     />
-                    Lead
+                    {t("companyNew.config.lead")}
                   </label>
                   <button
                     type="button"
                     onClick={() => removeRole(role.role)}
                     disabled={launching}
-                    aria-label={`Remove ${role.role}`}
+                    aria-label={t("companyNew.config.removeRoleAria", { role: role.role })}
                     className="shrink-0 text-muted-foreground hover:text-destructive"
                   >
                     <X className="h-3.5 w-3.5" />
@@ -451,14 +467,14 @@ export default function NewCompanyPage() {
               ))}
               {teamRoles.length === 0 ? (
                 <li className="rounded-md border border-dashed border-border px-3 py-2 text-sm text-muted-foreground">
-                  No roles yet — add at least one below.
+                  {t("companyNew.config.noRoles")}
                 </li>
               ) : null}
             </ul>
 
             {addablePresets.length > 0 ? (
               <div className="mt-1 flex flex-col gap-1.5">
-                <span className="text-xs font-medium text-muted-foreground">Add a role</span>
+                <span className="text-xs font-medium text-muted-foreground">{t("companyNew.config.addRole")}</span>
                 <div className="flex flex-wrap gap-1.5">
                   {addablePresets.map((p) => (
                     <button
@@ -483,13 +499,13 @@ export default function NewCompanyPage() {
         {/* Project name */}
         <section className="flex max-w-lg flex-col gap-2">
           <label htmlFor="company-name" className="text-sm font-medium text-foreground">
-            Name your project
+            {t("companyNew.config.nameLabel")}
           </label>
           <Input
             id="company-name"
             value={projectName}
             onChange={(e) => setProjectName(e.target.value)}
-            placeholder="e.g. Two-Table Cafe NY"
+            placeholder={t("companyNew.config.namePlaceholder")}
             disabled={launching}
             maxLength={48}
           />
@@ -498,7 +514,9 @@ export default function NewCompanyPage() {
         {/* Goal — feeds the PM's planning */}
         <section className="flex max-w-lg flex-col gap-2">
           <label htmlFor="project-goal" className="text-sm font-medium text-foreground">
-            What should this {teamSize > 0 ? "team" : "project"} achieve?
+            {teamSize > 0
+              ? t("companyNew.config.goalLabelTeam")
+              : t("companyNew.config.goalLabelProject")}
           </label>
           <textarea
             id="project-goal"
@@ -506,8 +524,8 @@ export default function NewCompanyPage() {
             onChange={(e) => setGoal(e.target.value)}
             placeholder={
               tmpl
-                ? `Optional — defaults to: "${tmpl.blurb}"`
-                : "e.g. Validate the concept: research the market, draft the launch plan, build a waitlist."
+                ? t("companyNew.config.goalPlaceholderDefault", { blurb: tmpl.blurb })
+                : t("companyNew.config.goalPlaceholder")
             }
             disabled={launching}
             rows={3}
@@ -516,7 +534,7 @@ export default function NewCompanyPage() {
           />
           {teamSize > 0 ? (
             <p className="text-xs text-muted-foreground">
-              Your team lead uses this goal to plan the board and brief the team.
+              {t("companyNew.config.goalHint")}
             </p>
           ) : null}
         </section>
@@ -524,7 +542,7 @@ export default function NewCompanyPage() {
         {/* Agent source — managed PerkOS agents vs the user's own */}
         {teamSize > 0 ? (
           <section className="flex max-w-lg flex-col gap-2">
-            <span className="text-sm font-medium text-foreground">Who runs these agents?</span>
+            <span className="text-sm font-medium text-foreground">{t("companyNew.config.sourceHeading")}</span>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <button
                 type="button"
@@ -541,10 +559,10 @@ export default function NewCompanyPage() {
                   {agentSource === "perkos" ? (
                     <Check className="h-3.5 w-3.5 text-primary" />
                   ) : null}
-                  PerkOS agents
+                  {t("companyNew.config.sourcePerkos")}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  We launch and host the team for you — online in minutes.
+                  {t("companyNew.config.sourcePerkosDesc")}
                 </span>
               </button>
               <button
@@ -564,11 +582,10 @@ export default function NewCompanyPage() {
                   ) : (
                     <Link2 className="h-3.5 w-3.5" />
                   )}
-                  Invite my own agents
+                  {t("companyNew.config.sourceInvite")}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  Register each role and connect agents you already run, via an
-                  onboarding prompt. No infra launched.
+                  {t("companyNew.config.sourceInviteDesc")}
                 </span>
               </button>
             </div>
@@ -578,7 +595,7 @@ export default function NewCompanyPage() {
         {/* LLM choice — only when WE host the agents */}
         {teamSize > 0 && agentSource === "perkos" ? (
         <section className="flex max-w-lg flex-col gap-2">
-          <span className="text-sm font-medium text-foreground">Where does the AI run?</span>
+          <span className="text-sm font-medium text-foreground">{t("companyNew.config.llmHeading")}</span>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <button
               type="button"
@@ -593,10 +610,10 @@ export default function NewCompanyPage() {
             >
               <span className="flex items-center gap-1.5 font-medium text-foreground">
                 {llmMode === "perkos" ? <Check className="h-3.5 w-3.5 text-primary" /> : null}
-                PerkOS LLM
+                {t("companyNew.config.llmPerkos")}
               </span>
               <span className="text-xs text-muted-foreground">
-                Runs on PerkOS infrastructure — no API key needed.
+                {t("companyNew.config.llmPerkosDesc")}
               </span>
             </button>
             <button
@@ -612,10 +629,10 @@ export default function NewCompanyPage() {
             >
               <span className="flex items-center gap-1.5 font-medium text-foreground">
                 {llmMode === "byok" ? <Check className="h-3.5 w-3.5 text-primary" /> : null}
-                Bring your own model
+                {t("companyNew.config.llmByok")}
               </span>
               <span className="text-xs text-muted-foreground">
-                Use your own OpenAI-compatible key. Deployed on PerkOS infra.
+                {t("companyNew.config.llmByokDesc")}
               </span>
             </button>
           </div>
@@ -638,7 +655,7 @@ export default function NewCompanyPage() {
                 <Input
                   value={byokModel}
                   onChange={(e) => setByokModel(e.target.value)}
-                  placeholder="model id"
+                  placeholder={t("companyNew.config.modelPlaceholder")}
                   disabled={launching}
                   className="h-9 min-w-0 flex-1 font-mono text-xs"
                 />
@@ -646,7 +663,7 @@ export default function NewCompanyPage() {
               <Input
                 value={byokKey}
                 onChange={(e) => setByokKey(e.target.value)}
-                placeholder="sk-… (your API key — stored encrypted, never in the job)"
+                placeholder={t("companyNew.config.keyPlaceholder")}
                 disabled={launching}
                 type="password"
                 className="h-9 font-mono text-xs"
@@ -667,21 +684,22 @@ export default function NewCompanyPage() {
                 disabled={launching}
                 className="h-3.5 w-3.5"
               />
-              Save this team as one of my templates
+              {t("companyNew.config.saveTemplateLabel")}
             </label>
             {saveAsTemplate ? (
               <Input
                 value={templateName}
                 onChange={(e) => setTemplateName(e.target.value)}
-                placeholder={`${projectName.trim() || "My"} team`}
+                placeholder={t("companyNew.config.saveTemplatePlaceholder", {
+                  name: projectName.trim() || t("companyNew.config.saveTemplatePlaceholderFallback"),
+                })}
                 disabled={launching}
                 maxLength={48}
                 className="h-9"
               />
             ) : (
               <p className="text-xs text-muted-foreground">
-                You changed the recommended team — save it to reuse on the next
-                project.
+                {t("companyNew.config.saveTemplateHint")}
               </p>
             )}
           </section>
@@ -704,16 +722,16 @@ export default function NewCompanyPage() {
               <Users className="h-4 w-4" />
             )}
             {launching
-              ? progress || "Launching…"
+              ? progress || t("companyNew.config.launching")
               : mode === "empty"
-                ? "Create project"
+                ? t("companyNew.config.createProject")
                 : agentSource === "invite"
-                  ? `Create + invite ${teamRoles.length} teammate${teamRoles.length === 1 ? "" : "s"}`
-                  : `Start your team (${teamRoles.length})`}
+                  ? t("companyNew.config.inviteButton", { count: teamRoles.length })
+                  : t("companyNew.config.startTeam", { count: teamRoles.length })}
           </Button>
           {launching ? (
             <span className="text-xs text-muted-foreground">
-              Don&apos;t close this tab until it finishes.
+              {t("companyNew.config.dontClose")}
             </span>
           ) : null}
         </div>
@@ -725,19 +743,17 @@ export default function NewCompanyPage() {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-3xl font-medium text-foreground">New project</h1>
+        <h1 className="text-3xl font-medium text-foreground">{t("companyNew.gallery.title")}</h1>
         <p className="max-w-2xl text-sm text-muted-foreground">
-          Start from a business template, pick your own team of roles, or
-          create an empty project. Your team drafts and suggests — nothing
-          happens without your OK. Prefer a single agent? {""}
+          {t("companyNew.gallery.intro")}
           <button
             type="button"
             onClick={() => router.push("/agents/new")}
             className="text-primary underline-offset-2 hover:underline"
           >
-            Create one here
+            {t("companyNew.gallery.introLink")}
           </button>
-          .
+          {t("companyNew.gallery.introAfter")}
         </p>
       </header>
 
@@ -745,10 +761,10 @@ export default function NewCompanyPage() {
       <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <li>
           <StarterCard
-            title="Custom team"
-            kicker="Build your own"
-            blurb="Define the project and pick exactly the roles it needs — PM, researcher, marketer, builder… you choose who leads."
-            cta="Pick your roles"
+            title={t("companyNew.gallery.customCard.title")}
+            kicker={t("companyNew.gallery.customCard.kicker")}
+            blurb={t("companyNew.gallery.customCard.blurb")}
+            cta={t("companyNew.gallery.customCard.cta")}
             icon={Users}
             accent={BRAND_ACCENT}
             emphasized
@@ -765,10 +781,10 @@ export default function NewCompanyPage() {
         </li>
         <li>
           <StarterCard
-            title="Empty project"
-            kicker="Start light"
-            blurb="Just the project — assign existing agents or add a team later."
-            cta="Create empty project"
+            title={t("companyNew.gallery.emptyCard.title")}
+            kicker={t("companyNew.gallery.emptyCard.kicker")}
+            blurb={t("companyNew.gallery.emptyCard.blurb")}
+            cta={t("companyNew.gallery.emptyCard.cta")}
             icon={Briefcase}
             accent="#8b87a8"
             onSelect={() => select("empty", [])}
@@ -780,35 +796,35 @@ export default function NewCompanyPage() {
       {myTemplates.length > 0 ? (
         <>
           <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-            My templates
+            {t("companyNew.gallery.myTemplates")}
           </h2>
           <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
-            {myTemplates.map((t) => {
-              const roles = (t.roles as CompanyRole[]) ?? [];
+            {myTemplates.map((t2) => {
+              const roles = (t2.roles as CompanyRole[]) ?? [];
               return (
-                <li key={t.id} className="relative">
+                <li key={t2.id} className="relative">
                   <TeamTemplateCard
-                    name={t.name}
-                    kicker="My template"
-                    blurb="Your saved team — tweak the roles and launch it on a new project."
+                    name={t2.name}
+                    kicker={t("companyNew.gallery.myTemplateKicker")}
+                    blurb={t("companyNew.gallery.myTemplateBlurb")}
                     icon={Users}
                     accent={BRAND_ACCENT}
                     roles={roles}
-                    onSelect={() => select(`my:${t.id}`, roles)}
+                    onSelect={() => select(`my:${t2.id}`, roles)}
                     titlePadding
                   />
                   <button
                     type="button"
-                    aria-label={`Delete template ${t.name}`}
-                    title="Delete this template"
+                    aria-label={t("companyNew.gallery.deleteTemplateAria", { name: t2.name })}
+                    title={t("companyNew.gallery.deleteTemplateTitle")}
                     onClick={() => {
                       if (!address) return;
-                      if (!window.confirm(`Delete the template "${t.name}"?`)) return;
-                      deleteTeamTemplate({ walletAddress: address, templateId: t.id })
+                      if (!window.confirm(t("companyNew.gallery.deleteTemplateConfirm", { name: t2.name }))) return;
+                      deleteTeamTemplate({ walletAddress: address, templateId: t2.id })
                         .then(() =>
-                          setMyTemplates((prev) => prev.filter((x) => x.id !== t.id)),
+                          setMyTemplates((prev) => prev.filter((x) => x.id !== t2.id)),
                         )
-                        .catch(() => toast.error("Couldn't delete the template"));
+                        .catch(() => toast.error(t("companyNew.gallery.deleteTemplateError")));
                     }}
                     className="absolute right-3 top-3 p-1 text-muted-foreground hover:text-destructive"
                   >
@@ -822,19 +838,19 @@ export default function NewCompanyPage() {
       ) : null}
 
       <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-        PerkOS business templates
+        {t("companyNew.gallery.businessTemplates")}
       </h2>
       <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
-        {COMPANY_TEMPLATES.map((t) => (
-          <li key={t.id}>
+        {COMPANY_TEMPLATES.map((t2) => (
+          <li key={t2.id}>
             <TeamTemplateCard
-              name={t.name}
-              kicker={INDUSTRY_LABELS[t.industry] ?? t.industry}
-              blurb={t.blurb}
-              icon={ICONS[t.icon] ?? Bot}
-              accent={TEMPLATE_ACCENTS[t.industry] ?? BRAND_ACCENT}
-              roles={t.roles}
-              onSelect={() => select(t.id, t.roles)}
+              name={t2.name}
+              kicker={INDUSTRY_LABELS[t2.industry] ?? t2.industry}
+              blurb={t2.blurb}
+              icon={ICONS[t2.icon] ?? Bot}
+              accent={TEMPLATE_ACCENTS[t2.industry] ?? BRAND_ACCENT}
+              roles={t2.roles}
+              onSelect={() => select(t2.id, t2.roles)}
             />
           </li>
         ))}

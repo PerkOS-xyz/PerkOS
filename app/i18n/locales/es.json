@@ -1076,5 +1076,193 @@
       "connectWallet": "Conecta una billetera antes de lanzar un agente.",
       "pickRuntime": "Elige un entorno de ejecución."
     }
+  },
+  "agentDetail": {
+    "backLink": "Volver a Equipo de agentes",
+    "notFound": "No se encontró el agente en tu equipo.",
+    "whatHappensNext": "Qué pasa después",
+    "header": {
+      "stop": "Detener",
+      "refresh": "Actualizar",
+      "edit": "Editar",
+      "alreadyStopped": "{{name}} ya estaba detenido.",
+      "stopping": "Deteniendo a {{name}}: se despertará automáticamente con tu próximo mensaje.",
+      "stopError": "No se pudo detener el agente"
+    },
+    "status": {
+      "syncing": "Sincronizando…",
+      "hibernated": "Hibernado",
+      "hibernating": "Hibernando…",
+      "waking": "Despertando…",
+      "online": "En línea",
+      "failed": "Falló",
+      "provisioning": "Aprovisionando",
+      "unknown": "Desconocido"
+    },
+    "activity": {
+      "title": "Actividad reciente"
+    },
+    "metadata": {
+      "title": "Metadatos del entorno de ejecución",
+      "agentId": "ID del agente",
+      "ownerWallet": "Billetera propietaria",
+      "created": "Creado",
+      "lastActive": "Última actividad",
+      "connectedNow": "· conectado ahora",
+      "neverConnected": "Nunca se conectó",
+      "endpoint": "Endpoint",
+      "notProvisioned": "Todavía no está aprovisionado",
+      "runtimeVersion": "Versión del entorno de ejecución",
+      "modelKey": "Clave del modelo",
+      "byok": "Provista por el usuario (BYOK)",
+      "perkosManaged": "Administrada por PerkOS"
+    },
+    "capabilities": {
+      "title": "Capacidades",
+      "description": "Plugins que este agente puede usar mientras trabaja en tareas.",
+      "empty": "Todavía no hay plugins configurados. Usa Editar para agregar algunos."
+    },
+    "channels": {
+      "title": "Canales conectados",
+      "description": "Dónde más pueden contactar a este agente, además de dentro de PerkOS.",
+      "none": "Ninguno configurado. Los agentes {{runtime}} se pueden conectar a canales como Telegram, Discord, Slack o WhatsApp."
+    },
+    "tasks": {
+      "title": "Tareas asignadas a {{name}}",
+      "description": "En todos tus proyectos. Haz clic en una tarea para ver su detalle.",
+      "empty": "Todavía no hay tareas asignadas a este agente."
+    },
+    "lifecycle": {
+      "title": "Ciclo de vida",
+      "description": "Quita este agente de tu equipo.",
+      "delete": "Eliminar",
+      "connectWallet": "Conecta una billetera.",
+      "deletedTitle": "Agente eliminado",
+      "deletedWithWarnings": "{{name}} fue eliminado. Algunas tareas de limpieza reportaron advertencias (revisa la consola).",
+      "deleted": "{{name}} fue eliminado de tu equipo.",
+      "deleteError": "No se pudo eliminar el agente",
+      "confirmTitle": "¿Eliminar a {{name}}?",
+      "confirmDescription": "Elimina el contenedor en ejecución, revoca su clave de LLM y borra sus registros. La facturación se detiene de inmediato. Las conversaciones y tareas en las que participaba conservan su historial, pero pierden esta asignación. Esta acción no se puede deshacer.",
+      "confirmLabel": "Eliminar agente"
+    }
+  },
+  "companyNew": {
+    "gallery": {
+      "title": "Nuevo proyecto",
+      "intro": "Empieza desde una plantilla de negocio, elige tu propio equipo de roles o crea un proyecto vacío. Tu equipo redacta y propone: nada sucede sin tu aprobación. ¿Prefieres un solo agente? ",
+      "introLink": "Créalo aquí",
+      "introAfter": ".",
+      "customCard": {
+        "title": "Equipo personalizado",
+        "kicker": "Arma el tuyo",
+        "blurb": "Define el proyecto y elige exactamente los roles que necesita: PM, investigador, especialista en marketing, desarrollador… tú eliges quién lidera.",
+        "cta": "Elige tus roles"
+      },
+      "emptyCard": {
+        "title": "Proyecto vacío",
+        "kicker": "Empieza ligero",
+        "blurb": "Solo el proyecto: asigna agentes existentes o agrega un equipo más adelante.",
+        "cta": "Crear proyecto vacío"
+      },
+      "myTemplates": "Mis plantillas",
+      "myTemplateKicker": "Mi plantilla",
+      "myTemplateBlurb": "Tu equipo guardado: ajusta los roles y lánzalo en un nuevo proyecto.",
+      "deleteTemplateAria": "Eliminar plantilla {{name}}",
+      "deleteTemplateTitle": "Eliminar esta plantilla",
+      "deleteTemplateConfirm": "¿Eliminar la plantilla \"{{name}}\"?",
+      "deleteTemplateError": "No se pudo eliminar la plantilla",
+      "businessTemplates": "Plantillas de negocio de PerkOS"
+    },
+    "config": {
+      "back": "Elige otro punto de partida",
+      "customTeamTitle": "Equipo personalizado",
+      "emptyProjectTitle": "Proyecto vacío",
+      "myTeamSubtitle": "Tu equipo guardado: ajústalo y lánzalo.",
+      "customTeamSubtitle": "Elige los roles que necesita tu proyecto y decide quién lidera.",
+      "emptyProjectSubtitle": "Solo el proyecto: agrega agentes cuando quieras más adelante.",
+      "teamHeading_one": "Tu equipo ({{count}} integrante)",
+      "teamHeading_other": "Tu equipo ({{count}} integrantes)",
+      "teamHintTemplate": "Recomendado para este tipo de negocio: quita lo que no necesites, agrega más roles abajo y elige quién lidera.",
+      "teamHintCustom": "Agrega o quita roles y elige quién lidera (el líder de equipo planea el trabajo y coordina al equipo).",
+      "leadTitle": "El líder de equipo planea el trabajo y coordina al equipo",
+      "lead": "Líder",
+      "removeRoleAria": "Quitar {{role}}",
+      "noRoles": "Todavía no hay roles: agrega al menos uno abajo.",
+      "addRole": "Agregar un rol",
+      "nameLabel": "Ponle nombre a tu proyecto",
+      "namePlaceholder": "p. ej. Two-Table Cafe NY",
+      "goalLabelTeam": "¿Qué debe lograr este equipo?",
+      "goalLabelProject": "¿Qué debe lograr este proyecto?",
+      "goalPlaceholderDefault": "Opcional: por defecto usa \"{{blurb}}\"",
+      "goalPlaceholder": "p. ej. Validar el concepto: investigar el mercado, redactar el plan de lanzamiento, armar una lista de espera.",
+      "goalHint": "Tu líder de equipo usa este objetivo para planear el tablero y dar instrucciones al equipo.",
+      "sourceHeading": "¿Quién opera estos agentes?",
+      "sourcePerkos": "Agentes de PerkOS",
+      "sourcePerkosDesc": "Nosotros lanzamos y alojamos el equipo por ti: en línea en minutos.",
+      "sourceInvite": "Invitar a mis propios agentes",
+      "sourceInviteDesc": "Registra cada rol y conecta agentes que ya operas, mediante un prompt de incorporación. No se lanza infraestructura.",
+      "llmHeading": "¿Dónde se ejecuta la IA?",
+      "llmPerkos": "LLM de PerkOS",
+      "llmPerkosDesc": "Se ejecuta en la infraestructura de PerkOS: no necesitas una clave de API.",
+      "llmByok": "Trae tu propio modelo",
+      "llmByokDesc": "Usa tu propia clave compatible con OpenAI. Se despliega en la infraestructura de PerkOS.",
+      "modelPlaceholder": "id del modelo",
+      "keyPlaceholder": "sk-… (tu clave de API, se guarda cifrada, nunca en el job)",
+      "saveTemplateLabel": "Guardar este equipo como una de mis plantillas",
+      "saveTemplatePlaceholder": "Equipo {{name}}",
+      "saveTemplatePlaceholderFallback": "Personal",
+      "saveTemplateHint": "Cambiaste el equipo recomendado: guárdalo para reutilizarlo en el próximo proyecto.",
+      "launching": "Lanzando…",
+      "createProject": "Crear proyecto",
+      "inviteButton_one": "Crear + invitar a {{count}} integrante",
+      "inviteButton_other": "Crear + invitar a {{count}} integrantes",
+      "startTeam": "Inicia tu equipo ({{count}})",
+      "dontClose": "No cierres esta pestaña hasta que termine."
+    },
+    "launch": {
+      "pickRole": "Elige al menos un rol para tu equipo.",
+      "enterKey": "Ingresa la clave de API de tu modelo (o cambia a LLM de PerkOS).",
+      "resolvingImages": "Resolviendo imágenes del entorno de ejecución…",
+      "noRuntimeImage": "No hay ninguna imagen activa de {{runtime}} publicada: un administrador debe configurar una antes de poder lanzar.",
+      "creatingProject": "Creando proyecto…",
+      "projectNoId": "El proyecto se creó sin un id.",
+      "registering": "Registrando {{role}} ({{current}}/{{total}})…",
+      "launchingRole": "Lanzando {{role}} ({{current}}/{{total}})…",
+      "assigningTeam": "Asignando al equipo…",
+      "savingTemplate": "Guardando tu plantilla…",
+      "defaultTemplateName": "Equipo {{name}}",
+      "templateSaveFailed": "El equipo se lanzó, pero no se pudo guardar la plantilla.",
+      "projectCreated": "Proyecto creado",
+      "invitesRegistered_one": "Proyecto creado: {{count}} invitación de agente registrada",
+      "invitesRegistered_other": "Proyecto creado: {{count}} invitaciones de agentes registradas",
+      "teamLaunched": "{{name}} lanzado",
+      "yourTeamFallback": "Tu equipo",
+      "descNoAgents": "Agrégale agentes cuando quieras desde la pestaña Agentes.",
+      "descInvite": "Abre cada agente para copiar su prompt de incorporación y conectar tu propio entorno de ejecución.",
+      "descPerkos": "Tu equipo está arrancando: van a estar en línea en unos minutos.",
+      "createError": "No se pudo crear el proyecto"
+    }
+  },
+  "walletSend": {
+    "success": {
+      "title": "Enviado",
+      "description": "{{amount}} {{token}} enviado en {{chain}}.",
+      "view": "Ver",
+      "sendAnother": "Enviar otro"
+    },
+    "form": {
+      "title": "Enviar",
+      "description": "Mueve fondos fuera de tu billetera. PerkOS firma y transmite la transacción por ti.",
+      "network": "Red",
+      "token": "Token",
+      "recipient": "Dirección del destinatario",
+      "recipientInvalid": "Ingresa una dirección 0x… válida.",
+      "recipientSelf": "Atención: esta es la dirección de tu propia billetera.",
+      "amount": "Monto ({{token}})",
+      "amountInvalid": "Ingresa un monto mayor a 0.",
+      "transferFailed": "Falló la transferencia.",
+      "sending": "Enviando…",
+      "send": "Enviar"
+    }
   }
 }
