@@ -2,23 +2,27 @@
 
 import Link from "next/link";
 import { Check, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { OnboardingShell } from "../../components/OnboardingShell";
 import { useOnboarding } from "../../lib/onboardingState";
 
 export default function ProjectPage() {
+  const { t } = useTranslation();
   const { hasProject } = useOnboarding();
 
   return (
     <OnboardingShell
       step="project"
-      title="Start a project"
-      description="Projects keep your agents and tasks organized around a shared goal. Think of each project as a mission with its own scope, agents assigned, and tasks to complete."
+      title={t("onboarding.project.title")}
+      description={t("onboarding.project.description")}
       nextHref="/onboarding/agent"
     >
       {hasProject ? (
         <div className="flex items-center justify-center gap-2 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-6 py-4 font-medium text-emerald-300">
           <Check className="h-4 w-4" />
-          <span className="text-base leading-none">Project created</span>
+          <span className="text-base leading-none">
+            {t("onboarding.project.created")}
+          </span>
         </div>
       ) : (
         <Link
@@ -27,7 +31,7 @@ export default function ProjectPage() {
         >
           <Plus className="h-4 w-4" />
           <span className="text-base leading-none">
-            Create your first project
+            {t("onboarding.project.createCta")}
           </span>
         </Link>
       )}
@@ -38,7 +42,7 @@ export default function ProjectPage() {
             href="/onboarding/agent"
             className="text-sm text-[#ec1b69] hover:underline"
           >
-            Skip this step
+            {t("onboarding.project.skip")}
           </Link>
         </div>
       ) : null}

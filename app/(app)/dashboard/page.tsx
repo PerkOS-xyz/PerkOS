@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import {
   Folder,
   ListTodo,
@@ -58,25 +59,23 @@ import {
 const QUICK_ACTIONS = [
   {
     href: "/projects/new",
-    label: "Create project",
-    description: "Set up a new mission for your agents.",
+    key: "createProject",
     Icon: Folder,
   },
   {
     href: "/tasks/new",
-    label: "Create task",
-    description: "Add work to one of your projects.",
+    key: "createTask",
     Icon: ListTodo,
   },
   {
     href: "/agents/new",
-    label: "Register agent",
-    description: "Launch a new worker for your team.",
+    key: "registerAgent",
     Icon: Bot,
   },
 ];
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   const { address } = useConnection();
   const { workspaceName } = useOnboarding();
   const { activeOrg, activeOrgId, defaultOrgId } = useActiveOrg();
@@ -126,7 +125,7 @@ export default function DashboardPage() {
   const failedAgents = allAgents.filter((a) =>
     ["failed", "provision-failed", "error"].includes(String(a.status)),
   );
-  const reviewTasks = allTasks.filter((t) => t.status === "Review");
+  const reviewTasks = allTasks.filter((task) => task.status === "Review");
   // Anchor "now" to the latest event so the derivation stays pure in render;
   // event timestamps are server-stamped, so the newest one ≈ now.
   const newestTs = events.length > 0 ? events[0].tsMs : 0;
@@ -156,17 +155,23 @@ export default function DashboardPage() {
       return {
         key: `plan-${pid}`,
         kind: "plan",
-        label: `Plan awaiting your approval${ev?.object ? ` — ${ev.object}` : ""}`,
-        hint: ev?.actor ? `Proposed by ${ev.actor}` : undefined,
+        label: ev?.object
+          ? t("dashboard.waiting.planLabelWithObject", { object: ev.object })
+          : t("dashboard.waiting.planLabel"),
+        hint: ev?.actor
+          ? t("dashboard.waiting.proposedBy", { actor: ev.actor })
+          : undefined,
         href: `/projects/${encodeURIComponent(pid)}?tab=docs`,
       };
     }),
     ...reviewTasks.slice(0, 4).map(
-      (t): WaitingItem => ({
-        key: `review-${t.id}`,
+      (task): WaitingItem => ({
+        key: `review-${task.id}`,
         kind: "review",
-        label: t.name,
-        hint: `In review · ${t.agent || "unassigned"}`,
+        label: task.name,
+        hint: t("dashboard.waiting.inReview", {
+          agent: task.agent || t("dashboard.waiting.unassigned"),
+        }),
         href: "/tasks?status=active",
       }),
     ),
@@ -174,8 +179,8 @@ export default function DashboardPage() {
       (a): WaitingItem => ({
         key: `failed-${a.id}`,
         kind: "agent-failed",
-        label: `${a.name} failed to start`,
-        hint: "Open the agent to retry or delete it",
+        label: t("dashboard.waiting.agentFailed", { name: a.name }),
+        hint: t("dashboard.waiting.agentFailedHint"),
         href: `/agents/${encodeURIComponent(a.id)}`,
       }),
     ),
@@ -200,7 +205,8 @@ export default function DashboardPage() {
     totalProjects === 0 &&
     totalTasks === 0;
 
-  const displayWorkspace = workspaceName.trim() || "Personal Workspace";
+  const displayWorkspace =
+    workspaceName.trim() || t("dashboard.personalWorkspace");
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
@@ -240,10 +246,12 @@ export default function DashboardPage() {
           <section className="glow-card flex flex-col gap-3 rounded-lg border border-primary/25 bg-card/60 px-4 py-4">
             <header className="flex items-center justify-between">
               <h2 className="text-sm font-medium text-foreground">
-                Team activity — last 12 weeks
+                {t("dashboard.teamActivity.title")}
               </h2>
               <span className="text-[10px] text-muted-foreground">
-                {events.length >= 200 ? "200+" : events.length} recent events
+                {t("dashboard.teamActivity.recentEvents", {
+                  total: events.length >= 200 ? "200+" : events.length,
+                })}
               </span>
             </header>
             <ActivityHeatmap counts={heatmapCounts} />
@@ -254,16 +262,16 @@ export default function DashboardPage() {
 
         {/* Quick Actions inline (mobile/tablet only — desktop has the sidebar) */}
         <section className="lg:hidden">
-          <SectionHeader title="Quick actions" />
+          <SectionHeader title={t("dashboard.quickActions.title")} />
           <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
-            {QUICK_ACTIONS.map(({ href, label, Icon }) => (
+            {QUICK_ACTIONS.map(({ href, key, Icon }) => (
               <Link
                 key={href}
                 href={href}
                 className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-3 text-sm text-foreground transition-colors hover:border-primary/40"
               >
                 <Icon className="h-4 w-4 text-primary" />
-                {label}
+                {t(`dashboard.quickActions.items.${key}.label`)}
               </Link>
             ))}
           </div>
@@ -271,17 +279,17 @@ export default function DashboardPage() {
 
         <section className="flex flex-col gap-3">
           <SectionHeader
-            title="Projects"
+            title={t("dashboard.sections.projects")}
             actionHref="/projects"
-            actionLabel="View all"
+            actionLabel={t("dashboard.sections.viewAll")}
           />
           {isLoading ? (
             <SkeletonList rows={3} />
           ) : projects.length === 0 ? (
             <EmptyHint
-              message="No projects yet."
+              message={t("dashboard.projects.empty")}
               ctaHref="/projects/new"
-              ctaLabel="Create your first project"
+              ctaLabel={t("dashboard.projects.emptyCta")}
             />
           ) : (
             <ul className="flex flex-col gap-2">
@@ -294,22 +302,22 @@ export default function DashboardPage() {
 
         <section className="flex flex-col gap-3">
           <SectionHeader
-            title="Recent tasks"
+            title={t("dashboard.sections.recentTasks")}
             actionHref="/tasks"
-            actionLabel="View all"
+            actionLabel={t("dashboard.sections.viewAll")}
           />
           {isLoading ? (
             <SkeletonList rows={3} />
           ) : tasks.length === 0 ? (
             <EmptyHint
-              message="No tasks yet."
+              message={t("dashboard.tasks.empty")}
               ctaHref="/tasks/new"
-              ctaLabel="Create a task"
+              ctaLabel={t("dashboard.tasks.emptyCta")}
             />
           ) : (
             <ul className="flex flex-col gap-2">
-              {tasks.map((t) => (
-                <TaskRow key={t.id ?? t.name} task={t} />
+              {tasks.map((task) => (
+                <TaskRow key={task.id ?? task.name} task={task} />
               ))}
             </ul>
           )}
@@ -328,6 +336,7 @@ export default function DashboardPage() {
 
 function StarterCallout({ address }: { address: string }) {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -369,12 +378,12 @@ function StarterCallout({ address }: { address: string }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["wallet-overview", address] });
       queryClient.invalidateQueries({ queryKey: ["wallet-projects", address] });
-      toast.success("Starter project ready", {
-        description: "Welcome to PerkOS — 3 demo tasks added.",
+      toast.success(t("dashboard.starter.toastSuccessTitle"), {
+        description: t("dashboard.starter.toastSuccessDesc"),
       });
     },
     onError: (err: Error) => {
-      toast.error("Couldn't create starter project", {
+      toast.error(t("dashboard.starter.toastErrorTitle"), {
         description: err.message,
       });
     },
@@ -385,11 +394,10 @@ function StarterCallout({ address }: { address: string }) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <Sparkles className="h-4 w-4 text-primary" />
-          New here?
+          {t("dashboard.starter.title")}
         </CardTitle>
         <CardDescription>
-          Spin up a demo project with 3 sample tasks so the kanban, chat, and
-          agent flows have something to show.
+          {t("dashboard.starter.description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -403,7 +411,9 @@ function StarterCallout({ address }: { address: string }) {
           ) : (
             <Sparkles className="h-4 w-4" />
           )}
-          {mutation.isPending ? "Creating…" : "Create starter project"}
+          {mutation.isPending
+            ? t("dashboard.starter.creating")
+            : t("dashboard.starter.cta")}
         </Button>
       </CardContent>
     </Card>
@@ -411,6 +421,7 @@ function StarterCallout({ address }: { address: string }) {
 }
 
 function GreetingBanner({ address }: { address?: string }) {
+  const { t } = useTranslation();
   return (
     <div className="relative overflow-hidden rounded-xl border border-primary/30 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent p-5">
       <div className="flex items-start gap-3">
@@ -420,7 +431,7 @@ function GreetingBanner({ address }: { address?: string }) {
         </div>
         <div className="flex flex-col gap-1">
           <h1 className="text-xl font-medium text-foreground md:text-2xl">
-            Welcome back
+            {t("dashboard.greeting.welcomeBack")}
             {address ? (
               <span className="ml-2 font-mono text-sm text-muted-foreground">
                 {formatAddress(address)}
@@ -428,8 +439,7 @@ function GreetingBanner({ address }: { address?: string }) {
             ) : null}
           </h1>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            I&apos;m your PerkOS Agent. I&apos;ll help you build and run the
-            agents and projects you need. Pick where to focus today.
+            {t("dashboard.greeting.intro")}
           </p>
         </div>
       </div>
@@ -444,18 +454,19 @@ function WorkspaceCard({
   name: string;
   ownerAddress?: string;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="glow-hero flex flex-col gap-1 rounded-md border border-primary/30 bg-card p-4">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-foreground">{name}</span>
         <Badge variant="secondary" className="border-border">
-          Workspace
+          {t("dashboard.workspace.badge")}
         </Badge>
       </div>
       <p className="text-xs text-muted-foreground">
-        1 member
+        {t("dashboard.workspace.memberCount")}
         <span className="px-2">·</span>
-        Owned by{" "}
+        {t("dashboard.workspace.ownedBy")}{" "}
         <span className="font-mono">{formatAddress(ownerAddress)}</span>
       </p>
     </div>
@@ -488,6 +499,7 @@ function SectionHeader({
 }
 
 function ProjectRow({ project }: { project: Project }) {
+  const { t } = useTranslation();
   const isActive = project.status?.toLowerCase() === "active";
   return (
     <li>
@@ -500,13 +512,15 @@ function ProjectRow({ project }: { project: Project }) {
             {project.name}
           </span>
           <span className="text-xs text-muted-foreground">
-            {project.agents} agent{project.agents === 1 ? "" : "s"}
+            {t("dashboard.projectRow.agentCount", { count: project.agents })}
             <span className="px-2">·</span>
-            {project.tasks} task{project.tasks === 1 ? "" : "s"}
+            {t("dashboard.projectRow.taskCount", { count: project.tasks })}
             {project.updatedAt ? (
               <>
                 <span className="px-2">·</span>
-                active {formatRelativeShort(project.updatedAt)}
+                {t("dashboard.projectRow.active", {
+                  time: formatRelativeShort(project.updatedAt),
+                })}
               </>
             ) : null}
           </span>
@@ -528,12 +542,13 @@ function ProjectRow({ project }: { project: Project }) {
 }
 
 function TaskRow({ task }: { task: Task }) {
+  const { t } = useTranslation();
   return (
     <li className="flex items-center justify-between gap-4 rounded-md border border-border bg-card px-4 py-3">
       <div className="flex min-w-0 flex-col">
         <span className="truncate text-sm text-foreground">{task.name}</span>
         <span className="text-xs text-muted-foreground">
-          Agent: {task.agent || "—"}
+          {t("dashboard.taskRow.agentLabel")} {task.agent || "—"}
           <span className="px-2">·</span>
           {task.priority || "Medium"}
           {task.updatedAt ? (
@@ -564,14 +579,19 @@ function TaskStatusBadge({ status }: { status: string }) {
 }
 
 function QuickActionsCard() {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Quick actions</CardTitle>
-        <CardDescription>Jump back into the build flow.</CardDescription>
+        <CardTitle className="text-base">
+          {t("dashboard.quickActions.title")}
+        </CardTitle>
+        <CardDescription>
+          {t("dashboard.quickActions.cardDescription")}
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
-        {QUICK_ACTIONS.map(({ href, label, description, Icon }) => (
+        {QUICK_ACTIONS.map(({ href, key, Icon }) => (
           <Link
             key={href}
             href={href}
@@ -582,10 +602,10 @@ function QuickActionsCard() {
             </span>
             <span className="flex flex-1 flex-col">
               <span className="text-sm font-medium text-foreground">
-                {label}
+                {t(`dashboard.quickActions.items.${key}.label`)}
               </span>
               <span className="text-xs text-muted-foreground">
-                {description}
+                {t(`dashboard.quickActions.items.${key}.description`)}
               </span>
             </span>
             <Plus className="mt-1 h-3.5 w-3.5 text-muted-foreground transition-colors group-hover:text-primary" />

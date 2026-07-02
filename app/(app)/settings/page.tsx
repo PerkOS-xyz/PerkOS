@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useConnection, useDisconnect } from "wagmi";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import {
   Wallet,
   Copy,
@@ -42,6 +43,7 @@ import { UsernameCard } from "../../components/UsernameCard";
 const ORG_DRAFT_KEY = "swarm.organization.draft.v1";
 
 export default function SettingsPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { address } = useConnection();
   const { disconnect } = useDisconnect();
@@ -70,15 +72,15 @@ export default function SettingsPage() {
     e.preventDefault();
     if (!canSave) return;
     setWorkspaceName(draftName.trim());
-    toast.success("Workspace name updated");
+    toast.success(t("settings.workspace.toastUpdated"));
   }
 
   function clearOrgDraft() {
     try {
       window.localStorage.removeItem(ORG_DRAFT_KEY);
-      toast.success("Organization draft cleared");
+      toast.success(t("settings.toast.draftCleared"));
     } catch {
-      toast.error("Couldn't clear draft");
+      toast.error(t("settings.toast.draftClearFailed"));
     }
   }
 
@@ -86,7 +88,7 @@ export default function SettingsPage() {
     resetOnboarding();
     setDraftName("");
     setResetOpen(false);
-    toast.success("Workspace state reset");
+    toast.success(t("settings.toast.stateReset"));
   }
 
   function handleDisconnect() {
@@ -97,9 +99,9 @@ export default function SettingsPage() {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
-        <h1 className="text-3xl font-medium text-foreground">Settings</h1>
+        <h1 className="text-3xl font-medium text-foreground">{t("settings.header.title")}</h1>
         <p className="text-sm text-muted-foreground">
-          Manage your wallet, workspace and integrations.
+          {t("settings.header.subtitle")}
         </p>
       </header>
 
@@ -109,20 +111,20 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Wallet className="h-4 w-4 text-primary" />
-              Account
+              {t("settings.account.title")}
             </CardTitle>
             <CardDescription>
-              You signed in with this Base / Solana wallet.
+              {t("settings.account.description")}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
               <Label className="text-xs uppercase tracking-wide text-muted-foreground">
-                Connected wallet
+                {t("settings.account.connectedWallet")}
               </Label>
               <div className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2">
                 <span className="flex-1 truncate font-mono text-sm text-foreground">
-                  {address ? formatAddress(address) : "Not connected"}
+                  {address ? formatAddress(address) : t("settings.account.notConnected")}
                 </span>
                 {address ? (
                   <Button
@@ -135,19 +137,19 @@ export default function SettingsPage() {
                     {walletCopied ? (
                       <>
                         <Check className="h-3.5 w-3.5 text-primary" />
-                        Copied
+                        {t("settings.account.copied")}
                       </>
                     ) : (
                       <>
                         <Copy className="h-3.5 w-3.5" />
-                        Copy full
+                        {t("settings.account.copyFull")}
                       </>
                     )}
                   </Button>
                 ) : null}
               </div>
               <p className="text-xs text-muted-foreground">
-                We never request private keys or seed phrases.
+                {t("settings.account.noKeys")}
               </p>
             </div>
 
@@ -160,7 +162,7 @@ export default function SettingsPage() {
               className="w-fit gap-2"
             >
               <LogOut className="h-4 w-4" />
-              Disconnect wallet
+              {t("settings.account.disconnect")}
             </Button>
           </CardContent>
         </Card>
@@ -170,11 +172,10 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <AtSign className="h-4 w-4 text-primary" />
-              Username
+              {t("settings.username.title")}
             </CardTitle>
             <CardDescription>
-              Your @handle — what teammates type to mention you in chats. Unique;
-              falls back to your wallet address when unset.
+              {t("settings.username.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -187,10 +188,10 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Briefcase className="h-4 w-4 text-primary" />
-              Workspace
+              {t("settings.workspace.title")}
             </CardTitle>
             <CardDescription>
-              Display name shown across the dashboard and onboarding.
+              {t("settings.workspace.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -199,21 +200,20 @@ export default function SettingsPage() {
               className="flex flex-col gap-4"
             >
               <div className="flex flex-col gap-2">
-                <Label htmlFor="workspace-name">Workspace name</Label>
+                <Label htmlFor="workspace-name">{t("settings.workspace.nameLabel")}</Label>
                 <Input
                   id="workspace-name"
                   value={draftName}
                   onChange={(e) => setDraftName(e.target.value)}
-                  placeholder="Software Workspace"
+                  placeholder={t("settings.workspace.namePlaceholder")}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Stored locally until PerkOS adds workspace persistence on
-                  the backend.
+                  {t("settings.workspace.storedLocally")}
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <Button type="submit" disabled={!canSave} size="sm">
-                  Save changes
+                  {t("settings.workspace.save")}
                 </Button>
               </div>
             </form>
@@ -226,11 +226,10 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <KeyRound className="h-4 w-4 text-primary" />
-            LLM provider keys
+            {t("settings.llm.title")}
           </CardTitle>
           <CardDescription>
-            API keys are currently configured per agent inside the launcher
-            (Step 3 → BYOK). Global key storage is on the roadmap.
+            {t("settings.llm.description")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -238,18 +237,17 @@ export default function SettingsPage() {
             <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
             <div className="flex flex-col gap-1">
               <span>
-                For now, each agent ships with its own BYOK setup. Use the{" "}
+                {t("settings.llm.infoBefore")}{" "}
                 <a
                   href="/agents/new"
                   className="text-primary hover:underline"
                 >
-                  agent launcher
+                  {t("settings.llm.infoLink")}
                 </a>{" "}
-                to attach OpenAI, Anthropic or OpenRouter credentials.
+                {t("settings.llm.infoAfter")}
               </span>
               <span className="text-xs">
-                A unified key vault scoped to your wallet is planned for a
-                future release.
+                {t("settings.llm.infoNote")}
               </span>
             </div>
           </div>
@@ -261,26 +259,26 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Network className="h-4 w-4 text-primary" />
-            Network
+            {t("settings.network.title")}
           </CardTitle>
           <CardDescription>
-            Backend and on-chain endpoints this app talks to.
+            {t("settings.network.description")}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <ReadOnlyRow
-            label="PerkOS API"
+            label={t("settings.network.perkosApi")}
             value={perkosApiBaseUrl}
           />
           <ReadOnlyRow
-            label="Default chain"
+            label={t("settings.network.defaultChain")}
             value="Base Sepolia"
-            badge="Testnet"
+            badge={t("settings.network.testnet")}
           />
           <ReadOnlyRow
-            label="Solana cluster"
+            label={t("settings.network.solanaCluster")}
             value="testnet"
-            badge="Testnet"
+            badge={t("settings.network.testnet")}
           />
         </CardContent>
       </Card>
@@ -290,33 +288,33 @@ export default function SettingsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base text-destructive">
             <AlertTriangle className="h-4 w-4" />
-            Danger zone
+            {t("settings.danger.title")}
           </CardTitle>
           <CardDescription>
-            Local-only actions. Nothing here touches the PerkOS backend.
+            {t("settings.danger.description")}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <DangerRow
-            title="Clear organization draft"
-            description="Wipes the in-progress organization form stored on this device."
-            actionLabel="Clear draft"
+            title={t("settings.danger.clearDraft.title")}
+            description={t("settings.danger.clearDraft.description")}
+            actionLabel={t("settings.danger.clearDraft.action")}
             Icon={Trash2}
             onAction={clearOrgDraft}
           />
           <Separator />
           <DangerRow
-            title="Reset onboarding state"
-            description="Forgets the locally saved workspace name, project marker and agent marker."
-            actionLabel="Reset"
+            title={t("settings.danger.reset.title")}
+            description={t("settings.danger.reset.description")}
+            actionLabel={t("settings.danger.reset.action")}
             Icon={RotateCcw}
             onAction={() => setResetOpen(true)}
           />
           <Separator />
           <DangerRow
-            title="Disconnect wallet"
-            description="Signs you out of this device. Your agents and projects on the backend stay intact."
-            actionLabel="Disconnect"
+            title={t("settings.danger.disconnect.title")}
+            description={t("settings.danger.disconnect.description")}
+            actionLabel={t("settings.danger.disconnect.action")}
             Icon={LogOut}
             onAction={handleDisconnect}
             destructive
@@ -327,9 +325,9 @@ export default function SettingsPage() {
       <ConfirmDialog
         open={resetOpen}
         onOpenChange={setResetOpen}
-        title="Reset onboarding state?"
-        description="This clears your local workspace name, project draft, and agent setup markers. Your data on the backend is untouched."
-        confirmLabel="Reset state"
+        title={t("settings.resetDialog.title")}
+        description={t("settings.resetDialog.description")}
+        confirmLabel={t("settings.resetDialog.confirmLabel")}
         destructive
         onConfirm={confirmResetWorkspace}
       />

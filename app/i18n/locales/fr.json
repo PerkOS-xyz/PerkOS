@@ -292,5 +292,431 @@
         "investors": "Investisseurs"
       }
     }
+  },
+  "onboarding": {
+    "shell": {
+      "next": "Suivant",
+      "back": "Retour",
+      "stepOf": "{{current}} sur {{total}}"
+    },
+    "welcome": {
+      "title": "Bienvenue sur PerkOS",
+      "description": "PerkOS est votre centre de commande pour un travail responsable, propulsé par l'IA. Organisez vos agents, répartissez les tâches et suivez les résultats, le tout au même endroit. Configurons votre espace en quelques étapes rapides.",
+      "stats": {
+        "projects": {
+          "label": "Projets",
+          "suffix": "projets actifs"
+        },
+        "tasks": {
+          "label": "Tâches",
+          "suffix": "tâches terminées"
+        },
+        "agents": {
+          "label": "Agents",
+          "suffix": "agents enregistrés"
+        }
+      },
+      "emptyNote": "Votre tableau de bord démarre vide. À la fin de cette configuration, vous aurez votre premier projet et votre premier agent prêts à l'emploi."
+    },
+    "workspace": {
+      "title": "Créez votre espace de travail",
+      "description": "Un espace de travail est le lieu commun de votre équipe dans PerkOS. Il regroupe vos projets, vos agents et vos membres sous un même toit. Vous pouvez le renommer à tout moment depuis les paramètres.",
+      "nameLabel": "Nom de l'espace de travail",
+      "namePlaceholder": "Espace de travail Logiciel",
+      "usernameLabel": "Votre nom d'utilisateur",
+      "optional": "(facultatif)",
+      "usernameHelp": "Votre @identifiant permet à vos coéquipiers et à vos agents de vous mentionner dans les discussions. Vous pouvez passer cette étape et le définir plus tard, ou conserver l'adresse de votre portefeuille.",
+      "memberCount": "1 membre",
+      "ownedBy": "Propriété de {{address}}",
+      "inviteHint": "Vous pourrez inviter des coéquipiers dans votre espace de travail plus tard, depuis le panneau Paramètres."
+    },
+    "project": {
+      "title": "Démarrez un projet",
+      "description": "Les projets permettent d'organiser vos agents et vos tâches autour d'un objectif commun. Voyez chaque projet comme une mission avec son propre périmètre, des agents assignés et des tâches à accomplir.",
+      "created": "Projet créé",
+      "createCta": "Créez votre premier projet",
+      "skip": "Passer cette étape"
+    },
+    "agent": {
+      "title": "Enregistrez votre premier agent",
+      "description": "Les agents sont les travailleurs de votre équipe. Chaque agent se connecte à l'environnement d'exécution Hermes ou OpenClaw, exécute des tâches et rend compte des résultats. Enregistrez-en un maintenant pour pouvoir l'assigner à un projet.",
+      "finish": "Terminer",
+      "registered": "Agent enregistré",
+      "registerCta": "Enregistrez un agent",
+      "needsTitle": "Ce dont vous aurez besoin",
+      "needs": {
+        "name": "Un nom d'agent et une description facultative",
+        "model": "Un modèle (Claude, GPT, etc.) et un environnement d'exécution (Hermes ou OpenClaw)",
+        "skills": "Des compétences/extensions à activer"
+      },
+      "skip": "Passer cette étape"
+    }
+  },
+  "dashboard": {
+    "greeting": {
+      "welcomeBack": "Ravi de vous revoir",
+      "intro": "Je suis votre agent PerkOS. Je vais vous aider à créer et faire fonctionner les agents et les projets dont vous avez besoin. Choisissez où concentrer votre attention aujourd'hui."
+    },
+    "workspace": {
+      "badge": "Espace de travail",
+      "memberCount": "1 membre",
+      "ownedBy": "Propriété de"
+    },
+    "personalWorkspace": "Espace de travail personnel",
+    "teamActivity": {
+      "title": "Activité de l'équipe (12 dernières semaines)",
+      "recentEvents": "{{total}} événements récents"
+    },
+    "quickActions": {
+      "title": "Actions rapides",
+      "cardDescription": "Reprenez directement le fil de la création.",
+      "items": {
+        "createProject": {
+          "label": "Créer un projet",
+          "description": "Configurez une nouvelle mission pour vos agents."
+        },
+        "createTask": {
+          "label": "Créer une tâche",
+          "description": "Ajoutez du travail à l'un de vos projets."
+        },
+        "registerAgent": {
+          "label": "Enregistrer un agent",
+          "description": "Lancez un nouveau travailleur pour votre équipe."
+        }
+      }
+    },
+    "sections": {
+      "projects": "Projets",
+      "recentTasks": "Tâches récentes",
+      "viewAll": "Tout afficher"
+    },
+    "projects": {
+      "empty": "Aucun projet pour le moment.",
+      "emptyCta": "Créez votre premier projet"
+    },
+    "tasks": {
+      "empty": "Aucune tâche pour le moment.",
+      "emptyCta": "Créer une tâche"
+    },
+    "projectRow": {
+      "agentCount_one": "{{count}} agent",
+      "agentCount_other": "{{count}} agents",
+      "taskCount_one": "{{count}} tâche",
+      "taskCount_other": "{{count}} tâches",
+      "active": "actif {{time}}"
+    },
+    "taskRow": {
+      "agentLabel": "Agent :"
+    },
+    "waiting": {
+      "planLabel": "Plan en attente de votre validation",
+      "planLabelWithObject": "Plan en attente de votre validation : {{object}}",
+      "proposedBy": "Proposé par {{actor}}",
+      "inReview": "En cours de révision · {{agent}}",
+      "unassigned": "non assigné",
+      "agentFailed": "{{name}} n'a pas réussi à démarrer",
+      "agentFailedHint": "Ouvrez l'agent pour réessayer ou le supprimer"
+    },
+    "starter": {
+      "title": "Nouveau ici ?",
+      "description": "Créez un projet de démonstration avec 3 tâches d'exemple pour que le tableau kanban, le chat et les flux d'agents aient quelque chose à montrer.",
+      "creating": "Création en cours…",
+      "cta": "Créer un projet de démarrage",
+      "toastSuccessTitle": "Projet de démarrage prêt",
+      "toastSuccessDesc": "Bienvenue sur PerkOS. 3 tâches de démonstration ajoutées.",
+      "toastErrorTitle": "Impossible de créer le projet de démarrage"
+    }
+  },
+  "projects": {
+    "header": {
+      "title": "Projets",
+      "countInWorkspace_one": "{{count}} projet dans votre espace de travail.",
+      "countInWorkspace_other": "{{count}} projets dans votre espace de travail.",
+      "createFirst": "Créez votre premier projet.",
+      "newProject": "Nouveau projet"
+    },
+    "search": {
+      "placeholder": "Rechercher des projets par nom, objectif ou statut…",
+      "noResults": "Aucun projet ne correspond à « {{query}} »."
+    },
+    "filter": {
+      "clearStatusAria": "Effacer le filtre de statut",
+      "statusPill": "statut : {{status}}"
+    },
+    "bulk": {
+      "selectAllAria": "Sélectionner tous les projets",
+      "selectAll": "Tout sélectionner",
+      "selectedCount": "{{count}} sélectionné(s)",
+      "archive": "Archiver",
+      "unarchive": "Désarchiver",
+      "delete": "Supprimer",
+      "clear": "Effacer"
+    },
+    "card": {
+      "selectAria": "Sélectionner {{name}}",
+      "agentCount_one": "{{count}} agent",
+      "agentCount_other": "{{count}} agents",
+      "taskCount_one": "{{count}} tâche",
+      "taskCount_other": "{{count}} tâches",
+      "active": "actif {{time}}"
+    },
+    "empty": {
+      "title": "Aucun projet pour le moment",
+      "description": "Les projets regroupent vos agents, vos tâches et vos discussions autour d'un objectif. Commencez par en créer un.",
+      "action": "Créer un projet"
+    },
+    "confirmDelete": {
+      "title_one": "Supprimer {{count}} projet ?",
+      "title_other": "Supprimer {{count}} projets ?",
+      "description": "Cela supprime définitivement les projets sélectionnés et les retire de votre espace de travail. Cette action est irréversible.",
+      "confirmLabel": "Supprimer"
+    },
+    "toast": {
+      "archivedSomeFailed": "{{ok}} archivés, {{failed}} en échec",
+      "archivedSuccess_one": "{{count}} projet archivé",
+      "archivedSuccess_other": "{{count}} projets archivés",
+      "unarchivedSomeFailed": "{{ok}} désarchivés, {{failed}} en échec",
+      "unarchivedSuccess_one": "{{count}} projet désarchivé",
+      "unarchivedSuccess_other": "{{count}} projets désarchivés",
+      "bulkUpdateFailed": "Échec de la mise à jour groupée",
+      "deletedSomeFailed": "{{ok}} supprimés, {{failed}} en échec",
+      "deletedSuccess_one": "{{count}} projet supprimé",
+      "deletedSuccess_other": "{{count}} projets supprimés",
+      "bulkDeleteFailed": "Échec de la suppression groupée"
+    }
+  },
+  "agents": {
+    "header": {
+      "title": "Équipe d'agents",
+      "subtitle": "Connectez vos agents, assignez-les à des projets et mettez-les au travail.",
+      "addAgent": "Ajouter un agent"
+    },
+    "search": {
+      "placeholder": "Rechercher des agents par nom, environnement d'exécution ou compétence…",
+      "noResults": "Aucun agent ne correspond à « {{query}} »."
+    },
+    "bulk": {
+      "selectAllAria": "Sélectionner tous les agents",
+      "selectAll": "Tout sélectionner",
+      "selectedCount": "{{count}} sélectionné(s)",
+      "assignToProject": "Assigner à un projet",
+      "hibernate": "Mettre en veille",
+      "wake": "Réveiller",
+      "delete": "Supprimer",
+      "clear": "Effacer"
+    },
+    "confirmDelete": {
+      "title_one": "Supprimer {{count}} agent ?",
+      "title_other": "Supprimer {{count}} agents ?",
+      "description": "Arrête chaque conteneur en cours d'exécution, révoque sa clé LLM et efface ses enregistrements (y compris dans le registre de relais). La facturation s'arrête immédiatement. Cette action est irréversible.",
+      "confirmLabel": "Supprimer"
+    },
+    "toast": {
+      "deletedSomeFailed": "{{ok}} supprimés, {{failed}} en échec",
+      "deletedSuccess_one": "{{count}} agent supprimé",
+      "deletedSuccess_other": "{{count}} agents supprimés",
+      "bulkDeleteFailed": "Échec de la suppression groupée",
+      "hibernatedSomeFailed": "{{ok}} mis en veille, {{failed}} en échec",
+      "hibernatedSomeFailedDesc": "Les agents qui ne sont pas déployés sur l'infrastructure PerkOS ne peuvent pas être mis en veille.",
+      "hibernatedSuccess_one": "{{count}} agent mis en veille",
+      "hibernatedSuccess_other": "{{count}} agents mis en veille",
+      "bulkHibernateFailed": "Échec de la mise en veille groupée",
+      "wokeSomeFailed": "{{ok}} réveillés, {{failed}} en échec",
+      "wokeSomeFailedDesc": "Les agents qui ne sont pas déployés sur l'infrastructure PerkOS ne peuvent pas être réveillés.",
+      "wokeSuccess_one": "{{count}} agent réveillé",
+      "wokeSuccess_other": "{{count}} agents réveillés",
+      "bulkWakeFailed": "Échec du réveil groupé"
+    },
+    "assignDialog": {
+      "title": "Assigner à un projet",
+      "description_one": "Ajoutez {{count}} agent sélectionné à l'équipe d'un projet.",
+      "description_other": "Ajoutez {{count}} agents sélectionnés à l'équipe d'un projet.",
+      "projectLabel": "Projet",
+      "selectPlaceholder": "Sélectionnez un projet…",
+      "cancel": "Annuler",
+      "assign": "Assigner",
+      "assigning": "Attribution en cours…",
+      "projectFallback": "projet",
+      "assignedSuccess_one": "{{count}} agent assigné à {{name}}",
+      "assignedSuccess_other": "{{count}} agents assignés à {{name}}",
+      "alreadyOn": "Déjà présent dans {{name}}, rien à ajouter",
+      "assignFailed": "Échec de l'attribution"
+    },
+    "card": {
+      "selectAria": "Sélectionner {{name}}",
+      "externalTitle": "Fonctionne sur votre propre infrastructure (invité ou auto-hébergé), PerkOS ne peut pas le mettre en veille",
+      "external": "Externe",
+      "capabilities": "Compétences : {{list}}",
+      "noCapabilities": "Aucune compétence configurée pour le moment.",
+      "projects": "Projets : {{count}}",
+      "active": "Actif {{time}}",
+      "created": "Créé {{time}}",
+      "capabilitiesCount": "Compétences : {{count}}"
+    },
+    "power": {
+      "waking": "Réveil de {{name}} en cours…",
+      "wakingDesc": "Démarre et se connecte en environ 2 à 3 min.",
+      "hibernating": "Mise en veille de {{name}} en cours…",
+      "hibernatingDesc": "Réduction des ressources pour économiser des coûts.",
+      "error": "Impossible de modifier l'état d'alimentation",
+      "wakeAria": "Réveiller {{name}}",
+      "hibernateAria": "Mettre {{name}} en veille",
+      "working": "Traitement en cours…",
+      "wakeTitle": "Réveiller l'agent",
+      "hibernateTitle": "Mettre l'agent en veille"
+    },
+    "status": {
+      "revoked": "Révoqué",
+      "neverConnected": "Jamais connecté",
+      "invited": "Invité",
+      "syncing": "Synchronisation…",
+      "hibernated": "En veille",
+      "hibernating": "Mise en veille…",
+      "waking": "Réveil…",
+      "online": "En ligne",
+      "failed": "Échec",
+      "provisioning": "Provisionnement",
+      "unknown": "Inconnu"
+    },
+    "empty": {
+      "title": "Aucun agent pour le moment",
+      "description": "Ajoutez un agent : créez un agent Hermes ou OpenClaw sur PerkOS, faites-en tourner un sur votre propre VPS, ou invitez dans votre organisation un agent que vous utilisez déjà ailleurs.",
+      "action": "Ajouter un agent"
+    }
+  },
+  "tasks": {
+    "header": {
+      "title": "Tâches",
+      "subtitle": "Tout ce qui est en cours dans vos projets.",
+      "createTask": "Créer une tâche"
+    },
+    "search": {
+      "placeholder": "Rechercher des tâches par nom, agent, projet ou statut…",
+      "noResults": "Aucune tâche ne correspond à « {{query}} »."
+    },
+    "filter": {
+      "statusPill": "statut : {{status}}",
+      "inProgress": "en cours",
+      "projectPill": "projet : {{project}}",
+      "clearAria": "Effacer {{label}}"
+    },
+    "emptyProjects": {
+      "title": "Aucun projet pour le moment",
+      "description": "Les tâches se trouvent à l'intérieur des projets. Créez-en un d'abord.",
+      "action": "Créer un projet"
+    },
+    "empty": {
+      "title": "Aucune tâche pour le moment",
+      "description": "Ajoutez des tâches à un projet et confiez-les à vos agents.",
+      "action": "Créer une tâche"
+    },
+    "bulk": {
+      "selectedCount": "{{count}} sélectionné(s)",
+      "moveTo": "Déplacer vers :",
+      "toDo": "À faire",
+      "inProgress": "En cours",
+      "done": "Terminé",
+      "delete": "Supprimer",
+      "clear": "Effacer"
+    },
+    "card": {
+      "selectAria": "Sélectionner {{name}}",
+      "agent": "Agent : {{agent}}"
+    },
+    "dragHint": "Le glisser-déposer est local pour le moment. La synchronisation avec le serveur arrive dans la prochaine version.",
+    "projectFilter": {
+      "aria": "Filtrer les tâches par projet",
+      "all": "Tous les projets"
+    },
+    "confirmDelete": {
+      "title_one": "Supprimer {{count}} tâche ?",
+      "title_other": "Supprimer {{count}} tâches ?",
+      "description": "Les tâches sélectionnées (dans tous les projets) et leur historique seront supprimés. Cette action est irréversible.",
+      "confirmLabel": "Supprimer"
+    },
+    "toast": {
+      "movedSomeFailed": "{{ok}} déplacées, {{failed}} en échec",
+      "movedSuccess_one": "{{count}} tâche déplacée",
+      "movedSuccess_other": "{{count}} tâches déplacées",
+      "bulkMoveFailed": "Échec du déplacement groupé",
+      "deletedSomeFailed": "{{ok}} supprimées, {{failed}} en échec",
+      "deletedSuccess_one": "{{count}} tâche supprimée",
+      "deletedSuccess_other": "{{count}} tâches supprimées",
+      "bulkDeleteFailed": "Échec de la suppression groupée"
+    }
+  },
+  "settings": {
+    "header": {
+      "title": "Paramètres",
+      "subtitle": "Gérez votre portefeuille, votre espace de travail et vos intégrations."
+    },
+    "account": {
+      "title": "Compte",
+      "description": "Vous vous êtes connecté avec ce portefeuille Base / Solana.",
+      "connectedWallet": "Portefeuille connecté",
+      "notConnected": "Non connecté",
+      "copied": "Copié",
+      "copyFull": "Copier en entier",
+      "noKeys": "Nous ne demandons jamais vos clés privées ni vos phrases de récupération.",
+      "disconnect": "Déconnecter le portefeuille"
+    },
+    "username": {
+      "title": "Nom d'utilisateur",
+      "description": "Votre @identifiant : ce que vos coéquipiers tapent pour vous mentionner dans les discussions. Unique, il utilise par défaut l'adresse de votre portefeuille si vous ne le définissez pas."
+    },
+    "workspace": {
+      "title": "Espace de travail",
+      "description": "Nom affiché dans le tableau de bord et lors de la configuration.",
+      "nameLabel": "Nom de l'espace de travail",
+      "namePlaceholder": "Espace de travail Logiciel",
+      "storedLocally": "Stocké localement en attendant que PerkOS ajoute la persistance des espaces de travail côté serveur.",
+      "save": "Enregistrer les modifications",
+      "toastUpdated": "Nom de l'espace de travail mis à jour"
+    },
+    "llm": {
+      "title": "Clés des fournisseurs LLM",
+      "description": "Les clés API sont actuellement configurées par agent dans l'assistant de lancement (étape 3 → BYOK). Le stockage global des clés est prévu sur la feuille de route.",
+      "infoBefore": "Pour l'instant, chaque agent est fourni avec sa propre configuration BYOK. Utilisez l'",
+      "infoLink": "assistant de lancement d'agent",
+      "infoAfter": "pour associer des identifiants OpenAI, Anthropic ou OpenRouter.",
+      "infoNote": "Un coffre-fort de clés unifié, lié à votre portefeuille, est prévu pour une prochaine version."
+    },
+    "network": {
+      "title": "Réseau",
+      "description": "Points de terminaison serveur et on-chain utilisés par cette application.",
+      "perkosApi": "API PerkOS",
+      "defaultChain": "Chaîne par défaut",
+      "solanaCluster": "Cluster Solana",
+      "testnet": "Testnet"
+    },
+    "danger": {
+      "title": "Zone à risques",
+      "description": "Actions locales uniquement. Rien ici ne touche au serveur de PerkOS.",
+      "clearDraft": {
+        "title": "Effacer le brouillon d'organisation",
+        "description": "Efface le formulaire d'organisation en cours, enregistré sur cet appareil.",
+        "action": "Effacer le brouillon"
+      },
+      "reset": {
+        "title": "Réinitialiser l'état de configuration",
+        "description": "Oublie le nom de l'espace de travail, le repère de projet et le repère d'agent enregistrés localement.",
+        "action": "Réinitialiser"
+      },
+      "disconnect": {
+        "title": "Déconnecter le portefeuille",
+        "description": "Vous déconnecte de cet appareil. Vos agents et projets sur le serveur restent intacts.",
+        "action": "Déconnecter"
+      }
+    },
+    "resetDialog": {
+      "title": "Réinitialiser l'état de configuration ?",
+      "description": "Cela efface le nom de votre espace de travail local, le brouillon de projet et les repères de configuration d'agent. Vos données sur le serveur restent inchangées.",
+      "confirmLabel": "Réinitialiser l'état"
+    },
+    "toast": {
+      "draftCleared": "Brouillon d'organisation effacé",
+      "draftClearFailed": "Impossible d'effacer le brouillon",
+      "stateReset": "État de l'espace de travail réinitialisé"
+    }
   }
 }

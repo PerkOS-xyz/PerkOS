@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
 import { Bot, FolderPlus, Loader2, Moon, Pause, Play, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 import {
   assignAgentsToProject,
@@ -35,6 +36,7 @@ import {
 } from "@/components/ui/dialog";
 
 export default function AgentsPage() {
+  const { t } = useTranslation();
   const { address } = useConnection();
   const qc = useQueryClient();
   const [query, setQuery] = useState("");
@@ -126,13 +128,13 @@ export default function AgentsPage() {
     onSuccess: (r) => {
       invalidateAgents();
       const { ok, failed } = summarize(r);
-      if (failed) toast.error(`Deleted ${ok}, ${failed} failed`);
-      else toast.success(`Deleted ${ok} agent${ok === 1 ? "" : "s"}`);
+      if (failed) toast.error(t("agents.toast.deletedSomeFailed", { ok, failed }));
+      else toast.success(t("agents.toast.deletedSuccess", { count: ok }));
       setConfirmDelete(false);
       clear();
     },
     onError: (e: Error) => {
-      toast.error("Bulk delete failed", { description: e.message });
+      toast.error(t("agents.toast.bulkDeleteFailed"), { description: e.message });
       setConfirmDelete(false);
     },
   });
@@ -144,13 +146,13 @@ export default function AgentsPage() {
       invalidateAgents();
       const { ok, failed } = summarize(r);
       if (failed)
-        toast.error(`Hibernated ${ok}, ${failed} failed`, {
-          description: "Agents not deployed on PerkOS infra can't hibernate.",
+        toast.error(t("agents.toast.hibernatedSomeFailed", { ok, failed }), {
+          description: t("agents.toast.hibernatedSomeFailedDesc"),
         });
-      else toast.success(`Hibernated ${ok} agent${ok === 1 ? "" : "s"}`);
+      else toast.success(t("agents.toast.hibernatedSuccess", { count: ok }));
       clear();
     },
-    onError: (e: Error) => toast.error("Bulk hibernate failed", { description: e.message }),
+    onError: (e: Error) => toast.error(t("agents.toast.bulkHibernateFailed"), { description: e.message }),
   });
 
   const wakeMut = useMutation({
@@ -160,13 +162,13 @@ export default function AgentsPage() {
       invalidateAgents();
       const { ok, failed } = summarize(r);
       if (failed)
-        toast.error(`Woke ${ok}, ${failed} failed`, {
-          description: "Agents not deployed on PerkOS infra can't wake.",
+        toast.error(t("agents.toast.wokeSomeFailed", { ok, failed }), {
+          description: t("agents.toast.wokeSomeFailedDesc"),
         });
-      else toast.success(`Woke ${ok} agent${ok === 1 ? "" : "s"}`);
+      else toast.success(t("agents.toast.wokeSuccess", { count: ok }));
       clear();
     },
-    onError: (e: Error) => toast.error("Bulk wake failed", { description: e.message }),
+    onError: (e: Error) => toast.error(t("agents.toast.bulkWakeFailed"), { description: e.message }),
   });
 
   const mutating =
@@ -176,9 +178,9 @@ export default function AgentsPage() {
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-medium text-[#ececff]">Agent team</h1>
+          <h1 className="text-3xl font-medium text-[#ececff]">{t("agents.header.title")}</h1>
           <p className="max-w-xl text-sm text-[#7975a8]">
-            Connect your agents, assign them to projects, and put them to work.
+            {t("agents.header.subtitle")}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -187,7 +189,7 @@ export default function AgentsPage() {
             className="flex items-center justify-center gap-2 rounded-md bg-[#ec1b69] px-5 py-2.5 text-sm font-medium text-[#ececff] transition-opacity hover:opacity-90"
           >
             <PlusIcon />
-            Add agent
+            {t("agents.header.addAgent")}
           </Link>
         </div>
       </header>
@@ -196,7 +198,7 @@ export default function AgentsPage() {
         <SearchInput
           value={query}
           onChange={setQuery}
-          placeholder="Search agents by name, runtime, or capability…"
+          placeholder={t("agents.search.placeholder")}
         />
       ) : null}
 
@@ -210,33 +212,33 @@ export default function AgentsPage() {
               <Checkbox
                 checked={allChecked ? true : someChecked ? "indeterminate" : false}
                 onCheckedChange={toggleAll}
-                aria-label="Select all agents"
+                aria-label={t("agents.bulk.selectAllAria")}
               />
-              Select all
+              {t("agents.bulk.selectAll")}
             </label>
             {selectedIds.length > 0 ? (
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs font-medium text-foreground">
-                  {selectedIds.length} selected
+                  {t("agents.bulk.selectedCount", { count: selectedIds.length })}
                 </span>
                 <Button size="xs" variant="outline" disabled={mutating} onClick={() => setAssignOpen(true)}>
-                  <FolderPlus className="h-3.5 w-3.5" /> Assign to project
+                  <FolderPlus className="h-3.5 w-3.5" /> {t("agents.bulk.assignToProject")}
                 </Button>
                 {selectedAllHibernatable ? (
                   <>
                     <Button size="xs" variant="outline" disabled={mutating} onClick={() => hibernateMut.mutate()}>
-                      <Moon className="h-3.5 w-3.5" /> Hibernate
+                      <Moon className="h-3.5 w-3.5" /> {t("agents.bulk.hibernate")}
                     </Button>
                     <Button size="xs" variant="outline" disabled={mutating} onClick={() => wakeMut.mutate()}>
-                      <Play className="h-3.5 w-3.5" /> Wake
+                      <Play className="h-3.5 w-3.5" /> {t("agents.bulk.wake")}
                     </Button>
                   </>
                 ) : null}
                 <Button size="xs" variant="destructive" disabled={mutating} onClick={() => setConfirmDelete(true)}>
-                  <Trash2 className="h-3.5 w-3.5" /> Delete
+                  <Trash2 className="h-3.5 w-3.5" /> {t("agents.bulk.delete")}
                 </Button>
                 <Button size="xs" variant="ghost" disabled={mutating} onClick={clear}>
-                  Clear
+                  {t("agents.bulk.clear")}
                 </Button>
               </div>
             ) : null}
@@ -258,7 +260,7 @@ export default function AgentsPage() {
 
       {!isLoading && !error && noResults ? (
         <p className="rounded-md border border-dashed border-[#1b1833] px-6 py-10 text-center text-sm text-[#7975a8]">
-          No agents match &quot;{query}&quot;.
+          {t("agents.search.noResults", { query })}
         </p>
       ) : null}
 
@@ -267,9 +269,9 @@ export default function AgentsPage() {
       <ConfirmDialog
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title={`Delete ${selectedIds.length} agent${selectedIds.length === 1 ? "" : "s"}?`}
-        description="Tears down each running container, revokes its LLM key, and clears its records (including the relay registry). Billing stops immediately. This can't be undone."
-        confirmLabel="Delete"
+        title={t("agents.confirmDelete.title", { count: selectedIds.length })}
+        description={t("agents.confirmDelete.description")}
+        confirmLabel={t("agents.confirmDelete.confirmLabel")}
         destructive
         pending={deleteMut.isPending}
         onConfirm={() => deleteMut.mutate()}
@@ -299,6 +301,7 @@ function AssignToProjectDialog({
   agentNames: string[];
   onAssigned: () => void;
 }) {
+  const { t } = useTranslation();
   const { address } = useConnection();
   const qc = useQueryClient();
   const [projectId, setProjectId] = useState("");
@@ -316,30 +319,31 @@ function AssignToProjectDialog({
     onSuccess: ({ added }) => {
       qc.invalidateQueries({ queryKey: ["wallet-projects", address] });
       qc.invalidateQueries({ queryKey: ["wallet-project", address, projectId] });
-      const name = projects.find((p) => p.id === projectId)?.name ?? "project";
+      const name =
+        projects.find((p) => p.id === projectId)?.name ??
+        t("agents.assignDialog.projectFallback");
       toast.success(
         added > 0
-          ? `Assigned ${agentNames.length} agent${agentNames.length === 1 ? "" : "s"} to ${name}`
-          : `Already on ${name} — nothing to add`
+          ? t("agents.assignDialog.assignedSuccess", { count: agentNames.length, name })
+          : t("agents.assignDialog.alreadyOn", { name })
       );
       onAssigned();
     },
-    onError: (e: Error) => toast.error("Assign failed", { description: e.message }),
+    onError: (e: Error) => toast.error(t("agents.assignDialog.assignFailed"), { description: e.message }),
   });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Assign to project</DialogTitle>
+          <DialogTitle>{t("agents.assignDialog.title")}</DialogTitle>
           <DialogDescription>
-            Add {agentNames.length} selected agent{agentNames.length === 1 ? "" : "s"} to a
-            project&apos;s roster.
+            {t("agents.assignDialog.description", { count: agentNames.length })}
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-2 py-2">
           <label htmlFor="assign-project" className="text-xs text-muted-foreground">
-            Project
+            {t("agents.assignDialog.projectLabel")}
           </label>
           <select
             id="assign-project"
@@ -347,7 +351,7 @@ function AssignToProjectDialog({
             onChange={(e) => setProjectId(e.target.value)}
             className="h-10 w-full appearance-none rounded-md border border-input bg-card px-3 text-sm text-foreground focus:border-primary focus:outline-none"
           >
-            <option value="">Select a project…</option>
+            <option value="">{t("agents.assignDialog.selectPlaceholder")}</option>
             {projects.map((p) => (
               <option key={p.id ?? p.name} value={p.id ?? ""}>
                 {p.name}
@@ -357,13 +361,13 @@ function AssignToProjectDialog({
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={assignMut.isPending}>
-            Cancel
+            {t("agents.assignDialog.cancel")}
           </Button>
           <Button
             disabled={!projectId || assignMut.isPending}
             onClick={() => assignMut.mutate()}
           >
-            {assignMut.isPending ? "Assigning…" : "Assign"}
+            {assignMut.isPending ? t("agents.assignDialog.assigning") : t("agents.assignDialog.assign")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -394,6 +398,7 @@ function AgentCard({
   onToggle: (on: boolean) => void;
   projectCount: number;
 }) {
+  const { t } = useTranslation();
   // Cross-reference the live hibernation status so a scaled-to-0 agent shows
   // "Hibernated" instead of a stale "Online" (agent.status stays "ready").
   // Shares the react-query cache with the detail page's query for this agent.
@@ -424,7 +429,7 @@ function AgentCard({
             <Checkbox
               checked={checked}
               onCheckedChange={onToggle}
-              aria-label={`Select ${agent.name}`}
+              aria-label={t("agents.card.selectAria", { name: agent.name })}
             />
             <span className="grid h-9 w-9 place-items-center rounded-full bg-[#ec1b69]/20 text-xs font-medium text-[#ec1b69]">
               {initials(agent.name)}
@@ -439,9 +444,9 @@ function AgentCard({
             {agent.external ? (
               <span
                 className="rounded border border-[#1b1833] px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-[#7975a8]"
-                title="Runs on your own infra (invited / self-hosted) — PerkOS can't hibernate it"
+                title={t("agents.card.externalTitle")}
               >
-                External
+                {t("agents.card.external")}
               </span>
             ) : null}
             <StatusBadge
@@ -465,20 +470,20 @@ function AgentCard({
 
         <p className="text-xs leading-relaxed text-[#7975a8]">
           {agent.plugins.length > 0
-            ? `Capabilities: ${agent.plugins.join(", ")}`
-            : "No capabilities configured yet."}
+            ? t("agents.card.capabilities", { list: agent.plugins.join(", ") })
+            : t("agents.card.noCapabilities")}
         </p>
 
         <div className="flex items-center justify-between text-xs text-[#7975a8]">
           <span>
-            Projects: {projectCount}
+            {t("agents.card.projects", { count: projectCount })}
           </span>
           <span>
             {agent.lastBridgeSeenAt
-              ? `Active ${formatRelativeShort(agent.lastBridgeSeenAt)}`
+              ? t("agents.card.active", { time: formatRelativeShort(agent.lastBridgeSeenAt) })
               : agent.createdAt
-                ? `Created ${formatRelativeShort(agent.createdAt)}`
-                : `Capabilities: ${agent.plugins.length}`}
+                ? t("agents.card.created", { time: formatRelativeShort(agent.createdAt) })
+                : t("agents.card.capabilitiesCount", { count: agent.plugins.length })}
           </span>
         </div>
       </Link>
@@ -497,6 +502,7 @@ function AgentPowerToggle({
   agent: AgentRow;
   hibState?: HibernationApiState;
 }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const controllable = agent.status === "ready" && !agent.external;
   const transitioning = hibState === "waking" || hibState === "hibernating";
@@ -510,16 +516,18 @@ function AgentPowerToggle({
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["agent-hibernation", agent.id] });
       toast.success(
-        hibernated ? `Waking ${agent.name}…` : `Hibernating ${agent.name}…`,
+        hibernated
+          ? t("agents.power.waking", { name: agent.name })
+          : t("agents.power.hibernating", { name: agent.name }),
         {
           description: hibernated
-            ? "Boots + connects in ~2–3 min."
-            : "Scaling down to save cost.",
+            ? t("agents.power.wakingDesc")
+            : t("agents.power.hibernatingDesc"),
         },
       );
     },
     onError: (e: Error) =>
-      toast.error("Couldn't change power state", { description: e.message }),
+      toast.error(t("agents.power.error"), { description: e.message }),
   });
 
   if (!controllable) return null;
@@ -536,9 +544,9 @@ function AgentPowerToggle({
         if (!busy) mut.mutate();
       }}
       disabled={busy}
-      aria-label={hibernated ? `Wake ${agent.name}` : `Hibernate ${agent.name}`}
+      aria-label={hibernated ? t("agents.power.wakeAria", { name: agent.name }) : t("agents.power.hibernateAria", { name: agent.name })}
       title={
-        busy ? "Working…" : hibernated ? "Wake agent" : "Hibernate agent"
+        busy ? t("agents.power.working") : hibernated ? t("agents.power.wakeTitle") : t("agents.power.hibernateTitle")
       }
       className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-[#1b1833] text-[#7975a8] transition-colors hover:border-[#530922] hover:text-[#ececff] disabled:opacity-60"
     >
@@ -562,6 +570,7 @@ function StatusBadge({
   revoked?: boolean;
   invitedStale?: boolean;
 }) {
+  const { t } = useTranslation();
   // Invited external agents: their lifecycle is "invited" → (connect) → "ready",
   // or "revoked" if the owner killed the credential. Surface those explicitly
   // instead of letting them fall through to a meaningless "Unknown". (These
@@ -569,18 +578,18 @@ function StatusBadge({
   if (revoked) {
     return (
       <span className="inline-flex items-center gap-1 rounded-full bg-[#ec1b69]/20 px-2 py-0.5 text-xs font-medium text-[#ec1b69]">
-        Revoked
+        {t("agents.status.revoked")}
       </span>
     );
   }
   if (invited && status !== "ready") {
     return invitedStale ? (
       <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-medium text-amber-300">
-        Never connected
+        {t("agents.status.neverConnected")}
       </span>
     ) : (
       <span className="inline-flex items-center gap-1 rounded-full bg-sky-500/20 px-2 py-0.5 text-xs font-medium text-sky-300">
-        Invited
+        {t("agents.status.invited")}
       </span>
     );
   }
@@ -589,7 +598,7 @@ function StatusBadge({
     return (
       <span className="inline-flex items-center gap-1 rounded-full bg-[#7975a8]/20 px-2 py-0.5 text-xs font-medium text-[#7975a8]">
         <Loader2 className="h-3 w-3 animate-spin" />
-        Syncing…
+        {t("agents.status.syncing")}
       </span>
     );
   }
@@ -598,10 +607,10 @@ function StatusBadge({
   if (status === "ready" && hibernationState && hibernationState !== "active") {
     const sleep =
       hibernationState === "hibernated"
-        ? { tone: "bg-[#7975a8]/20 text-[#7975a8]", label: "Hibernated", spin: false }
+        ? { tone: "bg-[#7975a8]/20 text-[#7975a8]", label: t("agents.status.hibernated"), spin: false }
         : hibernationState === "hibernating"
-        ? { tone: "bg-amber-500/20 text-amber-300", label: "Hibernating…", spin: true }
-        : { tone: "bg-sky-500/20 text-sky-300", label: "Waking…", spin: true };
+        ? { tone: "bg-amber-500/20 text-amber-300", label: t("agents.status.hibernating"), spin: true }
+        : { tone: "bg-sky-500/20 text-sky-300", label: t("agents.status.waking"), spin: true };
     return (
       <span
         className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${sleep.tone}`}
@@ -626,12 +635,12 @@ function StatusBadge({
       : "bg-[#7975a8]/20 text-[#7975a8]";
   const label =
     status === "ready"
-      ? "Online"
+      ? t("agents.status.online")
       : status === "failed"
-      ? "Failed"
+      ? t("agents.status.failed")
       : provisioning
-      ? "Provisioning"
-      : "Unknown";
+      ? t("agents.status.provisioning")
+      : t("agents.status.unknown");
   return (
     <span
       className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${tone}`}
@@ -646,14 +655,15 @@ function StatusBadge({
 }
 
 function EmptyHint() {
+  const { t } = useTranslation();
   return (
     <EmptyState
       icon={Bot}
-      title="No agents yet"
-      description="Add an agent — create a Hermes or OpenClaw agent on PerkOS, run one on your own VPS, or invite an agent you already run elsewhere into your org."
+      title={t("agents.empty.title")}
+      description={t("agents.empty.description")}
       actions={[
         {
-          label: "Add agent",
+          label: t("agents.empty.action"),
           href: "/agents/new",
           icon: Plus,
         },

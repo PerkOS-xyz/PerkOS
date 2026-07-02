@@ -7,6 +7,7 @@ import { useConnection } from "wagmi";
 import { Plus, Folder, ListTodo, Trash2, X, ChevronDown } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ type EnrichedTask = {
 };
 
 export default function TasksPage() {
+  const { t } = useTranslation();
   const { address } = useConnection();
   const queryClient = useQueryClient();
   const [query, setQuery] = useState("");
@@ -174,11 +176,11 @@ export default function TasksPage() {
     onSuccess: (results) => {
       invalidateAffected();
       const { ok, failed } = summarize(results);
-      if (failed) toast.error(`Moved ${ok}, ${failed} failed`);
-      else toast.success(`Moved ${ok} task${ok === 1 ? "" : "s"}`);
+      if (failed) toast.error(t("tasks.toast.movedSomeFailed", { ok, failed }));
+      else toast.success(t("tasks.toast.movedSuccess", { count: ok }));
       clear();
     },
-    onError: (e: Error) => toast.error("Bulk move failed", { description: e.message }),
+    onError: (e: Error) => toast.error(t("tasks.toast.bulkMoveFailed"), { description: e.message }),
   });
 
   const deleteMut = useMutation({
@@ -191,13 +193,13 @@ export default function TasksPage() {
     onSuccess: (results) => {
       invalidateAffected();
       const { ok, failed } = summarize(results);
-      if (failed) toast.error(`Deleted ${ok}, ${failed} failed`);
-      else toast.success(`Deleted ${ok} task${ok === 1 ? "" : "s"}`);
+      if (failed) toast.error(t("tasks.toast.deletedSomeFailed", { ok, failed }));
+      else toast.success(t("tasks.toast.deletedSuccess", { count: ok }));
       setConfirmDelete(false);
       clear();
     },
     onError: (e: Error) => {
-      toast.error("Bulk delete failed", { description: e.message });
+      toast.error(t("tasks.toast.bulkDeleteFailed"), { description: e.message });
       setConfirmDelete(false);
     },
   });
@@ -208,9 +210,9 @@ export default function TasksPage() {
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-medium text-foreground">Tasks</h1>
+          <h1 className="text-3xl font-medium text-foreground">{t("tasks.header.title")}</h1>
           <p className="text-sm text-muted-foreground">
-            Everything in flight across your projects.
+            {t("tasks.header.subtitle")}
           </p>
         </div>
         <Link
@@ -218,7 +220,7 @@ export default function TasksPage() {
           className="flex items-center justify-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
         >
           <Plus className="h-4 w-4" />
-          Create task
+          {t("tasks.header.createTask")}
         </Link>
       </header>
 
@@ -228,7 +230,7 @@ export default function TasksPage() {
             <SearchInput
               value={query}
               onChange={setQuery}
-              placeholder="Search tasks by name, agent, project, or status…"
+              placeholder={t("tasks.search.placeholder")}
             />
           </div>
           <ProjectFilter
@@ -243,15 +245,18 @@ export default function TasksPage() {
         <div className="flex flex-wrap items-center gap-2">
           {statusFilter ? (
             <FilterPill
-              label={`status: ${statusFilter === "active" ? "in progress" : statusFilter}`}
+              label={t("tasks.filter.statusPill", {
+                status: statusFilter === "active" ? t("tasks.filter.inProgress") : statusFilter,
+              })}
               clearHref={buildTasksHref({ project: projectFilter })}
             />
           ) : null}
           {projectFilter ? (
             <FilterPill
-              label={`project: ${
-                projects.find((p) => p.id === projectFilter)?.name ?? projectFilter
-              }`}
+              label={t("tasks.filter.projectPill", {
+                project:
+                  projects.find((p) => p.id === projectFilter)?.name ?? projectFilter,
+              })}
               clearHref={buildTasksHref({ status: statusFilter })}
             />
           ) : null}
@@ -263,45 +268,45 @@ export default function TasksPage() {
       ) : projects.length === 0 ? (
         <EmptyState
           icon={Folder}
-          title="No projects yet"
-          description="Tasks live inside projects. Create one first."
-          actions={[{ label: "Create project", href: "/projects/new", icon: Plus }]}
+          title={t("tasks.emptyProjects.title")}
+          description={t("tasks.emptyProjects.description")}
+          actions={[{ label: t("tasks.emptyProjects.action"), href: "/projects/new", icon: Plus }]}
         />
       ) : !ready ? (
         <SkeletonKanban />
       ) : allTasks.length === 0 ? (
         <EmptyState
           icon={ListTodo}
-          title="No tasks yet"
-          description="Add tasks to a project and route them to your agents."
-          actions={[{ label: "Create task", href: "/tasks/new", icon: Plus }]}
+          title={t("tasks.empty.title")}
+          description={t("tasks.empty.description")}
+          actions={[{ label: t("tasks.empty.action"), href: "/tasks/new", icon: Plus }]}
         />
       ) : noResults ? (
         <p className="rounded-md border border-dashed border-border px-6 py-10 text-center text-sm text-muted-foreground">
-          No tasks match &quot;{query}&quot;.
+          {t("tasks.search.noResults", { query })}
         </p>
       ) : (
         <div className="flex flex-col gap-3">
           {selectedItems.length > 0 ? (
             <div className="flex flex-wrap items-center gap-2 rounded-md border border-primary/30 bg-card/60 px-3 py-2">
               <span className="text-xs font-medium text-foreground">
-                {selectedItems.length} selected
+                {t("tasks.bulk.selectedCount", { count: selectedItems.length })}
               </span>
-              <span className="text-[11px] text-muted-foreground">Move to:</span>
+              <span className="text-[11px] text-muted-foreground">{t("tasks.bulk.moveTo")}</span>
               <Button size="xs" variant="outline" disabled={mutating} onClick={() => moveMut.mutate("Backlog")}>
-                To do
+                {t("tasks.bulk.toDo")}
               </Button>
               <Button size="xs" variant="outline" disabled={mutating} onClick={() => moveMut.mutate("In progress")}>
-                In progress
+                {t("tasks.bulk.inProgress")}
               </Button>
               <Button size="xs" variant="outline" disabled={mutating} onClick={() => moveMut.mutate("Done")}>
-                Done
+                {t("tasks.bulk.done")}
               </Button>
               <Button size="xs" variant="destructive" disabled={mutating} onClick={() => setConfirmDelete(true)}>
-                <Trash2 className="h-3.5 w-3.5" /> Delete
+                <Trash2 className="h-3.5 w-3.5" /> {t("tasks.bulk.delete")}
               </Button>
               <Button size="xs" variant="ghost" disabled={mutating} onClick={clear}>
-                Clear
+                {t("tasks.bulk.clear")}
               </Button>
             </div>
           ) : null}
@@ -318,7 +323,7 @@ export default function TasksPage() {
                   <Checkbox
                     checked={selected.has(item.id)}
                     onCheckedChange={(on) => toggle(item.id, on)}
-                    aria-label={`Select ${item.task.name}`}
+                    aria-label={t("tasks.card.selectAria", { name: item.task.name })}
                   />
                 </div>
                 <Link
@@ -334,15 +339,14 @@ export default function TasksPage() {
                       <Folder className="h-3 w-3" />
                       <span className="truncate">{item.projectName}</span>
                     </span>
-                    <span className="shrink-0">Agent: {item.task.agent || "—"}</span>
+                    <span className="shrink-0">{t("tasks.card.agent", { agent: item.task.agent || "—" })}</span>
                   </div>
                 </Link>
               </div>
             )}
           />
           <p className="text-[10px] text-muted-foreground">
-            Drag-and-drop is local for now. Backend sync coming with the next
-            release.
+            {t("tasks.dragHint")}
           </p>
         </div>
       )}
@@ -350,9 +354,9 @@ export default function TasksPage() {
       <ConfirmDialog
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
-        title={`Delete ${selectedItems.length} task${selectedItems.length === 1 ? "" : "s"}?`}
-        description="The selected tasks (across projects) and their history will be removed. This can't be undone."
-        confirmLabel="Delete"
+        title={t("tasks.confirmDelete.title", { count: selectedItems.length })}
+        description={t("tasks.confirmDelete.description")}
+        confirmLabel={t("tasks.confirmDelete.confirmLabel")}
         destructive
         pending={deleteMut.isPending}
         onConfirm={() => deleteMut.mutate()}
@@ -387,11 +391,12 @@ function FilterPill({
   label: string;
   clearHref: string;
 }) {
+  const { t } = useTranslation();
   return (
     <Link
       href={clearHref}
       className="inline-flex w-fit items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs text-primary hover:bg-primary/15"
-      aria-label={`Clear ${label}`}
+      aria-label={t("tasks.filter.clearAria", { label })}
     >
       {label}
       <X className="h-3 w-3" aria-hidden />
@@ -413,6 +418,7 @@ function ProjectFilter({
   selected: string | null;
   statusFilter: string | null;
 }) {
+  const { t } = useTranslation();
   const router = useRouter();
   return (
     <div className="relative shrink-0">
@@ -421,7 +427,7 @@ function ProjectFilter({
         aria-hidden
       />
       <select
-        aria-label="Filter tasks by project"
+        aria-label={t("tasks.projectFilter.aria")}
         value={selected ?? ""}
         onChange={(e) => {
           router.push(
@@ -433,7 +439,7 @@ function ProjectFilter({
         }}
         className="h-10 w-full appearance-none rounded-md border border-input bg-card pl-9 pr-8 text-sm text-foreground transition-colors hover:border-primary/40 focus:border-primary focus:outline-none sm:w-56"
       >
-        <option value="">All projects</option>
+        <option value="">{t("tasks.projectFilter.all")}</option>
         {projects.map((p) => (
           <option key={p.id ?? p.name} value={p.id ?? ""}>
             {p.name}
@@ -475,4 +481,3 @@ function SkeletonKanban() {
     </div>
   );
 }
-
