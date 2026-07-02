@@ -54,17 +54,41 @@ export default function SignInPage() {
     error?.name === "ConnectorAlreadyConnectedError" ||
     error?.message?.toLowerCase().includes("already connected") === true;
 
-  // Skip the manual connect-method buttons when there's no point
-  // showing them — i.e. inside a Mini App host (wallet about to
-  // auto-connect) OR when wagmi already has a connected wallet
-  // (in-app browser with a persisted session, normal tab with a
-  // prior session, etc.). /continue dispatches to /dashboard or
-  // the AccessGate. Browser users with no wallet keep the buttons.
+  // Hand off to /continue (the dispatcher → /dashboard or AccessGate) when
+  // there's no point showing the connect buttons — inside a Mini App host
+  // (wallet auto-connects) OR when wagmi already holds a connected wallet
+  // (in-app browser / persisted session).
+  //
+  // BUT never hand off a `signed-out` session: /continue bounces any
+  // signed-out session straight back to /sign-in, so redirecting there
+  // creates an infinite /sign-in ↔ /continue loop (seen as a "reload"
+  // flicker, no console error since both are client-side router.replace).
+  // This bites the browser/Dynamic path, where useWalletSession reads
+  // Dynamic (signed-out) while wagmi may still report a stale persisted
+  // connection, and any case where isInMiniApp is a false positive.
   useEffect(() => {
+    // TODO(i18n-cleanup): the [perkos:auth] console logs are temporary
+    // diagnostics for the /sign-in ↔ /continue reload loop; remove once
+    // confirmed fixed in prod.
+    if (session.status === "signed-out") {
+      if (isInMiniApp === true || (isConnected && address)) {
+        console.log(
+          "[perkos:auth] sign-in: holding (session signed-out, not handing off to /continue)",
+          { isInMiniApp, wagmiConnected: isConnected, address },
+        );
+      }
+      return;
+    }
     if (isInMiniApp === true || (isConnected && address)) {
+      console.log("[perkos:auth] sign-in → /continue", {
+        isInMiniApp,
+        wagmiConnected: isConnected,
+        address,
+        sessionStatus: session.status,
+      });
       router.replace("/continue");
     }
-  }, [isInMiniApp, isConnected, address, router]);
+  }, [isInMiniApp, isConnected, address, session.status, router]);
 
   // Once the user has both wagmi + Firebase, send them on.
   useEffect(() => {
