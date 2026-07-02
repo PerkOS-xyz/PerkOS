@@ -1008,9 +1008,18 @@
       "title": "既存のエージェントを招待",
       "description": "ランタイム、メモリー、ツールなど、既存の構成は一切変わりません。エージェントはPerkOS（perkos-a2a + perkos-chat）へアウトバウンドで接続するだけで、組織のチャットとジョブボードを利用できるようになります。",
       "runtimeKinds": {
-        "hermes": { "label": "Hermes", "hint": "/v1/responses" },
-        "openclaw": { "label": "OpenClaw", "hint": "/v1/chat/completions" },
-        "custom": { "label": "カスタム", "hint": "独自のHTTPランタイム" }
+        "hermes": {
+          "label": "Hermes",
+          "hint": "/v1/responses"
+        },
+        "openclaw": {
+          "label": "OpenClaw",
+          "hint": "/v1/chat/completions"
+        },
+        "custom": {
+          "label": "カスタム",
+          "hint": "独自のHTTPランタイム"
+        }
       },
       "nameLabel": "エージェント名（ハンドル）",
       "nameHelp": "リレー上とチャットで使われる識別名です。一意である必要があります。",
@@ -1075,6 +1084,194 @@
     "error": {
       "connectWallet": "エージェントを起動する前に、ウォレットを接続してください。",
       "pickRuntime": "ランタイムを選択してください。"
+    }
+  },
+  "agentDetail": {
+    "backLink": "エージェントチームに戻る",
+    "notFound": "エージェントがチームに見つかりません。",
+    "whatHappensNext": "次に起こること",
+    "header": {
+      "stop": "停止",
+      "refresh": "更新",
+      "edit": "編集",
+      "alreadyStopped": "{{name}}はすでに停止しています。",
+      "stopping": "{{name}}を停止しています。次にメッセージを送ると自動的に起動します。",
+      "stopError": "エージェントを停止できませんでした"
+    },
+    "status": {
+      "syncing": "同期中…",
+      "hibernated": "休止中",
+      "hibernating": "休止処理中…",
+      "waking": "起動中…",
+      "online": "オンライン",
+      "failed": "失敗",
+      "provisioning": "準備中",
+      "unknown": "不明"
+    },
+    "activity": {
+      "title": "最近のアクティビティ"
+    },
+    "metadata": {
+      "title": "ランタイムのメタデータ",
+      "agentId": "エージェントID",
+      "ownerWallet": "オーナーウォレット",
+      "created": "作成日時",
+      "lastActive": "最終アクティブ",
+      "connectedNow": "・現在接続中",
+      "neverConnected": "未接続",
+      "endpoint": "エンドポイント",
+      "notProvisioned": "まだプロビジョニングされていません",
+      "runtimeVersion": "ランタイムバージョン",
+      "modelKey": "モデルキー",
+      "byok": "ユーザー提供（BYOK）",
+      "perkosManaged": "PerkOS管理"
+    },
+    "capabilities": {
+      "title": "機能",
+      "description": "タスクの実行中にエージェントが呼び出せるプラグインです。",
+      "empty": "まだプラグインが設定されていません。「編集」から追加してください。"
+    },
+    "channels": {
+      "title": "接続済みのチャネル",
+      "description": "PerkOS内に加えて、ユーザーがこのエージェントに連絡できる場所です。",
+      "none": "まだ設定されていません。{{runtime}}エージェントは、Telegram、Discord、Slack、WhatsAppなどのチャネルに接続できます。"
+    },
+    "tasks": {
+      "title": "{{name}}に割り当てられたタスク",
+      "description": "すべてのプロジェクトを対象に表示しています。タスクをクリックすると詳細を確認できます。",
+      "empty": "このエージェントにはまだタスクが割り当てられていません。"
+    },
+    "lifecycle": {
+      "title": "ライフサイクル",
+      "description": "このエージェントをチームから削除します。",
+      "delete": "削除",
+      "connectWallet": "ウォレットを接続してください。",
+      "deletedTitle": "エージェントを削除しました",
+      "deletedWithWarnings": "{{name}}を削除しました。一部のクリーンアップ処理で警告が発生しました（コンソールを確認してください）。",
+      "deleted": "{{name}}をチームから削除しました。",
+      "deleteError": "エージェントを削除できませんでした",
+      "confirmTitle": "{{name}}を削除しますか？",
+      "confirmDescription": "実行中のコンテナを停止し、LLMキーを無効化し、記録を消去します。課金は即座に停止します。割り当てられていた会話やタスクの履歴は残りますが、この割り当ては解除されます。この操作は取り消せません。",
+      "confirmLabel": "エージェントを削除"
+    }
+  },
+  "companyNew": {
+    "gallery": {
+      "title": "新規プロジェクト",
+      "intro": "ビジネステンプレートから始める、自分でチームの役割を選ぶ、または空のプロジェクトを作成する、いずれかを選べます。チームが作るのは下書きと提案だけで、あなたのOKなしには何も実行されません。1人のエージェントだけでよければ、",
+      "introLink": "こちらから作成できます",
+      "introAfter": "。",
+      "customCard": {
+        "title": "カスタムチーム",
+        "kicker": "自分で作る",
+        "blurb": "プロジェクトを定義し、必要な役割だけを選びます。PM、リサーチャー、マーケター、ビルダーなど。リーダーは誰にするか自分で選べます。",
+        "cta": "役割を選ぶ"
+      },
+      "emptyCard": {
+        "title": "空のプロジェクト",
+        "kicker": "身軽に始める",
+        "blurb": "プロジェクトだけを作成します。既存のエージェントを割り当てるか、後からチームを追加できます。",
+        "cta": "空のプロジェクトを作成"
+      },
+      "myTemplates": "マイテンプレート",
+      "myTemplateKicker": "マイテンプレート",
+      "myTemplateBlurb": "保存済みのチームです。役割を調整して、新しいプロジェクトで起動できます。",
+      "deleteTemplateAria": "テンプレート「{{name}}」を削除",
+      "deleteTemplateTitle": "このテンプレートを削除",
+      "deleteTemplateConfirm": "テンプレート「{{name}}」を削除しますか？",
+      "deleteTemplateError": "テンプレートを削除できませんでした",
+      "businessTemplates": "PerkOSビジネステンプレート"
+    },
+    "config": {
+      "back": "別の出発点を選ぶ",
+      "customTeamTitle": "カスタムチーム",
+      "emptyProjectTitle": "空のプロジェクト",
+      "myTeamSubtitle": "保存済みのチームです。調整して起動しましょう。",
+      "customTeamSubtitle": "プロジェクトに必要な役割を選び、リーダーを決めましょう。",
+      "emptyProjectSubtitle": "プロジェクトだけを作成します。エージェントはいつでも後から追加できます。",
+      "teamHeading_one": "あなたのチーム（{{count}}名）",
+      "teamHeading_other": "あなたのチーム（{{count}}名）",
+      "teamHintTemplate": "このビジネス向けのおすすめ構成です。不要なものは削除し、下から役割を追加して、リーダーを選んでください。",
+      "teamHintCustom": "役割を追加・削除し、リーダーを選んでください（チームリーダーが作業を計画し、チームをまとめます）。",
+      "leadTitle": "チームリーダーが作業を計画し、チームをまとめます",
+      "lead": "リーダー",
+      "removeRoleAria": "{{role}}を削除",
+      "noRoles": "まだ役割がありません。下から少なくとも1つ追加してください。",
+      "addRole": "役割を追加",
+      "nameLabel": "プロジェクト名を入力",
+      "namePlaceholder": "例：Two-Table Cafe NY",
+      "goalLabelTeam": "このチームに何を達成してほしいですか？",
+      "goalLabelProject": "このプロジェクトで何を達成したいですか？",
+      "goalPlaceholderDefault": "任意項目です。未入力の場合は「{{blurb}}」が使われます",
+      "goalPlaceholder": "例：コンセプトを検証する。市場調査を行い、ローンチ計画の下書きを作り、ウェイトリストを作成する。",
+      "goalHint": "チームリーダーはこの目標をもとに、ボードを計画しチームに指示を出します。",
+      "sourceHeading": "誰がこれらのエージェントを動かしますか？",
+      "sourcePerkos": "PerkOSエージェント",
+      "sourcePerkosDesc": "PerkOSがチームを起動・ホスティングします。数分でオンラインになります。",
+      "sourceInvite": "自分のエージェントを招待",
+      "sourceInviteDesc": "各役割を登録し、すでに運用中のエージェントをオンボーディングプロンプト経由で接続します。インフラは起動されません。",
+      "llmHeading": "AIはどこで動きますか？",
+      "llmPerkos": "PerkOS LLM",
+      "llmPerkosDesc": "PerkOSのインフラ上で動作します。APIキーは不要です。",
+      "llmByok": "自分のモデルを持ち込む",
+      "llmByokDesc": "OpenAI互換の自分のキーを使用します。PerkOSインフラ上にデプロイされます。",
+      "modelPlaceholder": "モデルID",
+      "keyPlaceholder": "sk-…（あなたのAPIキー。暗号化して保存され、ジョブには含まれません）",
+      "saveTemplateLabel": "このチームをマイテンプレートとして保存",
+      "saveTemplatePlaceholder": "{{name}}チーム",
+      "saveTemplatePlaceholderFallback": "マイ",
+      "saveTemplateHint": "おすすめ構成から変更しました。保存すれば次のプロジェクトでも再利用できます。",
+      "launching": "起動しています…",
+      "createProject": "プロジェクトを作成",
+      "inviteButton_one": "作成＋{{count}}名を招待",
+      "inviteButton_other": "作成＋{{count}}名を招待",
+      "startTeam": "チームを起動（{{count}}）",
+      "dontClose": "完了するまでこのタブを閉じないでください。"
+    },
+    "launch": {
+      "pickRole": "チームに少なくとも1つの役割を選んでください。",
+      "enterKey": "モデルのAPIキーを入力するか、PerkOS LLMに切り替えてください。",
+      "resolvingImages": "ランタイムイメージを解決しています…",
+      "noRuntimeImage": "有効な{{runtime}}ランタイムイメージが公開されていません。起動する前に管理者が設定する必要があります。",
+      "creatingProject": "プロジェクトを作成しています…",
+      "projectNoId": "プロジェクトがIDなしで作成されました。",
+      "registering": "{{role}}を登録しています（{{current}}/{{total}}）…",
+      "launchingRole": "{{role}}を起動しています（{{current}}/{{total}}）…",
+      "assigningTeam": "チームを割り当てています…",
+      "savingTemplate": "テンプレートを保存しています…",
+      "defaultTemplateName": "{{name}}チーム",
+      "templateSaveFailed": "チームは起動しましたが、テンプレートを保存できませんでした。",
+      "projectCreated": "プロジェクトを作成しました",
+      "invitesRegistered_one": "プロジェクトを作成しました。{{count}}件のエージェント招待を登録しました",
+      "invitesRegistered_other": "プロジェクトを作成しました。{{count}}件のエージェント招待を登録しました",
+      "teamLaunched": "{{name}}を起動しました",
+      "yourTeamFallback": "あなたのチーム",
+      "descNoAgents": "エージェントタブからいつでもエージェントを追加できます。",
+      "descInvite": "各エージェントを開いてオンボーディングプロンプトをコピーし、自分のランタイムを接続してください。",
+      "descPerkos": "チームは起動処理中です。数分でオンラインになります。",
+      "createError": "プロジェクトを作成できませんでした"
+    }
+  },
+  "walletSend": {
+    "success": {
+      "title": "送金完了",
+      "description": "{{chain}}で{{amount}} {{token}}を送金しました。",
+      "view": "表示",
+      "sendAnother": "もう一度送る"
+    },
+    "form": {
+      "title": "送金",
+      "description": "ウォレットから資金を送ります。署名とブロードキャストはPerkOSが代行します。",
+      "network": "ネットワーク",
+      "token": "トークン",
+      "recipient": "送金先アドレス",
+      "recipientInvalid": "有効な0x…アドレスを入力してください。",
+      "recipientSelf": "ご注意ください。これはご自身のウォレットアドレスです。",
+      "amount": "金額（{{token}}）",
+      "amountInvalid": "0より大きい金額を入力してください。",
+      "transferFailed": "送金に失敗しました。",
+      "sending": "送金しています…",
+      "send": "送金"
     }
   }
 }

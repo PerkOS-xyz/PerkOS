@@ -6,6 +6,7 @@ import { use, useMemo, useState } from "react";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
   RefreshCw,
@@ -102,6 +103,7 @@ const CHANNEL_LABELS: Record<string, { label: string; Icon: typeof Send }> = {
 };
 
 export default function AgentDetailPage({ params }: PageProps) {
+  const { t } = useTranslation();
   const { agentId } = use(params);
   const queryClient = useQueryClient();
   const { address } = useConnection();
@@ -205,7 +207,7 @@ export default function AgentDetailPage({ params }: PageProps) {
       <div className="flex flex-col gap-4">
         <BackLink />
         <div className="rounded-md border border-dashed border-border px-6 py-10 text-center text-sm text-muted-foreground">
-          Agent not found in your team.
+          {t("agentDetail.notFound")}
         </div>
       </div>
     );
@@ -227,7 +229,7 @@ export default function AgentDetailPage({ params }: PageProps) {
       (agent.status === "ready" && !agent.bridgeConnected && !agent.invited) ? (
         <section className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
           <h2 className="mb-2 text-sm font-medium text-foreground">
-            What happens next
+            {t("agentDetail.whatHappensNext")}
           </h2>
           <ProvisionPipeline
             status={agent.status}
@@ -298,13 +300,14 @@ export default function AgentDetailPage({ params }: PageProps) {
 }
 
 function BackLink() {
+  const { t } = useTranslation();
   return (
     <Link
       href="/agents"
       className="inline-flex w-fit items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
     >
       <ArrowLeft className="h-4 w-4" />
-      Back to Agent team
+      {t("agentDetail.backLink")}
     </Link>
   );
 }
@@ -333,6 +336,7 @@ function AgentHeader({
   refreshing: boolean;
   walletAddress: string;
 }) {
+  const { t } = useTranslation();
   const [editOpen, setEditOpen] = useState(false);
   const queryClient = useQueryClient();
   const isExternal = isExternalAgent(agent);
@@ -345,8 +349,8 @@ function AgentHeader({
     onSuccess: (result) => {
       toast.success(
         result.previousDesiredCount === 0
-          ? `${agent.name} was already stopped.`
-          : `${agent.name} stopping — it'll wake automatically on your next message.`
+          ? t("agentDetail.header.alreadyStopped", { name: agent.name })
+          : t("agentDetail.header.stopping", { name: agent.name })
       );
       // Optimistically flip to "hibernating" so the badge updates instantly and
       // the chat panel's status poll kicks in. Without this the live ECS status
@@ -360,7 +364,7 @@ function AgentHeader({
       queryClient.invalidateQueries({ queryKey: ["wallet-agents", walletAddress] });
     },
     onError: (err: Error) =>
-      toast.error("Couldn't stop agent", { description: err.message }),
+      toast.error(t("agentDetail.header.stopError"), { description: err.message }),
   });
 
   // Hibernation state lives in a separate live query (shared cache with the
@@ -439,7 +443,7 @@ function AgentHeader({
             ) : (
               <Power className="h-3.5 w-3.5" />
             )}
-            Stop
+            {t("agentDetail.header.stop")}
           </Button>
         ) : null}
         <Button
@@ -452,7 +456,7 @@ function AgentHeader({
           <RefreshCw
             className={cn("h-3.5 w-3.5", refreshing && "animate-spin")}
           />
-          Refresh
+          {t("agentDetail.header.refresh")}
         </Button>
         <Button
           variant="outline"
@@ -462,7 +466,7 @@ function AgentHeader({
           className="gap-1.5"
         >
           <Pencil className="h-3.5 w-3.5" />
-          Edit
+          {t("agentDetail.header.edit")}
         </Button>
       </div>
 
@@ -487,6 +491,7 @@ function StatusBadge({
   hibernationState?: HibernationApiState;
   syncing?: boolean;
 }) {
+  const { t } = useTranslation();
   // Don't assert "Online" while the live hibernation status is still loading —
   // it may resolve to "Hibernated". Show a neutral syncing state instead.
   if (syncing) {
@@ -496,7 +501,7 @@ function StatusBadge({
         className="inline-flex items-center gap-1 border-0 bg-muted text-muted-foreground"
       >
         <Loader2 className="h-3 w-3 animate-spin" />
-        Syncing…
+        {t("agentDetail.status.syncing")}
       </Badge>
     );
   }
@@ -505,10 +510,10 @@ function StatusBadge({
   if (status === "ready" && hibernationState && hibernationState !== "active") {
     const sleep =
       hibernationState === "hibernated"
-        ? { tone: "bg-slate-500/20 text-slate-300", label: "Hibernated" }
+        ? { tone: "bg-slate-500/20 text-slate-300", label: t("agentDetail.status.hibernated") }
         : hibernationState === "hibernating"
-        ? { tone: "bg-amber-500/20 text-amber-300", label: "Hibernating…" }
-        : { tone: "bg-sky-500/20 text-sky-300", label: "Waking…" };
+        ? { tone: "bg-amber-500/20 text-amber-300", label: t("agentDetail.status.hibernating") }
+        : { tone: "bg-sky-500/20 text-sky-300", label: t("agentDetail.status.waking") };
     return (
       <Badge variant="secondary" className={cn("border-0", sleep.tone)}>
         {sleep.label}
@@ -523,12 +528,12 @@ function StatusBadge({
       : "bg-amber-500/20 text-amber-300";
   const label =
     status === "ready"
-      ? "Online"
+      ? t("agentDetail.status.online")
       : status === "failed"
-      ? "Failed"
+      ? t("agentDetail.status.failed")
       : status === "provisioning"
-      ? "Provisioning"
-      : "Unknown";
+      ? t("agentDetail.status.provisioning")
+      : t("agentDetail.status.unknown");
   return (
     <Badge variant="secondary" className={cn("border-0", tone)}>
       {label}
@@ -548,13 +553,14 @@ function AgentActivitySection({
   agentName: string;
   walletAddress?: string;
 }) {
+  const { t } = useTranslation();
   const { events } = useActivityFeed(walletAddress, 150);
   const mine = events.filter((e) => e.actor === agentName).slice(0, 8);
   if (mine.length === 0) return null;
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Recent activity</CardTitle>
+        <CardTitle className="text-base">{t("agentDetail.activity.title")}</CardTitle>
       </CardHeader>
       <CardContent>
         <ul className="flex flex-col">
@@ -579,43 +585,44 @@ function AgentActivitySection({
 }
 
 function MetadataCard({ agent }: { agent: Agent }) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Runtime metadata</CardTitle>
+        <CardTitle className="text-base">{t("agentDetail.metadata.title")}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 text-sm">
-        <MetaRow Icon={Bot} label="Agent ID">
+        <MetaRow Icon={Bot} label={t("agentDetail.metadata.agentId")}>
           <span className="font-mono">{formatAddress(agent.id)}</span>
         </MetaRow>
-        <MetaRow Icon={Wallet} label="Owner wallet">
+        <MetaRow Icon={Wallet} label={t("agentDetail.metadata.ownerWallet")}>
           <span className="font-mono">{formatAddress(agent.walletAddress)}</span>
         </MetaRow>
-        <MetaRow Icon={Calendar} label="Created">
+        <MetaRow Icon={Calendar} label={t("agentDetail.metadata.created")}>
           {formatDate(agent.createdAt)}
         </MetaRow>
-        <MetaRow Icon={Calendar} label="Last active">
+        <MetaRow Icon={Calendar} label={t("agentDetail.metadata.lastActive")}>
           {agent.lastBridgeSeenAt ? (
             <span title={agent.lastBridgeSeenAt}>
               {formatRelativeShort(agent.lastBridgeSeenAt)}
               {agent.bridgeConnected ? (
-                <span className="ml-1.5 text-emerald-300">· connected now</span>
+                <span className="ml-1.5 text-emerald-300">{t("agentDetail.metadata.connectedNow")}</span>
               ) : null}
             </span>
           ) : (
-            <span className="text-muted-foreground">Never connected</span>
+            <span className="text-muted-foreground">{t("agentDetail.metadata.neverConnected")}</span>
           )}
         </MetaRow>
-        <MetaRow Icon={Server} label="Endpoint">
+        <MetaRow Icon={Server} label={t("agentDetail.metadata.endpoint")}>
           {agent.endpoint ? (
             <span className="break-all font-mono text-xs">
               {agent.endpoint}
             </span>
           ) : (
-            <span className="text-muted-foreground">Not provisioned yet</span>
+            <span className="text-muted-foreground">{t("agentDetail.metadata.notProvisioned")}</span>
           )}
         </MetaRow>
-        <MetaRow Icon={Boxes} label="Runtime version">
+        <MetaRow Icon={Boxes} label={t("agentDetail.metadata.runtimeVersion")}>
           {agent.upstreamVersion ? (
             <span className="font-mono text-xs">
               {agent.runtime} {agent.upstreamVersion}
@@ -624,11 +631,11 @@ function MetadataCard({ agent }: { agent: Agent }) {
             <span className="text-muted-foreground">—</span>
           )}
         </MetaRow>
-        <MetaRow Icon={KeyRound} label="Model key">
+        <MetaRow Icon={KeyRound} label={t("agentDetail.metadata.modelKey")}>
           {agent.modelKeyProvided ? (
-            <span className="text-emerald-300">User-provided (BYOK)</span>
+            <span className="text-emerald-300">{t("agentDetail.metadata.byok")}</span>
           ) : (
-            <span className="text-muted-foreground">PerkOS managed</span>
+            <span className="text-muted-foreground">{t("agentDetail.metadata.perkosManaged")}</span>
           )}
         </MetaRow>
       </CardContent>
@@ -657,21 +664,22 @@ function MetaRow({
 }
 
 function CapabilitiesCard({ capabilities }: { capabilities: string[] }) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <Layers className="h-4 w-4 text-muted-foreground" />
-          Capabilities
+          {t("agentDetail.capabilities.title")}
         </CardTitle>
         <CardDescription>
-          Plugins this agent can call on while running tasks.
+          {t("agentDetail.capabilities.description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
         {capabilities.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No plugins configured yet. Use Edit to add some.
+            {t("agentDetail.capabilities.empty")}
           </p>
         ) : (
           <div className="flex flex-wrap gap-2">
@@ -698,19 +706,19 @@ function ChannelsSection({
   channels: { id: string; label: string; Icon: typeof Send }[];
   runtime: string;
 }) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Connected channels</CardTitle>
+        <CardTitle className="text-base">{t("agentDetail.channels.title")}</CardTitle>
         <CardDescription>
-          Where users can reach this agent in addition to inside PerkOS.
+          {t("agentDetail.channels.description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
         {channels.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            None configured. {runtime} agents can be wired to channels like
-            Telegram, Discord, Slack, or WhatsApp.
+            {t("agentDetail.channels.none", { runtime })}
           </p>
         ) : (
           <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -739,12 +747,13 @@ function TasksSection({
   ready: boolean;
   agentName: string;
 }) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Tasks assigned to {agentName}</CardTitle>
+        <CardTitle className="text-base">{t("agentDetail.tasks.title", { name: agentName })}</CardTitle>
         <CardDescription>
-          Across all your projects. Click a task to see its detail.
+          {t("agentDetail.tasks.description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -759,7 +768,7 @@ function TasksSection({
           </div>
         ) : tasks.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No tasks assigned to this agent yet.
+            {t("agentDetail.tasks.empty")}
           </p>
         ) : (
           <ul className="flex flex-col gap-2">
@@ -803,6 +812,7 @@ function TaskStatusBadge({ status }: { status: string }) {
 }
 
 function ActionsPanel({ agent }: { agent: Agent }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { address } = useConnection();
@@ -810,7 +820,7 @@ function ActionsPanel({ agent }: { agent: Agent }) {
 
   const deleteMutation = useMutation({
     mutationFn: () => {
-      if (!address) throw new Error("Connect a wallet.");
+      if (!address) throw new Error(t("agentDetail.lifecycle.connectWallet"));
       return deleteAgent({ walletAddress: address, agentId: agent.id });
     },
     onSuccess: (result) => {
@@ -822,15 +832,15 @@ function ActionsPanel({ agent }: { agent: Agent }) {
       if (hasWarnings) {
         console.warn("[deleteAgent] warnings:", result.warnings);
       }
-      toast.success("Agent deleted", {
+      toast.success(t("agentDetail.lifecycle.deletedTitle"), {
         description: hasWarnings
-          ? `${agent.name} was removed. Some cleanup tasks reported warnings (see console).`
-          : `${agent.name} was removed from your team.`,
+          ? t("agentDetail.lifecycle.deletedWithWarnings", { name: agent.name })
+          : t("agentDetail.lifecycle.deleted", { name: agent.name }),
       });
       router.replace("/agents");
     },
     onError: (err: Error) => {
-      toast.error("Couldn't delete agent", { description: err.message });
+      toast.error(t("agentDetail.lifecycle.deleteError"), { description: err.message });
       setConfirmOpen(false);
     },
   });
@@ -838,9 +848,9 @@ function ActionsPanel({ agent }: { agent: Agent }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Lifecycle</CardTitle>
+        <CardTitle className="text-base">{t("agentDetail.lifecycle.title")}</CardTitle>
         <CardDescription>
-          Remove this agent from your team.
+          {t("agentDetail.lifecycle.description")}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-wrap items-center gap-2">
@@ -851,16 +861,16 @@ function ActionsPanel({ agent }: { agent: Agent }) {
           className="gap-1.5"
         >
           <Trash2 className="h-3.5 w-3.5" />
-          Delete
+          {t("agentDetail.lifecycle.delete")}
         </Button>
       </CardContent>
 
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title={`Delete ${agent.name}?`}
-        description="Tears down the running container, revokes its LLM key, and clears its records. Billing stops immediately. Conversations and tasks it was assigned to keep their history but lose this assignment. This can't be undone."
-        confirmLabel="Delete agent"
+        title={t("agentDetail.lifecycle.confirmTitle", { name: agent.name })}
+        description={t("agentDetail.lifecycle.confirmDescription")}
+        confirmLabel={t("agentDetail.lifecycle.confirmLabel")}
         destructive
         pending={deleteMutation.isPending}
         onConfirm={() => deleteMutation.mutate()}

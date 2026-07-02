@@ -1085,5 +1085,193 @@
       "connectWallet": "启动智能体前请先连接钱包。",
       "pickRuntime": "请选择一个运行环境。"
     }
+  },
+  "agentDetail": {
+    "backLink": "返回智能体团队",
+    "notFound": "在你的团队中找不到该智能体。",
+    "whatHappensNext": "接下来会发生什么",
+    "header": {
+      "stop": "停止",
+      "refresh": "刷新",
+      "edit": "编辑",
+      "alreadyStopped": "{{name}} 已经处于停止状态。",
+      "stopping": "{{name}} 正在停止,你发送下一条消息时会自动唤醒。",
+      "stopError": "无法停止智能体"
+    },
+    "status": {
+      "syncing": "同步中…",
+      "hibernated": "已休眠",
+      "hibernating": "休眠中…",
+      "waking": "唤醒中…",
+      "online": "在线",
+      "failed": "失败",
+      "provisioning": "配置中",
+      "unknown": "未知"
+    },
+    "activity": {
+      "title": "最近动态"
+    },
+    "metadata": {
+      "title": "运行环境元数据",
+      "agentId": "智能体 ID",
+      "ownerWallet": "所有者钱包",
+      "created": "创建时间",
+      "lastActive": "最近活跃",
+      "connectedNow": "· 当前已连接",
+      "neverConnected": "从未连接",
+      "endpoint": "端点",
+      "notProvisioned": "尚未配置",
+      "runtimeVersion": "运行环境版本",
+      "modelKey": "模型密钥",
+      "byok": "用户自带(BYOK)",
+      "perkosManaged": "PerkOS 托管"
+    },
+    "capabilities": {
+      "title": "能力",
+      "description": "该智能体在执行任务时可以调用的插件。",
+      "empty": "尚未配置任何插件,点击“编辑”即可添加。"
+    },
+    "channels": {
+      "title": "已连接的渠道",
+      "description": "用户除了在 PerkOS 内部,还可以通过这些渠道联系到这个智能体。",
+      "none": "尚未配置任何渠道。{{runtime}} 智能体可以接入 Telegram、Discord、Slack 或 WhatsApp 等渠道。"
+    },
+    "tasks": {
+      "title": "分配给 {{name}} 的任务",
+      "description": "涵盖你所有的项目。点击任务即可查看详情。",
+      "empty": "该智能体目前还没有被分配任务。"
+    },
+    "lifecycle": {
+      "title": "生命周期",
+      "description": "把这个智能体从你的团队中移除。",
+      "delete": "删除",
+      "connectWallet": "请先连接钱包。",
+      "deletedTitle": "智能体已删除",
+      "deletedWithWarnings": "{{name}} 已被移除。部分清理步骤报告了警告信息(详见控制台)。",
+      "deleted": "{{name}} 已从你的团队中移除。",
+      "deleteError": "无法删除智能体",
+      "confirmTitle": "删除 {{name}}?",
+      "confirmDescription": "将拆除正在运行的容器,撤销其 LLM 密钥,并清除其相关记录。计费会立即停止。它参与过的对话和任务会保留历史记录,但会失去这项分配关系。此操作无法撤销。",
+      "confirmLabel": "删除智能体"
+    }
+  },
+  "companyNew": {
+    "gallery": {
+      "title": "新建项目",
+      "intro": "可以从行业模板开始,挑选你自己的团队角色,或者创建一个空项目。你的团队负责起草和建议,没有你的同意任何事都不会发生。更想用单个智能体?",
+      "introLink": "点击这里创建",
+      "introAfter": "。",
+      "customCard": {
+        "title": "自定义团队",
+        "kicker": "自己搭建",
+        "blurb": "定义你的项目,精确选出它需要的角色:项目经理、调研员、营销人员、开发人员…由你决定谁来带头。",
+        "cta": "选择你的角色"
+      },
+      "emptyCard": {
+        "title": "空项目",
+        "kicker": "轻装上阵",
+        "blurb": "只创建项目,之后再分配现有智能体或添加团队。",
+        "cta": "创建空项目"
+      },
+      "myTemplates": "我的模板",
+      "myTemplateKicker": "我的模板",
+      "myTemplateBlurb": "你保存的团队,调整角色后即可在新项目中启动。",
+      "deleteTemplateAria": "删除模板 {{name}}",
+      "deleteTemplateTitle": "删除此模板",
+      "deleteTemplateConfirm": "删除模板“{{name}}”?",
+      "deleteTemplateError": "无法删除该模板",
+      "businessTemplates": "PerkOS 行业模板"
+    },
+    "config": {
+      "back": "选择其他起点",
+      "customTeamTitle": "自定义团队",
+      "emptyProjectTitle": "空项目",
+      "myTeamSubtitle": "你保存的团队,调整后即可启动。",
+      "customTeamSubtitle": "选择项目需要的角色,并决定由谁带头。",
+      "emptyProjectSubtitle": "只创建项目,之后随时可以添加智能体。",
+      "teamHeading_one": "你的团队({{count}} 位成员)",
+      "teamHeading_other": "你的团队({{count}} 位成员)",
+      "teamHintTemplate": "这是为该行业推荐的配置,移除你不需要的角色,在下方添加更多角色,并选择谁来带头。",
+      "teamHintCustom": "添加或移除角色,并选择谁来带头(团队负责人负责规划工作并协调团队)。",
+      "leadTitle": "团队负责人负责规划工作并协调团队",
+      "lead": "负责人",
+      "removeRoleAria": "移除 {{role}}",
+      "noRoles": "还没有任何角色,请在下方至少添加一个。",
+      "addRole": "添加角色",
+      "nameLabel": "为你的项目命名",
+      "namePlaceholder": "例如:Two-Table Cafe NY",
+      "goalLabelTeam": "这个团队应该实现什么目标?",
+      "goalLabelProject": "这个项目应该实现什么目标?",
+      "goalPlaceholderDefault": "可选,默认使用:“{{blurb}}”",
+      "goalPlaceholder": "例如:验证这个想法,调研市场、起草上线计划、积累候补名单。",
+      "goalHint": "你的团队负责人会用这个目标来规划看板并向团队做说明。",
+      "sourceHeading": "由谁运行这些智能体?",
+      "sourcePerkos": "PerkOS 智能体",
+      "sourcePerkosDesc": "我们为你启动并托管这支团队,几分钟内即可上线。",
+      "sourceInvite": "邀请我自己的智能体",
+      "sourceInviteDesc": "为每个角色注册,并通过一段引导提示词连接你已经在运行的智能体。不会启动任何基础设施。",
+      "llmHeading": "AI 运行在哪里?",
+      "llmPerkos": "PerkOS LLM",
+      "llmPerkosDesc": "运行在 PerkOS 基础设施上,无需 API 密钥。",
+      "llmByok": "自带模型",
+      "llmByokDesc": "使用你自己的 OpenAI 兼容密钥,部署在 PerkOS 基础设施上。",
+      "modelPlaceholder": "模型 ID",
+      "keyPlaceholder": "sk-…(你的 API 密钥,加密存储,不会出现在任务记录中)",
+      "saveTemplateLabel": "把这支团队保存为我的模板之一",
+      "saveTemplatePlaceholder": "{{name}}团队",
+      "saveTemplatePlaceholderFallback": "我的",
+      "saveTemplateHint": "你调整了推荐的团队,保存后可以在下一个项目中复用。",
+      "launching": "启动中…",
+      "createProject": "创建项目",
+      "inviteButton_one": "创建项目并邀请 {{count}} 位团队成员",
+      "inviteButton_other": "创建项目并邀请 {{count}} 位团队成员",
+      "startTeam": "启动你的团队({{count}})",
+      "dontClose": "在完成之前请不要关闭此标签页。"
+    },
+    "launch": {
+      "pickRole": "请为你的团队至少选择一个角色。",
+      "enterKey": "请输入你的模型 API 密钥(或切换到 PerkOS LLM)。",
+      "resolvingImages": "正在解析运行环境镜像…",
+      "noRuntimeImage": "没有已发布的可用 {{runtime}} 运行环境镜像,需要管理员先设置一个才能启动。",
+      "creatingProject": "正在创建项目…",
+      "projectNoId": "项目创建时没有生成 ID。",
+      "registering": "正在注册 {{role}}({{current}}/{{total}})…",
+      "launchingRole": "正在启动 {{role}}({{current}}/{{total}})…",
+      "assigningTeam": "正在分配团队…",
+      "savingTemplate": "正在保存你的模板…",
+      "defaultTemplateName": "{{name}} 团队",
+      "templateSaveFailed": "团队已启动,但模板保存失败。",
+      "projectCreated": "项目已创建",
+      "invitesRegistered_one": "项目已创建,已注册 {{count}} 个智能体邀请",
+      "invitesRegistered_other": "项目已创建,已注册 {{count}} 个智能体邀请",
+      "teamLaunched": "{{name}} 已启动",
+      "yourTeamFallback": "你的团队",
+      "descNoAgents": "你可以随时从“智能体”标签页为它添加智能体。",
+      "descInvite": "打开每个智能体,复制它的引导提示词,连接你自己的运行环境。",
+      "descPerkos": "你的团队正在启动,几分钟后就会上线。",
+      "createError": "无法创建项目"
+    }
+  },
+  "walletSend": {
+    "success": {
+      "title": "已发送",
+      "description": "已在 {{chain}} 上发送 {{amount}} {{token}}。",
+      "view": "查看",
+      "sendAnother": "再发一笔"
+    },
+    "form": {
+      "title": "发送",
+      "description": "把资金从你的钱包转出。PerkOS 会替你签名并广播交易。",
+      "network": "网络",
+      "token": "代币",
+      "recipient": "收款地址",
+      "recipientInvalid": "请输入有效的 0x… 地址。",
+      "recipientSelf": "提醒一下,这是你自己的钱包地址。",
+      "amount": "金额({{token}})",
+      "amountInvalid": "请输入大于 0 的金额。",
+      "transferFailed": "转账失败。",
+      "sending": "发送中…",
+      "send": "发送"
+    }
   }
 }

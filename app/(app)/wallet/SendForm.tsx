@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import {
   Send,
   Check,
@@ -51,6 +52,7 @@ function shortHash(h: string): string {
 }
 
 export function SendForm({ address }: { address: string }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const [chain, setChain] = useState<Chain>("base");
@@ -98,11 +100,14 @@ export function SendForm({ address }: { address: string }) {
       <Card className="border-primary/30">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
-            <Check className="h-4 w-4 text-primary" /> Sent
+            <Check className="h-4 w-4 text-primary" /> {t("walletSend.success.title")}
           </CardTitle>
           <CardDescription>
-            {r.amount} {r.token === "PERKOS" ? "$PERKOS" : r.token} sent on{" "}
-            {chainLabel(r.chain)}.
+            {t("walletSend.success.description", {
+              amount: r.amount,
+              token: r.token === "PERKOS" ? "$PERKOS" : r.token,
+              chain: chainLabel(r.chain),
+            })}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3 pt-0">
@@ -116,11 +121,11 @@ export function SendForm({ address }: { address: string }) {
               {shortHash(r.hash)}
             </span>
             <span className="flex items-center gap-1 text-xs text-primary">
-              View <ExternalLink className="h-3.5 w-3.5" />
+              {t("walletSend.success.view")} <ExternalLink className="h-3.5 w-3.5" />
             </span>
           </a>
           <Button variant="outline" size="sm" className="self-start" onClick={reset}>
-            Send another
+            {t("walletSend.success.sendAnother")}
           </Button>
         </CardContent>
       </Card>
@@ -132,17 +137,17 @@ export function SendForm({ address }: { address: string }) {
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          <ArrowUpRight className="h-4 w-4" /> Send
+          <ArrowUpRight className="h-4 w-4" /> {t("walletSend.form.title")}
         </CardTitle>
         <CardDescription>
-          Move funds out of your wallet. PerkOS signs and broadcasts for you.
+          {t("walletSend.form.description")}
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-0">
         <form onSubmit={submit} className="flex flex-col gap-4">
           {/* Chain */}
           <div className="flex flex-col gap-1.5">
-            <Label className="text-xs text-muted-foreground">Network</Label>
+            <Label className="text-xs text-muted-foreground">{t("walletSend.form.network")}</Label>
             <div className="flex gap-2">
               {CHAINS.map((c) => (
                 <Button
@@ -160,7 +165,7 @@ export function SendForm({ address }: { address: string }) {
 
           {/* Token */}
           <div className="flex flex-col gap-1.5">
-            <Label className="text-xs text-muted-foreground">Token</Label>
+            <Label className="text-xs text-muted-foreground">{t("walletSend.form.token")}</Label>
             <div className="flex flex-wrap gap-2">
               {tokenOptions(chain).map((t) => (
                 <Button
@@ -179,7 +184,7 @@ export function SendForm({ address }: { address: string }) {
           {/* Recipient */}
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="to" className="text-xs text-muted-foreground">
-              Recipient address
+              {t("walletSend.form.recipient")}
             </Label>
             <Input
               id="to"
@@ -193,11 +198,11 @@ export function SendForm({ address }: { address: string }) {
             />
             {toTrimmed !== "" && !toValid ? (
               <p className="text-xs text-destructive">
-                Enter a valid 0x… address.
+                {t("walletSend.form.recipientInvalid")}
               </p>
             ) : sendingToSelf ? (
               <p className="text-xs text-muted-foreground">
-                Heads up — this is your own wallet address.
+                {t("walletSend.form.recipientSelf")}
               </p>
             ) : null}
           </div>
@@ -205,7 +210,7 @@ export function SendForm({ address }: { address: string }) {
           {/* Amount */}
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="amount" className="text-xs text-muted-foreground">
-              Amount ({tokenLabel})
+              {t("walletSend.form.amount", { token: tokenLabel })}
             </Label>
             <Input
               id="amount"
@@ -218,7 +223,7 @@ export function SendForm({ address }: { address: string }) {
             />
             {amountTrimmed !== "" && !amountValid ? (
               <p className="text-xs text-destructive">
-                Enter an amount greater than 0.
+                {t("walletSend.form.amountInvalid")}
               </p>
             ) : null}
           </div>
@@ -228,7 +233,7 @@ export function SendForm({ address }: { address: string }) {
               <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
               {mutation.error instanceof Error
                 ? mutation.error.message
-                : "Transfer failed."}
+                : t("walletSend.form.transferFailed")}
             </p>
           ) : null}
 
@@ -238,7 +243,7 @@ export function SendForm({ address }: { address: string }) {
             ) : (
               <Send className="h-4 w-4" />
             )}
-            {mutation.isPending ? "Sending…" : "Send"}
+            {mutation.isPending ? t("walletSend.form.sending") : t("walletSend.form.send")}
           </Button>
         </form>
       </CardContent>

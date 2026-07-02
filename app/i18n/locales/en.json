@@ -1076,5 +1076,193 @@
       "connectWallet": "Connect a wallet before launching an agent.",
       "pickRuntime": "Pick a runtime."
     }
+  },
+  "agentDetail": {
+    "backLink": "Back to Agent team",
+    "notFound": "Agent not found in your team.",
+    "whatHappensNext": "What happens next",
+    "header": {
+      "stop": "Stop",
+      "refresh": "Refresh",
+      "edit": "Edit",
+      "alreadyStopped": "{{name}} was already stopped.",
+      "stopping": "{{name}} stopping — it'll wake automatically on your next message.",
+      "stopError": "Couldn't stop agent"
+    },
+    "status": {
+      "syncing": "Syncing…",
+      "hibernated": "Hibernated",
+      "hibernating": "Hibernating…",
+      "waking": "Waking…",
+      "online": "Online",
+      "failed": "Failed",
+      "provisioning": "Provisioning",
+      "unknown": "Unknown"
+    },
+    "activity": {
+      "title": "Recent activity"
+    },
+    "metadata": {
+      "title": "Runtime metadata",
+      "agentId": "Agent ID",
+      "ownerWallet": "Owner wallet",
+      "created": "Created",
+      "lastActive": "Last active",
+      "connectedNow": "· connected now",
+      "neverConnected": "Never connected",
+      "endpoint": "Endpoint",
+      "notProvisioned": "Not provisioned yet",
+      "runtimeVersion": "Runtime version",
+      "modelKey": "Model key",
+      "byok": "User-provided (BYOK)",
+      "perkosManaged": "PerkOS managed"
+    },
+    "capabilities": {
+      "title": "Capabilities",
+      "description": "Plugins this agent can call on while running tasks.",
+      "empty": "No plugins configured yet. Use Edit to add some."
+    },
+    "channels": {
+      "title": "Connected channels",
+      "description": "Where users can reach this agent in addition to inside PerkOS.",
+      "none": "None configured. {{runtime}} agents can be wired to channels like Telegram, Discord, Slack, or WhatsApp."
+    },
+    "tasks": {
+      "title": "Tasks assigned to {{name}}",
+      "description": "Across all your projects. Click a task to see its detail.",
+      "empty": "No tasks assigned to this agent yet."
+    },
+    "lifecycle": {
+      "title": "Lifecycle",
+      "description": "Remove this agent from your team.",
+      "delete": "Delete",
+      "connectWallet": "Connect a wallet.",
+      "deletedTitle": "Agent deleted",
+      "deletedWithWarnings": "{{name}} was removed. Some cleanup tasks reported warnings (see console).",
+      "deleted": "{{name}} was removed from your team.",
+      "deleteError": "Couldn't delete agent",
+      "confirmTitle": "Delete {{name}}?",
+      "confirmDescription": "Tears down the running container, revokes its LLM key, and clears its records. Billing stops immediately. Conversations and tasks it was assigned to keep their history but lose this assignment. This can't be undone.",
+      "confirmLabel": "Delete agent"
+    }
+  },
+  "companyNew": {
+    "gallery": {
+      "title": "New project",
+      "intro": "Start from a business template, pick your own team of roles, or create an empty project. Your team drafts and suggests — nothing happens without your OK. Prefer a single agent? ",
+      "introLink": "Create one here",
+      "introAfter": ".",
+      "customCard": {
+        "title": "Custom team",
+        "kicker": "Build your own",
+        "blurb": "Define the project and pick exactly the roles it needs — PM, researcher, marketer, builder… you choose who leads.",
+        "cta": "Pick your roles"
+      },
+      "emptyCard": {
+        "title": "Empty project",
+        "kicker": "Start light",
+        "blurb": "Just the project — assign existing agents or add a team later.",
+        "cta": "Create empty project"
+      },
+      "myTemplates": "My templates",
+      "myTemplateKicker": "My template",
+      "myTemplateBlurb": "Your saved team — tweak the roles and launch it on a new project.",
+      "deleteTemplateAria": "Delete template {{name}}",
+      "deleteTemplateTitle": "Delete this template",
+      "deleteTemplateConfirm": "Delete the template \"{{name}}\"?",
+      "deleteTemplateError": "Couldn't delete the template",
+      "businessTemplates": "PerkOS business templates"
+    },
+    "config": {
+      "back": "Pick a different starting point",
+      "customTeamTitle": "Custom team",
+      "emptyProjectTitle": "Empty project",
+      "myTeamSubtitle": "Your saved team — tweak it and launch.",
+      "customTeamSubtitle": "Pick the roles your project needs and choose who leads.",
+      "emptyProjectSubtitle": "Just the project — add agents any time later.",
+      "teamHeading_one": "Your team ({{count}} teammate)",
+      "teamHeading_other": "Your team ({{count}} teammates)",
+      "teamHintTemplate": "Recommended for this business — remove what you don't need, add more roles below, and pick who leads.",
+      "teamHintCustom": "Add or remove roles and pick who leads (the team lead plans the work and coordinates the team).",
+      "leadTitle": "The team lead plans the work and coordinates the team",
+      "lead": "Lead",
+      "removeRoleAria": "Remove {{role}}",
+      "noRoles": "No roles yet — add at least one below.",
+      "addRole": "Add a role",
+      "nameLabel": "Name your project",
+      "namePlaceholder": "e.g. Two-Table Cafe NY",
+      "goalLabelTeam": "What should this team achieve?",
+      "goalLabelProject": "What should this project achieve?",
+      "goalPlaceholderDefault": "Optional — defaults to: \"{{blurb}}\"",
+      "goalPlaceholder": "e.g. Validate the concept: research the market, draft the launch plan, build a waitlist.",
+      "goalHint": "Your team lead uses this goal to plan the board and brief the team.",
+      "sourceHeading": "Who runs these agents?",
+      "sourcePerkos": "PerkOS agents",
+      "sourcePerkosDesc": "We launch and host the team for you — online in minutes.",
+      "sourceInvite": "Invite my own agents",
+      "sourceInviteDesc": "Register each role and connect agents you already run, via an onboarding prompt. No infra launched.",
+      "llmHeading": "Where does the AI run?",
+      "llmPerkos": "PerkOS LLM",
+      "llmPerkosDesc": "Runs on PerkOS infrastructure — no API key needed.",
+      "llmByok": "Bring your own model",
+      "llmByokDesc": "Use your own OpenAI-compatible key. Deployed on PerkOS infra.",
+      "modelPlaceholder": "model id",
+      "keyPlaceholder": "sk-… (your API key — stored encrypted, never in the job)",
+      "saveTemplateLabel": "Save this team as one of my templates",
+      "saveTemplatePlaceholder": "{{name}} team",
+      "saveTemplatePlaceholderFallback": "My",
+      "saveTemplateHint": "You changed the recommended team — save it to reuse on the next project.",
+      "launching": "Launching…",
+      "createProject": "Create project",
+      "inviteButton_one": "Create + invite {{count}} teammate",
+      "inviteButton_other": "Create + invite {{count}} teammates",
+      "startTeam": "Start your team ({{count}})",
+      "dontClose": "Don't close this tab until it finishes."
+    },
+    "launch": {
+      "pickRole": "Pick at least one role for your team.",
+      "enterKey": "Enter your model API key (or switch to PerkOS LLM).",
+      "resolvingImages": "Resolving runtime images…",
+      "noRuntimeImage": "No active {{runtime}} runtime image is published — an admin needs to set one before launching.",
+      "creatingProject": "Creating project…",
+      "projectNoId": "Project was created without an id.",
+      "registering": "Registering {{role}} ({{current}}/{{total}})…",
+      "launchingRole": "Launching {{role}} ({{current}}/{{total}})…",
+      "assigningTeam": "Assigning the team…",
+      "savingTemplate": "Saving your template…",
+      "defaultTemplateName": "{{name}} team",
+      "templateSaveFailed": "Team launched, but the template couldn't be saved.",
+      "projectCreated": "Project created",
+      "invitesRegistered_one": "Project created — {{count}} agent invite registered",
+      "invitesRegistered_other": "Project created — {{count}} agent invites registered",
+      "teamLaunched": "{{name}} launched",
+      "yourTeamFallback": "Your team",
+      "descNoAgents": "Add agents to it any time from the Agents tab.",
+      "descInvite": "Open each agent to copy its onboarding prompt and connect your own runtime.",
+      "descPerkos": "Your team is booting — they'll come online in a few minutes.",
+      "createError": "Couldn't create the project"
+    }
+  },
+  "walletSend": {
+    "success": {
+      "title": "Sent",
+      "description": "{{amount}} {{token}} sent on {{chain}}.",
+      "view": "View",
+      "sendAnother": "Send another"
+    },
+    "form": {
+      "title": "Send",
+      "description": "Move funds out of your wallet. PerkOS signs and broadcasts for you.",
+      "network": "Network",
+      "token": "Token",
+      "recipient": "Recipient address",
+      "recipientInvalid": "Enter a valid 0x… address.",
+      "recipientSelf": "Heads up — this is your own wallet address.",
+      "amount": "Amount ({{token}})",
+      "amountInvalid": "Enter an amount greater than 0.",
+      "transferFailed": "Transfer failed.",
+      "sending": "Sending…",
+      "send": "Send"
+    }
   }
 }
