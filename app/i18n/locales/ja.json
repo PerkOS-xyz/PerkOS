@@ -1609,5 +1609,93 @@
       "updated": "タスクを更新しました",
       "updateFailed": "タスクを更新できませんでした"
     }
+  },
+  "chrome": {
+    "network": {
+      "switchedTo": "{{network}}に切り替えました",
+      "switchFailed": "{{network}}に切り替えられませんでした",
+      "unknownError": "不明なエラー",
+      "wrongNetwork": "ネットワークが違います",
+      "loadingToken": "{{token}}を読み込み中",
+      "tokenUnavailable": "{{token}}の残高を取得できません",
+      "usdcBalance": "${{amount}} USDC",
+      "perkosBalance": "{{amount}} PERKOS",
+      "balancesSummary": "{{network}}上：{{usdc}}、{{perkos}}",
+      "triggerAria": "ネットワークと残高：{{summary}}",
+      "loadingBalance": "{{token}}の残高を読み込み中"
+    },
+    "userMenu": {
+      "accountMenu": "アカウントメニュー",
+      "ownerWallet": "オーナーウォレット",
+      "copied": "コピーしました",
+      "copyFullAddress": "アドレス全体をコピー",
+      "disconnect": "切断",
+      "notConnected": "未接続"
+    },
+    "orgSwitcher": {
+      "switchOrganization": "組織を切り替え",
+      "organizations": "組織",
+      "organizationRenamed": "組織名を変更しました",
+      "renameFailed": "名前を変更できませんでした",
+      "save": "保存",
+      "defaultBadge": "デフォルト",
+      "renameOrg": "「{{name}}」の名前を変更",
+      "createOrganization": "組織を作成",
+      "manageOrganizations": "組織を管理"
+    },
+    "projectPicker": {
+      "pickProject": "プロジェクトを選択",
+      "projectsInOrg": "この組織のプロジェクト",
+      "noProjects": "プロジェクトはまだありません。",
+      "taskCount_one": "{{count}}件のタスク",
+      "taskCount_other": "{{count}}件のタスク",
+      "allProjects": "すべてのプロジェクト",
+      "newProject": "新規プロジェクト"
+    },
+    "notifications": {
+      "emptyHint": "タスクの完了、エージェントのステータス変更、プロジェクトでのメンションをお知らせします。",
+      "viewAll": "すべて表示",
+      "unreadAria_one": "通知（未読{{count}}件）",
+      "unreadAria_other": "通知（未読{{count}}件）"
+    },
+    "commandMenu": {
+      "title": "コマンドメニュー",
+      "description": "プロジェクト、タスク、エージェント、画面を検索して移動します。",
+      "placeholder": "コマンド、プロジェクト、エージェントを入力…",
+      "noResults": "結果が見つかりませんでした。",
+      "navigation": "ナビゲーション",
+      "createNew": "新規作成",
+      "actions": "アクション",
+      "createProject": "プロジェクトを作成",
+      "createTask": "タスクを作成",
+      "registerAgent": "エージェントを登録",
+      "createOrganization": "組織を作成",
+      "openPerkosAgent": "PerkOSエージェントを開く",
+      "disconnectWallet": "ウォレットを切断"
+    },
+    "accessGate": {
+      "privateAlpha": "プライベートアルファ",
+      "title": "アルファ版へのアクセスをリクエスト",
+      "titleSubmitted": "リクエストを受け付けました",
+      "description": "PerkOSは現在プライベートアルファの段階です。このウォレットはまだアクセス権がありません。簡単な自己紹介をお送りいただければ、こちらからご連絡します。",
+      "descriptionSubmitted": "このウォレットが承認され次第、ご入力いただいたメールアドレスにご連絡します。",
+      "yourWallet": "あなたのウォレット",
+      "onTheList": "リストに登録されました。メールをご確認ください。",
+      "emailLabel": "メールアドレス",
+      "usernameLabel": "ユーザー名",
+      "usernamePlaceholder": "お名前またはハンドル名",
+      "companyLabel": "会社名／組織名",
+      "companyPlaceholder": "Acme Inc.",
+      "websiteLabel": "ウェブサイト（任意）",
+      "requestFailed": "リクエストに失敗しました（{{status}}）",
+      "submitError": "リクエストを送信できませんでした",
+      "sending": "送信中…",
+      "requestAccessButton": "アクセスをリクエスト",
+      "useDifferentWallet": "別のウォレットを使用"
+    },
+    "mobileNav": {
+      "home": "ホーム",
+      "primaryNavigation": "メインナビゲーション"
+    }
   }
 }

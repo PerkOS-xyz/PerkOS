@@ -1609,5 +1609,93 @@
       "updated": "任务已更新",
       "updateFailed": "无法更新任务"
     }
+  },
+  "chrome": {
+    "network": {
+      "switchedTo": "已切换到 {{network}}",
+      "switchFailed": "无法切换到 {{network}}",
+      "unknownError": "未知错误",
+      "wrongNetwork": "网络错误",
+      "loadingToken": "正在加载 {{token}}",
+      "tokenUnavailable": "{{token}} 余额不可用",
+      "usdcBalance": "${{amount}} USDC",
+      "perkosBalance": "{{amount}} PERKOS",
+      "balancesSummary": "{{usdc}}、{{perkos}},位于 {{network}}",
+      "triggerAria": "网络与余额:{{summary}}",
+      "loadingBalance": "正在加载 {{token}} 余额"
+    },
+    "userMenu": {
+      "accountMenu": "账户菜单",
+      "ownerWallet": "所有者钱包",
+      "copied": "已复制",
+      "copyFullAddress": "复制完整地址",
+      "disconnect": "断开连接",
+      "notConnected": "未连接"
+    },
+    "orgSwitcher": {
+      "switchOrganization": "切换组织",
+      "organizations": "组织",
+      "organizationRenamed": "组织已重命名",
+      "renameFailed": "无法重命名",
+      "save": "保存",
+      "defaultBadge": "默认",
+      "renameOrg": "重命名“{{name}}”",
+      "createOrganization": "创建组织",
+      "manageOrganizations": "管理组织"
+    },
+    "projectPicker": {
+      "pickProject": "选择一个项目",
+      "projectsInOrg": "此组织中的项目",
+      "noProjects": "暂时还没有项目。",
+      "taskCount_one": "{{count}} 个任务",
+      "taskCount_other": "{{count}} 个任务",
+      "allProjects": "所有项目",
+      "newProject": "新建项目"
+    },
+    "notifications": {
+      "emptyHint": "任务完成、智能体状态变化以及项目提及都会显示在这里。",
+      "viewAll": "查看全部",
+      "unreadAria_one": "通知 ({{count}} 条未读)",
+      "unreadAria_other": "通知 ({{count}} 条未读)"
+    },
+    "commandMenu": {
+      "title": "命令菜单",
+      "description": "搜索并跳转到任意项目、任务、智能体或页面。",
+      "placeholder": "输入命令、项目或智能体…",
+      "noResults": "未找到结果。",
+      "navigation": "导航",
+      "createNew": "新建",
+      "actions": "操作",
+      "createProject": "创建项目",
+      "createTask": "创建任务",
+      "registerAgent": "注册智能体",
+      "createOrganization": "创建组织",
+      "openPerkosAgent": "打开 PerkOS 智能体",
+      "disconnectWallet": "断开钱包连接"
+    },
+    "accessGate": {
+      "privateAlpha": "私有内测",
+      "title": "申请内测访问权限",
+      "titleSubmitted": "申请已收到",
+      "description": "PerkOS 目前处于私有内测阶段。此钱包尚未获得访问权限。简单介绍一下你自己,我们会尽快与你联系。",
+      "descriptionSubmitted": "此钱包获得批准后,我们会通过你提供的邮箱与你联系。",
+      "yourWallet": "你的钱包",
+      "onTheList": "你已加入名单,请留意收件箱。",
+      "emailLabel": "邮箱",
+      "usernameLabel": "用户名",
+      "usernamePlaceholder": "你的姓名或昵称",
+      "companyLabel": "公司 / 组织",
+      "companyPlaceholder": "Acme Inc.",
+      "websiteLabel": "网站(可选)",
+      "requestFailed": "请求失败({{status}})",
+      "submitError": "无法提交申请",
+      "sending": "发送中…",
+      "requestAccessButton": "申请访问权限",
+      "useDifferentWallet": "使用其他钱包"
+    },
+    "mobileNav": {
+      "home": "首页",
+      "primaryNavigation": "主导航"
+    }
   }
 }

@@ -1600,5 +1600,93 @@
       "updated": "Task updated",
       "updateFailed": "Couldn't update task"
     }
+  },
+  "chrome": {
+    "network": {
+      "switchedTo": "Switched to {{network}}",
+      "switchFailed": "Couldn't switch to {{network}}",
+      "unknownError": "Unknown error",
+      "wrongNetwork": "Wrong network",
+      "loadingToken": "loading {{token}}",
+      "tokenUnavailable": "{{token}} balance unavailable",
+      "usdcBalance": "${{amount}} USDC",
+      "perkosBalance": "{{amount}} PERKOS",
+      "balancesSummary": "{{usdc}}, {{perkos}}, on {{network}}",
+      "triggerAria": "Network and balances: {{summary}}",
+      "loadingBalance": "Loading {{token}} balance"
+    },
+    "userMenu": {
+      "accountMenu": "Account menu",
+      "ownerWallet": "Owner wallet",
+      "copied": "Copied",
+      "copyFullAddress": "Copy full address",
+      "disconnect": "Disconnect",
+      "notConnected": "Not connected"
+    },
+    "orgSwitcher": {
+      "switchOrganization": "Switch organization",
+      "organizations": "Organizations",
+      "organizationRenamed": "Organization renamed",
+      "renameFailed": "Couldn't rename",
+      "save": "Save",
+      "defaultBadge": "default",
+      "renameOrg": "Rename “{{name}}”",
+      "createOrganization": "Create organization",
+      "manageOrganizations": "Manage organizations"
+    },
+    "projectPicker": {
+      "pickProject": "Pick a project",
+      "projectsInOrg": "Projects in this org",
+      "noProjects": "No projects yet.",
+      "taskCount_one": "{{count}} task",
+      "taskCount_other": "{{count}} tasks",
+      "allProjects": "All projects",
+      "newProject": "New project"
+    },
+    "notifications": {
+      "emptyHint": "Task completions, agent status changes, and project mentions will land here.",
+      "viewAll": "View all",
+      "unreadAria_one": "Notifications ({{count}} unread)",
+      "unreadAria_other": "Notifications ({{count}} unread)"
+    },
+    "commandMenu": {
+      "title": "Command menu",
+      "description": "Search and jump to any project, task, agent, or screen.",
+      "placeholder": "Type a command, project, or agent…",
+      "noResults": "No results found.",
+      "navigation": "Navigation",
+      "createNew": "Create new",
+      "actions": "Actions",
+      "createProject": "Create project",
+      "createTask": "Create task",
+      "registerAgent": "Register agent",
+      "createOrganization": "Create organization",
+      "openPerkosAgent": "Open PerkOS Agent",
+      "disconnectWallet": "Disconnect wallet"
+    },
+    "accessGate": {
+      "privateAlpha": "Private alpha",
+      "title": "Request alpha access",
+      "titleSubmitted": "Request received",
+      "description": "PerkOS is in private alpha. This wallet doesn't have access yet. Tell us a bit about you and we'll get back.",
+      "descriptionSubmitted": "We'll reach out to the email you provided once this wallet is approved.",
+      "yourWallet": "Your wallet",
+      "onTheList": "You're on the list. Watch your inbox.",
+      "emailLabel": "Email",
+      "usernameLabel": "Username",
+      "usernamePlaceholder": "Your name or handle",
+      "companyLabel": "Company / organization",
+      "companyPlaceholder": "Acme Inc.",
+      "websiteLabel": "Website (optional)",
+      "requestFailed": "Request failed ({{status}})",
+      "submitError": "Could not submit request",
+      "sending": "Sending…",
+      "requestAccessButton": "Request access",
+      "useDifferentWallet": "Use a different wallet"
+    },
+    "mobileNav": {
+      "home": "Home",
+      "primaryNavigation": "Primary navigation"
+    }
   }
 }

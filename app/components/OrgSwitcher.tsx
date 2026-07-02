@@ -13,6 +13,7 @@ import {
   Pencil,
   Plus,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +31,7 @@ import { getOrgProjects, updateOrgName } from "../lib/perkosApi";
 /** Header org chip: shows the active org, switches between orgs, renames it,
  *  and links to create / manage organizations. */
 export function OrgSwitcher() {
+  const { t } = useTranslation();
   const { address } = useConnection();
   const qc = useQueryClient();
   const {
@@ -58,13 +60,13 @@ export function OrgSwitcher() {
     onSuccess: async () => {
       await refresh();
       setRenaming(false);
-      toast.success("Organization renamed");
+      toast.success(t("chrome.orgSwitcher.organizationRenamed"));
     },
     onError: (e: Error) =>
-      toast.error("Couldn't rename", { description: e.message }),
+      toast.error(t("chrome.orgSwitcher.renameFailed"), { description: e.message }),
   });
 
-  const label = loading ? "…" : activeOrg?.name ?? "Organization";
+  const label = loading ? "…" : activeOrg?.name ?? t("nav.organization");
 
   return (
     <Popover open={open} onOpenChange={(o) => { setOpen(o); if (!o) setRenaming(false); }}>
@@ -73,7 +75,7 @@ export function OrgSwitcher() {
           <Button
             variant="ghost"
             size="sm"
-            aria-label="Switch organization"
+            aria-label={t("chrome.orgSwitcher.switchOrganization")}
             className="min-w-0 max-w-[140px] gap-2 px-2 hover:bg-muted/40 lg:max-w-[180px]"
           />
         }
@@ -84,7 +86,7 @@ export function OrgSwitcher() {
       </PopoverTrigger>
       <PopoverContent align="start" className="w-72 max-w-[calc(100vw-2rem)] border-border bg-card p-2">
         <p className="px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-          Organizations
+          {t("chrome.orgSwitcher.organizations")}
         </p>
 
         {renaming ? (
@@ -107,7 +109,7 @@ export function OrgSwitcher() {
               size="xs"
               disabled={renameMut.isPending || !name.trim()}
             >
-              Save
+              {t("chrome.orgSwitcher.save")}
             </Button>
           </form>
         ) : (
@@ -126,7 +128,7 @@ export function OrgSwitcher() {
                   <span className="truncate">{o.name}</span>
                   {o.isDefault ? (
                     <span className="rounded border border-border px-1 text-[9px] uppercase text-muted-foreground">
-                      default
+                      {t("chrome.orgSwitcher.defaultBadge")}
                     </span>
                   ) : null}
                   {o.id === activeOrgId ? (
@@ -147,7 +149,7 @@ export function OrgSwitcher() {
             className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm text-foreground hover:bg-muted/40"
           >
             <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-            Rename “{activeOrg?.name}”
+            {t("chrome.orgSwitcher.renameOrg", { name: activeOrg?.name })}
           </button>
         ) : null}
 
@@ -157,7 +159,7 @@ export function OrgSwitcher() {
           className="flex items-center gap-2 rounded-md px-2 py-2 text-sm text-foreground hover:bg-muted/40"
         >
           <Plus className="h-3.5 w-3.5 text-muted-foreground" />
-          Create organization
+          {t("chrome.orgSwitcher.createOrganization")}
         </Link>
         <Link
           href="/organizations"
@@ -165,7 +167,7 @@ export function OrgSwitcher() {
           className="flex items-center gap-2 rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-muted/40"
         >
           <Building2 className="h-3.5 w-3.5" />
-          Manage organizations
+          {t("chrome.orgSwitcher.manageOrganizations")}
         </Link>
       </PopoverContent>
     </Popover>
@@ -175,6 +177,7 @@ export function OrgSwitcher() {
 /** Header project picker: lists the projects in the ACTIVE org and jumps to
  *  the one you want to work on. */
 export function ProjectPicker() {
+  const { t } = useTranslation();
   const { address } = useConnection();
   const router = useRouter();
   const { activeOrg, activeOrgId, defaultOrgId } = useActiveOrg();
@@ -199,22 +202,24 @@ export function ProjectPicker() {
           <Button
             variant="ghost"
             size="sm"
-            aria-label="Pick a project"
+            aria-label={t("chrome.projectPicker.pickProject")}
             className="min-w-0 max-w-[140px] gap-2 px-2 hover:bg-muted/40 lg:max-w-[180px]"
           />
         }
       >
         <FolderKanban className="h-4 w-4 shrink-0 text-muted-foreground" />
-        <span className="truncate text-sm text-foreground">Projects</span>
+        <span className="truncate text-sm text-foreground">{t("nav.projects")}</span>
         <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
       </PopoverTrigger>
       <PopoverContent align="start" className="w-72 max-w-[calc(100vw-2rem)] border-border bg-card p-2">
         <p className="px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-          Projects in this org
+          {t("chrome.projectPicker.projectsInOrg")}
         </p>
         {projects.length === 0 ? (
           <p className="px-2 py-2 text-xs text-muted-foreground">
-            {projectsQuery.isLoading ? "Loading…" : "No projects yet."}
+            {projectsQuery.isLoading
+              ? t("common.loading")
+              : t("chrome.projectPicker.noProjects")}
           </p>
         ) : (
           <ul className="flex max-h-72 flex-col gap-0.5 overflow-y-auto">
@@ -235,7 +240,7 @@ export function ProjectPicker() {
                   <FolderKanban className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                   <span className="truncate">{p.name}</span>
                   <span className="ml-auto shrink-0 text-[10px] text-muted-foreground">
-                    {p.tasks} {p.tasks === 1 ? "task" : "tasks"}
+                    {t("chrome.projectPicker.taskCount", { count: p.tasks })}
                   </span>
                 </button>
               </li>
@@ -249,7 +254,7 @@ export function ProjectPicker() {
           className="flex items-center gap-2 rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-muted/40"
         >
           <FolderKanban className="h-3.5 w-3.5" />
-          All projects
+          {t("chrome.projectPicker.allProjects")}
         </Link>
         <Link
           href="/projects/new"
@@ -257,7 +262,7 @@ export function ProjectPicker() {
           className="flex items-center gap-2 rounded-md px-2 py-2 text-sm text-foreground hover:bg-muted/40"
         >
           <Plus className="h-3.5 w-3.5 text-muted-foreground" />
-          New project
+          {t("chrome.projectPicker.newProject")}
         </Link>
       </PopoverContent>
     </Popover>

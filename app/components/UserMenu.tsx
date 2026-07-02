@@ -11,6 +11,7 @@ import {
   Settings,
   Wallet,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +23,7 @@ import { Separator } from "@/components/ui/separator";
 import { formatAddress } from "../lib/format";
 
 export function UserMenu() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { address } = useConnection();
   const { disconnect } = useDisconnect();
@@ -53,7 +55,7 @@ export function UserMenu() {
           <Button
             variant="ghost"
             size="sm"
-            aria-label="Account menu"
+            aria-label={t("chrome.userMenu.accountMenu")}
             className="gap-2 px-2 hover:bg-muted/40"
           />
         }
@@ -78,7 +80,7 @@ export function UserMenu() {
               {formatAddress(address)}
             </span>
             <span className="text-[10px] text-muted-foreground">
-              Owner wallet
+              {t("chrome.userMenu.ownerWallet")}
             </span>
           </div>
         </div>
@@ -93,12 +95,12 @@ export function UserMenu() {
           {copied ? (
             <>
               <Check className="h-3.5 w-3.5 text-primary" />
-              Copied
+              {t("chrome.userMenu.copied")}
             </>
           ) : (
             <>
               <Copy className="h-3.5 w-3.5 text-muted-foreground" />
-              Copy full address
+              {t("chrome.userMenu.copyFullAddress")}
             </>
           )}
         </button>
@@ -109,7 +111,7 @@ export function UserMenu() {
           className="flex items-center gap-2 rounded-md px-2 py-2 text-sm text-foreground hover:bg-muted/40"
         >
           <Settings className="h-3.5 w-3.5 text-muted-foreground" />
-          Settings
+          {t("nav.settings")}
         </Link>
 
         <Separator className="my-1 bg-border" />
@@ -120,7 +122,7 @@ export function UserMenu() {
           className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm text-destructive hover:bg-destructive/10"
         >
           <LogOut className="h-3.5 w-3.5" />
-          Disconnect
+          {t("chrome.userMenu.disconnect")}
         </button>
       </PopoverContent>
     </Popover>
@@ -128,10 +130,11 @@ export function UserMenu() {
 }
 
 export function UserMenuFallback() {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-2 text-xs text-muted-foreground">
       <Wallet className="h-3.5 w-3.5" />
-      Not connected
+      {t("chrome.userMenu.notConnected")}
     </div>
   );
 }

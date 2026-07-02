@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useMemo, useState, type FormEvent } from "react";
 import { useDisconnect } from "wagmi";
 import { CheckCircle2, Loader2, ShieldAlert, LogOut } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { emailSchema } from "../lib/validators";
 
@@ -25,6 +26,7 @@ type Props = {
 };
 
 export function AccessGate({ address }: Props) {
+  const { t } = useTranslation();
   const { disconnect } = useDisconnect();
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
@@ -67,11 +69,16 @@ export function AccessGate({ address }: Props) {
         const payload = (await res.json().catch(() => ({}))) as {
           error?: string;
         };
-        throw new Error(payload.error || `Request failed (${res.status})`);
+        throw new Error(
+          payload.error ||
+            t("chrome.accessGate.requestFailed", { status: res.status }),
+        );
       }
       setSubmitted(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not submit request");
+      setError(
+        err instanceof Error ? err.message : t("chrome.accessGate.submitError"),
+      );
     } finally {
       setSubmitting(false);
     }
@@ -101,23 +108,25 @@ export function AccessGate({ address }: Props) {
             variant="secondary"
             className="border-primary/30 bg-primary/10 text-[10px] uppercase tracking-wider text-primary"
           >
-            Private alpha
+            {t("chrome.accessGate.privateAlpha")}
           </Badge>
           <CardTitle className="flex items-center gap-2 pt-2 text-lg">
             <ShieldAlert className="h-4 w-4 text-primary" />
-            {submitted ? "Request received" : "Request alpha access"}
+            {submitted
+              ? t("chrome.accessGate.titleSubmitted")
+              : t("chrome.accessGate.title")}
           </CardTitle>
           <CardDescription className="text-center">
             {submitted
-              ? "We'll reach out to the email you provided once this wallet is approved."
-              : "PerkOS is in private alpha. This wallet doesn't have access yet. Tell us a bit about you and we'll get back."}
+              ? t("chrome.accessGate.descriptionSubmitted")
+              : t("chrome.accessGate.description")}
           </CardDescription>
         </CardHeader>
 
         <CardContent className="flex flex-col gap-4">
           <div className="flex items-center justify-between rounded-md border border-border bg-background px-3 py-2 text-xs">
             <span className="uppercase tracking-wider text-muted-foreground">
-              Your wallet
+              {t("chrome.accessGate.yourWallet")}
             </span>
             <span className="font-mono text-foreground" title={address}>
               {formatAddress(address)}
@@ -127,12 +136,14 @@ export function AccessGate({ address }: Props) {
           {submitted ? (
             <div className="flex flex-col items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 p-4 text-center text-sm text-emerald-200">
               <CheckCircle2 className="h-5 w-5 text-emerald-300" />
-              You&apos;re on the list. Watch your inbox.
+              {t("chrome.accessGate.onTheList")}
             </div>
           ) : (
             <form onSubmit={onSubmit} noValidate className="flex flex-col gap-3">
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="access-email">Email</Label>
+                <Label htmlFor="access-email">
+                  {t("chrome.accessGate.emailLabel")}
+                </Label>
                 <Input
                   id="access-email"
                   type="email"
@@ -154,25 +165,31 @@ export function AccessGate({ address }: Props) {
                 ) : null}
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="access-username">Username</Label>
+                <Label htmlFor="access-username">
+                  {t("chrome.accessGate.usernameLabel")}
+                </Label>
                 <Input
                   id="access-username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Your name or handle"
+                  placeholder={t("chrome.accessGate.usernamePlaceholder")}
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="access-company">Company / organization</Label>
+                <Label htmlFor="access-company">
+                  {t("chrome.accessGate.companyLabel")}
+                </Label>
                 <Input
                   id="access-company"
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
-                  placeholder="Acme Inc."
+                  placeholder={t("chrome.accessGate.companyPlaceholder")}
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="access-website">Website (optional)</Label>
+                <Label htmlFor="access-website">
+                  {t("chrome.accessGate.websiteLabel")}
+                </Label>
                 <Input
                   id="access-website"
                   type="url"
@@ -196,7 +213,9 @@ export function AccessGate({ address }: Props) {
                 {submitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : null}
-                {submitting ? "Sending…" : "Request access"}
+                {submitting
+                  ? t("chrome.accessGate.sending")
+                  : t("chrome.accessGate.requestAccessButton")}
               </Button>
             </form>
           )}
@@ -208,7 +227,7 @@ export function AccessGate({ address }: Props) {
             className="mt-1 justify-center gap-2 text-muted-foreground hover:text-foreground"
           >
             <LogOut className="h-3.5 w-3.5" />
-            Use a different wallet
+            {t("chrome.accessGate.useDifferentWallet")}
           </Button>
         </CardContent>
       </Card>

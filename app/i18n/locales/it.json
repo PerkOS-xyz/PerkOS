@@ -1609,5 +1609,93 @@
       "updated": "Attività aggiornata",
       "updateFailed": "Impossibile aggiornare l'attività"
     }
+  },
+  "chrome": {
+    "network": {
+      "switchedTo": "Passato a {{network}}",
+      "switchFailed": "Impossibile passare a {{network}}",
+      "unknownError": "Errore sconosciuto",
+      "wrongNetwork": "Rete errata",
+      "loadingToken": "caricamento di {{token}}",
+      "tokenUnavailable": "saldo {{token}} non disponibile",
+      "usdcBalance": "${{amount}} USDC",
+      "perkosBalance": "{{amount}} PERKOS",
+      "balancesSummary": "{{usdc}}, {{perkos}}, su {{network}}",
+      "triggerAria": "Rete e saldi: {{summary}}",
+      "loadingBalance": "Caricamento del saldo {{token}}"
+    },
+    "userMenu": {
+      "accountMenu": "Menu account",
+      "ownerWallet": "Portafoglio proprietario",
+      "copied": "Copiato",
+      "copyFullAddress": "Copia indirizzo completo",
+      "disconnect": "Disconnetti",
+      "notConnected": "Non connesso"
+    },
+    "orgSwitcher": {
+      "switchOrganization": "Cambia organizzazione",
+      "organizations": "Organizzazioni",
+      "organizationRenamed": "Organizzazione rinominata",
+      "renameFailed": "Impossibile rinominare",
+      "save": "Salva",
+      "defaultBadge": "predefinita",
+      "renameOrg": "Rinomina “{{name}}”",
+      "createOrganization": "Crea organizzazione",
+      "manageOrganizations": "Gestisci organizzazioni"
+    },
+    "projectPicker": {
+      "pickProject": "Scegli un progetto",
+      "projectsInOrg": "Progetti in questa organizzazione",
+      "noProjects": "Ancora nessun progetto.",
+      "taskCount_one": "{{count}} attività",
+      "taskCount_other": "{{count}} attività",
+      "allProjects": "Tutti i progetti",
+      "newProject": "Nuovo progetto"
+    },
+    "notifications": {
+      "emptyHint": "Le attività completate, i cambi di stato degli agenti e le menzioni nei progetti compariranno qui.",
+      "viewAll": "Vedi tutte",
+      "unreadAria_one": "Notifiche ({{count}} non letta)",
+      "unreadAria_other": "Notifiche ({{count}} non lette)"
+    },
+    "commandMenu": {
+      "title": "Menu comandi",
+      "description": "Cerca e vai direttamente a qualsiasi progetto, attività, agente o schermata.",
+      "placeholder": "Digita un comando, un progetto o un agente…",
+      "noResults": "Nessun risultato trovato.",
+      "navigation": "Navigazione",
+      "createNew": "Crea nuovo",
+      "actions": "Azioni",
+      "createProject": "Crea progetto",
+      "createTask": "Crea attività",
+      "registerAgent": "Registra agente",
+      "createOrganization": "Crea organizzazione",
+      "openPerkosAgent": "Apri l'agente PerkOS",
+      "disconnectWallet": "Disconnetti portafoglio"
+    },
+    "accessGate": {
+      "privateAlpha": "Alfa privata",
+      "title": "Richiedi accesso all'alfa",
+      "titleSubmitted": "Richiesta ricevuta",
+      "description": "PerkOS è in alfa privata. Questo portafoglio non ha ancora accesso. Raccontaci qualcosa di te e ti risponderemo.",
+      "descriptionSubmitted": "Ti contatteremo all'indirizzo email che hai fornito non appena questo portafoglio sarà approvato.",
+      "yourWallet": "Il tuo portafoglio",
+      "onTheList": "Sei in lista. Controlla la tua posta in arrivo.",
+      "emailLabel": "Email",
+      "usernameLabel": "Nome utente",
+      "usernamePlaceholder": "Il tuo nome o handle",
+      "companyLabel": "Azienda / organizzazione",
+      "companyPlaceholder": "Acme Inc.",
+      "websiteLabel": "Sito web (opzionale)",
+      "requestFailed": "Richiesta non riuscita ({{status}})",
+      "submitError": "Impossibile inviare la richiesta",
+      "sending": "Invio…",
+      "requestAccessButton": "Richiedi accesso",
+      "useDifferentWallet": "Usa un altro portafoglio"
+    },
+    "mobileNav": {
+      "home": "Home",
+      "primaryNavigation": "Navigazione principale"
+    }
   }
 }
