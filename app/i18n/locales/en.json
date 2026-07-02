@@ -426,5 +426,297 @@
       "toastSuccessDesc": "Welcome to PerkOS — 3 demo tasks added.",
       "toastErrorTitle": "Couldn't create starter project"
     }
+  },
+  "projects": {
+    "header": {
+      "title": "Projects",
+      "countInWorkspace_one": "{{count}} project in your workspace.",
+      "countInWorkspace_other": "{{count}} projects in your workspace.",
+      "createFirst": "Create your first project.",
+      "newProject": "New project"
+    },
+    "search": {
+      "placeholder": "Search projects by name, goal, or status…",
+      "noResults": "No projects match \"{{query}}\"."
+    },
+    "filter": {
+      "clearStatusAria": "Clear status filter",
+      "statusPill": "status: {{status}}"
+    },
+    "bulk": {
+      "selectAllAria": "Select all projects",
+      "selectAll": "Select all",
+      "selectedCount": "{{count}} selected",
+      "archive": "Archive",
+      "unarchive": "Unarchive",
+      "delete": "Delete",
+      "clear": "Clear"
+    },
+    "card": {
+      "selectAria": "Select {{name}}",
+      "agentCount_one": "{{count}} agent",
+      "agentCount_other": "{{count}} agents",
+      "taskCount_one": "{{count}} task",
+      "taskCount_other": "{{count}} tasks",
+      "active": "active {{time}}"
+    },
+    "empty": {
+      "title": "No projects yet",
+      "description": "Projects group your agents, tasks, and chats around a goal. Start by creating one.",
+      "action": "Create project"
+    },
+    "confirmDelete": {
+      "title_one": "Delete {{count}} project?",
+      "title_other": "Delete {{count}} projects?",
+      "description": "This permanently deletes the selected projects and removes them from your workspace. This can't be undone.",
+      "confirmLabel": "Delete"
+    },
+    "toast": {
+      "archivedSomeFailed": "Archived {{ok}}, {{failed}} failed",
+      "archivedSuccess_one": "Archived {{count}} project",
+      "archivedSuccess_other": "Archived {{count}} projects",
+      "unarchivedSomeFailed": "Unarchived {{ok}}, {{failed}} failed",
+      "unarchivedSuccess_one": "Unarchived {{count}} project",
+      "unarchivedSuccess_other": "Unarchived {{count}} projects",
+      "bulkUpdateFailed": "Bulk update failed",
+      "deletedSomeFailed": "Deleted {{ok}}, {{failed}} failed",
+      "deletedSuccess_one": "Deleted {{count}} project",
+      "deletedSuccess_other": "Deleted {{count}} projects",
+      "bulkDeleteFailed": "Bulk delete failed"
+    }
+  },
+  "agents": {
+    "header": {
+      "title": "Agent team",
+      "subtitle": "Connect your agents, assign them to projects, and put them to work.",
+      "addAgent": "Add agent"
+    },
+    "search": {
+      "placeholder": "Search agents by name, runtime, or capability…",
+      "noResults": "No agents match \"{{query}}\"."
+    },
+    "bulk": {
+      "selectAllAria": "Select all agents",
+      "selectAll": "Select all",
+      "selectedCount": "{{count}} selected",
+      "assignToProject": "Assign to project",
+      "hibernate": "Hibernate",
+      "wake": "Wake",
+      "delete": "Delete",
+      "clear": "Clear"
+    },
+    "confirmDelete": {
+      "title_one": "Delete {{count}} agent?",
+      "title_other": "Delete {{count}} agents?",
+      "description": "Tears down each running container, revokes its LLM key, and clears its records (including the relay registry). Billing stops immediately. This can't be undone.",
+      "confirmLabel": "Delete"
+    },
+    "toast": {
+      "deletedSomeFailed": "Deleted {{ok}}, {{failed}} failed",
+      "deletedSuccess_one": "Deleted {{count}} agent",
+      "deletedSuccess_other": "Deleted {{count}} agents",
+      "bulkDeleteFailed": "Bulk delete failed",
+      "hibernatedSomeFailed": "Hibernated {{ok}}, {{failed}} failed",
+      "hibernatedSomeFailedDesc": "Agents not deployed on PerkOS infra can't hibernate.",
+      "hibernatedSuccess_one": "Hibernated {{count}} agent",
+      "hibernatedSuccess_other": "Hibernated {{count}} agents",
+      "bulkHibernateFailed": "Bulk hibernate failed",
+      "wokeSomeFailed": "Woke {{ok}}, {{failed}} failed",
+      "wokeSomeFailedDesc": "Agents not deployed on PerkOS infra can't wake.",
+      "wokeSuccess_one": "Woke {{count}} agent",
+      "wokeSuccess_other": "Woke {{count}} agents",
+      "bulkWakeFailed": "Bulk wake failed"
+    },
+    "assignDialog": {
+      "title": "Assign to project",
+      "description_one": "Add {{count}} selected agent to a project's roster.",
+      "description_other": "Add {{count}} selected agents to a project's roster.",
+      "projectLabel": "Project",
+      "selectPlaceholder": "Select a project…",
+      "cancel": "Cancel",
+      "assign": "Assign",
+      "assigning": "Assigning…",
+      "projectFallback": "project",
+      "assignedSuccess_one": "Assigned {{count}} agent to {{name}}",
+      "assignedSuccess_other": "Assigned {{count}} agents to {{name}}",
+      "alreadyOn": "Already on {{name}} — nothing to add",
+      "assignFailed": "Assign failed"
+    },
+    "card": {
+      "selectAria": "Select {{name}}",
+      "externalTitle": "Runs on your own infra (invited / self-hosted) — PerkOS can't hibernate it",
+      "external": "External",
+      "capabilities": "Capabilities: {{list}}",
+      "noCapabilities": "No capabilities configured yet.",
+      "projects": "Projects: {{count}}",
+      "active": "Active {{time}}",
+      "created": "Created {{time}}",
+      "capabilitiesCount": "Capabilities: {{count}}"
+    },
+    "power": {
+      "waking": "Waking {{name}}…",
+      "wakingDesc": "Boots + connects in ~2–3 min.",
+      "hibernating": "Hibernating {{name}}…",
+      "hibernatingDesc": "Scaling down to save cost.",
+      "error": "Couldn't change power state",
+      "wakeAria": "Wake {{name}}",
+      "hibernateAria": "Hibernate {{name}}",
+      "working": "Working…",
+      "wakeTitle": "Wake agent",
+      "hibernateTitle": "Hibernate agent"
+    },
+    "status": {
+      "revoked": "Revoked",
+      "neverConnected": "Never connected",
+      "invited": "Invited",
+      "syncing": "Syncing…",
+      "hibernated": "Hibernated",
+      "hibernating": "Hibernating…",
+      "waking": "Waking…",
+      "online": "Online",
+      "failed": "Failed",
+      "provisioning": "Provisioning",
+      "unknown": "Unknown"
+    },
+    "empty": {
+      "title": "No agents yet",
+      "description": "Add an agent — create a Hermes or OpenClaw agent on PerkOS, run one on your own VPS, or invite an agent you already run elsewhere into your org.",
+      "action": "Add agent"
+    }
+  },
+  "tasks": {
+    "header": {
+      "title": "Tasks",
+      "subtitle": "Everything in flight across your projects.",
+      "createTask": "Create task"
+    },
+    "search": {
+      "placeholder": "Search tasks by name, agent, project, or status…",
+      "noResults": "No tasks match \"{{query}}\"."
+    },
+    "filter": {
+      "statusPill": "status: {{status}}",
+      "inProgress": "in progress",
+      "projectPill": "project: {{project}}",
+      "clearAria": "Clear {{label}}"
+    },
+    "emptyProjects": {
+      "title": "No projects yet",
+      "description": "Tasks live inside projects. Create one first.",
+      "action": "Create project"
+    },
+    "empty": {
+      "title": "No tasks yet",
+      "description": "Add tasks to a project and route them to your agents.",
+      "action": "Create task"
+    },
+    "bulk": {
+      "selectedCount": "{{count}} selected",
+      "moveTo": "Move to:",
+      "toDo": "To do",
+      "inProgress": "In progress",
+      "done": "Done",
+      "delete": "Delete",
+      "clear": "Clear"
+    },
+    "card": {
+      "selectAria": "Select {{name}}",
+      "agent": "Agent: {{agent}}"
+    },
+    "dragHint": "Drag-and-drop is local for now. Backend sync coming with the next release.",
+    "projectFilter": {
+      "aria": "Filter tasks by project",
+      "all": "All projects"
+    },
+    "confirmDelete": {
+      "title_one": "Delete {{count}} task?",
+      "title_other": "Delete {{count}} tasks?",
+      "description": "The selected tasks (across projects) and their history will be removed. This can't be undone.",
+      "confirmLabel": "Delete"
+    },
+    "toast": {
+      "movedSomeFailed": "Moved {{ok}}, {{failed}} failed",
+      "movedSuccess_one": "Moved {{count}} task",
+      "movedSuccess_other": "Moved {{count}} tasks",
+      "bulkMoveFailed": "Bulk move failed",
+      "deletedSomeFailed": "Deleted {{ok}}, {{failed}} failed",
+      "deletedSuccess_one": "Deleted {{count}} task",
+      "deletedSuccess_other": "Deleted {{count}} tasks",
+      "bulkDeleteFailed": "Bulk delete failed"
+    }
+  },
+  "settings": {
+    "header": {
+      "title": "Settings",
+      "subtitle": "Manage your wallet, workspace and integrations."
+    },
+    "account": {
+      "title": "Account",
+      "description": "You signed in with this Base / Solana wallet.",
+      "connectedWallet": "Connected wallet",
+      "notConnected": "Not connected",
+      "copied": "Copied",
+      "copyFull": "Copy full",
+      "noKeys": "We never request private keys or seed phrases.",
+      "disconnect": "Disconnect wallet"
+    },
+    "username": {
+      "title": "Username",
+      "description": "Your @handle — what teammates type to mention you in chats. Unique; falls back to your wallet address when unset."
+    },
+    "workspace": {
+      "title": "Workspace",
+      "description": "Display name shown across the dashboard and onboarding.",
+      "nameLabel": "Workspace name",
+      "namePlaceholder": "Software Workspace",
+      "storedLocally": "Stored locally until PerkOS adds workspace persistence on the backend.",
+      "save": "Save changes",
+      "toastUpdated": "Workspace name updated"
+    },
+    "llm": {
+      "title": "LLM provider keys",
+      "description": "API keys are currently configured per agent inside the launcher (Step 3 → BYOK). Global key storage is on the roadmap.",
+      "infoBefore": "For now, each agent ships with its own BYOK setup. Use the",
+      "infoLink": "agent launcher",
+      "infoAfter": "to attach OpenAI, Anthropic or OpenRouter credentials.",
+      "infoNote": "A unified key vault scoped to your wallet is planned for a future release."
+    },
+    "network": {
+      "title": "Network",
+      "description": "Backend and on-chain endpoints this app talks to.",
+      "perkosApi": "PerkOS API",
+      "defaultChain": "Default chain",
+      "solanaCluster": "Solana cluster",
+      "testnet": "Testnet"
+    },
+    "danger": {
+      "title": "Danger zone",
+      "description": "Local-only actions. Nothing here touches the PerkOS backend.",
+      "clearDraft": {
+        "title": "Clear organization draft",
+        "description": "Wipes the in-progress organization form stored on this device.",
+        "action": "Clear draft"
+      },
+      "reset": {
+        "title": "Reset onboarding state",
+        "description": "Forgets the locally saved workspace name, project marker and agent marker.",
+        "action": "Reset"
+      },
+      "disconnect": {
+        "title": "Disconnect wallet",
+        "description": "Signs you out of this device. Your agents and projects on the backend stay intact.",
+        "action": "Disconnect"
+      }
+    },
+    "resetDialog": {
+      "title": "Reset onboarding state?",
+      "description": "This clears your local workspace name, project draft, and agent setup markers. Your data on the backend is untouched.",
+      "confirmLabel": "Reset state"
+    },
+    "toast": {
+      "draftCleared": "Organization draft cleared",
+      "draftClearFailed": "Couldn't clear draft",
+      "stateReset": "Workspace state reset"
+    }
   }
 }

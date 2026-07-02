@@ -426,5 +426,297 @@
       "toastSuccessDesc": "PerkOSへようこそ。デモタスクを3件追加しました。",
       "toastErrorTitle": "スタータープロジェクトを作成できませんでした"
     }
+  },
+  "projects": {
+    "header": {
+      "title": "プロジェクト",
+      "countInWorkspace_one": "ワークスペース内に{{count}}件のプロジェクト。",
+      "countInWorkspace_other": "ワークスペース内に{{count}}件のプロジェクト。",
+      "createFirst": "最初のプロジェクトを作成しましょう。",
+      "newProject": "新規プロジェクト"
+    },
+    "search": {
+      "placeholder": "名前、目標、ステータスでプロジェクトを検索…",
+      "noResults": "「{{query}}」に一致するプロジェクトはありません。"
+    },
+    "filter": {
+      "clearStatusAria": "ステータスフィルターをクリア",
+      "statusPill": "ステータス：{{status}}"
+    },
+    "bulk": {
+      "selectAllAria": "すべてのプロジェクトを選択",
+      "selectAll": "すべて選択",
+      "selectedCount": "{{count}}件選択中",
+      "archive": "アーカイブ",
+      "unarchive": "アーカイブ解除",
+      "delete": "削除",
+      "clear": "クリア"
+    },
+    "card": {
+      "selectAria": "{{name}}を選択",
+      "agentCount_one": "{{count}}名のエージェント",
+      "agentCount_other": "{{count}}名のエージェント",
+      "taskCount_one": "{{count}}件のタスク",
+      "taskCount_other": "{{count}}件のタスク",
+      "active": "{{time}}に活動"
+    },
+    "empty": {
+      "title": "まだプロジェクトがありません",
+      "description": "プロジェクトは、目標を中心にエージェント、タスク、チャットをまとめます。まずは1つ作成しましょう。",
+      "action": "プロジェクトを作成"
+    },
+    "confirmDelete": {
+      "title_one": "{{count}}件のプロジェクトを削除しますか？",
+      "title_other": "{{count}}件のプロジェクトを削除しますか？",
+      "description": "選択したプロジェクトを完全に削除し、ワークスペースから取り除きます。この操作は取り消せません。",
+      "confirmLabel": "削除"
+    },
+    "toast": {
+      "archivedSomeFailed": "{{ok}}件をアーカイブしました。{{failed}}件は失敗しました",
+      "archivedSuccess_one": "{{count}}件のプロジェクトをアーカイブしました",
+      "archivedSuccess_other": "{{count}}件のプロジェクトをアーカイブしました",
+      "unarchivedSomeFailed": "{{ok}}件のアーカイブを解除しました。{{failed}}件は失敗しました",
+      "unarchivedSuccess_one": "{{count}}件のプロジェクトのアーカイブを解除しました",
+      "unarchivedSuccess_other": "{{count}}件のプロジェクトのアーカイブを解除しました",
+      "bulkUpdateFailed": "一括更新に失敗しました",
+      "deletedSomeFailed": "{{ok}}件を削除しました。{{failed}}件は失敗しました",
+      "deletedSuccess_one": "{{count}}件のプロジェクトを削除しました",
+      "deletedSuccess_other": "{{count}}件のプロジェクトを削除しました",
+      "bulkDeleteFailed": "一括削除に失敗しました"
+    }
+  },
+  "agents": {
+    "header": {
+      "title": "エージェントチーム",
+      "subtitle": "エージェントを接続し、プロジェクトに割り当てて、稼働させましょう。",
+      "addAgent": "エージェントを追加"
+    },
+    "search": {
+      "placeholder": "名前、ランタイム、機能でエージェントを検索…",
+      "noResults": "「{{query}}」に一致するエージェントはありません。"
+    },
+    "bulk": {
+      "selectAllAria": "すべてのエージェントを選択",
+      "selectAll": "すべて選択",
+      "selectedCount": "{{count}}件選択中",
+      "assignToProject": "プロジェクトに割り当て",
+      "hibernate": "休止",
+      "wake": "再開",
+      "delete": "削除",
+      "clear": "クリア"
+    },
+    "confirmDelete": {
+      "title_one": "{{count}}件のエージェントを削除しますか？",
+      "title_other": "{{count}}件のエージェントを削除しますか？",
+      "description": "実行中の各コンテナを停止し、LLMキーを無効化し、（リレーレジストリを含む）記録を消去します。課金は即座に停止します。この操作は取り消せません。",
+      "confirmLabel": "削除"
+    },
+    "toast": {
+      "deletedSomeFailed": "{{ok}}件を削除しました。{{failed}}件は失敗しました",
+      "deletedSuccess_one": "{{count}}件のエージェントを削除しました",
+      "deletedSuccess_other": "{{count}}件のエージェントを削除しました",
+      "bulkDeleteFailed": "一括削除に失敗しました",
+      "hibernatedSomeFailed": "{{ok}}件を休止しました。{{failed}}件は失敗しました",
+      "hibernatedSomeFailedDesc": "PerkOSインフラ以外にデプロイされているエージェントは休止できません。",
+      "hibernatedSuccess_one": "{{count}}件のエージェントを休止しました",
+      "hibernatedSuccess_other": "{{count}}件のエージェントを休止しました",
+      "bulkHibernateFailed": "一括休止に失敗しました",
+      "wokeSomeFailed": "{{ok}}件を再開しました。{{failed}}件は失敗しました",
+      "wokeSomeFailedDesc": "PerkOSインフラ以外にデプロイされているエージェントは再開できません。",
+      "wokeSuccess_one": "{{count}}件のエージェントを再開しました",
+      "wokeSuccess_other": "{{count}}件のエージェントを再開しました",
+      "bulkWakeFailed": "一括再開に失敗しました"
+    },
+    "assignDialog": {
+      "title": "プロジェクトに割り当て",
+      "description_one": "選択した{{count}}件のエージェントをプロジェクトの担当リストに追加します。",
+      "description_other": "選択した{{count}}件のエージェントをプロジェクトの担当リストに追加します。",
+      "projectLabel": "プロジェクト",
+      "selectPlaceholder": "プロジェクトを選択…",
+      "cancel": "キャンセル",
+      "assign": "割り当て",
+      "assigning": "割り当て中…",
+      "projectFallback": "プロジェクト",
+      "assignedSuccess_one": "{{count}}件のエージェントを{{name}}に割り当てました",
+      "assignedSuccess_other": "{{count}}件のエージェントを{{name}}に割り当てました",
+      "alreadyOn": "すでに{{name}}に含まれています。追加の必要はありません",
+      "assignFailed": "割り当てに失敗しました"
+    },
+    "card": {
+      "selectAria": "{{name}}を選択",
+      "externalTitle": "ご自身のインフラ（招待・セルフホスト）で稼働中のため、PerkOSからは休止できません",
+      "external": "外部",
+      "capabilities": "機能：{{list}}",
+      "noCapabilities": "機能はまだ設定されていません。",
+      "projects": "プロジェクト：{{count}}",
+      "active": "{{time}}に活動",
+      "created": "{{time}}に作成",
+      "capabilitiesCount": "機能：{{count}}"
+    },
+    "power": {
+      "waking": "{{name}}を起動しています…",
+      "wakingDesc": "起動から接続まで約2〜3分かかります。",
+      "hibernating": "{{name}}を休止しています…",
+      "hibernatingDesc": "コストを抑えるためスケールダウンしています。",
+      "error": "電源状態を変更できませんでした",
+      "wakeAria": "{{name}}を起動",
+      "hibernateAria": "{{name}}を休止",
+      "working": "処理中…",
+      "wakeTitle": "エージェントを起動",
+      "hibernateTitle": "エージェントを休止"
+    },
+    "status": {
+      "revoked": "無効化済み",
+      "neverConnected": "未接続",
+      "invited": "招待済み",
+      "syncing": "同期中…",
+      "hibernated": "休止中",
+      "hibernating": "休止処理中…",
+      "waking": "起動中…",
+      "online": "オンライン",
+      "failed": "失敗",
+      "provisioning": "準備中",
+      "unknown": "不明"
+    },
+    "empty": {
+      "title": "まだエージェントがいません",
+      "description": "エージェントを追加しましょう。PerkOS上でHermesまたはOpenClawエージェントを作成する、ご自身のVPSで稼働させる、あるいはすでに他所で運用しているエージェントを組織に招待する、いずれの方法も選べます。",
+      "action": "エージェントを追加"
+    }
+  },
+  "tasks": {
+    "header": {
+      "title": "タスク",
+      "subtitle": "すべてのプロジェクトで進行中のタスクをまとめて確認できます。",
+      "createTask": "タスクを作成"
+    },
+    "search": {
+      "placeholder": "名前、エージェント、プロジェクト、ステータスでタスクを検索…",
+      "noResults": "「{{query}}」に一致するタスクはありません。"
+    },
+    "filter": {
+      "statusPill": "ステータス：{{status}}",
+      "inProgress": "進行中",
+      "projectPill": "プロジェクト：{{project}}",
+      "clearAria": "{{label}}をクリア"
+    },
+    "emptyProjects": {
+      "title": "まだプロジェクトがありません",
+      "description": "タスクはプロジェクトの中に存在します。まずプロジェクトを作成してください。",
+      "action": "プロジェクトを作成"
+    },
+    "empty": {
+      "title": "まだタスクがありません",
+      "description": "プロジェクトにタスクを追加し、エージェントに割り振りましょう。",
+      "action": "タスクを作成"
+    },
+    "bulk": {
+      "selectedCount": "{{count}}件選択中",
+      "moveTo": "移動先：",
+      "toDo": "未着手",
+      "inProgress": "進行中",
+      "done": "完了",
+      "delete": "削除",
+      "clear": "クリア"
+    },
+    "card": {
+      "selectAria": "{{name}}を選択",
+      "agent": "エージェント：{{agent}}"
+    },
+    "dragHint": "ドラッグ＆ドロップは現在ローカルのみの機能です。バックエンドとの同期は次回リリースで対応予定です。",
+    "projectFilter": {
+      "aria": "プロジェクトでタスクを絞り込む",
+      "all": "すべてのプロジェクト"
+    },
+    "confirmDelete": {
+      "title_one": "{{count}}件のタスクを削除しますか？",
+      "title_other": "{{count}}件のタスクを削除しますか？",
+      "description": "選択したタスク（複数プロジェクトにまたがる場合も含む）とその履歴が削除されます。この操作は取り消せません。",
+      "confirmLabel": "削除"
+    },
+    "toast": {
+      "movedSomeFailed": "{{ok}}件を移動しました。{{failed}}件は失敗しました",
+      "movedSuccess_one": "{{count}}件のタスクを移動しました",
+      "movedSuccess_other": "{{count}}件のタスクを移動しました",
+      "bulkMoveFailed": "一括移動に失敗しました",
+      "deletedSomeFailed": "{{ok}}件を削除しました。{{failed}}件は失敗しました",
+      "deletedSuccess_one": "{{count}}件のタスクを削除しました",
+      "deletedSuccess_other": "{{count}}件のタスクを削除しました",
+      "bulkDeleteFailed": "一括削除に失敗しました"
+    }
+  },
+  "settings": {
+    "header": {
+      "title": "設定",
+      "subtitle": "ウォレット、ワークスペース、連携機能を管理します。"
+    },
+    "account": {
+      "title": "アカウント",
+      "description": "このBase／Solanaウォレットでサインインしています。",
+      "connectedWallet": "接続中のウォレット",
+      "notConnected": "未接続",
+      "copied": "コピーしました",
+      "copyFull": "すべてコピー",
+      "noKeys": "秘密鍵やシードフレーズをお尋ねすることは決してありません。",
+      "disconnect": "ウォレットを切断"
+    },
+    "username": {
+      "title": "ユーザー名",
+      "description": "あなたの@ハンドルです。チームメイトがチャットであなたにメンションする際に使われます。一意である必要があり、未設定の場合はウォレットアドレスが表示されます。"
+    },
+    "workspace": {
+      "title": "ワークスペース",
+      "description": "ダッシュボードとオンボーディング全体に表示される表示名です。",
+      "nameLabel": "ワークスペース名",
+      "namePlaceholder": "Software Workspace",
+      "storedLocally": "PerkOSがバックエンドでワークスペースの永続化に対応するまで、ローカルに保存されます。",
+      "save": "変更を保存",
+      "toastUpdated": "ワークスペース名を更新しました"
+    },
+    "llm": {
+      "title": "LLMプロバイダーキー",
+      "description": "APIキーは現在、ランチャー内でエージェントごとに設定します（ステップ3 → BYOK）。グローバルなキー管理は今後のロードマップに含まれています。",
+      "infoBefore": "現時点では、各エージェントは独自のBYOK設定を持っています。詳しくは",
+      "infoLink": "エージェントランチャー",
+      "infoAfter": "から、OpenAI、Anthropic、OpenRouterの認証情報を接続してください。",
+      "infoNote": "ウォレットに紐づく統一キーボールトは、今後のリリースで提供予定です。"
+    },
+    "network": {
+      "title": "ネットワーク",
+      "description": "このアプリが通信するバックエンドおよびオンチェーンのエンドポイントです。",
+      "perkosApi": "PerkOS API",
+      "defaultChain": "デフォルトチェーン",
+      "solanaCluster": "Solanaクラスター",
+      "testnet": "テストネット"
+    },
+    "danger": {
+      "title": "危険ゾーン",
+      "description": "ローカルのみの操作です。PerkOSのバックエンドには一切影響しません。",
+      "clearDraft": {
+        "title": "組織の下書きをクリア",
+        "description": "この端末に保存されている、作成途中の組織フォームを消去します。",
+        "action": "下書きをクリア"
+      },
+      "reset": {
+        "title": "オンボーディング状態をリセット",
+        "description": "ローカルに保存されているワークスペース名、プロジェクトのマーカー、エージェントのマーカーを消去します。",
+        "action": "リセット"
+      },
+      "disconnect": {
+        "title": "ウォレットを切断",
+        "description": "この端末からサインアウトします。バックエンド上のエージェントとプロジェクトはそのまま残ります。",
+        "action": "切断"
+      }
+    },
+    "resetDialog": {
+      "title": "オンボーディング状態をリセットしますか？",
+      "description": "ローカルのワークスペース名、プロジェクトの下書き、エージェント設定のマーカーが消去されます。バックエンド上のデータには影響しません。",
+      "confirmLabel": "状態をリセット"
+    },
+    "toast": {
+      "draftCleared": "組織の下書きをクリアしました",
+      "draftClearFailed": "下書きをクリアできませんでした",
+      "stateReset": "ワークスペースの状態をリセットしました"
+    }
   }
 }
