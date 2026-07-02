@@ -26,5 +26,271 @@
     "restoringPreviousSession": "Restoring previous session…",
     "withEmail": "Sign in with email",
     "withWallet": "Sign in with wallet"
+  },
+  "landing": {
+    "nav": {
+      "forYourBusiness": "For your business",
+      "howItWorks": "How it works",
+      "whyPerkos": "Why PerkOS",
+      "pricing": "Pricing",
+      "talkToUs": "Talk to us",
+      "signIn": "Sign in",
+      "meetYourTeam": "Meet your team",
+      "start": "Start"
+    },
+    "hero": {
+      "badge": "Early access · Free to start",
+      "titleBefore": "Your business just hired its",
+      "titleHighlight": "first team",
+      "titleAfter": ".",
+      "subtitle": "Pick your type of business, and in two minutes you have a small team that handles the busywork — and checks with you first.",
+      "ctaPrimary": "Meet your team",
+      "ctaSecondary": "See how it works",
+      "trust": {
+        "approve": "You approve everything",
+        "ready": "Ready in 2 minutes",
+        "noTech": "No tech skills needed",
+        "cancel": "Cancel anytime"
+      }
+    },
+    "fearKillers": {
+      "items": {
+        "approval": {
+          "title": "Nothing happens without your OK.",
+          "body": "Your team drafts and suggests — you review every piece before it goes anywhere."
+        },
+        "simple": {
+          "title": "If you can text, you can do this.",
+          "body": "Tell your team what you need in plain English. That's the whole job."
+        },
+        "affordable": {
+          "title": "Costs less than one hour of help.",
+          "body": "No contracts, no setup fees. When your team isn't working, you're barely paying."
+        }
+      }
+    },
+    "templates": {
+      "heading": "Built for businesses like yours.",
+      "subheading": "Pick the one that sounds like you — your team arrives already knowing your kind of work.",
+      "cardCta": "Meet this team",
+      "footNoteBefore": "Don't see your business? Build a custom team in the same two minutes — or",
+      "footNoteLink": "tell us what you need",
+      "footNoteAfter": ".",
+      "items": {
+        "restaurant": {
+          "name": "Restaurant",
+          "pitch": "For owners who'd rather cook than post: full tables, less screen time."
+        },
+        "realEstate": {
+          "name": "Real Estate",
+          "pitch": "For agents: listings polished and follow-ups sent while you're showing homes."
+        },
+        "marketingAgency": {
+          "name": "Marketing Agency",
+          "pitch": "For agency owners: more client work delivered without more late nights."
+        },
+        "onlineStore": {
+          "name": "Online Store",
+          "pitch": "For shop owners: product pages, promos, and customer replies handled."
+        },
+        "consulting": {
+          "name": "Consulting Practice",
+          "pitch": "For consultants: proposals and research done while you're with clients."
+        },
+        "healthWellness": {
+          "name": "Health & Wellness",
+          "pitch": "For studios and clinics: full classes and clients who come back."
+        },
+        "coaching": {
+          "name": "Coaching & Courses",
+          "pitch": "For coaches: more students enrolled, less time promoting yourself."
+        },
+        "trades": {
+          "name": "Trades & Contracting",
+          "pitch": "For contractors: quotes out fast and paperwork off your truck."
+        },
+        "finance": {
+          "name": "Finance & Bookkeeping",
+          "pitch": "For bookkeepers: more clients served, every ledger still spotless."
+        },
+        "localServices": {
+          "name": "Local Services",
+          "pitch": "For salons, cleaners, and shops: a steady stream of bookings."
+        }
+      }
+    },
+    "meetYourTeam": {
+      "heading": "Here's who shows up on day one.",
+      "subheading": "Every team comes with the people a small business actually needs.",
+      "footNote": "Chat with any of them, swap them out, or add your own. It's your team.",
+      "roles": {
+        "teamLead": {
+          "name": "Team Lead",
+          "blurb": "Takes your goal, breaks it into a plan, hands out the work, and double-checks everything before it reaches you."
+        },
+        "marketing": {
+          "name": "Marketing teammate",
+          "blurb": "Drafts your posts, emails, and promotions — in your voice — so something good goes out every week."
+        },
+        "research": {
+          "name": "Research teammate",
+          "blurb": "Looks into competitors, prices, and trends, then hands you the short version you can act on."
+        },
+        "bookkeeping": {
+          "name": "Bookkeeping teammate",
+          "blurb": "Keeps your numbers tidy and flags what needs attention, so tax season stops being a surprise."
+        }
+      }
+    },
+    "howItWorks": {
+      "heading": "Up and running in minutes.",
+      "cta": "Try it free",
+      "steps": {
+        "pick": {
+          "title": "Pick your business.",
+          "body": "Choose the template that matches what you do — your team is ready in about two minutes."
+        },
+        "say": {
+          "title": "Say what you need.",
+          "body": "Type a goal in plain English, like “get more weekday lunch customers.” Your Team Lead turns it into a plan."
+        },
+        "review": {
+          "title": "Review and approve.",
+          "body": "The team does the work and sends you drafts. You say yes, ask for changes, or say no. Always."
+        }
+      }
+    },
+    "expertise": {
+      "heading": "Behind the friendly faces: serious AI.",
+      "introBefore": "PerkOS is built on",
+      "introAfter": "— teams of AI workers that can plan, divide up a job, and finish it on their own, instead of waiting for instructions at every step. Here's what that means for you:",
+      "footNote": "This isn't a demo — the team that runs PerkOS is partly AI, on this same platform. And it's built on real research: 73% of small businesses say they want help getting AI to actually work. That's exactly what we built.",
+      "proofs": {
+        "plan": {
+          "title": "They plan like a real team.",
+          "body": "Give one goal, and your Team Lead breaks it into tasks, assigns each to the right teammate, and tracks it through to done — no babysitting required."
+        },
+        "quality": {
+          "title": "Weak work never reaches you.",
+          "body": "Every piece is checked before you see it. If something isn't good enough, it gets sent back and redone — automatically. You only review work worth reviewing."
+        },
+        "sleep": {
+          "title": "They work while you sleep — without running up a bill.",
+          "body": "Your team keeps making progress overnight, then rests when there's nothing to do. Resting time costs you almost nothing."
+        }
+      }
+    },
+    "beyondTeams": {
+      "heading": "Whatever AI your business needs, we set it up.",
+      "body1": "Ready-made teams are just the start. We also build custom AI for businesses with bigger or more unusual needs — answering your customers, connecting the tools you already use, automating the work that eats your week. Already using AI somewhere else? Bring it with you; it'll fit right in.",
+      "body2": "You don't need to know what to ask for. Tell us the problem — we'll handle the rest.",
+      "cta": "Talk to us"
+    },
+    "pricing": {
+      "heading": "Start free. It stays affordable.",
+      "subheading": "A full team for the price of a streaming subscription — and a resting team costs almost nothing. Compare that to one part-time hire.",
+      "mostPopular": "Most popular",
+      "footNote": "You only pay for the hours your team actually works. Reach your monthly hours and your team simply pauses — top up or upgrade to keep going. You never get a surprise bill.",
+      "tiers": {
+        "free": {
+          "name": "Free",
+          "price": "Free",
+          "cadence": "for 7 days",
+          "tag": "Bring your own agents",
+          "cta": "Start free",
+          "bullets": [
+            "Connect AI agents you already run",
+            "Full workspace — board, docs, chat",
+            "They draft, you approve — always",
+            "Runs on your setup, free for a week"
+          ]
+        },
+        "starter": {
+          "name": "Starter",
+          "price": "$9.99",
+          "cadence": "/ month",
+          "tag": "We host your team, you bring the AI",
+          "cta": "Start your team",
+          "bullets": [
+            "We run your team — nothing to install",
+            "Bring your own AI key (OpenAI & more)",
+            "50 team working hours / month",
+            "You pay your AI provider directly"
+          ]
+        },
+        "pro": {
+          "name": "Pro",
+          "price": "$29.99",
+          "cadence": "/ month",
+          "tag": "We host your team and run the AI",
+          "cta": "Start your team",
+          "bullets": [
+            "We run your team AND the AI — zero setup",
+            "No AI account needed",
+            "150 team working hours / month",
+            "Priority support"
+          ]
+        },
+        "scale": {
+          "name": "Scale",
+          "price": "$79.99",
+          "cadence": "/ month",
+          "tag": "For teams running all day",
+          "cta": "Start your team",
+          "bullets": [
+            "Everything in Pro",
+            "500 team working hours / month",
+            "Top up anytime if you need more",
+            "Onboarding & a real human"
+          ]
+        }
+      }
+    },
+    "buildersStrip": {
+      "heading": "Building something bigger?",
+      "links": {
+        "partners": {
+          "title": "For partners",
+          "desc": "Integrations, runtimes, and bring-your-own AI."
+        },
+        "developers": {
+          "title": "For developers",
+          "desc": "The platform under the hood — APIs, payment rails, docs."
+        }
+      }
+    },
+    "talkToUs": {
+      "heading": "Rather talk to a person first?",
+      "subheading": "Totally fair. Tell us about your business and what's eating your week — we'll tell you honestly whether (and how) AI can help.",
+      "followAlong": "Follow along",
+      "contacts": {
+        "general": {
+          "title": "General inquiries"
+        },
+        "partnerships": {
+          "title": "Partnerships"
+        },
+        "investors": {
+          "title": "Investors"
+        }
+      }
+    },
+    "finalCTA": {
+      "heading": "You've been the whole team long enough.",
+      "subheading": "Two minutes from now, you could have help — help that drafts, suggests, and always asks before acting.",
+      "ctaPrimary": "Meet your team — free to start",
+      "ctaSecondary": "Talk to us first"
+    },
+    "footer": {
+      "tagline": "AI teams for small businesses. They draft, you approve.",
+      "copyright": "© {{year}} PerkOS. AI teams for small businesses — they draft, you approve.",
+      "links": {
+        "forYourBusiness": "For your business",
+        "howItWorks": "How it works",
+        "whyPerkos": "Why PerkOS",
+        "contact": "Contact",
+        "investors": "Investors"
+      }
+    }
   }
 }

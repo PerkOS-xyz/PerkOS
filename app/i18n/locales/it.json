@@ -26,5 +26,271 @@
     "restoringPreviousSession": "Ripristino della sessione precedente…",
     "withEmail": "Accedi con email",
     "withWallet": "Accedi con il portafoglio"
+  },
+  "landing": {
+    "nav": {
+      "forYourBusiness": "Per la tua attività",
+      "howItWorks": "Come funziona",
+      "whyPerkos": "Perché PerkOS",
+      "pricing": "Prezzi",
+      "talkToUs": "Contattaci",
+      "signIn": "Accedi",
+      "meetYourTeam": "Conosci il tuo team",
+      "start": "Inizia"
+    },
+    "hero": {
+      "badge": "Accesso anticipato · Si inizia gratis",
+      "titleBefore": "La tua attività ha appena assunto il suo",
+      "titleHighlight": "primo team",
+      "titleAfter": ".",
+      "subtitle": "Scegli il tipo di attività che hai e in due minuti avrai un piccolo team che si occupa del lavoro di routine, chiedendoti sempre conferma prima.",
+      "ctaPrimary": "Conosci il tuo team",
+      "ctaSecondary": "Scopri come funziona",
+      "trust": {
+        "approve": "Approvi tu ogni cosa",
+        "ready": "Pronto in 2 minuti",
+        "noTech": "Nessuna competenza tecnica richiesta",
+        "cancel": "Annulla quando vuoi"
+      }
+    },
+    "fearKillers": {
+      "items": {
+        "approval": {
+          "title": "Non succede nulla senza il tuo ok.",
+          "body": "Il tuo team prepara le bozze e propone idee. Sei tu a rivedere ogni cosa prima che venga inviata."
+        },
+        "simple": {
+          "title": "Se sai scrivere un messaggio, sai già farlo.",
+          "body": "Dì al tuo team cosa ti serve, con parole semplici. Tutto qui il lavoro da fare."
+        },
+        "affordable": {
+          "title": "Costa meno di un'ora di aiuto.",
+          "body": "Niente contratti, niente costi di attivazione. Quando il tuo team non lavora, paghi quasi nulla."
+        }
+      }
+    },
+    "templates": {
+      "heading": "Pensato per attività come la tua.",
+      "subheading": "Scegli quello che ti somiglia di più. Il tuo team arriva già sapendo come funziona il tuo lavoro.",
+      "cardCta": "Conosci questo team",
+      "footNoteBefore": "Non vedi la tua attività? Crea un team su misura, sempre in due minuti, oppure",
+      "footNoteLink": "raccontaci di cosa hai bisogno",
+      "footNoteAfter": ".",
+      "items": {
+        "restaurant": {
+          "name": "Ristorante",
+          "pitch": "Per chi preferisce cucinare piuttosto che pubblicare post: tavoli pieni e meno tempo davanti allo schermo."
+        },
+        "realEstate": {
+          "name": "Immobiliare",
+          "pitch": "Per gli agenti: annunci curati e follow-up inviati mentre sei in giro a mostrare case."
+        },
+        "marketingAgency": {
+          "name": "Agenzia di Marketing",
+          "pitch": "Per chi gestisce un'agenzia: più lavoro consegnato ai clienti senza altre nottate."
+        },
+        "onlineStore": {
+          "name": "Negozio Online",
+          "pitch": "Per chi ha un negozio: schede prodotto, promozioni e risposte ai clienti gestite per te."
+        },
+        "consulting": {
+          "name": "Studio di Consulenza",
+          "pitch": "Per i consulenti: proposte e ricerche pronte mentre sei con i clienti."
+        },
+        "healthWellness": {
+          "name": "Salute e Benessere",
+          "pitch": "Per studi e cliniche: corsi al completo e clienti che tornano."
+        },
+        "coaching": {
+          "name": "Coaching e Corsi",
+          "pitch": "Per i coach: più iscritti ai corsi e meno tempo speso a promuoverti."
+        },
+        "trades": {
+          "name": "Artigiani e Imprese Edili",
+          "pitch": "Per gli imprenditori edili: preventivi pronti in fretta e meno scartoffie sul furgone."
+        },
+        "finance": {
+          "name": "Finanza e Contabilità",
+          "pitch": "Per i contabili: più clienti seguiti, con i registri sempre in ordine."
+        },
+        "localServices": {
+          "name": "Servizi Locali",
+          "pitch": "Per saloni, imprese di pulizia e negozi: un flusso costante di prenotazioni."
+        }
+      }
+    },
+    "meetYourTeam": {
+      "heading": "Ecco chi si presenta al lavoro dal primo giorno.",
+      "subheading": "Ogni team include le persone di cui una piccola attività ha davvero bisogno.",
+      "footNote": "Parla con chiunque di loro, sostituiscili o aggiungine altri. È il tuo team.",
+      "roles": {
+        "teamLead": {
+          "name": "Capo Team",
+          "blurb": "Prende il tuo obiettivo, lo trasforma in un piano, distribuisce il lavoro e ricontrolla tutto prima che arrivi a te."
+        },
+        "marketing": {
+          "name": "Compagno di team marketing",
+          "blurb": "Scrive bozze di post, email e promozioni con il tuo stile, così ogni settimana esce qualcosa di valido."
+        },
+        "research": {
+          "name": "Compagno di team ricerca",
+          "blurb": "Analizza concorrenti, prezzi e tendenze, poi ti consegna una versione breve e pronta all'uso."
+        },
+        "bookkeeping": {
+          "name": "Compagno di team contabilità",
+          "blurb": "Tiene i tuoi numeri in ordine e segnala cosa richiede attenzione, così le tasse non saranno più una sorpresa."
+        }
+      }
+    },
+    "howItWorks": {
+      "heading": "Operativo in pochi minuti.",
+      "cta": "Provalo gratis",
+      "steps": {
+        "pick": {
+          "title": "Scegli la tua attività.",
+          "body": "Scegli il modello che rispecchia il tuo lavoro. Il tuo team è pronto in circa due minuti."
+        },
+        "say": {
+          "title": "Dì cosa ti serve.",
+          "body": "Scrivi un obiettivo con parole semplici, ad esempio «più clienti a pranzo nei giorni feriali». Il tuo Capo Team lo trasforma in un piano."
+        },
+        "review": {
+          "title": "Rivedi e approva.",
+          "body": "Il team fa il lavoro e ti invia le bozze. Tu dici sì, chiedi modifiche o dici no. Sempre."
+        }
+      }
+    },
+    "expertise": {
+      "heading": "Dietro i volti amichevoli: un'AI seria.",
+      "introBefore": "PerkOS è costruito su",
+      "introAfter": "che permette a team di lavoratori AI di pianificare da soli, dividersi i compiti e portare a termine il lavoro senza aspettare istruzioni a ogni passo. Ecco cosa significa per te:",
+      "footNote": "Non è una demo: il team che gestisce PerkOS è in parte composto da AI, sulla stessa piattaforma che stai vedendo. Ed è basato su una ricerca reale: il 73% delle piccole imprese dice di voler essere aiutato a far funzionare davvero l'AI. Questo è esattamente ciò che abbiamo costruito.",
+      "proofs": {
+        "plan": {
+          "title": "Pianificano come un vero team.",
+          "body": "Basta un obiettivo: il tuo Capo Team lo suddivide in attività, le assegna al compagno di team giusto e segue tutto fino al completamento, senza che tu debba controllare ogni passo."
+        },
+        "quality": {
+          "title": "Un lavoro fatto male non arriva mai fino a te.",
+          "body": "Ogni cosa viene controllata prima che tu la veda. Se qualcosa non è abbastanza buono, viene rimandato indietro e rifatto, in automatico. Rivedi solo il lavoro che vale la pena rivedere."
+        },
+        "sleep": {
+          "title": "Lavorano mentre dormi, senza farti lievitare il conto.",
+          "body": "Il tuo team continua a fare progressi durante la notte, poi si ferma quando non c'è nulla da fare. Il tempo di riposo non ti costa quasi nulla."
+        }
+      }
+    },
+    "beyondTeams": {
+      "heading": "Qualunque AI serva alla tua attività, la mettiamo a punto noi.",
+      "body1": "I team già pronti sono solo l'inizio. Costruiamo anche soluzioni di AI su misura per attività con esigenze più grandi o particolari: rispondere ai tuoi clienti, collegare gli strumenti che usi già, automatizzare il lavoro che ti consuma la settimana. Usi già un'AI altrove? Portala con te, si integrerà perfettamente.",
+      "body2": "Non devi sapere cosa chiedere. Raccontaci il problema, al resto pensiamo noi.",
+      "cta": "Contattaci"
+    },
+    "pricing": {
+      "heading": "Inizia gratis. Resta conveniente.",
+      "subheading": "Un intero team al prezzo di un abbonamento streaming, e un team a riposo costa quasi nulla. Confrontalo con l'assunzione di una sola persona part-time.",
+      "mostPopular": "Il più scelto",
+      "footNote": "Paghi solo per le ore in cui il tuo team lavora davvero. Se raggiungi il limite mensile, il team si mette semplicemente in pausa: ricarica o passa a un piano superiore per continuare. Niente sorprese in fattura.",
+      "tiers": {
+        "free": {
+          "name": "Gratis",
+          "price": "Gratis",
+          "cadence": "per 7 giorni",
+          "tag": "Porta i tuoi agenti",
+          "cta": "Inizia gratis",
+          "bullets": [
+            "Collega gli agenti AI che usi già",
+            "Spazio di lavoro completo: bacheca, documenti, chat",
+            "Loro preparano le bozze, tu approvi. Sempre.",
+            "Funziona sulla tua infrastruttura, gratis per una settimana"
+          ]
+        },
+        "starter": {
+          "name": "Starter",
+          "price": "$9.99",
+          "cadence": "/ mese",
+          "tag": "Ospitiamo noi il tuo team, tu porti l'AI",
+          "cta": "Avvia il tuo team",
+          "bullets": [
+            "Gestiamo noi il tuo team: nulla da installare",
+            "Porta la tua chiave AI (OpenAI e altri)",
+            "50 ore di lavoro del team al mese",
+            "Paghi il tuo fornitore AI direttamente"
+          ]
+        },
+        "pro": {
+          "name": "Pro",
+          "price": "$29.99",
+          "cadence": "/ mese",
+          "tag": "Ospitiamo noi il tuo team e gestiamo anche l'AI",
+          "cta": "Avvia il tuo team",
+          "bullets": [
+            "Gestiamo noi il team E l'AI: zero configurazione",
+            "Nessun account AI necessario",
+            "150 ore di lavoro del team al mese",
+            "Supporto prioritario"
+          ]
+        },
+        "scale": {
+          "name": "Scale",
+          "price": "$79.99",
+          "cadence": "/ mese",
+          "tag": "Per team operativi tutto il giorno",
+          "cta": "Avvia il tuo team",
+          "bullets": [
+            "Tutto quello incluso in Pro",
+            "500 ore di lavoro del team al mese",
+            "Ricarica in qualsiasi momento se ti serve di più",
+            "Onboarding e una persona reale a disposizione"
+          ]
+        }
+      }
+    },
+    "buildersStrip": {
+      "heading": "Stai costruendo qualcosa di più grande?",
+      "links": {
+        "partners": {
+          "title": "Per i partner",
+          "desc": "Integrazioni, runtime e la possibilità di usare la tua AI."
+        },
+        "developers": {
+          "title": "Per gli sviluppatori",
+          "desc": "La piattaforma sotto il cofano: API, sistemi di pagamento, documentazione."
+        }
+      }
+    },
+    "talkToUs": {
+      "heading": "Preferisci parlare prima con una persona?",
+      "subheading": "Ci sta benissimo. Raccontaci della tua attività e di cosa ti porta via la settimana: ti diremo onestamente se (e come) l'AI può aiutarti.",
+      "followAlong": "Seguici",
+      "contacts": {
+        "general": {
+          "title": "Informazioni generali"
+        },
+        "partnerships": {
+          "title": "Collaborazioni"
+        },
+        "investors": {
+          "title": "Investitori"
+        }
+      }
+    },
+    "finalCTA": {
+      "heading": "Hai fatto il lavoro di un intero team da solo, per fin troppo tempo.",
+      "subheading": "Tra due minuti potresti già avere un aiuto: un aiuto che prepara bozze, propone idee e chiede sempre il tuo consenso prima di agire.",
+      "ctaPrimary": "Conosci il tuo team, si inizia gratis",
+      "ctaSecondary": "Parla prima con noi"
+    },
+    "footer": {
+      "tagline": "Team di AI per piccole imprese. Loro preparano le bozze, tu approvi.",
+      "copyright": "© {{year}} PerkOS. Team di AI per piccole imprese: loro preparano le bozze, tu approvi.",
+      "links": {
+        "forYourBusiness": "Per la tua attività",
+        "howItWorks": "Come funziona",
+        "whyPerkos": "Perché PerkOS",
+        "contact": "Contatti",
+        "investors": "Investitori"
+      }
+    }
   }
 }

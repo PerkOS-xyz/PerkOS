@@ -26,5 +26,271 @@
     "restoringPreviousSession": "Restauration de la session précédente…",
     "withEmail": "Se connecter par e-mail",
     "withWallet": "Se connecter avec un portefeuille"
+  },
+  "landing": {
+    "nav": {
+      "forYourBusiness": "Pour votre entreprise",
+      "howItWorks": "Comment ça marche",
+      "whyPerkos": "Pourquoi PerkOS",
+      "pricing": "Tarifs",
+      "talkToUs": "Nous contacter",
+      "signIn": "Se connecter",
+      "meetYourTeam": "Rencontrez votre équipe",
+      "start": "Commencer"
+    },
+    "hero": {
+      "badge": "Accès anticipé · Gratuit pour commencer",
+      "titleBefore": "Votre entreprise vient d'embaucher sa",
+      "titleHighlight": "première équipe",
+      "titleAfter": ".",
+      "subtitle": "Choisissez votre secteur d'activité et, en deux minutes, vous avez une petite équipe qui s'occupe des tâches répétitives, et qui vous consulte avant d'agir.",
+      "ctaPrimary": "Rencontrez votre équipe",
+      "ctaSecondary": "Découvrez comment ça marche",
+      "trust": {
+        "approve": "Vous validez tout",
+        "ready": "Prêt en 2 minutes",
+        "noTech": "Aucune compétence technique requise",
+        "cancel": "Annulez à tout moment"
+      }
+    },
+    "fearKillers": {
+      "items": {
+        "approval": {
+          "title": "Rien ne se passe sans votre accord.",
+          "body": "Votre équipe rédige des brouillons et propose des idées, vous validez chaque élément avant qu'il ne soit publié."
+        },
+        "simple": {
+          "title": "Si vous savez envoyer un texto, vous savez faire ça.",
+          "body": "Dites à votre équipe ce dont vous avez besoin, avec vos propres mots. C'est tout le travail."
+        },
+        "affordable": {
+          "title": "Coûte moins cher qu'une heure d'aide.",
+          "body": "Pas de contrat, pas de frais d'installation. Quand votre équipe ne travaille pas, vous ne payez presque rien."
+        }
+      }
+    },
+    "templates": {
+      "heading": "Conçu pour les entreprises comme la vôtre.",
+      "subheading": "Choisissez celle qui vous ressemble, votre équipe arrive en connaissant déjà votre métier.",
+      "cardCta": "Rencontrer cette équipe",
+      "footNoteBefore": "Vous ne trouvez pas votre secteur ? Créez une équipe sur mesure dans le même délai de deux minutes, ou",
+      "footNoteLink": "dites-nous ce dont vous avez besoin",
+      "footNoteAfter": ".",
+      "items": {
+        "restaurant": {
+          "name": "Restaurant",
+          "pitch": "Pour les propriétaires qui préfèrent cuisiner plutôt que publier : des tables pleines, moins d'écran."
+        },
+        "realEstate": {
+          "name": "Immobilier",
+          "pitch": "Pour les agents : des annonces soignées et des relances envoyées pendant que vous faites visiter des biens."
+        },
+        "marketingAgency": {
+          "name": "Agence marketing",
+          "pitch": "Pour les dirigeants d'agence : plus de travail livré aux clients, sans plus de soirées tardives."
+        },
+        "onlineStore": {
+          "name": "Boutique en ligne",
+          "pitch": "Pour les commerçants : fiches produits, promotions et réponses aux clients, tout est pris en charge."
+        },
+        "consulting": {
+          "name": "Cabinet de conseil",
+          "pitch": "Pour les consultants : propositions et recherches faites pendant que vous êtes avec vos clients."
+        },
+        "healthWellness": {
+          "name": "Santé & bien-être",
+          "pitch": "Pour les studios et cliniques : des cours complets et des clients qui reviennent."
+        },
+        "coaching": {
+          "name": "Coaching & formations",
+          "pitch": "Pour les coachs : plus d'élèves inscrits, moins de temps passé à faire votre propre promotion."
+        },
+        "trades": {
+          "name": "Artisanat & bâtiment",
+          "pitch": "Pour les artisans : des devis envoyés rapidement, et la paperasse enfin hors de votre camion."
+        },
+        "finance": {
+          "name": "Finance & comptabilité",
+          "pitch": "Pour les comptables : plus de clients servis, et des comptes toujours impeccables."
+        },
+        "localServices": {
+          "name": "Services de proximité",
+          "pitch": "Pour les salons, entreprises de nettoyage et commerces : un flux constant de réservations."
+        }
+      }
+    },
+    "meetYourTeam": {
+      "heading": "Voici qui arrive dès le premier jour.",
+      "subheading": "Chaque équipe vient avec les personnes dont une petite entreprise a vraiment besoin.",
+      "footNote": "Discutez avec eux, remplacez-les ou ajoutez les vôtres. C'est votre équipe.",
+      "roles": {
+        "teamLead": {
+          "name": "Chef d'équipe",
+          "blurb": "Prend votre objectif, le transforme en plan, répartit le travail, et vérifie tout deux fois avant que ça n'arrive jusqu'à vous."
+        },
+        "marketing": {
+          "name": "Coéquipier marketing",
+          "blurb": "Prépare des brouillons de vos publications, e-mails et promotions, avec votre ton à vous, pour que du bon contenu soit publié chaque semaine."
+        },
+        "research": {
+          "name": "Coéquipier recherche",
+          "blurb": "Étudie vos concurrents, les prix et les tendances, puis vous remet la version courte, prête à être utilisée."
+        },
+        "bookkeeping": {
+          "name": "Coéquipier comptabilité",
+          "blurb": "Garde vos chiffres bien rangés et signale ce qui mérite votre attention, pour que la période des impôts ne soit plus jamais une surprise."
+        }
+      }
+    },
+    "howItWorks": {
+      "heading": "Opérationnel en quelques minutes.",
+      "cta": "Essayez gratuitement",
+      "steps": {
+        "pick": {
+          "title": "Choisissez votre secteur.",
+          "body": "Choisissez le modèle qui correspond à votre activité, votre équipe est prête en environ deux minutes."
+        },
+        "say": {
+          "title": "Dites ce dont vous avez besoin.",
+          "body": "Tapez un objectif avec vos propres mots, par exemple « attirer plus de clients au déjeuner en semaine ». Votre chef d'équipe le transforme en plan."
+        },
+        "review": {
+          "title": "Vérifiez et validez.",
+          "body": "L'équipe fait le travail et vous envoie des brouillons. Vous dites oui, demandez des changements, ou dites non. Toujours."
+        }
+      }
+    },
+    "expertise": {
+      "heading": "Derrière des visages sympathiques : une IA sérieuse.",
+      "introBefore": "PerkOS repose sur",
+      "introAfter": "qui rassemble des équipes de travailleurs IA capables de planifier, de répartir une tâche et de la terminer par elles-mêmes, au lieu d'attendre des instructions à chaque étape. Voici ce que ça signifie pour vous :",
+      "footNote": "Ce n'est pas une démo : l'équipe qui fait fonctionner PerkOS est en partie composée d'IA, sur cette même plateforme. Et c'est basé sur une vraie étude : 73 % des petites entreprises disent vouloir de l'aide pour que l'IA fonctionne vraiment. C'est exactement ce que nous avons construit.",
+      "proofs": {
+        "plan": {
+          "title": "Ils planifient comme une vraie équipe.",
+          "body": "Donnez un seul objectif, et votre chef d'équipe le découpe en tâches, les confie au bon coéquipier, et suit tout jusqu'à la fin, sans que vous ayez à surveiller quoi que ce soit."
+        },
+        "quality": {
+          "title": "Un travail bâclé ne vous parvient jamais.",
+          "body": "Chaque élément est vérifié avant que vous le voyiez. Si quelque chose n'est pas à la hauteur, c'est renvoyé et refait, automatiquement. Vous ne validez que ce qui mérite d'être validé."
+        },
+        "sleep": {
+          "title": "Ils travaillent pendant que vous dormez, sans faire grimper la facture.",
+          "body": "Votre équipe continue d'avancer pendant la nuit, puis se repose quand il n'y a rien à faire. Le temps de repos ne vous coûte presque rien."
+        }
+      }
+    },
+    "beyondTeams": {
+      "heading": "Quelle que soit l'IA dont votre entreprise a besoin, on s'en occupe.",
+      "body1": "Les équipes prêtes à l'emploi ne sont qu'un début. Nous construisons aussi de l'IA sur mesure pour les entreprises aux besoins plus grands ou plus particuliers : répondre à vos clients, connecter les outils que vous utilisez déjà, automatiser les tâches qui vous mangent votre semaine. Vous utilisez déjà de l'IA ailleurs ? Apportez-la avec vous, elle s'intégrera parfaitement.",
+      "body2": "Vous n'avez pas besoin de savoir quoi demander. Dites-nous quel est le problème, on s'occupe du reste.",
+      "cta": "Contactez-nous"
+    },
+    "pricing": {
+      "heading": "Commencez gratuitement. Ça reste abordable.",
+      "subheading": "Une équipe complète pour le prix d'un abonnement de streaming, et une équipe au repos ne coûte presque rien. Comparez ça à l'embauche d'une seule personne à temps partiel.",
+      "mostPopular": "Le plus populaire",
+      "footNote": "Vous ne payez que les heures que votre équipe travaille réellement. Une fois votre quota mensuel atteint, votre équipe se met simplement en pause : rechargez ou passez à une offre supérieure pour continuer. Vous ne recevez jamais de facture surprise.",
+      "tiers": {
+        "free": {
+          "name": "Gratuit",
+          "price": "Gratuit",
+          "cadence": "pendant 7 jours",
+          "tag": "Apportez vos propres agents",
+          "cta": "Commencer gratuitement",
+          "bullets": [
+            "Connectez les agents IA que vous utilisez déjà",
+            "Espace de travail complet : tableau, documents, chat",
+            "Ils rédigent des brouillons, vous validez, toujours",
+            "Fonctionne sur votre propre installation, gratuit pendant une semaine"
+          ]
+        },
+        "starter": {
+          "name": "Starter",
+          "price": "$9.99",
+          "cadence": "/ mois",
+          "tag": "Nous hébergeons votre équipe, vous apportez l'IA",
+          "cta": "Lancez votre équipe",
+          "bullets": [
+            "Nous faisons tourner votre équipe : rien à installer",
+            "Apportez votre propre clé IA (OpenAI et autres)",
+            "50 heures de travail d'équipe / mois",
+            "Vous payez votre fournisseur d'IA directement"
+          ]
+        },
+        "pro": {
+          "name": "Pro",
+          "price": "$29.99",
+          "cadence": "/ mois",
+          "tag": "Nous hébergeons votre équipe et faisons tourner l'IA",
+          "cta": "Lancez votre équipe",
+          "bullets": [
+            "Nous faisons tourner votre équipe ET l'IA : zéro installation",
+            "Aucun compte IA nécessaire",
+            "150 heures de travail d'équipe / mois",
+            "Support prioritaire"
+          ]
+        },
+        "scale": {
+          "name": "Scale",
+          "price": "$79.99",
+          "cadence": "/ mois",
+          "tag": "Pour les équipes qui tournent toute la journée",
+          "cta": "Lancez votre équipe",
+          "bullets": [
+            "Tout ce qu'il y a dans Pro",
+            "500 heures de travail d'équipe / mois",
+            "Rechargez à tout moment si vous en avez besoin",
+            "Accompagnement au démarrage et un vrai humain"
+          ]
+        }
+      }
+    },
+    "buildersStrip": {
+      "heading": "Vous construisez quelque chose de plus grand ?",
+      "links": {
+        "partners": {
+          "title": "Pour les partenaires",
+          "desc": "Intégrations, environnements d'exécution et IA que vous apportez vous-même."
+        },
+        "developers": {
+          "title": "Pour les développeurs",
+          "desc": "La plateforme sous le capot : API, systèmes de paiement, documentation."
+        }
+      }
+    },
+    "talkToUs": {
+      "heading": "Vous préférez d'abord parler à quelqu'un ?",
+      "subheading": "C'est tout à fait normal. Parlez-nous de votre entreprise et de ce qui vous prend tout votre temps, et nous vous dirons honnêtement si (et comment) l'IA peut vous aider.",
+      "followAlong": "Suivez-nous",
+      "contacts": {
+        "general": {
+          "title": "Demandes générales"
+        },
+        "partnerships": {
+          "title": "Partenariats"
+        },
+        "investors": {
+          "title": "Investisseurs"
+        }
+      }
+    },
+    "finalCTA": {
+      "heading": "Vous avez été toute l'équipe assez longtemps.",
+      "subheading": "Dans deux minutes, vous pourriez avoir de l'aide : une aide qui prépare des brouillons, propose des idées et demande toujours votre accord avant d'agir.",
+      "ctaPrimary": "Rencontrez votre équipe, gratuit pour commencer",
+      "ctaSecondary": "Parlez-nous d'abord"
+    },
+    "footer": {
+      "tagline": "Des équipes IA pour les petites entreprises. Elles rédigent des brouillons, vous validez.",
+      "copyright": "© {{year}} PerkOS. Des équipes IA pour les petites entreprises : elles rédigent des brouillons, vous validez.",
+      "links": {
+        "forYourBusiness": "Pour votre entreprise",
+        "howItWorks": "Comment ça marche",
+        "whyPerkos": "Pourquoi PerkOS",
+        "contact": "Contact",
+        "investors": "Investisseurs"
+      }
+    }
   }
 }
