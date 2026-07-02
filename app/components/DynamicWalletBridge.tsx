@@ -20,12 +20,15 @@ import {
  * the context stays null there and useWalletSession falls back to wagmi.
  */
 export function DynamicWalletBridge({ children }: { children: ReactNode }) {
-  const { primaryWallet } = useDynamicContext();
+  const { primaryWallet, handleLogOut } = useDynamicContext();
 
   const address = primaryWallet?.address;
   const isEvm = !!address && address.startsWith("0x") && address.length === 42;
 
   const value = useMemo<DynamicWalletState>(() => {
+    const logout = async () => {
+      await handleLogOut();
+    };
     if (!primaryWallet || !isEvm) {
       return {
         address: undefined,
@@ -33,6 +36,7 @@ export function DynamicWalletBridge({ children }: { children: ReactNode }) {
         signMessage: async () => {
           throw new Error("No Dynamic wallet connected.");
         },
+        logout,
       };
     }
     return {
@@ -45,8 +49,9 @@ export function DynamicWalletBridge({ children }: { children: ReactNode }) {
         }
         return signature;
       },
+      logout,
     };
-  }, [primaryWallet, address, isEvm]);
+  }, [primaryWallet, address, isEvm, handleLogOut]);
 
   return (
     <DynamicWalletContext.Provider value={value}>

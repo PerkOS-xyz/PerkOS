@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { useConnection, useSignMessage } from "wagmi";
+import { useConnection, useDisconnect, useSignMessage } from "wagmi";
 import { signOut } from "firebase/auth";
 
 import { firebaseAuth } from "./firebase";
@@ -24,6 +24,15 @@ import { DynamicWalletContext } from "./dynamicWallet";
  */
 let pendingSignIn: Promise<unknown> | null = null;
 
+/**
+ * Set while `logout()` tears the session down. The auto-sign-in effect below
+ * checks it so that clearing Firebase (firebaseUser → null) mid-logout doesn't
+ * immediately re-trigger `signInWithWallet` (which would pop a fresh signature
+ * prompt and re-log the user in). Module-level so it's shared across every
+ * useWalletSession() instance, same as `pendingSignIn`.
+ */
+let loggingOut = false;
+
 export type WalletSessionStatus =
   /** waiting for the wallet or Firebase to settle */
   | "loading"
@@ -44,6 +53,12 @@ type Result = {
   error?: string;
   retry: () => void;
   signOutFirebase: () => Promise<void>;
+  /**
+   * Full sign-out: tears down the wallet (Dynamic in the browser, wagmi in
+   * Mini App hosts) AND the Firebase session. Use this for the logout button,
+   * not a bare wagmi `disconnect()` (a no-op on the browser/Dynamic path).
+   */
+  logout: () => Promise<void>;
 };
 
 /**
@@ -72,6 +87,7 @@ export function useWalletSession(): Result {
     status: wagmiStatus,
   } = useConnection();
   const { signMessageAsync } = useSignMessage();
+  const { disconnect } = useDisconnect();
   const { user: firebaseUser, loading: firebaseLoading } = useFirebaseUser();
 
   // Browser/Dynamic path: when the context is present, Dynamic owns the wallet
@@ -151,6 +167,7 @@ export function useWalletSession(): Result {
   // When the wallet has an address and there's no matching Firebase session,
   // run the sign-in flow exactly once. The user can `retry()` if it failed.
   useEffect(() => {
+    if (loggingOut) return; // a logout is tearing the session down
     if (firebaseLoading) return;
     if (!isConnected || !normalizedAddress) return;
     if (inSync) return;
@@ -176,6 +193,40 @@ export function useWalletSession(): Result {
     }
   }, [dyn, wagmiStatus, firebaseUser]);
 
+  // Full logout: drop the wallet on whichever path owns it, then the Firebase
+  // session. `loggingOut` suppresses the auto-sign-in effect so clearing
+  // Firebase doesn't immediately re-trigger a signature prompt. Order matters:
+  // log the wallet out FIRST (so `isConnected` flips false) before signing out
+  // of Firebase.
+  const logout = useCallback(async () => {
+    loggingOut = true;
+    try {
+      // Browser/Dynamic path: clears primaryWallet. No-op elsewhere.
+      if (dyn) {
+        try {
+          await dyn.logout();
+        } catch {
+          // best-effort — still clear the rest below
+        }
+      }
+      // Mini App / in-app browser (and any stale browser wagmi connection).
+      try {
+        disconnect();
+      } catch {
+        // ignore
+      }
+      // Firebase custom-token session.
+      try {
+        await signOut(firebaseAuth());
+      } catch {
+        // ignore
+      }
+      pendingSignIn = null;
+    } finally {
+      loggingOut = false;
+    }
+  }, [dyn, disconnect]);
+
   const status: WalletSessionStatus = (() => {
     if (firebaseLoading) return "loading";
     if (!dyn && (wagmiStatus === "connecting" || wagmiStatus === "reconnecting")) {
@@ -195,5 +246,6 @@ export function useWalletSession(): Result {
     error: errorMessage,
     retry: runSignIn,
     signOutFirebase: () => signOut(firebaseAuth()),
+    logout,
   };
 }

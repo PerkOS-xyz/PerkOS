@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { useConnection, useDisconnect } from "wagmi";
+import { useConnection } from "wagmi";
 import { Menu, LogOut, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -54,9 +54,12 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { t } = useTranslation();
-  const { address, connector } = useConnection();
-  const { disconnect } = useDisconnect();
+  // `connector` must come from wagmi (used to detect the Base App in-app
+  // browser). The displayed/gated address prefers the session's wallet so the
+  // browser/Dynamic path (where wagmi holds no address) still shows the wallet.
+  const { address: wagmiAddress, connector } = useConnection();
   const session = useWalletSession();
+  const address = session.address ?? wagmiAddress;
   // Inside a Mini App host (Base App / Farcaster) the wallet IS the host's
   // identity — there is no meaningful "log out", so the button is hidden.
   // In a regular browser, logging out returns to the public landing page.
@@ -74,10 +77,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const hideLogout = inMiniApp === true || isBaseAppBrowser;
   // Intentional logout goes to the LANDING page; the signed-out effect below
   // otherwise bounces to /sign-in (its job for unexpected session loss).
+  // session.logout() tears down the real wallet (Dynamic in a browser, wagmi
+  // in a Mini App) AND Firebase — a bare wagmi disconnect() is a no-op on the
+  // browser/Dynamic path, which is why the logout button "did nothing" there.
   const loggingOut = useRef(false);
-  const logout = () => {
+  const logout = async () => {
     loggingOut.current = true;
-    disconnect();
+    await session.logout();
     router.push("/");
   };
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -141,7 +147,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               <NetworkPill />
               <NotificationsBell />
               <LanguageSelector />
-              <UserMenu />
+              <UserMenu onLogout={hideLogout ? undefined : logout} />
             </div>
           </header>
 
