@@ -1496,5 +1496,109 @@
         "noLeadDescAdd": "Agrega agentes y elige un líder de equipo para planear y repartir el trabajo."
       }
     }
+  },
+  "components": {
+    "kanban": {
+      "todo": "Por hacer",
+      "inProgress": "En curso",
+      "done": "Hecho",
+      "moveTaskAria": "Mover tarea. Usa las flechas izquierda o derecha para cambiar de columna, espacio para arrastrar."
+    },
+    "conductor": {
+      "emptyMessage": "Todavía no hay tareas. Agrega una para empezar.",
+      "roster": "Lista",
+      "noSwarm": "Todavía no hay un equipo definido para este proyecto. Agrega agentes para completar la lista.",
+      "inProgressCount": "{{count}} en curso"
+    },
+    "members": {
+      "inviteLabel": "Invita una billetera a {{kind}}",
+      "kindOrg": "esta organización",
+      "kindProject": "este proyecto",
+      "walletPlaceholder": "0x… dirección de billetera",
+      "roleEditor": "Editor",
+      "roleViewer": "Espectador",
+      "inviting": "Invitando…",
+      "invite": "Invitar",
+      "invalidWallet": "Ingresa una dirección de billetera 0x… válida (40 caracteres hexadecimales).",
+      "loadingMembers": "Cargando miembros…",
+      "noMembers": "Todavía no hay miembros.",
+      "removeAria": "Quitar {{wallet}}",
+      "removeTitle": "Quitar miembro",
+      "memberInvited": "Miembro invitado",
+      "memberInvitedDesc": "{{address}} ahora tiene acceso a {{kind}}.",
+      "inviteFailed": "No se pudo invitar al miembro",
+      "memberRemoved": "Miembro quitado",
+      "removeFailed": "No se pudo quitar al miembro"
+    },
+    "insights": {
+      "teamWorkload": "Carga de trabajo del equipo",
+      "percentComplete": "{{rate}}% completado",
+      "taskLabel_one": "tarea",
+      "taskLabel_other": "tareas",
+      "donePerAgent": "Hecho por agente",
+      "unassigned": "Sin asignar"
+    },
+    "contextMap": {
+      "empty": "El mapa se va completando a medida que agregas agentes y tareas a este proyecto.",
+      "caption": "El proyecto al centro, los agentes en órbita (el líder de equipo tiene un anillo), sus tareas en el borde. Las líneas sólidas son asignaciones activas, las discontinuas ya están hechas.",
+      "hiddenTasks_one": " {{count}} tarea anterior no mostrada.",
+      "hiddenTasks_other": " {{count}} tareas anteriores no mostradas.",
+      "leadPrefix": "Líder · "
+    },
+    "activityFeed": {
+      "title": "Actividad reciente",
+      "live": "en vivo",
+      "loading": "Cargando actividad…",
+      "empty": "Todavía no hay nada. Cuando tus agentes planeen, empiecen y terminen su trabajo, va a aparecer aquí a medida que sucede."
+    },
+    "pmBanner": {
+      "teamLead": "Líder de equipo",
+      "paused": "Pausado",
+      "round": "· ronda {{current}}/{{max}}",
+      "lastRun": "· última ejecución {{time}}",
+      "reasons": {
+        "goalMet": "Objetivo cumplido",
+        "noMoreWork": "No queda nada por hacer",
+        "maxRounds": "Se alcanzó el límite de rondas, ejecuta de nuevo para continuar",
+        "badPlan": "No se pudo armar un plan válido",
+        "emptyPlan": "No hay trabajo por hacer",
+        "llmError": "El modelo tuvo un error",
+        "noPm": "No hay líder de equipo designado"
+      },
+      "phases": {
+        "plan": "Plan",
+        "work": "Trabajo",
+        "review": "Revisión",
+        "done": "Hecho"
+      }
+    },
+    "confirmDialog": {
+      "confirm": "Confirmar",
+      "cancel": "Cancelar"
+    },
+    "editProject": {
+      "title": "Editar proyecto",
+      "description": "Actualiza el nombre y el objetivo. Las tareas y el historial de chat no se modifican.",
+      "name": "Nombre",
+      "goal": "Objetivo",
+      "cancel": "Cancelar",
+      "save": "Guardar cambios",
+      "missingProjectId": "Falta el id del proyecto.",
+      "updated": "Proyecto actualizado",
+      "updateFailed": "No se pudo actualizar el proyecto"
+    },
+    "editTask": {
+      "title": "Editar tarea",
+      "description": "Actualiza el nombre, la prioridad o el agente asignado. Los cambios de estado se hacen desde el tablero kanban.",
+      "name": "Nombre",
+      "priority": "Prioridad",
+      "assignedAgent": "Agente asignado",
+      "cancel": "Cancelar",
+      "save": "Guardar cambios",
+      "nameError": "El nombre de la tarea debe tener al menos 2 caracteres.",
+      "missingTaskId": "Falta el id de la tarea.",
+      "updated": "Tarea actualizada",
+      "updateFailed": "No se pudo actualizar la tarea"
+    }
   }
 }

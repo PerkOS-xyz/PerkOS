@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -43,6 +44,7 @@ export function EditTaskDialog({
   projectId,
   walletAddress,
 }: Props) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [name, setName] = useState(task.name);
   const [priority, setPriority] = useState<Priority>(
@@ -61,11 +63,11 @@ export function EditTaskDialog({
   }, [open, task.name, task.priority, task.agent]);
 
   const nameError =
-    name.trim().length < 2 ? "Task name must be at least 2 characters." : null;
+    name.trim().length < 2 ? t("components.editTask.nameError") : null;
 
   const mutation = useMutation({
     mutationFn: () => {
-      if (!task.id) throw new Error("Missing task id.");
+      if (!task.id) throw new Error(t("components.editTask.missingTaskId"));
       return updateTask({
         walletAddress,
         projectId,
@@ -81,11 +83,13 @@ export function EditTaskDialog({
       queryClient.invalidateQueries({
         queryKey: ["wallet-project", walletAddress, projectId],
       });
-      toast.success("Task updated");
+      toast.success(t("components.editTask.updated"));
       onOpenChange(false);
     },
     onError: (err: Error) => {
-      toast.error("Couldn't update task", { description: err.message });
+      toast.error(t("components.editTask.updateFailed"), {
+        description: err.message,
+      });
     },
   });
 
@@ -100,15 +104,16 @@ export function EditTaskDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Edit task</DialogTitle>
+          <DialogTitle>{t("components.editTask.title")}</DialogTitle>
           <DialogDescription>
-            Update the name, priority, or assigned agent. Status changes happen
-            from the kanban board.
+            {t("components.editTask.description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="edit-task-name">Name</Label>
+            <Label htmlFor="edit-task-name">
+              {t("components.editTask.name")}
+            </Label>
             <Input
               id="edit-task-name"
               value={name}
@@ -121,7 +126,9 @@ export function EditTaskDialog({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="edit-task-priority">Priority</Label>
+            <Label htmlFor="edit-task-priority">
+              {t("components.editTask.priority")}
+            </Label>
             <Select
               value={priority}
               onValueChange={(v) => setPriority(v as Priority)}
@@ -138,7 +145,9 @@ export function EditTaskDialog({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="edit-task-agent">Assigned agent</Label>
+            <Label htmlFor="edit-task-agent">
+              {t("components.editTask.assignedAgent")}
+            </Label>
             <Input
               id="edit-task-agent"
               value={agent}
@@ -154,13 +163,13 @@ export function EditTaskDialog({
               onClick={() => onOpenChange(false)}
               disabled={mutation.isPending}
             >
-              Cancel
+              {t("components.editTask.cancel")}
             </Button>
             <Button type="submit" disabled={mutation.isPending} className="gap-2">
               {mutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : null}
-              Save changes
+              {t("components.editTask.save")}
             </Button>
           </DialogFooter>
         </form>

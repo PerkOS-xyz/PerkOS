@@ -19,6 +19,7 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { GripVertical } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 
@@ -26,14 +27,22 @@ export type KanbanStatus = "todo" | "in_progress" | "done";
 
 type Column = {
   id: KanbanStatus;
-  title: string;
+  titleKey: string;
   tone: string;
 };
 
 const COLUMNS: Column[] = [
-  { id: "todo", title: "To do", tone: "border-border" },
-  { id: "in_progress", title: "In progress", tone: "border-amber-500/40" },
-  { id: "done", title: "Done", tone: "border-emerald-500/40" },
+  { id: "todo", titleKey: "components.kanban.todo", tone: "border-border" },
+  {
+    id: "in_progress",
+    titleKey: "components.kanban.inProgress",
+    tone: "border-amber-500/40",
+  },
+  {
+    id: "done",
+    titleKey: "components.kanban.done",
+    tone: "border-emerald-500/40",
+  },
 ];
 
 const COLUMN_ORDER: KanbanStatus[] = ["todo", "in_progress", "done"];
@@ -185,6 +194,7 @@ function KanbanColumn({
   children: ReactNode;
   extras?: ReactNode;
 }) {
+  const { t } = useTranslation();
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
   return (
     <div className="flex flex-col gap-3">
@@ -195,7 +205,7 @@ function KanbanColumn({
         )}
       >
         <span className="text-sm font-medium text-foreground">
-          {column.title}
+          {t(column.titleKey)}
         </span>
         <span className="grid h-7 w-7 place-items-center rounded-md bg-muted text-xs text-foreground">
           {count}
@@ -230,6 +240,7 @@ function DraggableCard({
   onMoveLeft: () => void;
   onMoveRight: () => void;
 }) {
+  const { t } = useTranslation();
   const { setNodeRef, attributes, listeners, isDragging } = useDraggable({
     id,
   });
@@ -257,7 +268,7 @@ function DraggableCard({
         {...attributes}
         {...listeners}
         onKeyDown={onKeyDown}
-        aria-label="Move task. Use arrow left/right to change column, space to drag."
+        aria-label={t("components.kanban.moveTaskAria")}
         className="absolute left-1 top-1/2 z-10 grid h-6 w-4 -translate-y-1/2 cursor-grab place-items-center rounded text-muted-foreground/40 transition-opacity hover:text-foreground focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing md:opacity-0 md:group-hover:opacity-100"
       >
         <GripVertical className="h-3.5 w-3.5" />

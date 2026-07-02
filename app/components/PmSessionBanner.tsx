@@ -1,28 +1,30 @@
 "use client";
 
 import { Loader2, CheckCircle2, PauseCircle, Compass } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 import type { PmSession } from "../lib/perkosApi";
 import { formatRelativeShort } from "../lib/format";
 
-const REASON_LABEL: Record<string, string> = {
-  "goal-met": "Goal met",
-  "no-more-work": "Nothing left to do",
-  "max-rounds": "Hit the round limit — run again to continue",
-  "bad-plan": "Couldn't form a valid plan",
-  "empty-plan": "No work to do",
-  "llm-error": "The model errored",
-  "no-pm": "No team lead designated",
+// Maps a session `reason` enum to its translation key.
+const REASON_KEYS: Record<string, string> = {
+  "goal-met": "components.pmBanner.reasons.goalMet",
+  "no-more-work": "components.pmBanner.reasons.noMoreWork",
+  "max-rounds": "components.pmBanner.reasons.maxRounds",
+  "bad-plan": "components.pmBanner.reasons.badPlan",
+  "empty-plan": "components.pmBanner.reasons.emptyPlan",
+  "llm-error": "components.pmBanner.reasons.llmError",
+  "no-pm": "components.pmBanner.reasons.noPm",
 };
 
 // The PM loop's phases, in order — rendered as a mini pipeline so the owner
 // can see WHERE in the loop the session is, not just that it's "running".
-const PHASES: { id: string; label: string }[] = [
-  { id: "planning", label: "Plan" },
-  { id: "working", label: "Work" },
-  { id: "reviewing", label: "Review" },
-  { id: "done", label: "Done" },
+const PHASES: { id: string; labelKey: string }[] = [
+  { id: "planning", labelKey: "components.pmBanner.phases.plan" },
+  { id: "working", labelKey: "components.pmBanner.phases.work" },
+  { id: "reviewing", labelKey: "components.pmBanner.phases.review" },
+  { id: "done", labelKey: "components.pmBanner.phases.done" },
 ];
 
 /**
@@ -37,6 +39,7 @@ export function PmSessionBanner({
   session?: PmSession;
   pmAgent?: string | null;
 }) {
+  const { t } = useTranslation();
   if (!session) return null;
 
   const active =
@@ -47,7 +50,11 @@ export function PmSessionBanner({
     session.status === "done" ? "ok" : session.status === "stopped" ? "warn" : "active";
 
   const Icon = active ? Loader2 : session.status === "done" ? CheckCircle2 : PauseCircle;
-  const reason = session.reason ? REASON_LABEL[session.reason] ?? session.reason : null;
+  const reason = session.reason
+    ? REASON_KEYS[session.reason]
+      ? t(REASON_KEYS[session.reason])
+      : session.reason
+    : null;
   const phaseIdx = PHASES.findIndex((p) => p.id === session.status);
 
   return (
@@ -62,7 +69,7 @@ export function PmSessionBanner({
       <Icon className={cn("h-4 w-4 shrink-0", active && "animate-spin")} />
       <span className="inline-flex items-center gap-1 font-medium">
         <Compass className="h-3.5 w-3.5" />
-        {pmAgent ? `${pmAgent}` : "Team lead"}
+        {pmAgent ? `${pmAgent}` : t("components.pmBanner.teamLead")}
       </span>
 
       {/* Phase pipeline: Plan → Work → Review → Done */}
@@ -78,23 +85,28 @@ export function PmSessionBanner({
                   i > phaseIdx && "opacity-35",
                 )}
               >
-                {p.label}
+                {t(p.labelKey)}
               </span>
             </span>
           ))}
         </span>
       ) : (
-        <span className="opacity-90">Paused</span>
+        <span className="opacity-90">{t("components.pmBanner.paused")}</span>
       )}
 
       {session.maxRounds > 0 ? (
         <span className="opacity-70">
-          · round {Math.min(session.round, session.maxRounds)}/{session.maxRounds}
+          {t("components.pmBanner.round", {
+            current: Math.min(session.round, session.maxRounds),
+            max: session.maxRounds,
+          })}
         </span>
       ) : null}
       {session.lastRunAt ? (
         <span className="opacity-70" title={session.lastRunAt}>
-          · last run {formatRelativeShort(session.lastRunAt)}
+          {t("components.pmBanner.lastRun", {
+            time: formatRelativeShort(session.lastRunAt),
+          })}
         </span>
       ) : null}
       {reason ? <span className="opacity-70">· {reason}</span> : null}

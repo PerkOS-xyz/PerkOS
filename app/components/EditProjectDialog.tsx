@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -34,6 +35,7 @@ export function EditProjectDialog({
   project,
   walletAddress,
 }: Props) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [name, setName] = useState(project.name);
   const [goal, setGoal] = useState(project.goal ?? "");
@@ -52,7 +54,7 @@ export function EditProjectDialog({
 
   const mutation = useMutation({
     mutationFn: () => {
-      if (!project.id) throw new Error("Missing project id.");
+      if (!project.id) throw new Error(t("components.editProject.missingProjectId"));
       return updateProject({
         walletAddress,
         projectId: project.id,
@@ -66,11 +68,13 @@ export function EditProjectDialog({
       queryClient.invalidateQueries({
         queryKey: ["wallet-projects", walletAddress],
       });
-      toast.success("Project updated");
+      toast.success(t("components.editProject.updated"));
       onOpenChange(false);
     },
     onError: (err: Error) => {
-      toast.error("Couldn't update project", { description: err.message });
+      toast.error(t("components.editProject.updateFailed"), {
+        description: err.message,
+      });
     },
   });
 
@@ -85,14 +89,16 @@ export function EditProjectDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Edit project</DialogTitle>
+          <DialogTitle>{t("components.editProject.title")}</DialogTitle>
           <DialogDescription>
-            Update the name and goal. Tasks and chat history are untouched.
+            {t("components.editProject.description")}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="edit-project-name">Name</Label>
+            <Label htmlFor="edit-project-name">
+              {t("components.editProject.name")}
+            </Label>
             <Input
               id="edit-project-name"
               value={name}
@@ -104,7 +110,9 @@ export function EditProjectDialog({
             ) : null}
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="edit-project-goal">Goal</Label>
+            <Label htmlFor="edit-project-goal">
+              {t("components.editProject.goal")}
+            </Label>
             <Textarea
               id="edit-project-goal"
               value={goal}
@@ -123,13 +131,13 @@ export function EditProjectDialog({
               onClick={() => onOpenChange(false)}
               disabled={mutation.isPending}
             >
-              Cancel
+              {t("components.editProject.cancel")}
             </Button>
             <Button type="submit" disabled={mutation.isPending} className="gap-2">
               {mutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : null}
-              Save changes
+              {t("components.editProject.save")}
             </Button>
           </DialogFooter>
         </form>
