@@ -893,7 +893,7 @@
         "boundaries": "Límites",
         "memoryPolicy": "Política de memoria",
         "remember": "Recuerda:",
-        "dontRemember": "No recuerda:",
+        "dontRemember": "No recuerdes:",
         "petPeeves": "Manías"
       }
     },
@@ -1273,7 +1273,7 @@
     "tabs": {
       "tasks": "Tareas",
       "docs": "Documentos",
-      "conductor": "Conductor",
+      "conductor": "Director",
       "agents": "Agentes",
       "map": "Mapa",
       "chat": "Chat del proyecto",
@@ -1549,7 +1549,23 @@
       "title": "Actividad reciente",
       "live": "en vivo",
       "loading": "Cargando actividad…",
-      "empty": "Todavía no hay nada. Cuando tus agentes planeen, empiecen y terminen su trabajo, va a aparecer aquí a medida que sucede."
+      "empty": "Todavía no hay nada. Cuando tus agentes planeen, empiecen y terminen su trabajo, va a aparecer aquí a medida que sucede.",
+      "verbs": {
+        "created": "creó",
+        "moved": "movió",
+        "startedWorkingOn": "empezó a trabajar en",
+        "completed": "completó",
+        "sentBack": "devolvió para otra revisión:",
+        "planned": "planeó",
+        "proposedPlanIn": "propuso un plan en",
+        "approvedPlanIn": "aprobó el plan en",
+        "reachedGoalOf": "alcanzó el objetivo de",
+        "launched": "lanzó",
+        "cameOnline": "se conectó",
+        "failedToStart": "no pudo iniciarse",
+        "createdProject": "creó",
+        "flaggedOverlapOn": "marcó una superposición en"
+      }
     },
     "pmBanner": {
       "teamLead": "Líder de equipo",

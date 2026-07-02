@@ -22,6 +22,7 @@ import {
   serverTimestamp,
   type Timestamp,
 } from "firebase/firestore";
+import type { TFunction } from "i18next";
 import { useEffect, useState } from "react";
 
 import { firebaseDb } from "./firebase";
@@ -158,38 +159,32 @@ export function useActivityFeed(
   };
 }
 
-/** Plain-language phrasing per verb, e.g. "Scholar completed Write menu copy". */
-export function verbPhrase(verb: string): string {
-  switch (verb) {
-    case "created_task":
-      return "created";
-    case "moved_task":
-      return "moved";
-    case "started_task":
-      return "started working on";
-    case "completed_task":
-      return "completed";
-    case "retried_task":
-      return "sent back for another pass:";
-    case "planned":
-      return "planned";
-    case "proposed_plan":
-      return "proposed a plan in";
-    case "approved_plan":
-      return "approved the plan in";
-    case "goal_done":
-      return "reached the goal of";
-    case "launched_agent":
-      return "launched";
-    case "agent_online":
-      return "came online";
-    case "agent_failed":
-      return "failed to start";
-    case "created_project":
-      return "created";
-    case "flagged_contention":
-      return "flagged an overlap on";
-    default:
-      return verb.replace(/_/g, " ");
-  }
+/** Maps each activity verb to its i18n key under `components.activityFeed.verbs`. */
+const VERB_KEYS: Record<string, string> = {
+  created_task: "created",
+  moved_task: "moved",
+  started_task: "startedWorkingOn",
+  completed_task: "completed",
+  retried_task: "sentBack",
+  planned: "planned",
+  proposed_plan: "proposedPlanIn",
+  approved_plan: "approvedPlanIn",
+  goal_done: "reachedGoalOf",
+  launched_agent: "launched",
+  agent_online: "cameOnline",
+  agent_failed: "failedToStart",
+  created_project: "createdProject",
+  flagged_contention: "flaggedOverlapOn",
+};
+
+/**
+ * Plain-language phrasing per verb, e.g. "Scholar completed Write menu copy".
+ * Translated via i18n; pass the caller's `t` (from useTranslation). Unknown
+ * verbs fall back to the de-underscored verb string.
+ */
+export function verbPhrase(verb: string, t: TFunction): string {
+  const key = VERB_KEYS[verb];
+  return key
+    ? t(`components.activityFeed.verbs.${key}`)
+    : verb.replace(/_/g, " ");
 }

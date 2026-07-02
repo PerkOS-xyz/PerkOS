@@ -403,7 +403,7 @@
       "agentCount_other": "{{count}} 个智能体",
       "taskCount_one": "{{count}} 个任务",
       "taskCount_other": "{{count}} 个任务",
-      "active": "活跃 {{time}}"
+      "active": "活跃于 {{time}}"
     },
     "taskRow": {
       "agentLabel": "智能体:"
@@ -458,7 +458,7 @@
       "agentCount_other": "{{count}} 个智能体",
       "taskCount_one": "{{count}} 个任务",
       "taskCount_other": "{{count}} 个任务",
-      "active": "活跃 {{time}}"
+      "active": "活跃于 {{time}}"
     },
     "empty": {
       "title": "暂时还没有项目",
@@ -687,7 +687,7 @@
       "perkosApi": "PerkOS API",
       "defaultChain": "默认链",
       "solanaCluster": "Solana 集群",
-      "testnet": "Testnet"
+      "testnet": "测试网"
     },
     "danger": {
       "title": "危险操作区",
@@ -877,7 +877,7 @@
       "edited": "已编辑",
       "systemPromptSr": "系统提示词",
       "systemPromptHelp": "会成为运行环境容器内的 SOUL.md / IDENTITY.md 文件。",
-      "systemPromptPlaceholder": "You are a …",
+      "systemPromptPlaceholder": "你是一位…",
       "resetToDefault": "恢复为 {{name}} 的默认设置",
       "advancedHide": "高级选项,隐藏完整人设",
       "advancedView": "高级选项,查看完整人设",
@@ -966,7 +966,7 @@
         "visibilityMentions": "仅提及(推荐)",
         "visibilityAll": "全部(需要指定父频道)",
         "neynarApiKey": "Neynar API 密钥",
-        "signerUuid": "Signer UUID",
+        "signerUuid": "签名者 UUID",
         "webhookSecret": "Webhook 密钥",
         "webhookSecretPlaceholder": "你在 Neynar webhook 上设置的 HMAC 密钥",
         "parentChannel": "父频道",
@@ -1028,7 +1028,7 @@
       "runtimeHelp": "你的智能体使用的协议,决定提示词中桥接端点的设置。",
       "noteLabel": "给智能体的备注(可选)",
       "noteHelp": "智能体在其邀请提示词中会看到的背景信息。",
-      "notePlaceholder": "You'll help the team with market research and weekly reports.",
+      "notePlaceholder": "你将协助团队进行市场调研,并撰写每周报告。",
       "result": {
         "registeredBefore": "已注册到你的组织。在它连接之前,状态显示为",
         "invited": "已邀请",
@@ -1218,7 +1218,7 @@
       "modelPlaceholder": "模型 ID",
       "keyPlaceholder": "sk-…(你的 API 密钥,加密存储,不会出现在任务记录中)",
       "saveTemplateLabel": "把这支团队保存为我的模板之一",
-      "saveTemplatePlaceholder": "{{name}}团队",
+      "saveTemplatePlaceholder": "{{name}} 团队",
       "saveTemplatePlaceholderFallback": "我的",
       "saveTemplateHint": "你调整了推荐的团队,保存后可以在下一个项目中复用。",
       "launching": "启动中…",
@@ -1558,7 +1558,23 @@
       "title": "近期动态",
       "live": "实时",
       "loading": "正在加载动态…",
-      "empty": "还没有任何动态。当你的智能体规划、开始并完成工作时,内容会实时显示在这里。"
+      "empty": "还没有任何动态。当你的智能体规划、开始并完成工作时,内容会实时显示在这里。",
+      "verbs": {
+        "created": "创建了",
+        "moved": "移动了",
+        "startedWorkingOn": "开始处理",
+        "completed": "完成了",
+        "sentBack": "退回重做:",
+        "planned": "规划了",
+        "proposedPlanIn": "提议了计划:",
+        "approvedPlanIn": "批准了计划:",
+        "reachedGoalOf": "达成了目标:",
+        "launched": "启动了",
+        "cameOnline": "上线了",
+        "failedToStart": "启动失败",
+        "createdProject": "创建了",
+        "flaggedOverlapOn": "标记了重叠:"
+      }
     },
     "pmBanner": {
       "teamLead": "团队负责人",

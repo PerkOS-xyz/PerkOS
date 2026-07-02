@@ -569,7 +569,7 @@ function AgentActivitySection({
               key={e.id}
               className="flex items-baseline gap-1.5 border-b border-border/40 py-2 text-xs last:border-0"
             >
-              <span className="text-muted-foreground">{verbPhrase(e.verb)}</span>
+              <span className="text-muted-foreground">{verbPhrase(e.verb, t)}</span>
               <span className="min-w-0 flex-1 truncate text-foreground/90">
                 {e.object}
               </span>
