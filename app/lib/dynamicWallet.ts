@@ -18,6 +18,13 @@ export type DynamicWalletState = {
   address: string | undefined;
   isConnected: boolean;
   signMessage: (message: string) => Promise<string>;
+  /**
+   * Log out of Dynamic (clears `primaryWallet`). Required for a real browser
+   * logout: wagmi's `disconnect()` is a no-op here since Dynamic — not wagmi —
+   * owns the wallet, so without this the session survives and the user is
+   * bounced straight back in.
+   */
+  logout: () => Promise<void>;
 };
 
 export const DynamicWalletContext = createContext<DynamicWalletState | null>(

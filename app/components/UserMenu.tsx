@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useConnection, useDisconnect } from "wagmi";
 import {
   Check,
   Copy,
@@ -21,12 +20,17 @@ import {
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { formatAddress } from "../lib/format";
+import { useWalletSession } from "../lib/useWalletSession";
 
-export function UserMenu() {
+export function UserMenu({ onLogout }: { onLogout?: () => void }) {
   const { t } = useTranslation();
   const router = useRouter();
-  const { address } = useConnection();
-  const { disconnect } = useDisconnect();
+  // Read the wallet from the session (Dynamic in a browser, wagmi in a Mini
+  // App) so the menu renders on both paths. Logout goes through the layout's
+  // handler (single path: it tears down wallet + Firebase and routes to the
+  // landing page); fall back to session.logout() if no handler was provided.
+  const session = useWalletSession();
+  const address = session.address;
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -42,10 +46,14 @@ export function UserMenu() {
       .catch(() => {});
   }
 
-  function handleDisconnect() {
+  async function handleDisconnect() {
     setOpen(false);
-    disconnect();
-    router.replace("/sign-in");
+    if (onLogout) {
+      onLogout();
+      return;
+    }
+    await session.logout();
+    router.replace("/");
   }
 
   return (
