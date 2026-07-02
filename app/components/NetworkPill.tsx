@@ -42,6 +42,7 @@ import { base, celo } from "wagmi/chains";
 import { sdk } from "@farcaster/miniapp-sdk";
 import { ChevronDown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 import {
   DropdownMenu,
@@ -161,6 +162,7 @@ function formatBalance(raw: bigint, decimals: number): string {
 }
 
 export function NetworkPill() {
+  const { t } = useTranslation();
   const { address, isConnected } = useAccount();
   const activeChainId = useChainId();
   const { switchChainAsync, isPending: isSwitching } = useSwitchChain();
@@ -253,14 +255,15 @@ export function NetworkPill() {
     if (target.id === activeChainId) return;
     try {
       await switchChainAsync({ chainId: target.id });
-      toast.success(`Switched to ${target.name}`);
+      toast.success(t("chrome.network.switchedTo", { network: target.name }));
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Unknown error";
+      const message =
+        err instanceof Error ? err.message : t("chrome.network.unknownError");
       // Some smart wallets (Coinbase Smart Wallet in particular) reject
       // wallet_switchEthereumChain entirely because they're pinned to
       // a single chain. Surface the wallet's message so the user can
       // see what's going on rather than a generic "cancelled".
-      toast.error(`Couldn't switch to ${target.name}`, {
+      toast.error(t("chrome.network.switchFailed", { network: target.name }), {
         description: message,
       });
     }
@@ -269,17 +272,21 @@ export function NetworkPill() {
   const ariaLabel = (() => {
     const u =
       usdcLabel === null
-        ? "loading USDC"
+        ? t("chrome.network.loadingToken", { token: "USDC" })
         : usdcLabel === "—"
-          ? "USDC balance unavailable"
-          : `$${usdcLabel} USDC`;
+          ? t("chrome.network.tokenUnavailable", { token: "USDC" })
+          : t("chrome.network.usdcBalance", { amount: usdcLabel });
     const p =
       perkosLabel === null
-        ? "loading PERKOS"
+        ? t("chrome.network.loadingToken", { token: "PERKOS" })
         : perkosLabel === "—"
-          ? "PERKOS balance unavailable"
-          : `${perkosLabel} PERKOS`;
-    return `${u}, ${p}, on ${displayedNetwork.name}`;
+          ? t("chrome.network.tokenUnavailable", { token: "PERKOS" })
+          : t("chrome.network.perkosBalance", { amount: perkosLabel });
+    return t("chrome.network.balancesSummary", {
+      usdc: u,
+      perkos: p,
+      network: displayedNetwork.name,
+    });
   })();
 
   // -----------------------------------------------------------------
@@ -303,7 +310,7 @@ export function NetworkPill() {
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-haspopup="listbox"
-        aria-label={`Network and balances: ${ariaLabel}`}
+        aria-label={t("chrome.network.triggerAria", { summary: ariaLabel })}
         aria-disabled={isSwitching || undefined}
         className={cn(
           "group inline-flex items-center gap-1.5 rounded-full border bg-card px-3 text-xs font-medium transition-colors",
@@ -318,7 +325,9 @@ export function NetworkPill() {
       >
         <LogoMark network={displayedNetwork} />
         {isUnsupportedChain ? (
-          <span className="text-destructive">Wrong network</span>
+          <span className="text-destructive">
+            {t("chrome.network.wrongNetwork")}
+          </span>
         ) : (
           <BalancesBody usdcLabel={usdcLabel} perkosLabel={perkosLabel} />
         )}
@@ -434,11 +443,12 @@ function TokenSlot({
   suffix?: string;
   loadingHint: string;
 }) {
+  const { t } = useTranslation();
   if (label === null) {
     return (
       <span
         className="block h-2 w-8 animate-pulse rounded-full bg-muted"
-        aria-label={`Loading ${loadingHint} balance`}
+        aria-label={t("chrome.network.loadingBalance", { token: loadingHint })}
         role="status"
       />
     );

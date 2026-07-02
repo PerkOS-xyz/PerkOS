@@ -3,26 +3,29 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Folder, ListTodo, Bot, MessageCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { href: "/dashboard", label: "Home", Icon: Home },
-  { href: "/projects", label: "Projects", Icon: Folder },
-  { href: "/tasks", label: "Tasks", Icon: ListTodo },
-  { href: "/chat", label: "Chat", Icon: MessageCircle },
-  { href: "/agents", label: "Agents", Icon: Bot },
+  { href: "/dashboard", labelKey: "chrome.mobileNav.home", Icon: Home },
+  { href: "/projects", labelKey: "nav.projects", Icon: Folder },
+  { href: "/tasks", labelKey: "nav.tasks", Icon: ListTodo },
+  { href: "/chat", labelKey: "nav.chat", Icon: MessageCircle },
+  { href: "/agents", labelKey: "nav.agents", Icon: Bot },
 ];
 
 export function MobileBottomNav() {
+  const { t } = useTranslation();
   const pathname = usePathname();
 
   return (
     <nav
-      aria-label="Primary navigation"
+      aria-label={t("chrome.mobileNav.primaryNavigation")}
       className="fixed inset-x-0 bottom-0 z-20 flex h-16 items-stretch border-t border-border bg-card/95 backdrop-blur md:hidden"
     >
-      {NAV.map(({ href, label, Icon }) => {
+      {NAV.map(({ href, labelKey, Icon }) => {
         const active = pathname === href || pathname?.startsWith(`${href}/`);
+        const label = t(labelKey);
         return (
           <Link
             key={href}

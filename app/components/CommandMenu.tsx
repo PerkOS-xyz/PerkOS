@@ -17,6 +17,7 @@ import {
   Settings,
   Sparkles,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import {
   CommandDialog,
@@ -35,6 +36,7 @@ import {
 import { useChatbot } from "./ChatbotProvider";
 
 export function CommandMenu() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const { address, isConnected } = useConnection();
@@ -75,22 +77,22 @@ export function CommandMenu() {
 
   const navItems = useMemo(
     () => [
-      { icon: Home, label: "Dashboard", href: "/dashboard", shortcut: "g d" },
-      { icon: Folder, label: "Projects", href: "/projects", shortcut: "g p" },
-      { icon: ListTodo, label: "Tasks", href: "/tasks", shortcut: "g t" },
-      { icon: Bot, label: "Agents", href: "/agents", shortcut: "g a" },
-      { icon: MessageSquare, label: "Chat", href: "/chat", shortcut: "g c" },
-      { icon: Settings, label: "Settings", href: "/settings", shortcut: "g s" },
+      { icon: Home, labelKey: "nav.dashboard", href: "/dashboard", shortcut: "g d" },
+      { icon: Folder, labelKey: "nav.projects", href: "/projects", shortcut: "g p" },
+      { icon: ListTodo, labelKey: "nav.tasks", href: "/tasks", shortcut: "g t" },
+      { icon: Bot, labelKey: "nav.agents", href: "/agents", shortcut: "g a" },
+      { icon: MessageSquare, labelKey: "nav.chat", href: "/chat", shortcut: "g c" },
+      { icon: Settings, labelKey: "nav.settings", href: "/settings", shortcut: "g s" },
     ],
     []
   );
 
   const createItems = useMemo(
     () => [
-      { icon: Folder, label: "Create project", href: "/projects/new", shortcut: "c p" },
-      { icon: ListTodo, label: "Create task", href: "/tasks/new", shortcut: "c t" },
-      { icon: Bot, label: "Register agent", href: "/agents/new", shortcut: "c a" },
-      { icon: Briefcase, label: "Create organization", href: "/organizations/new", shortcut: "c o" },
+      { icon: Folder, labelKey: "chrome.commandMenu.createProject", href: "/projects/new", shortcut: "c p" },
+      { icon: ListTodo, labelKey: "chrome.commandMenu.createTask", href: "/tasks/new", shortcut: "c t" },
+      { icon: Bot, labelKey: "chrome.commandMenu.registerAgent", href: "/agents/new", shortcut: "c a" },
+      { icon: Briefcase, labelKey: "chrome.commandMenu.createOrganization", href: "/organizations/new", shortcut: "c o" },
     ],
     []
   );
@@ -151,22 +153,22 @@ export function CommandMenu() {
     <CommandDialog
       open={open}
       onOpenChange={setOpen}
-      title="Command menu"
-      description="Search and jump to any project, task, agent, or screen."
+      title={t("chrome.commandMenu.title")}
+      description={t("chrome.commandMenu.description")}
     >
-      <CommandInput placeholder="Type a command, project, or agent…" />
+      <CommandInput placeholder={t("chrome.commandMenu.placeholder")} />
       <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
+        <CommandEmpty>{t("chrome.commandMenu.noResults")}</CommandEmpty>
 
-        <CommandGroup heading="Navigation">
-          {navItems.map(({ icon: Icon, label, href, shortcut }) => (
+        <CommandGroup heading={t("chrome.commandMenu.navigation")}>
+          {navItems.map(({ icon: Icon, labelKey, href, shortcut }) => (
             <CommandItem
               key={href}
-              value={`nav ${label}`}
+              value={`nav ${t(labelKey)}`}
               onSelect={() => go(href)}
             >
               <Icon className="mr-2 h-4 w-4 text-muted-foreground" />
-              <span>{label}</span>
+              <span>{t(labelKey)}</span>
               <ShortcutHint hint={shortcut} />
             </CommandItem>
           ))}
@@ -174,16 +176,16 @@ export function CommandMenu() {
 
         <CommandSeparator />
 
-        <CommandGroup heading="Create new">
-          {createItems.map(({ icon: Icon, label, href, shortcut }) => (
+        <CommandGroup heading={t("chrome.commandMenu.createNew")}>
+          {createItems.map(({ icon: Icon, labelKey, href, shortcut }) => (
             <CommandItem
               key={href}
-              value={`create ${label}`}
+              value={`create ${t(labelKey)}`}
               onSelect={() => go(href)}
             >
               <Plus className="mr-2 h-4 w-4 text-muted-foreground" />
               <Icon className="mr-2 h-4 w-4 text-muted-foreground" />
-              <span>{label}</span>
+              <span>{t(labelKey)}</span>
               <ShortcutHint hint={shortcut} />
             </CommandItem>
           ))}
@@ -192,7 +194,7 @@ export function CommandMenu() {
         {projects.length > 0 ? (
           <>
             <CommandSeparator />
-            <CommandGroup heading="Projects">
+            <CommandGroup heading={t("nav.projects")}>
               {projects.slice(0, 8).map((p) => (
                 <CommandItem
                   key={p.id ?? p.name}
@@ -213,7 +215,7 @@ export function CommandMenu() {
         {agents.length > 0 ? (
           <>
             <CommandSeparator />
-            <CommandGroup heading="Agents">
+            <CommandGroup heading={t("nav.agents")}>
               {agents.slice(0, 8).map((a) => (
                 <CommandItem
                   key={a.id}
@@ -233,7 +235,7 @@ export function CommandMenu() {
 
         <CommandSeparator />
 
-        <CommandGroup heading="Actions">
+        <CommandGroup heading={t("chrome.commandMenu.actions")}>
           <CommandItem
             value="open perkos agent"
             onSelect={() => {
@@ -242,7 +244,7 @@ export function CommandMenu() {
             }}
           >
             <Sparkles className="mr-2 h-4 w-4 text-primary" />
-            Open PerkOS Agent
+            {t("chrome.commandMenu.openPerkosAgent")}
           </CommandItem>
           <CommandItem
             value="disconnect wallet"
@@ -253,7 +255,7 @@ export function CommandMenu() {
             }}
           >
             <LogOut className="mr-2 h-4 w-4 text-destructive" />
-            Disconnect wallet
+            {t("chrome.commandMenu.disconnectWallet")}
           </CommandItem>
         </CommandGroup>
       </CommandList>
