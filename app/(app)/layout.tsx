@@ -28,6 +28,7 @@ import { AccessGate } from "../components/AccessGate";
 import { NotificationsBell } from "../components/NotificationsBell";
 import { NetworkPill } from "../components/NetworkPill";
 import { UserMenu } from "../components/UserMenu";
+import { LanguageSelector } from "../components/LanguageSelector";
 import { RefreshButton } from "../components/RefreshButton";
 import { PullToRefresh } from "../components/PullToRefresh";
 import { OrgSwitcher, ProjectPicker } from "../components/OrgSwitcher";
@@ -36,21 +37,23 @@ import { ActiveOrgProvider } from "../lib/useActiveOrg";
 import { formatAddress } from "../lib/format";
 import { useIsInMiniApp } from "../lib/useIsInMiniApp";
 import { useWalletSession } from "../lib/useWalletSession";
+import { useTranslation } from "react-i18next";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/projects", label: "Projects" },
-  { href: "/tasks", label: "Tasks" },
-  { href: "/agents", label: "Agents" },
-  { href: "/chat", label: "Chat" },
-  { href: "/organizations", label: "Organization" },
-  { href: "/wallet", label: "Wallet" },
-  { href: "/settings", label: "Settings" },
+  { href: "/dashboard", key: "nav.dashboard" },
+  { href: "/projects", key: "nav.projects" },
+  { href: "/tasks", key: "nav.tasks" },
+  { href: "/agents", key: "nav.agents" },
+  { href: "/chat", key: "nav.chat" },
+  { href: "/organizations", key: "nav.organization" },
+  { href: "/wallet", key: "nav.wallet" },
+  { href: "/settings", key: "nav.settings" },
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { t } = useTranslation();
   const { address, connector } = useConnection();
   const { disconnect } = useDisconnect();
   const session = useWalletSession();
@@ -112,7 +115,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:border focus:border-primary focus:bg-card focus:px-3 focus:py-2 focus:text-sm focus:text-foreground focus:shadow-lg"
         >
-          Skip to main content
+          {t("common.skipToContent")}
         </a>
 
         {/* Desktop sidebar */}
@@ -137,6 +140,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               <RefreshButton />
               <NetworkPill />
               <NotificationsBell />
+              <LanguageSelector />
               <UserMenu />
             </div>
           </header>
@@ -160,7 +164,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      aria-label="Open menu"
+                      aria-label={t("common.openMenu")}
                       className="h-9 w-9 text-foreground hover:bg-primary/10"
                     />
                   }
@@ -181,11 +185,15 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                       />
                     </SheetTitle>
                     <SheetDescription className="sr-only">
-                      Main navigation
+                      {t("common.mainNavigation")}
                     </SheetDescription>
                   </SheetHeader>
 
                   <NavList pathname={pathname} />
+
+                  <div className="px-1">
+                    <LanguageSelector />
+                  </div>
 
                   <Separator className="bg-border" />
 
@@ -275,6 +283,7 @@ function Brand() {
 }
 
 function NavList({ pathname }: { pathname: string | null }) {
+  const { t } = useTranslation();
   return (
     <nav aria-label="Primary" className="flex flex-1 flex-col gap-1">
       {NAV_ITEMS.map((item) => {
@@ -291,7 +300,7 @@ function NavList({ pathname }: { pathname: string | null }) {
                 : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
             )}
           >
-            {item.label}
+            {t(item.key)}
           </Link>
         );
       })}

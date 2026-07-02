@@ -1,0 +1,30 @@
+{
+  "nav": {
+    "dashboard": "仪表盘",
+    "projects": "项目",
+    "tasks": "任务",
+    "agents": "智能体",
+    "chat": "聊天",
+    "organization": "组织",
+    "wallet": "钱包",
+    "settings": "设置"
+  },
+  "common": {
+    "language": "语言",
+    "loading": "加载中…",
+    "skipToContent": "跳到主要内容",
+    "openMenu": "打开菜单",
+    "mainNavigation": "主导航"
+  },
+  "signIn": {
+    "signingIn": "正在登录…",
+    "continueAs": "以 {{address}} 继续",
+    "retry": "重试登录",
+    "useDifferentAccount": "使用其他账户",
+    "connectingWallet": "正在连接钱包…",
+    "restoringSession": "正在恢复会话…",
+    "restoringPreviousSession": "正在恢复上一个会话…",
+    "withEmail": "使用邮箱登录",
+    "withWallet": "使用钱包登录"
+  }
+}

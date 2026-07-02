@@ -4,6 +4,7 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useConnect, useConnection, useDisconnect } from "wagmi";
 import { formatAddress } from "../../lib/format";
 import { useWalletSession } from "../../lib/useWalletSession";
@@ -28,6 +29,7 @@ const DynamicSignInButton = dynamic(
 
 export default function SignInPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { connectors, connect, isPending, error, reset } = useConnect();
   const { status, address } = useConnection();
   const { disconnect } = useDisconnect();
@@ -109,8 +111,8 @@ export default function SignInPage() {
             >
               <span className="text-base leading-none">
                 {session.status === "syncing"
-                  ? "Signing you in…"
-                  : `Continue as ${formatAddress(address)}`}
+                  ? t("signIn.signingIn")
+                  : t("signIn.continueAs", { address: formatAddress(address) })}
               </span>
             </button>
             {session.status === "error" ? (
@@ -119,7 +121,7 @@ export default function SignInPage() {
                 onClick={session.retry}
                 className="text-center text-xs text-[#ec1b69] hover:underline"
               >
-                Retry sign-in
+                {t("signIn.retry")}
               </button>
             ) : null}
             <button
@@ -127,7 +129,7 @@ export default function SignInPage() {
               onClick={() => disconnect()}
               className="text-center text-xs text-[#7975a8] hover:text-[#ececff]"
             >
-              Use a different account
+              {t("signIn.useDifferentAccount")}
             </button>
           </div>
         ) : isInMiniApp === null ? (
@@ -135,14 +137,14 @@ export default function SignInPage() {
           // a neutral placeholder so we never flash the browser-mode
           // connect buttons inside Farcaster / Base App.
           <p className="text-center text-xs text-[#7975a8]">
-            Loading…
+            {t("common.loading")}
           </p>
         ) : isInMiniApp ? (
           // Inside Farcaster / Base App — AutoConnect is running. The
           // moment the wallet is injected, this view rerenders with
           // `isConnected = true` and the "Continue as 0x…" button shows.
           <p className="text-center text-xs text-[#7975a8]">
-            Connecting your wallet…
+            {t("signIn.connectingWallet")}
           </p>
         ) : isReconnecting || isStuckOnStaleConnector ? (
           // wagmi is rehydrating its store (or we just kicked it via
@@ -151,7 +153,7 @@ export default function SignInPage() {
           // finishes we'll either flip to "Continue as 0x…" or, if
           // there is no persisted session, to the buttons below.
           <p className="text-center text-xs text-[#7975a8]">
-            Restoring your session…
+            {t("signIn.restoringSession")}
           </p>
         ) : dynamicEnabled ? (
           // Browser + Dynamic configured → Dynamic's connect modal (email /
@@ -172,7 +174,7 @@ export default function SignInPage() {
               className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#ec1b69] px-6 py-4 font-medium text-[#ececff] transition-opacity hover:opacity-90 disabled:opacity-60"
             >
               <Image src="/brand/icon-mail.svg" alt="" width={16} height={16} />
-              <span className="text-base leading-none">Sign in with email</span>
+              <span className="text-base leading-none">{t("signIn.withEmail")}</span>
             </button>
 
             <button
@@ -184,12 +186,12 @@ export default function SignInPage() {
               className="flex w-full items-center justify-center gap-2 rounded-lg border border-[#1b1833] bg-[#0e0716] px-6 py-4 font-medium text-[#ececff] transition-colors hover:border-[#530922] disabled:opacity-60"
             >
               <Image src="/brand/icon-wallet.svg" alt="" width={16} height={16} />
-              <span className="text-base leading-none">Sign in with wallet</span>
+              <span className="text-base leading-none">{t("signIn.withWallet")}</span>
             </button>
 
             {isReconnecting ? (
               <p className="text-center text-xs text-[#7975a8]">
-                Restoring previous session…
+                {t("signIn.restoringPreviousSession")}
               </p>
             ) : null}
           </div>

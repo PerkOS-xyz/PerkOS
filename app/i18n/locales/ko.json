@@ -1,0 +1,30 @@
+{
+  "nav": {
+    "dashboard": "대시보드",
+    "projects": "프로젝트",
+    "tasks": "작업",
+    "agents": "에이전트",
+    "chat": "채팅",
+    "organization": "조직",
+    "wallet": "지갑",
+    "settings": "설정"
+  },
+  "common": {
+    "language": "언어",
+    "loading": "불러오는 중…",
+    "skipToContent": "본문으로 건너뛰기",
+    "openMenu": "메뉴 열기",
+    "mainNavigation": "기본 탐색"
+  },
+  "signIn": {
+    "signingIn": "로그인 중…",
+    "continueAs": "{{address}}(으)로 계속",
+    "retry": "다시 로그인",
+    "useDifferentAccount": "다른 계정 사용",
+    "connectingWallet": "지갑 연결 중…",
+    "restoringSession": "세션 복원 중…",
+    "restoringPreviousSession": "이전 세션 복원 중…",
+    "withEmail": "이메일로 로그인",
+    "withWallet": "지갑으로 로그인"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "nav": {
+    "dashboard": "Panel",
+    "projects": "Proyectos",
+    "tasks": "Tareas",
+    "agents": "Agentes",
+    "chat": "Chat",
+    "organization": "Organización",
+    "wallet": "Billetera",
+    "settings": "Ajustes"
+  },
+  "common": {
+    "language": "Idioma",
+    "loading": "Cargando…",
+    "skipToContent": "Saltar al contenido principal",
+    "openMenu": "Abrir menú",
+    "mainNavigation": "Navegación principal"
+  },
+  "signIn": {
+    "signingIn": "Iniciando sesión…",
+    "continueAs": "Continuar como {{address}}",
+    "retry": "Reintentar inicio de sesión",
+    "useDifferentAccount": "Usar otra cuenta",
+    "connectingWallet": "Conectando tu billetera…",
+    "restoringSession": "Restaurando tu sesión…",
+    "restoringPreviousSession": "Restaurando la sesión anterior…",
+    "withEmail": "Iniciar sesión con correo",
+    "withWallet": "Iniciar sesión con billetera"
+  }
+}

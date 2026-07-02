@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { MiniAppReady } from "./components/MiniAppReady";
 import { DevAuthIndicator } from "./components/DevAuthIndicator";
+import { LocaleProvider } from "./components/LocaleProvider";
 import { cn } from "@/lib/utils";
 
 const poppins = Poppins({
@@ -125,7 +126,7 @@ export default function RootLayout({
         <MiniAppReady />
         <Providers>
           <DevAuthIndicator />
-          {children}
+          <LocaleProvider>{children}</LocaleProvider>
         </Providers>
       </body>
     </html>
