@@ -116,6 +116,7 @@ export function ActivityFeedCard({
 }
 
 function FeedRow({ event }: { event: ActivityEvent }) {
+  const { t } = useTranslation();
   const meta = VERB_ICONS[event.verb] ?? {
     Icon: event.actorType === "user" ? User : Bot,
     tone: "text-muted-foreground",
@@ -125,7 +126,7 @@ function FeedRow({ event }: { event: ActivityEvent }) {
   const line = (
     <div className="flex min-w-0 flex-1 items-baseline gap-1.5 text-xs leading-relaxed">
       <span className="shrink-0 font-medium text-foreground">{event.actor}</span>
-      <span className="shrink-0 text-muted-foreground">{verbPhrase(event.verb)}</span>
+      <span className="shrink-0 text-muted-foreground">{verbPhrase(event.verb, t)}</span>
       {event.object ? (
         <span className="min-w-0 truncate text-foreground/90">{event.object}</span>
       ) : null}

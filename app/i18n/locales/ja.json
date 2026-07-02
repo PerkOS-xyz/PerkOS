@@ -322,7 +322,7 @@
       "title": "ワークスペースを作成",
       "description": "ワークスペースは、PerkOS内であなたのチームが共有するホームです。プロジェクト、エージェント、メンバーを一つにまとめます。名前はいつでも設定から変更できます。",
       "nameLabel": "ワークスペース名",
-      "namePlaceholder": "Software Workspace",
+      "namePlaceholder": "ソフトウェア・ワークスペース",
       "usernameLabel": "あなたのユーザー名",
       "optional": "（任意）",
       "usernameHelp": "@ハンドルは、チームメイトやエージェントがチャットであなたにメンションする際に使われます。今はスキップして後で設定することも、ウォレットアドレスのままにしておくこともできます。",
@@ -668,7 +668,7 @@
       "title": "ワークスペース",
       "description": "ダッシュボードとオンボーディング全体に表示される表示名です。",
       "nameLabel": "ワークスペース名",
-      "namePlaceholder": "Software Workspace",
+      "namePlaceholder": "ソフトウェア・ワークスペース",
       "storedLocally": "PerkOSがバックエンドでワークスペースの永続化に対応するまで、ローカルに保存されます。",
       "save": "変更を保存",
       "toastUpdated": "ワークスペース名を更新しました"
@@ -877,7 +877,7 @@
       "edited": "編集済み",
       "systemPromptSr": "システムプロンプト",
       "systemPromptHelp": "ランタイムコンテナ内でSOUL.md／IDENTITY.mdになります。",
-      "systemPromptPlaceholder": "You are a …",
+      "systemPromptPlaceholder": "あなたは…",
       "resetToDefault": "{{name}}のデフォルトに戻す",
       "advancedHide": "詳細設定・ソウル全文を非表示",
       "advancedView": "詳細設定・ソウル全文を表示",
@@ -1028,7 +1028,7 @@
       "runtimeHelp": "エージェントが使用するプロトコルです。プロンプト内のブリッジのエンドポイントが決まります。",
       "noteLabel": "エージェントへのメモ（任意）",
       "noteHelp": "招待プロンプト内で、エージェントに伝わる背景情報です。",
-      "notePlaceholder": "You'll help the team with market research and weekly reports.",
+      "notePlaceholder": "市場調査や週次レポートの作成でチームをサポートしてください。",
       "result": {
         "registeredBefore": "があなたの組織に登録されました。ステータスは",
         "invited": "招待済み",
@@ -1558,7 +1558,23 @@
       "title": "最近のアクティビティ",
       "live": "ライブ",
       "loading": "アクティビティを読み込み中…",
-      "empty": "まだ何もありません。エージェントが計画・開始・完了すると、ここにリアルタイムで表示されます。"
+      "empty": "まだ何もありません。エージェントが計画・開始・完了すると、ここにリアルタイムで表示されます。",
+      "verbs": {
+        "created": "作成",
+        "moved": "移動",
+        "startedWorkingOn": "着手",
+        "completed": "完了",
+        "sentBack": "差し戻し:",
+        "planned": "計画",
+        "proposedPlanIn": "計画を提案:",
+        "approvedPlanIn": "計画を承認:",
+        "reachedGoalOf": "目標を達成:",
+        "launched": "起動",
+        "cameOnline": "稼働開始",
+        "failedToStart": "起動失敗",
+        "createdProject": "作成",
+        "flaggedOverlapOn": "重複を報告:"
+      }
     },
     "pmBanner": {
       "teamLead": "チームリーダー",

@@ -877,7 +877,7 @@
       "edited": "modificato",
       "systemPromptSr": "Prompt di sistema",
       "systemPromptHelp": "Diventa SOUL.md / IDENTITY.md all'interno del container runtime.",
-      "systemPromptPlaceholder": "You are a …",
+      "systemPromptPlaceholder": "Sei un …",
       "resetToDefault": "Ripristina al valore predefinito di {{name}}",
       "advancedHide": "Avanzate: nascondi il soul completo",
       "advancedView": "Avanzate: visualizza il soul completo",
@@ -951,8 +951,8 @@
         "blurb": "Il tuo agente risponde nei canali Slack in cui viene invitato. Modalità webhook (Events API), compatibile con l'ibernazione. Crei un'app Slack, la installi nel tuo spazio di lavoro Slack e copi il token del bot e il signing secret.",
         "botToken": "Token del bot (xoxb-...)",
         "botTokenHelp": "App Slack → OAuth & Permissions → Bot User OAuth Token.",
-        "signingSecret": "Signing secret",
-        "signingSecretPlaceholder": "32-char hex from Slack app settings",
+        "signingSecret": "Segreto di firma",
+        "signingSecretPlaceholder": "Hex a 32 caratteri dalle impostazioni dell'app Slack",
         "signingSecretHelp": "App Slack → Basic Information → Signing Secret. Usato per verificare i payload webhook in entrata.",
         "channelId": "ID canale (facoltativo)",
         "channelIdHelp": "Limita l'agente a un singolo canale. Lascia vuoto per menzioni e DM in ogni canale in cui si trova il bot."
@@ -967,8 +967,8 @@
         "visibilityAll": "tutte (richiede un canale principale)",
         "neynarApiKey": "Chiave API Neynar",
         "signerUuid": "Signer UUID",
-        "webhookSecret": "Webhook secret",
-        "webhookSecretPlaceholder": "HMAC secret you set on the Neynar webhook",
+        "webhookSecret": "Segreto webhook",
+        "webhookSecretPlaceholder": "Il segreto HMAC che imposti sul webhook di Neynar",
         "parentChannel": "Canale principale",
         "parentChannelHelp": "Obbligatorio quando la visibilità è “tutte”: limita l'agente a un solo canale."
       },
@@ -1028,7 +1028,7 @@
       "runtimeHelp": "Cosa parla il tuo agente: imposta l'endpoint del bridge nel prompt.",
       "noteLabel": "Nota per l'agente (facoltativo)",
       "noteHelp": "Contesto che l'agente vede nel suo prompt di invito.",
-      "notePlaceholder": "You'll help the team with market research and weekly reports.",
+      "notePlaceholder": "Aiuterai il team con ricerche di mercato e report settimanali.",
       "result": {
         "registeredBefore": "registrato nella tua organizzazione. Appare come",
         "invited": "invitato",
@@ -1158,7 +1158,7 @@
   "companyNew": {
     "gallery": {
       "title": "Nuovo progetto",
-      "intro": "Parti da un modello aziendale, scegli tu i ruoli del tuo team oppure crea un progetto vuoto. Il tuo team prepara bozze e proposte, non succede nulla senza il tuo okay. Preferisci un singolo agente? ",
+      "intro": "Parti da un modello aziendale, scegli tu i ruoli del tuo team oppure crea un progetto vuoto. Il tuo team prepara bozze e proposte, non succede nulla senza il tuo ok. Preferisci un singolo agente? ",
       "introLink": "Creane uno qui",
       "introAfter": ".",
       "customCard": {
@@ -1331,7 +1331,7 @@
         "step3After": " e assegnale ad agenti specifici.",
         "ctaWithPm": "Metti il team al lavoro",
         "ctaNoPm": "Scegli un Capo Team e inizia",
-        "ctaHint": "Il tuo team prepara bozze e proposte, non succede nulla senza il tuo okay. I compagni di team si riattivano automaticamente quando viene assegnato del lavoro."
+        "ctaHint": "Il tuo team prepara bozze e proposte, non succede nulla senza il tuo ok. I compagni di team si riattivano automaticamente quando viene assegnato del lavoro."
       },
       "choosePm": {
         "title": "Scegli il tuo Capo Team",
@@ -1558,7 +1558,23 @@
       "title": "Attività recente",
       "live": "in diretta",
       "loading": "Caricamento dell'attività…",
-      "empty": "Ancora nulla: quando i tuoi agenti pianificano, iniziano e completano il lavoro, comparirà qui in tempo reale."
+      "empty": "Ancora nulla: quando i tuoi agenti pianificano, iniziano e completano il lavoro, comparirà qui in tempo reale.",
+      "verbs": {
+        "created": "ha creato",
+        "moved": "ha spostato",
+        "startedWorkingOn": "ha iniziato a lavorare su",
+        "completed": "ha completato",
+        "sentBack": "ha rimandato indietro per un'altra revisione:",
+        "planned": "ha pianificato",
+        "proposedPlanIn": "ha proposto un piano in",
+        "approvedPlanIn": "ha approvato il piano in",
+        "reachedGoalOf": "ha raggiunto l'obiettivo di",
+        "launched": "ha avviato",
+        "cameOnline": "è online",
+        "failedToStart": "non è riuscito ad avviarsi",
+        "createdProject": "ha creato",
+        "flaggedOverlapOn": "ha segnalato una sovrapposizione su"
+      }
     },
     "pmBanner": {
       "teamLead": "Capo Team",

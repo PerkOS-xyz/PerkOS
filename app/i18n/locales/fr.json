@@ -1558,7 +1558,23 @@
       "title": "Activité récente",
       "live": "en direct",
       "loading": "Chargement de l'activité…",
-      "empty": "Rien pour l'instant. Dès que vos agents planifient, démarrent et terminent du travail, ça apparaît ici en temps réel."
+      "empty": "Rien pour l'instant. Dès que vos agents planifient, démarrent et terminent du travail, ça apparaît ici en temps réel.",
+      "verbs": {
+        "created": "a créé",
+        "moved": "a déplacé",
+        "startedWorkingOn": "a commencé à travailler sur",
+        "completed": "a terminé",
+        "sentBack": "a renvoyé pour une nouvelle passe :",
+        "planned": "a planifié",
+        "proposedPlanIn": "a proposé un plan dans",
+        "approvedPlanIn": "a approuvé le plan dans",
+        "reachedGoalOf": "a atteint l'objectif de",
+        "launched": "a lancé",
+        "cameOnline": "est passé en ligne",
+        "failedToStart": "n'a pas réussi à démarrer",
+        "createdProject": "a créé",
+        "flaggedOverlapOn": "a signalé un chevauchement sur"
+      }
     },
     "pmBanner": {
       "teamLead": "Chef d'équipe",
