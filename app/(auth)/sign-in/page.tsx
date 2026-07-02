@@ -54,27 +54,32 @@ export default function SignInPage() {
     error?.name === "ConnectorAlreadyConnectedError" ||
     error?.message?.toLowerCase().includes("already connected") === true;
 
-  // Hand off to /continue (the dispatcher → /dashboard or AccessGate) when
-  // there's no point showing the connect buttons — inside a Mini App host
-  // (wallet auto-connects) OR when wagmi already holds a connected wallet
-  // (in-app browser / persisted session).
+  // Hand off to /continue's dispatcher (→ /dashboard or AccessGate) for an
+  // already-connected wallet, so a returning user doesn't sit on the connect
+  // buttons — inside a Mini App host (wallet auto-connects) OR when wagmi
+  // already holds a connected wallet (in-app browser / persisted session).
   //
-  // BUT never hand off a `signed-out` session: /continue bounces any
-  // signed-out session straight back to /sign-in, so redirecting there
-  // creates an infinite /sign-in ↔ /continue loop (seen as a "reload"
-  // flicker, no console error since both are client-side router.replace).
-  // This bites the browser/Dynamic path, where useWalletSession reads
-  // Dynamic (signed-out) while wagmi may still report a stale persisted
-  // connection, and any case where isInMiniApp is a false positive.
+  // ONLY once the session has SETTLED (signed-in or not-allowlisted). During
+  // the transient states we must stay put:
+  //  - signed-out: /continue bounces it straight back → /sign-in ↔ /continue
+  //    infinite loop (a "reload" flicker, no console error since both are
+  //    client-side router.replace);
+  //  - loading / syncing: a sign-in is IN PROGRESS on this page (e.g. the
+  //    wallet-signature popup is open). Handing off mid-sync navigates away
+  //    from the page driving the signature and thrashes /sign-in ↔ /continue.
+  // This matters on the browser/Dynamic path, where AutoConnect can connect
+  // wagmi to a Coinbase EIP-6963 provider while the real sign-in runs through
+  // Dynamic — so `isConnected` (wagmi) is true throughout the Dynamic sync.
+  const sessionSettled =
+    session.status === "signed-in" || session.status === "not-allowlisted";
   useEffect(() => {
-    // TODO(i18n-cleanup): the [perkos:auth] console logs are temporary
-    // diagnostics for the /sign-in ↔ /continue reload loop; remove once
-    // confirmed fixed in prod.
-    if (session.status === "signed-out") {
+    // TODO: the [perkos:auth] console logs are temporary diagnostics for the
+    // /sign-in ↔ /continue reload loop; remove once confirmed fixed in prod.
+    if (!sessionSettled) {
       if (isInMiniApp === true || (isConnected && address)) {
         console.log(
-          "[perkos:auth] sign-in: holding (session signed-out, not handing off to /continue)",
-          { isInMiniApp, wagmiConnected: isConnected, address },
+          "[perkos:auth] sign-in: holding, session not settled",
+          { sessionStatus: session.status, isInMiniApp, wagmiConnected: isConnected },
         );
       }
       return;
@@ -88,7 +93,7 @@ export default function SignInPage() {
       });
       router.replace("/continue");
     }
-  }, [isInMiniApp, isConnected, address, session.status, router]);
+  }, [isInMiniApp, isConnected, address, sessionSettled, session.status, router]);
 
   // Once the user has both wagmi + Firebase, send them on.
   useEffect(() => {
