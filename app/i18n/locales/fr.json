@@ -1,0 +1,30 @@
+{
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "projects": "Projets",
+    "tasks": "Tâches",
+    "agents": "Agents",
+    "chat": "Chat",
+    "organization": "Organisation",
+    "wallet": "Portefeuille",
+    "settings": "Paramètres"
+  },
+  "common": {
+    "language": "Langue",
+    "loading": "Chargement…",
+    "skipToContent": "Aller au contenu principal",
+    "openMenu": "Ouvrir le menu",
+    "mainNavigation": "Navigation principale"
+  },
+  "signIn": {
+    "signingIn": "Connexion en cours…",
+    "continueAs": "Continuer en tant que {{address}}",
+    "retry": "Réessayer la connexion",
+    "useDifferentAccount": "Utiliser un autre compte",
+    "connectingWallet": "Connexion de votre portefeuille…",
+    "restoringSession": "Restauration de votre session…",
+    "restoringPreviousSession": "Restauration de la session précédente…",
+    "withEmail": "Se connecter par e-mail",
+    "withWallet": "Se connecter avec un portefeuille"
+  }
+}
