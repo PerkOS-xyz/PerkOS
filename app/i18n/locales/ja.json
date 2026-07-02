@@ -1697,5 +1697,170 @@
       "home": "ホーム",
       "primaryNavigation": "メインナビゲーション"
     }
+  },
+  "chat": {
+    "docs": {
+      "loadingDocs": "ドキュメントを読み込み中…",
+      "untitled": "無題",
+      "docFallback": "ドキュメント",
+      "someone": "誰か",
+      "selectPrompt": "ドキュメントを選択するか、新規作成してください。",
+      "docType": {
+        "note": "メモ",
+        "plan": "プラン",
+        "spec": "仕様書"
+      },
+      "planStatus": {
+        "draft": "下書き",
+        "underDiscussion": "議論中",
+        "planProposed": "プラン提案済み",
+        "approved": "承認済み",
+        "materialized": "タスク化済み"
+      },
+      "empty": {
+        "title": "まだドキュメントがありません",
+        "description": "ドキュメントは、チームとチームリーダーが一緒に考える場所です。スプリント計画、仕様書、会議メモなど。スプリント計画を始めるか、自由形式のメモを作成しましょう。",
+        "starting": "開始中…",
+        "startSprintPlan": "スプリント計画を開始",
+        "newNote": "新しいメモ"
+      },
+      "tree": {
+        "heading": "ドキュメント",
+        "newDocAria": "新しいドキュメント",
+        "noDocsYet": "まだドキュメントがありません。",
+        "teamLeadDrafts": "チームリーダーの下書き",
+        "planBadge": "プラン"
+      },
+      "newDoc": {
+        "titlePlaceholder": "タイトル…",
+        "cancel": "キャンセル",
+        "create": "作成"
+      },
+      "toast": {
+        "startPlanError": "プランを開始できませんでした",
+        "createDocError": "ドキュメントを作成できませんでした"
+      },
+      "editor": {
+        "leadsDraft": "リーダーの下書き",
+        "promote": "公開",
+        "discussion": "議論",
+        "deleteDocAria": "ドキュメントを削除",
+        "draftTaskCount_one": "下書きタスク{{count}}件",
+        "draftTaskCount_other": "下書きタスク{{count}}件",
+        "approving": "承認中…",
+        "approveAndCreate_one": "承認して{{count}}件のタスクを作成",
+        "approveAndCreate_other": "承認して{{count}}件のタスクを作成",
+        "tasksCreatedNote": "タスクがボードに作成されました。",
+        "proposedNoTasks": "提案済み。作成できる下書きタスクはまだありません。",
+        "emptyDocPlan": "ドキュメントが空です。下にメモを追加するか、議論でチームリーダーにプランの下書きを頼みましょう。",
+        "emptyDocNote": "ドキュメントが空です。下にメモを追加してください。",
+        "untitledGroup": "無題のグループ",
+        "notePlaceholder": "メモを追加（背景、制約、フィードバックなど）…",
+        "addNote": "メモを追加",
+        "addNoteError": "メモを追加できませんでした",
+        "confirmDeleteDoc": "このドキュメントを削除しますか？",
+        "deleteDocError": "ドキュメントを削除できませんでした",
+        "promotedSuccess": "ドキュメントを公開しました",
+        "promoteError": "公開できませんでした",
+        "tasksCreatedOnBoard_one": "ボードに{{count}}件のタスクを作成しました",
+        "tasksCreatedOnBoard_other": "ボードに{{count}}件のタスクを作成しました",
+        "planApproved": "プランを承認しました",
+        "approvePlanError": "プランを承認できませんでした"
+      },
+      "note": {
+        "saveError": "メモを保存できませんでした",
+        "cancel": "キャンセル",
+        "save": "保存",
+        "editAria": "メモを編集",
+        "deleteAria": "メモを削除"
+      },
+      "task": {
+        "untitledTask": "無題のタスク",
+        "doneWhen": "完了条件：",
+        "proposedBy": "{{owner}}が提案・下書き"
+      },
+      "docChat": {
+        "sendError": "送信できませんでした",
+        "headerTitle": "{{title}}の議論",
+        "closeAria": "議論を閉じる",
+        "empty": "このドキュメントについてチームやチームリーダーと話し合いましょう。リーダーがドキュメントを編集すると、ここに投稿されます。",
+        "you": "あなた",
+        "composerPlaceholder": "メッセージ…（@でメンション）",
+        "send": "送信"
+      }
+    },
+    "composer": {
+      "messagePlaceholder": "メッセージを入力…",
+      "listening": "聞き取り中…",
+      "slashCommandsAria": "スラッシュコマンド",
+      "uploadFailed": "アップロードに失敗しました",
+      "unknownError": "不明なエラー",
+      "removeAttachment": "{{name}}を削除",
+      "attachFiles": "ファイルを添付",
+      "attach": "添付",
+      "attachComingSoon": "添付機能は近日公開",
+      "pauseDictation": "音声入力を一時停止",
+      "dictate": "音声入力",
+      "dictateWithMic": "マイクで音声入力",
+      "send": "送信",
+      "dictationError": "音声入力：{{error}}",
+      "slash": {
+        "task": {
+          "label": "タスクを作成",
+          "description": "タスク作成画面を開きます。"
+        },
+        "project": {
+          "label": "プロジェクトを作成",
+          "description": "プロジェクト作成画面を開きます。"
+        },
+        "agent": {
+          "label": "エージェントを起動",
+          "description": "7ステップのエージェント起動ウィザードを開始します。"
+        },
+        "perkos": {
+          "label": "PerkOSエージェントを開く",
+          "description": "アプリ内アシスタントに相談します。"
+        },
+        "clear": {
+          "label": "会話をクリア",
+          "description": "このチャット履歴をリセットします。"
+        }
+      }
+    },
+    "assistant": {
+      "quickActions": {
+        "project": "プロジェクトを作成",
+        "task": "タスクを作成",
+        "agent": "エージェントを登録"
+      },
+      "system": {
+        "connectWallet": "⚠ アシスタントとチャットするにはウォレットを接続してください。",
+        "stillOpening": "⚠ アシスタントとの会話をまだ開いています。少し待ってからもう一度お試しください。",
+        "openError": "⚠ アシスタントチャットを開けませんでした：{{error}}"
+      },
+      "status": {
+        "openingChat": "チャットを開いています…",
+        "offline": "オフライン",
+        "online": "オンライン",
+        "connecting": "接続中…"
+      },
+      "header": {
+        "loadHistory": "過去の会話を読み込む",
+        "clearAria": "会話をクリア",
+        "clearTitle": "クリアして新しい会話を始める",
+        "close": "閉じる"
+      },
+      "empty": {
+        "greeting": "こんにちは、今日はどのようなご用件でしょうか？",
+        "intro": "私はPerkOSエージェントです。プラットフォームの使い方を学んだり、プロジェクトで使う作業エージェントを設定したりするお手伝いをします。",
+        "quickActionsLabel": "クイックアクション",
+        "footer": "または、プロジェクト、エージェント、ランタイムなど、PerkOSについて何でも聞いてください。ご案内します。"
+      },
+      "reactions": {
+        "copy": "コピー",
+        "thumbsUp": "高評価",
+        "thumbsDown": "低評価"
+      }
+    }
   }
 }

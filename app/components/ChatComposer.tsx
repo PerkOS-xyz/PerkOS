@@ -9,6 +9,7 @@ import {
   type KeyboardEvent,
 } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import {
   ArrowUp,
   Bot,
@@ -50,6 +51,8 @@ type Props = {
   uploadFile?: (file: File, index: number) => Promise<Attachment>;
 };
 
+// `label`/`description` hold translation keys, resolved via t() at render.
+// `trigger` stays literal — it's the typed command, not display copy.
 type SlashCommand = {
   id: string;
   trigger: string;
@@ -64,40 +67,40 @@ const SLASH_COMMANDS: SlashCommand[] = [
   {
     id: "task",
     trigger: "/task",
-    label: "Create task",
-    description: "Open the task creator.",
+    label: "chat.composer.slash.task.label",
+    description: "chat.composer.slash.task.description",
     icon: ListTodo,
     href: "/tasks/new",
   },
   {
     id: "project",
     trigger: "/project",
-    label: "Create project",
-    description: "Open the project creator.",
+    label: "chat.composer.slash.project.label",
+    description: "chat.composer.slash.project.description",
     icon: Folder,
     href: "/projects/new",
   },
   {
     id: "agent",
     trigger: "/agent",
-    label: "Launch agent",
-    description: "Start the 7-step agent launcher.",
+    label: "chat.composer.slash.agent.label",
+    description: "chat.composer.slash.agent.description",
     icon: Bot,
     href: "/agents/new",
   },
   {
     id: "perkos",
     trigger: "/perkos",
-    label: "Open PerkOS Agent",
-    description: "Get help from the in-app assistant.",
+    label: "chat.composer.slash.perkos.label",
+    description: "chat.composer.slash.perkos.description",
     icon: Sparkles,
     href: "/chat",
   },
   {
     id: "clear",
     trigger: "/clear",
-    label: "Clear conversation",
-    description: "Reset this chat history.",
+    label: "chat.composer.slash.clear.label",
+    description: "chat.composer.slash.clear.description",
     icon: Trash2,
     action: "clear",
   },
@@ -116,17 +119,20 @@ export function ChatComposer({
   onChange,
   onSend,
   onClear,
-  placeholder = "Write a message…",
+  placeholder,
   disabled,
   sending,
   className,
   uploadFile,
 }: Props) {
+  const { t } = useTranslation();
   const router = useRouter();
   const [slashIndex, setSlashIndex] = useState(0);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const resolvedPlaceholder = placeholder ?? t("chat.composer.messagePlaceholder");
 
   // Dictation (Web Speech API). Appends transcribed phrases to the input.
   const speech = useSpeechToText({
@@ -167,8 +173,8 @@ export function ChatComposer({
       );
       setAttachments((prev) => [...prev, ...uploaded]);
     } catch (err) {
-      toast.error("Upload failed", {
-        description: err instanceof Error ? err.message : "Unknown error",
+      toast.error(t("chat.composer.uploadFailed"), {
+        description: err instanceof Error ? err.message : t("chat.composer.unknownError"),
       });
     } finally {
       setUploading(false);
@@ -237,14 +243,14 @@ export function ChatComposer({
     <div className={cn("flex flex-col gap-2", className)}>
       {speech.error ? (
         <p className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
-          Dictation: {speech.error}
+          {t("chat.composer.dictationError", { error: speech.error })}
         </p>
       ) : null}
 
       <form onSubmit={onSubmit} className="relative">
         {slashOpen ? (
           <div className="absolute bottom-full left-0 right-0 z-20 mb-2 overflow-hidden rounded-lg border border-border bg-card shadow-lg">
-            <ul role="listbox" aria-label="Slash commands">
+            <ul role="listbox" aria-label={t("chat.composer.slashCommandsAria")}>
               {slashMatches.map((cmd, idx) => {
                 const Icon = cmd.icon;
                 const active = idx === slashIndex;
@@ -270,7 +276,7 @@ export function ChatComposer({
                           {cmd.trigger}
                         </span>
                         <span className="truncate text-xs text-muted-foreground">
-                          {cmd.description}
+                          {t(cmd.description)}
                         </span>
                       </div>
                     </button>
@@ -302,7 +308,7 @@ export function ChatComposer({
                 <button
                   type="button"
                   onClick={() => removeAttachment(a.url)}
-                  aria-label={`Remove ${a.name}`}
+                  aria-label={t("chat.composer.removeAttachment", { name: a.name })}
                   className="text-muted-foreground hover:text-foreground"
                 >
                   <X className="h-3.5 w-3.5" />
@@ -324,11 +330,11 @@ export function ChatComposer({
               />
               <button
                 type="button"
-                aria-label="Attach files"
+                aria-label={t("chat.composer.attachFiles")}
                 disabled={disabled || uploading}
                 onClick={() => fileInputRef.current?.click()}
                 className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:text-primary disabled:opacity-50"
-                title="Attach files"
+                title={t("chat.composer.attachFiles")}
               >
                 {uploading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -340,10 +346,10 @@ export function ChatComposer({
           ) : (
             <button
               type="button"
-              aria-label="Attach"
+              aria-label={t("chat.composer.attach")}
               disabled
               className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-muted-foreground/60"
-              title="Attachments coming soon"
+              title={t("chat.composer.attachComingSoon")}
             >
               <Plus className="h-4 w-4" />
             </button>
@@ -352,7 +358,7 @@ export function ChatComposer({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={onKey}
-            placeholder={speech.listening ? (speech.interimText || "Listening…") : placeholder}
+            placeholder={speech.listening ? (speech.interimText || t("chat.composer.listening")) : resolvedPlaceholder}
             rows={1}
             disabled={disabled}
             className="flex-1 resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
@@ -370,11 +376,11 @@ export function ChatComposer({
                   speech.listening &&
                     "animate-pulse bg-primary/10 text-primary",
                 )}
-                aria-label={speech.listening ? "Pause dictation" : "Dictate"}
+                aria-label={speech.listening ? t("chat.composer.pauseDictation") : t("chat.composer.dictate")}
                 title={
                   speech.listening
-                    ? "Pause dictation"
-                    : "Dictate with microphone"
+                    ? t("chat.composer.pauseDictation")
+                    : t("chat.composer.dictateWithMic")
                 }
               >
                 {speech.listening ? (
@@ -389,7 +395,7 @@ export function ChatComposer({
               size="icon"
               disabled={!canSend}
               className="h-8 w-8 rounded-full"
-              aria-label="Send"
+              aria-label={t("chat.composer.send")}
             >
               {sending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

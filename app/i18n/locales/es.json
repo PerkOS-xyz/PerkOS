@@ -1688,5 +1688,170 @@
       "home": "Inicio",
       "primaryNavigation": "Navegación principal"
     }
+  },
+  "chat": {
+    "docs": {
+      "loadingDocs": "Cargando documentos…",
+      "untitled": "Sin título",
+      "docFallback": "Documento",
+      "someone": "alguien",
+      "selectPrompt": "Selecciona un documento, o crea uno.",
+      "docType": {
+        "note": "Nota",
+        "plan": "Plan",
+        "spec": "Especificación"
+      },
+      "planStatus": {
+        "draft": "Borrador",
+        "underDiscussion": "En discusión",
+        "planProposed": "Plan propuesto",
+        "approved": "Aprobado",
+        "materialized": "Materializado"
+      },
+      "empty": {
+        "title": "Todavía no hay documentos",
+        "description": "Los documentos son donde tu equipo y tu líder de equipo piensan juntos: un plan de sprint, una especificación, notas de reunión. Empieza el plan de sprint, o crea una nota libre.",
+        "starting": "Empezando…",
+        "startSprintPlan": "Empezar plan de sprint",
+        "newNote": "Nueva nota"
+      },
+      "tree": {
+        "heading": "Documentos",
+        "newDocAria": "Nuevo documento",
+        "noDocsYet": "Todavía no hay documentos.",
+        "teamLeadDrafts": "Borradores del líder de equipo",
+        "planBadge": "plan"
+      },
+      "newDoc": {
+        "titlePlaceholder": "Título…",
+        "cancel": "Cancelar",
+        "create": "Crear"
+      },
+      "toast": {
+        "startPlanError": "No se pudo empezar el plan",
+        "createDocError": "No se pudo crear el documento"
+      },
+      "editor": {
+        "leadsDraft": "borrador del líder",
+        "promote": "Promover",
+        "discussion": "Discusión",
+        "deleteDocAria": "Eliminar documento",
+        "draftTaskCount_one": "{{count}} tarea en borrador",
+        "draftTaskCount_other": "{{count}} tareas en borrador",
+        "approving": "Aprobando…",
+        "approveAndCreate_one": "Aprobar y crear {{count}} tarea",
+        "approveAndCreate_other": "Aprobar y crear {{count}} tareas",
+        "tasksCreatedNote": "Tareas creadas en el tablero.",
+        "proposedNoTasks": "Propuesto: todavía no hay tareas en borrador para crear.",
+        "emptyDocPlan": "Documento vacío. Agrega una nota abajo, o pídele a tu líder de equipo en la discusión que redacte el plan.",
+        "emptyDocNote": "Documento vacío. Agrega una nota abajo.",
+        "untitledGroup": "Grupo sin título",
+        "notePlaceholder": "Agrega una nota (contexto, restricciones, comentarios)…",
+        "addNote": "Agregar nota",
+        "addNoteError": "No se pudo agregar la nota",
+        "confirmDeleteDoc": "¿Eliminar este documento?",
+        "deleteDocError": "No se pudo eliminar el documento",
+        "promotedSuccess": "Documento promovido al árbol",
+        "promoteError": "No se pudo promover",
+        "tasksCreatedOnBoard_one": "Se creó {{count}} tarea en el tablero",
+        "tasksCreatedOnBoard_other": "Se crearon {{count}} tareas en el tablero",
+        "planApproved": "Plan aprobado",
+        "approvePlanError": "No se pudo aprobar el plan"
+      },
+      "note": {
+        "saveError": "No se pudo guardar la nota",
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "editAria": "Editar nota",
+        "deleteAria": "Eliminar nota"
+      },
+      "task": {
+        "untitledTask": "Tarea sin título",
+        "doneWhen": "Se considera hecha cuando:",
+        "proposedBy": "Propuesto por {{owner}} · borrador"
+      },
+      "docChat": {
+        "sendError": "No se pudo enviar",
+        "headerTitle": "{{title}}: Discusión",
+        "closeAria": "Cerrar discusión",
+        "empty": "Discute este documento con tu equipo y tu líder de equipo. El líder publica aquí cuando edita el documento.",
+        "you": "Tú",
+        "composerPlaceholder": "Mensaje…  (escribe @ para mencionar)",
+        "send": "Enviar"
+      }
+    },
+    "composer": {
+      "messagePlaceholder": "Escribe un mensaje…",
+      "listening": "Escuchando…",
+      "slashCommandsAria": "Comandos con barra",
+      "uploadFailed": "Error al subir",
+      "unknownError": "Error desconocido",
+      "removeAttachment": "Quitar {{name}}",
+      "attachFiles": "Adjuntar archivos",
+      "attach": "Adjuntar",
+      "attachComingSoon": "Adjuntos próximamente",
+      "pauseDictation": "Pausar dictado",
+      "dictate": "Dictar",
+      "dictateWithMic": "Dictar con micrófono",
+      "send": "Enviar",
+      "dictationError": "Dictado: {{error}}",
+      "slash": {
+        "task": {
+          "label": "Crear tarea",
+          "description": "Abre el creador de tareas."
+        },
+        "project": {
+          "label": "Crear proyecto",
+          "description": "Abre el creador de proyectos."
+        },
+        "agent": {
+          "label": "Lanzar agente",
+          "description": "Inicia el asistente de lanzamiento de agentes en 7 pasos."
+        },
+        "perkos": {
+          "label": "Abrir Agente de PerkOS",
+          "description": "Obtén ayuda del asistente dentro de la app."
+        },
+        "clear": {
+          "label": "Limpiar conversación",
+          "description": "Reinicia el historial de este chat."
+        }
+      }
+    },
+    "assistant": {
+      "quickActions": {
+        "project": "Crear un proyecto",
+        "task": "Crear una tarea",
+        "agent": "Registrar un agente"
+      },
+      "system": {
+        "connectWallet": "⚠ Conecta una billetera para chatear con el asistente.",
+        "stillOpening": "⚠ Todavía estamos abriendo tu conversación con el Asistente, intenta de nuevo en un momento.",
+        "openError": "⚠ No se pudo abrir el chat del Asistente: {{error}}"
+      },
+      "status": {
+        "openingChat": "Abriendo chat…",
+        "offline": "Desconectado",
+        "online": "En línea",
+        "connecting": "Conectando…"
+      },
+      "header": {
+        "loadHistory": "Cargar conversación anterior",
+        "clearAria": "Limpiar conversación",
+        "clearTitle": "Limpiar: empezar una nueva conversación",
+        "close": "Cerrar"
+      },
+      "empty": {
+        "greeting": "Hola, ¿en qué puedo ayudarte hoy?",
+        "intro": "Soy el Agente de PerkOS. Te ayudo a conocer la plataforma y a configurar los agentes de trabajo que vas a usar en tus proyectos.",
+        "quickActionsLabel": "Acciones rápidas",
+        "footer": "O pregúntame lo que quieras sobre PerkOS: proyectos, agentes, entornos de ejecución, y te voy a guiar."
+      },
+      "reactions": {
+        "copy": "Copiar",
+        "thumbsUp": "Me gusta",
+        "thumbsDown": "No me gusta"
+      }
+    }
   }
 }

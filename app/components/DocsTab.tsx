@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useConnection } from "wagmi";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import {
   Bot,
   Check,
@@ -46,38 +48,40 @@ import {
   useActivePlanId,
 } from "../lib/useDocs";
 
-const PLAN_STATUS_META: Record<string, { label: string; cls: string }> = {
-  draft: { label: "Draft", cls: "border-[#1b1833] text-[#7975a8]" },
+// `labelKey` maps a plan status to its translation key; `cls` stays a CSS token.
+const PLAN_STATUS_META: Record<string, { labelKey: string; cls: string }> = {
+  draft: { labelKey: "chat.docs.planStatus.draft", cls: "border-[#1b1833] text-[#7975a8]" },
   under_discussion: {
-    label: "Under discussion",
+    labelKey: "chat.docs.planStatus.underDiscussion",
     cls: "border-sky-500/30 bg-sky-500/10 text-sky-200",
   },
   plan_proposed: {
-    label: "Plan proposed",
+    labelKey: "chat.docs.planStatus.planProposed",
     cls: "border-amber-500/30 bg-amber-500/10 text-amber-200",
   },
   approved: {
-    label: "Approved",
+    labelKey: "chat.docs.planStatus.approved",
     cls: "border-emerald-500/30 bg-emerald-500/10 text-emerald-200",
   },
   materialized: {
-    label: "Materialized",
+    labelKey: "chat.docs.planStatus.materialized",
     cls: "border-emerald-500/30 bg-emerald-500/10 text-emerald-200",
   },
 };
 
+// Doc-type enum value → translation key for its human-readable label.
 const DOC_TYPE_LABEL: Record<string, string> = {
-  note: "Note",
-  plan: "Plan",
-  spec: "Spec",
+  note: "chat.docs.docType.note",
+  plan: "chat.docs.docType.plan",
+  spec: "chat.docs.docType.spec",
 };
 
 function docIcon(type?: string | null) {
   return type === "plan" ? ListChecks : FileText;
 }
 
-function ownerLabel(owner?: string | null): string {
-  if (!owner) return "someone";
+function ownerLabel(owner: string | null | undefined, t: TFunction): string {
+  if (!owner) return t("chat.docs.someone");
   if (owner.startsWith("agent:")) return owner.slice("agent:".length);
   if (owner.startsWith("user:")) return formatAddress(owner.slice("user:".length));
   return owner;
@@ -99,6 +103,7 @@ export function DocsTab({
   projectId: string;
   ownerWallet?: string;
 }) {
+  const { t } = useTranslation();
   const { address } = useConnection();
   const wallet = ownerWallet ?? address ?? undefined;
   const { docs, loading } = useDocs(wallet, projectId);
@@ -122,7 +127,7 @@ export function DocsTab({
 
   const startPlan = async () => {
     if (!address || !wallet) {
-      toast.error("Connect a wallet first.");
+      toast.error(t("projectRoom.chat.errors.connectWalletFirst"));
       return;
     }
     setBusy(true);
@@ -134,7 +139,7 @@ export function DocsTab({
       });
       setSelectedId(id);
     } catch (e) {
-      toast.error("Couldn't start the plan", {
+      toast.error(t("chat.docs.toast.startPlanError"), {
         description: (e as Error).message,
       });
     } finally {
@@ -144,7 +149,7 @@ export function DocsTab({
 
   const handleCreate = async (type: DocType, title: string) => {
     if (!address || !wallet) {
-      toast.error("Connect a wallet first.");
+      toast.error(t("projectRoom.chat.errors.connectWalletFirst"));
       return;
     }
     setBusy(true);
@@ -159,7 +164,7 @@ export function DocsTab({
       setSelectedId(id);
       setCreating(false);
     } catch (e) {
-      toast.error("Couldn't create the doc", {
+      toast.error(t("chat.docs.toast.createDocError"), {
         description: (e as Error).message,
       });
     } finally {
@@ -170,7 +175,7 @@ export function DocsTab({
   if (loading && docs.length === 0) {
     return (
       <div className="flex items-center gap-2 px-1 py-8 text-sm text-[#7975a8]">
-        <Loader2 className="h-4 w-4 animate-spin" /> Loading docs…
+        <Loader2 className="h-4 w-4 animate-spin" /> {t("chat.docs.loadingDocs")}
       </div>
     );
   }
@@ -179,11 +184,15 @@ export function DocsTab({
     return (
       <EmptyState
         icon={FileText}
-        title="No docs yet"
-        description="Docs are where your team and your team lead think together — a sprint plan, a spec, meeting notes. Start the sprint plan, or create a free-form note."
+        title={t("chat.docs.empty.title")}
+        description={t("chat.docs.empty.description")}
         actions={[
-          { label: busy ? "Starting…" : "Start sprint plan", onClick: startPlan, icon: ListChecks },
-          { label: "New note", onClick: () => setCreating(true), variant: "outline", icon: Plus },
+          {
+            label: busy ? t("chat.docs.empty.starting") : t("chat.docs.empty.startSprintPlan"),
+            onClick: startPlan,
+            icon: ListChecks,
+          },
+          { label: t("chat.docs.empty.newNote"), onClick: () => setCreating(true), variant: "outline", icon: Plus },
         ]}
       />
     );
@@ -195,13 +204,13 @@ export function DocsTab({
       <aside className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium uppercase tracking-wide text-[#7975a8]">
-            Docs
+            {t("chat.docs.tree.heading")}
           </span>
           <button
             type="button"
             onClick={() => setCreating((v) => !v)}
             className="rounded p-1 text-[#7975a8] hover:text-[#ececff]"
-            aria-label="New doc"
+            aria-label={t("chat.docs.tree.newDocAria")}
           >
             <Plus className="h-4 w-4" />
           </button>
@@ -212,7 +221,7 @@ export function DocsTab({
         ) : null}
 
         {liveDocs.length === 0 && !creating ? (
-          <p className="px-1 py-2 text-xs text-[#4f4b6e]">No docs yet.</p>
+          <p className="px-1 py-2 text-xs text-[#4f4b6e]">{t("chat.docs.tree.noDocsYet")}</p>
         ) : null}
 
         {liveDocs.map((d) => (
@@ -232,14 +241,14 @@ export function DocsTab({
             disabled={busy}
             className="mt-1 flex items-center gap-1.5 rounded-md border border-dashed border-[#1b1833] px-2 py-1.5 text-xs text-[#7975a8] hover:text-[#ececff]"
           >
-            <ListChecks className="h-3.5 w-3.5" /> Start sprint plan
+            <ListChecks className="h-3.5 w-3.5" /> {t("chat.docs.empty.startSprintPlan")}
           </button>
         ) : null}
 
         {pmDrafts.length > 0 ? (
           <div className="mt-3 flex flex-col gap-1.5">
             <span className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-[#7975a8]">
-              <Bot className="h-3 w-3" /> Team lead drafts
+              <Bot className="h-3 w-3" /> {t("chat.docs.tree.teamLeadDrafts")}
             </span>
             {pmDrafts.map((d) => (
               <DocTreeItem
@@ -268,7 +277,7 @@ export function DocsTab({
         />
       ) : (
         <div className="grid place-items-center rounded-md border border-dashed border-[#1b1833] bg-[#0e0716] p-10 text-sm text-[#7975a8]">
-          Select a doc, or create one.
+          {t("chat.docs.selectPrompt")}
         </div>
       )}
     </div>
@@ -288,6 +297,7 @@ function DocTreeItem({
   isDraft?: boolean;
   onSelect: () => void;
 }) {
+  const { t } = useTranslation();
   const Icon = docIcon(doc.type);
   return (
     <button
@@ -301,11 +311,11 @@ function DocTreeItem({
     >
       <Icon className={`h-3.5 w-3.5 shrink-0 ${isDraft ? "text-[#7975a8]" : ""}`} />
       <span className="min-w-0 flex-1 truncate">
-        {doc.title || "Untitled"}
+        {doc.title || t("chat.docs.untitled")}
       </span>
       {isPlan ? (
         <span className="shrink-0 rounded-full bg-[#ec1b69]/15 px-1.5 text-[10px] text-[#ec1b69]">
-          plan
+          {t("chat.docs.tree.planBadge")}
         </span>
       ) : null}
     </button>
@@ -321,30 +331,31 @@ function NewDocForm({
   onCreate: (type: DocType, title: string) => void;
   onCancel: () => void;
 }) {
+  const { t } = useTranslation();
   const [type, setType] = useState<DocType>("note");
   const [title, setTitle] = useState("");
   return (
     <div className="flex flex-col gap-2 rounded-md border border-[#1b1833] bg-[#0e0716] p-2">
       <div className="flex gap-1">
-        {(["note", "plan", "spec"] as DocType[]).map((t) => (
+        {(["note", "plan", "spec"] as DocType[]).map((dt) => (
           <button
-            key={t}
+            key={dt}
             type="button"
-            onClick={() => setType(t)}
+            onClick={() => setType(dt)}
             className={`flex-1 rounded px-1.5 py-1 text-[11px] capitalize ${
-              type === t
+              type === dt
                 ? "bg-[#ec1b69]/15 text-[#ec1b69]"
                 : "text-[#7975a8] hover:text-[#ececff]"
             }`}
           >
-            {DOC_TYPE_LABEL[t]}
+            {t(DOC_TYPE_LABEL[dt])}
           </button>
         ))}
       </div>
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        placeholder="Title…"
+        placeholder={t("chat.docs.newDoc.titlePlaceholder")}
         className="w-full rounded-md border border-[#1b1833] bg-[#0a0511] px-2 py-1.5 text-sm text-[#ececff] outline-none placeholder:text-[#4f4b6e] focus:border-[#ec1b69]/50"
         onKeyDown={(e) => {
           if (e.key === "Enter" && title.trim()) onCreate(type, title.trim());
@@ -352,14 +363,14 @@ function NewDocForm({
       />
       <div className="flex justify-end gap-1.5">
         <Button size="sm" variant="ghost" onClick={onCancel} disabled={busy}>
-          Cancel
+          {t("chat.docs.newDoc.cancel")}
         </Button>
         <Button
           size="sm"
           onClick={() => title.trim() && onCreate(type, title.trim())}
           disabled={busy || !title.trim()}
         >
-          Create
+          {t("chat.docs.newDoc.create")}
         </Button>
       </div>
     </div>
@@ -383,6 +394,7 @@ function DocEditor({
   participants: MentionParticipant[];
   onDeleted: () => void;
 }) {
+  const { t } = useTranslation();
   const { doc, blocks, loading } = useDoc(wallet, projectId, docId);
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
@@ -404,7 +416,7 @@ function DocEditor({
       await addDocNote({ walletAddress: wallet, projectId, docId, text, owner: me, order });
       setDraft("");
     } catch (e) {
-      toast.error("Couldn't add note", { description: (e as Error).message });
+      toast.error(t("chat.docs.editor.addNoteError"), { description: (e as Error).message });
     } finally {
       setBusy(false);
     }
@@ -413,13 +425,13 @@ function DocEditor({
   const remove = async () => {
     if (!wallet) return;
     if (doc?.draft !== true) {
-      if (!confirm("Delete this doc?")) return;
+      if (!confirm(t("chat.docs.editor.confirmDeleteDoc"))) return;
     }
     try {
       await deleteProjectDoc({ walletAddress: wallet, projectId, docId });
       onDeleted();
     } catch (e) {
-      toast.error("Couldn't delete the doc", { description: (e as Error).message });
+      toast.error(t("chat.docs.editor.deleteDocError"), { description: (e as Error).message });
     }
   };
 
@@ -427,9 +439,9 @@ function DocEditor({
     if (!wallet) return;
     try {
       await promoteDoc({ walletAddress: wallet, projectId, docId });
-      toast.success("Doc promoted to the tree");
+      toast.success(t("chat.docs.editor.promotedSuccess"));
     } catch (e) {
-      toast.error("Couldn't promote", { description: (e as Error).message });
+      toast.error(t("chat.docs.editor.promoteError"), { description: (e as Error).message });
     }
   };
 
@@ -450,11 +462,11 @@ function DocEditor({
       const res = await approvePlan({ projectId, docId, owner: wallet });
       toast.success(
         res.created > 0
-          ? `Created ${res.created} task${res.created === 1 ? "" : "s"} on the board`
-          : "Plan approved",
+          ? t("chat.docs.editor.tasksCreatedOnBoard", { count: res.created })
+          : t("chat.docs.editor.planApproved"),
       );
     } catch (e) {
-      toast.error("Couldn't approve the plan", {
+      toast.error(t("chat.docs.editor.approvePlanError"), {
         description: (e as Error).message,
       });
     } finally {
@@ -467,17 +479,17 @@ function DocEditor({
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <h2 className="truncate text-lg font-semibold text-[#ececff]">
-            {doc?.title || "Untitled"}
+            {doc?.title || t("chat.docs.untitled")}
           </h2>
           <span className="text-[11px] uppercase tracking-wide text-[#7975a8]">
-            {DOC_TYPE_LABEL[doc?.type ?? "note"] ?? "Note"}
-            {doc?.draft ? " · lead's draft" : ""}
+            {t(DOC_TYPE_LABEL[doc?.type ?? "note"] ?? DOC_TYPE_LABEL.note)}
+            {doc?.draft ? ` · ${t("chat.docs.editor.leadsDraft")}` : ""}
           </span>
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
           {doc?.draft ? (
             <Button size="sm" variant="outline" onClick={promote}>
-              Promote
+              {t("chat.docs.editor.promote")}
             </Button>
           ) : null}
           <Button
@@ -485,13 +497,13 @@ function DocEditor({
             variant={showChat ? "secondary" : "outline"}
             onClick={() => setShowChat((v) => !v)}
           >
-            <MessageSquare className="h-4 w-4" /> Discussion
+            <MessageSquare className="h-4 w-4" /> {t("chat.docs.editor.discussion")}
           </Button>
           <button
             type="button"
             onClick={remove}
             className="rounded p-1.5 text-[#7975a8] hover:text-red-400"
-            aria-label="Delete doc"
+            aria-label={t("chat.docs.editor.deleteDocAria")}
           >
             <Trash2 className="h-4 w-4" />
           </button>
@@ -502,32 +514,32 @@ function DocEditor({
         <div className="flex flex-wrap items-center gap-2 rounded-md border border-[#1b1833] bg-[#0e0716] px-3 py-2">
           {statusMeta ? (
             <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs ${statusMeta.cls}`}>
-              {statusMeta.label}
+              {t(statusMeta.labelKey)}
             </span>
           ) : null}
           <span className="text-xs text-[#7975a8]">
-            {taskCount} draft task{taskCount === 1 ? "" : "s"}
+            {t("chat.docs.editor.draftTaskCount", { count: taskCount })}
           </span>
           {canApprove ? (
             <Button size="xs" onClick={approve} disabled={approving}>
               {approving ? (
                 <>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> Approving…
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> {t("chat.docs.editor.approving")}
                 </>
               ) : (
                 <>
-                  <Check className="h-3.5 w-3.5" /> Approve &amp; create{" "}
-                  {unmaterializedTasks} task{unmaterializedTasks === 1 ? "" : "s"}
+                  <Check className="h-3.5 w-3.5" />{" "}
+                  {t("chat.docs.editor.approveAndCreate", { count: unmaterializedTasks })}
                 </>
               )}
             </Button>
           ) : status === "materialized" ? (
             <span className="text-xs text-emerald-200/80">
-              Tasks created on the board.
+              {t("chat.docs.editor.tasksCreatedNote")}
             </span>
           ) : status === "plan_proposed" ? (
             <span className="text-xs text-amber-200/80">
-              Proposed — no draft tasks to create yet.
+              {t("chat.docs.editor.proposedNoTasks")}
             </span>
           ) : null}
         </div>
@@ -535,13 +547,13 @@ function DocEditor({
 
       {loading && blocks.length === 0 ? (
         <div className="flex items-center gap-2 py-6 text-sm text-[#7975a8]">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+          <Loader2 className="h-4 w-4 animate-spin" /> {t("common.loading")}
         </div>
       ) : (
         <div className="flex flex-col gap-2">
           {blocks.length === 0 ? (
             <p className="rounded-md border border-dashed border-[#1b1833] bg-[#0e0716] px-4 py-6 text-center text-sm text-[#7975a8]">
-              Empty doc. Add a note below{isPlan ? ", or ask your team lead in the discussion to draft the plan." : "."}
+              {isPlan ? t("chat.docs.editor.emptyDocPlan") : t("chat.docs.editor.emptyDocNote")}
             </p>
           ) : (
             blocks.map((b) =>
@@ -562,7 +574,7 @@ function DocEditor({
               ) : b.type === "planGroup" ? (
                 <div key={b.id} className="pt-2">
                   <h3 className="text-sm font-semibold text-[#ececff]">
-                    {b.title || "Untitled group"}
+                    {b.title || t("chat.docs.editor.untitledGroup")}
                   </h3>
                   <div className="mt-1 h-px bg-[#1b1833]" />
                 </div>
@@ -578,13 +590,13 @@ function DocEditor({
         <textarea
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder="Add a note (context, constraints, feedback)…"
+          placeholder={t("chat.docs.editor.notePlaceholder")}
           rows={3}
           className="w-full resize-y rounded-md border border-[#1b1833] bg-[#0a0511] px-3 py-2 text-sm text-[#ececff] outline-none placeholder:text-[#4f4b6e] focus:border-[#ec1b69]/50"
         />
         <div className="flex justify-end">
           <Button size="sm" onClick={addNote} disabled={busy || !draft.trim()}>
-            <Plus className="h-4 w-4" /> Add note
+            <Plus className="h-4 w-4" /> {t("chat.docs.editor.addNote")}
           </Button>
         </div>
       </div>
@@ -600,7 +612,7 @@ function DocEditor({
         wallet={wallet}
         projectId={projectId}
         docId={docId}
-        docTitle={doc?.title ?? "Doc"}
+        docTitle={doc?.title ?? t("chat.docs.docFallback")}
         participants={participants}
         meWallet={meWallet}
         onClose={() => setShowChat(false)}
@@ -620,6 +632,7 @@ function PlanNoteBlock({
   onSave: (text: string) => Promise<void>;
   onDelete: () => Promise<void>;
 }) {
+  const { t } = useTranslation();
   const [editing, setEditing] = useState(false);
   const [val, setVal] = useState(block.text ?? "");
   const [busy, setBusy] = useState(false);
@@ -634,7 +647,7 @@ function PlanNoteBlock({
       await onSave(val.trim());
       setEditing(false);
     } catch (e) {
-      toast.error("Couldn't save note", { description: (e as Error).message });
+      toast.error(t("chat.docs.note.saveError"), { description: (e as Error).message });
     } finally {
       setBusy(false);
     }
@@ -652,10 +665,10 @@ function PlanNoteBlock({
           />
           <div className="flex justify-end gap-2">
             <Button size="sm" variant="ghost" onClick={() => setEditing(false)} disabled={busy}>
-              Cancel
+              {t("chat.docs.note.cancel")}
             </Button>
             <Button size="sm" onClick={save} disabled={busy || !val.trim()}>
-              <Check className="h-4 w-4" /> Save
+              <Check className="h-4 w-4" /> {t("chat.docs.note.save")}
             </Button>
           </div>
         </div>
@@ -663,7 +676,7 @@ function PlanNoteBlock({
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1 text-sm text-[#cfcbef]">
             <Markdown>{block.text ?? ""}</Markdown>
-            <p className="mt-1 text-[11px] text-[#4f4b6e]">{ownerLabel(block.owner)}</p>
+            <p className="mt-1 text-[11px] text-[#4f4b6e]">{ownerLabel(block.owner, t)}</p>
           </div>
           {canEdit ? (
             <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
@@ -671,7 +684,7 @@ function PlanNoteBlock({
                 type="button"
                 onClick={() => setEditing(true)}
                 className="rounded p-1 text-[#7975a8] hover:text-[#ececff]"
-                aria-label="Edit note"
+                aria-label={t("chat.docs.note.editAria")}
               >
                 <Pencil className="h-3.5 w-3.5" />
               </button>
@@ -679,7 +692,7 @@ function PlanNoteBlock({
                 type="button"
                 onClick={() => onDelete().catch(() => {})}
                 className="rounded p-1 text-[#7975a8] hover:text-red-400"
-                aria-label="Delete note"
+                aria-label={t("chat.docs.note.deleteAria")}
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
@@ -692,11 +705,12 @@ function PlanNoteBlock({
 }
 
 function PlanTaskBlock({ block }: { block: PlanBlock }) {
+  const { t } = useTranslation();
   return (
     <div className="ml-3 rounded-md border-l-2 border-[#ec1b69]/40 border-y border-r border-y-[#1b1833] border-r-[#1b1833] bg-[#0c0613] px-3 py-2.5">
       <div className="flex items-start justify-between gap-2">
         <span className="text-sm font-medium text-[#ececff]">
-          {block.title || "Untitled task"}
+          {block.title || t("chat.docs.task.untitledTask")}
         </span>
         {block.suggestedAgent ? (
           <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[#1b1833] px-2 py-0.5 text-[11px] text-[#a9a4d4]">
@@ -709,11 +723,11 @@ function PlanTaskBlock({ block }: { block: PlanBlock }) {
       ) : null}
       {block.acceptance ? (
         <p className="mt-1.5 text-[11px] text-[#7975a8]">
-          <span className="text-[#a9a4d4]">Done when:</span> {block.acceptance}
+          <span className="text-[#a9a4d4]">{t("chat.docs.task.doneWhen")}</span> {block.acceptance}
         </p>
       ) : null}
       <p className="mt-1 text-[11px] text-[#4f4b6e]">
-        Proposed by {ownerLabel(block.owner)} · draft
+        {t("chat.docs.task.proposedBy", { owner: ownerLabel(block.owner, t) })}
       </p>
     </div>
   );
@@ -736,6 +750,7 @@ function DocChat({
   meWallet?: string;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const { address } = useConnection();
   const { messages } = useDocMessages(wallet, projectId, docId);
   const [draft, setDraft] = useState("");
@@ -756,7 +771,7 @@ function DocChat({
       });
       setDraft("");
     } catch (e) {
-      toast.error("Couldn't send", { description: (e as Error).message });
+      toast.error(t("chat.docs.docChat.sendError"), { description: (e as Error).message });
     } finally {
       setBusy(false);
     }
@@ -766,13 +781,13 @@ function DocChat({
     <div className="flex h-[60vh] min-h-[420px] flex-col rounded-md border border-[#1b1833] bg-[#0e0716]">
       <div className="flex items-center justify-between border-b border-[#1b1833] px-3 py-2">
         <span className="truncate text-sm font-medium text-[#ececff]">
-          {docTitle} — Discussion
+          {t("chat.docs.docChat.headerTitle", { title: docTitle })}
         </span>
         <button
           type="button"
           onClick={onClose}
           className="rounded p-1 text-[#7975a8] hover:text-[#ececff]"
-          aria-label="Close discussion"
+          aria-label={t("chat.docs.docChat.closeAria")}
         >
           ✕
         </button>
@@ -780,8 +795,7 @@ function DocChat({
       <div className="flex-1 space-y-2 overflow-y-auto p-3">
         {messages.length === 0 ? (
           <p className="py-6 text-center text-xs text-[#4f4b6e]">
-            Discuss this doc with your team + your team lead. The lead posts here when it
-            edits the doc.
+            {t("chat.docs.docChat.empty")}
           </p>
         ) : (
           messages.map((m) => {
@@ -795,7 +809,7 @@ function DocChat({
                 className={`flex flex-col ${mine ? "items-end" : "items-start"}`}
               >
                 <span className="text-[10px] text-[#4f4b6e]">
-                  {m.from === "agent" ? ownerLabel(m.agentName ?? "agent") : "You"}
+                  {m.from === "agent" ? ownerLabel(m.agentName ?? "agent", t) : t("chat.docs.docChat.you")}
                 </span>
                 <div
                   className={`max-w-[85%] rounded-md px-2.5 py-1.5 text-sm ${
@@ -822,13 +836,13 @@ function DocChat({
             onChange={setDraft}
             onSend={send}
             participants={participants}
-            placeholder="Message…  (type @ to mention)"
+            placeholder={t("chat.docs.docChat.composerPlaceholder")}
             rows={1}
             className="min-h-[38px] w-full resize-y rounded-md border border-[#1b1833] bg-[#0a0511] px-2.5 py-2 text-sm text-[#ececff] outline-none placeholder:text-[#4f4b6e] focus:border-[#ec1b69]/50"
           />
         </div>
         <Button size="sm" onClick={send} disabled={busy || !draft.trim()}>
-          Send
+          {t("chat.docs.docChat.send")}
         </Button>
       </div>
     </div>

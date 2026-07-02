@@ -1688,5 +1688,171 @@
       "home": "Home",
       "primaryNavigation": "Primary navigation"
     }
+  },
+  "chat": {
+    "docs": {
+      "loadingDocs": "Loading docs…",
+      "untitled": "Untitled",
+      "docFallback": "Doc",
+      "someone": "someone",
+      "selectPrompt": "Select a doc, or create one.",
+      "docType": {
+        "note": "Note",
+        "plan": "Plan",
+        "spec": "Spec"
+      },
+      "planStatus": {
+        "draft": "Draft",
+        "underDiscussion": "Under discussion",
+        "planProposed": "Plan proposed",
+        "approved": "Approved",
+        "materialized": "Materialized"
+      },
+      "empty": {
+        "title": "No docs yet",
+        "description": "Docs are where your team and your team lead think together — a sprint plan, a spec, meeting notes. Start the sprint plan, or create a free-form note.",
+        "starting": "Starting…",
+        "startSprintPlan": "Start sprint plan",
+        "newNote": "New note"
+      },
+      "tree": {
+        "heading": "Docs",
+        "newDocAria": "New doc",
+        "noDocsYet": "No docs yet.",
+        "teamLeadDrafts": "Team lead drafts",
+        "planBadge": "plan"
+      },
+      "newDoc": {
+        "titlePlaceholder": "Title…",
+        "cancel": "Cancel",
+        "create": "Create"
+      },
+      "toast": {
+        "startPlanError": "Couldn't start the plan",
+        "createDocError": "Couldn't create the doc"
+      },
+      "editor": {
+        "leadsDraft": "lead's draft",
+        "promote": "Promote",
+        "discussion": "Discussion",
+        "deleteDocAria": "Delete doc",
+        "draftTaskCount_one": "{{count}} draft task",
+        "draftTaskCount_other": "{{count}} draft tasks",
+        "approving": "Approving…",
+        "approveAndCreate_one": "Approve & create {{count}} task",
+        "approveAndCreate_other": "Approve & create {{count}} tasks",
+        "tasksCreatedNote": "Tasks created on the board.",
+        "proposedNoTasks": "Proposed — no draft tasks to create yet.",
+        "emptyDocPlan": "Empty doc. Add a note below, or ask your team lead in the discussion to draft the plan.",
+        "emptyDocNote": "Empty doc. Add a note below.",
+        "untitledGroup": "Untitled group",
+        "notePlaceholder": "Add a note (context, constraints, feedback)…",
+        "addNote": "Add note",
+        "addNoteError": "Couldn't add note",
+        "confirmDeleteDoc": "Delete this doc?",
+        "deleteDocError": "Couldn't delete the doc",
+        "promotedSuccess": "Doc promoted to the tree",
+        "promoteError": "Couldn't promote",
+        "tasksCreatedOnBoard_one": "Created {{count}} task on the board",
+        "tasksCreatedOnBoard_other": "Created {{count}} tasks on the board",
+        "planApproved": "Plan approved",
+        "approvePlanError": "Couldn't approve the plan"
+      },
+      "note": {
+        "saveError": "Couldn't save note",
+        "cancel": "Cancel",
+        "save": "Save",
+        "editAria": "Edit note",
+        "deleteAria": "Delete note"
+      },
+      "task": {
+        "untitledTask": "Untitled task",
+        "doneWhen": "Done when:",
+        "proposedBy": "Proposed by {{owner}} · draft"
+      },
+      "docChat": {
+        "sendError": "Couldn't send",
+        "headerTitle": "{{title}} — Discussion",
+        "closeAria": "Close discussion",
+        "empty": "Discuss this doc with your team + your team lead. The lead posts here when it edits the doc.",
+        "you": "You",
+        "composerPlaceholder": "Message…  (type @ to mention)",
+        "send": "Send"
+      }
+    },
+    "composer": {
+      "messagePlaceholder": "Write a message…",
+      "listening": "Listening…",
+      "slashCommandsAria": "Slash commands",
+      "uploadFailed": "Upload failed",
+      "unknownError": "Unknown error",
+      "removeAttachment": "Remove {{name}}",
+      "attachFiles": "Attach files",
+      "attach": "Attach",
+      "attachComingSoon": "Attachments coming soon",
+      "pauseDictation": "Pause dictation",
+      "dictate": "Dictate",
+      "dictateWithMic": "Dictate with microphone",
+      "send": "Send",
+      "dictationError": "Dictation: {{error}}",
+      "slash": {
+        "task": {
+          "label": "Create task",
+          "description": "Open the task creator."
+        },
+        "project": {
+          "label": "Create project",
+          "description": "Open the project creator."
+        },
+        "agent": {
+          "label": "Launch agent",
+          "description": "Start the 7-step agent launcher."
+        },
+        "perkos": {
+          "label": "Open PerkOS Agent",
+          "description": "Get help from the in-app assistant."
+        },
+        "clear": {
+          "label": "Clear conversation",
+          "description": "Reset this chat history."
+        }
+      }
+    },
+    "assistant": {
+      "quickActions": {
+        "project": "Create a project",
+        "task": "Create a task",
+        "agent": "Register an agent"
+      },
+      "system": {
+        "connectWallet": "⚠ Connect a wallet to chat with the assistant.",
+        "stillOpening": "⚠ Still opening your Assistant conversation, try again in a moment.",
+        "openError": "⚠ Couldn't open Assistant chat: {{error}}"
+      },
+      "status": {
+        "openingChat": "Opening chat…",
+        "offline": "Offline",
+        "online": "Online",
+        "connecting": "Connecting…"
+      },
+      "header": {
+        "loadHistory": "Load previous conversation",
+        "clearAria": "Clear conversation",
+        "clearTitle": "Clear — start a new conversation",
+        "close": "Close"
+      },
+      "empty": {
+        "greeting": "Hi, how can I help you today?",
+        "intro": "I'm the PerkOS Agent. I help you learn the platform and set up the work agents you'll use across your projects.",
+        "quickActionsLabel": "Quick actions",
+        "footer": "Or ask me anything about PerkOS — projects, agents, runtimes — and I'll guide you."
+      },
+      "reactions": {
+        "copy": "Copy",
+        "thumbsUp": "Thumbs up",
+        "thumbsDown": "Thumbs down"
+      }
+    }
   }
 }
+
