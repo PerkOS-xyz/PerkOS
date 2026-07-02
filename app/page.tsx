@@ -30,6 +30,7 @@ import { AgentOrb } from "./components/AgentOrb";
 import { ContactForm } from "./components/landing/ContactForm";
 import { LandingAutoRoute } from "./components/LandingAutoRoute";
 import { SmartCTA } from "./components/SmartCTA";
+import { LanguageSelector } from "./components/LanguageSelector";
 
 export const metadata: Metadata = {
   title: "PerkOS — Your business just hired its first team",
@@ -152,6 +153,8 @@ function TopNav() {
           </Link>
         </nav>
         <div className="flex items-center gap-2">
+          {/* Language selector — browser-only (self-hidden inside Mini App hosts). */}
+          <LanguageSelector />
           {/* Sign-in — works on the web and inside supported host apps,
               where SmartCTA picks up the host account automatically. */}
           <SmartCTA
