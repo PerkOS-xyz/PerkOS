@@ -1697,5 +1697,170 @@
       "home": "首页",
       "primaryNavigation": "主导航"
     }
+  },
+  "chat": {
+    "docs": {
+      "loadingDocs": "正在加载文档…",
+      "untitled": "无标题",
+      "docFallback": "文档",
+      "someone": "某人",
+      "selectPrompt": "选择一个文档,或新建一个。",
+      "docType": {
+        "note": "笔记",
+        "plan": "计划",
+        "spec": "规范"
+      },
+      "planStatus": {
+        "draft": "草稿",
+        "underDiscussion": "讨论中",
+        "planProposed": "计划已提议",
+        "approved": "已批准",
+        "materialized": "已落地"
+      },
+      "empty": {
+        "title": "暂无文档",
+        "description": "文档是你的团队和团队负责人共同思考的地方,例如冲刺计划、规范或会议记录。开始编写冲刺计划,或创建一篇自由格式的笔记。",
+        "starting": "启动中…",
+        "startSprintPlan": "开始冲刺计划",
+        "newNote": "新建笔记"
+      },
+      "tree": {
+        "heading": "文档",
+        "newDocAria": "新建文档",
+        "noDocsYet": "暂无文档。",
+        "teamLeadDrafts": "团队负责人草稿",
+        "planBadge": "计划"
+      },
+      "newDoc": {
+        "titlePlaceholder": "标题…",
+        "cancel": "取消",
+        "create": "创建"
+      },
+      "toast": {
+        "startPlanError": "无法启动计划",
+        "createDocError": "无法创建文档"
+      },
+      "editor": {
+        "leadsDraft": "负责人的草稿",
+        "promote": "发布",
+        "discussion": "讨论",
+        "deleteDocAria": "删除文档",
+        "draftTaskCount_one": "{{count}} 个草稿任务",
+        "draftTaskCount_other": "{{count}} 个草稿任务",
+        "approving": "批准中…",
+        "approveAndCreate_one": "批准并创建 {{count}} 个任务",
+        "approveAndCreate_other": "批准并创建 {{count}} 个任务",
+        "tasksCreatedNote": "任务已创建到看板。",
+        "proposedNoTasks": "已提议,暂无可创建的草稿任务。",
+        "emptyDocPlan": "空文档。在下方添加笔记,或在讨论中让团队负责人起草计划。",
+        "emptyDocNote": "空文档。在下方添加笔记。",
+        "untitledGroup": "无标题分组",
+        "notePlaceholder": "添加笔记(背景、限制条件、反馈)…",
+        "addNote": "添加笔记",
+        "addNoteError": "无法添加笔记",
+        "confirmDeleteDoc": "删除此文档?",
+        "deleteDocError": "无法删除文档",
+        "promotedSuccess": "文档已发布到文档树",
+        "promoteError": "无法发布",
+        "tasksCreatedOnBoard_one": "已在看板上创建 {{count}} 个任务",
+        "tasksCreatedOnBoard_other": "已在看板上创建 {{count}} 个任务",
+        "planApproved": "计划已批准",
+        "approvePlanError": "无法批准计划"
+      },
+      "note": {
+        "saveError": "无法保存笔记",
+        "cancel": "取消",
+        "save": "保存",
+        "editAria": "编辑笔记",
+        "deleteAria": "删除笔记"
+      },
+      "task": {
+        "untitledTask": "无标题任务",
+        "doneWhen": "完成条件:",
+        "proposedBy": "由 {{owner}} 提议 · 草稿"
+      },
+      "docChat": {
+        "sendError": "无法发送",
+        "headerTitle": "{{title}} · 讨论",
+        "closeAria": "关闭讨论",
+        "empty": "在这里和团队以及团队负责人一起讨论此文档。负责人编辑文档时也会在这里发布消息。",
+        "you": "你",
+        "composerPlaceholder": "消息…(输入 @ 可提及)",
+        "send": "发送"
+      }
+    },
+    "composer": {
+      "messagePlaceholder": "输入一条消息…",
+      "listening": "正在聆听…",
+      "slashCommandsAria": "斜杠命令",
+      "uploadFailed": "上传失败",
+      "unknownError": "未知错误",
+      "removeAttachment": "移除 {{name}}",
+      "attachFiles": "添加附件",
+      "attach": "附件",
+      "attachComingSoon": "附件功能即将推出",
+      "pauseDictation": "暂停听写",
+      "dictate": "听写",
+      "dictateWithMic": "使用麦克风听写",
+      "send": "发送",
+      "dictationError": "听写:{{error}}",
+      "slash": {
+        "task": {
+          "label": "创建任务",
+          "description": "打开任务创建器。"
+        },
+        "project": {
+          "label": "创建项目",
+          "description": "打开项目创建器。"
+        },
+        "agent": {
+          "label": "启动智能体",
+          "description": "启动 7 步智能体启动向导。"
+        },
+        "perkos": {
+          "label": "打开 PerkOS 智能体",
+          "description": "从应用内助手获取帮助。"
+        },
+        "clear": {
+          "label": "清除对话",
+          "description": "重置此聊天记录。"
+        }
+      }
+    },
+    "assistant": {
+      "quickActions": {
+        "project": "创建一个项目",
+        "task": "创建一个任务",
+        "agent": "注册一个智能体"
+      },
+      "system": {
+        "connectWallet": "⚠ 请连接钱包以与助手聊天。",
+        "stillOpening": "⚠ 助手对话仍在打开中,请稍后重试。",
+        "openError": "⚠ 无法打开助手聊天:{{error}}"
+      },
+      "status": {
+        "openingChat": "正在打开聊天…",
+        "offline": "离线",
+        "online": "在线",
+        "connecting": "连接中…"
+      },
+      "header": {
+        "loadHistory": "加载历史对话",
+        "clearAria": "清除对话",
+        "clearTitle": "清除,开始新对话",
+        "close": "关闭"
+      },
+      "empty": {
+        "greeting": "你好,今天有什么可以帮你的?",
+        "intro": "我是 PerkOS 智能体,可以帮助你了解平台,并设置你将在各个项目中使用的工作智能体。",
+        "quickActionsLabel": "快捷操作",
+        "footer": "或者向我询问关于 PerkOS 的任何问题,例如项目、智能体、运行环境,我会为你解答。"
+      },
+      "reactions": {
+        "copy": "复制",
+        "thumbsUp": "赞",
+        "thumbsDown": "踩"
+      }
+    }
   }
 }

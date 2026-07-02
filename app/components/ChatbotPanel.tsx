@@ -12,6 +12,7 @@ import {
   type KeyboardEvent,
 } from "react";
 import { useConnection } from "wagmi";
+import { useTranslation } from "react-i18next";
 import {
   X,
   ArrowUp,
@@ -44,6 +45,7 @@ import {
   type Attachment,
 } from "../lib/uploadAttachment";
 
+// `label` holds a translation key, resolved via t() at render.
 type QuickAction = {
   id: string;
   label: string;
@@ -52,9 +54,9 @@ type QuickAction = {
 };
 
 const QUICK_ACTIONS: QuickAction[] = [
-  { id: "project", label: "Create a project", href: "/projects/new", Icon: Folder },
-  { id: "task", label: "Create a task", href: "/tasks/new", Icon: ListTodo },
-  { id: "agent", label: "Register an agent", href: "/agents/new", Icon: Bot },
+  { id: "project", label: "chat.assistant.quickActions.project", href: "/projects/new", Icon: Folder },
+  { id: "task", label: "chat.assistant.quickActions.task", href: "/tasks/new", Icon: ListTodo },
+  { id: "agent", label: "chat.assistant.quickActions.agent", href: "/agents/new", Icon: Bot },
 ];
 
 function genId() {
@@ -62,6 +64,7 @@ function genId() {
 }
 
 export function ChatbotPanel() {
+  const { t } = useTranslation();
   const {
     open,
     setOpen,
@@ -179,8 +182,8 @@ export function ChatbotPanel() {
       );
       setAttachments((prev) => [...prev, ...uploaded]);
     } catch (err) {
-      toast.error("Upload failed", {
-        description: err instanceof Error ? err.message : "Unknown error",
+      toast.error(t("chat.composer.uploadFailed"), {
+        description: err instanceof Error ? err.message : t("chat.composer.unknownError"),
       });
     } finally {
       setUploading(false);
@@ -199,7 +202,7 @@ export function ChatbotPanel() {
       appendMessage({
         id: genId(),
         role: "agent",
-        text: "⚠ Connect a wallet to chat with the assistant.",
+        text: t("chat.assistant.system.connectWallet"),
       });
       return;
     }
@@ -207,7 +210,7 @@ export function ChatbotPanel() {
       appendMessage({
         id: genId(),
         role: "agent",
-        text: "⚠ Still opening your Assistant conversation, try again in a moment.",
+        text: t("chat.assistant.system.stillOpening"),
       });
       return;
     }
@@ -215,7 +218,7 @@ export function ChatbotPanel() {
       appendMessage({
         id: genId(),
         role: "agent",
-        text: `⚠ Couldn't open Assistant chat: ${convError}`,
+        text: t("chat.assistant.system.openError", { error: convError }),
       });
       return;
     }
@@ -284,12 +287,12 @@ export function ChatbotPanel() {
           title="PerkOS Agent"
           subtitle={
             loadingConv
-              ? "Opening chat…"
+              ? t("chat.assistant.status.openingChat")
               : chat.error
-                ? "Offline"
+                ? t("chat.assistant.status.offline")
                 : chat.authed
-                  ? "Online"
-                  : "Connecting…"
+                  ? t("chat.assistant.status.online")
+                  : t("chat.assistant.status.connecting")
           }
           onClose={() => setOpen(false)}
           onReset={isEmpty ? undefined : resetConversation}
@@ -319,7 +322,7 @@ export function ChatbotPanel() {
         <div className="border-t border-border bg-card/95 px-5 py-3">
           {speech.error ? (
             <p className="mb-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
-              Dictation: {speech.error}
+              {t("chat.composer.dictationError", { error: speech.error })}
             </p>
           ) : null}
 
@@ -340,7 +343,7 @@ export function ChatbotPanel() {
                   <button
                     type="button"
                     onClick={() => removeAttachment(a.url)}
-                    aria-label={`Remove ${a.name}`}
+                    aria-label={t("chat.composer.removeAttachment", { name: a.name })}
                     className="text-muted-foreground hover:text-foreground"
                   >
                     <X className="h-3.5 w-3.5" />
@@ -361,11 +364,11 @@ export function ChatbotPanel() {
               />
               <button
                 type="button"
-                aria-label="Attach files"
+                aria-label={t("chat.composer.attachFiles")}
                 disabled={uploading || !convId}
                 onClick={() => fileInputRef.current?.click()}
                 className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:text-primary disabled:opacity-50"
-                title="Attach files"
+                title={t("chat.composer.attachFiles")}
               >
                 {uploading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -377,7 +380,7 @@ export function ChatbotPanel() {
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 onKeyDown={onKey}
-                placeholder={speech.listening ? (speech.interimText || "Listening…") : "Write a message…"}
+                placeholder={speech.listening ? (speech.interimText || t("chat.composer.listening")) : t("chat.composer.messagePlaceholder")}
                 rows={1}
                 className="flex-1 resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
               />
@@ -394,11 +397,11 @@ export function ChatbotPanel() {
                       speech.listening &&
                         "animate-pulse bg-primary/10 text-primary",
                     )}
-                    aria-label={speech.listening ? "Pause dictation" : "Dictate"}
+                    aria-label={speech.listening ? t("chat.composer.pauseDictation") : t("chat.composer.dictate")}
                     title={
                       speech.listening
-                        ? "Pause dictation"
-                        : "Dictate with microphone"
+                        ? t("chat.composer.pauseDictation")
+                        : t("chat.composer.dictateWithMic")
                     }
                   >
                     {speech.listening ? (
@@ -413,7 +416,7 @@ export function ChatbotPanel() {
                   size="icon"
                   disabled={awaitingReply || draft.trim().length === 0}
                   className="h-8 w-8 rounded-full"
-                  aria-label="Send"
+                  aria-label={t("chat.composer.send")}
                 >
                   {awaitingReply ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -443,6 +446,7 @@ function Header({
   onReset?: () => void;
   onHistory?: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center justify-between border-b border-border px-5 py-3">
       <div className="flex items-center gap-2">
@@ -469,8 +473,8 @@ function Header({
             type="button"
             onClick={onHistory}
             className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:text-foreground"
-            aria-label="Load previous conversation"
-            title="Load previous conversation"
+            aria-label={t("chat.assistant.header.loadHistory")}
+            title={t("chat.assistant.header.loadHistory")}
           >
             <History className="h-4 w-4" />
           </button>
@@ -480,8 +484,8 @@ function Header({
             type="button"
             onClick={onReset}
             className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:text-foreground"
-            aria-label="Clear conversation"
-            title="Clear — start a new conversation"
+            aria-label={t("chat.assistant.header.clearAria")}
+            title={t("chat.assistant.header.clearTitle")}
           >
             <RefreshCw className="h-4 w-4" />
           </button>
@@ -490,7 +494,7 @@ function Header({
           type="button"
           onClick={onClose}
           className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:text-foreground"
-          aria-label="Close"
+          aria-label={t("chat.assistant.header.close")}
         >
           <X className="h-4 w-4" />
         </button>
@@ -500,6 +504,7 @@ function Header({
 }
 
 function EmptyState({ onAction }: { onAction: (href: string) => void }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-start gap-3">
@@ -508,18 +513,17 @@ function EmptyState({ onAction }: { onAction: (href: string) => void }) {
         </span>
         <div className="flex flex-col gap-1.5">
           <h2 className="text-lg font-medium leading-snug text-foreground">
-            Hi, how can I help you today?
+            {t("chat.assistant.empty.greeting")}
           </h2>
           <p className="text-xs leading-relaxed text-muted-foreground">
-            I&apos;m the PerkOS Agent. I help you learn the platform and set up
-            the work agents you&apos;ll use across your projects.
+            {t("chat.assistant.empty.intro")}
           </p>
         </div>
       </div>
 
       <div className="flex flex-col gap-1">
         <span className="px-2 pb-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-          Quick actions
+          {t("chat.assistant.empty.quickActionsLabel")}
         </span>
         {QUICK_ACTIONS.map(({ id, label, href, Icon }) => (
           <button
@@ -529,12 +533,11 @@ function EmptyState({ onAction }: { onAction: (href: string) => void }) {
             className="flex items-center gap-3 rounded-md px-2 py-2 text-sm text-foreground transition-colors hover:bg-primary/10"
           >
             <Icon className="h-4 w-4 text-muted-foreground" />
-            {label}
+            {t(label)}
           </button>
         ))}
         <p className="mt-2 px-2 text-xs text-muted-foreground">
-          Or ask me anything about PerkOS — projects, agents, runtimes — and
-          I&apos;ll guide you.
+          {t("chat.assistant.empty.footer")}
         </p>
       </div>
     </div>
@@ -567,6 +570,7 @@ function Bubble({
 }
 
 function Reactions({ text }: { text: string }) {
+  const { t } = useTranslation();
   function copy() {
     navigator.clipboard.writeText(text).catch(() => {});
   }
@@ -576,21 +580,21 @@ function Reactions({ text }: { text: string }) {
         type="button"
         onClick={copy}
         className="grid h-6 w-6 place-items-center rounded-md hover:bg-primary/10 hover:text-foreground"
-        aria-label="Copy"
+        aria-label={t("chat.assistant.reactions.copy")}
       >
         <Copy className="h-3.5 w-3.5" />
       </button>
       <button
         type="button"
         className="grid h-6 w-6 place-items-center rounded-md hover:bg-primary/10 hover:text-foreground"
-        aria-label="Thumbs up"
+        aria-label={t("chat.assistant.reactions.thumbsUp")}
       >
         <ThumbsUp className="h-3.5 w-3.5" />
       </button>
       <button
         type="button"
         className="grid h-6 w-6 place-items-center rounded-md hover:bg-primary/10 hover:text-foreground"
-        aria-label="Thumbs down"
+        aria-label={t("chat.assistant.reactions.thumbsDown")}
       >
         <ThumbsDown className="h-3.5 w-3.5" />
       </button>

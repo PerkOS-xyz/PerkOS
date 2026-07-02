@@ -1697,5 +1697,170 @@
       "home": "Accueil",
       "primaryNavigation": "Navigation principale"
     }
+  },
+  "chat": {
+    "docs": {
+      "loadingDocs": "Chargement des docs…",
+      "untitled": "Sans titre",
+      "docFallback": "Doc",
+      "someone": "quelqu'un",
+      "selectPrompt": "Sélectionnez un doc, ou créez-en un.",
+      "docType": {
+        "note": "Note",
+        "plan": "Plan",
+        "spec": "Spécification"
+      },
+      "planStatus": {
+        "draft": "Brouillon",
+        "underDiscussion": "En discussion",
+        "planProposed": "Plan proposé",
+        "approved": "Approuvé",
+        "materialized": "Matérialisé"
+      },
+      "empty": {
+        "title": "Aucun doc pour le moment",
+        "description": "Les docs sont l'endroit où votre équipe et votre chef d'équipe réfléchissent ensemble : un plan de sprint, une spécification, des notes de réunion. Démarrez le plan de sprint, ou créez une note libre.",
+        "starting": "Démarrage…",
+        "startSprintPlan": "Démarrer le plan de sprint",
+        "newNote": "Nouvelle note"
+      },
+      "tree": {
+        "heading": "Docs",
+        "newDocAria": "Nouveau doc",
+        "noDocsYet": "Aucun doc pour le moment.",
+        "teamLeadDrafts": "Brouillons du chef d'équipe",
+        "planBadge": "plan"
+      },
+      "newDoc": {
+        "titlePlaceholder": "Titre…",
+        "cancel": "Annuler",
+        "create": "Créer"
+      },
+      "toast": {
+        "startPlanError": "Impossible de démarrer le plan",
+        "createDocError": "Impossible de créer le doc"
+      },
+      "editor": {
+        "leadsDraft": "brouillon du chef d'équipe",
+        "promote": "Promouvoir",
+        "discussion": "Discussion",
+        "deleteDocAria": "Supprimer le doc",
+        "draftTaskCount_one": "{{count}} tâche en brouillon",
+        "draftTaskCount_other": "{{count}} tâches en brouillon",
+        "approving": "Approbation…",
+        "approveAndCreate_one": "Approuver et créer {{count}} tâche",
+        "approveAndCreate_other": "Approuver et créer {{count}} tâches",
+        "tasksCreatedNote": "Tâches créées sur le tableau.",
+        "proposedNoTasks": "Proposé : aucune tâche en brouillon à créer pour le moment.",
+        "emptyDocPlan": "Doc vide. Ajoutez une note ci-dessous, ou demandez à votre chef d'équipe de rédiger le plan dans la discussion.",
+        "emptyDocNote": "Doc vide. Ajoutez une note ci-dessous.",
+        "untitledGroup": "Groupe sans titre",
+        "notePlaceholder": "Ajoutez une note (contexte, contraintes, retours)…",
+        "addNote": "Ajouter une note",
+        "addNoteError": "Impossible d'ajouter la note",
+        "confirmDeleteDoc": "Supprimer ce doc ?",
+        "deleteDocError": "Impossible de supprimer le doc",
+        "promotedSuccess": "Doc promu dans l'arborescence",
+        "promoteError": "Impossible de promouvoir",
+        "tasksCreatedOnBoard_one": "{{count}} tâche créée sur le tableau",
+        "tasksCreatedOnBoard_other": "{{count}} tâches créées sur le tableau",
+        "planApproved": "Plan approuvé",
+        "approvePlanError": "Impossible d'approuver le plan"
+      },
+      "note": {
+        "saveError": "Impossible d'enregistrer la note",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "editAria": "Modifier la note",
+        "deleteAria": "Supprimer la note"
+      },
+      "task": {
+        "untitledTask": "Tâche sans titre",
+        "doneWhen": "Terminé quand :",
+        "proposedBy": "Proposé par {{owner}} · brouillon"
+      },
+      "docChat": {
+        "sendError": "Impossible d'envoyer",
+        "headerTitle": "{{title}} : Discussion",
+        "closeAria": "Fermer la discussion",
+        "empty": "Discutez de ce doc avec votre équipe et votre chef d'équipe. Le chef publie ici quand il modifie le doc.",
+        "you": "Vous",
+        "composerPlaceholder": "Message… (tapez @ pour mentionner)",
+        "send": "Envoyer"
+      }
+    },
+    "composer": {
+      "messagePlaceholder": "Écrivez un message…",
+      "listening": "Écoute…",
+      "slashCommandsAria": "Commandes slash",
+      "uploadFailed": "Échec de l'envoi",
+      "unknownError": "Erreur inconnue",
+      "removeAttachment": "Supprimer {{name}}",
+      "attachFiles": "Joindre des fichiers",
+      "attach": "Joindre",
+      "attachComingSoon": "Pièces jointes bientôt disponibles",
+      "pauseDictation": "Mettre en pause la dictée",
+      "dictate": "Dicter",
+      "dictateWithMic": "Dicter avec le microphone",
+      "send": "Envoyer",
+      "dictationError": "Dictée : {{error}}",
+      "slash": {
+        "task": {
+          "label": "Créer une tâche",
+          "description": "Ouvre le créateur de tâche."
+        },
+        "project": {
+          "label": "Créer un projet",
+          "description": "Ouvre le créateur de projet."
+        },
+        "agent": {
+          "label": "Lancer un agent",
+          "description": "Démarre l'assistant de lancement d'agent en 7 étapes."
+        },
+        "perkos": {
+          "label": "Ouvrir l'agent PerkOS",
+          "description": "Obtenez de l'aide depuis l'assistant intégré."
+        },
+        "clear": {
+          "label": "Effacer la conversation",
+          "description": "Réinitialise cet historique de chat."
+        }
+      }
+    },
+    "assistant": {
+      "quickActions": {
+        "project": "Créer un projet",
+        "task": "Créer une tâche",
+        "agent": "Enregistrer un agent"
+      },
+      "system": {
+        "connectWallet": "⚠ Connectez un portefeuille pour discuter avec l'assistant.",
+        "stillOpening": "⚠ Ouverture de votre conversation avec l'Assistant en cours, réessayez dans un instant.",
+        "openError": "⚠ Impossible d'ouvrir le chat de l'Assistant : {{error}}"
+      },
+      "status": {
+        "openingChat": "Ouverture du chat…",
+        "offline": "Hors ligne",
+        "online": "En ligne",
+        "connecting": "Connexion…"
+      },
+      "header": {
+        "loadHistory": "Charger la conversation précédente",
+        "clearAria": "Effacer la conversation",
+        "clearTitle": "Effacer : démarrer une nouvelle conversation",
+        "close": "Fermer"
+      },
+      "empty": {
+        "greeting": "Bonjour, comment puis-je vous aider aujourd'hui ?",
+        "intro": "Je suis l'agent PerkOS. Je vous aide à apprendre à utiliser la plateforme et à configurer les agents de travail que vous utiliserez dans vos projets.",
+        "quickActionsLabel": "Actions rapides",
+        "footer": "Ou posez-moi n'importe quelle question sur PerkOS : projets, agents, environnements d'exécution, et je vous guiderai."
+      },
+      "reactions": {
+        "copy": "Copier",
+        "thumbsUp": "Pouce levé",
+        "thumbsDown": "Pouce baissé"
+      }
+    }
   }
 }

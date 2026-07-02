@@ -1697,5 +1697,170 @@
       "home": "Home",
       "primaryNavigation": "Navigazione principale"
     }
+  },
+  "chat": {
+    "docs": {
+      "loadingDocs": "Caricamento dei documenti…",
+      "untitled": "Senza titolo",
+      "docFallback": "Documento",
+      "someone": "qualcuno",
+      "selectPrompt": "Seleziona un documento, o creane uno.",
+      "docType": {
+        "note": "Nota",
+        "plan": "Piano",
+        "spec": "Specifica"
+      },
+      "planStatus": {
+        "draft": "Bozza",
+        "underDiscussion": "In discussione",
+        "planProposed": "Piano proposto",
+        "approved": "Approvato",
+        "materialized": "Materializzato"
+      },
+      "empty": {
+        "title": "Ancora nessun documento",
+        "description": "I documenti sono il luogo dove il tuo team e il tuo Capo Team pensano insieme: un piano di sprint, una specifica, note di riunione. Avvia il piano di sprint, oppure crea una nota libera.",
+        "starting": "Avvio…",
+        "startSprintPlan": "Avvia piano di sprint",
+        "newNote": "Nuova nota"
+      },
+      "tree": {
+        "heading": "Documenti",
+        "newDocAria": "Nuovo documento",
+        "noDocsYet": "Ancora nessun documento.",
+        "teamLeadDrafts": "Bozze del Capo Team",
+        "planBadge": "piano"
+      },
+      "newDoc": {
+        "titlePlaceholder": "Titolo…",
+        "cancel": "Annulla",
+        "create": "Crea"
+      },
+      "toast": {
+        "startPlanError": "Impossibile avviare il piano",
+        "createDocError": "Impossibile creare il documento"
+      },
+      "editor": {
+        "leadsDraft": "bozza del Capo Team",
+        "promote": "Promuovi",
+        "discussion": "Discussione",
+        "deleteDocAria": "Elimina documento",
+        "draftTaskCount_one": "{{count}} attività in bozza",
+        "draftTaskCount_other": "{{count}} attività in bozza",
+        "approving": "Approvazione in corso…",
+        "approveAndCreate_one": "Approva e crea {{count}} attività",
+        "approveAndCreate_other": "Approva e crea {{count}} attività",
+        "tasksCreatedNote": "Attività create sulla bacheca.",
+        "proposedNoTasks": "Proposto: ancora nessuna attività in bozza da creare.",
+        "emptyDocPlan": "Documento vuoto. Aggiungi una nota qui sotto, oppure chiedi al tuo Capo Team nella discussione di redigere il piano.",
+        "emptyDocNote": "Documento vuoto. Aggiungi una nota qui sotto.",
+        "untitledGroup": "Gruppo senza titolo",
+        "notePlaceholder": "Aggiungi una nota (contesto, vincoli, feedback)…",
+        "addNote": "Aggiungi nota",
+        "addNoteError": "Impossibile aggiungere la nota",
+        "confirmDeleteDoc": "Eliminare questo documento?",
+        "deleteDocError": "Impossibile eliminare il documento",
+        "promotedSuccess": "Documento promosso nell'albero",
+        "promoteError": "Impossibile promuovere",
+        "tasksCreatedOnBoard_one": "Creata {{count}} attività sulla bacheca",
+        "tasksCreatedOnBoard_other": "Create {{count}} attività sulla bacheca",
+        "planApproved": "Piano approvato",
+        "approvePlanError": "Impossibile approvare il piano"
+      },
+      "note": {
+        "saveError": "Impossibile salvare la nota",
+        "cancel": "Annulla",
+        "save": "Salva",
+        "editAria": "Modifica nota",
+        "deleteAria": "Elimina nota"
+      },
+      "task": {
+        "untitledTask": "Attività senza titolo",
+        "doneWhen": "Fatto quando:",
+        "proposedBy": "Proposta da {{owner}} · bozza"
+      },
+      "docChat": {
+        "sendError": "Impossibile inviare",
+        "headerTitle": "{{title}}: Discussione",
+        "closeAria": "Chiudi discussione",
+        "empty": "Discuti questo documento con il tuo team e il tuo Capo Team. Il Capo Team scrive qui quando modifica il documento.",
+        "you": "Tu",
+        "composerPlaceholder": "Messaggio…  (digita @ per menzionare)",
+        "send": "Invia"
+      }
+    },
+    "composer": {
+      "messagePlaceholder": "Scrivi un messaggio…",
+      "listening": "Ascolto in corso…",
+      "slashCommandsAria": "Comandi slash",
+      "uploadFailed": "Caricamento non riuscito",
+      "unknownError": "Errore sconosciuto",
+      "removeAttachment": "Rimuovi {{name}}",
+      "attachFiles": "Allega file",
+      "attach": "Allega",
+      "attachComingSoon": "Allegati in arrivo",
+      "pauseDictation": "Metti in pausa la dettatura",
+      "dictate": "Detta",
+      "dictateWithMic": "Detta con il microfono",
+      "send": "Invia",
+      "dictationError": "Dettatura: {{error}}",
+      "slash": {
+        "task": {
+          "label": "Crea attività",
+          "description": "Apre il creatore di attività."
+        },
+        "project": {
+          "label": "Crea progetto",
+          "description": "Apre il creatore di progetti."
+        },
+        "agent": {
+          "label": "Avvia agente",
+          "description": "Avvia la procedura guidata dell'agente in 7 passaggi."
+        },
+        "perkos": {
+          "label": "Apri PerkOS Agente",
+          "description": "Ricevi aiuto dall'assistente integrato nell'app."
+        },
+        "clear": {
+          "label": "Cancella conversazione",
+          "description": "Reimposta la cronologia di questa chat."
+        }
+      }
+    },
+    "assistant": {
+      "quickActions": {
+        "project": "Crea un progetto",
+        "task": "Crea un'attività",
+        "agent": "Registra un agente"
+      },
+      "system": {
+        "connectWallet": "⚠ Connetti un portafoglio per chattare con l'assistente.",
+        "stillOpening": "⚠ Stiamo ancora aprendo la tua conversazione con l'Assistente, riprova tra un momento.",
+        "openError": "⚠ Impossibile aprire la chat con l'Assistente: {{error}}"
+      },
+      "status": {
+        "openingChat": "Apertura della chat…",
+        "offline": "Offline",
+        "online": "Online",
+        "connecting": "Connessione…"
+      },
+      "header": {
+        "loadHistory": "Carica conversazione precedente",
+        "clearAria": "Cancella conversazione",
+        "clearTitle": "Cancella: avvia una nuova conversazione",
+        "close": "Chiudi"
+      },
+      "empty": {
+        "greeting": "Ciao, come posso aiutarti oggi?",
+        "intro": "Sono il PerkOS Agente. Ti aiuto a scoprire la piattaforma e a configurare gli agenti di lavoro che userai nei tuoi progetti.",
+        "quickActionsLabel": "Azioni rapide",
+        "footer": "Oppure chiedimi qualsiasi cosa su PerkOS: progetti, agenti, runtime, e ti guiderò."
+      },
+      "reactions": {
+        "copy": "Copia",
+        "thumbsUp": "Pollice in su",
+        "thumbsDown": "Pollice in giù"
+      }
+    }
   }
 }

@@ -1688,5 +1688,170 @@
       "home": "홈",
       "primaryNavigation": "주요 탐색"
     }
+  },
+  "chat": {
+    "docs": {
+      "loadingDocs": "문서를 불러오는 중…",
+      "untitled": "제목 없음",
+      "docFallback": "문서",
+      "someone": "누군가",
+      "selectPrompt": "문서를 선택하거나 새로 만들어보세요.",
+      "docType": {
+        "note": "노트",
+        "plan": "계획",
+        "spec": "스펙"
+      },
+      "planStatus": {
+        "draft": "초안",
+        "underDiscussion": "논의 중",
+        "planProposed": "계획 제안됨",
+        "approved": "승인됨",
+        "materialized": "보드에 반영됨"
+      },
+      "empty": {
+        "title": "아직 문서가 없어요",
+        "description": "문서는 팀과 팀장이 함께 고민하는 공간이에요. 스프린트 계획, 스펙, 회의록 같은 것들이죠. 스프린트 계획을 시작하거나, 자유 형식의 노트를 만들어보세요.",
+        "starting": "시작하는 중…",
+        "startSprintPlan": "스프린트 계획 시작",
+        "newNote": "새 노트"
+      },
+      "tree": {
+        "heading": "문서",
+        "newDocAria": "새 문서",
+        "noDocsYet": "아직 문서가 없어요.",
+        "teamLeadDrafts": "팀장 초안",
+        "planBadge": "계획"
+      },
+      "newDoc": {
+        "titlePlaceholder": "제목…",
+        "cancel": "취소",
+        "create": "만들기"
+      },
+      "toast": {
+        "startPlanError": "계획을 시작하지 못했어요",
+        "createDocError": "문서를 만들지 못했어요"
+      },
+      "editor": {
+        "leadsDraft": "팀장의 초안",
+        "promote": "게시",
+        "discussion": "논의",
+        "deleteDocAria": "문서 삭제",
+        "draftTaskCount_one": "초안 작업 {{count}}개",
+        "draftTaskCount_other": "초안 작업 {{count}}개",
+        "approving": "승인하는 중…",
+        "approveAndCreate_one": "승인하고 작업 {{count}}개 만들기",
+        "approveAndCreate_other": "승인하고 작업 {{count}}개 만들기",
+        "tasksCreatedNote": "보드에 작업이 생성됐어요.",
+        "proposedNoTasks": "제안됨. 아직 만들 초안 작업이 없어요.",
+        "emptyDocPlan": "빈 문서예요. 아래에 메모를 추가하거나, 논의에서 팀장에게 계획 초안을 요청하세요.",
+        "emptyDocNote": "빈 문서예요. 아래에 메모를 추가하세요.",
+        "untitledGroup": "제목 없는 그룹",
+        "notePlaceholder": "메모 추가 (배경, 제약 조건, 피드백)…",
+        "addNote": "메모 추가",
+        "addNoteError": "메모를 추가하지 못했어요",
+        "confirmDeleteDoc": "이 문서를 삭제할까요?",
+        "deleteDocError": "문서를 삭제하지 못했어요",
+        "promotedSuccess": "문서가 트리에 게시됐어요",
+        "promoteError": "게시하지 못했어요",
+        "tasksCreatedOnBoard_one": "보드에 작업 {{count}}개를 생성했어요",
+        "tasksCreatedOnBoard_other": "보드에 작업 {{count}}개를 생성했어요",
+        "planApproved": "계획이 승인됐어요",
+        "approvePlanError": "계획을 승인하지 못했어요"
+      },
+      "note": {
+        "saveError": "메모를 저장하지 못했어요",
+        "cancel": "취소",
+        "save": "저장",
+        "editAria": "메모 수정",
+        "deleteAria": "메모 삭제"
+      },
+      "task": {
+        "untitledTask": "제목 없는 작업",
+        "doneWhen": "완료 조건:",
+        "proposedBy": "제안자: {{owner}} · 초안"
+      },
+      "docChat": {
+        "sendError": "보내지 못했어요",
+        "headerTitle": "{{title}} · 논의",
+        "closeAria": "논의 닫기",
+        "empty": "이 문서에 대해 팀 및 팀장과 이야기하세요. 팀장이 문서를 수정하면 여기에 남겨요.",
+        "you": "나",
+        "composerPlaceholder": "메시지…  (@를 입력해 멘션)",
+        "send": "보내기"
+      }
+    },
+    "composer": {
+      "messagePlaceholder": "메시지 입력…",
+      "listening": "듣는 중…",
+      "slashCommandsAria": "슬래시 명령어",
+      "uploadFailed": "업로드 실패",
+      "unknownError": "알 수 없는 오류",
+      "removeAttachment": "{{name}} 제거",
+      "attachFiles": "파일 첨부",
+      "attach": "첨부",
+      "attachComingSoon": "첨부 기능은 곧 제공될 예정이에요",
+      "pauseDictation": "받아쓰기 일시정지",
+      "dictate": "받아쓰기",
+      "dictateWithMic": "마이크로 받아쓰기",
+      "send": "보내기",
+      "dictationError": "받아쓰기: {{error}}",
+      "slash": {
+        "task": {
+          "label": "작업 만들기",
+          "description": "작업 생성 화면을 열어요."
+        },
+        "project": {
+          "label": "프로젝트 만들기",
+          "description": "프로젝트 생성 화면을 열어요."
+        },
+        "agent": {
+          "label": "에이전트 실행",
+          "description": "7단계 에이전트 실행 마법사를 시작해요."
+        },
+        "perkos": {
+          "label": "PerkOS 에이전트 열기",
+          "description": "앱 내 어시스턴트의 도움을 받아요."
+        },
+        "clear": {
+          "label": "대화 지우기",
+          "description": "이 채팅 기록을 초기화해요."
+        }
+      }
+    },
+    "assistant": {
+      "quickActions": {
+        "project": "프로젝트 만들기",
+        "task": "작업 만들기",
+        "agent": "에이전트 등록"
+      },
+      "system": {
+        "connectWallet": "⚠ 어시스턴트와 대화하려면 지갑을 연결하세요.",
+        "stillOpening": "⚠ 아직 어시스턴트 대화를 여는 중이에요. 잠시 후 다시 시도하세요.",
+        "openError": "⚠ 어시스턴트 채팅을 열지 못했어요: {{error}}"
+      },
+      "status": {
+        "openingChat": "채팅을 여는 중…",
+        "offline": "오프라인",
+        "online": "온라인",
+        "connecting": "연결하는 중…"
+      },
+      "header": {
+        "loadHistory": "이전 대화 불러오기",
+        "clearAria": "대화 지우기",
+        "clearTitle": "지우고 새 대화 시작하기",
+        "close": "닫기"
+      },
+      "empty": {
+        "greeting": "안녕하세요, 오늘은 무엇을 도와드릴까요?",
+        "intro": "저는 PerkOS 에이전트예요. 플랫폼 사용법을 안내하고, 프로젝트 전반에서 사용할 업무 에이전트를 설정하는 걸 도와드려요.",
+        "quickActionsLabel": "빠른 작업",
+        "footer": "또는 프로젝트, 에이전트, 런타임 등 PerkOS에 대해 무엇이든 물어보세요. 안내해 드릴게요."
+      },
+      "reactions": {
+        "copy": "복사",
+        "thumbsUp": "좋아요",
+        "thumbsDown": "싫어요"
+      }
+    }
   }
 }
