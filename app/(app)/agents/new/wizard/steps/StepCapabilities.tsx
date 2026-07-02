@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Layers,
   Check,
@@ -39,37 +40,16 @@ import { StepHeader } from "../ui/StepHeader";
 // and each runtime entrypoint translates it to that runtime's native disable —
 // OpenClaw `tools.deny`, Hermes a custom toolset bundle. The ids here are the
 // contract; they must match CAPABILITY_IDS in PerkOS-API provision.ts + the
-// case arms in both docker-entrypoint.sh scripts.
+// case arms in both docker-entrypoint.sh scripts. Labels/descriptions are
+// resolved via i18n keyed by id (wizard.capabilities.tools.<id>.*).
 const BUILT_IN_TOOLS: {
   id: string;
-  label: string;
-  description: string;
   icon: LucideIcon;
 }[] = [
-  {
-    id: "web-search",
-    label: "Web search",
-    description: "Find and read pages on the public web.",
-    icon: Search,
-  },
-  {
-    id: "code-execution",
-    label: "Code execution",
-    description: "Run Python / shell in a sandbox.",
-    icon: SquareTerminal,
-  },
-  {
-    id: "browser",
-    label: "Headless browser",
-    description: "Navigate sites and capture content.",
-    icon: AppWindow,
-  },
-  {
-    id: "memory",
-    label: "Memory",
-    description: "Store and recall facts across the conversation.",
-    icon: Brain,
-  },
+  { id: "web-search", icon: Search },
+  { id: "code-execution", icon: SquareTerminal },
+  { id: "browser", icon: AppWindow },
+  { id: "memory", icon: Brain },
 ];
 
 // A small on/off switch (no Switch primitive in the design system yet — this
@@ -83,12 +63,16 @@ function ToolSwitch({
   onToggle: (next: boolean) => void;
   label: string;
 }) {
+  const { t } = useTranslation();
   return (
     <button
       type="button"
       role="switch"
       aria-checked={enabled}
-      aria-label={`${label}: ${enabled ? "on" : "off"}`}
+      aria-label={t("wizard.capabilities.toolSwitchAria", {
+        label,
+        state: enabled ? t("wizard.capabilities.on") : t("wizard.capabilities.off"),
+      })}
       onClick={() => onToggle(!enabled)}
       className={cn(
         "relative h-5 w-9 shrink-0 rounded-full transition-colors",
@@ -106,6 +90,7 @@ function ToolSwitch({
 }
 
 export function StepCapabilities({ state, onChange }: StepProps) {
+  const { t } = useTranslation();
   const preset = findPreset(state.personaId);
 
   const toggleSkill = (id: string) => {
@@ -118,7 +103,7 @@ export function StepCapabilities({ state, onChange }: StepProps) {
   const disabled = new Set(state.disabledTools);
   const setToolEnabled = (id: string, enabled: boolean) => {
     const next = enabled
-      ? state.disabledTools.filter((t) => t !== id)
+      ? state.disabledTools.filter((tid) => tid !== id)
       : state.disabledTools.includes(id)
         ? state.disabledTools
         : [...state.disabledTools, id];
@@ -129,8 +114,8 @@ export function StepCapabilities({ state, onChange }: StepProps) {
   return (
     <div className="flex flex-col gap-6">
       <StepHeader
-        title="Capabilities & skills"
-        description="Your agent ships with core tools on by default. Turn off anything it shouldn't have, then add open-source skill packs for domain expertise — both work on Hermes and OpenClaw."
+        title={t("wizard.capabilities.title")}
+        description={t("wizard.capabilities.description")}
       />
 
       {/* Built-in tools — real per-tool toggles. On by default; turning one off
@@ -139,23 +124,22 @@ export function StepCapabilities({ state, onChange }: StepProps) {
       <div className="flex flex-col gap-3 rounded-lg border border-border bg-card/50 p-4">
         <div className="flex items-center gap-2">
           <Layers className="h-4 w-4 text-primary" />
-          <h3 className="text-sm font-medium text-foreground">Built-in tools</h3>
+          <h3 className="text-sm font-medium text-foreground">{t("wizard.capabilities.builtInTools")}</h3>
           <Badge variant="secondary" className="text-[10px]">
             Hermes + OpenClaw
           </Badge>
         </div>
         <p className="text-xs text-muted-foreground">
-          On by default. Turn off what this agent doesn&rsquo;t need — a narrower
-          tool set is safer and cheaper for focused agents. Your project board
-          tools aren&rsquo;t affected.
+          {t("wizard.capabilities.builtInHelp")}
         </p>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {BUILT_IN_TOOLS.map((t) => {
-            const enabled = !disabled.has(t.id);
-            const Icon = t.icon;
+          {BUILT_IN_TOOLS.map((tool) => {
+            const enabled = !disabled.has(tool.id);
+            const Icon = tool.icon;
+            const label = t(`wizard.capabilities.tools.${tool.id}.label`);
             return (
               <div
-                key={t.id}
+                key={tool.id}
                 className={cn(
                   "flex items-center gap-3 rounded-md border p-3 transition-colors",
                   enabled
@@ -176,16 +160,16 @@ export function StepCapabilities({ state, onChange }: StepProps) {
                       enabled ? "text-foreground" : "text-muted-foreground",
                     )}
                   >
-                    {t.label}
+                    {label}
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    {t.description}
+                    {t(`wizard.capabilities.tools.${tool.id}.description`)}
                   </span>
                 </div>
                 <ToolSwitch
                   enabled={enabled}
-                  onToggle={(v) => setToolEnabled(t.id, v)}
-                  label={t.label}
+                  onToggle={(v) => setToolEnabled(tool.id, v)}
+                  label={label}
                 />
               </div>
             );
@@ -193,13 +177,16 @@ export function StepCapabilities({ state, onChange }: StepProps) {
         </div>
         {anyDisabled ? (
           <p className="text-[11px] text-muted-foreground">
-            Turned off:{" "}
+            {t("wizard.capabilities.turnedOffLabel")}{" "}
             <span className="text-foreground">
               {state.disabledTools
-                .map((id) => BUILT_IN_TOOLS.find((t) => t.id === id)?.label ?? id)
+                .map((id) => {
+                  const tool = BUILT_IN_TOOLS.find((bt) => bt.id === id);
+                  return tool ? t(`wizard.capabilities.tools.${id}.label`) : id;
+                })
                 .join(", ")}
             </span>
-            . Takes effect when the agent next provisions.
+            {t("wizard.capabilities.turnedOffEffect")}
           </p>
         ) : null}
       </div>
@@ -230,6 +217,7 @@ function OpenSourceSkills({
   recommendedSkillIds: string[];
   toggleSkill: (id: string) => void;
 }) {
+  const { t } = useTranslation();
   const [repoInput, setRepoInput] = useState("");
   const [repoError, setRepoError] = useState<string | null>(null);
 
@@ -254,9 +242,7 @@ function OpenSourceSkills({
   const addRepo = () => {
     const pack = parseUserRepo(repoInput);
     if (!pack) {
-      setRepoError(
-        "Only github.com / raw.githubusercontent.com SKILL.md URLs are allowed.",
-      );
+      setRepoError(t("wizard.capabilities.repoError"));
       return;
     }
     setRepoError(null);
@@ -272,10 +258,9 @@ function OpenSourceSkills({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-1">
-        <h3 className="text-sm font-medium text-foreground">Open-source skills</h3>
+        <h3 className="text-sm font-medium text-foreground">{t("wizard.capabilities.openSourceTitle")}</h3>
         <p className="text-xs text-muted-foreground">
-          Markdown skill packs from public GitHub repos. They&rsquo;re injected into
-          your agent&rsquo;s instructions. You can inspect each on GitHub.
+          {t("wizard.capabilities.openSourceHelp")}
         </p>
       </div>
 
@@ -306,7 +291,7 @@ function OpenSourceSkills({
                         variant="secondary"
                         className="border-primary/30 bg-primary/10 text-primary"
                       >
-                        Recommended
+                        {t("wizard.capabilities.recommended")}
                       </Badge>
                     ) : null}
                   </div>
@@ -329,15 +314,17 @@ function OpenSourceSkills({
                     className="gap-1 border-amber-500/40 bg-amber-500/15 text-amber-300"
                   >
                     <ShieldAlert className="h-3 w-3" />
-                    Unverified — review
+                    {t("wizard.capabilities.unverified")}
                   </Badge>
                 ) : (
                   <Badge variant="secondary" className="gap-1 text-muted-foreground">
                     <ShieldCheck className="h-3 w-3" />
-                    Open source
+                    {t("wizard.capabilities.openSource")}
                   </Badge>
                 )}
-                <span className="text-[11px] text-muted-foreground">by {pack.author}</span>
+                <span className="text-[11px] text-muted-foreground">
+                  {t("wizard.capabilities.byAuthor", { author: pack.author })}
+                </span>
                 <a
                   href={pack.githubUrl}
                   target="_blank"
@@ -346,7 +333,7 @@ function OpenSourceSkills({
                   className="ml-auto inline-flex items-center gap-1 text-[11px] text-primary hover:underline"
                 >
                   <GitFork className="h-3.5 w-3.5" />
-                  Inspect
+                  {t("wizard.capabilities.inspect")}
                   <ExternalLink className="h-3 w-3" />
                 </a>
               </div>
@@ -357,7 +344,7 @@ function OpenSourceSkills({
 
       <div className="flex flex-col gap-1.5 rounded-lg border border-dashed border-border p-3">
         <Label htmlFor="skill-repo" className="text-xs text-muted-foreground">
-          Add a GitHub skill
+          {t("wizard.capabilities.addGithubSkill")}
         </Label>
         <div className="flex gap-2">
           <Input
@@ -380,7 +367,7 @@ function OpenSourceSkills({
           />
           <Button type="button" variant="outline" onClick={addRepo}>
             <Plus className="mr-1 h-4 w-4" />
-            Add
+            {t("wizard.capabilities.add")}
           </Button>
         </div>
         {repoError ? (

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { Send, Hash, MessageSquare } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -22,18 +23,17 @@ import { GatewayCard } from "../ui/GatewayCard";
 // ---------------------------------------------------------------------------
 
 export function StepChannels({ state, onChange }: StepProps) {
+  const { t } = useTranslation();
   const isHermes = state.runtime === "Hermes";
 
   return (
     <div className="flex flex-col gap-4">
       <StepHeader
-        title="Channels"
-        description="Optional. Let your agent receive and reply to messages from outside PerkOS, using each runtime's native messaging integration."
+        title={t("wizard.channels.title")}
+        description={t("wizard.channels.description")}
       />
       <p className="text-xs text-muted-foreground">
-        Secrets are stored in a managed vault under your wallet&rsquo;s namespace — never in
-        the agent doc, never in this browser tab beyond the launch request. You can also add
-        a channel later from the agent&rsquo;s settings.
+        {t("wizard.channels.secretsNote")}
       </p>
 
       <GatewayCard
@@ -41,11 +41,11 @@ export function StepChannels({ state, onChange }: StepProps) {
         icon={Send}
         enabled={state.gatewayTelegramEnabled}
         onToggle={(v) => onChange({ gatewayTelegramEnabled: v })}
-        blurb="Your agent answers from a Telegram bot you create at @BotFather. Webhook mode is friendly to hibernation — no idle connection while the agent sleeps."
+        blurb={t("wizard.channels.telegram.blurb")}
       >
         <div className="grid gap-3">
           <div className="grid gap-1.5">
-            <Label htmlFor="telegram-bot-token">Bot token</Label>
+            <Label htmlFor="telegram-bot-token">{t("wizard.channels.telegram.botToken")}</Label>
             <Input
               id="telegram-bot-token"
               type="password"
@@ -55,11 +55,11 @@ export function StepChannels({ state, onChange }: StepProps) {
               placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
             />
             <span className="text-xs text-muted-foreground">
-              From @BotFather. Stored in a managed secrets vault; never returned by the API.
+              {t("wizard.channels.telegram.botTokenHelp")}
             </span>
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="telegram-webhook-url">Webhook URL (optional)</Label>
+            <Label htmlFor="telegram-webhook-url">{t("wizard.channels.telegram.webhookUrl")}</Label>
             <Input
               id="telegram-webhook-url"
               value={state.gatewayTelegramWebhookUrl}
@@ -67,7 +67,7 @@ export function StepChannels({ state, onChange }: StepProps) {
               placeholder="https://relay.perkos.xyz/webhook/telegram/<agentId>"
             />
             <span className="text-xs text-muted-foreground">
-              Leave blank to use long-polling. Setting a webhook URL is recommended for hibernation friendliness.
+              {t("wizard.channels.telegram.webhookHelp")}
             </span>
           </div>
         </div>
@@ -78,11 +78,11 @@ export function StepChannels({ state, onChange }: StepProps) {
         icon={MessageSquare}
         enabled={state.gatewaySlackEnabled}
         onToggle={(v) => onChange({ gatewaySlackEnabled: v })}
-        blurb="Your agent answers in Slack channels it's invited to. Webhook-mode (Events API), hibernation-friendly. You create a Slack app, install it to your workspace, copy the bot token + signing secret."
+        blurb={t("wizard.channels.slack.blurb")}
       >
         <div className="grid gap-3">
           <div className="grid gap-1.5">
-            <Label htmlFor="slack-bot-token">Bot token (xoxb-...)</Label>
+            <Label htmlFor="slack-bot-token">{t("wizard.channels.slack.botToken")}</Label>
             <Input
               id="slack-bot-token"
               type="password"
@@ -92,25 +92,25 @@ export function StepChannels({ state, onChange }: StepProps) {
               placeholder="xoxb-XXXXXXXX..."
             />
             <span className="text-xs text-muted-foreground">
-              Slack app → OAuth &amp; Permissions → Bot User OAuth Token.
+              {t("wizard.channels.slack.botTokenHelp")}
             </span>
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="slack-signing-secret">Signing secret</Label>
+            <Label htmlFor="slack-signing-secret">{t("wizard.channels.slack.signingSecret")}</Label>
             <Input
               id="slack-signing-secret"
               type="password"
               autoComplete="off"
               value={state.gatewaySlackSigningSecret}
               onChange={(e) => onChange({ gatewaySlackSigningSecret: e.target.value })}
-              placeholder="32-char hex from Slack app settings"
+              placeholder={t("wizard.channels.slack.signingSecretPlaceholder")}
             />
             <span className="text-xs text-muted-foreground">
-              Slack app → Basic Information → Signing Secret. Used to verify inbound webhook payloads.
+              {t("wizard.channels.slack.signingSecretHelp")}
             </span>
           </div>
           <div className="grid gap-1.5">
-            <Label htmlFor="slack-channel-id">Channel id (optional)</Label>
+            <Label htmlFor="slack-channel-id">{t("wizard.channels.slack.channelId")}</Label>
             <Input
               id="slack-channel-id"
               value={state.gatewaySlackChannelId}
@@ -118,7 +118,7 @@ export function StepChannels({ state, onChange }: StepProps) {
               placeholder="e.g. C0123ABC"
             />
             <span className="text-xs text-muted-foreground">
-              Restrict the agent to a single channel. Leave blank for mentions + DMs in every channel the bot is in.
+              {t("wizard.channels.slack.channelIdHelp")}
             </span>
           </div>
         </div>
@@ -130,7 +130,7 @@ export function StepChannels({ state, onChange }: StepProps) {
           icon={Hash}
           enabled={state.gatewayFarcasterEnabled}
           onToggle={(v) => onChange({ gatewayFarcasterEnabled: v })}
-          blurb="Hermes only. Your agent replies to mentions on Farcaster via Neynar. You need a Neynar-managed signer for the agent's identity."
+          blurb={t("wizard.channels.farcaster.blurb")}
         >
           <div className="grid gap-3">
             {/* Where to point the Neynar webhook. Your agent has no public IP
@@ -138,20 +138,18 @@ export function StepChannels({ state, onChange }: StepProps) {
                 to the agent over its existing connection. */}
             <div className="grid gap-1.5 rounded-md border border-border bg-card/50 p-2.5">
               <Label className="text-xs text-muted-foreground">
-                Neynar webhook URL — set this as your Neynar webhook&rsquo;s target URL
+                {t("wizard.channels.farcaster.webhookLabel")}
               </Label>
               <code className="select-all break-all rounded bg-background px-2 py-1 font-mono text-xs text-foreground">
                 {`https://chat.perkos.xyz/webhooks/farcaster/${state.agentName?.trim() || "<your-agent-name>"}`}
               </code>
               <span className="text-[11px] text-muted-foreground">
-                Use the webhook secret below as the webhook&rsquo;s signature secret. If the agent
-                name is taken it gets a suffix on launch — use the final name (shown after launch)
-                in the URL.
+                {t("wizard.channels.farcaster.webhookHelp")}
               </span>
             </div>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <div className="grid gap-1.5">
-                <Label htmlFor="fc-fid">FID</Label>
+                <Label htmlFor="fc-fid">{t("wizard.channels.farcaster.fid")}</Label>
                 <Input
                   id="fc-fid"
                   inputMode="numeric"
@@ -161,20 +159,20 @@ export function StepChannels({ state, onChange }: StepProps) {
                 />
               </div>
               <div className="grid gap-1.5">
-                <Label htmlFor="fc-visibility">Reply visibility</Label>
+                <Label htmlFor="fc-visibility">{t("wizard.channels.farcaster.replyVisibility")}</Label>
                 <select
                   id="fc-visibility"
                   value={state.gatewayFarcasterReplyVisibility}
                   onChange={(e) => onChange({ gatewayFarcasterReplyVisibility: e.target.value })}
                   className="h-9 rounded-md border border-input bg-background px-3 text-sm"
                 >
-                  <option value="mentions">mentions only (recommended)</option>
-                  <option value="all">all (requires parent channel)</option>
+                  <option value="mentions">{t("wizard.channels.farcaster.visibilityMentions")}</option>
+                  <option value="all">{t("wizard.channels.farcaster.visibilityAll")}</option>
                 </select>
               </div>
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="fc-neynar-key">Neynar API key</Label>
+              <Label htmlFor="fc-neynar-key">{t("wizard.channels.farcaster.neynarApiKey")}</Label>
               <Input
                 id="fc-neynar-key"
                 type="password"
@@ -185,7 +183,7 @@ export function StepChannels({ state, onChange }: StepProps) {
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="fc-signer">Signer UUID</Label>
+              <Label htmlFor="fc-signer">{t("wizard.channels.farcaster.signerUuid")}</Label>
               <Input
                 id="fc-signer"
                 type="password"
@@ -196,19 +194,19 @@ export function StepChannels({ state, onChange }: StepProps) {
               />
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="fc-webhook-secret">Webhook secret</Label>
+              <Label htmlFor="fc-webhook-secret">{t("wizard.channels.farcaster.webhookSecret")}</Label>
               <Input
                 id="fc-webhook-secret"
                 type="password"
                 autoComplete="off"
                 value={state.gatewayFarcasterWebhookSecret}
                 onChange={(e) => onChange({ gatewayFarcasterWebhookSecret: e.target.value })}
-                placeholder="HMAC secret you set on the Neynar webhook"
+                placeholder={t("wizard.channels.farcaster.webhookSecretPlaceholder")}
               />
             </div>
             {state.gatewayFarcasterReplyVisibility === "all" ? (
               <div className="grid gap-1.5">
-                <Label htmlFor="fc-channel">Parent channel</Label>
+                <Label htmlFor="fc-channel">{t("wizard.channels.farcaster.parentChannel")}</Label>
                 <Input
                   id="fc-channel"
                   value={state.gatewayFarcasterParentChannel}
@@ -216,7 +214,7 @@ export function StepChannels({ state, onChange }: StepProps) {
                   placeholder="chain://eip155:..."
                 />
                 <span className="text-xs text-muted-foreground">
-                  Required when visibility is &ldquo;all&rdquo; — scopes the agent to one channel.
+                  {t("wizard.channels.farcaster.parentChannelHelp")}
                 </span>
               </div>
             ) : null}
@@ -224,9 +222,9 @@ export function StepChannels({ state, onChange }: StepProps) {
         </GatewayCard>
       ) : (
         <p className="rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
-          Farcaster is available on Hermes agents. Your agent runs on{" "}
-          <span className="text-foreground">{state.runtime ?? "OpenClaw"}</span>, which doesn&rsquo;t
-          have a native Farcaster channel.
+          {t("wizard.channels.farcasterUnavailableBefore")}{" "}
+          <span className="text-foreground">{state.runtime ?? "OpenClaw"}</span>
+          {t("wizard.channels.farcasterUnavailableAfter")}
         </p>
       )}
     </div>

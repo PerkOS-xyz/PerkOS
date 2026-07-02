@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, ChevronDown, ChevronUp, ExternalLink, Plus, Search, X } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -59,11 +60,6 @@ function defaultRuntimeFor(origin: Origin): AgentRuntime | null {
   return null;
 }
 
-const RUNTIME_HINT: Record<AgentRuntime, string> = {
-  OpenClaw: "Autonomous — multi-step work & tools",
-  Hermes: "Conversational — fast, chat-driven",
-};
-
 // Card description. Community blurbs are raw 2nd-person SOUL.md first sentences
 // ("You are Sentinel, an AI churn … agent.") — normalize to an outcome line with
 // no internal name leak. PerkOS blurbs (no "You are") pass through unchanged.
@@ -101,6 +97,7 @@ export function StepTemplate({
   onChange,
   presets,
 }: StepProps & { presets: AgentPreset[] }) {
+  const { t } = useTranslation();
   const preset =
     presets.find((p) => p.id === state.personaId) ?? findPreset(state.personaId);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -167,14 +164,14 @@ export function StepTemplate({
           className="inline-flex min-h-11 -ml-2 items-center gap-1.5 self-start px-2 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
           <ArrowLeft className="h-4 w-4" />
-          Change persona
+          {t("wizard.template.changePersona")}
         </button>
 
         <div className="flex flex-col items-center gap-3">
           <TeammateIdCard
             name={preset.name}
             presetId={preset.id}
-            tagline={`Your ${preset.name.toLowerCase()} teammate`}
+            tagline={t("wizard.template.teammateTagline", { name: preset.name.toLowerCase() })}
           />
           <p className="text-xl font-semibold text-foreground">{preset.name}</p>
           <p className="-mt-1 text-center text-xs text-muted-foreground">{preset.blurb}</p>
@@ -198,18 +195,18 @@ export function StepTemplate({
                   href={preset.sourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={`View ${ORIGIN_META[origin].label} source on GitHub (opens in new tab)`}
+                  aria-label={t("wizard.template.viewSourceAria", { origin: ORIGIN_META[origin].label })}
                   className={cn(
                     "inline-flex items-center gap-1 text-xs underline-offset-2 hover:underline",
                     ORIGIN_META[origin].link,
                   )}
                 >
                   <ExternalLink className="h-3 w-3 shrink-0" aria-hidden />
-                  View source on GitHub
+                  {t("wizard.template.viewSourceLink")}
                 </a>
               </>
             ) : (
-              <span className="text-xs text-muted-foreground">Hand-crafted by PerkOS</span>
+              <span className="text-xs text-muted-foreground">{t("wizard.template.handCrafted")}</span>
             )}
           </div>
         ) : null}
@@ -217,7 +214,7 @@ export function StepTemplate({
         {/* Engine — every template is portable; it defaults to its origin's
             engine (tagged "recommended") but the user can switch to either. */}
         <div className="flex flex-col gap-2">
-          <Label className="text-xs text-muted-foreground">Engine</Label>
+          <Label className="text-xs text-muted-foreground">{t("wizard.template.engine")}</Label>
           <div className="grid grid-cols-2 gap-2">
             {(["OpenClaw", "Hermes"] as AgentRuntime[])
               .filter((rt) => available.includes(rt))
@@ -239,11 +236,13 @@ export function StepTemplate({
                       {rt}
                       {recommended ? (
                         <span className="rounded bg-primary/15 px-1 py-0.5 text-[9px] font-semibold uppercase text-primary">
-                          recommended
+                          {t("wizard.template.recommended")}
                         </span>
                       ) : null}
                     </span>
-                    <span className="text-[10px] text-muted-foreground">{RUNTIME_HINT[rt]}</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {t(`wizard.template.runtimeHint.${rt}`)}
+                    </span>
                   </button>
                 );
               })}
@@ -252,7 +251,7 @@ export function StepTemplate({
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="agent-name" className="text-xs text-muted-foreground">
-            Agent name
+            {t("wizard.template.agentName")}
           </Label>
           <Input
             id="agent-name"
@@ -274,21 +273,21 @@ export function StepTemplate({
             ) : (
               <ChevronDown className="h-3.5 w-3.5" />
             )}
-            {showPrompt ? "Hide" : "Show"} system prompt
+            {showPrompt ? t("wizard.template.hidePrompt") : t("wizard.template.showPrompt")}
             {state.systemPromptOverride &&
             state.systemPromptOverride !== defaultPrompt ? (
               <span className="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] text-primary">
-                edited
+                {t("wizard.template.edited")}
               </span>
             ) : null}
           </button>
           {showPrompt ? (
             <>
               <Label htmlFor="system-prompt" className="sr-only">
-                System prompt
+                {t("wizard.template.systemPromptSr")}
               </Label>
               <p className="text-[11px] text-muted-foreground">
-                Becomes SOUL.md / IDENTITY.md inside the runtime container.
+                {t("wizard.template.systemPromptHelp")}
               </p>
               <Textarea
                 id="system-prompt"
@@ -296,7 +295,7 @@ export function StepTemplate({
                 onChange={(e) => onChange({ systemPromptOverride: e.target.value })}
                 rows={5}
                 className="font-mono text-xs"
-                placeholder="You are a …"
+                placeholder={t("wizard.template.systemPromptPlaceholder")}
               />
               {state.systemPromptOverride &&
               state.systemPromptOverride !== defaultPrompt ? (
@@ -305,7 +304,7 @@ export function StepTemplate({
                   className="self-start text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
                   onClick={() => onChange({ systemPromptOverride: "" })}
                 >
-                  Reset to the {preset.name} default
+                  {t("wizard.template.resetToDefault", { name: preset.name })}
                 </button>
               ) : null}
             </>
@@ -327,7 +326,7 @@ export function StepTemplate({
               ) : (
                 <ChevronDown className="h-3.5 w-3.5" />
               )}
-              Advanced — {showAdvanced ? "hide" : "view"} full soul
+              {showAdvanced ? t("wizard.template.advancedHide") : t("wizard.template.advancedView")}
             </button>
             {showAdvanced ? <SoulDetailCard soul={preset.soul} /> : null}
           </div>
@@ -340,15 +339,15 @@ export function StepTemplate({
   return (
     <div className="flex flex-col gap-4">
       <StepHeader
-        title="Pick your Agent"
-        description="Choose the agent you want to work with — from PerkOS, the OpenClaw and Hermes communities, or build your own. Each is editable later."
+        title={t("wizard.template.pickTitle")}
+        description={t("wizard.template.pickDescription")}
       />
 
       {/* Filter by origin + search. */}
       <div className="flex flex-col gap-2">
-        <div role="radiogroup" aria-label="Filter agents by origin" className="flex flex-wrap gap-1.5">
+        <div role="radiogroup" aria-label={t("wizard.template.filterAria")} className="flex flex-wrap gap-1.5">
           {(["all", ...FILTERS] as const).map((f) => {
-            const label = f === "all" ? "All" : ORIGIN_META[f].label;
+            const label = f === "all" ? t("wizard.template.filterAll") : ORIGIN_META[f].label;
             const count = f === "all" ? presets.length : counts[f];
             const active = filter === f;
             return (
@@ -381,7 +380,7 @@ export function StepTemplate({
 
         <div className="relative">
           <Label htmlFor="template-search" className="sr-only">
-            Search agents
+            {t("wizard.template.searchSr")}
           </Label>
           <Search
             className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
@@ -392,13 +391,13 @@ export function StepTemplate({
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search agents…"
+            placeholder={t("wizard.template.searchPlaceholder")}
             className="h-9 pl-9 pr-9"
           />
           {search ? (
             <button
               type="button"
-              aria-label="Clear search"
+              aria-label={t("wizard.template.clearSearch")}
               onClick={() => setSearch("")}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
@@ -411,7 +410,9 @@ export function StepTemplate({
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-10 text-center">
           <p className="text-sm text-muted-foreground">
-            No agents match {search ? `“${search}”` : "this filter"}.
+            {search
+              ? t("wizard.template.noMatchQuery", { query: search })
+              : t("wizard.template.noMatchFilter")}
           </p>
           <button
             type="button"
@@ -421,13 +422,13 @@ export function StepTemplate({
             }}
             className="rounded-md border border-border px-3 py-1.5 text-xs text-foreground transition-colors hover:border-primary/40"
           >
-            Show all agents
+            {t("wizard.template.showAll")}
           </button>
         </div>
       ) : (
         <div
           role="radiogroup"
-          aria-label="Choose an agent persona"
+          aria-label={t("wizard.template.chooseAria")}
           aria-live="polite"
           className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4"
         >
@@ -485,7 +486,7 @@ export function StepTemplate({
                     href={p.sourceUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label={`View ${ORIGIN_META[o].label} source on GitHub (opens in new tab)`}
+                    aria-label={t("wizard.template.viewSourceAria", { origin: ORIGIN_META[o].label })}
                     onClick={(e) => e.stopPropagation()}
                     className={cn(
                       "absolute right-1.5 top-1.5 z-10 inline-flex items-center rounded-md bg-background/70 p-1 opacity-0 backdrop-blur-sm transition-opacity hover:bg-background focus:opacity-100 group-hover:opacity-100",

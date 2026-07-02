@@ -811,5 +811,270 @@
       "members": "メンバー",
       "rename": "名前を変更"
     }
+  },
+  "wizard": {
+    "common": {
+      "goBack": "エージェントチームに戻る",
+      "title": "エージェントを追加",
+      "stepOf": "ステップ {{current}} / {{total}}",
+      "back": "戻る",
+      "continue": "続ける",
+      "launching": "起動しています…",
+      "launch": "エージェントを起動",
+      "creatingInvitation": "招待を作成しています…",
+      "generateInvitation": "招待を作成",
+      "doneBackToAgents": "完了・エージェント一覧に戻る"
+    },
+    "method": {
+      "title": "このエージェントをどう動かしますか？",
+      "description": "この選択が、その後すべての流れを決めます。ブリッジは常にPerkOSへ発信（アウトバウンド）で接続するため、どの方式でも受信ポートの開放は不要です。",
+      "comingSoon": "近日公開",
+      "recommended": "おすすめ",
+      "perkos": {
+        "title": "PerkOSインフラ",
+        "descLead": "PerkOSがエージェント用のマネージドコンテナを自動でプロビジョニングします。料金は",
+        "onNetwork": "（{{network}}上）",
+        "descTail": "x402{{onNetwork}}で課金されます。コンテナが正常に起動すると（約30秒）、ステータスが「ready」に切り替わります。",
+        "inviteOnly": "現在はテスト中につき招待制です。今は「ご自身のVPS」または「すでにエージェントを持っている」を選択いただくか、管理者に連絡して早期アクセスリストへの追加を依頼してください。"
+      },
+      "vps": {
+        "title": "ご自身のVPS（セルフホスト）",
+        "descLead": "docker-composeバンドル（ランタイム＋ブリッジのサイドカー）を生成します。実行するのは",
+        "descTail": "だけです。Dockerが使えるホストであれば、Hetzner、AWS EC2など、どこでも構いません。ブリッジは常にアウトバウンドで接続するため、受信ポートの開放やSSHアクセスは不要です。",
+        "inviteOnly": "セルフホスト機能はテスト中につき招待制です。今は「すでにエージェントを持っている」を選択いただくか、管理者に連絡して早期アクセスリストへの追加を依頼してください。"
+      },
+      "external": {
+        "title": "すでにエージェントを持っている",
+        "description": "すでに自分のHermes／OpenClaw／カスタムエージェントを、独自のナレッジ込みで運用していますか？それなら招待しましょう。PerkOSは何もプロビジョニングしません。エージェントに渡すプロンプトが発行され、それを使って組織に参加すれば、ネイティブエージェントと同等にボードで作業できるようになります。"
+      }
+    },
+    "template": {
+      "filterAll": "すべて",
+      "pickTitle": "エージェントを選ぶ",
+      "pickDescription": "一緒に働くエージェントを選びましょう。PerkOS製、OpenClawやHermesのコミュニティ製、あるいは自分で一から作ることもできます。どれも後から編集可能です。",
+      "filterAria": "提供元でエージェントを絞り込む",
+      "searchSr": "エージェントを検索",
+      "searchPlaceholder": "エージェントを検索…",
+      "clearSearch": "検索をクリア",
+      "noMatchQuery": "「{{query}}」に一致するエージェントはありません。",
+      "noMatchFilter": "このフィルターに一致するエージェントはありません。",
+      "showAll": "すべてのエージェントを表示",
+      "chooseAria": "エージェントのペルソナを選択",
+      "viewSourceAria": "{{origin}}のソースをGitHubで見る（新しいタブで開きます）",
+      "changePersona": "ペルソナを変更",
+      "teammateTagline": "あなたの{{name}}チームメイト",
+      "viewSourceLink": "GitHubでソースを見る",
+      "handCrafted": "PerkOSによる手作り",
+      "engine": "エンジン",
+      "recommended": "おすすめ",
+      "runtimeHint": {
+        "OpenClaw": "自律型・複数ステップの作業とツール利用",
+        "Hermes": "会話型・スピーディーでチャット主体"
+      },
+      "agentName": "エージェント名",
+      "hidePrompt": "システムプロンプトを非表示",
+      "showPrompt": "システムプロンプトを表示",
+      "edited": "編集済み",
+      "systemPromptSr": "システムプロンプト",
+      "systemPromptHelp": "ランタイムコンテナ内でSOUL.md／IDENTITY.mdになります。",
+      "systemPromptPlaceholder": "You are a …",
+      "resetToDefault": "{{name}}のデフォルトに戻す",
+      "advancedHide": "詳細設定・ソウル全文を非表示",
+      "advancedView": "詳細設定・ソウル全文を表示",
+      "soul": {
+        "identity": "アイデンティティ",
+        "coreTruths": "コアとなる信条",
+        "worldview": "世界観",
+        "communicationStyle": "コミュニケーションスタイル",
+        "expertise": "専門分野",
+        "primary": "主要：",
+        "fluentIn": "得意分野：",
+        "defersOn": "判断を委ねる分野：",
+        "boundaries": "境界線",
+        "memoryPolicy": "メモリーポリシー",
+        "remember": "記憶する：",
+        "dontRemember": "記憶しない：",
+        "petPeeves": "苦手なこと"
+      }
+    },
+    "capabilities": {
+      "title": "機能とスキル",
+      "description": "エージェントには、標準でコアツールが有効になった状態で用意されています。不要な機能はオフにし、専門知識が必要な分野にはオープンソースのスキルパックを追加してください。どちらもHermesとOpenClawの両方で使えます。",
+      "builtInTools": "組み込みツール",
+      "builtInHelp": "標準で有効になっています。このエージェントに不要な機能はオフにしてください。ツールセットを絞るほど、用途に特化したエージェントは安全かつ低コストになります。プロジェクトボードのツールには影響しません。",
+      "on": "オン",
+      "off": "オフ",
+      "toolSwitchAria": "{{label}}：{{state}}",
+      "turnedOffLabel": "オフにした機能：",
+      "turnedOffEffect": "。次回のエージェントのプロビジョニング時に反映されます。",
+      "tools": {
+        "web-search": {
+          "label": "ウェブ検索",
+          "description": "公開されているウェブページを検索・閲覧します。"
+        },
+        "code-execution": {
+          "label": "コード実行",
+          "description": "サンドボックス内でPython／シェルを実行します。"
+        },
+        "browser": {
+          "label": "ヘッドレスブラウザ",
+          "description": "サイトを操作してコンテンツを取得します。"
+        },
+        "memory": {
+          "label": "メモリー",
+          "description": "会話をまたいで情報を記憶・呼び出しします。"
+        }
+      },
+      "openSourceTitle": "オープンソーススキル",
+      "openSourceHelp": "公開GitHubリポジトリ由来のMarkdown形式のスキルパックです。エージェントの指示に組み込まれます。各スキルの内容はGitHub上で確認できます。",
+      "recommended": "おすすめ",
+      "unverified": "未検証・要確認",
+      "openSource": "オープンソース",
+      "byAuthor": "作成：{{author}}",
+      "inspect": "確認",
+      "addGithubSkill": "GitHubスキルを追加",
+      "repoError": "github.com／raw.githubusercontent.comのSKILL.md URLのみ利用できます。",
+      "add": "追加"
+    },
+    "channels": {
+      "title": "チャネル",
+      "description": "任意設定です。各ランタイムのネイティブなメッセージング連携を使って、PerkOS外部からのメッセージをエージェントが受信・返信できるようにします。",
+      "secretsNote": "シークレット情報は、あなたのウォレットの名前空間に紐づくマネージドボールトに保存されます。エージェントのドキュメントに保存されることはなく、起動リクエスト後にこのブラウザタブに残ることもありません。チャネルは、エージェントの設定から後で追加することもできます。",
+      "telegram": {
+        "blurb": "@BotFatherで作成したTelegramボットから、エージェントが応答します。Webhookモードは休止機能と相性が良く、エージェントが眠っている間はアイドル接続が発生しません。",
+        "botToken": "ボットトークン",
+        "botTokenHelp": "@BotFatherから取得します。マネージドシークレットボールトに保存され、APIから返されることはありません。",
+        "webhookUrl": "Webhook URL（任意）",
+        "webhookHelp": "空欄のままにするとロングポーリングを使用します。休止機能との相性を考えると、Webhook URLの設定をおすすめします。"
+      },
+      "slack": {
+        "blurb": "招待されたSlackチャンネルでエージェントが応答します。Webhookモード（Events API）を使うため休止機能とも相性良好です。Slackアプリを作成し、ワークスペースにインストールしたうえで、ボットトークンと署名シークレットをコピーしてください。",
+        "botToken": "ボットトークン（xoxb-...）",
+        "botTokenHelp": "Slackアプリ → OAuth & Permissions → Bot User OAuth Token。",
+        "signingSecret": "署名シークレット",
+        "signingSecretPlaceholder": "Slackアプリの設定にある32文字の16進数文字列",
+        "signingSecretHelp": "Slackアプリ → Basic Information → Signing Secret。受信するwebhookペイロードの検証に使用します。",
+        "channelId": "チャンネルID（任意）",
+        "channelIdHelp": "エージェントを1つのチャンネルに限定します。空欄のままにすると、ボットが参加しているすべてのチャンネルでのメンションとDMに対応します。"
+      },
+      "farcaster": {
+        "blurb": "Hermes限定です。Neynar経由で、Farcaster上のメンションにエージェントが返信します。エージェントのIDには、Neynarが管理するsignerが必要です。",
+        "webhookLabel": "Neynar webhook URL・Neynarのwebhook設定でこのURLを送信先として指定してください",
+        "webhookHelp": "下記のwebhookシークレットを、webhookの署名シークレットとして使用してください。エージェント名がすでに使われている場合は、起動時に末尾へ番号が付与されます。URLには、起動後に表示される最終的な名前を使用してください。",
+        "fid": "FID",
+        "replyVisibility": "返信の公開範囲",
+        "visibilityMentions": "メンションのみ（推奨）",
+        "visibilityAll": "すべて（親チャンネルが必要）",
+        "neynarApiKey": "Neynar APIキー",
+        "signerUuid": "Signer UUID",
+        "webhookSecret": "Webhookシークレット",
+        "webhookSecretPlaceholder": "Neynarのwebhookに設定したHMACシークレット",
+        "parentChannel": "親チャンネル",
+        "parentChannelHelp": "公開範囲が「すべて」の場合は必須です。エージェントを1つのチャンネルに限定します。"
+      },
+      "farcasterUnavailableBefore": "FarcasterはHermesエージェントで利用できます。このエージェントが動作しているのは",
+      "farcasterUnavailableAfter": "で、ネイティブのFarcasterチャネルには対応していません。"
+    },
+    "llm": {
+      "title": "LLMソース",
+      "description": "エージェントがモデルにアクセスする方法を選んでください。各ランタイムには、それぞれのネイティブ形式で設定ブロックが生成されます。内容は確認ステップでプレビューできます。",
+      "comingSoon": "近日公開",
+      "perkos": {
+        "title": "PerkOS LLMサービス",
+        "descBefore": "Ollama互換のマネージドゲートウェイ",
+        "descAfter": "。kimi-k2.6:cloud、qwen 7B/14Bに対応。キーは不要です。エージェント専用のキーをこちらで発行します。",
+        "inviteOnly": "現在はテスト中につき招待制です。今は「BYOK」または「後で設定」を選択いただくか、管理者に連絡して早期アクセスリストへの追加を依頼してください。"
+      },
+      "byok": {
+        "title": "自分のキーを使う（BYOK）",
+        "description": "ご自身のプロバイダーキーを使用します。キーはエージェントのランタイムへそのまま転送され、通信内容を記録したり中継したりすることはありません。"
+      },
+      "skip": {
+        "title": "後で設定",
+        "description": "LLMソースなしでエージェントが起動します。通信経路やツール呼び出しのみをテストしたい場合に便利です。"
+      },
+      "providerSettings": {
+        "openclawTitle": "OpenClawのプロバイダー設定",
+        "hermesTitle": "Hermesのプロバイダー設定",
+        "openclawDesc": "各項目は、openclaw.json内のmodels.providers.*配下のブロックに1対1で対応します。",
+        "hermesDesc": "各項目は、Hermesプロファイルのconfig.yaml内のprovider.*およびsecrets.*に対応します。",
+        "provider": "プロバイダー",
+        "providerPlaceholder": "プロバイダーを選択",
+        "defaultModel": "デフォルトモデル",
+        "apiKey": "APIキー"
+      }
+    },
+    "external": {
+      "title": "既存のエージェントを招待",
+      "description": "ランタイム、メモリー、ツールなど、既存の構成は一切変わりません。エージェントはPerkOS（perkos-a2a + perkos-chat）へアウトバウンドで接続するだけで、組織のチャットとジョブボードを利用できるようになります。",
+      "runtimeKinds": {
+        "hermes": { "label": "Hermes", "hint": "/v1/responses" },
+        "openclaw": { "label": "OpenClaw", "hint": "/v1/chat/completions" },
+        "custom": { "label": "カスタム", "hint": "独自のHTTPランタイム" }
+      },
+      "nameLabel": "エージェント名（ハンドル）",
+      "nameHelp": "リレー上とチャットで使われる識別名です。一意である必要があります。",
+      "nameError": "半角英数字、_、- のみ使用可、2〜32文字",
+      "runtimeLabel": "ランタイム",
+      "runtimeHelp": "エージェントが使用するプロトコルです。プロンプト内のブリッジのエンドポイントが決まります。",
+      "noteLabel": "エージェントへのメモ（任意）",
+      "noteHelp": "招待プロンプト内で、エージェントに伝わる背景情報です。",
+      "notePlaceholder": "You'll help the team with market research and weekly reports.",
+      "result": {
+        "registeredBefore": "があなたの組織に登録されました。ステータスは",
+        "invited": "招待済み",
+        "registeredAfter": "と表示され、接続が完了するまでそのままです。",
+        "invitationPrompt": "招待プロンプト",
+        "copyPrompt": "プロンプトをコピー",
+        "pasteHelp": "これをエージェントに貼り付けてください。認証情報（relayApiKey）が含まれているため、パスワードと同様に扱い、招待するエージェント本人にのみ渡してください。",
+        "copyRelayKey": "relayApiKeyをコピー",
+        "copied": "コピーしました"
+      }
+    },
+    "review": {
+      "title": "確認して起動",
+      "description": "「起動」をクリックすると、ディスク（またはマネージドコンテナ）に書き込まれる内容です。",
+      "persona": "ペルソナ",
+      "agentName": "エージェント名",
+      "runtime": "ランタイム",
+      "deploy": "デプロイ",
+      "deployPerkos": "PerkOSインフラ",
+      "deployVps": "セルフホスト（ご自身のインフラ）",
+      "llm": "LLM",
+      "llmPerkos": "PerkOS LLMサービス",
+      "llmConfigureLater": "後で設定",
+      "skills": "スキル",
+      "builtInTools": "組み込みツール",
+      "skillPacks_one": "{{count}}件のスキルパック",
+      "skillPacks_other": "{{count}}件のスキルパック",
+      "toolsOff_one": " ・{{count}}件のツールをオフ",
+      "toolsOff_other": " ・{{count}}件のツールをオフ",
+      "channels": "チャネル",
+      "channelsPerkosOnly": "PerkOSのみ",
+      "configPreview": "設定プレビュー",
+      "configPreviewDescBefore": "エージェントホスト上の",
+      "configPreviewDescAfter": "に、そのまま書き込まれるブロックです。",
+      "renameOrSkip": "名前を変更するか、スキップ",
+      "renameOrSkipDesc": "ペルソナから自動入力されています。今回限りの起動であれば、ここで調整してください。",
+      "agentNameLabel": "エージェント名"
+    },
+    "toast": {
+      "launched": "エージェントを起動しました",
+      "launchedSavedAs": "「{{launched}}」として保存しました。すでに「{{requested}}」という名前のエージェントが存在します。",
+      "launchedReady": "{{name}}の準備ができました。",
+      "telegramSaved": "Telegramゲートウェイを保存しました",
+      "telegramNotSaved": "Telegramゲートウェイを保存できませんでした",
+      "farcasterSaved": "Farcasterゲートウェイを保存しました",
+      "farcasterNotSaved": "Farcasterゲートウェイを保存できませんでした",
+      "slackSaved": "Slackゲートウェイを保存しました",
+      "slackNotSaved": "Slackゲートウェイを保存できませんでした",
+      "gatewayActivate": "エージェントの次回再起動時に有効になります。",
+      "launchFailed": "起動に失敗しました",
+      "inviteFailed": "招待に失敗しました"
+    },
+    "error": {
+      "connectWallet": "エージェントを起動する前に、ウォレットを接続してください。",
+      "pickRuntime": "ランタイムを選択してください。"
+    }
   }
 }

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useConnection } from "wagmi";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import {
@@ -40,6 +41,7 @@ import {
  * stays a thin renderer over this hook.
  */
 export function useAgentWizard() {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
@@ -153,9 +155,9 @@ export function useAgentWizard() {
   const launchMutation = useMutation({
     mutationFn: async () => {
       if (!isConnected || !address) {
-        throw new Error("Connect a wallet before launching an agent.");
+        throw new Error(t("wizard.error.connectWallet"));
       }
-      if (!state.runtime) throw new Error("Pick a runtime.");
+      if (!state.runtime) throw new Error(t("wizard.error.pickRuntime"));
       const finalName = state.agentName.trim() || preset?.name || "Untitled agent";
       // Channels are now their own step (native messaging gateways, posted
       // after launch). plugins[] carries the preset's recommended capability
@@ -199,11 +201,14 @@ export function useAgentWizard() {
       if (fromOnboarding) markAgentRegistered();
       const requestedName = state.agentName.trim() || preset?.name || "Your agent";
       const launchedName = response?.result?.agent?.name || requestedName;
-      toast.success("Agent launched", {
+      toast.success(t("wizard.toast.launched"), {
         description:
           launchedName !== requestedName
-            ? `Saved as "${launchedName}" — you already have an agent named "${requestedName}".`
-            : `${launchedName} is ready.`,
+            ? t("wizard.toast.launchedSavedAs", {
+                launched: launchedName,
+                requested: requestedName,
+              })
+            : t("wizard.toast.launchedReady", { name: launchedName }),
       });
 
       const agentId = response?.result?.agent?.id;
@@ -218,11 +223,11 @@ export function useAgentWizard() {
                 ? { webhookUrl: state.gatewayTelegramWebhookUrl }
                 : undefined,
             });
-            toast.success("Telegram gateway saved", {
-              description: "Will activate on next agent restart.",
+            toast.success(t("wizard.toast.telegramSaved"), {
+              description: t("wizard.toast.gatewayActivate"),
             });
           } catch (err) {
-            toast.error("Telegram gateway not saved", {
+            toast.error(t("wizard.toast.telegramNotSaved"), {
               description: err instanceof Error ? err.message : String(err),
             });
           }
@@ -245,11 +250,11 @@ export function useAgentWizard() {
                   : {}),
               },
             });
-            toast.success("Farcaster gateway saved", {
-              description: "Will activate on next agent restart.",
+            toast.success(t("wizard.toast.farcasterSaved"), {
+              description: t("wizard.toast.gatewayActivate"),
             });
           } catch (err) {
-            toast.error("Farcaster gateway not saved", {
+            toast.error(t("wizard.toast.farcasterNotSaved"), {
               description: err instanceof Error ? err.message : String(err),
             });
           }
@@ -267,11 +272,11 @@ export function useAgentWizard() {
                 ? { channelId: state.gatewaySlackChannelId }
                 : undefined,
             });
-            toast.success("Slack gateway saved", {
-              description: "Will activate on next agent restart.",
+            toast.success(t("wizard.toast.slackSaved"), {
+              description: t("wizard.toast.gatewayActivate"),
             });
           } catch (err) {
-            toast.error("Slack gateway not saved", {
+            toast.error(t("wizard.toast.slackNotSaved"), {
               description: err instanceof Error ? err.message : String(err),
             });
           }
@@ -302,7 +307,7 @@ export function useAgentWizard() {
       router.replace(fromOnboarding ? "/dashboard" : "/agents");
     },
     onError: (err: Error) => {
-      toast.error("Launch failed", { description: err.message });
+      toast.error(t("wizard.toast.launchFailed"), { description: err.message });
     },
   });
 
@@ -320,7 +325,7 @@ export function useAgentWizard() {
       setInviteResult(data);
     },
     onError: (err: Error) => {
-      toast.error("Invite failed", { description: err.message });
+      toast.error(t("wizard.toast.inviteFailed"), { description: err.message });
     },
   });
 

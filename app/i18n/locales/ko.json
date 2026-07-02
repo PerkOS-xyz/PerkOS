@@ -811,5 +811,270 @@
       "members": "멤버",
       "rename": "이름 변경"
     }
+  },
+  "wizard": {
+    "common": {
+      "goBack": "에이전트 팀으로 돌아가기",
+      "title": "에이전트 추가",
+      "stepOf": "{{current}}/{{total}} 단계",
+      "back": "이전",
+      "continue": "계속",
+      "launching": "실행하는 중…",
+      "launch": "에이전트 실행하기",
+      "creatingInvitation": "초대장 만드는 중…",
+      "generateInvitation": "초대장 만들기",
+      "doneBackToAgents": "완료 · 에이전트 팀으로 돌아가기"
+    },
+    "method": {
+      "title": "이 에이전트를 어떻게 실행할까요?",
+      "description": "이후 모든 과정을 좌우하는 단 하나의 선택이에요. 브리지는 항상 PerkOS로 아웃바운드 연결만 하므로, 어떤 방식을 선택하든 인바운드 포트가 필요 없어요.",
+      "comingSoon": "곧 지원 예정",
+      "recommended": "추천",
+      "perkos": {
+        "title": "PerkOS 인프라",
+        "descLead": "PerkOS가 에이전트용 관리형 컨테이너를 준비해요. 요금은 최소",
+        "onNetwork": " {{network}}에서",
+        "descTail": "부터{{onNetwork}} x402로 청구돼요. 컨테이너가 정상 상태가 되면(약 30초) 상태가 “준비 완료”로 바뀌어요.",
+        "inviteOnly": "현재는 테스트 중이라 초대받은 분만 이용할 수 있어요. 지금은 “내 VPS”나 “이미 있어요”를 선택하시거나, 관리자에게 문의해 얼리 액세스 목록에 추가해달라고 요청하세요."
+      },
+      "vps": {
+        "title": "내 VPS(자체 호스팅)",
+        "descLead": "런타임과 브리지 사이드카가 담긴 docker-compose 번들을 만들어 드려요. Docker가 설치된 호스트라면 어디든(Hetzner, AWS EC2 등)",
+        "descTail": "명령으로 실행하세요. 브리지가 항상 아웃바운드로만 연결되므로 인바운드 포트나 SSH 접근 권한이 필요 없어요.",
+        "inviteOnly": "자체 호스팅은 테스트 중이라 초대받은 분만 이용할 수 있어요. 지금은 “이미 있어요”를 선택하시거나, 관리자에게 문의해 얼리 액세스 목록에 추가해달라고 요청하세요."
+      },
+      "external": {
+        "title": "이미 에이전트가 있어요",
+        "description": "이미 자체적으로 Hermes / OpenClaw / 커스텀 에이전트를 운영 중이고, 고유한 지식을 갖고 있나요? 초대만 하면 돼요. PerkOS는 아무것도 프로비저닝하지 않아요. 에이전트에게 전달할 프롬프트를 드리면, 그 에이전트가 조직에 합류해서 네이티브 에이전트와 동등하게 보드에서 작업할 수 있어요."
+      }
+    },
+    "template": {
+      "filterAll": "전체",
+      "pickTitle": "에이전트 선택",
+      "pickDescription": "함께 일할 에이전트를 선택하세요. PerkOS, OpenClaw·Hermes 커뮤니티에서 고르거나 직접 만들 수 있어요. 각 에이전트는 나중에 수정할 수 있어요.",
+      "filterAria": "출처별로 에이전트 필터링",
+      "searchSr": "에이전트 검색",
+      "searchPlaceholder": "에이전트 검색…",
+      "clearSearch": "검색 지우기",
+      "noMatchQuery": "“{{query}}”와 일치하는 에이전트가 없어요.",
+      "noMatchFilter": "이 필터와 일치하는 에이전트가 없어요.",
+      "showAll": "모든 에이전트 보기",
+      "chooseAria": "에이전트 페르소나 선택",
+      "viewSourceAria": "GitHub에서 {{origin}} 소스 보기(새 탭에서 열림)",
+      "changePersona": "페르소나 변경",
+      "teammateTagline": "{{name}} 팀원",
+      "viewSourceLink": "GitHub에서 소스 보기",
+      "handCrafted": "PerkOS가 직접 제작",
+      "engine": "엔진",
+      "recommended": "추천",
+      "runtimeHint": {
+        "OpenClaw": "자율형 · 다단계 작업과 도구 활용",
+        "Hermes": "대화형 · 빠르고 채팅 중심"
+      },
+      "agentName": "에이전트 이름",
+      "hidePrompt": "시스템 프롬프트 숨기기",
+      "showPrompt": "시스템 프롬프트 보기",
+      "edited": "수정됨",
+      "systemPromptSr": "시스템 프롬프트",
+      "systemPromptHelp": "런타임 컨테이너 안에서 SOUL.md / IDENTITY.md가 돼요.",
+      "systemPromptPlaceholder": "당신은 …",
+      "resetToDefault": "{{name}} 기본값으로 재설정",
+      "advancedHide": "고급 · 전체 소울 숨기기",
+      "advancedView": "고급 · 전체 소울 보기",
+      "soul": {
+        "identity": "정체성",
+        "coreTruths": "핵심 신념",
+        "worldview": "세계관",
+        "communicationStyle": "커뮤니케이션 스타일",
+        "expertise": "전문 분야",
+        "primary": "주 분야:",
+        "fluentIn": "능숙한 분야:",
+        "defersOn": "위임 분야:",
+        "boundaries": "경계",
+        "memoryPolicy": "메모리 정책",
+        "remember": "기억하는 것:",
+        "dontRemember": "기억하지 않는 것:",
+        "petPeeves": "싫어하는 것들"
+      }
+    },
+    "capabilities": {
+      "title": "기능과 스킬",
+      "description": "에이전트는 기본적으로 핵심 도구가 켜진 상태로 제공돼요. 필요 없는 기능은 꺼두고, 전문 분야에 맞는 오픈소스 스킬 팩을 추가하세요. Hermes와 OpenClaw 모두에서 사용할 수 있어요.",
+      "builtInTools": "내장 도구",
+      "builtInHelp": "기본적으로 켜져 있어요. 이 에이전트에 필요 없는 기능은 꺼두세요. 도구 범위를 좁히면 특정 업무에 집중하는 에이전트일수록 더 안전하고 비용도 줄어들어요. 프로젝트 보드 도구에는 영향이 없어요.",
+      "on": "켜짐",
+      "off": "꺼짐",
+      "toolSwitchAria": "{{label}}: {{state}}",
+      "turnedOffLabel": "꺼진 기능:",
+      "turnedOffEffect": ". 에이전트가 다음에 프로비저닝될 때 적용돼요.",
+      "tools": {
+        "web-search": {
+          "label": "웹 검색",
+          "description": "공개된 웹 페이지를 검색하고 읽어요."
+        },
+        "code-execution": {
+          "label": "코드 실행",
+          "description": "샌드박스에서 Python / shell을 실행해요."
+        },
+        "browser": {
+          "label": "헤드리스 브라우저",
+          "description": "사이트를 탐색하고 콘텐츠를 수집해요."
+        },
+        "memory": {
+          "label": "메모리",
+          "description": "대화 전반에 걸쳐 정보를 저장하고 다시 불러와요."
+        }
+      },
+      "openSourceTitle": "오픈소스 스킬",
+      "openSourceHelp": "공개 GitHub 저장소에서 가져온 마크다운 스킬 팩이에요. 에이전트의 지침에 삽입돼요. GitHub에서 각 스킬을 직접 확인할 수 있어요.",
+      "recommended": "추천",
+      "unverified": "미검증 · 검토 필요",
+      "openSource": "오픈소스",
+      "byAuthor": "{{author}} 제작",
+      "inspect": "살펴보기",
+      "addGithubSkill": "GitHub 스킬 추가",
+      "repoError": "github.com / raw.githubusercontent.com의 SKILL.md URL만 허용돼요.",
+      "add": "추가"
+    },
+    "channels": {
+      "title": "채널",
+      "description": "선택 사항이에요. 각 런타임의 기본 메시징 연동을 이용해 에이전트가 PerkOS 밖에서 오는 메시지를 받고 답장할 수 있게 해줘요.",
+      "secretsNote": "비밀 정보는 지갑 네임스페이스 아래 관리형 보관함에 저장돼요. 에이전트 문서에는 절대 저장되지 않고, 실행 요청 이후에는 이 브라우저 탭에도 남지 않아요. 채널은 나중에 에이전트 설정에서도 추가할 수 있어요.",
+      "telegram": {
+        "blurb": "@BotFather에서 만든 Telegram 봇을 통해 에이전트가 응답해요. 웹훅 모드는 휴면과 잘 맞아요. 에이전트가 쉬는 동안 유휴 연결이 없거든요.",
+        "botToken": "봇 토큰",
+        "botTokenHelp": "@BotFather에서 발급받아요. 관리형 비밀 보관함에 저장되며, API가 이를 다시 반환하지 않아요.",
+        "webhookUrl": "웹훅 URL(선택 사항)",
+        "webhookHelp": "비워두면 롱폴링을 사용해요. 휴면과 잘 어울리려면 웹훅 URL을 설정하는 걸 권장해요."
+      },
+      "slack": {
+        "blurb": "초대된 Slack 채널에서 에이전트가 응답해요. 웹훅 모드(Events API)로 동작해 휴면과 잘 맞아요. Slack 앱을 만들어 워크스페이스에 설치한 뒤, 봇 토큰과 서명 시크릿을 복사하세요.",
+        "botToken": "봇 토큰(xoxb-...)",
+        "botTokenHelp": "Slack 앱 → OAuth & Permissions → Bot User OAuth Token.",
+        "signingSecret": "서명 시크릿",
+        "signingSecretPlaceholder": "Slack 앱 설정의 32자리 16진수 값",
+        "signingSecretHelp": "Slack 앱 → Basic Information → Signing Secret. 수신되는 웹훅 페이로드를 검증하는 데 사용돼요.",
+        "channelId": "채널 ID(선택 사항)",
+        "channelIdHelp": "에이전트를 하나의 채널로 제한해요. 비워두면 봇이 속한 모든 채널에서 멘션과 DM에 응답해요."
+      },
+      "farcaster": {
+        "blurb": "Hermes 전용이에요. Neynar를 통해 Farcaster에서 멘션에 답장해요. 에이전트 아이덴티티에는 Neynar가 관리하는 signer가 필요해요.",
+        "webhookLabel": "Neynar 웹훅 URL · Neynar 웹훅의 대상 URL로 설정하세요",
+        "webhookHelp": "아래 웹훅 시크릿을 웹훅의 서명 시크릿으로 사용하세요. 에이전트 이름이 이미 사용 중이면 실행 시 접미사가 붙어요. URL에는 실행 후 표시되는 최종 이름을 사용하세요.",
+        "fid": "FID",
+        "replyVisibility": "답장 공개 범위",
+        "visibilityMentions": "멘션만(권장)",
+        "visibilityAll": "전체(상위 채널 필요)",
+        "neynarApiKey": "Neynar API 키",
+        "signerUuid": "Signer UUID",
+        "webhookSecret": "웹훅 시크릿",
+        "webhookSecretPlaceholder": "Neynar 웹훅에 설정한 HMAC 시크릿",
+        "parentChannel": "상위 채널",
+        "parentChannelHelp": "공개 범위가 “전체”일 때 필요해요. 에이전트 범위를 하나의 채널로 제한해요."
+      },
+      "farcasterUnavailableBefore": "Farcaster는 Hermes 에이전트에서 사용할 수 있어요. 이 에이전트는",
+      "farcasterUnavailableAfter": " 위에서 실행되는데, 여기에는 기본 Farcaster 채널이 없어요."
+    },
+    "llm": {
+      "title": "LLM 소스",
+      "description": "에이전트가 모델에 접근하는 방식을 선택하세요. 각 런타임은 고유한 형식의 설정 블록을 받아요. 검토 단계에서 미리 볼 수 있어요.",
+      "comingSoon": "곧 지원 예정",
+      "perkos": {
+        "title": "PerkOS LLM 서비스",
+        "descBefore": "관리형 Ollama 호환 게이트웨이:",
+        "descAfter": "· kimi-k2.6:cloud + qwen 7B/14B. 별도 키가 필요 없어요. 에이전트 전용 키를 저희가 발급해 드려요.",
+        "inviteOnly": "현재는 테스트 중이라 초대받은 분만 이용할 수 있어요. 지금은 BYOK나 “나중에 설정”을 선택하시거나, 관리자에게 문의해 얼리 액세스 목록에 추가해달라고 요청하세요."
+      },
+      "byok": {
+        "title": "직접 키 가져오기(BYOK)",
+        "description": "직접 준비한 제공업체 키를 사용하세요. 에이전트 런타임으로 그대로 전달할 뿐, 트래픽을 기록하거나 중계하지 않아요."
+      },
+      "skip": {
+        "title": "나중에 설정",
+        "description": "LLM 소스 없이 에이전트가 부팅돼요. 전송과 도구 호출만 테스트할 때 유용해요."
+      },
+      "providerSettings": {
+        "openclawTitle": "OpenClaw 제공업체 설정",
+        "hermesTitle": "Hermes 제공업체 설정",
+        "openclawDesc": "각 항목은 openclaw.json의 models.providers.* 블록에 1:1로 매핑돼요.",
+        "hermesDesc": "각 항목은 Hermes 프로필의 config.yaml에 있는 provider.* 및 secrets.*에 매핑돼요.",
+        "provider": "제공업체",
+        "providerPlaceholder": "제공업체 선택",
+        "defaultModel": "기본 모델",
+        "apiKey": "API 키"
+      }
+    },
+    "external": {
+      "title": "기존 에이전트 초대",
+      "description": "런타임, 메모리, 도구는 그대로 유지돼요. 에이전트가 PerkOS(perkos-a2a + perkos-chat)로 아웃바운드 연결만 하면, 조직의 채팅과 작업 보드를 사용할 수 있게 돼요.",
+      "runtimeKinds": {
+        "hermes": { "label": "Hermes", "hint": "/v1/responses" },
+        "openclaw": { "label": "OpenClaw", "hint": "/v1/chat/completions" },
+        "custom": { "label": "커스텀", "hint": "직접 준비한 HTTP 런타임" }
+      },
+      "nameLabel": "에이전트 이름(핸들)",
+      "nameHelp": "릴레이와 채팅에서 사용되는 이름이에요. 고유해야 해요.",
+      "nameError": "2~32자, 영문/숫자/_/- 만 사용 가능",
+      "runtimeLabel": "런타임",
+      "runtimeHelp": "에이전트가 사용하는 프로토콜이에요. 프롬프트 안의 브리지 엔드포인트를 결정해요.",
+      "noteLabel": "에이전트에게 전할 메모(선택 사항)",
+      "noteHelp": "초대 프롬프트에서 에이전트가 보게 될 맥락 정보예요.",
+      "notePlaceholder": "시장 조사와 주간 보고서 작성을 도와줄 거예요.",
+      "result": {
+        "registeredBefore": "님이 조직에 등록됐어요. 지금은",
+        "invited": "초대됨",
+        "registeredAfter": "상태이며, 연결되면 자동으로 활성화돼요.",
+        "invitationPrompt": "초대 프롬프트",
+        "copyPrompt": "프롬프트 복사",
+        "pasteHelp": "이 내용을 에이전트에게 전달하세요. 자격 증명(relayApiKey)이 포함되어 있으니 비밀번호처럼 다루고, 초대하려는 에이전트에게만 전달하세요.",
+        "copyRelayKey": "relayApiKey 복사",
+        "copied": "복사됨"
+      }
+    },
+    "review": {
+      "title": "검토 + 실행",
+      "description": "실행을 클릭하면 디스크(또는 관리형 컨테이너)에 기록될 내용이에요.",
+      "persona": "페르소나",
+      "agentName": "에이전트 이름",
+      "runtime": "런타임",
+      "deploy": "배포",
+      "deployPerkos": "PerkOS 인프라",
+      "deployVps": "자체 호스팅(직접 준비한 인프라)",
+      "llm": "LLM",
+      "llmPerkos": "PerkOS LLM 서비스",
+      "llmConfigureLater": "나중에 설정",
+      "skills": "스킬",
+      "builtInTools": "내장 도구",
+      "skillPacks_one": "스킬 팩 {{count}}개",
+      "skillPacks_other": "스킬 팩 {{count}}개",
+      "toolsOff_one": " · 도구 {{count}}개 꺼짐",
+      "toolsOff_other": " · 도구 {{count}}개 꺼짐",
+      "channels": "채널",
+      "channelsPerkosOnly": "PerkOS 전용",
+      "configPreview": "설정 미리보기",
+      "configPreviewDescBefore": "실제로 다음 위치에 기록될 설정 블록이에요:",
+      "configPreviewDescAfter": "(에이전트 호스트 기준)",
+      "renameOrSkip": "이름 변경 또는 건너뛰기",
+      "renameOrSkipDesc": "페르소나에서 자동으로 채워졌어요. 일회성 실행이라면 여기서 조정하세요.",
+      "agentNameLabel": "에이전트 이름"
+    },
+    "toast": {
+      "launched": "에이전트 실행 완료",
+      "launchedSavedAs": "\"{{launched}}\"(으)로 저장했어요. 이미 \"{{requested}}\"라는 이름의 에이전트가 있어요.",
+      "launchedReady": "{{name}}이(가) 준비됐어요.",
+      "telegramSaved": "Telegram 게이트웨이 저장 완료",
+      "telegramNotSaved": "Telegram 게이트웨이 저장 안 됨",
+      "farcasterSaved": "Farcaster 게이트웨이 저장 완료",
+      "farcasterNotSaved": "Farcaster 게이트웨이 저장 안 됨",
+      "slackSaved": "Slack 게이트웨이 저장 완료",
+      "slackNotSaved": "Slack 게이트웨이 저장 안 됨",
+      "gatewayActivate": "에이전트가 다음에 재시작될 때 적용돼요.",
+      "launchFailed": "실행 실패",
+      "inviteFailed": "초대 실패"
+    },
+    "error": {
+      "connectWallet": "에이전트를 실행하기 전에 지갑을 연결하세요.",
+      "pickRuntime": "런타임을 선택하세요."
+    }
   }
 }

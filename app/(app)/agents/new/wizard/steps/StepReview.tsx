@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Sparkles,
   Bot,
@@ -22,6 +23,7 @@ import { StepHeader } from "../ui/StepHeader";
 import { SummaryRow } from "../ui/SummaryRow";
 
 export function StepReview({ state, onChange }: StepProps) {
+  const { t } = useTranslation();
   const preset = findPreset(state.personaId);
   const finalName = state.agentName.trim() || preset?.name || "Untitled agent";
   const preview = state.runtime
@@ -34,19 +36,27 @@ export function StepReview({ state, onChange }: StepProps) {
       })
     : null;
 
+  const skillsSummary =
+    (state.skills.length === 0
+      ? t("wizard.review.builtInTools")
+      : t("wizard.review.skillPacks", { count: state.skills.length })) +
+    (state.disabledTools.length > 0
+      ? t("wizard.review.toolsOff", { count: state.disabledTools.length })
+      : "");
+
   return (
     <div className="flex flex-col gap-4">
       <StepHeader
-        title="Review + launch"
-        description="What we'll write to disk (or to your managed container) when you click Launch."
+        title={t("wizard.review.title")}
+        description={t("wizard.review.description")}
       />
 
       <Card>
         <CardContent className="flex flex-col gap-3 p-5">
-          <SummaryRow label="Persona" value={preset?.name ?? "—"} icon={Sparkles} />
-          <SummaryRow label="Agent name" value={finalName} icon={Bot} />
+          <SummaryRow label={t("wizard.review.persona")} value={preset?.name ?? "—"} icon={Sparkles} />
+          <SummaryRow label={t("wizard.review.agentName")} value={finalName} icon={Bot} />
           <SummaryRow
-            label="Runtime"
+            label={t("wizard.review.runtime")}
             value={
               state.runtime
                 ? state.imageTag
@@ -57,24 +67,24 @@ export function StepReview({ state, onChange }: StepProps) {
             icon={Bot}
           />
           <SummaryRow
-            label="Deploy"
+            label={t("wizard.review.deploy")}
             value={
               state.method === "perkos"
-                ? "PerkOS infra"
+                ? t("wizard.review.deployPerkos")
                 : state.method === "vps"
-                  ? "Self-hosted (your infra)"
+                  ? t("wizard.review.deployVps")
                   : "—"
             }
             icon={state.method === "perkos" ? Cloud : Server}
           />
           <SummaryRow
-            label="LLM"
+            label={t("wizard.review.llm")}
             value={
               state.llmSource === "perkos"
-                ? "PerkOS LLM service"
+                ? t("wizard.review.llmPerkos")
                 : state.llmSource === "byok"
                   ? `BYOK · ${state.byokProvider} · ${state.byokModel}`
-                  : "Configure later"
+                  : t("wizard.review.llmConfigureLater")
             }
             icon={
               state.llmSource === "byok"
@@ -85,19 +95,12 @@ export function StepReview({ state, onChange }: StepProps) {
             }
           />
           <SummaryRow
-            label="Skills"
-            value={
-              (state.skills.length === 0
-                ? "Built-in tools"
-                : `${state.skills.length} skill pack${state.skills.length === 1 ? "" : "s"}`) +
-              (state.disabledTools.length > 0
-                ? ` · ${state.disabledTools.length} tool${state.disabledTools.length === 1 ? "" : "s"} off`
-                : "")
-            }
+            label={t("wizard.review.skills")}
+            value={skillsSummary}
             icon={Layers}
           />
           <SummaryRow
-            label="Channels"
+            label={t("wizard.review.channels")}
             value={
               [
                 state.gatewayTelegramEnabled ? "Telegram" : null,
@@ -105,7 +108,7 @@ export function StepReview({ state, onChange }: StepProps) {
                 state.gatewayFarcasterEnabled && state.runtime === "Hermes" ? "Farcaster" : null,
               ]
                 .filter(Boolean)
-                .join(", ") || "PerkOS only"
+                .join(", ") || t("wizard.review.channelsPerkosOnly")
             }
             icon={MessageSquare}
           />
@@ -116,17 +119,17 @@ export function StepReview({ state, onChange }: StepProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <FileCode className="h-4 w-4 text-primary" />
-            Config preview
+            {t("wizard.review.configPreview")}
             <Badge variant="secondary" className="font-mono text-[10px]">
               {preview?.language ?? "—"}
             </Badge>
           </CardTitle>
           <CardDescription>
-            This is the literal block that will be written to{" "}
+            {t("wizard.review.configPreviewDescBefore")}{" "}
             <code className="rounded bg-muted px-1 font-mono text-[11px]">
               {preview?.configPath ?? "—"}
             </code>{" "}
-            on the agent host.
+            {t("wizard.review.configPreviewDescAfter")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -138,14 +141,14 @@ export function StepReview({ state, onChange }: StepProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Rename or skip</CardTitle>
+          <CardTitle className="text-base">{t("wizard.review.renameOrSkip")}</CardTitle>
           <CardDescription>
-            Pre-filled from the persona; tweak here for one-off launches.
+            {t("wizard.review.renameOrSkipDesc")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="agent-name-review">Agent name</Label>
+            <Label htmlFor="agent-name-review">{t("wizard.review.agentNameLabel")}</Label>
             <Input
               id="agent-name-review"
               value={state.agentName}
