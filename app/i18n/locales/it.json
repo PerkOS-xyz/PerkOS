@@ -718,5 +718,98 @@
       "draftClearFailed": "Impossibile cancellare la bozza",
       "stateReset": "Stato dello spazio di lavoro ripristinato"
     }
+  },
+  "wallet": {
+    "header": {
+      "title": "Portafoglio",
+      "subtitle": "Il tuo portafoglio PerkOS: qui arrivano le tue ricompense fedeltà e dove puoi conservare e spostare fondi. Se ne occupa PerkOS per te, senza seed phrase da gestire."
+    },
+    "loading": "Caricamento del tuo portafoglio…",
+    "error": {
+      "load": "Impossibile caricare il tuo portafoglio."
+    },
+    "comingSoon": {
+      "title": "In arrivo",
+      "description": "Il tuo portafoglio è in fase di configurazione per questo account. Ricontrolla tra poco: è qui che arriveranno le tue ricompense fedeltà."
+    },
+    "address": {
+      "title": "Il tuo indirizzo del portafoglio",
+      "description": "Invia token qui per finanziare il tuo portafoglio, su Base o Celo.",
+      "copied": "Copiato",
+      "copy": "Copia",
+      "deposit": "Deposito: invia USDC o $PERKOS a {{addr}} da qualsiasi portafoglio."
+    },
+    "balances": {
+      "title": "Saldi",
+      "refresh": "Aggiorna",
+      "reading": "Lettura dei saldi…",
+      "error": "Impossibile leggere i saldi."
+    }
+  },
+  "notifications": {
+    "header": {
+      "title": "Notifiche",
+      "subtitle": "Attività completate, cambi di stato degli agenti e menzioni nei progetti."
+    },
+    "actions": {
+      "markAllRead": "Segna tutte come lette",
+      "clearAll": "Cancella tutte"
+    },
+    "tabs": {
+      "filterAria": "Filtra notifiche",
+      "all": "Tutte",
+      "allWithCount": "Tutte ({{count}})",
+      "unread": "Non lette",
+      "unreadWithCount": "Non lette ({{count}})"
+    },
+    "emptyNone": {
+      "title": "Ancora nessuna notifica",
+      "description": "Quando gli agenti completano attività o i progetti hanno movimenti, gli eventi compariranno qui."
+    },
+    "emptyCaughtUp": {
+      "title": "Sei in pari con tutto",
+      "description": "Nessuna notifica non letta. Passa alla scheda Tutte per rivedere la cronologia."
+    },
+    "clearDialog": {
+      "title": "Cancellare tutte le notifiche?",
+      "description": "Questa azione rimuove ogni notifica su questo dispositivo. Non può essere annullata.",
+      "confirmLabel": "Cancella tutte"
+    },
+    "time": {
+      "justNow": "adesso",
+      "minutesAgo": "{{count}}m fa",
+      "hoursAgo": "{{count}}h fa",
+      "daysAgo": "{{count}}g fa"
+    },
+    "row": {
+      "new": "Nuovo",
+      "dismissAria": "Ignora notifica",
+      "dismiss": "Ignora"
+    }
+  },
+  "organizations": {
+    "header": {
+      "title": "Organizzazioni",
+      "subtitle": "Raggruppa i tuoi progetti e gli agenti che ci lavorano. Cambia l'organizzazione attiva dall'intestazione.",
+      "newOrg": "Nuova organizzazione"
+    },
+    "toast": {
+      "renamed": "Organizzazione rinominata",
+      "renameFailed": "Impossibile rinominare"
+    },
+    "rename": {
+      "save": "Salva",
+      "cancel": "Annulla"
+    },
+    "card": {
+      "default": "predefinita",
+      "active": "attiva",
+      "projectCount_one": "{{count}} progetto",
+      "projectCount_other": "{{count}} progetti",
+      "ownerSuffix": " · proprietario {{address}}",
+      "setActive": "Imposta come attiva",
+      "members": "Membri",
+      "rename": "Rinomina"
+    }
   }
 }

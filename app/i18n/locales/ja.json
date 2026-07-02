@@ -718,5 +718,98 @@
       "draftClearFailed": "下書きをクリアできませんでした",
       "stateReset": "ワークスペースの状態をリセットしました"
     }
+  },
+  "wallet": {
+    "header": {
+      "title": "ウォレット",
+      "subtitle": "あなたのPerkOSウォレットです。ロイヤルティ特典が届く場所であり、資金の保管や送金もここで行えます。PerkOSが管理するので、シードフレーズを扱う必要はありません。"
+    },
+    "loading": "ウォレットを読み込んでいます…",
+    "error": {
+      "load": "ウォレットを読み込めませんでした。"
+    },
+    "comingSoon": {
+      "title": "近日公開",
+      "description": "このアカウント用のウォレットを準備しています。もうしばらくしてからご確認ください。ロイヤルティ特典もここに届く予定です。"
+    },
+    "address": {
+      "title": "あなたのウォレットアドレス",
+      "description": "BaseまたはCeloで、こちらのアドレスにトークンを送るとウォレットに入金されます。",
+      "copied": "コピーしました",
+      "copy": "コピー",
+      "deposit": "入金：どのウォレットからでも、{{addr}}宛にUSDCまたは$PERKOSを送ってください。"
+    },
+    "balances": {
+      "title": "残高",
+      "refresh": "更新",
+      "reading": "残高を確認しています…",
+      "error": "残高を確認できませんでした。"
+    }
+  },
+  "notifications": {
+    "header": {
+      "title": "通知",
+      "subtitle": "タスクの完了、エージェントのステータス変更、プロジェクトでのメンションをお知らせします。"
+    },
+    "actions": {
+      "markAllRead": "すべて既読にする",
+      "clearAll": "すべて削除"
+    },
+    "tabs": {
+      "filterAria": "通知を絞り込む",
+      "all": "すべて",
+      "allWithCount": "すべて（{{count}}）",
+      "unread": "未読",
+      "unreadWithCount": "未読（{{count}}）"
+    },
+    "emptyNone": {
+      "title": "通知はまだありません",
+      "description": "エージェントがタスクを完了したり、プロジェクトに動きがあったりすると、ここに表示されます。"
+    },
+    "emptyCaughtUp": {
+      "title": "すべて確認済みです",
+      "description": "未読の通知はありません。履歴を見るには「すべて」タブに切り替えてください。"
+    },
+    "clearDialog": {
+      "title": "すべての通知を削除しますか？",
+      "description": "この端末上のすべての通知が削除されます。この操作は取り消せません。",
+      "confirmLabel": "すべて削除"
+    },
+    "time": {
+      "justNow": "たった今",
+      "minutesAgo": "{{count}}分前",
+      "hoursAgo": "{{count}}時間前",
+      "daysAgo": "{{count}}日前"
+    },
+    "row": {
+      "new": "新着",
+      "dismissAria": "通知を閉じる",
+      "dismiss": "閉じる"
+    }
+  },
+  "organizations": {
+    "header": {
+      "title": "組織",
+      "subtitle": "プロジェクトと、それに携わるエージェントをグループにまとめます。アクティブな組織はヘッダーから切り替えられます。",
+      "newOrg": "新規組織"
+    },
+    "toast": {
+      "renamed": "組織名を変更しました",
+      "renameFailed": "名前を変更できませんでした"
+    },
+    "rename": {
+      "save": "保存",
+      "cancel": "キャンセル"
+    },
+    "card": {
+      "default": "デフォルト",
+      "active": "アクティブ",
+      "projectCount_one": "{{count}}件のプロジェクト",
+      "projectCount_other": "{{count}}件のプロジェクト",
+      "ownerSuffix": " · オーナー {{address}}",
+      "setActive": "アクティブにする",
+      "members": "メンバー",
+      "rename": "名前を変更"
+    }
   }
 }

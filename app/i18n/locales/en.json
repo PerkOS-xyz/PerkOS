@@ -718,5 +718,98 @@
       "draftClearFailed": "Couldn't clear draft",
       "stateReset": "Workspace state reset"
     }
+  },
+  "wallet": {
+    "header": {
+      "title": "Wallet",
+      "subtitle": "Your PerkOS wallet — where your Loyalty rewards land and you can hold and move funds. PerkOS runs it for you; no seed phrase to manage."
+    },
+    "loading": "Loading your wallet…",
+    "error": {
+      "load": "Couldn't load your wallet."
+    },
+    "comingSoon": {
+      "title": "Coming soon",
+      "description": "Your wallet is being set up for this account. Check back shortly — it's where your Loyalty rewards will arrive."
+    },
+    "address": {
+      "title": "Your wallet address",
+      "description": "Send tokens here to fund your wallet — on Base or Celo.",
+      "copied": "Copied",
+      "copy": "Copy",
+      "deposit": "Deposit: send USDC or $PERKOS to {{addr}} from any wallet."
+    },
+    "balances": {
+      "title": "Balances",
+      "refresh": "Refresh",
+      "reading": "Reading balances…",
+      "error": "Couldn't read balances."
+    }
+  },
+  "notifications": {
+    "header": {
+      "title": "Notifications",
+      "subtitle": "Task completions, agent status changes, and project mentions."
+    },
+    "actions": {
+      "markAllRead": "Mark all read",
+      "clearAll": "Clear all"
+    },
+    "tabs": {
+      "filterAria": "Filter notifications",
+      "all": "All",
+      "allWithCount": "All ({{count}})",
+      "unread": "Unread",
+      "unreadWithCount": "Unread ({{count}})"
+    },
+    "emptyNone": {
+      "title": "No notifications yet",
+      "description": "When agents finish tasks or projects get activity, the events will show up here."
+    },
+    "emptyCaughtUp": {
+      "title": "You're all caught up",
+      "description": "No unread notifications. Switch to the All tab to review history."
+    },
+    "clearDialog": {
+      "title": "Clear all notifications?",
+      "description": "This removes every notification on this device. Cannot be undone.",
+      "confirmLabel": "Clear all"
+    },
+    "time": {
+      "justNow": "just now",
+      "minutesAgo": "{{count}}m ago",
+      "hoursAgo": "{{count}}h ago",
+      "daysAgo": "{{count}}d ago"
+    },
+    "row": {
+      "new": "New",
+      "dismissAria": "Dismiss notification",
+      "dismiss": "Dismiss"
+    }
+  },
+  "organizations": {
+    "header": {
+      "title": "Organizations",
+      "subtitle": "Group your projects and the agents that work on them. Switch the active organization from the header.",
+      "newOrg": "New organization"
+    },
+    "toast": {
+      "renamed": "Organization renamed",
+      "renameFailed": "Couldn't rename"
+    },
+    "rename": {
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "card": {
+      "default": "default",
+      "active": "active",
+      "projectCount_one": "{{count}} project",
+      "projectCount_other": "{{count}} projects",
+      "ownerSuffix": " · owner {{address}}",
+      "setActive": "Set active",
+      "members": "Members",
+      "rename": "Rename"
+    }
   }
 }

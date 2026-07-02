@@ -718,5 +718,98 @@
       "draftClearFailed": "Impossible d'effacer le brouillon",
       "stateReset": "État de l'espace de travail réinitialisé"
     }
+  },
+  "wallet": {
+    "header": {
+      "title": "Portefeuille",
+      "subtitle": "Votre portefeuille PerkOS : l'endroit où arrivent vos récompenses de fidélité et où vous pouvez conserver et transférer des fonds. PerkOS le gère pour vous, sans phrase de récupération à retenir."
+    },
+    "loading": "Chargement de votre portefeuille…",
+    "error": {
+      "load": "Impossible de charger votre portefeuille."
+    },
+    "comingSoon": {
+      "title": "Bientôt disponible",
+      "description": "Votre portefeuille est en cours de configuration pour ce compte. Revenez bientôt, c'est là que vos récompenses de fidélité arriveront."
+    },
+    "address": {
+      "title": "Adresse de votre portefeuille",
+      "description": "Envoyez des tokens ici pour alimenter votre portefeuille, sur Base ou Celo.",
+      "copied": "Copié",
+      "copy": "Copier",
+      "deposit": "Dépôt : envoyez des USDC ou des $PERKOS à {{addr}} depuis n'importe quel portefeuille."
+    },
+    "balances": {
+      "title": "Soldes",
+      "refresh": "Actualiser",
+      "reading": "Lecture des soldes…",
+      "error": "Impossible de lire les soldes."
+    }
+  },
+  "notifications": {
+    "header": {
+      "title": "Notifications",
+      "subtitle": "Tâches terminées, changements de statut des agents et mentions dans les projets."
+    },
+    "actions": {
+      "markAllRead": "Tout marquer comme lu",
+      "clearAll": "Tout effacer"
+    },
+    "tabs": {
+      "filterAria": "Filtrer les notifications",
+      "all": "Toutes",
+      "allWithCount": "Toutes ({{count}})",
+      "unread": "Non lues",
+      "unreadWithCount": "Non lues ({{count}})"
+    },
+    "emptyNone": {
+      "title": "Aucune notification pour le moment",
+      "description": "Quand des agents terminent des tâches ou que des projets ont de l'activité, les événements apparaissent ici."
+    },
+    "emptyCaughtUp": {
+      "title": "Vous êtes à jour",
+      "description": "Aucune notification non lue. Passez à l'onglet Toutes pour consulter l'historique."
+    },
+    "clearDialog": {
+      "title": "Effacer toutes les notifications ?",
+      "description": "Cela supprime toutes les notifications sur cet appareil. Cette action est irréversible.",
+      "confirmLabel": "Tout effacer"
+    },
+    "time": {
+      "justNow": "à l'instant",
+      "minutesAgo": "il y a {{count}} min",
+      "hoursAgo": "il y a {{count}} h",
+      "daysAgo": "il y a {{count}} j"
+    },
+    "row": {
+      "new": "Nouveau",
+      "dismissAria": "Ignorer la notification",
+      "dismiss": "Ignorer"
+    }
+  },
+  "organizations": {
+    "header": {
+      "title": "Organisations",
+      "subtitle": "Regroupez vos projets et les agents qui y travaillent. Changez d'organisation active depuis l'en-tête.",
+      "newOrg": "Nouvelle organisation"
+    },
+    "toast": {
+      "renamed": "Organisation renommée",
+      "renameFailed": "Impossible de renommer"
+    },
+    "rename": {
+      "save": "Enregistrer",
+      "cancel": "Annuler"
+    },
+    "card": {
+      "default": "par défaut",
+      "active": "active",
+      "projectCount_one": "{{count}} projet",
+      "projectCount_other": "{{count}} projets",
+      "ownerSuffix": " · propriétaire {{address}}",
+      "setActive": "Définir comme active",
+      "members": "Membres",
+      "rename": "Renommer"
+    }
   }
 }
