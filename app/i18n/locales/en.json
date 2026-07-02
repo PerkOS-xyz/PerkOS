@@ -292,5 +292,139 @@
         "investors": "Investors"
       }
     }
+  },
+  "onboarding": {
+    "shell": {
+      "next": "Next",
+      "back": "Back",
+      "stepOf": "{{current}} of {{total}}"
+    },
+    "welcome": {
+      "title": "Welcome to PerkOS",
+      "description": "PerkOS is your command center for AI-first accountable work. Organize your agents, dispatch tasks, and track results — all in one place. Let's get you set up in a few quick steps.",
+      "stats": {
+        "projects": {
+          "label": "Projects",
+          "suffix": "active projects"
+        },
+        "tasks": {
+          "label": "Tasks",
+          "suffix": "completed tasks"
+        },
+        "agents": {
+          "label": "Agents",
+          "suffix": "registered agents"
+        }
+      },
+      "emptyNote": "Your dashboard starts empty. By the end of this setup, you'll have your first project and agent ready to go."
+    },
+    "workspace": {
+      "title": "Create your Workspace",
+      "description": "A workspace is your team's shared home in PerkOS. It groups your projects, agents, and members under one roof. You can rename it anytime from settings.",
+      "nameLabel": "Workspace name",
+      "namePlaceholder": "Software Workspace",
+      "usernameLabel": "Your username",
+      "optional": "(optional)",
+      "usernameHelp": "Your @handle is how teammates and agents mention you in chats. You can skip and set it later, or keep your wallet address.",
+      "memberCount": "1 member",
+      "ownedBy": "Owned by {{address}}",
+      "inviteHint": "You can invite teammates to your workspace later from the Settings panel."
+    },
+    "project": {
+      "title": "Start a project",
+      "description": "Projects keep your agents and tasks organized around a shared goal. Think of each project as a mission with its own scope, agents assigned, and tasks to complete.",
+      "created": "Project created",
+      "createCta": "Create your first project",
+      "skip": "Skip this step"
+    },
+    "agent": {
+      "title": "Register your first agent",
+      "description": "Agents are the workers in your flock. Each agent connects to Hermes or OpenClaw runtime, executes tasks, and reports results. Register one now to be ready to assign to a project.",
+      "finish": "Finish",
+      "registered": "Agent registered",
+      "registerCta": "Register an agent",
+      "needsTitle": "What you'll need",
+      "needs": {
+        "name": "An agent name and optional description",
+        "model": "A model (Claude, GPT, etc.) and runtime (Hermes or OpenClaw)",
+        "skills": "Skills/plugins to enable"
+      },
+      "skip": "Skip this step"
+    }
+  },
+  "dashboard": {
+    "greeting": {
+      "welcomeBack": "Welcome back",
+      "intro": "I'm your PerkOS Agent. I'll help you build and run the agents and projects you need. Pick where to focus today."
+    },
+    "workspace": {
+      "badge": "Workspace",
+      "memberCount": "1 member",
+      "ownedBy": "Owned by"
+    },
+    "personalWorkspace": "Personal Workspace",
+    "teamActivity": {
+      "title": "Team activity — last 12 weeks",
+      "recentEvents": "{{total}} recent events"
+    },
+    "quickActions": {
+      "title": "Quick actions",
+      "cardDescription": "Jump back into the build flow.",
+      "items": {
+        "createProject": {
+          "label": "Create project",
+          "description": "Set up a new mission for your agents."
+        },
+        "createTask": {
+          "label": "Create task",
+          "description": "Add work to one of your projects."
+        },
+        "registerAgent": {
+          "label": "Register agent",
+          "description": "Launch a new worker for your team."
+        }
+      }
+    },
+    "sections": {
+      "projects": "Projects",
+      "recentTasks": "Recent tasks",
+      "viewAll": "View all"
+    },
+    "projects": {
+      "empty": "No projects yet.",
+      "emptyCta": "Create your first project"
+    },
+    "tasks": {
+      "empty": "No tasks yet.",
+      "emptyCta": "Create a task"
+    },
+    "projectRow": {
+      "agentCount_one": "{{count}} agent",
+      "agentCount_other": "{{count}} agents",
+      "taskCount_one": "{{count}} task",
+      "taskCount_other": "{{count}} tasks",
+      "active": "active {{time}}"
+    },
+    "taskRow": {
+      "agentLabel": "Agent:"
+    },
+    "waiting": {
+      "planLabel": "Plan awaiting your approval",
+      "planLabelWithObject": "Plan awaiting your approval — {{object}}",
+      "proposedBy": "Proposed by {{actor}}",
+      "inReview": "In review · {{agent}}",
+      "unassigned": "unassigned",
+      "agentFailed": "{{name}} failed to start",
+      "agentFailedHint": "Open the agent to retry or delete it"
+    },
+    "starter": {
+      "title": "New here?",
+      "description": "Spin up a demo project with 3 sample tasks so the kanban, chat, and agent flows have something to show.",
+      "creating": "Creating…",
+      "cta": "Create starter project",
+      "toastSuccessTitle": "Starter project ready",
+      "toastSuccessDesc": "Welcome to PerkOS — 3 demo tasks added.",
+      "toastErrorTitle": "Couldn't create starter project"
+    }
   }
 }

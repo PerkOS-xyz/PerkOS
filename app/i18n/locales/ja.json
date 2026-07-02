@@ -292,5 +292,139 @@
         "investors": "投資家の方へ"
       }
     }
+  },
+  "onboarding": {
+    "shell": {
+      "next": "次へ",
+      "back": "戻る",
+      "stepOf": "{{current}} / {{total}}"
+    },
+    "welcome": {
+      "title": "PerkOSへようこそ",
+      "description": "PerkOSは、AIファーストで責任を持って進める仕事のための司令塔です。エージェントを整理し、タスクを割り振り、成果を追跡できます。すべてがここに揃っています。いくつかの簡単なステップで、セットアップを進めましょう。",
+      "stats": {
+        "projects": {
+          "label": "プロジェクト",
+          "suffix": "件の進行中プロジェクト"
+        },
+        "tasks": {
+          "label": "タスク",
+          "suffix": "件の完了タスク"
+        },
+        "agents": {
+          "label": "エージェント",
+          "suffix": "件の登録エージェント"
+        }
+      },
+      "emptyNote": "ダッシュボードは、最初は空の状態からスタートします。このセットアップが終わる頃には、最初のプロジェクトとエージェントの準備が整っています。"
+    },
+    "workspace": {
+      "title": "ワークスペースを作成",
+      "description": "ワークスペースは、PerkOS内であなたのチームが共有するホームです。プロジェクト、エージェント、メンバーを一つにまとめます。名前はいつでも設定から変更できます。",
+      "nameLabel": "ワークスペース名",
+      "namePlaceholder": "Software Workspace",
+      "usernameLabel": "あなたのユーザー名",
+      "optional": "（任意）",
+      "usernameHelp": "@ハンドルは、チームメイトやエージェントがチャットであなたにメンションする際に使われます。今はスキップして後で設定することも、ウォレットアドレスのままにしておくこともできます。",
+      "memberCount": "1名のメンバー",
+      "ownedBy": "オーナー：{{address}}",
+      "inviteHint": "チームメイトの招待は、後から設定パネルでいつでも行えます。"
+    },
+    "project": {
+      "title": "プロジェクトをはじめる",
+      "description": "プロジェクトは、共通の目標に向けてエージェントとタスクを整理する単位です。それぞれのプロジェクトを、独自の範囲・担当エージェント・完了すべきタスクを持つミッションだと考えてください。",
+      "created": "プロジェクトを作成しました",
+      "createCta": "最初のプロジェクトを作成",
+      "skip": "このステップをスキップ"
+    },
+    "agent": {
+      "title": "最初のエージェントを登録",
+      "description": "エージェントは、あなたのチームの働き手です。それぞれがHermesまたはOpenClawランタイムに接続し、タスクを実行し、結果を報告します。今すぐ1体登録して、プロジェクトへの割り当てに備えましょう。",
+      "finish": "完了",
+      "registered": "エージェントを登録しました",
+      "registerCta": "エージェントを登録",
+      "needsTitle": "必要なもの",
+      "needs": {
+        "name": "エージェント名と任意の説明",
+        "model": "モデル（Claude、GPTなど）とランタイム（HermesまたはOpenClaw）",
+        "skills": "有効にするスキル／プラグイン"
+      },
+      "skip": "このステップをスキップ"
+    }
+  },
+  "dashboard": {
+    "greeting": {
+      "welcomeBack": "おかえりなさい",
+      "intro": "私はあなたのPerkOSエージェントです。必要なエージェントやプロジェクトの構築と運用をお手伝いします。今日はどこから始めるか選んでください。"
+    },
+    "workspace": {
+      "badge": "ワークスペース",
+      "memberCount": "1名のメンバー",
+      "ownedBy": "オーナー"
+    },
+    "personalWorkspace": "個人ワークスペース",
+    "teamActivity": {
+      "title": "チームアクティビティ（過去12週間）",
+      "recentEvents": "直近{{total}}件のイベント"
+    },
+    "quickActions": {
+      "title": "クイックアクション",
+      "cardDescription": "作業フローにすぐ戻れます。",
+      "items": {
+        "createProject": {
+          "label": "プロジェクトを作成",
+          "description": "エージェントのための新しいミッションを設定します。"
+        },
+        "createTask": {
+          "label": "タスクを作成",
+          "description": "プロジェクトに作業を追加します。"
+        },
+        "registerAgent": {
+          "label": "エージェントを登録",
+          "description": "チームのために新しい働き手を立ち上げます。"
+        }
+      }
+    },
+    "sections": {
+      "projects": "プロジェクト",
+      "recentTasks": "最近のタスク",
+      "viewAll": "すべて表示"
+    },
+    "projects": {
+      "empty": "まだプロジェクトがありません。",
+      "emptyCta": "最初のプロジェクトを作成"
+    },
+    "tasks": {
+      "empty": "まだタスクがありません。",
+      "emptyCta": "タスクを作成"
+    },
+    "projectRow": {
+      "agentCount_one": "{{count}}名のエージェント",
+      "agentCount_other": "{{count}}名のエージェント",
+      "taskCount_one": "{{count}}件のタスク",
+      "taskCount_other": "{{count}}件のタスク",
+      "active": "{{time}}に活動"
+    },
+    "taskRow": {
+      "agentLabel": "エージェント："
+    },
+    "waiting": {
+      "planLabel": "承認待ちのプラン",
+      "planLabelWithObject": "承認待ちのプラン：{{object}}",
+      "proposedBy": "{{actor}}が提案",
+      "inReview": "レビュー中・{{agent}}",
+      "unassigned": "未割り当て",
+      "agentFailed": "{{name}}の起動に失敗しました",
+      "agentFailedHint": "エージェントを開いて再試行するか、削除してください"
+    },
+    "starter": {
+      "title": "はじめての方へ",
+      "description": "サンプルタスク3件付きのデモプロジェクトを作成し、かんばん・チャット・エージェントの流れを体験できるようにします。",
+      "creating": "作成中…",
+      "cta": "スタータープロジェクトを作成",
+      "toastSuccessTitle": "スタータープロジェクトの準備ができました",
+      "toastSuccessDesc": "PerkOSへようこそ。デモタスクを3件追加しました。",
+      "toastErrorTitle": "スタータープロジェクトを作成できませんでした"
+    }
   }
 }

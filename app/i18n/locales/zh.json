@@ -292,5 +292,139 @@
         "investors": "投资者"
       }
     }
+  },
+  "onboarding": {
+    "shell": {
+      "next": "下一步",
+      "back": "上一步",
+      "stepOf": "{{current}} / {{total}}"
+    },
+    "welcome": {
+      "title": "欢迎使用 PerkOS",
+      "description": "PerkOS 是你管理 AI 优先、可问责工作的指挥中心。组织你的智能体,派发任务,跟踪结果,一切尽在一处。让我们用几个简单步骤,快速帮你完成设置。",
+      "stats": {
+        "projects": {
+          "label": "项目",
+          "suffix": "个进行中的项目"
+        },
+        "tasks": {
+          "label": "任务",
+          "suffix": "个已完成任务"
+        },
+        "agents": {
+          "label": "智能体",
+          "suffix": "个已注册智能体"
+        }
+      },
+      "emptyNote": "你的仪表盘现在还是空的。完成这次设置后,你就会拥有第一个项目和第一个智能体,随时可以开始工作。"
+    },
+    "workspace": {
+      "title": "创建你的工作空间",
+      "description": "工作空间是你的团队在 PerkOS 中的共同家园,把你的项目、智能体和成员统一归拢在一起。你可以随时在设置中为它改名。",
+      "nameLabel": "工作空间名称",
+      "namePlaceholder": "软件工作空间",
+      "usernameLabel": "你的用户名",
+      "optional": "(可选)",
+      "usernameHelp": "你的 @用户名 是团队成员和智能体在聊天中提到你的方式。你可以先跳过,以后再设置,也可以直接保留你的钱包地址。",
+      "memberCount": "1 位成员",
+      "ownedBy": "所有者:{{address}}",
+      "inviteHint": "你可以稍后在设置面板中邀请团队成员加入你的工作空间。"
+    },
+    "project": {
+      "title": "创建一个项目",
+      "description": "项目能把你的智能体和任务围绕同一个目标组织起来。可以把每个项目想象成一项任务:有自己的范围、分配的智能体,以及要完成的工作。",
+      "created": "项目已创建",
+      "createCta": "创建你的第一个项目",
+      "skip": "跳过此步骤"
+    },
+    "agent": {
+      "title": "注册你的第一个智能体",
+      "description": "智能体就是你团队中的工作者。每个智能体都会连接到 Hermes 或 OpenClaw 运行环境,执行任务并反馈结果。现在就注册一个,方便随时分配给项目。",
+      "finish": "完成",
+      "registered": "智能体已注册",
+      "registerCta": "注册一个智能体",
+      "needsTitle": "你需要准备的内容",
+      "needs": {
+        "name": "智能体名称,以及可选的描述",
+        "model": "一个模型(如 Claude、GPT 等)和运行环境(Hermes 或 OpenClaw)",
+        "skills": "要启用的技能/插件"
+      },
+      "skip": "跳过此步骤"
+    }
+  },
+  "dashboard": {
+    "greeting": {
+      "welcomeBack": "欢迎回来",
+      "intro": "我是你的 PerkOS 智能体,会帮你搭建并运行你需要的智能体和项目。选一个今天想专注的方向吧。"
+    },
+    "workspace": {
+      "badge": "工作空间",
+      "memberCount": "1 位成员",
+      "ownedBy": "所有者"
+    },
+    "personalWorkspace": "个人工作空间",
+    "teamActivity": {
+      "title": "团队动态,最近 12 周",
+      "recentEvents": "{{total}} 条最新动态"
+    },
+    "quickActions": {
+      "title": "快捷操作",
+      "cardDescription": "快速回到搭建流程。",
+      "items": {
+        "createProject": {
+          "label": "创建项目",
+          "description": "为你的智能体设置一项新任务。"
+        },
+        "createTask": {
+          "label": "创建任务",
+          "description": "为你的某个项目添加工作内容。"
+        },
+        "registerAgent": {
+          "label": "注册智能体",
+          "description": "为你的团队启动一个新的工作者。"
+        }
+      }
+    },
+    "sections": {
+      "projects": "项目",
+      "recentTasks": "最近任务",
+      "viewAll": "查看全部"
+    },
+    "projects": {
+      "empty": "暂时还没有项目。",
+      "emptyCta": "创建你的第一个项目"
+    },
+    "tasks": {
+      "empty": "暂时还没有任务。",
+      "emptyCta": "创建一个任务"
+    },
+    "projectRow": {
+      "agentCount_one": "{{count}} 个智能体",
+      "agentCount_other": "{{count}} 个智能体",
+      "taskCount_one": "{{count}} 个任务",
+      "taskCount_other": "{{count}} 个任务",
+      "active": "活跃 {{time}}"
+    },
+    "taskRow": {
+      "agentLabel": "智能体:"
+    },
+    "waiting": {
+      "planLabel": "计划正在等待你的批准",
+      "planLabelWithObject": "计划正在等待你的批准:{{object}}",
+      "proposedBy": "由 {{actor}} 提出",
+      "inReview": "审核中 · {{agent}}",
+      "unassigned": "未分配",
+      "agentFailed": "{{name}} 启动失败",
+      "agentFailedHint": "打开该智能体以重试或删除它"
+    },
+    "starter": {
+      "title": "刚接触 PerkOS?",
+      "description": "创建一个带有 3 个示例任务的演示项目,让看板、聊天和智能体流程都有内容可看。",
+      "creating": "创建中…",
+      "cta": "创建入门项目",
+      "toastSuccessTitle": "入门项目已就绪",
+      "toastSuccessDesc": "欢迎使用 PerkOS,已添加 3 个演示任务。",
+      "toastErrorTitle": "无法创建入门项目"
+    }
   }
 }

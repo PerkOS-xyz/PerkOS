@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 const STEPS = ["welcome", "workspace", "project", "agent"] as const;
 type StepId = (typeof STEPS)[number];
@@ -31,11 +32,13 @@ export function OnboardingShell({
   description,
   children,
   nextHref,
-  nextLabel = "Next",
+  nextLabel,
   nextDisabled = false,
   onNext,
 }: Props) {
+  const { t } = useTranslation();
   const currentIndex = STEP_ORDER[step];
+  const resolvedNextLabel = nextLabel ?? t("onboarding.shell.next");
   const backHref =
     currentIndex > 1 ? `/onboarding/${STEPS[currentIndex - 2]}` : null;
 
@@ -68,14 +71,17 @@ export function OnboardingShell({
             href={backHref}
             className="rounded-md px-4 py-2 text-sm text-[#ececff] hover:bg-[#1b1833]/40"
           >
-            Back
+            {t("onboarding.shell.back")}
           </Link>
         ) : (
           <span aria-hidden className="w-[80px]" />
         )}
 
         <span className="text-xs text-[#7975a8]">
-          {currentIndex} of {STEPS.length}
+          {t("onboarding.shell.stepOf", {
+            current: currentIndex,
+            total: STEPS.length,
+          })}
         </span>
 
         {onNext ? (
@@ -85,7 +91,7 @@ export function OnboardingShell({
             disabled={nextDisabled}
             className="rounded-md bg-[#ec1b69] px-5 py-2 text-sm font-medium text-[#ececff] transition-opacity hover:opacity-90 disabled:opacity-50"
           >
-            {nextLabel}
+            {resolvedNextLabel}
           </button>
         ) : (
           <Link
@@ -95,7 +101,7 @@ export function OnboardingShell({
               nextDisabled ? "pointer-events-none opacity-50" : ""
             }`}
           >
-            {nextLabel}
+            {resolvedNextLabel}
           </Link>
         )}
       </div>

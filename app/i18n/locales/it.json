@@ -292,5 +292,139 @@
         "investors": "Investitori"
       }
     }
+  },
+  "onboarding": {
+    "shell": {
+      "next": "Avanti",
+      "back": "Indietro",
+      "stepOf": "{{current}} di {{total}}"
+    },
+    "welcome": {
+      "title": "Benvenuto su PerkOS",
+      "description": "PerkOS è il tuo centro di comando per un lavoro organizzato e verificabile, guidato dall'AI. Organizza i tuoi agenti, assegna le attività e monitora i risultati, tutto in un unico posto. Configuriamo tutto insieme in pochi passaggi rapidi.",
+      "stats": {
+        "projects": {
+          "label": "Progetti",
+          "suffix": "progetti attivi"
+        },
+        "tasks": {
+          "label": "Attività",
+          "suffix": "attività completate"
+        },
+        "agents": {
+          "label": "Agenti",
+          "suffix": "agenti registrati"
+        }
+      },
+      "emptyNote": "La tua dashboard parte vuota. Alla fine di questa configurazione avrai già pronti il tuo primo progetto e il tuo primo agente."
+    },
+    "workspace": {
+      "title": "Crea il tuo Spazio di lavoro",
+      "description": "Uno spazio di lavoro è la casa comune del tuo team su PerkOS. Raccoglie progetti, agenti e membri in un unico posto. Puoi rinominarlo in qualsiasi momento dalle impostazioni.",
+      "nameLabel": "Nome dello spazio di lavoro",
+      "namePlaceholder": "Spazio di Lavoro Software",
+      "usernameLabel": "Il tuo nome utente",
+      "optional": "(facoltativo)",
+      "usernameHelp": "Il tuo @handle è il modo in cui compagni di team e agenti ti menzionano nelle chat. Puoi saltare questo passaggio e impostarlo più tardi, oppure mantenere il tuo indirizzo del portafoglio.",
+      "memberCount": "1 membro",
+      "ownedBy": "Di proprietà di {{address}}",
+      "inviteHint": "Potrai invitare compagni di team nel tuo spazio di lavoro più avanti, dal pannello Impostazioni."
+    },
+    "project": {
+      "title": "Avvia un progetto",
+      "description": "I progetti tengono organizzati agenti e attività attorno a un obiettivo comune. Pensa a ogni progetto come a una missione, con il proprio ambito, gli agenti assegnati e le attività da completare.",
+      "created": "Progetto creato",
+      "createCta": "Crea il tuo primo progetto",
+      "skip": "Salta questo passaggio"
+    },
+    "agent": {
+      "title": "Registra il tuo primo agente",
+      "description": "Gli agenti sono i collaboratori del tuo team. Ogni agente si collega al runtime Hermes o OpenClaw, esegue le attività e riporta i risultati. Registrane uno ora per averlo pronto da assegnare a un progetto.",
+      "finish": "Fine",
+      "registered": "Agente registrato",
+      "registerCta": "Registra un agente",
+      "needsTitle": "Cosa ti servirà",
+      "needs": {
+        "name": "Un nome per l'agente e una descrizione facoltativa",
+        "model": "Un modello (Claude, GPT, ecc.) e un runtime (Hermes o OpenClaw)",
+        "skills": "Competenze/plugin da attivare"
+      },
+      "skip": "Salta questo passaggio"
+    }
+  },
+  "dashboard": {
+    "greeting": {
+      "welcomeBack": "Bentornato",
+      "intro": "Sono il tuo Agente PerkOS. Ti aiuto a costruire e gestire gli agenti e i progetti di cui hai bisogno. Scegli su cosa concentrarti oggi."
+    },
+    "workspace": {
+      "badge": "Spazio di lavoro",
+      "memberCount": "1 membro",
+      "ownedBy": "Di proprietà di"
+    },
+    "personalWorkspace": "Spazio di lavoro personale",
+    "teamActivity": {
+      "title": "Attività del team, ultime 12 settimane",
+      "recentEvents": "{{total}} eventi recenti"
+    },
+    "quickActions": {
+      "title": "Azioni rapide",
+      "cardDescription": "Torna al flusso di lavoro.",
+      "items": {
+        "createProject": {
+          "label": "Crea progetto",
+          "description": "Imposta una nuova missione per i tuoi agenti."
+        },
+        "createTask": {
+          "label": "Crea attività",
+          "description": "Aggiungi lavoro a uno dei tuoi progetti."
+        },
+        "registerAgent": {
+          "label": "Registra agente",
+          "description": "Avvia un nuovo collaboratore per il tuo team."
+        }
+      }
+    },
+    "sections": {
+      "projects": "Progetti",
+      "recentTasks": "Attività recenti",
+      "viewAll": "Vedi tutto"
+    },
+    "projects": {
+      "empty": "Ancora nessun progetto.",
+      "emptyCta": "Crea il tuo primo progetto"
+    },
+    "tasks": {
+      "empty": "Ancora nessuna attività.",
+      "emptyCta": "Crea un'attività"
+    },
+    "projectRow": {
+      "agentCount_one": "{{count}} agente",
+      "agentCount_other": "{{count}} agenti",
+      "taskCount_one": "{{count}} attività",
+      "taskCount_other": "{{count}} attività",
+      "active": "attivo {{time}}"
+    },
+    "taskRow": {
+      "agentLabel": "Agente:"
+    },
+    "waiting": {
+      "planLabel": "Piano in attesa della tua approvazione",
+      "planLabelWithObject": "Piano in attesa della tua approvazione: {{object}}",
+      "proposedBy": "Proposto da {{actor}}",
+      "inReview": "In revisione · {{agent}}",
+      "unassigned": "non assegnato",
+      "agentFailed": "{{name}} non è riuscito ad avviarsi",
+      "agentFailedHint": "Apri l'agente per riprovare o eliminarlo"
+    },
+    "starter": {
+      "title": "Sei nuovo qui?",
+      "description": "Crea un progetto dimostrativo con 3 attività di esempio, così la bacheca kanban, la chat e i flussi degli agenti hanno subito qualcosa da mostrare.",
+      "creating": "Creazione in corso…",
+      "cta": "Crea progetto dimostrativo",
+      "toastSuccessTitle": "Progetto dimostrativo pronto",
+      "toastSuccessDesc": "Benvenuto su PerkOS: 3 attività dimostrative aggiunte.",
+      "toastErrorTitle": "Impossibile creare il progetto dimostrativo"
+    }
   }
 }
