@@ -677,7 +677,11 @@
       "hint": "PNG, JPG ou WebP. Nous la redimensionnons pour vous.",
       "noOnchain": "Associez un nom ENS ou Basename à votre portefeuille pour l'utiliser ici.",
       "updated": "Photo de profil mise à jour",
-      "uploadFailed": "Impossible d'importer l'image"
+      "uploadFailed": "Impossible d'importer l'image",
+      "refresh": "Actualiser",
+      "refreshHint": "Rechercher à nouveau un avatar ENS ou Basename",
+      "resolved": "Avatar trouvé et mis à jour",
+      "noneFound": "Aucun avatar ENS ou Basename trouvé pour ce portefeuille"
     },
     "workspace": {
       "title": "Espace de travail",

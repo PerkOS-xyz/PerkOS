@@ -6,10 +6,10 @@
  * default) and upload a custom image. Writes go straight to the owner-only
  * profile doc, mirroring UsernameCard's client-write pattern.
  */
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ImagePlus, Loader2, Trash2 } from "lucide-react";
+import { ImagePlus, Loader2, RefreshCw, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -21,12 +21,16 @@ import {
   availableAvatarSources,
   clearCustomAvatar,
   effectiveAvatarUrl,
+  persistResolvedAvatar,
   setAvatarSource,
   setCustomAvatar,
   type AvatarSource,
 } from "../lib/perkosApi";
+import { resolveOnchainAvatars } from "../lib/avatarResolveCore";
 import { uploadAvatar } from "../lib/uploadAvatar";
 import { UserAvatar } from "./UserAvatar";
+
+const ALCHEMY_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
 
 const SOURCE_LABEL: Record<AvatarSource, string> = {
   ens: "settings.avatar.sourceEns",
@@ -43,6 +47,7 @@ export function ProfileAvatarCard() {
   const { data: profile } = useUserProfile(address);
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const [resolving, setResolving] = useState(false);
 
   const sources = availableAvatarSources(profile);
   const current: AvatarSource = profile?.avatarSource ?? "default";
@@ -53,6 +58,50 @@ export function ProfileAvatarCard() {
     if (!address) return;
     qc.invalidateQueries({ queryKey: ["user-profile", address.toLowerCase()] });
     qc.invalidateQueries({ queryKey: ["user-profiles"] });
+  }
+
+  async function resolveOnchain(): Promise<void> {
+    if (!address) return;
+    const r = await resolveOnchainAvatars(address, ALCHEMY_KEY);
+    await persistResolvedAvatar({
+      walletAddress: address,
+      resolved: r,
+      hadSource: !!profile?.avatarSource,
+    });
+    invalidate();
+  }
+
+  // First visit with no prior resolution (e.g. a session that predates the
+  // feature): resolve ENS/Basename once so the avatar appears without a
+  // re-login. Fire-and-forget — no synchronous state writes in the effect.
+  const autoTried = useRef(false);
+  useEffect(() => {
+    if (autoTried.current || !address || profile === undefined) return;
+    if (profile?.avatarResolvedAt) return;
+    autoTried.current = true;
+    void resolveOnchain().catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address, profile]);
+
+  async function refresh() {
+    if (!address || resolving) return;
+    setResolving(true);
+    try {
+      const r = await resolveOnchainAvatars(address, ALCHEMY_KEY);
+      await persistResolvedAvatar({
+        walletAddress: address,
+        resolved: r,
+        hadSource: !!profile?.avatarSource,
+      });
+      invalidate();
+      if (r.ensAvatarUrl || r.basenameAvatarUrl)
+        toast.success(t("settings.avatar.resolved"));
+      else toast.message(t("settings.avatar.noneFound"));
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setResolving(false);
+    }
   }
 
   async function pick(source: AvatarSource) {
@@ -127,6 +176,20 @@ export function ProfileAvatarCard() {
                 <ImagePlus className="h-3.5 w-3.5" />
               )}
               {t("settings.avatar.upload")}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="gap-1.5 text-muted-foreground"
+              disabled={resolving || !address}
+              onClick={refresh}
+              title={t("settings.avatar.refreshHint")}
+            >
+              <RefreshCw
+                className={cn("h-3.5 w-3.5", resolving && "animate-spin")}
+              />
+              {t("settings.avatar.refresh")}
             </Button>
             {profile?.avatarCustomUrl ? (
               <Button

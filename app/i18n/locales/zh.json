@@ -677,7 +677,11 @@
       "hint": "支持 PNG、JPG 或 WebP，我们会自动调整尺寸。",
       "noOnchain": "将 ENS 名称或 Basename 关联到你的钱包即可在此使用。",
       "updated": "头像已更新",
-      "uploadFailed": "无法上传图片"
+      "uploadFailed": "无法上传图片",
+      "refresh": "刷新",
+      "refreshHint": "重新检查钱包的 ENS 或 Basename 头像",
+      "resolved": "已找到并更新头像",
+      "noneFound": "未找到此钱包的 ENS 或 Basename 头像"
     },
     "workspace": {
       "title": "工作空间",
