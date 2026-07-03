@@ -1708,7 +1708,13 @@
       "submitError": "リクエストを送信できませんでした",
       "sending": "送信中…",
       "requestAccessButton": "アクセスをリクエスト",
-      "useDifferentWallet": "別のウォレットを使用"
+      "useDifferentWallet": "別のウォレットを使用",
+      "accessCodeLabel": "アクセスコード（任意）",
+      "accessCodePlaceholder": "例: JULIO10",
+      "accessCodeHint": "PerkOS パートナーからのコードをお持ちですか？入力するとすぐにアクセスできます。",
+      "usernameInvalid": "3〜20文字：英数字、_ または -。",
+      "redeemButton": "今すぐ入る",
+      "granting": "入室中…"
     },
     "mobileNav": {
       "home": "ホーム",

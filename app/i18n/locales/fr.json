@@ -1708,7 +1708,13 @@
       "submitError": "Impossible d'envoyer la demande",
       "sending": "Envoi en cours…",
       "requestAccessButton": "Demander l'accès",
-      "useDifferentWallet": "Utiliser un autre portefeuille"
+      "useDifferentWallet": "Utiliser un autre portefeuille",
+      "accessCodeLabel": "Code d'accès (facultatif)",
+      "accessCodePlaceholder": "ex. JULIO10",
+      "accessCodeHint": "Vous avez un code d'un partenaire PerkOS ? Saisissez-le pour un accès immédiat.",
+      "usernameInvalid": "3 à 20 caractères : lettres, chiffres, _ ou -.",
+      "redeemButton": "Obtenir l'accès",
+      "granting": "Connexion en cours…"
     },
     "mobileNav": {
       "home": "Accueil",

@@ -1699,7 +1699,13 @@
       "submitError": "Could not submit request",
       "sending": "Sending…",
       "requestAccessButton": "Request access",
-      "useDifferentWallet": "Use a different wallet"
+      "useDifferentWallet": "Use a different wallet",
+      "accessCodeLabel": "Access code (optional)",
+      "accessCodePlaceholder": "e.g. JULIO10",
+      "accessCodeHint": "Have a code from a PerkOS partner? Enter it for instant access.",
+      "usernameInvalid": "3-20 characters: letters, numbers, _ or -.",
+      "redeemButton": "Get instant access",
+      "granting": "Getting you in…"
     },
     "mobileNav": {
       "home": "Home",
