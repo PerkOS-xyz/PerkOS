@@ -118,9 +118,32 @@ export default function SignInPage() {
     reset();
   }, [isStuckOnStaleConnector, disconnect, reset]);
 
+  // Which wallet drives the UI. In the browser/Dynamic path the wallet is
+  // Dynamic (read from the session); wagmi may hold a STALE persisted
+  // connection there (a prior injected/EIP-6963 login, wallet now locked so
+  // eth_accounts is empty), and we must NOT let that show a disabled
+  // "Continue as 0x…" and hide the Dynamic connect button — that strands the
+  // user with no way to connect and no popup. In Mini App hosts wagmi IS the
+  // wallet source.
+  const connectedAddress = dynamicEnabled
+    ? session.address
+    : isConnected
+      ? address
+      : undefined;
+
+  const handleUseDifferentAccount = () => {
+    // Dynamic owns the wallet in the browser path, so fully log out (Dynamic +
+    // Firebase) — a bare wagmi disconnect() wouldn't clear it. wagmi elsewhere.
+    if (dynamicEnabled) {
+      void session.logout();
+    } else {
+      disconnect();
+    }
+  };
+
   // Wallet connected but Firebase rejected the allowlist → request access UI.
-  if (session.status === "not-allowlisted" && address) {
-    return <AccessGate address={address} />;
+  if (session.status === "not-allowlisted" && session.address) {
+    return <AccessGate address={session.address} />;
   }
 
   return (
@@ -136,7 +159,7 @@ export default function SignInPage() {
       </div>
 
       <div className="flex w-full flex-col gap-2">
-        {isConnected && address ? (
+        {connectedAddress ? (
           <div className="flex w-full flex-col gap-3">
             <button
               type="button"
@@ -147,7 +170,9 @@ export default function SignInPage() {
               <span className="text-base leading-none">
                 {session.status === "syncing"
                   ? t("signIn.signingIn")
-                  : t("signIn.continueAs", { address: formatAddress(address) })}
+                  : t("signIn.continueAs", {
+                      address: formatAddress(connectedAddress),
+                    })}
               </span>
             </button>
             {session.status === "error" ? (
@@ -161,11 +186,20 @@ export default function SignInPage() {
             ) : null}
             <button
               type="button"
-              onClick={() => disconnect()}
+              onClick={handleUseDifferentAccount}
               className="text-center text-xs text-[#7975a8] hover:text-[#ececff]"
             >
               {t("signIn.useDifferentAccount")}
             </button>
+          </div>
+        ) : dynamicEnabled ? (
+          // Browser + Dynamic configured → Dynamic's connect modal (email /
+          // social / external + embedded wallet). Keyed off the SESSION above
+          // (Dynamic), NOT wagmi — a stale persisted wagmi connection must not
+          // hide this button. Checked before the wagmi-state branches below so
+          // the browser path never falls into them.
+          <div className="flex w-full flex-col gap-4">
+            <DynamicSignInButton />
           </div>
         ) : isInMiniApp === null ? (
           // Still resolving whether we're inside a Mini App host. Render
@@ -190,13 +224,6 @@ export default function SignInPage() {
           <p className="text-center text-xs text-[#7975a8]">
             {t("signIn.restoringSession")}
           </p>
-        ) : dynamicEnabled ? (
-          // Browser + Dynamic configured → Dynamic's connect modal (email /
-          // social / external + embedded wallet). On connect, the wallet syncs
-          // into wagmi and this view flips to the "Continue as 0x…" branch.
-          <div className="flex w-full flex-col gap-4">
-            <DynamicSignInButton />
-          </div>
         ) : (
           <div className="flex w-full flex-col gap-4">
             <button
