@@ -81,9 +81,9 @@ function TopNav() {
   const { t } = useTranslation();
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-8">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 md:px-8">
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/perkos-header.png" alt="PerkOS" width={130} height={28} priority />
+          <Image src="/perkos-header.png" alt="PerkOS" width={150} height={52} priority />
         </Link>
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
           <Link href="#templates" className="transition-colors hover:text-foreground">
