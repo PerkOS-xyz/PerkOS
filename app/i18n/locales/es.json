@@ -25,7 +25,8 @@
     "restoringSession": "Restaurando tu sesión…",
     "restoringPreviousSession": "Restaurando la sesión anterior…",
     "withEmail": "Iniciar sesión con correo",
-    "withWallet": "Iniciar sesión con billetera"
+    "withWallet": "Iniciar sesión con billetera",
+    "backToLanding": "Volver al inicio"
   },
   "landing": {
     "nav": {

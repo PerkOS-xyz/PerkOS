@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -251,6 +252,13 @@ export default function SignInPage() {
             {session.error}
           </p>
         ) : null}
+
+        <Link
+          href="/"
+          className="mt-2 text-center text-xs text-[#7975a8] transition-colors hover:text-[#ececff]"
+        >
+          ← {t("signIn.backToLanding")}
+        </Link>
       </div>
     </div>
   );
