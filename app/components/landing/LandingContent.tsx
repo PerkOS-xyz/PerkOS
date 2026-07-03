@@ -32,8 +32,6 @@ import { AgentOrb } from "../AgentOrb";
 import { ContactForm } from "./ContactForm";
 import { SmartCTA } from "../SmartCTA";
 import { LanguageSelector } from "../LanguageSelector";
-import { useIsInMiniApp } from "../../lib/useIsInMiniApp";
-import { isCoinbaseInAppBrowser } from "../../lib/dynamicBrowser";
 
 // ============================================================================
 // LandingContent — the client-rendered body of the PerkOS landing page.
@@ -81,12 +79,6 @@ export function LandingContent() {
 
 function TopNav() {
   const { t } = useTranslation();
-  // Host-wallet contexts (Farcaster / Base App Mini App + the Base App in-app
-  // browser) auto-connect the wallet, so the manual "Sign in" form is pointless
-  // there — show only "Start" (SmartCTA picks up the host account and dispatches
-  // to /continue). In a plain browser we keep both "Sign in" and "Start".
-  const isInMiniApp = useIsInMiniApp();
-  const hideSignIn = isInMiniApp === true || isCoinbaseInAppBrowser();
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-8">
@@ -113,16 +105,8 @@ function TopNav() {
         <div className="flex items-center gap-2">
           {/* Language selector — browser-only (self-hidden inside Mini App hosts). */}
           <LanguageSelector />
-          {/* Sign-in — plain browser only. In host-wallet contexts the wallet
-              is already the user's identity, so only "Start" is shown. */}
-          {!hideSignIn ? (
-            <SmartCTA
-              href="/sign-in"
-              className="inline-flex items-center rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/40"
-            >
-              {t("landing.nav.signIn")}
-            </SmartCTA>
-          ) : null}
+          {/* Single entry point — "Start". SmartCTA connects the host wallet
+              (Farcaster / Base App) or opens the browser sign-in as needed. */}
           <SmartCTA
             href="/sign-in"
             className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 sm:px-4"
