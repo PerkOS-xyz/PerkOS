@@ -30,6 +30,14 @@ export function LandingAutoRoute() {
     if (redirected.current) return;
     if (session.status !== "signed-in") return;
 
+    // Explicit landing view (e.g. the in-app logo links to /?home): the user
+    // asked to see the marketing page, so don't bounce them back to the app.
+    try {
+      if (new URLSearchParams(window.location.search).has("home")) return;
+    } catch {
+      // window unavailable — fall through to the normal redirect
+    }
+
     redirected.current = true;
     setRedirecting(true);
     router.replace("/dashboard");
