@@ -1702,6 +1702,43 @@ export async function clearCustomAvatar(input: {
   );
 }
 
+/**
+ * Persist a fresh ENS/Basename resolution (from avatarResolveCore) onto the
+ * profile — the client-side counterpart of the login-hook resolver, used by the
+ * Settings "refresh" + first-visit auto-resolve so already-signed-in users get
+ * their avatar without re-logging-in. Only sets the default display source when
+ * the user hasn't already picked one. `avatarResolvedAt` is an ISO string to
+ * match the server hook (both are read back as a string).
+ */
+export async function persistResolvedAvatar(input: {
+  walletAddress: string;
+  resolved: {
+    ensName: string | null;
+    ensAvatarUrl: string | null;
+    basename: string | null;
+    basenameAvatarUrl: string | null;
+  };
+  hadSource?: boolean;
+}): Promise<void> {
+  const { resolved } = input;
+  const patch: Record<string, unknown> = {
+    ensName: resolved.ensName,
+    ensAvatarUrl: resolved.ensAvatarUrl,
+    basename: resolved.basename,
+    basenameAvatarUrl: resolved.basenameAvatarUrl,
+    avatarResolvedAt: new Date().toISOString(),
+    updatedAt: serverTimestamp(),
+  };
+  if (!input.hadSource) {
+    patch.avatarSource = resolved.ensAvatarUrl
+      ? "ens"
+      : resolved.basenameAvatarUrl
+        ? "basename"
+        : "default";
+  }
+  await setDoc(profileDoc(input.walletAddress), patch, { merge: true });
+}
+
 // ---------------------------------------------------------------------------
 // Agents
 // ---------------------------------------------------------------------------

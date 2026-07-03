@@ -677,7 +677,11 @@
       "hint": "PNG, JPG 또는 WebP. 크기는 자동으로 조정됩니다.",
       "noOnchain": "여기서 사용하려면 지갑에 ENS 이름이나 Basename을 연결하세요.",
       "updated": "프로필 사진이 업데이트되었습니다",
-      "uploadFailed": "이미지를 업로드할 수 없습니다"
+      "uploadFailed": "이미지를 업로드할 수 없습니다",
+      "refresh": "새로고침",
+      "refreshHint": "지갑의 ENS 또는 Basename 아바타를 다시 확인합니다",
+      "resolved": "아바타를 찾아 업데이트했습니다",
+      "noneFound": "이 지갑의 ENS 또는 Basename 아바타를 찾을 수 없습니다"
     },
     "workspace": {
       "title": "워크스페이스",

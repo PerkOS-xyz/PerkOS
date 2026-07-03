@@ -677,7 +677,11 @@
       "hint": "PNG, JPG or WebP. We resize it for you.",
       "noOnchain": "Link an ENS name or Basename to your wallet to use it here.",
       "updated": "Profile picture updated",
-      "uploadFailed": "Couldn't upload image"
+      "uploadFailed": "Couldn't upload image",
+      "refresh": "Refresh",
+      "refreshHint": "Re-check your wallet for an ENS or Basename avatar",
+      "resolved": "Avatar found and updated",
+      "noneFound": "No ENS or Basename avatar found for this wallet"
     },
     "workspace": {
       "title": "Workspace",

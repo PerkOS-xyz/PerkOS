@@ -677,7 +677,11 @@
       "hint": "PNG、JPG、WebP に対応。サイズは自動で調整します。",
       "noOnchain": "ここで使うには、ウォレットに ENS 名または Basename をリンクしてください。",
       "updated": "プロフィール画像を更新しました",
-      "uploadFailed": "画像をアップロードできませんでした"
+      "uploadFailed": "画像をアップロードできませんでした",
+      "refresh": "更新",
+      "refreshHint": "ウォレットの ENS / Basename アバターを再確認します",
+      "resolved": "アバターを取得して更新しました",
+      "noneFound": "このウォレットの ENS / Basename アバターは見つかりませんでした"
     },
     "workspace": {
       "title": "ワークスペース",
