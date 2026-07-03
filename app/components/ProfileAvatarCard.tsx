@@ -15,22 +15,40 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+import { firebaseAuth } from "../lib/firebase";
 import { useWalletSession } from "../lib/useWalletSession";
 import { useUserProfile } from "../lib/useUserProfile";
 import {
   availableAvatarSources,
   clearCustomAvatar,
   effectiveAvatarUrl,
-  persistResolvedAvatar,
   setAvatarSource,
   setCustomAvatar,
   type AvatarSource,
 } from "../lib/perkosApi";
-import { resolveOnchainAvatars } from "../lib/avatarResolveCore";
 import { uploadAvatar } from "../lib/uploadAvatar";
 import { UserAvatar } from "./UserAvatar";
 
-const ALCHEMY_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
+/**
+ * Ask the server to resolve + cache this wallet's ENS/Basename avatar. Resolving
+ * runs server-side (NFT metadata fetches are CORS-blocked in the browser).
+ * Returns whether an on-chain avatar was found.
+ */
+async function requestServerResolve(): Promise<boolean> {
+  const user = firebaseAuth().currentUser;
+  if (!user) return false;
+  const idToken = await user.getIdToken();
+  const res = await fetch("/api/avatar/resolve", {
+    method: "POST",
+    headers: { authorization: `Bearer ${idToken}` },
+  });
+  if (!res.ok) throw new Error("Resolution failed.");
+  const data = (await res.json()) as {
+    ensAvatarUrl?: string | null;
+    basenameAvatarUrl?: string | null;
+  };
+  return !!(data.ensAvatarUrl || data.basenameAvatarUrl);
+}
 
 const SOURCE_LABEL: Record<AvatarSource, string> = {
   ens: "settings.avatar.sourceEns",
@@ -60,26 +78,17 @@ export function ProfileAvatarCard() {
     qc.invalidateQueries({ queryKey: ["user-profiles"] });
   }
 
-  async function resolveOnchain(): Promise<void> {
-    if (!address) return;
-    const r = await resolveOnchainAvatars(address, ALCHEMY_KEY);
-    await persistResolvedAvatar({
-      walletAddress: address,
-      resolved: r,
-      hadSource: !!profile?.avatarSource,
-    });
-    invalidate();
-  }
-
   // First visit with no prior resolution (e.g. a session that predates the
-  // feature): resolve ENS/Basename once so the avatar appears without a
-  // re-login. Fire-and-forget — no synchronous state writes in the effect.
+  // feature): ask the server to resolve ENS/Basename once so the avatar appears
+  // without a re-login. Fire-and-forget — no synchronous state writes here.
   const autoTried = useRef(false);
   useEffect(() => {
     if (autoTried.current || !address || profile === undefined) return;
     if (profile?.avatarResolvedAt) return;
     autoTried.current = true;
-    void resolveOnchain().catch(() => {});
+    void requestServerResolve()
+      .then(() => invalidate())
+      .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [address, profile]);
 
@@ -87,15 +96,9 @@ export function ProfileAvatarCard() {
     if (!address || resolving) return;
     setResolving(true);
     try {
-      const r = await resolveOnchainAvatars(address, ALCHEMY_KEY);
-      await persistResolvedAvatar({
-        walletAddress: address,
-        resolved: r,
-        hadSource: !!profile?.avatarSource,
-      });
+      const found = await requestServerResolve();
       invalidate();
-      if (r.ensAvatarUrl || r.basenameAvatarUrl)
-        toast.success(t("settings.avatar.resolved"));
+      if (found) toast.success(t("settings.avatar.resolved"));
       else toast.message(t("settings.avatar.noneFound"));
     } catch (e) {
       toast.error((e as Error).message);
