@@ -665,6 +665,20 @@
       "title": "ユーザー名",
       "description": "あなたの@ハンドルです。チームメイトがチャットであなたにメンションする際に使われます。一意である必要があり、未設定の場合はウォレットアドレスが表示されます。"
     },
+    "avatar": {
+      "title": "プロフィール画像",
+      "description": "アプリ全体で使うアバターです。ENS または Basename があればそれを使い、なければ画像をアップロードできます。",
+      "sourceEns": "ENS",
+      "sourceBasename": "Basename",
+      "sourceCustom": "カスタム",
+      "sourceDefault": "デフォルト",
+      "upload": "画像をアップロード",
+      "remove": "削除",
+      "hint": "PNG、JPG、WebP に対応。サイズは自動で調整します。",
+      "noOnchain": "ここで使うには、ウォレットに ENS 名または Basename をリンクしてください。",
+      "updated": "プロフィール画像を更新しました",
+      "uploadFailed": "画像をアップロードできませんでした"
+    },
     "workspace": {
       "title": "ワークスペース",
       "description": "ダッシュボードとオンボーディング全体に表示される表示名です。",

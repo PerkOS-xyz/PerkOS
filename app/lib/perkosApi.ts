@@ -1477,10 +1477,25 @@ export async function addDocMessage(input: {
 //   /wallets/{w}/profile/main            { username, displayName, updatedAt }
 //   /usernames/{lowercased}              { wallet }   (top-level uniqueness registry)
 
+/** Which avatar a user shows. Auto-default priority: ens → basename → default. */
+export type AvatarSource = "ens" | "basename" | "custom" | "default";
+
 export type UserProfile = {
   username?: string | null;
   displayName?: string | null;
   updatedAt?: string;
+  // Avatar system. The per-source URLs are resolved on login (ENS/basename) or
+  // uploaded (custom); `avatarSource` is the user's pick (or the auto-default).
+  // The effective URL for display is derived via `effectiveAvatarUrl()` — we do
+  // NOT store a denormalized "current url" so a source switch is a 1-field write.
+  avatarSource?: AvatarSource | null;
+  ensName?: string | null;
+  ensAvatarUrl?: string | null;
+  basename?: string | null;
+  basenameAvatarUrl?: string | null;
+  avatarCustomUrl?: string | null;
+  /** ISO stamp of the last ENS/basename resolution (TTL marker, login-side). */
+  avatarResolvedAt?: string | null;
 };
 
 /** A username is 3–20 chars, [a-z0-9_-], compared case-insensitively. */
@@ -1526,6 +1541,13 @@ export async function getUserProfile(
   return {
     username: (d.username as string | null) ?? null,
     displayName: (d.displayName as string | null) ?? null,
+    avatarSource: (d.avatarSource as AvatarSource | null) ?? null,
+    ensName: (d.ensName as string | null) ?? null,
+    ensAvatarUrl: (d.ensAvatarUrl as string | null) ?? null,
+    basename: (d.basename as string | null) ?? null,
+    basenameAvatarUrl: (d.basenameAvatarUrl as string | null) ?? null,
+    avatarCustomUrl: (d.avatarCustomUrl as string | null) ?? null,
+    avatarResolvedAt: (d.avatarResolvedAt as string | null) ?? null,
   };
 }
 
@@ -1589,6 +1611,95 @@ export function resolveUserLabel(
   if (profile?.username) return profile.username;
   if (profile?.displayName) return profile.displayName;
   return formatAddress(walletAddress);
+}
+
+/**
+ * The effective avatar image URL for a profile, derived from the chosen
+ * source. Returns null when the user is on the generated gradient fallback
+ * (source "default"/unset) or the selected source has no resolved URL — the
+ * caller (UserAvatar) then draws the address-hashed gradient + initials.
+ */
+export function effectiveAvatarUrl(profile?: UserProfile | null): string | null {
+  if (!profile) return null;
+  switch (profile.avatarSource) {
+    case "custom":
+      return profile.avatarCustomUrl ?? null;
+    case "ens":
+      return profile.ensAvatarUrl ?? null;
+    case "basename":
+      return profile.basenameAvatarUrl ?? null;
+    default:
+      return null;
+  }
+}
+
+/** Which avatar sources the user actually has available to choose from. */
+export function availableAvatarSources(
+  profile?: UserProfile | null
+): AvatarSource[] {
+  const out: AvatarSource[] = [];
+  if (profile?.ensAvatarUrl) out.push("ens");
+  if (profile?.basenameAvatarUrl) out.push("basename");
+  if (profile?.avatarCustomUrl) out.push("custom");
+  out.push("default");
+  return out;
+}
+
+/**
+ * Set which avatar source the user displays (owner-only client write, mirrors
+ * setUsername's merge pattern into /wallets/{w}/profile/main).
+ */
+export async function setAvatarSource(input: {
+  walletAddress: string;
+  source: AvatarSource;
+}): Promise<void> {
+  await setDoc(
+    profileDoc(input.walletAddress),
+    { avatarSource: input.source, updatedAt: serverTimestamp() },
+    { merge: true }
+  );
+}
+
+/**
+ * Persist a freshly uploaded custom avatar URL and switch the display to it.
+ */
+export async function setCustomAvatar(input: {
+  walletAddress: string;
+  url: string;
+}): Promise<void> {
+  await setDoc(
+    profileDoc(input.walletAddress),
+    {
+      avatarCustomUrl: input.url,
+      avatarSource: "custom",
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true }
+  );
+}
+
+/**
+ * Drop the custom avatar and fall back to the best remaining source
+ * (ens → basename → default). Pass the current profile so we can pick.
+ */
+export async function clearCustomAvatar(input: {
+  walletAddress: string;
+  profile?: UserProfile | null;
+}): Promise<void> {
+  const fallback: AvatarSource = input.profile?.ensAvatarUrl
+    ? "ens"
+    : input.profile?.basenameAvatarUrl
+      ? "basename"
+      : "default";
+  await setDoc(
+    profileDoc(input.walletAddress),
+    {
+      avatarCustomUrl: null,
+      avatarSource: fallback,
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true }
+  );
 }
 
 // ---------------------------------------------------------------------------

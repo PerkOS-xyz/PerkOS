@@ -18,6 +18,7 @@ import {
   RotateCcw,
   Info,
   AtSign,
+  UserCircle,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,7 @@ import { formatAddress } from "../../lib/format";
 import { perkosApiBaseUrl } from "../../lib/perkosApi";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { UsernameCard } from "../../components/UsernameCard";
+import { ProfileAvatarCard } from "../../components/ProfileAvatarCard";
 
 const ORG_DRAFT_KEY = "swarm.organization.draft.v1";
 
@@ -180,6 +182,22 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent>
             <UsernameCard address={address} />
+          </CardContent>
+        </Card>
+
+        {/* Profile picture */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <UserCircle className="h-4 w-4 text-primary" />
+              {t("settings.avatar.title")}
+            </CardTitle>
+            <CardDescription>
+              {t("settings.avatar.description")}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ProfileAvatarCard />
           </CardContent>
         </Card>
 

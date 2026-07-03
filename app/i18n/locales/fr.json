@@ -665,6 +665,20 @@
       "title": "Nom d'utilisateur",
       "description": "Votre @identifiant : ce que vos coéquipiers tapent pour vous mentionner dans les discussions. Unique, il utilise par défaut l'adresse de votre portefeuille si vous ne le définissez pas."
     },
+    "avatar": {
+      "title": "Photo de profil",
+      "description": "Votre avatar dans toute l'application. Utilise votre ENS ou Basename si vous en avez un, ou importez le vôtre.",
+      "sourceEns": "ENS",
+      "sourceBasename": "Basename",
+      "sourceCustom": "Personnalisée",
+      "sourceDefault": "Par défaut",
+      "upload": "Importer une image",
+      "remove": "Retirer",
+      "hint": "PNG, JPG ou WebP. Nous la redimensionnons pour vous.",
+      "noOnchain": "Associez un nom ENS ou Basename à votre portefeuille pour l'utiliser ici.",
+      "updated": "Photo de profil mise à jour",
+      "uploadFailed": "Impossible d'importer l'image"
+    },
     "workspace": {
       "title": "Espace de travail",
       "description": "Nom affiché dans le tableau de bord et lors de la configuration.",

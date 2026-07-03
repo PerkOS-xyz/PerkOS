@@ -665,6 +665,20 @@
       "title": "Nombre de usuario",
       "description": "Tu @usuario: lo que tus compañeros escriben para mencionarte en los chats. Es único, y si no lo configuras, se usa la dirección de tu billetera."
     },
+    "avatar": {
+      "title": "Foto de perfil",
+      "description": "Tu avatar en toda la app. Usa tu ENS o Basename si tenés uno, o subí el tuyo.",
+      "sourceEns": "ENS",
+      "sourceBasename": "Basename",
+      "sourceCustom": "Personalizada",
+      "sourceDefault": "Predeterminada",
+      "upload": "Subir imagen",
+      "remove": "Quitar",
+      "hint": "PNG, JPG o WebP. La redimensionamos por vos.",
+      "noOnchain": "Vinculá un nombre ENS o Basename a tu wallet para usarlo acá.",
+      "updated": "Foto de perfil actualizada",
+      "uploadFailed": "No se pudo subir la imagen"
+    },
     "workspace": {
       "title": "Espacio de trabajo",
       "description": "Nombre que se muestra en el panel y durante la configuración inicial.",

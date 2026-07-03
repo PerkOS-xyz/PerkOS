@@ -19,6 +19,18 @@ service firebase.storage {
                    && request.resource.size < 25 * 1024 * 1024;
     }
 
+    // Profile avatars. Written only by the owning wallet; PUBLICLY readable
+    // because the download URL is embedded in the user's profile and shown to
+    // other members/agents across the app (unlike attachments, which are
+    // owner-scoped). Image-only, tightly capped (client downscales to ~256px).
+    match /avatars/{wallet}/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.auth.uid == wallet
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
     // Everything else: deny.
     match /{allPaths=**} {
       allow read, write: if false;

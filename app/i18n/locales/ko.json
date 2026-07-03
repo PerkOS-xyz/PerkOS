@@ -665,6 +665,20 @@
       "title": "사용자 이름",
       "description": "@핸들은 채팅에서 팀원들이 사장님을 언급할 때 입력하는 이름이에요. 다른 사람과 겹칠 수 없고, 설정하지 않으면 지갑 주소로 대신 표시돼요."
     },
+    "avatar": {
+      "title": "프로필 사진",
+      "description": "앱 전체에서 사용하는 아바타입니다. ENS나 Basename이 있으면 사용하고, 없으면 직접 업로드하세요.",
+      "sourceEns": "ENS",
+      "sourceBasename": "Basename",
+      "sourceCustom": "사용자 지정",
+      "sourceDefault": "기본",
+      "upload": "이미지 업로드",
+      "remove": "제거",
+      "hint": "PNG, JPG 또는 WebP. 크기는 자동으로 조정됩니다.",
+      "noOnchain": "여기서 사용하려면 지갑에 ENS 이름이나 Basename을 연결하세요.",
+      "updated": "프로필 사진이 업데이트되었습니다",
+      "uploadFailed": "이미지를 업로드할 수 없습니다"
+    },
     "workspace": {
       "title": "워크스페이스",
       "description": "대시보드와 온보딩 전체에 표시되는 이름이에요.",
