@@ -108,14 +108,14 @@ export default function WalletPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3 pt-0">
-              <div className="flex items-center gap-2 rounded-md border border-border bg-muted/40 p-2.5">
+              <div className="flex items-start gap-2 rounded-md border border-border bg-muted/40 p-2.5">
                 <span
-                  className="min-w-0 flex-1 truncate font-mono text-sm text-foreground"
+                  className="min-w-0 flex-1 break-all font-mono text-sm text-foreground"
                   title={wallet.address}
                 >
                   {wallet.address}
                 </span>
-                <Button size="sm" variant="ghost" className="h-7 gap-1.5" onClick={copy}>
+                <Button size="sm" variant="ghost" className="h-7 shrink-0 gap-1.5" onClick={copy}>
                   {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                   {copied ? t("wallet.address.copied") : t("wallet.address.copy")}
                 </Button>

@@ -21,7 +21,7 @@ export function ChatbotTrigger() {
       aria-label={open ? "Close your PerkOS assistant" : "Open your PerkOS assistant"}
       title="Your PerkOS assistant"
       className={cn(
-        "fixed bottom-32 right-5 z-30 h-14 w-14 rounded-full transition-transform hover:scale-105 active:scale-95 md:bottom-[62px] md:right-8 md:h-16 md:w-16",
+        "fixed bottom-32 right-[30px] z-30 h-14 w-14 rounded-full transition-transform hover:scale-105 active:scale-95 md:bottom-[62px] md:right-[42px] md:h-16 md:w-16",
         open && "opacity-0 pointer-events-none"
       )}
     >
