@@ -3,7 +3,14 @@
 import Image from "next/image";
 import { useMemo, useState, type FormEvent } from "react";
 import { useDisconnect } from "wagmi";
-import { CheckCircle2, Loader2, ShieldAlert, LogOut } from "lucide-react";
+import {
+  Check,
+  CheckCircle2,
+  Copy,
+  Loader2,
+  ShieldAlert,
+  LogOut,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { emailSchema } from "../lib/validators";
@@ -19,7 +26,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { formatAddress } from "../lib/format";
 
 type Props = {
   address: string;
@@ -28,6 +34,7 @@ type Props = {
 export function AccessGate({ address }: Props) {
   const { t } = useTranslation();
   const { disconnect } = useDisconnect();
+  const [copied, setCopied] = useState(false);
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [company, setCompany] = useState("");
@@ -36,6 +43,16 @@ export function AccessGate({ address }: Props) {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [attempted, setAttempted] = useState(false);
+
+  function copyAddress() {
+    navigator.clipboard
+      .writeText(address)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      })
+      .catch(() => {});
+  }
 
   const emailError = useMemo(() => {
     const parsed = emailSchema.safeParse(email);
@@ -124,13 +141,32 @@ export function AccessGate({ address }: Props) {
         </CardHeader>
 
         <CardContent className="flex flex-col gap-4">
-          <div className="flex items-center justify-between rounded-md border border-border bg-background px-3 py-2 text-xs">
+          <div className="flex flex-col gap-1.5 rounded-md border border-border bg-background px-3 py-2 text-xs">
             <span className="uppercase tracking-wider text-muted-foreground">
               {t("chrome.accessGate.yourWallet")}
             </span>
-            <span className="font-mono text-foreground" title={address}>
-              {formatAddress(address)}
-            </span>
+            <div className="flex items-start gap-2">
+              <span className="min-w-0 flex-1 break-all font-mono text-foreground">
+                {address}
+              </span>
+              <button
+                type="button"
+                onClick={copyAddress}
+                aria-label={t("chrome.userMenu.copyFullAddress")}
+                title={
+                  copied
+                    ? t("chrome.userMenu.copied")
+                    : t("chrome.userMenu.copyFullAddress")
+                }
+                className="shrink-0 rounded p-1 text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {copied ? (
+                  <Check className="h-3.5 w-3.5 text-primary" />
+                ) : (
+                  <Copy className="h-3.5 w-3.5" />
+                )}
+              </button>
+            </div>
           </div>
 
           {submitted ? (
