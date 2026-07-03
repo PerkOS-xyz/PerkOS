@@ -23,6 +23,12 @@ export function DynamicOuter({ children }: { children: ReactNode }) {
         // EVM (Base / Celo) today. Append SolanaWalletConnectors here when the
         // Solana path lands — Dynamic surfaces both in a single connect modal.
         walletConnectors: [EthereumWalletConnectors],
+        // Connect the wallet only — do NOT run Dynamic's own SIWE. PerkOS does
+        // its own nonce sign-in (/api/auth/wallet-signin), so the default
+        // "connect-and-sign" makes the user sign TWICE (Dynamic's SIWE + ours).
+        // "connect-only" leaves just our single signature. There is no dashboard
+        // toggle for this — it's an SDK setting.
+        initialAuthenticationMode: "connect-only",
       }}
     >
       {children}
