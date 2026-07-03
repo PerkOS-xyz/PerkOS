@@ -23,6 +23,7 @@ import { base, baseSepolia } from "viem/chains";
 import { adminAuth, adminDb } from "../../../lib/firebaseAdmin";
 import { checkWalletAccess } from "../../../lib/accessControl";
 import { recordUserLogin, recordAccessAttempt } from "../../../lib/userLogins";
+import { resolveAndPersistAvatar } from "../../../lib/resolveAvatar";
 
 // We try Base mainnet first, then Base Sepolia, in case the smart wallet only
 // exists on testnet during alpha.
@@ -140,6 +141,10 @@ export async function POST(request: Request) {
   // 6. Record IP + geolocation for the Admin user log (best-effort,
   //    fire-and-forget — never blocks or fails sign-in).
   void recordUserLogin(address, request);
+
+  // 7. Resolve ENS / Basename avatars for this wallet and cache them on the
+  //    profile (best-effort, fire-and-forget, TTL-guarded — never blocks).
+  void resolveAndPersistAvatar(address);
 
   return NextResponse.json({ token });
 }

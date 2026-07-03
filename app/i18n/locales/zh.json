@@ -665,6 +665,20 @@
       "title": "用户名",
       "description": "你的 @用户名,团队成员在聊天中借此提到你。用户名是唯一的;未设置时会显示你的钱包地址。"
     },
+    "avatar": {
+      "title": "头像",
+      "description": "在整个应用中使用的头像。如果你有 ENS 或 Basename 会自动使用，也可以上传自己的图片。",
+      "sourceEns": "ENS",
+      "sourceBasename": "Basename",
+      "sourceCustom": "自定义",
+      "sourceDefault": "默认",
+      "upload": "上传图片",
+      "remove": "移除",
+      "hint": "支持 PNG、JPG 或 WebP，我们会自动调整尺寸。",
+      "noOnchain": "将 ENS 名称或 Basename 关联到你的钱包即可在此使用。",
+      "updated": "头像已更新",
+      "uploadFailed": "无法上传图片"
+    },
     "workspace": {
       "title": "工作空间",
       "description": "在仪表盘和引导流程中显示的名称。",

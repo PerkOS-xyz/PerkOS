@@ -665,6 +665,20 @@
       "title": "Nome utente",
       "description": "Il tuo @handle: quello che i compagni di team digitano per menzionarti nelle chat. Univoco; se non impostato, viene usato l'indirizzo del tuo portafoglio."
     },
+    "avatar": {
+      "title": "Immagine del profilo",
+      "description": "Il tuo avatar in tutta l'app. Usa il tuo ENS o Basename se ne hai uno, oppure carica il tuo.",
+      "sourceEns": "ENS",
+      "sourceBasename": "Basename",
+      "sourceCustom": "Personalizzata",
+      "sourceDefault": "Predefinita",
+      "upload": "Carica immagine",
+      "remove": "Rimuovi",
+      "hint": "PNG, JPG o WebP. La ridimensioniamo noi.",
+      "noOnchain": "Collega un nome ENS o Basename al tuo wallet per usarlo qui.",
+      "updated": "Immagine del profilo aggiornata",
+      "uploadFailed": "Impossibile caricare l'immagine"
+    },
     "workspace": {
       "title": "Spazio di lavoro",
       "description": "Nome visualizzato nella dashboard e nell'onboarding.",

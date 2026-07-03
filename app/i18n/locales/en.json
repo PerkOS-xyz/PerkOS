@@ -665,6 +665,20 @@
       "title": "Username",
       "description": "Your @handle: what teammates type to mention you in chats. Unique; falls back to your wallet address when unset."
     },
+    "avatar": {
+      "title": "Profile picture",
+      "description": "Your avatar across the app. Uses your ENS or Basename if you have one, or upload your own.",
+      "sourceEns": "ENS",
+      "sourceBasename": "Basename",
+      "sourceCustom": "Custom",
+      "sourceDefault": "Default",
+      "upload": "Upload image",
+      "remove": "Remove",
+      "hint": "PNG, JPG or WebP. We resize it for you.",
+      "noOnchain": "Link an ENS name or Basename to your wallet to use it here.",
+      "updated": "Profile picture updated",
+      "uploadFailed": "Couldn't upload image"
+    },
     "workspace": {
       "title": "Workspace",
       "description": "Display name shown across the dashboard and onboarding.",

@@ -21,6 +21,9 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { formatAddress } from "../lib/format";
 import { useWalletSession } from "../lib/useWalletSession";
+import { useUserProfile } from "../lib/useUserProfile";
+import { effectiveAvatarUrl } from "../lib/perkosApi";
+import { UserAvatar } from "./UserAvatar";
 
 export function UserMenu({ onLogout }: { onLogout?: () => void }) {
   const { t } = useTranslation();
@@ -31,6 +34,8 @@ export function UserMenu({ onLogout }: { onLogout?: () => void }) {
   // landing page); fall back to session.logout() if no handler was provided.
   const session = useWalletSession();
   const address = session.address;
+  const { data: profile } = useUserProfile(address);
+  const avatarUrl = effectiveAvatarUrl(profile);
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -68,9 +73,7 @@ export function UserMenu({ onLogout }: { onLogout?: () => void }) {
           />
         }
       >
-        <span className="grid h-7 w-7 place-items-center rounded-full bg-primary/15 text-[10px] font-medium text-primary">
-          {address.slice(2, 4).toUpperCase()}
-        </span>
+        <UserAvatar address={address} avatarUrl={avatarUrl} size={28} title={address} />
         <span className="hidden font-mono text-xs text-foreground md:inline">
           {formatAddress(address)}
         </span>
@@ -80,9 +83,7 @@ export function UserMenu({ onLogout }: { onLogout?: () => void }) {
         className="w-64 border-border bg-card p-2"
       >
         <div className="flex items-center gap-2 rounded-md px-2 py-2">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/15 text-xs font-medium text-primary">
-            {address.slice(2, 4).toUpperCase()}
-          </span>
+          <UserAvatar address={address} avatarUrl={avatarUrl} size={36} title={address} />
           <div className="flex min-w-0 flex-col">
             <span className="truncate font-mono text-xs text-foreground" title={address}>
               {formatAddress(address)}

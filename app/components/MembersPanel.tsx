@@ -9,6 +9,8 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatAddress } from "../lib/format";
+import { effectiveAvatarUrl, getUserProfiles } from "../lib/perkosApi";
+import { UserAvatar } from "./UserAvatar";
 import {
   inviteOrgMember,
   inviteProjectMember,
@@ -53,6 +55,15 @@ export function MembersPanel({
     enabled: Boolean(id),
   });
   const members: Member[] = membersQuery.data ?? [];
+
+  // Avatars/usernames for the listed members (one batched read, shared cache).
+  const memberWallets = members.map((m) => m.wallet.toLowerCase());
+  const profilesQuery = useQuery({
+    queryKey: ["user-profiles", memberWallets.join(",")],
+    queryFn: () => getUserProfiles(memberWallets),
+    enabled: memberWallets.length > 0,
+    staleTime: 60_000,
+  });
 
   const isWallet = /^0x[a-fA-F0-9]{40}$/.test(wallet.trim());
 
@@ -163,9 +174,14 @@ export function MembersPanel({
               className="flex items-center justify-between gap-2 px-4 py-2.5"
             >
               <div className="flex min-w-0 items-center gap-2">
-                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-primary/15 text-[10px] font-medium text-primary">
-                  {m.wallet.slice(2, 4).toUpperCase()}
-                </span>
+                <UserAvatar
+                  address={m.wallet}
+                  avatarUrl={effectiveAvatarUrl(
+                    profilesQuery.data?.[m.wallet.toLowerCase()]
+                  )}
+                  size={28}
+                  title={m.wallet}
+                />
                 <span
                   className="truncate font-mono text-xs text-foreground"
                   title={m.wallet}
