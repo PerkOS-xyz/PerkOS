@@ -43,11 +43,11 @@ export function DynamicWalletBridge({ children }: { children: ReactNode }) {
   //  - Farcaster / Base App MINI APP hosts never mount this component
   //    (useDynamicContext is browser-only), so the effect can't run there and
   //    their host wallets are never touched.
-  //  - The Base App IN-APP BROWSER is not a Mini App host (isInMiniApp false),
-  //    so this DOES mount there — but the host injects the user's Coinbase
-  //    Smart Wallet (EIP-6963 rdns com.coinbase.wallet) as the real wallet, so
-  //    we must NOT disconnect it. We skip that connector.
-  // In all three, the user's wallet is the host identity and by definition
+  //  - The Base App IN-APP BROWSER no longer reaches this component at all:
+  //    dynamicBrowserEnabled() now excludes the Coinbase Wallet in-app browser
+  //    (it uses the wagmi/host path like the Mini App hosts). The Coinbase host
+  //    connector is still skipped here as a belt-and-suspenders guard.
+  // In all these, the user's wallet is the host identity and by definition
   // can't be disconnected; everything else in a plain browser is stale noise.
   const { isConnected: wagmiConnected, connector } = useAccount();
   const { disconnect: disconnectWagmi } = useDisconnect();
@@ -56,8 +56,14 @@ export function DynamicWalletBridge({ children }: { children: ReactNode }) {
     const isCoinbaseHost =
       connector.id === COINBASE_WALLET_RDNS ||
       rdnsOf(connector) === COINBASE_WALLET_RDNS;
-    if (isCoinbaseHost) return; // Base App in-app browser host wallet — leave it
-    disconnectWagmi();
+    if (isCoinbaseHost) return; // host wallet — leave it
+    try {
+      disconnectWagmi();
+    } catch {
+      // Some in-app-wallet connectors don't implement disconnect
+      // ("s.disconnect is not a function"); ignore — this is only stale
+      // wagmi cleanup in a plain browser, never a host wallet.
+    }
   }, [wagmiConnected, connector, disconnectWagmi]);
 
   const address = primaryWallet?.address;
