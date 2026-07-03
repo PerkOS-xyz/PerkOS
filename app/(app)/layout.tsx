@@ -153,12 +153,14 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
           {/* Mobile header */}
           <header className="flex items-center justify-between gap-2 border-b border-border px-5 py-4 md:hidden">
-            <Image
-              src="/perkos-header.png"
-              alt="PerkOS"
-              width={150}
-              height={52}
-            />
+            <Link href="/?home" aria-label="PerkOS">
+              <Image
+                src="/perkos-header.png"
+                alt="PerkOS"
+                width={150}
+                height={52}
+              />
+            </Link>
 
             <div className="flex items-center gap-1">
               <NetworkPill />
@@ -281,10 +283,13 @@ function SessionSplash({
 }
 
 function Brand() {
+  // The logo links back to the marketing landing (with ?home so LandingAutoRoute
+  // doesn't bounce a signed-in user straight back to the app) — lets people
+  // revisit "our services" anytime.
   return (
-    <div className="flex items-center gap-3 px-4">
-      <Image src="/perkos-header.png" alt="Perkos" width={160} height={32} />
-    </div>
+    <Link href="/?home" className="flex items-center gap-3 px-4" aria-label="PerkOS">
+      <Image src="/perkos-header.png" alt="PerkOS" width={160} height={32} />
+    </Link>
   );
 }
 
