@@ -419,10 +419,9 @@ function BalancesBody({
   return (
     <span className="flex items-center gap-1.5 truncate">
       <TokenSlot label={usdcLabel} prefix="$" suffix="USDC" loadingHint="USDC" />
-      {/* Tablet portrait (md→lg) runs the pill compact — USDC only — so the
-          topbar fits on one row. $PERKOS returns on desktop and stays on
-          mobile (its own header has room). */}
-      <span className="flex items-center gap-1.5 md:max-lg:hidden">
+      {/* Compact on mobile + tablet portrait — USDC only — so the cramped
+          topbar has room for the wallet chip. $PERKOS returns at lg+. */}
+      <span className="flex items-center gap-1.5 max-lg:hidden">
         <span className="text-muted-foreground/60" aria-hidden>
           ·
         </span>

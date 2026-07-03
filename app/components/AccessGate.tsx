@@ -122,9 +122,10 @@ export function AccessGate({ address }: Props) {
               t("chrome.accessGate.requestFailed", { status: res.status }),
           );
         }
-        // Full reload so the wallet session re-checks: now allowlisted → the
-        // dispatcher forwards to the dashboard.
-        window.location.assign("/continue");
+        // A redeemed code = a brand-new user → send them to onboarding (the
+        // wizard sets up their workspace + first project). Full reload so the
+        // wallet session re-checks and picks up the fresh allowlist grant.
+        window.location.assign("/onboarding/welcome");
         return;
       }
 

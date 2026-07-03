@@ -152,19 +152,20 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </header>
 
           {/* Mobile header */}
-          <header className="flex items-center justify-between gap-2 border-b border-border px-5 py-4 md:hidden">
-            <Link href="/?home" aria-label="PerkOS">
+          <header className="flex items-center justify-between gap-2 border-b border-border px-4 py-4 md:hidden">
+            <Link href="/?home" aria-label="PerkOS" className="shrink-0">
               <Image
                 src="/perkos-header.png"
                 alt="PerkOS"
-                width={150}
-                height={52}
+                width={116}
+                height={40}
               />
             </Link>
 
             <div className="flex items-center gap-1">
               <NetworkPill />
               <RefreshButton />
+              <UserMenu onLogout={hideLogout ? undefined : logout} />
 
               <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                 <SheetTrigger
