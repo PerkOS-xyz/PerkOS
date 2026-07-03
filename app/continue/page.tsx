@@ -44,9 +44,6 @@ export default function ContinuePage() {
       // No wallet at all — fall back to the manual sign-in screen. This
       // matters in a browser tab that opened /continue directly (e.g.
       // from a shared link) rather than via a landing-page CTA.
-      // Temporary diagnostic (paired with /sign-in): the return leg of the
-      // /sign-in ↔ /continue reload loop, if it ever recurs.
-      console.log("[perkos:auth] continue → /sign-in (session signed-out)");
       router.replace("/sign-in");
     }
   }, [session.status, router]);

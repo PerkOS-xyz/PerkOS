@@ -73,27 +73,11 @@ export default function SignInPage() {
   const sessionSettled =
     session.status === "signed-in" || session.status === "not-allowlisted";
   useEffect(() => {
-    // TODO: the [perkos:auth] console logs are temporary diagnostics for the
-    // /sign-in ↔ /continue reload loop; remove once confirmed fixed in prod.
-    if (!sessionSettled) {
-      if (isInMiniApp === true || (isConnected && address)) {
-        console.log(
-          "[perkos:auth] sign-in: holding, session not settled",
-          { sessionStatus: session.status, isInMiniApp, wagmiConnected: isConnected },
-        );
-      }
-      return;
-    }
+    if (!sessionSettled) return;
     if (isInMiniApp === true || (isConnected && address)) {
-      console.log("[perkos:auth] sign-in → /continue", {
-        isInMiniApp,
-        wagmiConnected: isConnected,
-        address,
-        sessionStatus: session.status,
-      });
       router.replace("/continue");
     }
-  }, [isInMiniApp, isConnected, address, sessionSettled, session.status, router]);
+  }, [isInMiniApp, isConnected, address, sessionSettled, router]);
 
   // Once the user has both wagmi + Firebase, send them on through /continue,
   // the single post-auth dispatcher (→ /dashboard). Do NOT route straight to
