@@ -1708,7 +1708,13 @@
       "submitError": "无法提交申请",
       "sending": "发送中…",
       "requestAccessButton": "申请访问权限",
-      "useDifferentWallet": "使用其他钱包"
+      "useDifferentWallet": "使用其他钱包",
+      "accessCodeLabel": "访问码（可选）",
+      "accessCodePlaceholder": "例如 JULIO10",
+      "accessCodeHint": "有 PerkOS 合作伙伴给你的访问码吗？输入即可立即访问。",
+      "usernameInvalid": "3-20 个字符：字母、数字、_ 或 -。",
+      "redeemButton": "立即进入",
+      "granting": "正在进入…"
     },
     "mobileNav": {
       "home": "首页",

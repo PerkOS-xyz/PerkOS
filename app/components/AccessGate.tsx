@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useMemo, useState, type FormEvent } from "react";
-import { useDisconnect } from "wagmi";
 import {
   Check,
   CheckCircle2,
@@ -14,6 +13,9 @@ import {
 import { useTranslation } from "react-i18next";
 
 import { emailSchema } from "../lib/validators";
+import { useWalletSession } from "../lib/useWalletSession";
+import { useIsInMiniApp } from "../lib/useIsInMiniApp";
+import { dynamicBrowserEnabled } from "../lib/dynamicBrowser";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -33,8 +35,14 @@ type Props = {
 
 export function AccessGate({ address }: Props) {
   const { t } = useTranslation();
-  const { disconnect } = useDisconnect();
+  const session = useWalletSession();
+  const isInMiniApp = useIsInMiniApp();
+  // "Use a different wallet" only makes sense in a real browser (Dynamic owns
+  // the wallet). In Farcaster / Base App the wallet is the host identity.
+  const dynamicEnabled = dynamicBrowserEnabled(isInMiniApp);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [accessCode, setAccessCode] = useState("");
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [company, setCompany] = useState("");
@@ -43,6 +51,13 @@ export function AccessGate({ address }: Props) {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [attempted, setAttempted] = useState(false);
+
+  // With an access code the user redeems for instant access → email + a valid
+  // username are required (username is claimed in the shared /usernames
+  // registry: 3-20 chars, [a-z0-9_-]). Without a code it's the normal
+  // request-access flow (email + username + company).
+  const hasCode = accessCode.trim().length > 0;
+  const usernameValid = /^[a-z0-9_-]{3,20}$/.test(username.trim().toLowerCase());
 
   function copyAddress() {
     navigator.clipboard
@@ -54,6 +69,18 @@ export function AccessGate({ address }: Props) {
       .catch(() => {});
   }
 
+  async function useDifferentWallet() {
+    // Fully log out the Dynamic wallet + Firebase (a bare wagmi disconnect() is
+    // a no-op on the browser/Dynamic path), then start over from the landing.
+    setLoggingOut(true);
+    try {
+      await session.logout();
+    } catch {
+      // ignore — navigate away regardless
+    }
+    window.location.assign("/");
+  }
+
   const emailError = useMemo(() => {
     const parsed = emailSchema.safeParse(email);
     return parsed.success ? undefined : parsed.error.issues[0]?.message;
@@ -61,8 +88,9 @@ export function AccessGate({ address }: Props) {
   const canSubmit =
     !submitting &&
     !emailError &&
-    username.trim().length > 0 &&
-    company.trim().length > 0;
+    (hasCode
+      ? usernameValid
+      : username.trim().length > 0 && company.trim().length > 0);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -71,6 +99,36 @@ export function AccessGate({ address }: Props) {
     setSubmitting(true);
     setError(null);
     try {
+      if (hasCode) {
+        // Redeem path: valid code → allowlisted instantly, then re-enter.
+        const res = await fetch("/api/redeem-access-code", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            walletAddress: address,
+            code: accessCode.trim(),
+            email: email.trim(),
+            username: username.trim(),
+            company: company.trim() || undefined,
+            website: website.trim() || undefined,
+          }),
+        });
+        if (!res.ok) {
+          const payload = (await res.json().catch(() => ({}))) as {
+            error?: string;
+          };
+          throw new Error(
+            payload.error ||
+              t("chrome.accessGate.requestFailed", { status: res.status }),
+          );
+        }
+        // Full reload so the wallet session re-checks: now allowlisted → the
+        // dispatcher forwards to the dashboard.
+        window.location.assign("/continue");
+        return;
+      }
+
+      // Request-access path: no code → goes to the pending queue + team email.
       const res = await fetch("/api/request-access", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -177,6 +235,23 @@ export function AccessGate({ address }: Props) {
           ) : (
             <form onSubmit={onSubmit} noValidate className="flex flex-col gap-3">
               <div className="flex flex-col gap-1.5">
+                <Label htmlFor="access-code">
+                  {t("chrome.accessGate.accessCodeLabel")}
+                </Label>
+                <Input
+                  id="access-code"
+                  value={accessCode}
+                  onChange={(e) => setAccessCode(e.target.value)}
+                  placeholder={t("chrome.accessGate.accessCodePlaceholder")}
+                  autoCapitalize="characters"
+                  autoComplete="off"
+                  className="uppercase"
+                />
+                <p className="text-xs text-muted-foreground">
+                  {t("chrome.accessGate.accessCodeHint")}
+                </p>
+              </div>
+              <div className="flex flex-col gap-1.5">
                 <Label htmlFor="access-email">
                   {t("chrome.accessGate.emailLabel")}
                 </Label>
@@ -209,7 +284,15 @@ export function AccessGate({ address }: Props) {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder={t("chrome.accessGate.usernamePlaceholder")}
+                  aria-invalid={
+                    attempted && hasCode && !usernameValid ? true : undefined
+                  }
                 />
+                {attempted && hasCode && !usernameValid ? (
+                  <p className="text-xs text-destructive">
+                    {t("chrome.accessGate.usernameInvalid")}
+                  </p>
+                ) : null}
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="access-company">
@@ -250,21 +333,37 @@ export function AccessGate({ address }: Props) {
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : null}
                 {submitting
-                  ? t("chrome.accessGate.sending")
-                  : t("chrome.accessGate.requestAccessButton")}
+                  ? hasCode
+                    ? t("chrome.accessGate.granting")
+                    : t("chrome.accessGate.sending")
+                  : hasCode
+                    ? t("chrome.accessGate.redeemButton")
+                    : t("chrome.accessGate.requestAccessButton")}
               </Button>
             </form>
           )}
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => disconnect()}
-            className="mt-1 justify-center gap-2 text-muted-foreground hover:text-foreground"
-          >
-            <LogOut className="h-3.5 w-3.5" />
-            {t("chrome.accessGate.useDifferentWallet")}
-          </Button>
+          {/* Browser/Dynamic only — the wallet is connected through Dynamic, so
+              "use a different wallet" fully logs it out (Dynamic + Firebase) and
+              returns to the landing to start over. Hidden in Farcaster / Base App
+              (Mini App + in-app browser): there the wallet IS the host identity
+              and can't be disconnected. */}
+          {dynamicEnabled ? (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={loggingOut}
+              onClick={useDifferentWallet}
+              className="mt-1 justify-center gap-2 text-muted-foreground hover:text-foreground"
+            >
+              {loggingOut ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <LogOut className="h-3.5 w-3.5" />
+              )}
+              {t("chrome.accessGate.useDifferentWallet")}
+            </Button>
+          ) : null}
         </CardContent>
       </Card>
     </div>

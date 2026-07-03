@@ -1699,7 +1699,13 @@
       "submitError": "No se pudo enviar la solicitud",
       "sending": "Enviando…",
       "requestAccessButton": "Solicitar acceso",
-      "useDifferentWallet": "Usar otra billetera"
+      "useDifferentWallet": "Usar otra billetera",
+      "accessCodeLabel": "Código de acceso (opcional)",
+      "accessCodePlaceholder": "ej. JULIO10",
+      "accessCodeHint": "¿Tenés un código de un partner de PerkOS? Ingresalo para acceso instantáneo.",
+      "usernameInvalid": "3-20 caracteres: letras, números, _ o -.",
+      "redeemButton": "Obtener acceso",
+      "granting": "Entrando…"
     },
     "mobileNav": {
       "home": "Inicio",

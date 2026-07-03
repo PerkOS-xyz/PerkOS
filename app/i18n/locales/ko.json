@@ -1699,7 +1699,13 @@
       "submitError": "요청을 제출하지 못했어요",
       "sending": "보내는 중…",
       "requestAccessButton": "접근 요청",
-      "useDifferentWallet": "다른 지갑 사용"
+      "useDifferentWallet": "다른 지갑 사용",
+      "accessCodeLabel": "액세스 코드 (선택)",
+      "accessCodePlaceholder": "예: JULIO10",
+      "accessCodeHint": "PerkOS 파트너에게 받은 코드가 있나요? 입력하면 즉시 액세스할 수 있어요.",
+      "usernameInvalid": "3~20자: 영문, 숫자, _ 또는 -.",
+      "redeemButton": "바로 입장하기",
+      "granting": "입장 중…"
     },
     "mobileNav": {
       "home": "홈",
