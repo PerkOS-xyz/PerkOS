@@ -85,8 +85,8 @@
           "name": "Immobiliare",
           "pitch": "Per gli agenti: annunci curati e follow-up inviati mentre sei in giro a mostrare case."
         },
-        "marketingAgency": {
-          "name": "Agenzia di Marketing",
+        "growthAgency": {
+          "name": "Agenzia di Crescita",
           "pitch": "Per chi gestisce un'agenzia: più lavoro consegnato ai clienti senza altre nottate."
         },
         "onlineStore": {
@@ -128,8 +128,8 @@
           "name": "Capo Team",
           "blurb": "Prende il tuo obiettivo, lo trasforma in un piano, distribuisce il lavoro e ricontrolla tutto prima che arrivi a te."
         },
-        "marketing": {
-          "name": "Compagno di team marketing",
+        "distribution": {
+          "name": "Esperto di distribuzione",
           "blurb": "Scrive bozze di post, email e promozioni con il tuo stile, così ogni settimana esce qualcosa di valido."
         },
         "research": {
@@ -1164,7 +1164,7 @@
       "customCard": {
         "title": "Team personalizzato",
         "kicker": "Costruisci il tuo",
-        "blurb": "Definisci il progetto e scegli esattamente i ruoli di cui ha bisogno: PM, ricercatore, marketer, builder... scegli tu chi guida.",
+        "blurb": "Definisci il progetto e scegli esattamente i ruoli di cui ha bisogno: PM, ricercatore, esperto di distribuzione, builder... scegli tu chi guida.",
         "cta": "Scegli i tuoi ruoli"
       },
       "emptyCard": {

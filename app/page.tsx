@@ -6,7 +6,7 @@ import { LandingContent } from "./components/landing/LandingContent";
 export const metadata: Metadata = {
   title: "PerkOS — Your business just hired its first team",
   description:
-    "Pick your type of business and in two minutes you have a small AI team that handles the busywork — marketing, customer replies, research, the books — and checks with you first. They draft, you approve. No tech skills needed.",
+    "Pick your type of business and in two minutes you have a small AI team that handles the busywork — content, customer replies, research, the books — and checks with you first. They draft, you approve. No tech skills needed.",
 };
 
 // ============================================================================
@@ -46,7 +46,7 @@ const JSON_LD = {
       url: SITE,
       logo: `${SITE}/logo.png`,
       description:
-        "PerkOS gives small businesses a team of AI teammates that handle the busywork — marketing, customer replies, research, the books. They draft, you approve.",
+        "PerkOS gives small businesses a team of AI teammates that handle the busywork — content, customer replies, research, the books. They draft, you approve.",
       sameAs: [
         "https://x.com/perk_os",
         "https://farcaster.xyz/perkos",

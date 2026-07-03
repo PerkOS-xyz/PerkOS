@@ -85,8 +85,8 @@
           "name": "Immobilier",
           "pitch": "Pour les agents : des annonces soignées et des relances envoyées pendant que vous faites visiter des biens."
         },
-        "marketingAgency": {
-          "name": "Agence marketing",
+        "growthAgency": {
+          "name": "Agence de croissance",
           "pitch": "Pour les dirigeants d'agence : plus de travail livré aux clients, sans plus de soirées tardives."
         },
         "onlineStore": {
@@ -128,8 +128,8 @@
           "name": "Chef d'équipe",
           "blurb": "Prend votre objectif, le transforme en plan, répartit le travail, et vérifie tout deux fois avant que ça n'arrive jusqu'à vous."
         },
-        "marketing": {
-          "name": "Coéquipier marketing",
+        "distribution": {
+          "name": "Expert en distribution",
           "blurb": "Prépare des brouillons de vos publications, e-mails et promotions, avec votre ton à vous, pour que du bon contenu soit publié chaque semaine."
         },
         "research": {
@@ -1164,7 +1164,7 @@
       "customCard": {
         "title": "Équipe personnalisée",
         "kicker": "Créez la vôtre",
-        "blurb": "Définissez le projet et choisissez exactement les rôles dont il a besoin : chef de projet, chercheur, marketeur, développeur… c'est vous qui choisissez qui dirige.",
+        "blurb": "Définissez le projet et choisissez exactement les rôles dont il a besoin : chef de projet, chercheur, expert en distribution, développeur… c'est vous qui choisissez qui dirige.",
         "cta": "Choisissez vos rôles"
       },
       "emptyCard": {
