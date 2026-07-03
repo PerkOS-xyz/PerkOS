@@ -25,7 +25,8 @@
     "restoringSession": "Ripristino della sessione…",
     "restoringPreviousSession": "Ripristino della sessione precedente…",
     "withEmail": "Accedi con email",
-    "withWallet": "Accedi con il portafoglio"
+    "withWallet": "Accedi con il portafoglio",
+    "backToLanding": "Torna alla home"
   },
   "landing": {
     "nav": {

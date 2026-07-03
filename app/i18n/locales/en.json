@@ -25,7 +25,8 @@
     "restoringSession": "Restoring your session…",
     "restoringPreviousSession": "Restoring previous session…",
     "withEmail": "Sign in with email",
-    "withWallet": "Sign in with wallet"
+    "withWallet": "Sign in with wallet",
+    "backToLanding": "Back to landing"
   },
   "landing": {
     "nav": {

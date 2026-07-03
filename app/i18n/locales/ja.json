@@ -25,7 +25,8 @@
     "restoringSession": "セッションを復元しています…",
     "restoringPreviousSession": "前回のセッションを復元しています…",
     "withEmail": "メールでサインイン",
-    "withWallet": "ウォレットでサインイン"
+    "withWallet": "ウォレットでサインイン",
+    "backToLanding": "ホームに戻る"
   },
   "landing": {
     "nav": {

@@ -25,7 +25,8 @@
     "restoringSession": "세션 복원 중…",
     "restoringPreviousSession": "이전 세션 복원 중…",
     "withEmail": "이메일로 로그인",
-    "withWallet": "지갑으로 로그인"
+    "withWallet": "지갑으로 로그인",
+    "backToLanding": "홈으로 돌아가기"
   },
   "landing": {
     "nav": {

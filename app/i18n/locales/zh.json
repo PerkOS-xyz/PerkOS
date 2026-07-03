@@ -25,7 +25,8 @@
     "restoringSession": "正在恢复会话…",
     "restoringPreviousSession": "正在恢复上一个会话…",
     "withEmail": "使用邮箱登录",
-    "withWallet": "使用钱包登录"
+    "withWallet": "使用钱包登录",
+    "backToLanding": "返回首页"
   },
   "landing": {
     "nav": {
