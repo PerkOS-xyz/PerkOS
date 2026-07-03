@@ -85,8 +85,8 @@
           "name": "Real Estate",
           "pitch": "For agents: listings polished and follow-ups sent while you're showing homes."
         },
-        "marketingAgency": {
-          "name": "Marketing Agency",
+        "growthAgency": {
+          "name": "Growth Agency",
           "pitch": "For agency owners: more client work delivered without more late nights."
         },
         "onlineStore": {
@@ -128,8 +128,8 @@
           "name": "Team Lead",
           "blurb": "Takes your goal, breaks it into a plan, hands out the work, and double-checks everything before it reaches you."
         },
-        "marketing": {
-          "name": "Marketing teammate",
+        "distribution": {
+          "name": "Distribution Expert",
           "blurb": "Drafts your posts, emails, and promotions (in your voice) so something good goes out every week."
         },
         "research": {
@@ -1155,7 +1155,7 @@
       "customCard": {
         "title": "Custom team",
         "kicker": "Build your own",
-        "blurb": "Define the project and pick exactly the roles it needs: PM, researcher, marketer, builder… you choose who leads.",
+        "blurb": "Define the project and pick exactly the roles it needs: PM, researcher, distribution expert, builder… you choose who leads.",
         "cta": "Pick your roles"
       },
       "emptyCard": {

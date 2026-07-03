@@ -199,7 +199,7 @@ export const SKILLS_CATALOG: SkillPack[] = [
   kwPack(
     "kw-marketing",
     "marketing",
-    "Marketing",
+    "Distribution",
     "Campaign planning, content creation, brand-voice review, and SEO audits.",
     "marketing",
     ["campaign-plan", "content-creation", "brand-review", "seo-audit"],

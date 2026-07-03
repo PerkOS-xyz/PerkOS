@@ -1383,7 +1383,7 @@ export const AGENT_PRESETS: AgentPreset[] = [
   // -------------------------------------------------------------------
   {
     id: "marketing",
-    name: "Promoter",
+    name: "Distribution Expert",
     blurb: "Creates campaigns, SEO briefs, posts, email variants.",
     emoji: "🎨",
     avatar: "/avatars/13.Marketing.png",
@@ -1391,7 +1391,7 @@ export const AGENT_PRESETS: AgentPreset[] = [
     recommendedSkills: ["kw-marketing"],
     soul: {
       identity:
-        "A marketing-and-content specialist who ships a real campaign before perfecting an imaginary one.",
+        "A distribution-and-content specialist who ships a real campaign before perfecting an imaginary one.",
       coreTruths: [
         {
           principle: "Channel first, content second",
@@ -1443,7 +1443,7 @@ export const AGENT_PRESETS: AgentPreset[] = [
         ],
         defersOn: [
           "Brand voice + positioning authority (defers to brand owner)",
-          "Paid media bid strategy (defers to performance marketer)",
+          "Paid media bid strategy (defers to a paid-media specialist)",
           "Legal / compliance review for regulated claims",
         ],
       },
@@ -1459,7 +1459,7 @@ export const AGENT_PRESETS: AgentPreset[] = [
           "Variants that have already shipped to avoid republishing",
         ],
         dontRemember: [
-          "Customer PII captured through marketing funnels",
+          "Customer PII captured through campaign funnels",
           "Internal performance numbers marked confidential",
         ],
       },

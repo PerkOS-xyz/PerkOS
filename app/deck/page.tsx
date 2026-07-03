@@ -174,7 +174,7 @@ function SlideTitle() {
 }
 
 const JOBS = [
-  { Icon: Megaphone, label: "Marketing", hue: 330 },
+  { Icon: Megaphone, label: "Growth", hue: 330 },
   { Icon: Bot, label: "Customer support", hue: 160 },
   { Icon: Calculator, label: "Bookkeeping", hue: 200 },
   { Icon: HeartPulse, label: "Scheduling", hue: 270 },
@@ -316,7 +316,7 @@ function SlideVisibility() {
     { who: "Cafe-Manager", what: "completed Price the signature menu", t: "2m", done: true },
     { who: "Team Lead", what: "planned 4 tasks · round 1", t: "6m" },
     { who: "Recipe-Researcher", what: "started Map local suppliers", t: "9m" },
-    { who: "Cafe-Marketer", what: "came online", t: "12m" },
+    { who: "Cafe-Promoter", what: "came online", t: "12m" },
   ];
   return (
     <SlideFrame footer="04 — Live visibility">
@@ -328,9 +328,9 @@ function SlideVisibility() {
         {/* mini kanban */}
         <div className="grid grid-cols-3 gap-4">
           {[
-            { col: "To do", cards: [<MiniCard key="a" title="Write the landlord pitch" agent="Cafe-Marketer" tone="todo" />] },
+            { col: "To do", cards: [<MiniCard key="a" title="Write the landlord pitch" agent="Cafe-Promoter" tone="todo" />] },
             { col: "In progress", cards: [
-              <MiniCard key="b" title="Draft opening-week social calendar" agent="Cafe-Marketer" tone="doing" />,
+              <MiniCard key="b" title="Draft opening-week social calendar" agent="Cafe-Promoter" tone="doing" />,
               <MiniCard key="c" title="Plan friends-and-family tasting" agent="Cafe-Manager" tone="doing" />,
             ] },
             { col: "Done", cards: [

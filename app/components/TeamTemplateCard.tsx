@@ -18,7 +18,8 @@ import { AgentOrb } from "./AgentOrb";
 import type { CompanyRole } from "../lib/companyTemplates";
 
 export const TEMPLATE_ACCENTS: Record<string, string> = {
-  marketing: "#ec1b69",
+  growth: "#ec1b69",
+  marketing: "#ec1b69", // legacy alias of "growth"
   ecommerce: "#f97316",
   services: "#60a5fa",
   realestate: "#34d399",
@@ -31,7 +32,8 @@ export const TEMPLATE_ACCENTS: Record<string, string> = {
 };
 
 export const INDUSTRY_LABELS: Record<string, string> = {
-  marketing: "Marketing",
+  growth: "Growth",
+  marketing: "Growth", // legacy alias of "growth"
   ecommerce: "E-commerce",
   services: "Professional services",
   realestate: "Real estate",

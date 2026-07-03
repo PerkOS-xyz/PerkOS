@@ -40,7 +40,7 @@ export type CompanyTemplate = {
   id: string;
   /** Coarse industry tag, for grouping/filtering. */
   industry: string;
-  /** Display name, e.g. "Marketing Agency". */
+  /** Display name, e.g. "Growth Agency". */
   name: string;
   /** lucide-react icon name (resolved in the gallery). */
   icon: string;
@@ -91,10 +91,10 @@ export const COMPANY_TEMPLATES: CompanyTemplate[] = [
   // 84% willing to automate content creation).
   {
     id: "creative-agency",
-    industry: "marketing",
-    name: "Marketing Agency",
+    industry: "growth",
+    name: "Growth Agency",
     icon: "Palette",
-    blurb: "Agency or freelance marketer: content, SEO, and social — run like a client team.",
+    blurb: "Agency or freelancer: content, SEO, and social — run like a client team.",
     roles: [
       preset("Account Manager", "pm", true),
       {
@@ -103,7 +103,7 @@ export const COMPANY_TEMPLATES: CompanyTemplate[] = [
         soul: soul({
           identity:
             "You write the agency's client content: articles, landing copy, newsletters, and campaign copy that sounds like the client, not like AI.",
-          primary: "Content writing for small-business marketing campaigns",
+          primary: "Content writing for small-business growth campaigns",
           truths: [
             ["Voice beats volume", "One on-brand piece outperforms five generic ones."],
             ["Every piece has a job", "State the goal (traffic, signups, sales) before writing."],
@@ -160,7 +160,7 @@ export const COMPANY_TEMPLATES: CompanyTemplate[] = [
         }),
       },
       preset("Customer Support", "support"),
-      preset("Marketing & Promotions", "marketing"),
+      preset("Promotions & Outreach", "marketing"),
     ],
   },
 
@@ -210,7 +210,7 @@ export const COMPANY_TEMPLATES: CompanyTemplate[] = [
         soul: soul({
           identity:
             "You turn property facts into listings that get showings: headlines, descriptions, and feature highlights per channel.",
-          primary: "Property listing copy + marketing remarks",
+          primary: "Property listing copy + promo remarks",
           truths: [
             ["Lead with the life, not the sqft", "Buyers shop for a lifestyle; numbers support it."],
             ["Accuracy is legal", "Never embellish facts — fair-housing-safe language always."],
@@ -289,7 +289,7 @@ export const COMPANY_TEMPLATES: CompanyTemplate[] = [
         runtime: "OpenClaw",
         soul: soul({
           identity:
-            "You watch the restaurant's reputation: draft responses to reviews, spot recurring complaints, and turn praise into marketing material.",
+            "You watch the restaurant's reputation: draft responses to reviews, spot recurring complaints, and turn praise into promotional material.",
           primary: "Review responses + reputation tracking for a restaurant",
           truths: [
             ["Reply to everything", "A thoughtful reply to a bad review wins future guests."],
@@ -311,7 +311,7 @@ export const COMPANY_TEMPLATES: CompanyTemplate[] = [
     industry: "education",
     name: "Coaching & Courses",
     icon: "GraduationCap",
-    blurb: "Coaches and course creators: curriculum, community care, and launch marketing.",
+    blurb: "Coaches and course creators: curriculum, community care, and launch promotion.",
     roles: [
       preset("Program Director", "pm", true),
       {
@@ -331,7 +331,7 @@ export const COMPANY_TEMPLATES: CompanyTemplate[] = [
         }),
       },
       preset("Community Support", "support"),
-      preset("Launch Marketer", "marketing"),
+      preset("Launch Promoter", "marketing"),
     ],
   },
 

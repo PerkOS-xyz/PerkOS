@@ -85,8 +85,8 @@
           "name": "Bienes Raíces",
           "pitch": "Para agentes inmobiliarios: publicaciones bien armadas y seguimientos enviados mientras tú muestras propiedades."
         },
-        "marketingAgency": {
-          "name": "Agencia de Marketing",
+        "growthAgency": {
+          "name": "Agencia de Crecimiento",
           "pitch": "Para dueños de agencias: más trabajo entregado a los clientes sin más noches sin dormir."
         },
         "onlineStore": {
@@ -128,8 +128,8 @@
           "name": "Líder de Equipo",
           "blurb": "Toma tu objetivo, lo convierte en un plan, reparte el trabajo y revisa todo dos veces antes de que llegue a ti."
         },
-        "marketing": {
-          "name": "Compañero de Marketing",
+        "distribution": {
+          "name": "Experto en Distribución",
           "blurb": "Redacta tus publicaciones, correos y promociones, con tu propio estilo, para que cada semana salga algo bueno."
         },
         "research": {
@@ -1155,7 +1155,7 @@
       "customCard": {
         "title": "Equipo personalizado",
         "kicker": "Arma el tuyo",
-        "blurb": "Define el proyecto y elige exactamente los roles que necesita: PM, investigador, especialista en marketing, desarrollador… tú eliges quién lidera.",
+        "blurb": "Define el proyecto y elige exactamente los roles que necesita: PM, investigador, especialista en distribución, desarrollador… tú eliges quién lidera.",
         "cta": "Elige tus roles"
       },
       "emptyCard": {

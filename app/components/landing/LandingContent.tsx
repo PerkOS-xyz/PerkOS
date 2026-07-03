@@ -255,7 +255,7 @@ type TemplatePitch = {
 const TEMPLATE_PITCHES: TemplatePitch[] = [
   { key: "restaurant", Icon: UtensilsCrossed, accent: "#fbbf24" },
   { key: "realEstate", Icon: Home, accent: "#34d399" },
-  { key: "marketingAgency", Icon: Palette, accent: "#ec1b69" },
+  { key: "growthAgency", Icon: Palette, accent: "#ec1b69" },
   { key: "onlineStore", Icon: ShoppingCart, accent: "#f97316" },
   { key: "consulting", Icon: Briefcase, accent: "#60a5fa" },
   { key: "healthWellness", Icon: HeartPulse, accent: "#2dd4bf" },
@@ -322,7 +322,7 @@ function Templates() {
 
 const TEAM_ROLES: { key: string; presetId: string }[] = [
   { key: "teamLead", presetId: "pm" },
-  { key: "marketing", presetId: "marketing" },
+  { key: "distribution", presetId: "marketing" },
   { key: "research", presetId: "researcher" },
   { key: "bookkeeping", presetId: "analyst" },
 ];
