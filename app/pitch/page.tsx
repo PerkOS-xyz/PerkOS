@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * /pitch — the 15-slide investor deck, presentable live from the browser.
+ * /pitch — the 15-slide PerkOS deck, presentable live from the browser.
  *
  * Modes:
  *  - Overview: slides stacked vertically, scaled to the viewport width.
@@ -200,7 +200,7 @@ export default function PitchPage() {
         <Link href="/" className="flex items-center gap-3">
           <Image src="/perkos-header.png" alt="PerkOS" width={120} height={40} />
           <span className="rounded-full border border-[#2A2935] px-2.5 py-0.5 text-[11px] uppercase tracking-wider text-[#B0ACD9]">
-            Investor deck
+            PerkOS 2026
           </span>
         </Link>
         <div className="flex items-center gap-3">
@@ -224,11 +224,6 @@ export default function PitchPage() {
       </header>
 
       <div className="mx-auto flex max-w-[1160px] flex-col gap-10 px-6 pt-10">
-        <p className="text-sm text-[#B0ACD9]">
-          {PITCH_SLIDES.length} slides · ~15 minutes · click any slide to
-          present from there · open Presenter notes in a second window (it
-          stays in sync, share only this one)
-        </p>
         {PITCH_SLIDES.map((s, i) => (
           <ScaledSlide
             key={s.hash}

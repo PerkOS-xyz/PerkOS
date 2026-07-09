@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * /pitch — slide content for the 15-minute investor presentation.
+ * /pitch — slide content for the 15-minute PerkOS presentation.
  *
  * Authored on a fixed 1920×1080 canvas (scaled by the engine in page.tsx).
  * PITCH_META is the single source of truth for order, hash slugs, speaker
@@ -186,7 +186,7 @@ function SlideHero() {
     <SlideFrame hideChrome>
       <div className="flex h-full items-center gap-24">
         <div className="flex max-w-[980px] flex-col gap-10">
-          <Kicker>Investor briefing · 2026</Kicker>
+          <Kicker>PerkOS · 2026</Kicker>
           <div className="flex items-center gap-6">
             <Image src="/logo.png" alt="PerkOS" width={96} height={96} />
             <span className="text-[56px] font-semibold tracking-tight">PerkOS</span>
@@ -456,6 +456,8 @@ function SlideApp() {
       bullets={[
         "Company templates, one-click launch",
         "Team lead + workers on a shared job board",
+        "Isolated containers, two agent frameworks: Hermes and OpenClaw",
+        "Teammates hibernate when idle, wake on demand",
         "Rent your teammates to others and earn",
       ]}
       visual={
@@ -507,6 +509,43 @@ function SlideMiniPay() {
   );
 }
 
+function PairCard({
+  mark,
+  name,
+  domain,
+  oneLiner,
+  bullets,
+}: {
+  mark: string;
+  name: string;
+  domain: string;
+  oneLiner: string;
+  bullets: string[];
+}) {
+  return (
+    <Card className="flex flex-col gap-6 p-12">
+      <div className="flex items-center gap-5">
+        <ProductMark label={mark} />
+        <div className="flex flex-col">
+          <span className="text-[40px] font-bold">{name}</span>
+          <span className="text-[22px]" style={{ color: PINK_T }}>{domain}</span>
+        </div>
+      </div>
+      <p className="text-[24px] leading-snug" style={{ color: LAV_T }}>
+        {oneLiner}
+      </p>
+      <ul className="flex flex-col gap-5 text-[26px] font-medium leading-snug">
+        {bullets.map((b) => (
+          <li key={b} className="flex items-start gap-4">
+            <span className="mt-3 h-3 w-3 shrink-0 rounded-sm" style={{ background: PINK }} />
+            {b}
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
+
 function SlideB2BKnowledge() {
   return (
     <SlideFrame kicker="Products 3 and 4 of 6">
@@ -514,52 +553,30 @@ function SlideB2BKnowledge() {
         Distribution and <span style={{ color: PINK }}>context.</span>
       </h2>
       <div className="mt-14 grid flex-1 grid-cols-2 gap-8">
-        <Card className="flex flex-col gap-7 p-12">
-          <div className="flex items-center gap-5">
-            <ProductMark label="B" />
-            <div className="flex flex-col">
-              <span className="text-[40px] font-bold">PerkOS B2B</span>
-              <span className="text-[22px]" style={{ color: PINK_T }}>b2b.perkos.xyz</span>
-            </div>
-          </div>
-          <ul className="flex flex-col gap-5 text-[26px] font-medium leading-snug">
-            <li className="flex items-start gap-4">
-              <span className="mt-3 h-3 w-3 shrink-0 rounded-sm" style={{ background: PINK }} />
-              White-label, multi-tenant portals
-            </li>
-            <li className="flex items-start gap-4">
-              <span className="mt-3 h-3 w-3 shrink-0 rounded-sm" style={{ background: PINK }} />
-              Every company: its own branded subdomain
-            </li>
-            <li className="flex items-start gap-4">
-              <span className="mt-3 h-3 w-3 shrink-0 rounded-sm" style={{ background: PINK }} />
-              Their distribution, our engine
-            </li>
-          </ul>
-        </Card>
-        <Card className="flex flex-col gap-7 p-12">
-          <div className="flex items-center gap-5">
-            <ProductMark label="K" />
-            <div className="flex flex-col">
-              <span className="text-[40px] font-bold">PerkOS Knowledge</span>
-              <span className="text-[22px]" style={{ color: PINK_T }}>knowledge.perkos.xyz</span>
-            </div>
-          </div>
-          <ul className="flex flex-col gap-5 text-[26px] font-medium leading-snug">
-            <li className="flex items-start gap-4">
-              <span className="mt-3 h-3 w-3 shrink-0 rounded-sm" style={{ background: PINK }} />
-              Two-sided market for operational context
-            </li>
-            <li className="flex items-start gap-4">
-              <span className="mt-3 h-3 w-3 shrink-0 rounded-sm" style={{ background: PINK }} />
-              Providers earn when their knowledge answers
-            </li>
-            <li className="flex items-start gap-4">
-              <span className="mt-3 h-3 w-3 shrink-0 rounded-sm" style={{ background: PINK }} />
-              Prepaid credits, on-chain payouts, 75 / 20 / 5
-            </li>
-          </ul>
-        </Card>
+        <PairCard
+          mark="B"
+          name="PerkOS B2B"
+          domain="b2b.perkos.xyz"
+          oneLiner="Enterprise multi-tenancy: partners resell PerkOS teams as their own product."
+          bullets={[
+            "Every partner: a branded portal on its own subdomain",
+            "Tenant-scoped teams, users, and billing",
+            "Built for agencies, ISVs, and platforms serving SMBs",
+            "Their brand and distribution, our engine underneath",
+          ]}
+        />
+        <PairCard
+          mark="K"
+          name="PerkOS Knowledge"
+          domain="knowledge.perkos.xyz"
+          oneLiner="The context economy: teams buy the operational knowledge they need."
+          bullets={[
+            "Two-sided market: providers publish, teams consume",
+            "Providers earn every time their knowledge answers",
+            "Prepaid credits, x402 deposits, on-chain payouts (75 / 20 / 5)",
+            "Every answer makes every team smarter: a compounding moat",
+          ]}
+        />
       </div>
     </SlideFrame>
   );
@@ -572,52 +589,30 @@ function SlideStackLLM() {
         The rails <span style={{ color: PINK }}>we own.</span>
       </h2>
       <div className="mt-14 grid flex-1 grid-cols-2 gap-8">
-        <Card className="flex flex-col gap-7 p-12">
-          <div className="flex items-center gap-5">
-            <ProductMark label="S" />
-            <div className="flex flex-col">
-              <span className="text-[40px] font-bold">PerkOS Stack</span>
-              <span className="text-[22px]" style={{ color: PINK_T }}>stack.perkos.xyz</span>
-            </div>
-          </div>
-          <ul className="flex flex-col gap-5 text-[26px] font-medium leading-snug">
-            <li className="flex items-start gap-4">
-              <span className="mt-3 h-3 w-3 shrink-0 rounded-sm" style={{ background: PINK }} />
-              x402 machine-native stablecoin payments
-            </li>
-            <li className="flex items-start gap-4">
-              <span className="mt-3 h-3 w-3 shrink-0 rounded-sm" style={{ background: PINK }} />
-              Wallet infrastructure for agent commerce
-            </li>
-            <li className="flex items-start gap-4">
-              <span className="mt-3 h-3 w-3 shrink-0 rounded-sm" style={{ background: PINK }} />
-              Aligned with the emerging agent standards
-            </li>
-          </ul>
-        </Card>
-        <Card className="flex flex-col gap-7 p-12">
-          <div className="flex items-center gap-5">
-            <ProductMark label="L" />
-            <div className="flex flex-col">
-              <span className="text-[40px] font-bold">PerkOS LLM</span>
-              <span className="text-[22px]" style={{ color: PINK_T }}>model gateway</span>
-            </div>
-          </div>
-          <ul className="flex flex-col gap-5 text-[26px] font-medium leading-snug">
-            <li className="flex items-start gap-4">
-              <span className="mt-3 h-3 w-3 shrink-0 rounded-sm" style={{ background: PINK }} />
-              Self-hosted, per-teammate keys, metered
-            </li>
-            <li className="flex items-start gap-4">
-              <span className="mt-3 h-3 w-3 shrink-0 rounded-sm" style={{ background: PINK }} />
-              Bring your own model: OpenAI, Anthropic, local
-            </li>
-            <li className="flex items-start gap-4">
-              <span className="mt-3 h-3 w-3 shrink-0 rounded-sm" style={{ background: PINK }} />
-              No vendor lock, for us or our customers
-            </li>
-          </ul>
-        </Card>
+        <PairCard
+          mark="S"
+          name="PerkOS Stack"
+          domain="stack.perkos.xyz"
+          oneLiner="The commerce rail: everything an autonomous team needs to transact."
+          bullets={[
+            "x402 machine-native stablecoin payments on Base and Celo",
+            "On-chain agent identity and reputation (ERC-8004 registries)",
+            "Wallets, authorization, and settlement for agent commerce",
+            "Standards-first, ahead of the emerging agent protocols",
+          ]}
+        />
+        <PairCard
+          mark="L"
+          name="PerkOS LLM"
+          domain="model gateway"
+          oneLiner="The model rail: control over every token of inference."
+          bullets={[
+            "Self-hosted gateway on our own infrastructure",
+            "Per-teammate keys, metered usage, full cost attribution",
+            "Bring your own model: OpenAI, Anthropic, or local",
+            "No vendor lock, for us or for our customers",
+          ]}
+        />
       </div>
     </SlideFrame>
   );
@@ -782,7 +777,7 @@ function SlideCta() {
   const contacts = [
     { Icon: Globe2, label: "perkos.xyz" },
     { Icon: Layers, label: "@perk_os" },
-    { Icon: Mail, label: "julio@perkos.xyz" },
+    { Icon: Mail, label: "julio.cruz@perkos.xyz" },
   ];
   return (
     <SlideFrame hideChrome>
@@ -805,7 +800,7 @@ function SlideCta() {
           ))}
         </div>
         <p className="text-[28px]" style={{ color: LAV_T }}>
-          We are looking for partnerships, pilots, and investors.
+          We are looking for partners, pilots, and backers.
         </p>
       </div>
     </SlideFrame>
@@ -878,7 +873,7 @@ export const PITCH_SLIDES: PitchSlide[] = [
     title: "PerkOS App",
     budgetSeconds: 60,
     notes:
-      "PerkOS App is the flagship, live at app.perkos.xyz. Pick a company template and in one click you get an autonomous team lead and worker teammates collaborating on a shared job board. Multiple teammates run inside one runtime, which keeps costs low. And there is a rental layer: if your team is good, rent your teammates to other owners and earn. We validated full rental cycles with strict per-renter isolation. Multi-language from the start.",
+      "PerkOS App is the flagship, live at app.perkos.xyz. Pick a company template and in one click you get an autonomous team lead and worker teammates collaborating on a shared job board. Under the hood, each team runs in isolated containers on two hardened agent frameworks, Hermes and OpenClaw, and multiple teammates share one runtime to keep costs low. Idle teammates hibernate for about two cents a month and wake on demand. And there is a rental layer: if your team is good, rent your teammates to other owners and earn. We validated full rental cycles with strict per-renter isolation.",
     Component: SlideApp,
   },
   {
@@ -894,7 +889,7 @@ export const PITCH_SLIDES: PitchSlide[] = [
     title: "PerkOS B2B + PerkOS Knowledge",
     budgetSeconds: 60,
     notes:
-      "Two products here. B2B is our white-label surface: a partner company gets its own branded space on its own subdomain, multi-tenant, so agencies and platforms offer PerkOS teams as their own product. Their distribution, our engine. Knowledge is a two-sided market for operational context: teammates pay for the knowledge they need, providers earn every time their knowledge answers a query. Prepaid credits, on-chain payouts, a transparent 75-20-5 split.",
+      "Two products here, and this is where the enterprise story lives. B2B is a true multi-tenant platform: a partner gets a fully branded portal on its own subdomain, with teams, users, and billing scoped per tenant. Agencies, software vendors, and platforms resell PerkOS teams as their own product: their brand and distribution, our engine underneath. Knowledge is the context economy: a two-sided market where teams buy the operational knowledge they need and providers earn every time their knowledge answers. Prepaid credits, x402 deposits, on-chain payouts with a transparent 75-20-5 split. And every answer makes every team smarter, so the moat compounds.",
     Component: SlideB2BKnowledge,
   },
   {
@@ -902,7 +897,7 @@ export const PITCH_SLIDES: PitchSlide[] = [
     title: "PerkOS Stack + PerkOS LLM",
     budgetSeconds: 60,
     notes:
-      "The rails everything runs on. Stack is our agentic commerce layer: x402 machine-native stablecoin payments on Base and Celo, plus the wallet infrastructure a teammate needs to transact, aligned with the emerging agent-commerce standards for authorization, escrow, and identity. PerkOS LLM is our self-hosted model gateway: every teammate gets its own key, usage is metered, and customers can bring their own model. Payments rail and model rail, both owned, both live.",
+      "The rails everything runs on, and both are enterprise infrastructure in their own right. Stack is the commerce rail: x402 machine-native stablecoin payments on Base and Celo, on-chain agent identity and reputation through the ERC-8004 registries, plus the wallets, authorization, and settlement an autonomous team needs to transact. PerkOS LLM is the model rail: a self-hosted gateway on our own infrastructure, per-teammate keys with metered usage and full cost attribution, and bring-your-own-model support for OpenAI, Anthropic, or local models. No vendor lock, for us or for our customers. Payments rail and model rail, both owned, both live.",
     Component: SlideStackLLM,
   },
   {
@@ -942,7 +937,7 @@ export const PITCH_SLIDES: PitchSlide[] = [
     title: "Contact",
     budgetSeconds: 90,
     notes:
-      "That is PerkOS: a working AI team in one click, real work done, settled on-chain, built on rails we own and proven live today. If you take one thing away: the AI is the easy part. We built everything around it, for the person who has no team and no time. Website perkos.xyz, we build in public on X at perk underscore os, and you can reach me by email. We are looking for partners who want teams in front of their users, pilots with real businesses, and investors who want to own this layer with us. I will stop here and take questions.",
+      "That is PerkOS: a working AI team in one click, real work done, settled on-chain, built on rails we own and proven live today. If you take one thing away: the AI is the easy part. We built everything around it, for the person who has no team and no time. Website perkos.xyz, we build in public on X at perk underscore os, and you can reach me by email. We are looking for partners who want teams in front of their users, pilots with real businesses, and backers who want to own this layer with us. I will stop here and take questions.",
     Component: SlideCta,
   },
 ];
