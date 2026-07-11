@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { LandingAutoRoute } from "./components/LandingAutoRoute";
-import { LandingContent } from "./components/landing/LandingContent";
+import { LandingContentV2 } from "./components/landing/v2/LandingContentV2";
 
 export const metadata: Metadata = {
   title: "PerkOS — Your business just hired its first team",
@@ -14,8 +14,9 @@ export const metadata: Metadata = {
 //
 // This file stays a SERVER Component: it owns the page `metadata` and the
 // JSON-LD structured data below. All the rendered, translatable body lives in
-// the client component `LandingContent` (react-i18next), which the
-// LanguageSelector switches at runtime.
+// the client component `LandingContentV2` (react-i18next + the scroll motion
+// system built on branch dex/landing), which the LanguageSelector switches at
+// runtime. The previous body (LandingContent) is kept in the repo untouched.
 //
 // Audience: NON-TECHNICAL small-business owners first (anxious about AI —
 // user testing showed robot imagery + tech jargon scared them), investors /
@@ -81,7 +82,7 @@ export default function LandingPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
       />
       <LandingAutoRoute />
-      <LandingContent />
+      <LandingContentV2 />
     </div>
   );
 }
