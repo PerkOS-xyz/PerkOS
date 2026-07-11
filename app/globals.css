@@ -8,6 +8,7 @@
   --color-brand-pink: #ec1b69;
   --color-brand-pink-soft: rgba(236, 27, 105, 0.3);
   --color-brand-pink-border: #530922;
+  --color-brand-coral: #f05b57;
   --color-bg-base: #0e0716;
   --color-surface: #0e0716;
   --color-surface-border: #1b1833;
@@ -67,6 +68,9 @@ body {
 
 /* Map shadcn tokens to PerkOS / Swarm brand palette. */
 :root {
+  /* Signature easing for the landing motion system (Picasso): fast-out,
+     soft-settle — reused by every entrance/tilt so motion feels like one hand. */
+  --ease-signature: cubic-bezier(0.16, 1, 0.3, 1);
   --background: #0e0716;
   --foreground: #ececff;
   --card: #0e0716;
@@ -198,4 +202,78 @@ body {
   .glow-icon-hover:hover svg {
     filter: drop-shadow(0 0 3px rgba(236, 27, 105, 0.5));
   }
+
+  /* ------------------------------------------------------------------ */
+  /* Landing v2 — brand gradient + motion system (dex/landing preview)   */
+  /* ------------------------------------------------------------------ */
+
+  /*
+   * The one brand accent (60-30-10 → the 10%): the logo's 45° magenta→coral
+   * ramp. Use as a fill (`.brand-gradient`) for the single primary CTA / hero
+   * flourish, or as clipped text (`.brand-gradient-text`) for a peak headline.
+   */
+  .brand-gradient {
+    background-image: linear-gradient(
+      45deg,
+      var(--color-brand-pink),
+      var(--color-brand-coral)
+    );
+  }
+  .brand-gradient-text {
+    background-image: linear-gradient(
+      45deg,
+      var(--color-brand-pink),
+      var(--color-brand-coral)
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  /*
+   * Soft, slowly-drifting gradient blob for hero/section backdrops. Full-bleed
+   * with a scrim on top — never framed in a card. Pure CSS, no image asset.
+   */
+  .brand-blob {
+    background: radial-gradient(
+      closest-side,
+      rgba(236, 27, 105, 0.45),
+      rgba(240, 91, 87, 0.18) 55%,
+      transparent 80%
+    );
+    filter: blur(24px);
+    animation: brand-blob-drift 18s var(--ease-signature) infinite alternate;
+    will-change: transform;
+  }
+
 }
+
+/* Keyframes live OUTSIDE @layer utilities — Tailwind v4 can drop keyframes
+   nested in the utilities layer when no utility class references them, which
+   froze the marquee/blob animations. Top-level keeps them always emitted. */
+@keyframes brand-blob-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(4%, -6%, 0) scale(1.12);
+  }
+}
+
+/* Infinite ticker track (Marquee.tsx) — track is duplicated, so -50% loops. */
+@keyframes marquee-x {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/*
+ * NOTE (dex/landing preview): OS reduce-motion respect is intentionally OFF here
+ * so the full motion system is visible for design review regardless of the
+ * viewer's OS setting. Re-add a `@media (prefers-reduced-motion: reduce)` guard
+ * (and the useReducedMotion() short-circuits in the v2 motion wrappers) before
+ * shipping to production.
+ */
