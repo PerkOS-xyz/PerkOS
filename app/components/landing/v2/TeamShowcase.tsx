@@ -46,7 +46,9 @@ export function TeamShowcase() {
   const mounted = useMounted();
 
   return (
-    <section ref={ref} className="relative bg-background" style={{ height: "220vh" }}>
+    /* Shorter scroll runway on mobile (the swap passes quicker); desktop
+       keeps the original 220vh pacing. */
+    <section ref={ref} className="relative h-[140vh] bg-background md:h-[220vh]">
       <div className="sticky top-0 flex h-screen flex-col overflow-hidden">
         {/* Aurora backdrop — fast opposite parallax */}
         <ParallaxLayer
@@ -73,7 +75,9 @@ export function TeamShowcase() {
         />
 
         <div className="relative">
-          <KineticHeading className="pt-24" from="-14%" to="8%">
+          {/* compact: long sentence — sized to fit the viewport whole so the
+              tail ("…day one.") is always readable. */}
+          <KineticHeading className="pt-24" from="-14%" to="8%" pinned compact>
             {t("landing.meetYourTeam.heading")}
           </KineticHeading>
           <p className="mx-auto mt-3 max-w-2xl px-4 text-center text-base text-muted-foreground">

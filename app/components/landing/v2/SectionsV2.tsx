@@ -41,7 +41,7 @@ import { ParallaxLayer } from "./ParallaxLayer";
 import { ScrubItem, ScrubBlock, useScrubProgress } from "./Scrub";
 import { TiltCard } from "./TiltCard";
 import { useActiveSlot } from "./useActiveSlot";
-import { useMounted } from "./useMounted";
+import { useMounted, useMdUp } from "./useMounted";
 import {
   FEAR_KILLERS,
   HOW_IT_WORKS_STEPS,
@@ -116,11 +116,12 @@ export function HowItWorksV2() {
     <section
       id="how-it-works"
       ref={ref}
-      className="relative bg-background"
-      style={{ height: "300vh" }}
+      /* Short runways so the 1→2→3 swap passes quickly on both viewports
+         (desktop trimmed 300vh → 220vh per design review). */
+      className="relative h-[170vh] bg-background md:h-[220vh]"
     >
       <div className="sticky top-0 flex h-screen flex-col overflow-hidden">
-        <KineticHeading className="pt-24" from="-10%" to="6%">
+        <KineticHeading className="pt-24" from="-10%" to="6%" pinned>
           {t("landing.howItWorks.heading")}
         </KineticHeading>
 
@@ -210,7 +211,7 @@ export function ExpertiseV2() {
         </p>
 
         <div
-          className="mt-28 grid grid-cols-1 gap-6 md:mt-36 md:grid-cols-3"
+          className="mt-28 grid grid-cols-1 gap-10 md:mt-36 md:grid-cols-3 md:gap-6"
           style={{ perspective: 1100 }}
         >
           {EXPERTISE_PROOFS.map((key, i) => (
@@ -239,6 +240,7 @@ function ProofPoster({ proofKey, index }: { proofKey: string; index: number }) {
   // scroll progress mapping stays stable while the card animates.
   const ref = useRef<HTMLDivElement>(null);
   const mounted = useMounted();
+  const mdUp = useMdUp();
   const { Icon, accent } = PROOF_VISUAL[proofKey] ?? PROOF_VISUAL.plan;
 
   // Directional 3D entrance per column (refs-inspired): left card swings in
@@ -248,11 +250,21 @@ function ProofPoster({ proofKey, index }: { proofKey: string; index: number }) {
     target: ref,
     offset: ["start 0.95", `start ${0.42 - index * 0.05}`],
   });
-  const dir = index === 0 ? -1 : index === 2 ? 1 : 0;
+  // Mobile: short fade+lift only (no big travel — in the single-column stack
+  // a large entrance y made cards transiently overlap their neighbours).
+  const dir = mdUp ? (index === 0 ? -1 : index === 2 ? 1 : 0) : 0;
   const x = useTransform(scrollYProgress, [0, 1], [dir * 140, 0]);
   const rotateY = useTransform(scrollYProgress, [0, 1], [dir * 32, 0]);
-  const rotateX = useTransform(scrollYProgress, [0, 1], [dir === 0 ? 46 : 12, 0]);
-  const y = useTransform(scrollYProgress, [0, 1], [dir === 0 ? 170 : 60, 0]);
+  const rotateX = useTransform(
+    scrollYProgress,
+    [0, 1],
+    [mdUp ? (dir === 0 ? 46 : 12) : 18, 0],
+  );
+  const y = useTransform(
+    scrollYProgress,
+    [0, 1],
+    [mdUp ? (dir === 0 ? 170 : 60) : 28, 0],
+  );
   const opacity = useTransform(scrollYProgress, [0, 0.5], [0, 1]);
   const scale = useTransform(scrollYProgress, [0, 1], [0.88, 1]);
 
@@ -325,8 +337,10 @@ function ProofPoster({ proofKey, index }: { proofKey: string; index: number }) {
         }}
       >
         {/* Continuous differential float: middle card drifts against the
-            sides while scrolling, so the trio never reads as static. */}
-        <ParallaxLayer speed={index === 1 ? 44 : -26} className="h-full">
+            sides while scrolling, so the trio never reads as static.
+            Desktop-only — in the mobile single-column stack the drift made
+            neighbouring cards overlap. */}
+        <ParallaxLayer speed={mdUp ? (index === 1 ? 44 : -26) : 0} className="h-full">
           <TiltCard className="h-full" max={7} hoverScale={1.02}>
             {inner}
           </TiltCard>

@@ -18,3 +18,18 @@ export function useMounted() {
   }, []);
   return mounted;
 }
+
+// True on md+ viewports (Tailwind's 768px breakpoint), false during SSR and
+// on mobile. Lets motion params (parallax speeds, travel) adapt per device
+// the same way responsive classes do.
+export function useMdUp() {
+  const [mdUp, setMdUp] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const update = () => setMdUp(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  return mdUp;
+}
