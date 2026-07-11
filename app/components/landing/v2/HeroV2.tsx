@@ -9,7 +9,6 @@
 // ============================================================================
 
 import Image from "next/image";
-import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, Check } from "lucide-react";
 import { motion, useScroll, useTransform } from "motion/react";
@@ -138,12 +137,12 @@ export function HeroV2() {
                   {t("landing.hero.ctaPrimary")}
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </SmartCTA>
-                <Link
+                <a
                   href="#how-it-works"
                   className="inline-flex items-center justify-center gap-1 rounded-full px-5 py-3.5 text-[15px] text-foreground/80 underline-offset-4 transition-colors hover:text-foreground hover:underline"
                 >
                   {t("landing.hero.ctaSecondary")}
-                </Link>
+                </a>
               </div>
             </RevealItem>
 

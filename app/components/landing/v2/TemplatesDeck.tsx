@@ -10,7 +10,6 @@
 // ============================================================================
 
 import Image from "next/image";
-import Link from "next/link";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowRight } from "lucide-react";
@@ -92,12 +91,12 @@ export function TemplatesDeck() {
 
         <p className="pb-6 text-center text-xs text-muted-foreground">
           {t("landing.templates.footNoteBefore")}{" "}
-          <Link
+          <a
             href="#talk-to-us"
             className="pointer-events-auto text-primary underline-offset-2 hover:underline"
           >
             {t("landing.templates.footNoteLink")}
-          </Link>
+          </a>
           {t("landing.templates.footNoteAfter")}
         </p>
       </div>

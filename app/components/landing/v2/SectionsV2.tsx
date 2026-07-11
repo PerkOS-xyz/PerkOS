@@ -377,13 +377,13 @@ export function BeyondTeamsV2() {
           className="text-base text-muted-foreground md:text-lg"
         />
         <ScrubBlock travel={60}>
-          <Link
+          <a
             href="#talk-to-us"
             className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-7 py-3.5 text-[15px] font-medium text-primary transition-colors hover:bg-primary/15"
           >
             <MessageSquare className="h-4 w-4" />
             {t("landing.beyondTeams.cta")}
-          </Link>
+          </a>
         </ScrubBlock>
       </div>
     </section>

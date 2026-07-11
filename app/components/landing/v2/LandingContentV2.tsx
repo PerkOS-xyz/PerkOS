@@ -40,7 +40,14 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 
 export function LandingContentV2() {
   return (
-    <ReactLenis root options={{ lerp: 0.08, smoothWheel: true }}>
+    <ReactLenis
+      root
+      // anchors: Lenis handles in-page #hash clicks with its own scrollTo —
+      // without it, the native hash jump desyncs Lenis' internal position and
+      // the next wheel tick snaps the user back (nav links "didn't work").
+      // offset clears the fixed 80px nav.
+      options={{ lerp: 0.08, smoothWheel: true, anchors: { offset: -88 } }}
+    >
       <TopNavV2 />
       <main>
         {/* Pinned hero (z-0) … */}
@@ -97,22 +104,25 @@ function TopNavV2() {
             priority
           />
         </Link>
+        {/* Hash links are plain <a> (not next/link): the router's own hash
+            scroll bypasses Lenis; plain anchors let Lenis' `anchors` handler
+            drive the smooth scroll. */}
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-          <Link href="#templates" className="transition-colors hover:text-foreground">
+          <a href="#templates" className="transition-colors hover:text-foreground">
             {t("landing.nav.forYourBusiness")}
-          </Link>
-          <Link href="#how-it-works" className="transition-colors hover:text-foreground">
+          </a>
+          <a href="#how-it-works" className="transition-colors hover:text-foreground">
             {t("landing.nav.howItWorks")}
-          </Link>
-          <Link href="#expertise" className="transition-colors hover:text-foreground">
+          </a>
+          <a href="#expertise" className="transition-colors hover:text-foreground">
             {t("landing.nav.whyPerkos")}
-          </Link>
-          <Link href="#pricing" className="transition-colors hover:text-foreground">
+          </a>
+          <a href="#pricing" className="transition-colors hover:text-foreground">
             {t("landing.nav.pricing")}
-          </Link>
-          <Link href="#talk-to-us" className="transition-colors hover:text-foreground">
+          </a>
+          <a href="#talk-to-us" className="transition-colors hover:text-foreground">
             {t("landing.nav.talkToUs")}
-          </Link>
+          </a>
         </nav>
         <div className="flex items-center gap-2">
           <LanguageSelector />
@@ -185,12 +195,12 @@ function FinalCTAV2() {
             {t("landing.finalCTA.ctaPrimary")}
             <ArrowRight className="h-4 w-4" />
           </SmartCTA>
-          <Link
+          <a
             href="#talk-to-us"
             className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card/60 px-7 py-3.5 text-[15px] text-foreground backdrop-blur-sm transition-colors hover:border-primary/40"
           >
             {t("landing.finalCTA.ctaSecondary")}
-          </Link>
+          </a>
         </div>
       </ScrubBlock>
     </section>
@@ -212,18 +222,18 @@ function FooterV2() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-            <Link href="#templates" className="transition-colors hover:text-foreground">
+            <a href="#templates" className="transition-colors hover:text-foreground">
               {t("landing.footer.links.forYourBusiness")}
-            </Link>
-            <Link href="#how-it-works" className="transition-colors hover:text-foreground">
+            </a>
+            <a href="#how-it-works" className="transition-colors hover:text-foreground">
               {t("landing.footer.links.howItWorks")}
-            </Link>
-            <Link href="#expertise" className="transition-colors hover:text-foreground">
+            </a>
+            <a href="#expertise" className="transition-colors hover:text-foreground">
               {t("landing.footer.links.whyPerkos")}
-            </Link>
-            <Link href="#talk-to-us" className="transition-colors hover:text-foreground">
+            </a>
+            <a href="#talk-to-us" className="transition-colors hover:text-foreground">
               {t("landing.footer.links.contact")}
-            </Link>
+            </a>
           </div>
         </div>
         <p className="mt-8 text-xs text-muted-foreground">
