@@ -11,7 +11,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { firebaseDb } from "./firebase";
-import type { ChatMessage, Doc, PlanBlock } from "./perkosApi";
+import type { ChatMessage, Doc, DocRevision, PlanBlock } from "./perkosApi";
 
 function tsToIso(value: unknown): string | undefined {
   if (!value) return undefined;
@@ -272,6 +272,63 @@ export function useDocMessages(
         setState({ messages, loading: false, error: null });
       },
       (error) => setState({ messages: [], loading: false, error })
+    );
+  }, [walletAddress, projectId, docId]);
+
+  return state;
+}
+
+/** Auditable revision stream shared by human edits, PM tools and completion. */
+export function useDocRevisions(
+  walletAddress: string | null | undefined,
+  projectId: string | null | undefined,
+  docId: string | null | undefined
+): { revisions: DocRevision[]; loading: boolean; error: Error | null } {
+  const [state, setState] = useState<{
+    revisions: DocRevision[];
+    loading: boolean;
+    error: Error | null;
+  }>({ revisions: [], loading: Boolean(walletAddress && projectId && docId), error: null });
+
+  useEffect(() => {
+    if (!walletAddress || !projectId || !docId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setState({ revisions: [], loading: false, error: null });
+      return;
+    }
+    const ref = query(
+      collection(
+        firebaseDb(),
+        "wallets",
+        walletAddress.toLowerCase(),
+        "projects",
+        projectId,
+        "docs",
+        docId,
+        "revisions"
+      ),
+      orderBy("createdAt", "asc")
+    );
+    return onSnapshot(
+      ref,
+      (snap) => {
+        const revisions = snap.docs.map((item) => {
+          const data = item.data();
+          return {
+            id: item.id,
+            revision: typeof data.revision === "number" ? data.revision : undefined,
+            actor: typeof data.actor === "string" ? data.actor : "unknown",
+            action: typeof data.action === "string" ? data.action : "doc_edited",
+            blockId: typeof data.blockId === "string" ? data.blockId : null,
+            summary: typeof data.summary === "string" ? data.summary : null,
+            before: typeof data.before === "string" ? data.before : null,
+            after: typeof data.after === "string" ? data.after : null,
+            createdAt: tsToIso(data.createdAt),
+          } satisfies DocRevision;
+        });
+        setState({ revisions, loading: false, error: null });
+      },
+      (error) => setState({ revisions: [], loading: false, error })
     );
   }, [walletAddress, projectId, docId]);
 

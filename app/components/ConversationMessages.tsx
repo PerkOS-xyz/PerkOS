@@ -55,6 +55,19 @@ export function ConversationMessages({
       a.timestamp.localeCompare(b.timestamp),
     );
   }, [history, live, pending]);
+  const approvedPlanIds = useMemo(
+    () =>
+      new Set(
+        merged.flatMap((message) =>
+          message.event?.domain === "project_workflow" &&
+          message.event.type === "plan_approved" &&
+          message.event.planId
+            ? [message.event.planId]
+            : [],
+        ),
+      ),
+    [merged],
+  );
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const lastLengthRef = useRef(0);
@@ -148,6 +161,9 @@ export function ConversationMessages({
             walletAddress={walletAddress}
             onApprovePlan={onApprovePlan}
             approvingPlanId={approvingPlanId}
+            planAlreadyApproved={Boolean(
+              m.event?.planId && approvedPlanIds.has(m.event.planId),
+            )}
           />
         ))}
       </div>
@@ -160,11 +176,13 @@ function MessageRow({
   walletAddress,
   onApprovePlan,
   approvingPlanId,
+  planAlreadyApproved,
 }: {
   message: OptimisticMessage;
   walletAddress: string;
   onApprovePlan?: (planId: string) => void;
   approvingPlanId?: string | null;
+  planAlreadyApproved?: boolean;
 }) {
   const me = `user:${walletAddress.toLowerCase()}`;
   const fromMe = message.from === me;
@@ -209,7 +227,7 @@ function MessageRow({
             ))}
           </div>
         ) : null}
-        {proposal && onApprovePlan ? (
+        {proposal && onApprovePlan && !planAlreadyApproved ? (
           <div className="mt-3 flex items-center justify-between gap-3 rounded-md border border-primary/30 bg-primary/5 p-2">
             <span className="text-xs text-muted-foreground">
               Approval is required before tasks start.

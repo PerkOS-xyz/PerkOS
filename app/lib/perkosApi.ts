@@ -176,6 +176,18 @@ export type PlanDoc = {
   updatedAt?: string;
 };
 
+export type DocRevision = {
+  id?: string;
+  revision?: number;
+  actor: string;
+  action: string;
+  blockId?: string | null;
+  summary?: string | null;
+  before?: string | null;
+  after?: string | null;
+  createdAt?: string;
+};
+
 /**
  * @deprecated Project group chat messages no longer live in Firestore.
  * The new chat layer uses the `Conversation` model in `conversationsApi.ts`
@@ -510,38 +522,6 @@ function docDoc(walletAddress: string, projectId: string, docId: string) {
     projectId,
     "docs",
     docId
-  );
-}
-
-function docBlocksCol(walletAddress: string, projectId: string, docId: string) {
-  return collection(
-    firebaseDb(),
-    "wallets",
-    normalize(walletAddress),
-    "projects",
-    projectId,
-    "docs",
-    docId,
-    "blocks"
-  );
-}
-
-function docBlockDoc(
-  walletAddress: string,
-  projectId: string,
-  docId: string,
-  blockId: string
-) {
-  return doc(
-    firebaseDb(),
-    "wallets",
-    normalize(walletAddress),
-    "projects",
-    projectId,
-    "docs",
-    docId,
-    "blocks",
-    blockId
   );
 }
 
@@ -1398,18 +1378,22 @@ export async function addDocNote(input: {
   owner: string;
   order: number;
 }): Promise<{ id: string }> {
-  const ref = doc(
-    docBlocksCol(input.walletAddress, input.projectId, input.docId)
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/projects/${input.projectId}/docs/${input.docId}/notes`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        owner: input.walletAddress,
+        text: input.text,
+        order: input.order,
+      }),
+    },
   );
-  await setDoc(ref, {
-    type: "note",
-    text: input.text,
-    order: input.order,
-    owner: input.owner,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  });
-  return { id: ref.id };
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't add the note"));
+  const data = (payload.data ?? payload) as { blockId: string };
+  return { id: data.blockId };
 }
 
 /** Edit a `note` block's text (last-writer-wins at block level). */
@@ -1420,10 +1404,16 @@ export async function updateDocNote(input: {
   blockId: string;
   text: string;
 }): Promise<void> {
-  await updateDoc(
-    docBlockDoc(input.walletAddress, input.projectId, input.docId, input.blockId),
-    { text: input.text, updatedAt: serverTimestamp() }
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/projects/${input.projectId}/docs/${input.docId}/blocks/${input.blockId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ owner: input.walletAddress, text: input.text }),
+    },
   );
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't update the note"));
 }
 
 /** Delete a block (humans may remove their own notes). */
@@ -1433,9 +1423,13 @@ export async function deleteDocBlock(input: {
   docId: string;
   blockId: string;
 }): Promise<void> {
-  await deleteDoc(
-    docBlockDoc(input.walletAddress, input.projectId, input.docId, input.blockId)
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/projects/${input.projectId}/docs/${input.docId}/blocks/${input.blockId}?owner=${encodeURIComponent(input.walletAddress)}`,
+    { method: "DELETE" },
   );
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't delete the note"));
 }
 
 /** Post a human message into a doc's own discussion. */

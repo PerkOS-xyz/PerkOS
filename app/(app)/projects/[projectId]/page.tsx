@@ -171,6 +171,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
             <ConductorTab
               tasks={liveDetail.tasks}
               swarm={liveDetail.project.swarm}
+              agentNames={liveDetail.project.agentIds ?? []}
               projectId={projectId}
               ownerWallet={ownerWallet ?? undefined}
             />
@@ -934,11 +935,13 @@ function TasksTab({
 function ConductorTab({
   tasks,
   swarm,
+  agentNames,
   projectId,
   ownerWallet,
 }: {
   tasks: Task[];
   swarm?: SwarmDefinition;
+  agentNames: string[];
   projectId: string;
   /** Owner wallet for a SHARED project (editors write to it). */
   ownerWallet?: string;
@@ -979,6 +982,7 @@ function ConductorTab({
       <ConductorBoard
         tasks={tasks}
         swarm={swarm}
+        agentNames={agentNames}
         projectId={projectId}
         onMove={(taskId, nextStatus) =>
           handleDragMove(taskId, KANBAN_TO_BACKEND[nextStatus])
@@ -1208,6 +1212,11 @@ function AgentsTab({ detail }: { detail: ProjectDetail }) {
   // Live per-agent status (Online / Starting / Hibernated / …) so the roster
   // shows a state dot that updates on its own.
   const { byName: agentStatus } = useWalletAgents(address);
+  const workingAgents = new Set(
+    detail.tasks
+      .filter((task) => task.status === "In progress" || task.status === "Review")
+      .map((task) => task.agent),
+  );
 
   const setPmMut = useMutation({
     mutationFn: (name: string | null) =>
@@ -1259,8 +1268,8 @@ function AgentsTab({ detail }: { detail: ProjectDetail }) {
                   {initials(name)}
                   {/* Live status dot (Online / Starting / Hibernated / …) */}
                   <span
-                    className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#0e0716] ${realtimeAgentStatus(agentStatus[name]).color}`}
-                    title={realtimeAgentStatus(agentStatus[name]).label}
+                    className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#0e0716] ${workingAgents.has(name) ? "bg-amber-400" : realtimeAgentStatus(agentStatus[name]).color}`}
+                    title={workingAgents.has(name) ? "Working" : realtimeAgentStatus(agentStatus[name]).label}
                   />
                 </span>
                 <div className="flex min-w-0 flex-col">
@@ -1271,13 +1280,13 @@ function AgentsTab({ detail }: { detail: ProjectDetail }) {
                       : ""}
                     <span
                       className={
-                        realtimeAgentStatus(agentStatus[name]).label ===
+                        !workingAgents.has(name) && realtimeAgentStatus(agentStatus[name]).label ===
                         STATUS_AVAILABLE
                           ? "text-emerald-400"
                           : ""
                       }
                     >
-                      {realtimeAgentStatus(agentStatus[name]).label}
+                      {workingAgents.has(name) ? "Working" : realtimeAgentStatus(agentStatus[name]).label}
                     </span>
                     {" · "}
                     {name === pmAgent ? t("projectRoom.agentsTab.roleLead") : t("projectRoom.agentsTab.roleWorker")}

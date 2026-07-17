@@ -9,6 +9,7 @@ import {
   Bot,
   Check,
   FileText,
+  History,
   ListChecks,
   Loader2,
   MessageSquare,
@@ -44,6 +45,7 @@ import { formatAddress } from "../lib/format";
 import {
   useDoc,
   useDocMessages,
+  useDocRevisions,
   useDocs,
   useActivePlanId,
 } from "../lib/useDocs";
@@ -396,9 +398,11 @@ function DocEditor({
 }) {
   const { t } = useTranslation();
   const { doc, blocks, loading } = useDoc(wallet, projectId, docId);
+  const { revisions } = useDocRevisions(wallet, projectId, docId);
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   const isPlan = doc?.type === "plan";
   const status = (doc?.status as string) ?? null;
@@ -499,6 +503,13 @@ function DocEditor({
           >
             <MessageSquare className="h-4 w-4" /> {t("chat.docs.editor.discussion")}
           </Button>
+          <Button
+            size="sm"
+            variant={showHistory ? "secondary" : "outline"}
+            onClick={() => setShowHistory((value) => !value)}
+          >
+            <History className="h-4 w-4" /> History ({revisions.length})
+          </Button>
           <button
             type="button"
             onClick={remove}
@@ -542,6 +553,36 @@ function DocEditor({
               {t("chat.docs.editor.proposedNoTasks")}
             </span>
           ) : null}
+        </div>
+      ) : null}
+
+      {showHistory ? (
+        <div className="rounded-md border border-[#1b1833] bg-[#0e0716] p-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-[#a9a4d4]">
+            Revision history
+          </h3>
+          {revisions.length === 0 ? (
+            <p className="mt-2 text-xs text-[#7975a8]">No revisions recorded yet.</p>
+          ) : (
+            <ol className="mt-2 space-y-2">
+              {[...revisions].reverse().map((revision) => (
+                <li key={revision.id} className="rounded border border-[#1b1833] px-2.5 py-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                    <span className="font-medium text-[#cfcbef]">
+                      {revision.action.replaceAll("_", " ")}
+                    </span>
+                    <span className="text-[#4f4b6e]">
+                      {revision.createdAt ? new Date(revision.createdAt).toLocaleString() : "pending"}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[11px] text-[#7975a8]">
+                    {ownerLabel(revision.actor, t)}
+                    {revision.summary ? ` · ${revision.summary}` : ""}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          )}
         </div>
       ) : null}
 
