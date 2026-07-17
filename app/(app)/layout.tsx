@@ -33,6 +33,7 @@ import { RefreshButton } from "../components/RefreshButton";
 import { PullToRefresh } from "../components/PullToRefresh";
 import { OrgSwitcher, ProjectPicker } from "../components/OrgSwitcher";
 import { ActiveSessionsBar } from "../components/ActiveSessionsBar";
+import { ChatClientProvider } from "../lib/useChatClient";
 import { ActiveOrgProvider } from "../lib/useActiveOrg";
 import { formatAddress } from "../lib/format";
 import { useIsInMiniApp } from "../lib/useIsInMiniApp";
@@ -114,8 +115,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <ChatbotProvider>
-      <ActiveOrgProvider>
+    <ChatClientProvider>
+      <ChatbotProvider>
+        <ActiveOrgProvider>
       <div className="flex min-h-screen w-full overflow-x-clip bg-background text-foreground">
         <a
           href="#main-content"
@@ -238,8 +240,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         <ChatbotPanel />
         <CommandMenu />
       </div>
-      </ActiveOrgProvider>
-    </ChatbotProvider>
+        </ActiveOrgProvider>
+      </ChatbotProvider>
+    </ChatClientProvider>
   );
 }
 

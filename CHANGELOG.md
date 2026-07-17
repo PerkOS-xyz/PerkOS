@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-07-17 — Project chat available across the authenticated app
+
+- Mounted the shared `ChatClientProvider` at the authenticated-app layout so
+  embedded project chat works from `/projects/:id`, not only from `/chat`.
+- Removed the redundant nested provider from the chat-only layout. Project
+  messages now use the same authenticated WebSocket session throughout the
+  app and remain visible through the history-host flow after reload.
+- Updated the shared client/type packages used by the service-first project
+  workflow integration.
+
 ## 2026-06-10 (evening) — Visibility: activity feed, KPIs, charts, context map
 
 - **"Team Lead" naming completed.** The wizard persona preset formerly named
