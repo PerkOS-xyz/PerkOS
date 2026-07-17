@@ -67,6 +67,19 @@ describe("ConductorBoard rendering", () => {
     ).toBeInTheDocument();
   });
 
+  it("uses the canonical project agents when no swarm is configured", () => {
+    render(
+      <ConductorBoard
+        projectId="p1"
+        tasks={[task({ agent: "Morpheus", status: "In progress" })]}
+        agentNames={["Morpheus", "Researcher"]}
+      />,
+    );
+    expect(screen.getAllByText("Morpheus").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Researcher")).toBeInTheDocument();
+    expect(screen.queryByText(/No swarm defined/i)).not.toBeInTheDocument();
+  });
+
   it("maps a task agent='handle' to the roster member chip", () => {
     render(
       <ConductorBoard

@@ -14,6 +14,8 @@ type Props = {
   tasks: Task[];
   /** Optional swarm definition — when missing, the roster panel is hidden. */
   swarm?: SwarmDefinition;
+  /** Canonical project roster fallback when no swarm.yaml is configured. */
+  agentNames?: string[];
   onMove?: (taskId: string, nextStatus: KanbanStatus) => void;
 };
 
@@ -46,10 +48,18 @@ export function ConductorBoard({
   projectId,
   tasks,
   swarm,
+  agentNames = [],
   onMove,
 }: Props) {
   const { t } = useTranslation();
-  const members = swarm?.roster ?? [];
+  const members =
+    swarm?.roster && swarm.roster.length > 0
+      ? swarm.roster
+      : Array.from(new Set(agentNames.filter(Boolean))).map((name) => ({
+          handle: name,
+          agent: `agent:${name}`,
+          role: "project agent",
+        }));
   const byHandle = new Map<string, SwarmRosterMember>(
     members.map((m) => [m.handle, m]),
   );
