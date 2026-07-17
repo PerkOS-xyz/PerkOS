@@ -31,6 +31,8 @@ import { fetchVpsAccess } from "@/app/lib/vpsAccess";
 import {
   EXTERNAL_NAME_RE,
   INITIAL_WIZARD_STATE,
+  isValidAgentName,
+  resolveAgentName,
   stepsForMethod,
   type WizardState,
 } from "./types";
@@ -158,7 +160,7 @@ export function useAgentWizard() {
         throw new Error(t("wizard.error.connectWallet"));
       }
       if (!state.runtime) throw new Error(t("wizard.error.pickRuntime"));
-      const finalName = state.agentName.trim() || preset?.name || "Untitled agent";
+      const finalName = resolveAgentName(state.agentName, preset?.name ?? "Untitled agent");
       // Channels are now their own step (native messaging gateways, posted
       // after launch). plugins[] carries the preset's recommended capability
       // tags for record-keeping only — see the capability-wiring follow-up.
@@ -199,7 +201,7 @@ export function useAgentWizard() {
     onSuccess: async (response) => {
       queryClient.invalidateQueries({ queryKey: ["wallet-agents", address] });
       if (fromOnboarding) markAgentRegistered();
-      const requestedName = state.agentName.trim() || preset?.name || "Your agent";
+      const requestedName = resolveAgentName(state.agentName, preset?.name ?? "Your agent");
       const launchedName = response?.result?.agent?.name || requestedName;
       toast.success(t("wizard.toast.launched"), {
         description:
@@ -355,6 +357,9 @@ export function useAgentWizard() {
         // server rejects it (IMAGE_TAG_REQUIRED) and we'd strand a doc. Block
         // the launch button until an image is resolved.
         if (state.deployMode === "perkos-ecs" && !state.imageTag) return false;
+        if (!isValidAgentName(resolveAgentName(state.agentName, preset?.name ?? "Untitled agent"))) {
+          return false;
+        }
         return !launchMutation.isPending && !launchMutation.isSuccess;
       case "external":
         return (
@@ -369,6 +374,7 @@ export function useAgentWizard() {
   }, [
     currentStepKey,
     state,
+    preset?.name,
     apiKeyError,
     llmAllowed,
     launchMutation.isPending,

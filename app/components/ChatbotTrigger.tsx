@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 import { useChatbot } from "./ChatbotProvider";
 import { cn } from "@/lib/utils";
@@ -12,7 +13,13 @@ import { cn } from "@/lib/utils";
  * the live chat is there.
  */
 export function ChatbotTrigger() {
+  const pathname = usePathname();
   const { open, toggle } = useChatbot();
+
+  // The wizard's primary action sits in the same bottom-right viewport area
+  // as the floating assistant. Hiding the trigger here keeps Continue/Launch
+  // directly clickable instead of letting the fixed button intercept them.
+  if (pathname?.startsWith("/agents/new")) return null;
 
   return (
     <button

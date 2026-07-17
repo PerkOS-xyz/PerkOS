@@ -18,14 +18,17 @@ import { Badge } from "@/components/ui/badge";
 import { findPreset } from "@/app/lib/agentPresets";
 import { buildConfigPreview } from "@/app/lib/agentConfigPreview";
 
-import type { StepProps } from "../types";
+import { isValidAgentName, resolveAgentName, type StepProps } from "../types";
 import { StepHeader } from "../ui/StepHeader";
 import { SummaryRow } from "../ui/SummaryRow";
 
 export function StepReview({ state, onChange }: StepProps) {
   const { t } = useTranslation();
   const preset = findPreset(state.personaId);
-  const finalName = state.agentName.trim() || preset?.name || "Untitled agent";
+  const finalName = resolveAgentName(state.agentName, preset?.name ?? "Untitled agent");
+  const nameError = !isValidAgentName(finalName)
+    ? t("wizard.external.nameError")
+    : undefined;
   const preview = state.runtime
     ? buildConfigPreview({
         runtime: state.runtime,
@@ -154,7 +157,11 @@ export function StepReview({ state, onChange }: StepProps) {
               value={state.agentName}
               onChange={(e) => onChange({ agentName: e.target.value })}
               placeholder={preset?.name ?? "Untitled agent"}
+              maxLength={32}
+              pattern="[A-Za-z0-9_-]{2,32}"
+              aria-invalid={Boolean(nameError)}
             />
+            {nameError ? <span className="text-xs text-destructive">{nameError}</span> : null}
           </div>
         </CardContent>
       </Card>
