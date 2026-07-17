@@ -31,9 +31,10 @@ import { ConfirmDialog } from "../../../components/ConfirmDialog";
 type Props = {
   agentId: string;
   agentName: string;
-  /** Whether the agent is ECS-deployed. When false we render a polite
-   *  placeholder instead of trying to open a WS conv. */
-  ecsDeployed: boolean;
+  /** Whether this agent is ready for a direct WebSocket conversation. */
+  chatEnabled: boolean;
+  /** PerkOS-managed ECS agents can hibernate. External agents cannot. */
+  hibernationEnabled: boolean;
 };
 
 type Bubble = {
@@ -56,7 +57,12 @@ function formatTime(ts?: number): string {
   }
 }
 
-export function AgentChatPanel({ agentId, agentName, ecsDeployed }: Props) {
+export function AgentChatPanel({
+  agentId,
+  agentName,
+  chatEnabled,
+  hibernationEnabled,
+}: Props) {
   const { address, isConnected } = useConnection();
   const queryClient = useQueryClient();
   const [messages, setMessages] = useState<Bubble[]>([]);
@@ -78,7 +84,7 @@ export function AgentChatPanel({ agentId, agentName, ecsDeployed }: Props) {
   const convQuery = useQuery({
     queryKey: ["agent-conv", agentId, address],
     queryFn: () => ensureAgentConv({ agentId }),
-    enabled: ecsDeployed && isConnected && Boolean(address),
+    enabled: chatEnabled && isConnected && Boolean(address),
     staleTime: 5 * 60 * 1000,
   });
   const convId = convQuery.data?.convId ?? null;
@@ -89,7 +95,7 @@ export function AgentChatPanel({ agentId, agentName, ecsDeployed }: Props) {
   const hibernationQuery = useQuery<HibernationStatus>({
     queryKey: ["agent-hibernation", agentId],
     queryFn: () => getHibernationStatusApi({ agentId }),
-    enabled: ecsDeployed,
+    enabled: hibernationEnabled,
     refetchInterval: (q) => {
       const s = (q.state.data as HibernationStatus | undefined)?.state;
       return s === "hibernating" || s === "waking" ? 5_000 : false;
@@ -99,7 +105,7 @@ export function AgentChatPanel({ agentId, agentName, ecsDeployed }: Props) {
 
   const chat = useChatPerkosClient({
     convId,
-    enabled: ecsDeployed && isConnected && Boolean(convId),
+    enabled: chatEnabled && isConnected && Boolean(convId),
     onMessage: (msg) => {
       if (sentIdsRef.current.has(msg.id)) {
         sentIdsRef.current.delete(msg.id);
@@ -201,6 +207,7 @@ export function AgentChatPanel({ agentId, agentName, ecsDeployed }: Props) {
     // is 0). waitForRunning=false → we kick off the wake and let the
     // hibernation poll update the UI; the send below will queue.
     if (
+      hibernationEnabled &&
       hibernation &&
       (hibernation.state === "hibernated" || hibernation.state === "hibernating")
     ) {
@@ -254,7 +261,7 @@ export function AgentChatPanel({ agentId, agentName, ecsDeployed }: Props) {
     toast.success("Conversation cleared");
   }
 
-  if (!ecsDeployed) {
+  if (!chatEnabled) {
     return (
       <Card>
         <CardHeader>
@@ -382,11 +389,11 @@ export function AgentChatPanel({ agentId, agentName, ecsDeployed }: Props) {
           />
           <div className="flex items-center justify-between gap-2">
             <p className="text-xs text-muted-foreground">
-              {hibernation?.state === "hibernated" ? (
+              {hibernationEnabled && hibernation?.state === "hibernated" ? (
                 <>Agent is hibernated — sending will wake it.</>
-              ) : hibernation?.state === "waking" ? (
+              ) : hibernationEnabled && hibernation?.state === "waking" ? (
                 <>Agent is waking up…</>
-              ) : hibernation?.state === "hibernating" ? (
+              ) : hibernationEnabled && hibernation?.state === "hibernating" ? (
                 <>Agent is hibernating; message will queue.</>
               ) : (
                 <>Enter to send · Shift+Enter for a new line</>

@@ -16,10 +16,12 @@ export function ChatbotTrigger() {
   const pathname = usePathname();
   const { open, toggle } = useChatbot();
 
-  // The wizard's primary action sits in the same bottom-right viewport area
-  // as the floating assistant. Hiding the trigger here keeps Continue/Launch
-  // directly clickable instead of letting the fixed button intercept them.
-  if (pathname?.startsWith("/agents/new")) return null;
+  // These screens already own the bottom-right composer/action area. Hiding
+  // the floating assistant keeps wizard and chat Send controls directly
+  // clickable instead of letting the fixed trigger intercept them.
+  if (pathname?.startsWith("/agents/new") || pathname?.startsWith("/chat")) {
+    return null;
+  }
 
   return (
     <button

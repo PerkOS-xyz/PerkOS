@@ -249,7 +249,8 @@ export default function AgentDetailPage({ params }: PageProps) {
       <AgentChatPanel
         agentId={agent.id}
         agentName={agent.name}
-        ecsDeployed={agent.status === "ready"}
+        chatEnabled={agent.status === "ready"}
+        hibernationEnabled={agent.status === "ready" && !isExternalAgent(agent)}
       />
 
       <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
