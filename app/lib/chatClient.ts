@@ -8,7 +8,22 @@
  * Frame schema mirrors the spec in `PerkOS-Chat/docs/protocol.md`.
  */
 
-export type ChatIdentity = `user:${string}` | `agent:${string}`;
+export type ChatIdentity =
+  | `user:${string}`
+  | `agent:${string}`
+  | `service:${string}`;
+
+export interface ChatDomainEvent {
+  domain: string;
+  type: string;
+  projectId?: string;
+  phase?: string;
+  planId?: string;
+  taskId?: string;
+  taskIds?: string[];
+  actor?: string;
+  data?: Record<string, unknown>;
+}
 
 /**
  * One tool invocation made by an agent while producing a reply. Renders
@@ -46,6 +61,8 @@ export interface ChatMessage {
   replyTo?: string | null;
   /** Inline tool invocations the agent made while producing this reply. */
   toolCalls?: ChatToolCall[];
+  /** Structured domain event rendered as a rich card by capable clients. */
+  event?: ChatDomainEvent;
 }
 
 export type ChatClientStatus =
@@ -187,7 +204,13 @@ export class ChatClient {
    *
    * Optional `onAck` is invoked once when the server confirms routing.
    */
-  send(input: { convId: string; text: string; onAck?: AckListener }): string {
+  send(input: {
+    convId: string;
+    text: string;
+    targets?: ChatIdentity[];
+    event?: ChatDomainEvent;
+    onAck?: AckListener;
+  }): string {
     const id = makeId();
     if (input.onAck) this.ackListeners.set(id, input.onAck);
     this.sendFrame({
@@ -195,6 +218,8 @@ export class ChatClient {
       id,
       convId: input.convId,
       text: input.text,
+      targets: input.targets,
+      event: input.event,
     });
     return id;
   }
@@ -327,6 +352,7 @@ export class ChatClient {
         timestamp: String(frame.timestamp),
         replyTo: (frame.replyTo as string | null | undefined) ?? null,
         toolCalls: normalizeToolCalls(frame.toolCalls),
+        event: normalizeEvent(frame.event),
       };
       const set = this.messageListeners.get(msg.convId);
       if (set) for (const fn of set) fn(msg);
@@ -461,7 +487,17 @@ function normalizeMessage(raw: Record<string, unknown>, fallbackConvId: string):
     timestamp: String(raw.timestamp ?? new Date().toISOString()),
     replyTo: (raw.replyTo as string | null | undefined) ?? null,
     toolCalls: normalizeToolCalls(raw.toolCalls),
+    event: normalizeEvent(raw.event),
   };
+}
+
+function normalizeEvent(raw: unknown): ChatDomainEvent | undefined {
+  if (!raw || typeof raw !== "object") return undefined;
+  const event = raw as Record<string, unknown>;
+  if (typeof event.domain !== "string" || typeof event.type !== "string") {
+    return undefined;
+  }
+  return event as unknown as ChatDomainEvent;
 }
 
 /**

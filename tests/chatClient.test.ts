@@ -182,6 +182,54 @@ describe("ChatClient receipt round-trip", () => {
 });
 
 describe("ChatClient message routing", () => {
+  it("sends directed project messages and preserves workflow events", async () => {
+    const client = new ChatClient({
+      url: "ws://test/chat",
+      getToken: async () => "token",
+    });
+    client.start();
+    await new Promise((r) => setTimeout(r, 5));
+    activeFake!.push({ type: "auth_ok", session: { walletAddress: "0xabc" } });
+
+    client.send({
+      convId: "project-1",
+      text: "Review this plan",
+      targets: ["agent:morpheus"],
+      event: {
+        domain: "project_workflow",
+        type: "plan_proposed",
+        projectId: "1",
+        planId: "plan-1",
+      },
+    });
+    expect(readSentFrame(1)).toMatchObject({
+      type: "send",
+      convId: "project-1",
+      targets: ["agent:morpheus"],
+      event: { type: "plan_proposed", planId: "plan-1" },
+    });
+
+    const seen: unknown[] = [];
+    client.onMessage("project-1", (message) => seen.push(message.event));
+    activeFake!.push({
+      type: "chat_message",
+      id: "event-1",
+      convId: "project-1",
+      from: "service:perkos-api",
+      text: "Plan approved",
+      timestamp: "2026-07-17T10:00:00.000Z",
+      event: {
+        domain: "project_workflow",
+        type: "plan_approved",
+        projectId: "1",
+      },
+    });
+    expect(seen).toEqual([
+      expect.objectContaining({ domain: "project_workflow", type: "plan_approved" }),
+    ]);
+    client.stop();
+  });
+
   it("delivers chat_message frames to the registered conv listener", async () => {
     const client = new ChatClient({
       url: "ws://test/chat",

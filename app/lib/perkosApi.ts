@@ -2178,6 +2178,34 @@ export async function pmTurn(input: {
   return (payload.data ?? payload) as PmTurnResult;
 }
 
+export async function ensureProjectChat(input: {
+  projectId: string;
+  owner?: string;
+}): Promise<{ convId: string; participants: string[] }> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(`/api/projects/${input.projectId}/chat`, {
+    method: "POST",
+    body: JSON.stringify({ owner: input.owner }),
+  });
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't open project chat"));
+  return payload as unknown as { convId: string; participants: string[] };
+}
+
+export async function createProjectChatThread(input: {
+  projectId: string;
+  owner?: string;
+}): Promise<{ convId: string; participants: string[] }> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(`/api/projects/${input.projectId}/chat/new`, {
+    method: "POST",
+    body: JSON.stringify({ owner: input.owner }),
+  });
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't start a new project chat"));
+  return payload as unknown as { convId: string; participants: string[] };
+}
+
 /**
  * Notify a human participant they were @-mentioned in a project chat/doc.
  * Server (PerkOS-API) writes a Firestore notification to the target's
