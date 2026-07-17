@@ -30,4 +30,13 @@ describe("ChatbotTrigger route visibility", () => {
     render(<ChatbotTrigger />);
     expect(screen.queryByRole("button", { name: "Open your PerkOS assistant" })).toBeNull();
   });
+
+  it.each(["/chat", "/chat/agent/morpheus", "/chat/conversation-id"])(
+    "does not cover chat controls on %s",
+    (route) => {
+      pathname = route;
+      render(<ChatbotTrigger />);
+      expect(screen.queryByRole("button", { name: "Open your PerkOS assistant" })).toBeNull();
+    },
+  );
 });
