@@ -25,8 +25,20 @@ describe("ChatbotTrigger route visibility", () => {
     expect(screen.getByRole("button", { name: "Open your PerkOS assistant" })).toBeVisible();
   });
 
+  it("renders on the agent roster", () => {
+    pathname = "/agents";
+    render(<ChatbotTrigger />);
+    expect(screen.getByRole("button", { name: "Open your PerkOS assistant" })).toBeVisible();
+  });
+
   it("does not cover the agent wizard actions", () => {
     pathname = "/agents/new";
+    render(<ChatbotTrigger />);
+    expect(screen.queryByRole("button", { name: "Open your PerkOS assistant" })).toBeNull();
+  });
+
+  it("does not cover direct agent chat controls", () => {
+    pathname = "/agents/DWaY182NNUTg0FMWloXY";
     render(<ChatbotTrigger />);
     expect(screen.queryByRole("button", { name: "Open your PerkOS assistant" })).toBeNull();
   });
