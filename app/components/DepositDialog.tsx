@@ -6,9 +6,8 @@
  * Ported from PerkOS-Knowledge's DepositPanel: Base uses `x402-fetch`
  * (`wrapFetchWithPayment` handles the 402 → EIP-3009 signature → retry); Celo
  * signs the authorization by hand (x402-fetch 1.2's network enum lacks "celo").
- * Unlike Knowledge (same-origin /api/deposit), we hit the platform API
- * (api.perkos.xyz/billing/deposit) and must inject the Firebase id-token, so the
- * x402 init carries an Authorization header that survives the signed retry.
+ * The browser hits the App's same-origin platform proxy. The Firebase id-token
+ * remains attached so the proxy can forward it through the x402 signed retry.
  */
 
 import { useState } from "react";
@@ -103,7 +102,7 @@ async function signX402Payment(
   return btoa(JSON.stringify(paymentPayload));
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_PERKOS_API_URL ?? "https://api.perkos.xyz";
+const API_BASE = "/api/platform";
 
 async function idToken(): Promise<string> {
   const user = firebaseAuth().currentUser;

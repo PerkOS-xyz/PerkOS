@@ -251,9 +251,8 @@ export type LaunchAgentResponse = {
   };
 };
 
-const defaultApiUrl = "https://nexus-api.perkos.xyz/api";
-export const perkosApiBaseUrl =
-  process.env.NEXT_PUBLIC_PERKOS_API_URL ?? defaultApiUrl;
+/** Browser-visible API entrypoint. The upstream host is resolved server-side. */
+export const perkosApiBaseUrl = "/api/platform";
 
 // ---------------------------------------------------------------------------
 // Firestore helpers
