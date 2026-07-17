@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils";
 
 import { ConversationSidebar } from "../../components/ConversationSidebar";
 import { NewConversationDialog } from "../../components/NewConversationDialog";
-import { ChatClientProvider } from "../../lib/useChatClient";
 
 /**
  * Two-pane chat layout:
@@ -39,7 +38,7 @@ export default function ChatLayout({ children }: { children: ReactNode }) {
   };
 
   return (
-    <ChatClientProvider>
+    <>
     {/*
       Break out of (app)/layout.tsx's content padding so the conversation
       sidebar can touch the viewport edges:
@@ -102,6 +101,6 @@ export default function ChatLayout({ children }: { children: ReactNode }) {
         walletAddress={address}
       />
     </div>
-    </ChatClientProvider>
+    </>
   );
 }
