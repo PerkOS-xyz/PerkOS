@@ -14,7 +14,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
 import {
-  addProjectMessage,
   assignAgentsToProject,
   deleteProject,
   deleteTask,
@@ -22,14 +21,11 @@ import {
   getWalletProject,
   warmAgent,
   hibernateAgentApi,
-  mentionAgent,
-  notifyProjectMention,
   pmTurn,
   setProjectPm,
   updateTask,
   wakeAgentApi,
   wakeProjectTeam,
-  type ChatMessage,
   type ProjectDetail,
   type Task,
   type TaskStatus,
@@ -48,19 +44,11 @@ import {
 } from "@/components/ui/dialog";
 import { Bot, Loader2, Plus } from "lucide-react";
 
-import { ChatComposer } from "../../../components/ChatComposer";
-import { Markdown } from "../../../components/Markdown";
 import { KanbanBoard } from "../../../components/KanbanBoard";
 import { ConductorBoard } from "../../../components/ConductorBoard";
 import type { SwarmDefinition } from "../../../lib/swarm";
 import { EmptyState } from "../../../components/EmptyState";
-import { formatAddress } from "../../../lib/format";
-import { useProjectMessages } from "../../../lib/useProjectMessages";
 import { DocsTab } from "../../../components/DocsTab";
-import { MentionText } from "../../../components/MentionText";
-import { extractMentions, type MentionParticipant } from "../../../lib/mentions";
-import { useMentionParticipants } from "../../../lib/useMentionParticipants";
-import { uploadAttachment } from "../../../lib/uploadAttachment";
 import { useProjectTasks } from "../../../lib/useProjectTasks";
 import { useWalletAgents, realtimeAgentStatus, STATUS_AVAILABLE, STATUS_RESTING, STATUS_GETTING_READY, STATUS_GOING_TO_REST, type AgentLiveStatus } from "../../../lib/useWalletAgents";
 import { MembersPanel } from "../../../components/MembersPanel";
@@ -69,7 +57,7 @@ import { ProjectContextMap } from "../../../components/ProjectContextMap";
 import { ActivityFeedCard } from "../../../components/ActivityFeedCard";
 import { formatRelativeShort } from "../../../lib/format";
 import { logActivity } from "../../../lib/activityEvents";
-import { entityKey, writeEdge } from "../../../lib/edges";
+import { ProjectChatTab } from "../../../components/ProjectChatTab";
 
 type Tab = "tasks" | "docs" | "conductor" | "agents" | "map" | "chat" | "members";
 
@@ -81,7 +69,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
   const { projectId } = use(params);
   const { t } = useTranslation();
   const searchParams = useSearchParams();
-  const { address, isConnected } = useConnection();
+  const { address } = useConnection();
   // For a SHARED project (owned by another wallet), the owner is passed as
   // ?owner=. All reads then target the owner's subtree (the membership rules
   // permit it). For own projects it's just the connected wallet.
@@ -191,7 +179,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
             <MapTab detail={liveDetail} projectId={projectId} ownerWallet={ownerWallet ?? undefined} />
           ) : null}
           {tab === "chat" ? (
-            <ChatTab
+            <ProjectChatTab
               detail={liveDetail}
               projectId={projectId}
               ownerWallet={ownerWallet ?? undefined}
@@ -1490,383 +1478,6 @@ function AddAgentToProjectDialog({
   );
 }
 
-function ChatTab({
-  detail,
-  projectId,
-  ownerWallet,
-  onDesignatePm,
-}: {
-  detail: ProjectDetail;
-  projectId: string;
-  ownerWallet?: string;
-  onDesignatePm: () => void;
-}) {
-  const { address, isConnected } = useConnection();
-  const { t } = useTranslation();
-  // For a shared project, the chat lives under the owner's subtree.
-  const chatWallet = ownerWallet ?? address;
-  const queryClient = useQueryClient();
-  const [draft, setDraft] = useState("");
-
-  // @-mention participants: human members (owner + teammates, by username) +
-  // the project's agents. Collision-free structured identities.
-  const participants = useMentionParticipants(detail, projectId);
-  const myLabel =
-    participants.find((p) => p.id === `user:${(address ?? "").toLowerCase()}`)
-      ?.label || formatAddress(address);
-  const pmAgent = detail.project.pmAgent ?? null;
-  const agentIds = detail.project.agentIds ?? [];
-  // The most PM-like assigned agent, for a one-click "Make PM" right here.
-  const pmCandidate =
-    agentIds.find((n) =>
-      /(^|[^a-z])pm($|[^a-z])|manager|orchestrat|conductor/i.test(n)
-    ) ??
-    agentIds[0] ??
-    null;
-
-  // Realtime subscription to the messages subcollection — no manual refetch
-  // needed after a send, the snapshot listener delivers the new doc.
-  const { messages } = useProjectMessages(chatWallet, projectId);
-
-  const setPmMut = useMutation({
-    mutationFn: (name: string) => {
-      if (!address) throw new Error(t("projectRoom.chat.errors.connectWalletFirst"));
-      return setProjectPm({ walletAddress: address, projectId, pmAgent: name });
-    },
-    onSuccess: (_res, name) => {
-      queryClient.invalidateQueries({
-        queryKey: ["wallet-project", address, projectId],
-      });
-      toast.success(t("projectRoom.chat.toast.nowLead", { name }), {
-        description: t("projectRoom.chat.toast.nowLeadDesc"),
-      });
-    },
-    onError: (e: Error) =>
-      toast.error(t("projectRoom.chat.toast.setLeadError"), { description: e.message }),
-  });
-
-  const sharedChat = Boolean(
-    ownerWallet && ownerWallet.toLowerCase() !== (address ?? "").toLowerCase()
-  );
-
-  const sendMutation = useMutation({
-    mutationFn: async (text: string) => {
-      if (!isConnected || !address) {
-        throw new Error(t("projectRoom.chat.errors.connectWalletSend"));
-      }
-      // For a shared project the chat lives under the owner; editors can write.
-      const mentions = extractMentions(text, participants);
-      const res = await addProjectMessage({
-        walletAddress: chatWallet ?? address,
-        projectId,
-        text,
-        from: "user",
-        mentions,
-      });
-      // Materialize each structured @-mention as a graph edge (idempotent,
-      // fire-and-forget) — feeds the backlinks panel + context map.
-      for (const id of mentions) {
-        writeEdge(chatWallet ?? address, {
-          fromKey: entityKey.user(address),
-          toKey: id,
-          rel: "mentions",
-          projectId,
-          sourceRef: res.message.id,
-          sourceLabel: text.slice(0, 80),
-        });
-      }
-      const ownerArg = sharedChat ? ownerWallet : undefined;
-      // Ping any @-mentioned HUMAN teammate (≠ me) via a real Firestore
-      // notification (server-side, cross-user). Fire-and-forget.
-      for (const id of mentions) {
-        if (!id.startsWith("user:")) continue;
-        const target = id.slice("user:".length);
-        if (target.toLowerCase() === address.toLowerCase()) continue;
-        notifyProjectMention({
-          projectId,
-          target,
-          title: t("projectRoom.chat.toast.mentionedYouTitle", { label: myLabel }),
-          body: text.slice(0, 200),
-          href: `/projects/${projectId}?tab=chat`,
-          owner: ownerArg,
-        }).catch(() => {});
-      }
-      // Route @-mentioned AGENTS directly: wake + deliver to each. This is the
-      // direct path — when you @ specific agents, the PM is NOT auto-woken.
-      const mentionedAgents = mentions
-        .filter((id) => id.startsWith("agent:"))
-        .map((id) => id.slice("agent:".length));
-      for (const agentName of mentionedAgents) {
-        mentionAgent({ projectId, agentName, text, owner: ownerArg }).catch(
-          () => {}
-        );
-      }
-      return { res, mentionedAgents };
-    },
-    onSuccess: ({ res, mentionedAgents }) => {
-      setDraft("");
-      // @-mentioned a specific agent → it was directed; don't also wake the PM.
-      if (mentionedAgents.length) {
-        toast.success(
-          t("projectRoom.chat.toast.sentTo", { agents: mentionedAgents.map((a) => `@${a}`).join(", ") })
-        );
-        return;
-      }
-      // Otherwise: if this project has a PM, wake it to read + react (fire-and-
-      // forget; the PM's reply lands via the realtime messages subscription).
-      if (pmAgent) {
-        pmTurn({
-          projectId,
-          trigger: "chat",
-          userMessageId: res?.message?.id,
-          owner: sharedChat ? ownerWallet : undefined,
-        }).catch(() => {});
-      } else {
-        // No PM designated → nothing autonomous happens. Tell the user instead
-        // of silently swallowing the goal (the message still posts to chat).
-        toast.info(t("projectRoom.chat.toast.noLeadTitle"), {
-          description: agentIds.length
-            ? t("projectRoom.chat.toast.noLeadDescPick")
-            : t("projectRoom.chat.toast.noLeadDescAdd"),
-        });
-      }
-    },
-  });
-
-  return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_320px]">
-      <div className="flex h-[60vh] min-h-[480px] min-w-0 flex-col gap-3 rounded-md border border-[#1b1833] bg-[#0e0716] p-4">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-[#ececff]">
-            # {detail.project.name}
-          </span>
-          <span className="text-xs text-[#7975a8]">
-            {t("projectRoom.chat.memberCount", { count: participants.length })}
-          </span>
-        </div>
-
-        {!pmAgent ? (
-          <div className="flex flex-col gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-200">
-            <div className="flex items-start gap-2">
-              <Compass className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-              <p>
-                {t("projectRoom.chat.noLeadWarning")}
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {pmCandidate ? (
-                <Button
-                  size="sm"
-                  className="h-7"
-                  disabled={setPmMut.isPending || !address}
-                  onClick={() => setPmMut.mutate(pmCandidate)}
-                  title={t("projectRoom.chat.makeLeadTitle", { name: pmCandidate })}
-                >
-                  {setPmMut.isPending ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                  ) : (
-                    <Compass className="h-3 w-3" />
-                  )}
-                  {t("projectRoom.chat.makeLeadButton", { name: pmCandidate })}
-                </Button>
-              ) : null}
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-7"
-                onClick={onDesignatePm}
-              >
-                {pmCandidate ? t("projectRoom.chat.chooseAnother") : t("projectRoom.chat.designate")}
-              </Button>
-            </div>
-          </div>
-        ) : null}
-
-        <div className="flex-1 overflow-y-auto pr-1">
-          {messages.length === 0 ? (
-            <div className="grid h-full place-items-center text-sm text-[#7975a8]">
-              <p className="max-w-xs text-center">
-                {t("projectRoom.chat.emptyMessages")}
-              </p>
-            </div>
-          ) : (
-            <ul className="flex flex-col gap-3">
-              {messages.map((m, idx) => (
-                <ProjectMessageBubble
-                  key={m.id ?? idx}
-                  message={m}
-                  isMine={m.from === "user"}
-                  participants={participants}
-                  meWallet={address ?? undefined}
-                />
-              ))}
-              {sendMutation.isPending ? (
-                <li className="flex items-center gap-1.5 px-1 text-muted-foreground">
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary" />
-                </li>
-              ) : null}
-            </ul>
-          )}
-        </div>
-
-        {sendMutation.error ? (
-          <p className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
-            {(sendMutation.error as Error).message}
-          </p>
-        ) : null}
-
-        <ChatComposer
-          value={draft}
-          onChange={setDraft}
-          onSend={(text) => sendMutation.mutate(text)}
-          sending={sendMutation.isPending}
-          placeholder={t("projectRoom.chat.composerPlaceholder", { name: detail.project.name })}
-          uploadFile={
-            address
-              ? (file, index) =>
-                  uploadAttachment({
-                    file,
-                    walletAddress: address,
-                    conversationId: projectId,
-                    index,
-                  })
-              : undefined
-          }
-        />
-      </div>
-
-      <aside className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2 rounded-md border border-[#1b1833] bg-[#0e0716] p-4">
-          <span className="text-sm font-medium text-[#ececff]">
-            {t("projectRoom.chat.membersHeading")}
-          </span>
-          {participants.length === 0 ? (
-            <p className="text-xs text-[#7975a8]">{t("projectRoom.chat.noMembers")}</p>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {participants.map((p) => (
-                <li
-                  key={p.id}
-                  className="flex items-center gap-2 text-sm text-[#ececff]"
-                >
-                  <span
-                    className={`grid h-7 w-7 place-items-center rounded-full text-[10px] font-medium ${
-                      p.kind === "agent"
-                        ? "bg-[#ec1b69]/20 text-[#ec1b69]"
-                        : "bg-emerald-500/20 text-emerald-300"
-                    }`}
-                  >
-                    {initials(p.label)}
-                  </span>
-                  <div className="flex min-w-0 flex-col">
-                    <span className="truncate">{p.label}</span>
-                    <span className="text-[10px] uppercase tracking-wide text-[#7975a8]">
-                      {p.kind === "agent" ? t("projectRoom.chat.kindAgent") : t("projectRoom.chat.kindHuman")}
-                    </span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-      </aside>
-    </div>
-  );
-}
-
-/** Clean up the chat sender label. The board MCP currently stamps agent
- * messages with the synthetic `mcp-<wallet>` conv id (and some legacy ones use
- * the raw 0x… wallet); show a friendly label instead of the ugly hash until the
- * bridge stamps the real agent name. `agent:<name>` → `<name>`. */
-function senderLabel(agentName: string | undefined, agentFallback: string): string {
-  const v = (agentName ?? "").trim();
-  if (!v) return agentFallback;
-  if (/^agent:/i.test(v)) return v.slice(v.indexOf(":") + 1) || agentFallback;
-  if (/^(mcp-)?0x[0-9a-fA-F]{6,}$/.test(v)) return agentFallback;
-  return v;
-}
-
-/** Short local time (HH:MM) for a message timestamp, or "" if absent. */
-function formatMsgTime(createdAt?: string): string {
-  if (!createdAt) return "";
-  const d = new Date(createdAt);
-  if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-}
-
-/**
- * Resolve the displayed sender + body for an agent message. The board MCP still
- * stamps `agentName` with the synthetic mcp-<wallet> id, but agents are now
- * prompted to prefix their chat posts with their name ("Demo-W1: done — …").
- * When the stamped name is generic, recover the real one from that prefix and
- * strip it from the body so it isn't shown twice.
- */
-function resolveAgentSender(
-  agentName: string | undefined,
-  text: string,
-  agentFallback: string
-): { label: string; body: string } {
-  const fromStamp = senderLabel(agentName, agentFallback);
-  if (fromStamp !== agentFallback) return { label: fromStamp, body: text };
-  const m = text.match(/^([A-Za-z0-9][A-Za-z0-9 _-]{1,31}):\s+([\s\S]+)$/);
-  if (m) return { label: m[1]!.trim(), body: m[2]! };
-  return { label: agentFallback, body: text };
-}
-
-function ProjectMessageBubble({
-  message,
-  isMine,
-  participants,
-  meWallet,
-}: {
-  message: ChatMessage;
-  isMine: boolean;
-  participants: MentionParticipant[];
-  meWallet?: string;
-}) {
-  const { t } = useTranslation();
-  const time = formatMsgTime(message.createdAt);
-  if (isMine) {
-    return (
-      <li className="flex flex-col items-end gap-0.5">
-        <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-primary/15 px-3 py-2 text-sm text-foreground">
-          <MentionText text={message.text} participants={participants} meWallet={meWallet} />
-        </div>
-        {time ? (
-          <span className="px-1 text-[10px] text-muted-foreground">{time}</span>
-        ) : null}
-      </li>
-    );
-  }
-  const { label, body } = resolveAgentSender(message.agentName, message.text, t("projectRoom.chat.agentFallback"));
-  return (
-    <li className="flex items-start gap-2">
-      <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[#ec1b69]/20 text-[10px] font-medium text-[#ec1b69]">
-        {initials(label)}
-      </div>
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <span className="flex items-center gap-2">
-          <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-            {label}
-          </span>
-          {time ? (
-            <span className="text-[10px] text-muted-foreground/70">{time}</span>
-          ) : null}
-        </span>
-        <MentionText
-          text={body}
-          participants={participants}
-          meWallet={meWallet}
-          className="leading-relaxed text-sm"
-        />
-      </div>
-    </li>
-  );
-}
-
 function uniqueAgents(tasks: Task[], agentIds: string[]): string[] {
   const fromTasks = tasks
     .map((t) => t.agent)
@@ -1938,4 +1549,3 @@ function PlusIcon() {
     </svg>
   );
 }
-

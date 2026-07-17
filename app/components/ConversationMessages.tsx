@@ -28,6 +28,8 @@ type Props = {
   hasMore: boolean;
   onLoadOlder: () => void;
   error?: Error | null;
+  onApprovePlan?: (planId: string) => void;
+  approvingPlanId?: string | null;
 };
 
 export function ConversationMessages({
@@ -40,6 +42,8 @@ export function ConversationMessages({
   hasMore,
   onLoadOlder,
   error,
+  onApprovePlan,
+  approvingPlanId,
 }: Props) {
   // Merge history + live + pending; dedupe by id, then sort.
   const merged = useMemo(() => {
@@ -138,7 +142,13 @@ export function ConversationMessages({
         ) : null}
 
         {merged.map((m) => (
-          <MessageRow key={m.id} message={m} walletAddress={walletAddress} />
+          <MessageRow
+            key={m.id}
+            message={m}
+            walletAddress={walletAddress}
+            onApprovePlan={onApprovePlan}
+            approvingPlanId={approvingPlanId}
+          />
         ))}
       </div>
     </div>
@@ -148,14 +158,27 @@ export function ConversationMessages({
 function MessageRow({
   message,
   walletAddress,
+  onApprovePlan,
+  approvingPlanId,
 }: {
   message: OptimisticMessage;
   walletAddress: string;
+  onApprovePlan?: (planId: string) => void;
+  approvingPlanId?: string | null;
 }) {
   const me = `user:${walletAddress.toLowerCase()}`;
   const fromMe = message.from === me;
   const fromAgent = message.from.startsWith("agent:");
-  const label = fromMe ? "you" : message.from.replace(/^(?:user|agent):/, "");
+  const fromService = message.from.startsWith("service:");
+  const label = fromMe
+    ? "you"
+    : message.from.replace(/^(?:user|agent|service):/, "");
+  const proposal =
+    message.event?.domain === "project_workflow" &&
+    message.event.type === "plan_proposed" &&
+    message.event.planId
+      ? message.event.planId
+      : null;
 
   return (
     <div
@@ -166,7 +189,7 @@ function MessageRow({
     >
       <span className="px-1 text-[10px] uppercase tracking-wider text-muted-foreground">
         {label}
-        {fromAgent ? " · agent" : ""}
+        {fromAgent ? " · agent" : fromService ? " · workflow" : ""}
         {message.pending ? " · sending…" : ""}
       </span>
       <div
@@ -184,6 +207,25 @@ function MessageRow({
             {message.toolCalls.map((call) => (
               <ToolPill key={call.id} call={call} />
             ))}
+          </div>
+        ) : null}
+        {proposal && onApprovePlan ? (
+          <div className="mt-3 flex items-center justify-between gap-3 rounded-md border border-primary/30 bg-primary/5 p-2">
+            <span className="text-xs text-muted-foreground">
+              Approval is required before tasks start.
+            </span>
+            <Button
+              type="button"
+              size="sm"
+              className="h-7 shrink-0"
+              disabled={approvingPlanId === proposal}
+              onClick={() => onApprovePlan(proposal)}
+            >
+              {approvingPlanId === proposal ? (
+                <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+              ) : null}
+              Approve plan
+            </Button>
           </div>
         ) : null}
       </div>
