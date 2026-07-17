@@ -16,7 +16,7 @@ import { findPreset, presetSystemPrompt, type AgentPreset } from "@/app/lib/agen
 import type { AgentRuntime } from "@/app/lib/perkosApi";
 import { fetchActiveRuntimes } from "@/app/lib/runtimeImages";
 
-import type { StepProps } from "../types";
+import { isValidAgentName, normalizeAgentName, type StepProps } from "../types";
 import { StepHeader } from "../ui/StepHeader";
 import { TeammateIdCard } from "../ui/TeammateIdCard";
 import { SoulDetailCard } from "../ui/SoulDetailCard";
@@ -105,6 +105,10 @@ export function StepTemplate({
   const [filter, setFilter] = useState<"all" | Origin>("all");
   const [search, setSearch] = useState("");
   const defaultPrompt = preset ? presetSystemPrompt(preset, state.agentName) : "";
+  const nameError =
+    state.agentName.length > 0 && !isValidAgentName(state.agentName)
+      ? t("wizard.external.nameError")
+      : undefined;
 
   const { data: runtimes } = useQuery({ queryKey: ["wizard", "runtimes"], queryFn: fetchActiveRuntimes });
   const tagFor = (rt: AgentRuntime): string | null => {
@@ -124,7 +128,7 @@ export function StepTemplate({
       (available.includes("OpenClaw") ? "OpenClaw" : available[0] ?? "OpenClaw");
     onChange({
       personaId: p.id,
-      agentName: state.agentName || p.name,
+      agentName: state.agentName || normalizeAgentName(p.name),
       systemPromptOverride: "",
       runtime: rt,
       imageTag: tagFor(rt),
@@ -259,7 +263,11 @@ export function StepTemplate({
             onChange={(e) => onChange({ agentName: e.target.value })}
             placeholder={preset.name}
             className="h-10"
+            maxLength={32}
+            pattern="[A-Za-z0-9_-]{2,32}"
+            aria-invalid={Boolean(nameError)}
           />
+          {nameError ? <span className="text-xs text-destructive">{nameError}</span> : null}
         </div>
 
         <div className="flex flex-col gap-2">

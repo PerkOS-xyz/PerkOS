@@ -159,8 +159,27 @@ export function stepsForMethod(method: LaunchMethod | null): StepKey[] {
   return ["method"]; // nothing picked yet
 }
 
-/** Handle pattern for an invited/external agent name (relay identity). */
-export const EXTERNAL_NAME_RE = /^[a-zA-Z0-9_-]{2,32}$/;
+/** API-compatible agent handle used by every launch/invite path. */
+export const AGENT_NAME_RE = /^[a-zA-Z0-9_-]{2,32}$/;
+export const EXTERNAL_NAME_RE = AGENT_NAME_RE;
+
+/** Turn a display label such as "Customer Support" into a valid default. */
+export function normalizeAgentName(value: string): string {
+  return value
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-zA-Z0-9_-]/g, "")
+    .replace(/[-_]{2,}/g, "-")
+    .slice(0, 32);
+}
+
+export function resolveAgentName(value: string, fallback: string): string {
+  return value.trim() || normalizeAgentName(fallback) || "Untitled-agent";
+}
+
+export function isValidAgentName(value: string): boolean {
+  return AGENT_NAME_RE.test(value.trim());
+}
 
 /** Props every step module receives: the form state + a patch updater. */
 export type StepProps = {
