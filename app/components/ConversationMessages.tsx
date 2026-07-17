@@ -107,7 +107,7 @@ export function ConversationMessages({
   return (
     <div
       ref={scrollRef}
-      className="flex-1 overflow-y-auto px-4 py-4"
+      className="min-h-0 flex-1 overscroll-contain overflow-y-auto px-4 py-4"
       role="log"
       aria-live="polite"
       aria-relevant="additions"

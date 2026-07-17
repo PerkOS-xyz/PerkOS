@@ -2,11 +2,20 @@
 
 import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Loader2, MessageSquarePlus, Play } from "lucide-react";
+import {
+  Loader2,
+  MessageSquarePlus,
+  PanelRightClose,
+  PanelRightOpen,
+  Play,
+  Users,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useConnection } from "wagmi";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 import type { ProjectDetail } from "../lib/perkosApi";
 import {
@@ -53,6 +62,8 @@ export function ProjectChatTab({
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [optimistic, setOptimistic] = useState<OptimisticMessage[]>([]);
   const [sendError, setSendError] = useState<string | null>(null);
+  const [teamCollapsed, setTeamCollapsed] = useState(false);
+  const [mobileTeamOpen, setMobileTeamOpen] = useState(false);
   const shared = Boolean(
     ownerWallet && ownerWallet.toLowerCase() !== (address ?? "").toLowerCase(),
   );
@@ -171,16 +182,48 @@ export function ProjectChatTab({
         : undefined;
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_280px]">
-      <section className="flex h-[64vh] min-h-[520px] min-w-0 flex-col overflow-hidden rounded-md border border-border bg-background">
-        <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
-          <div>
-            <p className="text-sm font-medium"># {detail.project.name}</p>
+    <div
+      className={cn(
+        "relative grid min-h-0 grid-cols-1 gap-3",
+        !teamCollapsed && "lg:grid-cols-[minmax(0,1fr)_280px]",
+      )}
+    >
+      <section className="flex h-[24rem] min-h-[24rem] min-w-0 flex-col overflow-hidden rounded-md border border-border bg-background lg:h-[calc(100dvh-20rem)]">
+        <header className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border px-3 py-2.5 md:px-4">
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium"># {detail.project.name}</p>
             <p className="text-xs text-muted-foreground">
               {pmAgent ? `${pmAgent} coordinates this project` : "No PM designated"}
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="gap-1.5 lg:hidden"
+              aria-expanded={mobileTeamOpen}
+              aria-controls="project-team-mobile"
+              onClick={() => setMobileTeamOpen(true)}
+            >
+              <Users className="h-3.5 w-3.5" />
+              Team
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="hidden h-8 w-8 lg:inline-flex"
+              aria-label={teamCollapsed ? "Show project team" : "Hide project team"}
+              aria-expanded={!teamCollapsed}
+              onClick={() => setTeamCollapsed((collapsed) => !collapsed)}
+            >
+              {teamCollapsed ? (
+                <PanelRightOpen className="h-4 w-4" />
+              ) : (
+                <PanelRightClose className="h-4 w-4" />
+              )}
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -218,7 +261,7 @@ export function ProjectChatTab({
           onApprovePlan={(planId) => approve.mutate(planId)}
           approvingPlanId={approve.isPending ? approve.variables ?? null : null}
         />
-        {sendError ? <p className="px-4 py-2 text-xs text-destructive">{sendError}</p> : null}
+        {sendError ? <p className="shrink-0 px-4 py-2 text-xs text-destructive">{sendError}</p> : null}
         <ChatComposer
           value={draft}
           onChange={setDraft}
@@ -230,27 +273,93 @@ export function ProjectChatTab({
               ? (file, index) => uploadAttachment({ file, walletAddress: address, conversationId: convId, index })
               : undefined
           }
-          className="border-t border-border p-3"
+          className="relative z-10 shrink-0 border-t border-border bg-background/95 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-8px_24px_rgba(0,0,0,0.16)] backdrop-blur"
         />
       </section>
 
-      <aside className="flex flex-col gap-3 rounded-md border border-border bg-card p-4">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">Project team</span>
-          <span className="text-xs text-muted-foreground">{participants.length}</span>
+      {!teamCollapsed ? (
+        <ProjectTeamPanel
+          className="hidden min-h-0 lg:flex"
+          participants={participants}
+          pmAgent={pmAgent}
+          onDesignatePm={onDesignatePm}
+        />
+      ) : null}
+
+      {mobileTeamOpen ? (
+        <div className="absolute inset-0 z-30 flex justify-end lg:hidden">
+          <button
+            type="button"
+            className="absolute inset-0 bg-background/75 backdrop-blur-sm"
+            aria-label="Close project team"
+            onClick={() => setMobileTeamOpen(false)}
+          />
+          <ProjectTeamPanel
+            id="project-team-mobile"
+            className="relative z-10 h-full w-[min(20rem,90%)] rounded-l-md shadow-2xl"
+            participants={participants}
+            pmAgent={pmAgent}
+            onDesignatePm={onDesignatePm}
+            onClose={() => setMobileTeamOpen(false)}
+          />
         </div>
-        {!pmAgent ? (
-          <Button size="sm" variant="outline" onClick={onDesignatePm}>Designate PM</Button>
-        ) : null}
-        <ul className="flex flex-col gap-2">
-          {participants.map((participant) => (
-            <li key={participant.id} className="flex items-center justify-between gap-2 text-sm">
-              <span className="truncate">{participant.label}</span>
-              <span className="text-[10px] uppercase text-muted-foreground">{participant.kind}</span>
-            </li>
-          ))}
-        </ul>
-      </aside>
+      ) : null}
     </div>
+  );
+}
+
+function ProjectTeamPanel({
+  id,
+  className,
+  participants,
+  pmAgent,
+  onDesignatePm,
+  onClose,
+}: {
+  id?: string;
+  className?: string;
+  participants: ReturnType<typeof useMentionParticipants>;
+  pmAgent: string | null;
+  onDesignatePm: () => void;
+  onClose?: () => void;
+}) {
+  return (
+    <aside
+      id={id}
+      className={cn(
+        "flex flex-col gap-3 overflow-hidden rounded-md border border-border bg-card p-4",
+        className,
+      )}
+    >
+      <div className="flex shrink-0 items-center justify-between gap-2">
+        <span className="text-sm font-medium">Project team</span>
+        <div className="flex items-center gap-1">
+          <span className="text-xs text-muted-foreground">{participants.length}</span>
+          {onClose ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              aria-label="Close project team"
+              onClick={onClose}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          ) : null}
+        </div>
+      </div>
+      {!pmAgent ? (
+        <Button size="sm" variant="outline" onClick={onDesignatePm}>Designate PM</Button>
+      ) : null}
+      <ul className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
+        {participants.map((participant) => (
+          <li key={participant.id} className="flex items-center justify-between gap-2 text-sm">
+            <span className="truncate">{participant.label}</span>
+            <span className="text-[10px] uppercase text-muted-foreground">{participant.kind}</span>
+          </li>
+        ))}
+      </ul>
+    </aside>
   );
 }

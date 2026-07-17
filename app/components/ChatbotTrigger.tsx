@@ -19,7 +19,11 @@ export function ChatbotTrigger() {
   // These screens already own the bottom-right composer/action area. Hiding
   // the floating assistant keeps wizard and chat Send controls directly
   // clickable instead of letting the fixed trigger intercept them.
-  if (pathname?.startsWith("/agents/") || pathname?.startsWith("/chat")) {
+  if (
+    pathname?.startsWith("/agents/") ||
+    pathname?.startsWith("/chat") ||
+    pathname?.startsWith("/projects/")
+  ) {
     return null;
   }
 

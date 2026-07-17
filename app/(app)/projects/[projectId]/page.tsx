@@ -132,7 +132,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
   }, [data?.project?.pmAgent, myAgents, isShared, projectId]);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className={cn("flex flex-col", tab === "chat" ? "gap-3" : "gap-6")}>
       <Link
         href="/projects"
         className="inline-flex w-fit items-center gap-2 text-sm text-[#7975a8] hover:text-[#ececff]"
@@ -149,6 +149,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
             detail={liveDetail}
             ownerWallet={ownerWallet ?? undefined}
             isShared={isShared}
+            compact={tab === "chat"}
             onShowMembers={() => setTab("members")}
           />
           <Tabs current={tab} onChange={setTab} />
@@ -208,11 +209,13 @@ function DetailHeader({
   detail,
   ownerWallet,
   isShared,
+  compact = false,
   onShowMembers,
 }: {
   detail: ProjectDetail;
   ownerWallet?: string;
   isShared?: boolean;
+  compact?: boolean;
   onShowMembers: () => void;
 }) {
   const { t } = useTranslation();
@@ -360,13 +363,13 @@ function DetailHeader({
   });
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className={cn("flex flex-col", compact ? "gap-2" : "gap-4")}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <PrimaryAgentAvatar name={primaryAgent} />
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
-              <h1 className="text-3xl font-medium text-[#ececff]">
+              <h1 className={cn("font-medium text-[#ececff]", compact ? "text-xl" : "text-3xl")}>
                 {project.name}
               </h1>
               <span
@@ -462,29 +465,31 @@ function DetailHeader({
           ) : null}
         </div>
       </div>
-      {project.goal ? (
+      {!compact && project.goal ? (
         <p className="max-w-2xl text-sm text-[#7975a8]">{project.goal}</p>
       ) : null}
 
-      {project.pmSession ? (
+      {!compact && project.pmSession ? (
         pmRunRecent ? (
         <PmSessionBanner session={project.pmSession} pmAgent={project.pmAgent} />
         ) : null
       ) : null}
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatTile label={t("projectRoom.header.stats.totalTasks")} value={tasks.length} />
-        <StatTile label={t("projectRoom.header.stats.inProgress")} value={inProgress} />
-        <StatTile label={t("projectRoom.header.stats.done")} value={done} />
-        <StatTile label={t("projectRoom.header.stats.agents")} value={project.agents} />
-      </div>
+      {!compact ? (
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <StatTile label={t("projectRoom.header.stats.totalTasks")} value={tasks.length} />
+          <StatTile label={t("projectRoom.header.stats.inProgress")} value={inProgress} />
+          <StatTile label={t("projectRoom.header.stats.done")} value={done} />
+          <StatTile label={t("projectRoom.header.stats.agents")} value={project.agents} />
+        </div>
+      ) : null}
 
       {/* Who's doing the work + how it's going — only once there's a board. */}
-      {tasks.length > 0 ? <ProjectInsights tasks={tasks} /> : null}
+      {!compact && tasks.length > 0 ? <ProjectInsights tasks={tasks} /> : null}
 
       {/* First-run guidance: a fresh team with an empty board is confusing —
           tell the owner the next move instead of greeting them with 0s. */}
-      {tasks.length === 0 && project.agents > 0 && !pmActive ? (
+      {!compact && tasks.length === 0 && project.agents > 0 && !pmActive ? (
         <div className="glow-card flex flex-col gap-3 rounded-lg border border-primary/40 bg-primary/5 p-4">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />

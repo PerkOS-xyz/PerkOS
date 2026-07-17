@@ -51,4 +51,13 @@ describe("ChatbotTrigger route visibility", () => {
       expect(screen.queryByRole("button", { name: "Open your PerkOS assistant" })).toBeNull();
     },
   );
+
+  it.each(["/projects/new", "/projects/project-id", "/projects/project-id?tab=chat"])(
+    "does not cover project controls on %s",
+    (route) => {
+      pathname = route;
+      render(<ChatbotTrigger />);
+      expect(screen.queryByRole("button", { name: "Open your PerkOS assistant" })).toBeNull();
+    },
+  );
 });
