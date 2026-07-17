@@ -11,8 +11,6 @@ import {
   useChatHistory,
   useConversationLiveMessages,
 } from "../../../lib/useChatClient";
-import type { ChatMessage } from "../../../lib/chatClient";
-
 import { ConversationHeader } from "../../../components/ConversationHeader";
 import {
   ConversationMessages,
@@ -62,9 +60,18 @@ export default function ConversationPage() {
       const id = client.send({
         convId,
         text,
-        onAck: () => {
-          // ack arrives before the broadcast echo in some cases; keep the
-          // optimistic entry until live picks it up.
+        onAck: (ack) => {
+          // Some agent bridges persist the user's message but only broadcast
+          // the agent reply back to the sender. Keep the optimistic row until
+          // history/live can coalesce it, but stop showing "sending…" as soon
+          // as the chat server acknowledges delivery.
+          setOptimistic((prev) =>
+            prev.map((message) =>
+              message.id === ack.id
+                ? { ...message, pending: false }
+                : message,
+            ),
+          );
         },
       });
       const msg: OptimisticMessage = {
