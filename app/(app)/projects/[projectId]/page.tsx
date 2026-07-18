@@ -224,10 +224,11 @@ function DetailHeader({
   const inProgress = tasks.filter((t) => t.status === "In progress").length;
   const done = tasks.filter((t) => t.status === "Done").length;
 
-  // Principal agent: first explicit project assignment, otherwise the first
-  // agent that appears on the project's tasks. Falls back to null when
-  // the project has nobody assigned (shows a "no agent" pill in the header).
+  // Principal agent: the user-designated PM, then the first explicit project
+  // assignment, then the first agent that appears on a task. The roster order
+  // is not a leadership signal (newly-added workers are often first).
   const primaryAgent =
+    project.pmAgent ??
     project.agentIds?.[0] ??
     tasks.map((t) => t.agent).find((name) => name && name !== "App Agent") ??
     null;
@@ -1222,7 +1223,16 @@ function AgentsTab({ detail }: { detail: ProjectDetail }) {
     mutationFn: (name: string | null) =>
       setProjectPm({ walletAddress: address!, projectId, pmAgent: name }),
     onSuccess: (_d, name) => {
-      qc.invalidateQueries({ queryKey: ["wallet-project", address, projectId] });
+      const queryKey = ["wallet-project", address, projectId] as const;
+      qc.setQueryData<ProjectDetail>(queryKey, (current) =>
+        current
+          ? {
+              ...current,
+              project: { ...current.project, pmAgent: name ?? undefined },
+            }
+          : current,
+      );
+      void qc.invalidateQueries({ queryKey });
       toast.success(
         name ? t("projectRoom.agentsTab.toast.nowLead", { name }) : t("projectRoom.agentsTab.toast.clearedLead"),
       );
