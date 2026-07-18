@@ -19,6 +19,7 @@ import {
   type ChatMessage,
 } from "./chatClient";
 import { useFirebaseUser } from "./useFirebaseUser";
+import { upsertLiveMessage } from "./chatMessageMerge";
 
 const ChatClientContext = createContext<ChatClient | null>(null);
 
@@ -100,17 +101,11 @@ export function useConversationLiveMessages(convId: string | null | undefined): 
   const client = useChatClient();
   const wallet = client?.getSessionWallet() ?? null;
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  // Use a ref to keep set of seen IDs without re-rendering.
-  const seenRef = useRef<Set<string>>(new Set());
-
   useEffect(() => {
-    seenRef.current = new Set();
     setMessages([]);
     if (!client || !convId) return;
     return client.onMessage(convId, (msg) => {
-      if (seenRef.current.has(msg.id)) return;
-      seenRef.current.add(msg.id);
-      setMessages((prev) => insertChronological(prev, msg));
+      setMessages((prev) => upsertLiveMessage(prev, msg));
       if (wallet) {
         void cachePut(wallet, convId, [msg]).catch(() => {});
       }
@@ -286,19 +281,4 @@ function stripCachedMeta(c: {
     timestamp: c.timestamp,
     replyTo: c.replyTo,
   };
-}
-
-function insertChronological(list: ChatMessage[], msg: ChatMessage): ChatMessage[] {
-  if (list.length === 0) return [msg];
-  // Common case: newer than last.
-  if (msg.timestamp >= list[list.length - 1].timestamp) return [...list, msg];
-  // Otherwise binary-search insertion point.
-  let lo = 0;
-  let hi = list.length;
-  while (lo < hi) {
-    const mid = (lo + hi) >> 1;
-    if (list[mid].timestamp <= msg.timestamp) lo = mid + 1;
-    else hi = mid;
-  }
-  return [...list.slice(0, lo), msg, ...list.slice(lo)];
 }
