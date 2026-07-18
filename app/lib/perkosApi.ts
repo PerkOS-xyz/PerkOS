@@ -2200,6 +2200,25 @@ export async function createProjectChatThread(input: {
   return payload as unknown as { convId: string; participants: string[] };
 }
 
+export type ProjectChatThread = {
+  convId: string;
+  title: string;
+  createdAt: string | null;
+  updatedAt: string | null;
+};
+
+export async function listProjectChatThreads(input: {
+  projectId: string;
+  owner?: string;
+}): Promise<ProjectChatThread[]> {
+  const { authedFetch } = await import("./apiClient");
+  const query = input.owner ? `?owner=${encodeURIComponent(input.owner)}` : "";
+  const response = await authedFetch(`/api/projects/${input.projectId}/chats${query}`);
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't load project chats"));
+  return ((payload as { threads?: ProjectChatThread[] }).threads ?? []);
+}
+
 /**
  * Notify a human participant they were @-mentioned in a project chat/doc.
  * Server (PerkOS-API) writes a Firestore notification to the target's

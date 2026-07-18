@@ -132,7 +132,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
   }, [data?.project?.pmAgent, myAgents, isShared, projectId]);
 
   return (
-    <div className={cn("flex flex-col", tab === "chat" ? "gap-3" : "gap-6")}>
+    <div className={cn("flex min-w-0 max-w-full flex-col overflow-x-hidden", tab === "chat" ? "gap-3" : "gap-6")}>
       <Link
         href="/projects"
         className="inline-flex w-fit items-center gap-2 text-sm text-[#7975a8] hover:text-[#ececff]"
@@ -697,7 +697,7 @@ function Tabs({
   return (
     <div
       role="tablist"
-      className="flex gap-1 border-b border-[#1b1833] overflow-x-auto"
+      className="grid grid-cols-4 gap-1 border-b border-[#1b1833] sm:flex sm:overflow-x-auto"
     >
       {items.map((item) => {
         const active = current === item.id;
@@ -708,7 +708,7 @@ function Tabs({
             role="tab"
             aria-selected={active}
             onClick={() => onChange(item.id)}
-            className={`relative px-4 py-3 text-sm transition-colors ${
+            className={`relative min-w-0 px-1.5 py-2 text-[11px] transition-colors sm:shrink-0 sm:px-4 sm:py-3 sm:text-sm ${
               active
                 ? "text-[#ececff]"
                 : "text-[#7975a8] hover:text-[#ececff]"
