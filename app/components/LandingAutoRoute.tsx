@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 
 import { useWalletSession } from "../lib/useWalletSession";
@@ -22,12 +22,18 @@ import { useWalletSession } from "../lib/useWalletSession";
  */
 export function LandingAutoRoute() {
   const router = useRouter();
+  const pathname = usePathname();
   const session = useWalletSession();
   const redirected = useRef(false);
   const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
     if (redirected.current) return;
+    // This component belongs to the marketing landing, but a cached or
+    // concurrently-hydrating landing tree can briefly survive while Next is
+    // entering a deep route. Never let that stale effect override the URL the
+    // user explicitly opened.
+    if (pathname !== "/" || window.location.pathname !== "/") return;
     if (session.status !== "signed-in") return;
 
     // Explicit landing view (e.g. the in-app logo links to /?home): the user
@@ -39,9 +45,13 @@ export function LandingAutoRoute() {
     }
 
     redirected.current = true;
-    setRedirecting(true);
+    // Defer the visual transition to the next frame. The effect's primary job
+    // remains synchronizing the router, and we avoid a synchronous cascading
+    // render while React is flushing effects.
+    const frame = window.requestAnimationFrame(() => setRedirecting(true));
     router.replace("/dashboard");
-  }, [session.status, router]);
+    return () => window.cancelAnimationFrame(frame);
+  }, [pathname, session.status, router]);
 
   if (!redirecting) return null;
 

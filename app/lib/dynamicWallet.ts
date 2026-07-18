@@ -15,6 +15,8 @@ import { createContext } from "react";
  * useWalletSession keeps using wagmi exactly as before.
  */
 export type DynamicWalletState = {
+  /** Dynamic is still restoring its persisted user/wallet session. */
+  loading: boolean;
   address: string | undefined;
   isConnected: boolean;
   signMessage: (message: string) => Promise<string>;

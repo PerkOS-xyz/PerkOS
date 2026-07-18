@@ -29,7 +29,7 @@ import {
  * defensively in useWalletSession / the sign-in render, which read Dynamic.
  */
 export function DynamicWalletBridge({ children }: { children: ReactNode }) {
-  const { primaryWallet, handleLogOut } = useDynamicContext();
+  const { primaryWallet, handleLogOut, sdkHasLoaded } = useDynamicContext();
 
   const address = primaryWallet?.address;
   const isEvm = !!address && address.startsWith("0x") && address.length === 42;
@@ -40,6 +40,7 @@ export function DynamicWalletBridge({ children }: { children: ReactNode }) {
     };
     if (!primaryWallet || !isEvm) {
       return {
+        loading: !sdkHasLoaded,
         address: undefined,
         isConnected: false,
         signMessage: async () => {
@@ -49,6 +50,7 @@ export function DynamicWalletBridge({ children }: { children: ReactNode }) {
       };
     }
     return {
+      loading: !sdkHasLoaded,
       address,
       isConnected: true,
       signMessage: async (message: string) => {
@@ -60,7 +62,7 @@ export function DynamicWalletBridge({ children }: { children: ReactNode }) {
       },
       logout,
     };
-  }, [primaryWallet, address, isEvm, handleLogOut]);
+  }, [primaryWallet, address, isEvm, handleLogOut, sdkHasLoaded]);
 
   return (
     <DynamicWalletContext.Provider value={value}>

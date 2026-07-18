@@ -61,6 +61,40 @@ type Result = {
   logout: () => Promise<void>;
 };
 
+export function resolveWalletSessionStatus({
+  firebaseLoading,
+  dynamicLoading,
+  hasDynamicWallet,
+  wagmiStatus,
+  isConnected,
+  denial,
+  syncing,
+  inSync,
+}: {
+  firebaseLoading: boolean;
+  dynamicLoading: boolean;
+  hasDynamicWallet: boolean;
+  wagmiStatus: string;
+  isConnected: boolean;
+  denial: "not-allowlisted" | "error" | null;
+  syncing: boolean;
+  inSync: boolean;
+}): WalletSessionStatus {
+  if (firebaseLoading || dynamicLoading) return "loading";
+  if (
+    !hasDynamicWallet &&
+    (wagmiStatus === "connecting" || wagmiStatus === "reconnecting")
+  ) {
+    return "loading";
+  }
+  if (!isConnected) return "signed-out";
+  if (denial === "not-allowlisted") return "not-allowlisted";
+  if (denial === "error") return "error";
+  if (syncing) return "syncing";
+  if (inSync) return "signed-in";
+  return "syncing";
+}
+
 /**
  * Glue layer between the connected wallet and Firebase Auth.
  *
@@ -173,7 +207,13 @@ export function useWalletSession(): Result {
     if (inSync) return;
     if (syncing) return;
     if (denial) return; // wait for explicit retry
-    void runSignIn();
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (!cancelled) void runSignIn();
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [
     firebaseLoading,
     isConnected,
@@ -227,18 +267,16 @@ export function useWalletSession(): Result {
     }
   }, [dyn, disconnect]);
 
-  const status: WalletSessionStatus = (() => {
-    if (firebaseLoading) return "loading";
-    if (!dyn && (wagmiStatus === "connecting" || wagmiStatus === "reconnecting")) {
-      return "loading";
-    }
-    if (!isConnected) return "signed-out";
-    if (denial === "not-allowlisted") return "not-allowlisted";
-    if (denial === "error") return "error";
-    if (syncing) return "syncing";
-    if (inSync) return "signed-in";
-    return "syncing";
-  })();
+  const status = resolveWalletSessionStatus({
+    firebaseLoading,
+    dynamicLoading: dyn?.loading ?? false,
+    hasDynamicWallet: Boolean(dyn),
+    wagmiStatus,
+    isConnected,
+    denial,
+    syncing,
+    inSync,
+  });
 
   return {
     status,
