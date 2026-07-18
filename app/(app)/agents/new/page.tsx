@@ -69,7 +69,9 @@ export default function AddAgentPage() {
       <div className="flex flex-col gap-1">
         <h1 className="text-3xl font-medium text-foreground">{t("wizard.common.title")}</h1>
         <p className="text-sm text-muted-foreground">
-          {t("wizard.common.stepOf", { current: stepIndex + 1, total: steps.length })}
+          {state.method
+            ? t("wizard.common.stepOf", { current: stepIndex + 1, total: steps.length })
+            : t("wizard.common.chooseMethod")}
         </p>
       </div>
 

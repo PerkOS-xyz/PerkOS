@@ -86,6 +86,12 @@ export type Project = {
   pmAgent?: string | null;
   /** Autonomous PM session state (set by the PM route/worker). */
   pmSession?: PmSession;
+  /** API-owned workflow; clients use it to disable invalid repeated actions. */
+  workflow?: {
+    phase?: "draft" | "planning" | "awaiting_approval" | "approved" | "running" | "pm_review" | "complete" | "cancelled";
+    planId?: string;
+    taskIds?: string[];
+  };
   createdAt?: string;
   updatedAt?: string;
 };
@@ -315,6 +321,19 @@ const projectConverter: FirestoreDataConverter<Project> = {
         lastRunAt: tsToIso(s.lastRunAt),
       };
     }
+    let workflow: Project["workflow"];
+    if (data.workflow && typeof data.workflow === "object") {
+      const value = data.workflow as Record<string, unknown>;
+      workflow = {
+        phase: typeof value.phase === "string"
+          ? value.phase as NonNullable<Project["workflow"]>["phase"]
+          : "draft",
+        planId: typeof value.planId === "string" ? value.planId : undefined,
+        taskIds: Array.isArray(value.taskIds)
+          ? value.taskIds.filter((id): id is string => typeof id === "string")
+          : [],
+      };
+    }
     return {
       id: snap.id,
       name: (data.name as string) ?? "",
@@ -328,6 +347,7 @@ const projectConverter: FirestoreDataConverter<Project> = {
       swarm,
       pmAgent: (data.pmAgent as string | null | undefined) ?? null,
       pmSession,
+      workflow,
       createdAt: tsToIso(data.createdAt),
       updatedAt: tsToIso(data.updatedAt),
     };
@@ -2313,6 +2333,26 @@ export async function approvePlan(input: {
     created: data.created ?? 0,
     taskIds: data.taskIds ?? [],
   };
+}
+
+export async function requestPlanChanges(input: {
+  projectId: string;
+  docId: string;
+  text: string;
+  owner?: string;
+}): Promise<{ chatId: string | null }> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/projects/${input.projectId}/plans/${input.docId}/request-changes`,
+    {
+      method: "POST",
+      body: JSON.stringify({ owner: input.owner, text: input.text }),
+    },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't request plan changes"));
+  const result = (payload.data ?? payload) as { workflow?: { chatId?: string | null } };
+  return { chatId: result.workflow?.chatId ?? null };
 }
 
 /** Wake every agent on a project (ECS scale-up). `owner` is the project owner

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -14,7 +15,7 @@ import {
 import { toast } from "sonner";
 import { useConnection } from "wagmi";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import type { ProjectDetail } from "../lib/perkosApi";
@@ -26,6 +27,7 @@ import {
   mentionAgent,
   notifyProjectMention,
   pmTurn,
+  requestPlanChanges,
 } from "../lib/perkosApi";
 import type { ChatIdentity } from "../lib/chatClient";
 import {
@@ -39,6 +41,7 @@ import { useMentionParticipants } from "../lib/useMentionParticipants";
 import { entityKey, writeEdge } from "../lib/edges";
 import { uploadAttachment } from "../lib/uploadAttachment";
 import { projectChatAvailableHeight } from "../lib/projectChatLayout";
+import { putMessages as cacheMessages } from "../lib/chatCache";
 import { ChatComposer } from "./ChatComposer";
 import {
   ConversationMessages,
@@ -65,6 +68,7 @@ export function ProjectChatTab({
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [optimistic, setOptimistic] = useState<OptimisticMessage[]>([]);
   const [sendError, setSendError] = useState<string | null>(null);
+  const [changeRequestPlanId, setChangeRequestPlanId] = useState<string | null>(null);
   const [teamCollapsed, setTeamCollapsed] = useState(false);
   const [mobileTeamOpen, setMobileTeamOpen] = useState(false);
   const chatSectionRef = useRef<HTMLElement>(null);
@@ -74,6 +78,11 @@ export function ProjectChatTab({
   const owner = shared ? ownerWallet : undefined;
   const participants = useMentionParticipants(detail, projectId);
   const pmAgent = detail.project.pmAgent ?? null;
+  const workflowPhase = detail.project.workflow?.phase ?? "draft";
+  const canStartPlanning = ["draft", "cancelled"].includes(workflowPhase);
+  const docsHref = owner
+    ? `/projects/${projectId}?owner=${encodeURIComponent(owner)}&tab=docs`
+    : `/projects/${projectId}?tab=docs`;
 
   const conversationQuery = useQuery({
     queryKey: ["project-chat", projectId, owner],
@@ -114,14 +123,39 @@ export function ProjectChatTab({
 
   const approve = useMutation({
     mutationFn: (planId: string) => approvePlan({ projectId, docId: planId, owner }),
-    onSuccess: ({ created }) => toast.success(
-      `Plan approved · ${created} task${created === 1 ? "" : "s"} started`,
-    ),
+    onSuccess: ({ created }) => {
+      toast.success(`Plan approved · ${created} task${created === 1 ? "" : "s"} started`);
+      void queryClient.invalidateQueries({ queryKey: ["wallet-project", ownerWallet ?? address, projectId] });
+    },
     onError: (error: Error) => toast.error("Couldn't approve the plan", { description: error.message }),
+  });
+
+  const requestChanges = useMutation({
+    mutationFn: ({ planId, text }: { planId: string; text: string }) =>
+      requestPlanChanges({ projectId, docId: planId, text, owner }),
+    onSuccess: ({ chatId }, { text }) => {
+      if (chatId && address && convId) {
+        void cacheMessages(address, convId, [{
+          id: chatId,
+          from: `user:${address.toLowerCase()}`,
+          text,
+          timestamp: new Date().toISOString(),
+        }]).catch(() => {});
+      }
+      setChangeRequestPlanId(null);
+      toast.success("Changes sent to the PM");
+      void queryClient.invalidateQueries({ queryKey: ["wallet-project", ownerWallet ?? address, projectId] });
+    },
+    onError: (error: Error) => toast.error("Couldn't request changes", { description: error.message }),
   });
 
   function send(text: string) {
     if (!client || !convId || !address || status !== "connected") return;
+    if (changeRequestPlanId) {
+      requestChanges.mutate({ planId: changeRequestPlanId, text });
+      setDraft("");
+      return;
+    }
     setSendError(null);
     const mentions = extractMentions(text, participants) as ChatIdentity[];
     const targets: ChatIdentity[] | undefined =
@@ -140,6 +174,12 @@ export function ProjectChatTab({
             message.id === ack.id ? { ...message, pending: false } : message,
           ),
         );
+        void cacheMessages(address, convId, [{
+          id: ack.id,
+          from: `user:${address.toLowerCase()}`,
+          text,
+          timestamp: ack.timestamp,
+        }]).catch(() => {});
         // A resting PM has no chat socket. When PerkOS-Chat confirms nobody
         // received the message, start the PM workflow so it wakes the agent
         // and advances planning. An online PM already received the chat
@@ -179,6 +219,15 @@ export function ProjectChatTab({
         pending: true,
       },
     ]);
+    // The chat router does not echo a user's frame back to that same socket.
+    // Persist the optimistic copy immediately so reload/thread switching does
+    // not erase an accepted human message.
+    void cacheMessages(address, convId, [{
+      id,
+      from: `user:${address.toLowerCase()}`,
+      text,
+      timestamp: new Date().toISOString(),
+    }]).catch(() => {});
     setDraft("");
 
     for (const identity of mentions) {
@@ -266,7 +315,7 @@ export function ProjectChatTab({
     <div
       className={cn(
         "relative grid min-h-0 grid-cols-1 gap-3",
-        !teamCollapsed && "lg:grid-cols-[minmax(0,1fr)_280px]",
+        !teamCollapsed && "lg:grid-cols-[minmax(0,1fr)_320px]",
       )}
     >
       <section
@@ -281,7 +330,7 @@ export function ProjectChatTab({
               {pmAgent ? `${pmAgent} coordinates this project` : "No PM designated"}
             </p>
           </div>
-          <div className="flex min-w-0 flex-wrap items-center gap-2 sm:justify-end">
+          <div className="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 sm:flex sm:w-auto sm:flex-wrap sm:justify-end">
             <label className="min-w-0 flex-1 sm:max-w-48">
               <span className="sr-only">Conversation history</span>
               <select
@@ -296,7 +345,7 @@ export function ProjectChatTab({
               >
                 {threadsQuery.data?.map((thread, index) => (
                   <option key={thread.convId} value={thread.convId}>
-                    {index === 0 ? "Latest · " : ""}{thread.title}
+                    {formatThreadLabel(thread, index === 0)}
                   </option>
                 ))}
                 {!threadsQuery.data?.some((thread) => thread.convId === convId) && convId ? (
@@ -341,17 +390,54 @@ export function ProjectChatTab({
               {newChat.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MessageSquarePlus className="h-3.5 w-3.5" />}
               New chat
             </Button>
-            <Button
-              size="sm"
-              className="gap-1.5"
-              disabled={!pmAgent || startPlanning.isPending}
-              onClick={() => startPlanning.mutate()}
-            >
-              {startPlanning.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
-              Start
-            </Button>
+            {canStartPlanning ? (
+              <Button
+                size="sm"
+                className="col-span-3 w-full gap-1.5 sm:w-auto"
+                disabled={!pmAgent || startPlanning.isPending}
+                onClick={() => startPlanning.mutate()}
+              >
+                {startPlanning.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
+                Plan with PM
+              </Button>
+            ) : null}
           </div>
         </header>
+        {workflowPhase === "awaiting_approval" ? (
+          <div className="flex shrink-0 flex-col gap-2 border-b border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs sm:flex-row sm:items-center sm:justify-between">
+            <span>The PM&apos;s plan is ready for your decision.</span>
+            <div className="flex gap-2">
+              {detail.project.workflow?.planId ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-8 flex-1 sm:flex-none"
+                  onClick={() => {
+                    setChangeRequestPlanId(detail.project.workflow?.planId ?? null);
+                    setDraft("");
+                  }}
+                >
+                  Request changes
+                </Button>
+              ) : null}
+              <Link href={docsHref} className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-8 flex-1 sm:flex-none")}>
+                Review in Docs
+              </Link>
+            </div>
+          </div>
+        ) : ["approved", "running", "pm_review"].includes(workflowPhase) ? (
+          <div className="shrink-0 border-b border-primary/20 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
+            The approved plan is in progress. Task and PM updates appear here.
+          </div>
+        ) : workflowPhase === "complete" ? (
+          <div className="flex shrink-0 items-center justify-between gap-3 border-b border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs">
+            <span>Project work is complete.</span>
+            <Link href={docsHref} className={buttonVariants({ variant: "outline", size: "sm" })}>
+              Open final doc
+            </Link>
+          </div>
+        ) : null}
         {historyState.hostOffline && convId ? (
           <OfflineBanner historyHost={`agent:${pmAgent ?? "unknown"}`} fromCache={historyState.fromCache} />
         ) : null}
@@ -366,15 +452,27 @@ export function ProjectChatTab({
           onLoadOlder={historyState.loadOlder}
           error={conversationQuery.error as Error | null ?? historyState.error}
           onApprovePlan={(planId) => approve.mutate(planId)}
+          onRequestPlanChanges={(planId) => {
+            setChangeRequestPlanId(planId);
+            setDraft("");
+          }}
           approvingPlanId={approve.isPending ? approve.variables ?? null : null}
         />
+        {changeRequestPlanId ? (
+          <div className="flex shrink-0 items-center justify-between gap-3 border-t border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs">
+            <span>Describe what the PM should change in this plan.</span>
+            <Button type="button" size="sm" variant="ghost" className="h-7" onClick={() => setChangeRequestPlanId(null)}>
+              Cancel
+            </Button>
+          </div>
+        ) : null}
         {sendError ? <p className="shrink-0 px-4 py-2 text-xs text-destructive">{sendError}</p> : null}
         <ChatComposer
           value={draft}
           onChange={setDraft}
           onSend={send}
-          disabled={disabled}
-          placeholder={disabledReason ?? `Message ${pmAgent ?? "the project team"}…`}
+          disabled={disabled || requestChanges.isPending}
+          placeholder={changeRequestPlanId ? "Describe the requested plan changes…" : disabledReason ?? `Message ${pmAgent ?? "the project team"}…`}
           uploadFile={
             address && convId
               ? (file, index) => uploadAttachment({ file, walletAddress: address, conversationId: convId, index })
@@ -413,6 +511,17 @@ export function ProjectChatTab({
       ) : null}
     </div>
   );
+}
+
+function formatThreadLabel(
+  thread: { title: string; createdAt: string | null },
+  latest: boolean,
+): string {
+  const date = thread.createdAt ? new Date(thread.createdAt) : null;
+  const stamp = date && !Number.isNaN(date.getTime())
+    ? date.toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
+    : "Saved chat";
+  return `${latest ? "Latest · " : ""}${thread.title} · ${stamp}`;
 }
 
 function ProjectTeamPanel({

@@ -37,3 +37,11 @@ export function upsertLiveMessage(
   }
   return [...list.slice(0, lo), incoming, ...list.slice(lo)];
 }
+
+/** Merge local accepted sends with host history without dropping either side. */
+export function mergeChatHistory(
+  cached: ChatMessage[],
+  server: ChatMessage[],
+): ChatMessage[] {
+  return server.reduce(upsertLiveMessage, cached);
+}

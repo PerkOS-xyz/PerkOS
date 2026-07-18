@@ -29,6 +29,7 @@ type Props = {
   onLoadOlder: () => void;
   error?: Error | null;
   onApprovePlan?: (planId: string) => void;
+  onRequestPlanChanges?: (planId: string) => void;
   approvingPlanId?: string | null;
 };
 
@@ -43,6 +44,7 @@ export function ConversationMessages({
   onLoadOlder,
   error,
   onApprovePlan,
+  onRequestPlanChanges,
   approvingPlanId,
 }: Props) {
   // Merge history + live + pending; dedupe by id, then sort.
@@ -160,6 +162,7 @@ export function ConversationMessages({
             message={m}
             walletAddress={walletAddress}
             onApprovePlan={onApprovePlan}
+            onRequestPlanChanges={onRequestPlanChanges}
             approvingPlanId={approvingPlanId}
             planAlreadyApproved={Boolean(
               m.event?.planId && approvedPlanIds.has(m.event.planId),
@@ -175,12 +178,14 @@ function MessageRow({
   message,
   walletAddress,
   onApprovePlan,
+  onRequestPlanChanges,
   approvingPlanId,
   planAlreadyApproved,
 }: {
   message: OptimisticMessage;
   walletAddress: string;
   onApprovePlan?: (planId: string) => void;
+  onRequestPlanChanges?: (planId: string) => void;
   approvingPlanId?: string | null;
   planAlreadyApproved?: boolean;
 }) {
@@ -228,11 +233,23 @@ function MessageRow({
           </div>
         ) : null}
         {proposal && onApprovePlan && !planAlreadyApproved ? (
-          <div className="mt-3 flex items-center justify-between gap-3 rounded-md border border-primary/30 bg-primary/5 p-2">
+          <div className="mt-3 flex flex-col items-stretch gap-2 rounded-md border border-primary/30 bg-primary/5 p-2 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-xs text-muted-foreground">
               Approval is required before tasks start.
             </span>
-            <Button
+            <div className="flex shrink-0 gap-1.5">
+              {onRequestPlanChanges ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-7"
+                  onClick={() => onRequestPlanChanges(proposal)}
+                >
+                  Request changes
+                </Button>
+              ) : null}
+              <Button
               type="button"
               size="sm"
               className="h-7 shrink-0"
@@ -243,7 +260,8 @@ function MessageRow({
                 <Loader2 className="mr-1 h-3 w-3 animate-spin" />
               ) : null}
               Approve plan
-            </Button>
+              </Button>
+            </div>
           </div>
         ) : null}
       </div>
