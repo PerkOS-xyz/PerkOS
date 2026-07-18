@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Sparkles, KeyRound, FileCode } from "lucide-react";
+import { Sparkles, KeyRound, FileCode, Loader2 } from "lucide-react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -25,7 +25,12 @@ export function StepLLM({
   onChange,
   apiKeyError,
   llmAllowed,
-}: StepProps & { apiKeyError?: string; llmAllowed: boolean }) {
+  llmAccessLoading,
+}: StepProps & {
+  apiKeyError?: string;
+  llmAllowed: boolean;
+  llmAccessLoading: boolean;
+}) {
   const { t } = useTranslation();
   const providerOpts = state.runtime ? byokProviderOptions(state.runtime) : [];
   return (
@@ -42,7 +47,7 @@ export function StepLLM({
         <SelectableCard
           selected={state.llmSource === "perkos"}
           onClick={() => llmAllowed && onChange({ llmSource: "perkos" })}
-          disabled={!llmAllowed}
+          disabled={llmAccessLoading || !llmAllowed}
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-1">
@@ -51,7 +56,11 @@ export function StepLLM({
                 <span className="text-base font-medium text-foreground">
                   {t("wizard.llm.perkos.title")}
                 </span>
-                {!llmAllowed ? (
+                {llmAccessLoading ? (
+                  <Badge variant="secondary" className="gap-1">
+                    <Loader2 className="h-3 w-3 animate-spin" /> Checking access
+                  </Badge>
+                ) : !llmAllowed ? (
                   <Badge
                     variant="secondary"
                     className="border-amber-500/40 bg-amber-500/15 text-amber-300"
@@ -67,13 +76,13 @@ export function StepLLM({
                 </code>{" "}
                 {t("wizard.llm.perkos.descAfter")}
               </p>
-              {!llmAllowed ? (
+              {!llmAccessLoading && !llmAllowed ? (
                 <p className="text-xs text-muted-foreground">
                   {t("wizard.llm.perkos.inviteOnly")}
                 </p>
               ) : null}
             </div>
-            <RadioGroupItem value="perkos" id="llm-perkos" disabled={!llmAllowed} />
+            <RadioGroupItem value="perkos" id="llm-perkos" disabled={llmAccessLoading || !llmAllowed} />
           </div>
         </SelectableCard>
 

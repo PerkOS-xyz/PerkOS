@@ -1306,6 +1306,7 @@
       "runPmTitleNoPm": "You'll pick which agent leads the team",
       "teamWorking": "Team working…",
       "putTeamToWork": "Put the team to work",
+      "projectComplete": "Project complete",
       "wakeTeamTitle": "Scale up all of this project's agents now (pre-warm the team)",
       "waking": "Waking…",
       "wakeTeam": "Wake team",
@@ -1896,4 +1897,3 @@
     }
   }
 }
-

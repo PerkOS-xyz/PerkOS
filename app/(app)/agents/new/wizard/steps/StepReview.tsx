@@ -118,6 +118,12 @@ export function StepReview({ state, onChange }: StepProps) {
         </CardContent>
       </Card>
 
+      {state.deployMode === "perkos-ecs" && !state.imageTag ? (
+        <p className="text-sm text-amber-400" role="status">
+          Resolving the approved runtime image… Launch will enable automatically.
+        </p>
+      ) : null}
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">

@@ -400,8 +400,11 @@ export function useAgentWizard() {
     visiblePresets,
     // access
     ecsAllowed,
+    ecsAccessLoading: ecsAccessQuery.isPending,
     llmAllowed,
+    llmAccessLoading: llmAccessQuery.isPending,
     vpsAllowed,
+    vpsAccessLoading: vpsAccessQuery.isPending,
     apiKeyError,
     // step machine
     steps,

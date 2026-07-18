@@ -284,6 +284,7 @@ function DetailHeader({
     (project.pmSession?.status === "planning" ||
       project.pmSession?.status === "working" ||
       project.pmSession?.status === "reviewing");
+  const projectComplete = project.status?.toLowerCase() === "done";
 
   const runPmMutation = useMutation({
     mutationFn: () => {
@@ -406,7 +407,7 @@ function DetailHeader({
             size="sm"
             className="gap-1.5"
             disabled={
-              runPmMutation.isPending || pmActive || project.agents === 0
+              runPmMutation.isPending || pmActive || projectComplete || project.agents === 0
             }
             onClick={() => requirePmThen(() => runPmMutation.mutate())}
             title={
@@ -420,7 +421,11 @@ function DetailHeader({
             ) : (
               <Sparkles className="h-4 w-4" />
             )}
-            {pmActive ? t("projectRoom.header.teamWorking") : t("projectRoom.header.putTeamToWork")}
+            {projectComplete
+              ? t("projectRoom.header.projectComplete")
+              : pmActive
+                ? t("projectRoom.header.teamWorking")
+                : t("projectRoom.header.putTeamToWork")}
           </Button>
           <Button
             variant="outline"
