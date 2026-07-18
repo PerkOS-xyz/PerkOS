@@ -222,7 +222,7 @@ export function DocsTab({
           <NewDocForm busy={busy} onCreate={handleCreate} onCancel={() => setCreating(false)} />
         ) : null}
 
-        {liveDocs.length === 0 && !creating ? (
+        {liveDocs.length === 0 && pmDrafts.length === 0 && !creating ? (
           <p className="px-1 py-2 text-xs text-[#4f4b6e]">{t("chat.docs.tree.noDocsYet")}</p>
         ) : null}
 
@@ -649,7 +649,7 @@ function DocEditor({
   return (
     <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       {editor}
-      <div className="fixed inset-0 z-50 bg-background/80 p-2 backdrop-blur-sm lg:static lg:z-auto lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+      <div className="fixed inset-0 z-50 bg-background/80 p-2 pb-20 backdrop-blur-sm lg:static lg:z-auto lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
         <DocChat
           wallet={wallet}
           projectId={projectId}
