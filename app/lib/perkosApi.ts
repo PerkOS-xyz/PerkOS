@@ -1106,10 +1106,12 @@ export async function deleteProject(input: {
   walletAddress: string;
   projectId: string;
 }): Promise<void> {
-  // NOTE: this only deletes the project document. Tasks/messages
-  // subcollections will be orphaned until we add a recursive cleanup
-  // (Cloud Function trigger on project delete is the recommended path).
-  await deleteDoc(projectDoc(input.walletAddress, input.projectId));
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(`/projects/${input.projectId}`, {
+    method: "DELETE",
+  });
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't delete project"));
 }
 
 export async function startProject(input: {
