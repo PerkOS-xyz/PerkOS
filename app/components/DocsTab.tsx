@@ -201,7 +201,7 @@ export function DocsTab({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-[220px_1fr]">
+    <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
       {/* Doc tree */}
       <aside className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
@@ -480,7 +480,7 @@ function DocEditor({
 
   const editor = (
     <div className="flex flex-col gap-3">
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h2 className="truncate text-lg font-semibold text-[#ececff]">
             {doc?.title || t("chat.docs.untitled")}
@@ -490,7 +490,7 @@ function DocEditor({
             {doc?.draft ? ` · ${t("chat.docs.editor.leadsDraft")}` : ""}
           </span>
         </div>
-        <div className="flex shrink-0 items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5 sm:shrink-0 sm:justify-end">
           {doc?.draft ? (
             <Button size="sm" variant="outline" onClick={promote}>
               {t("chat.docs.editor.promote")}
@@ -647,17 +647,19 @@ function DocEditor({
   if (!showChat) return editor;
 
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+    <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
       {editor}
-      <DocChat
-        wallet={wallet}
-        projectId={projectId}
-        docId={docId}
-        docTitle={doc?.title ?? t("chat.docs.docFallback")}
-        participants={participants}
-        meWallet={meWallet}
-        onClose={() => setShowChat(false)}
-      />
+      <div className="fixed inset-0 z-50 bg-background/80 p-2 backdrop-blur-sm lg:static lg:z-auto lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+        <DocChat
+          wallet={wallet}
+          projectId={projectId}
+          docId={docId}
+          docTitle={doc?.title ?? t("chat.docs.docFallback")}
+          participants={participants}
+          meWallet={meWallet}
+          onClose={() => setShowChat(false)}
+        />
+      </div>
     </div>
   );
 }
@@ -819,7 +821,7 @@ function DocChat({
   };
 
   return (
-    <div className="flex h-[60vh] min-h-[420px] flex-col rounded-md border border-[#1b1833] bg-[#0e0716]">
+    <div className="flex h-full min-h-0 flex-col rounded-md border border-[#1b1833] bg-[#0e0716] lg:h-[60vh] lg:min-h-[420px]">
       <div className="flex items-center justify-between border-b border-[#1b1833] px-3 py-2">
         <span className="truncate text-sm font-medium text-[#ececff]">
           {t("chat.docs.docChat.headerTitle", { title: docTitle })}

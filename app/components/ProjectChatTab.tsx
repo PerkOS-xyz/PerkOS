@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Loader2,
   MessageSquarePlus,
@@ -22,6 +22,7 @@ import {
   approvePlan,
   createProjectChatThread,
   ensureProjectChat,
+  listProjectChatThreads,
   mentionAgent,
   notifyProjectMention,
   pmTurn,
@@ -57,6 +58,7 @@ export function ProjectChatTab({
 }) {
   const { address, isConnected } = useConnection();
   const client = useChatClient();
+  const queryClient = useQueryClient();
   const { status } = useChatClientStatus();
   const [draft, setDraft] = useState("");
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
@@ -76,6 +78,11 @@ export function ProjectChatTab({
     queryFn: () => ensureProjectChat({ projectId, owner }),
     enabled: Boolean(address),
   });
+  const threadsQuery = useQuery({
+    queryKey: ["project-chat-threads", projectId, owner],
+    queryFn: () => listProjectChatThreads({ projectId, owner }),
+    enabled: Boolean(address),
+  });
   const convId = activeConvId ?? conversationQuery.data?.convId ?? null;
   const live = useConversationLiveMessages(convId);
   const historyState = useChatHistory(convId);
@@ -91,6 +98,7 @@ export function ProjectChatTab({
       setActiveConvId(next);
       setOptimistic([]);
       setSendError(null);
+      void queryClient.invalidateQueries({ queryKey: ["project-chat-threads", projectId, owner] });
       toast.success("New project chat started");
     },
     onError: (error: Error) => toast.error("Couldn't start a new chat", { description: error.message }),
@@ -130,10 +138,31 @@ export function ProjectChatTab({
             message.id === ack.id ? { ...message, pending: false } : message,
           ),
         );
-        // A resting PerkOS agent has no chat socket. Wake/deliver through A2A
-        // only when PerkOS-Chat confirms that no target socket received it.
+        // A resting PM has no chat socket. When PerkOS-Chat confirms nobody
+        // received the message, start the PM workflow so it wakes the agent
+        // and advances planning. An online PM already received the chat
+        // message, so dispatching a second A2A turn here would duplicate work.
         if (ack.delivered === 0 && pmAgent && mentions.length === 0) {
-          void mentionAgent({ projectId, agentName: pmAgent, text, owner });
+          void pmTurn({ projectId, trigger: "chat", owner }).catch((error: Error) => {
+            toast.error("The PM couldn't process this message", {
+              description: error.message,
+            });
+          });
+        }
+
+        // A resting explicitly-mentioned agent has no chat socket. Wake and
+        // deliver through A2A only when PerkOS-Chat confirms nobody received it.
+        if (ack.delivered === 0) {
+          for (const identity of mentions) {
+            if (identity.startsWith("agent:")) {
+              void mentionAgent({
+                projectId,
+                agentName: identity.slice("agent:".length),
+                text,
+                owner,
+              });
+            }
+          }
         }
       },
     });
@@ -188,15 +217,37 @@ export function ProjectChatTab({
         !teamCollapsed && "lg:grid-cols-[minmax(0,1fr)_280px]",
       )}
     >
-      <section className="flex h-[24rem] min-h-[24rem] min-w-0 flex-col overflow-hidden rounded-md border border-border bg-background lg:h-[calc(100dvh-20rem)]">
-        <header className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border px-3 py-2.5 md:px-4">
+      <section className="flex h-[calc(100dvh-15.5rem)] min-h-[28rem] min-w-0 flex-col overflow-hidden rounded-md border border-border bg-background lg:h-[calc(100dvh-20rem)]">
+        <header className="flex shrink-0 flex-col gap-2 border-b border-border px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between md:px-4">
           <div className="min-w-0">
             <p className="truncate text-sm font-medium"># {detail.project.name}</p>
             <p className="text-xs text-muted-foreground">
               {pmAgent ? `${pmAgent} coordinates this project` : "No PM designated"}
             </p>
           </div>
-          <div className="flex flex-wrap items-center justify-end gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-2 sm:justify-end">
+            <label className="min-w-0 flex-1 sm:max-w-48">
+              <span className="sr-only">Conversation history</span>
+              <select
+                value={convId ?? ""}
+                onChange={(event) => {
+                  setActiveConvId(event.target.value);
+                  setOptimistic([]);
+                  setSendError(null);
+                }}
+                className="h-9 w-full rounded-md border border-border bg-background px-2 text-xs text-foreground"
+                aria-label="Conversation history"
+              >
+                {threadsQuery.data?.map((thread, index) => (
+                  <option key={thread.convId} value={thread.convId}>
+                    {index === 0 ? "Latest · " : ""}{thread.title}
+                  </option>
+                ))}
+                {!threadsQuery.data?.some((thread) => thread.convId === convId) && convId ? (
+                  <option value={convId}>Current chat</option>
+                ) : null}
+              </select>
+            </label>
             <Button
               type="button"
               variant="ghost"
@@ -287,7 +338,7 @@ export function ProjectChatTab({
       ) : null}
 
       {mobileTeamOpen ? (
-        <div className="absolute inset-0 z-30 flex justify-end lg:hidden">
+        <div className="fixed inset-0 z-50 flex justify-end p-2 lg:hidden">
           <button
             type="button"
             className="absolute inset-0 bg-background/75 backdrop-blur-sm"
@@ -296,7 +347,7 @@ export function ProjectChatTab({
           />
           <ProjectTeamPanel
             id="project-team-mobile"
-            className="relative z-10 h-full w-[min(20rem,90%)] rounded-l-md shadow-2xl"
+            className="relative z-10 h-full w-[min(20rem,calc(100vw-1rem))] rounded-md shadow-2xl"
             participants={participants}
             pmAgent={pmAgent}
             onDesignatePm={onDesignatePm}

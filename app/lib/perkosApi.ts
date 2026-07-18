@@ -1106,10 +1106,12 @@ export async function deleteProject(input: {
   walletAddress: string;
   projectId: string;
 }): Promise<void> {
-  // NOTE: this only deletes the project document. Tasks/messages
-  // subcollections will be orphaned until we add a recursive cleanup
-  // (Cloud Function trigger on project delete is the recommended path).
-  await deleteDoc(projectDoc(input.walletAddress, input.projectId));
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(`/projects/${input.projectId}`, {
+    method: "DELETE",
+  });
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't delete project"));
 }
 
 export async function startProject(input: {
@@ -2198,6 +2200,25 @@ export async function createProjectChatThread(input: {
   const payload = await parseJson(response);
   if (!response.ok) throw new Error(apiError(payload, "Couldn't start a new project chat"));
   return payload as unknown as { convId: string; participants: string[] };
+}
+
+export type ProjectChatThread = {
+  convId: string;
+  title: string;
+  createdAt: string | null;
+  updatedAt: string | null;
+};
+
+export async function listProjectChatThreads(input: {
+  projectId: string;
+  owner?: string;
+}): Promise<ProjectChatThread[]> {
+  const { authedFetch } = await import("./apiClient");
+  const query = input.owner ? `?owner=${encodeURIComponent(input.owner)}` : "";
+  const response = await authedFetch(`/api/projects/${input.projectId}/chats${query}`);
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't load project chats"));
+  return ((payload as { threads?: ProjectChatThread[] }).threads ?? []);
 }
 
 /**

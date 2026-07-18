@@ -132,7 +132,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
   }, [data?.project?.pmAgent, myAgents, isShared, projectId]);
 
   return (
-    <div className={cn("flex flex-col", tab === "chat" ? "gap-3" : "gap-6")}>
+    <div className={cn("flex min-w-0 max-w-full flex-col overflow-x-hidden", tab === "chat" ? "gap-3" : "gap-6")}>
       <Link
         href="/projects"
         className="inline-flex w-fit items-center gap-2 text-sm text-[#7975a8] hover:text-[#ececff]"
@@ -224,10 +224,11 @@ function DetailHeader({
   const inProgress = tasks.filter((t) => t.status === "In progress").length;
   const done = tasks.filter((t) => t.status === "Done").length;
 
-  // Principal agent: first explicit project assignment, otherwise the first
-  // agent that appears on the project's tasks. Falls back to null when
-  // the project has nobody assigned (shows a "no agent" pill in the header).
+  // Principal agent: the user-designated PM, then the first explicit project
+  // assignment, then the first agent that appears on a task. The roster order
+  // is not a leadership signal (newly-added workers are often first).
   const primaryAgent =
+    project.pmAgent ??
     project.agentIds?.[0] ??
     tasks.map((t) => t.agent).find((name) => name && name !== "App Agent") ??
     null;
@@ -697,7 +698,7 @@ function Tabs({
   return (
     <div
       role="tablist"
-      className="flex gap-1 border-b border-[#1b1833] overflow-x-auto"
+      className="grid grid-cols-4 gap-1 border-b border-[#1b1833] sm:flex sm:overflow-x-auto"
     >
       {items.map((item) => {
         const active = current === item.id;
@@ -708,7 +709,7 @@ function Tabs({
             role="tab"
             aria-selected={active}
             onClick={() => onChange(item.id)}
-            className={`relative px-4 py-3 text-sm transition-colors ${
+            className={`relative min-w-0 px-1.5 py-2 text-[11px] transition-colors sm:shrink-0 sm:px-4 sm:py-3 sm:text-sm ${
               active
                 ? "text-[#ececff]"
                 : "text-[#7975a8] hover:text-[#ececff]"
@@ -1222,7 +1223,16 @@ function AgentsTab({ detail }: { detail: ProjectDetail }) {
     mutationFn: (name: string | null) =>
       setProjectPm({ walletAddress: address!, projectId, pmAgent: name }),
     onSuccess: (_d, name) => {
-      qc.invalidateQueries({ queryKey: ["wallet-project", address, projectId] });
+      const queryKey = ["wallet-project", address, projectId] as const;
+      qc.setQueryData<ProjectDetail>(queryKey, (current) =>
+        current
+          ? {
+              ...current,
+              project: { ...current.project, pmAgent: name ?? undefined },
+            }
+          : current,
+      );
+      void qc.invalidateQueries({ queryKey });
       toast.success(
         name ? t("projectRoom.agentsTab.toast.nowLead", { name }) : t("projectRoom.agentsTab.toast.clearedLead"),
       );
