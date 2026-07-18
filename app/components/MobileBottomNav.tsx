@@ -20,6 +20,7 @@ export function MobileBottomNav() {
 
   return (
     <nav
+      data-mobile-bottom-nav
       aria-label={t("chrome.mobileNav.primaryNavigation")}
       className="fixed inset-x-0 bottom-0 z-20 flex h-16 items-stretch border-t border-border bg-card/95 backdrop-blur md:hidden"
     >

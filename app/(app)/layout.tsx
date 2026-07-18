@@ -231,7 +231,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           {/* Live "who's working right now" strip — self-vanishing when idle. */}
           <ActiveSessionsBar />
 
-          <div id="main-content" className="p-5 pb-44 md:p-8 md:pb-8">
+          <div
+            id="main-content"
+            className={cn(
+              "p-5 md:p-8 md:pb-8",
+              pathname?.startsWith("/projects/") ? "pb-24" : "pb-44",
+            )}
+          >
             <PullToRefresh>{children}</PullToRefresh>
           </div>
         </main>
