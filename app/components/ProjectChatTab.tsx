@@ -138,10 +138,31 @@ export function ProjectChatTab({
             message.id === ack.id ? { ...message, pending: false } : message,
           ),
         );
-        // A resting PerkOS agent has no chat socket. Wake/deliver through A2A
-        // only when PerkOS-Chat confirms that no target socket received it.
+        // A resting PM has no chat socket. When PerkOS-Chat confirms nobody
+        // received the message, start the PM workflow so it wakes the agent
+        // and advances planning. An online PM already received the chat
+        // message, so dispatching a second A2A turn here would duplicate work.
         if (ack.delivered === 0 && pmAgent && mentions.length === 0) {
-          void mentionAgent({ projectId, agentName: pmAgent, text, owner });
+          void pmTurn({ projectId, trigger: "chat", owner }).catch((error: Error) => {
+            toast.error("The PM couldn't process this message", {
+              description: error.message,
+            });
+          });
+        }
+
+        // A resting explicitly-mentioned agent has no chat socket. Wake and
+        // deliver through A2A only when PerkOS-Chat confirms nobody received it.
+        if (ack.delivered === 0) {
+          for (const identity of mentions) {
+            if (identity.startsWith("agent:")) {
+              void mentionAgent({
+                projectId,
+                agentName: identity.slice("agent:".length),
+                text,
+                owner,
+              });
+            }
+          }
         }
       },
     });
