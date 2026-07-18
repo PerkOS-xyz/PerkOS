@@ -1315,6 +1315,7 @@
       "runPmTitleNoPm": "どのエージェントがチームを率いるか選択します",
       "teamWorking": "チームが作業中…",
       "putTeamToWork": "チームに仕事を任せる",
+      "projectComplete": "プロジェクト完了",
       "wakeTeamTitle": "このプロジェクトのエージェントを今すぐ全員起動します（チームを事前に準備しておきます）",
       "waking": "起動中…",
       "wakeTeam": "チームを起動",

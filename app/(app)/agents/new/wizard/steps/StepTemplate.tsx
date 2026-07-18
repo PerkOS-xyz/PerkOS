@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, ChevronDown, ChevronUp, ExternalLink, Plus, Search, X } from "lucide-react";
 
@@ -119,6 +119,16 @@ export function StepTemplate({
     ...(runtimes?.openclaw?.length ? (["OpenClaw"] as AgentRuntime[]) : []),
     ...(runtimes?.hermes?.length ? (["Hermes"] as AgentRuntime[]) : []),
   ];
+  // A persona can be selected before the runtime query settles. Resolve the
+  // concrete image as soon as it arrives so Review never becomes silently
+  // blocked by that network race.
+  useEffect(() => {
+    if (!state.runtime || state.imageTag) return;
+    const runtimeImages =
+      state.runtime === "OpenClaw" ? runtimes?.openclaw : runtimes?.hermes;
+    const imageTag = runtimeImages?.[0]?.primaryTag ?? null;
+    if (imageTag) onChange({ imageTag });
+  }, [runtimes, state.runtime, state.imageTag, onChange]);
   // Pick a template + resolve its engine: locked by origin for community
   // templates, else default to the first available (the user can switch
   // portable PerkOS/Custom templates in the detail view).
