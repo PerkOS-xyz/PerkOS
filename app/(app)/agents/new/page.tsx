@@ -31,8 +31,11 @@ export default function AddAgentPage() {
     update,
     visiblePresets,
     ecsAllowed,
+    ecsAccessLoading,
     llmAllowed,
+    llmAccessLoading,
     vpsAllowed,
+    vpsAccessLoading,
     apiKeyError,
     steps,
     stepIndex,
@@ -74,7 +77,14 @@ export default function AddAgentPage() {
 
       <div className="mt-2">
         {currentStepKey === "method" && (
-          <StepMethod state={state} onChange={update} ecsAllowed={ecsAllowed} vpsAllowed={vpsAllowed} />
+          <StepMethod
+            state={state}
+            onChange={update}
+            ecsAllowed={ecsAllowed}
+            ecsAccessLoading={ecsAccessLoading}
+            vpsAllowed={vpsAllowed}
+            vpsAccessLoading={vpsAccessLoading}
+          />
         )}
         {currentStepKey === "template" && (
           <StepTemplate state={state} onChange={update} presets={visiblePresets} />
@@ -85,6 +95,7 @@ export default function AddAgentPage() {
             onChange={update}
             apiKeyError={apiKeyError}
             llmAllowed={llmAllowed}
+            llmAccessLoading={llmAccessLoading}
           />
         )}
         {currentStepKey === "capabilities" && (
