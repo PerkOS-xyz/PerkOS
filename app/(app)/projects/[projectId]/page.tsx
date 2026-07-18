@@ -395,7 +395,13 @@ function DetailHeader({
             </span>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div
+          className={cn(
+            "flex flex-wrap items-center gap-2",
+            compact &&
+              "w-full flex-nowrap overflow-x-auto overscroll-x-contain pb-1 sm:w-auto sm:flex-wrap sm:overflow-visible sm:pb-0",
+          )}
+        >
           <Button
             size="sm"
             className="gap-1.5"
@@ -698,7 +704,7 @@ function Tabs({
   return (
     <div
       role="tablist"
-      className="grid grid-cols-4 gap-1 border-b border-[#1b1833] sm:flex sm:overflow-x-auto"
+      className="flex overflow-x-auto overscroll-x-contain border-b border-[#1b1833] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       {items.map((item) => {
         const active = current === item.id;
@@ -709,7 +715,7 @@ function Tabs({
             role="tab"
             aria-selected={active}
             onClick={() => onChange(item.id)}
-            className={`relative min-w-0 px-1.5 py-2 text-[11px] transition-colors sm:shrink-0 sm:px-4 sm:py-3 sm:text-sm ${
+            className={`relative shrink-0 px-3 py-2 text-[11px] transition-colors sm:px-4 sm:py-3 sm:text-sm ${
               active
                 ? "text-[#ececff]"
                 : "text-[#7975a8] hover:text-[#ececff]"

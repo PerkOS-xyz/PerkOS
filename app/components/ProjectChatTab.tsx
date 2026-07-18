@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Loader2,
@@ -38,6 +38,7 @@ import { extractMentions } from "../lib/mentions";
 import { useMentionParticipants } from "../lib/useMentionParticipants";
 import { entityKey, writeEdge } from "../lib/edges";
 import { uploadAttachment } from "../lib/uploadAttachment";
+import { projectChatAvailableHeight } from "../lib/projectChatLayout";
 import { ChatComposer } from "./ChatComposer";
 import {
   ConversationMessages,
@@ -66,6 +67,7 @@ export function ProjectChatTab({
   const [sendError, setSendError] = useState<string | null>(null);
   const [teamCollapsed, setTeamCollapsed] = useState(false);
   const [mobileTeamOpen, setMobileTeamOpen] = useState(false);
+  const chatSectionRef = useRef<HTMLElement>(null);
   const shared = Boolean(
     ownerWallet && ownerWallet.toLowerCase() !== (address ?? "").toLowerCase(),
   );
@@ -210,6 +212,56 @@ export function ProjectChatTab({
         ? "Designate a PM or mention an agent"
         : undefined;
 
+  // The project header, app chrome and mobile bottom nav all have dynamic
+  // heights. A viewport-only calc therefore makes the composer land below the
+  // screen on small devices. Measure the section's real top edge and size it to
+  // the visible navigation boundary instead. Desktop keeps its stable two-pane
+  // height; this measurement only applies below the lg breakpoint.
+  useEffect(() => {
+    const section = chatSectionRef.current;
+    if (!section) return;
+
+    const mobile = window.matchMedia("(max-width: 1023px)");
+    const updateHeight = () => {
+      if (!mobile.matches) {
+        section.style.removeProperty("--project-chat-available-height");
+        return;
+      }
+
+      const bottomNav = document.querySelector<HTMLElement>(
+        "[data-mobile-bottom-nav]",
+      );
+      const viewportBottom = bottomNav?.getBoundingClientRect().top
+        ?? window.visualViewport?.height
+        ?? window.innerHeight;
+      const height = projectChatAvailableHeight({
+        sectionTop: section.getBoundingClientRect().top,
+        viewportBottom,
+      });
+      section.style.setProperty(
+        "--project-chat-available-height",
+        `${height}px`,
+      );
+    };
+
+    updateHeight();
+    const resizeObserver = new ResizeObserver(updateHeight);
+    const mainContent = document.querySelector<HTMLElement>("#main-content");
+    if (mainContent) resizeObserver.observe(mainContent);
+    window.addEventListener("resize", updateHeight);
+    window.addEventListener("scroll", updateHeight, { passive: true });
+    window.visualViewport?.addEventListener("resize", updateHeight);
+    mobile.addEventListener("change", updateHeight);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateHeight);
+      window.removeEventListener("scroll", updateHeight);
+      window.visualViewport?.removeEventListener("resize", updateHeight);
+      mobile.removeEventListener("change", updateHeight);
+    };
+  }, []);
+
   return (
     <div
       className={cn(
@@ -217,7 +269,11 @@ export function ProjectChatTab({
         !teamCollapsed && "lg:grid-cols-[minmax(0,1fr)_280px]",
       )}
     >
-      <section className="flex h-[calc(100dvh-15.5rem)] min-h-[28rem] min-w-0 flex-col overflow-hidden rounded-md border border-border bg-background lg:h-[calc(100dvh-20rem)]">
+      <section
+        ref={chatSectionRef}
+        data-project-chat
+        className="flex h-[var(--project-chat-available-height,calc(100dvh-15.5rem))] min-h-72 min-w-0 flex-col overflow-hidden rounded-md border border-border bg-background lg:h-[calc(100dvh-20rem)] lg:min-h-[28rem]"
+      >
         <header className="flex shrink-0 flex-col gap-2 border-b border-border px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between md:px-4">
           <div className="min-w-0">
             <p className="truncate text-sm font-medium"># {detail.project.name}</p>
