@@ -836,6 +836,7 @@
       "goBack": "Volver a Equipo de agentes",
       "title": "Agregar agente",
       "stepOf": "Paso {{current}} de {{total}}",
+      "chooseMethod": "Elige un tipo de configuración para ver el flujo completo",
       "back": "Atrás",
       "continue": "Continuar",
       "launching": "Lanzando…",

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { ChatMessage } from "../app/lib/chatClient";
-import { upsertLiveMessage } from "../app/lib/chatMessageMerge";
+import { mergeChatHistory, upsertLiveMessage } from "../app/lib/chatMessageMerge";
 
 const base: ChatMessage = {
   id: "m1",
@@ -39,5 +39,22 @@ describe("upsertLiveMessage", () => {
       },
     };
     expect(upsertLiveMessage([rich], base)[0].event).toEqual(rich.event);
+  });
+});
+
+describe("mergeChatHistory", () => {
+  it("keeps a locally accepted user message when host history is empty", () => {
+    const local = { ...base, from: "user:0x123" as const, text: "Please make six tasks" };
+    expect(mergeChatHistory([local], [])).toEqual([local]);
+  });
+
+  it("combines local and host messages chronologically", () => {
+    const reply = {
+      ...base,
+      id: "m2",
+      text: "I will prepare the plan.",
+      timestamp: "2026-07-18T10:00:01.000Z",
+    };
+    expect(mergeChatHistory([base], [reply]).map((message) => message.id)).toEqual(["m1", "m2"]);
   });
 });

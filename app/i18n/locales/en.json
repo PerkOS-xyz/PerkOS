@@ -836,6 +836,7 @@
       "goBack": "Go back to Agent team",
       "title": "Add agent",
       "stepOf": "Step {{current}} of {{total}}",
+      "chooseMethod": "Choose a setup type to see the complete flow",
       "back": "Back",
       "continue": "Continue",
       "launching": "Launching…",

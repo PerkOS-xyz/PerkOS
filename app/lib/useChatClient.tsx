@@ -19,7 +19,7 @@ import {
   type ChatMessage,
 } from "./chatClient";
 import { useFirebaseUser } from "./useFirebaseUser";
-import { upsertLiveMessage } from "./chatMessageMerge";
+import { mergeChatHistory, upsertLiveMessage } from "./chatMessageMerge";
 
 const ChatClientContext = createContext<ChatClient | null>(null);
 
@@ -194,7 +194,10 @@ export function useChatHistory(convId: string | null | undefined): {
         const page = await client.history({ convId });
         if (cancelled) return;
         for (const m of page.messages) seenRef.current.add(m.id);
-        setHistory(page.messages);
+        // The host may have restarted or may not yet have persisted a user
+        // send. Never replace accepted local messages with an empty/partial
+        // page; merge both id-keyed sources instead.
+        setHistory((current) => mergeChatHistory(current, page.messages));
         setHasMore(page.hasMore);
         setHostOffline(false);
         setFromCache(false);
