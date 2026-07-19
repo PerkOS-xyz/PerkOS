@@ -457,6 +457,11 @@ export function ProjectChatTab({
             setDraft("");
           }}
           approvingPlanId={approve.isPending ? approve.variables ?? null : null}
+          actionablePlanId={
+            workflowPhase === "awaiting_approval"
+              ? detail.project.workflow?.planId ?? null
+              : null
+          }
         />
         {changeRequestPlanId ? (
           <div className="flex shrink-0 items-center justify-between gap-3 border-t border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs">

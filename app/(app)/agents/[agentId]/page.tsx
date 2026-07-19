@@ -174,7 +174,12 @@ export default function AgentDetailPage({ params }: PageProps) {
 
   const capabilities = useMemo(() => {
     if (!agent) return [] as string[];
-    return agent.plugins.filter((p) => !p.startsWith("channel:"));
+    const configured = agent.plugins.filter((p) => !p.startsWith("channel:"));
+    if (configured.length > 0 || agent.external) return configured;
+
+    // Managed agents always receive these platform capabilities even when the
+    // runtime does not expose optional plugin names in its registry payload.
+    return ["Project chat", "Project tools", "Docs workspace"];
   }, [agent]);
 
   const refresh = () => {

@@ -599,19 +599,23 @@ function DocEditor({
           ) : (
             blocks.map((b) =>
               b.type === "note" ? (
-                <PlanNoteBlock
-                  key={b.id}
-                  block={b}
-                  canEdit={Boolean(me) && b.owner === me}
-                  onSave={async (text) => {
-                    if (!wallet) return;
-                    await updateDocNote({ walletAddress: wallet, projectId, docId, blockId: b.id!, text });
-                  }}
-                  onDelete={async () => {
-                    if (!wallet) return;
-                    await deleteDocBlock({ walletAddress: wallet, projectId, docId, blockId: b.id! });
-                  }}
-                />
+                b.owner === "service:perkos-api" ? (
+                  <TaskResultBlock key={b.id} block={b} />
+                ) : (
+                  <PlanNoteBlock
+                    key={b.id}
+                    block={b}
+                    canEdit={Boolean(me) && b.owner === me}
+                    onSave={async (text) => {
+                      if (!wallet) return;
+                      await updateDocNote({ walletAddress: wallet, projectId, docId, blockId: b.id!, text });
+                    }}
+                    onDelete={async () => {
+                      if (!wallet) return;
+                      await deleteDocBlock({ walletAddress: wallet, projectId, docId, blockId: b.id! });
+                    }}
+                  />
+                )
               ) : b.type === "planGroup" ? (
                 <div key={b.id} className="pt-2">
                   <h3 className="text-sm font-semibold text-[#ececff]">
@@ -661,6 +665,32 @@ function DocEditor({
         />
       </div>
     </div>
+  );
+}
+
+function TaskResultBlock({ block }: { block: PlanBlock }) {
+  const text = block.text ?? "";
+  const lines = text.split("\n");
+  const headingIndex = lines.findIndex((line) => line.trim().length > 0);
+  const title = headingIndex >= 0
+    ? lines[headingIndex]!.replace(/^#{1,6}\s*/, "").trim()
+    : "Completed task result";
+  const body = headingIndex >= 0
+    ? lines.filter((_line, index) => index !== headingIndex).join("\n").trim()
+    : text;
+
+  return (
+    <details className="group rounded-md border border-emerald-500/20 bg-emerald-500/[0.04]">
+      <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 text-sm font-medium text-[#ececff] marker:content-none">
+        <FileText className="h-4 w-4 shrink-0 text-emerald-300" />
+        <span className="min-w-0 flex-1 truncate">{title}</span>
+        <span className="text-[11px] font-normal text-emerald-200/70 group-open:hidden">Open result</span>
+        <span className="hidden text-[11px] font-normal text-emerald-200/70 group-open:inline">Collapse</span>
+      </summary>
+      <div className="border-t border-emerald-500/15 px-3 py-3 text-sm text-[#cfcbef]">
+        <Markdown>{body}</Markdown>
+      </div>
+    </details>
   );
 }
 
