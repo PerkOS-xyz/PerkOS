@@ -401,6 +401,8 @@ const messageConverter: FirestoreDataConverter<ChatMessage> = {
  * infra, so they CAN'T be hibernated/woken (that's ECS scale-to-0, PerkOS-only).
  */
 export type AgentRow = Agent & {
+  /** True only for PerkOS-managed ECS agents (including legacy ECS records). */
+  managed?: boolean;
   external?: boolean;
   /**
    * True for agents registered via the "invite" flow (deployMode "invited").
@@ -431,6 +433,7 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
     const data = snap.data();
     const rawDeployMode = typeof data.deployMode === "string" ? data.deployMode : undefined;
     const rawStatus = typeof data.status === "string" ? data.status : "unknown";
+    const ecsServiceArn = (data.ecs as { serviceArn?: unknown } | undefined)?.serviceArn;
     // The shared `Agent.status` enum only models the ECS lifecycle. Invited
     // agents add "invited"/"revoked" — fold those into "unknown" for the typed
     // field and surface them via the `invited`/`revoked` flags below.
@@ -460,6 +463,9 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
         rawDeployMode === "self-hosted" ||
         rawDeployMode === "imported",
       invited: rawDeployMode === "invited",
+      managed:
+        rawDeployMode === "perkos-managed" ||
+        (typeof ecsServiceArn === "string" && ecsServiceArn.length > 0),
       revoked: rawStatus === "revoked",
       bridgeConnected:
         typeof data.bridgeConnected === "boolean" ? data.bridgeConnected : undefined,
@@ -469,6 +475,10 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
     };
   },
 };
+
+function isAllowedAgentRow(agent: AgentRow): boolean {
+  return agent.managed === true || agent.invited === true;
+}
 
 function projectsCol(walletAddress: string) {
   return collection(
@@ -628,7 +638,7 @@ export async function getWalletOverview(
   ]);
 
   const projects = projectsSnap.docs.map((d) => d.data());
-  const agents = agentsSnap.docs.map((d) => d.data());
+  const agents = agentsSnap.docs.map((d) => d.data()).filter(isAllowedAgentRow);
 
   // Pull recent tasks across all projects. Limited fan-out for now.
   const taskBundles = await Promise.all(
@@ -645,7 +655,7 @@ export async function getWalletOverview(
     activeProjects: projects.filter(
       (p) => (p.status ?? "").toLowerCase() === "active"
     ).length,
-    registeredAgents: agentsSnap.size,
+    registeredAgents: agents.length,
     activeTasks: tasks.filter(
       (t) => t.status === "In progress" || t.status === "Review"
     ).length,
@@ -953,7 +963,9 @@ export async function getWalletProject(input: {
   if (agentsSnap) {
     const liveAgentNames = new Set(
       agentsSnap.docs
-        .map((d) => (d.data().name ?? "").trim().toLowerCase())
+        .map((d) => d.data())
+        .filter(isAllowedAgentRow)
+        .map((agent) => (agent.name ?? "").trim().toLowerCase())
         .filter((n) => n.length > 0)
     );
     const roster = (project.agentIds as string[] | undefined) ?? [];
@@ -1745,7 +1757,7 @@ export async function getWalletAgents(
   walletAddress: string
 ): Promise<AgentRow[]> {
   const snap = await getDocs(agentsCol(walletAddress));
-  return snap.docs.map((d) => d.data());
+  return snap.docs.map((d) => d.data()).filter(isAllowedAgentRow);
 }
 
 export async function updateAgent(input: {
