@@ -1,12 +1,12 @@
 "use client";
 
 /**
- * Header pill that shows the connected wallet's USDC + PERKOS
+ * Header pill that shows the connected wallet's stablecoin + PERKOS
  * balances on the currently selected EVM chain, with a switcher for
- * picking between Base mainnet and Celo mainnet.
+ * picking between Base, Celo, and Robinhood Chain mainnets.
  *
  * Pill body shape (left → right):
- *   [chain logo]  $usdc USDC  ·  perkos $PERKOS  [chevron|spinner]
+ *   [chain logo]  $stablecoin SYMBOL  ·  perkos $PERKOS  [chevron|spinner]
  *
  * Large PERKOS balances render in compact notation (30.2M) rather
  * than the exact token count — see formatBalance.
@@ -24,7 +24,8 @@
  *
  * UX spec source: ui-ux-designer agent, 2026-05-25. The PERKOS slot
  * was added afterwards (the original spec was USDC-only); both
- * balances share the same loading + error treatment.
+ * balances share the same loading + error treatment. Robinhood Chain uses
+ * its canonical USDG stablecoin; Base and Celo use native USDC.
  */
 
 import Image from "next/image";
@@ -54,10 +55,11 @@ import { cn } from "@/lib/utils";
 
 import {
   PERKOS_BY_CHAIN,
-  USDC_BY_CHAIN,
+  STABLECOIN_BY_CHAIN,
   isSupportedChainId,
   type SupportedChainId,
 } from "../lib/tokenAddresses";
+import { robinhoodChain } from "../lib/chains";
 
 const BASE_APP_CLIENT_FID = 309857;
 const COINBASE_WALLET_RDNS = "com.coinbase.wallet";
@@ -122,6 +124,11 @@ type NetworkOption = {
 const NETWORKS: NetworkOption[] = [
   { id: base.id, name: "Base", logo: "/base.png" },
   { id: celo.id, name: "Celo", logo: "/celo.png" },
+  {
+    id: robinhoodChain.id,
+    name: "Robinhood Chain",
+    logo: "/robinhood-chain.svg",
+  },
 ];
 
 const compactFormatter = new Intl.NumberFormat("en-US", {
@@ -217,11 +224,11 @@ export function NetworkPill() {
       : base.id;
 
   const displayedNetwork = NETWORKS.find((n) => n.id === displayedChainId)!;
-  const usdc = USDC_BY_CHAIN[displayedChainId];
+  const stablecoin = STABLECOIN_BY_CHAIN[displayedChainId];
   const perkos = PERKOS_BY_CHAIN[displayedChainId];
 
-  const usdcQuery = useReadContract({
-    address: usdc.address,
+  const stablecoinQuery = useReadContract({
+    address: stablecoin.address,
     abi: erc20Abi,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
@@ -238,7 +245,11 @@ export function NetworkPill() {
     query: { enabled: isConnected && !!address },
   });
 
-  const usdcLabel = formatQueryResult(usdcQuery, usdc.decimals, isConnected);
+  const stablecoinLabel = formatQueryResult(
+    stablecoinQuery,
+    stablecoin.decimals,
+    isConnected,
+  );
   const perkosLabel = formatQueryResult(
     perkosQuery,
     perkos.decimals,
@@ -271,11 +282,13 @@ export function NetworkPill() {
 
   const ariaLabel = (() => {
     const u =
-      usdcLabel === null
-        ? t("chrome.network.loadingToken", { token: "USDC" })
-        : usdcLabel === "—"
-          ? t("chrome.network.tokenUnavailable", { token: "USDC" })
-          : t("chrome.network.usdcBalance", { amount: usdcLabel });
+      stablecoinLabel === null
+        ? t("chrome.network.loadingToken", { token: stablecoin.symbol })
+        : stablecoinLabel === "—"
+          ? t("chrome.network.tokenUnavailable", { token: stablecoin.symbol })
+          : stablecoin.symbol === "USDC"
+            ? t("chrome.network.usdcBalance", { amount: stablecoinLabel })
+            : `${stablecoinLabel} ${stablecoin.symbol}`;
     const p =
       perkosLabel === null
         ? t("chrome.network.loadingToken", { token: "PERKOS" })
@@ -297,7 +310,11 @@ export function NetworkPill() {
     return (
       <PillShell static aria-label={ariaLabel}>
         <LogoMark network={displayedNetwork} />
-        <BalancesBody usdcLabel={usdcLabel} perkosLabel={perkosLabel} />
+        <BalancesBody
+          stablecoinLabel={stablecoinLabel}
+          stablecoinSymbol={stablecoin.symbol}
+          perkosLabel={perkosLabel}
+        />
       </PillShell>
     );
   }
@@ -329,7 +346,11 @@ export function NetworkPill() {
             {t("chrome.network.wrongNetwork")}
           </span>
         ) : (
-          <BalancesBody usdcLabel={usdcLabel} perkosLabel={perkosLabel} />
+          <BalancesBody
+            stablecoinLabel={stablecoinLabel}
+            stablecoinSymbol={stablecoin.symbol}
+            perkosLabel={perkosLabel}
+          />
         )}
         {isSwitching ? (
           <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
@@ -405,21 +426,28 @@ function LogoMark({ network }: { network: NetworkOption }) {
 }
 
 /**
- * The "$usdc USDC · perkos $PERKOS" body. Each side handles its own
+ * The "$stablecoin SYMBOL · perkos $PERKOS" body. Each side handles its own
  * loading / error state independently so a flaky RPC on one token
  * doesn't blank the other.
  */
 function BalancesBody({
-  usdcLabel,
+  stablecoinLabel,
+  stablecoinSymbol,
   perkosLabel,
 }: {
-  usdcLabel: string | null;
+  stablecoinLabel: string | null;
+  stablecoinSymbol: string;
   perkosLabel: string | null;
 }) {
   return (
     <span className="flex items-center gap-1.5 truncate">
-      <TokenSlot label={usdcLabel} prefix="$" suffix="USDC" loadingHint="USDC" />
-      {/* Compact on mobile + tablet portrait — USDC only — so the cramped
+      <TokenSlot
+        label={stablecoinLabel}
+        prefix="$"
+        suffix={stablecoinSymbol}
+        loadingHint={stablecoinSymbol}
+      />
+      {/* Compact on mobile + tablet portrait — stablecoin only — so the cramped
           topbar has room for the wallet chip. $PERKOS returns at lg+. */}
       <span className="flex items-center gap-1.5 max-lg:hidden">
         <span className="text-muted-foreground/60" aria-hidden>
