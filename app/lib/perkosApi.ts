@@ -114,6 +114,42 @@ export type Task = {
   updatedAt?: string;
 };
 
+export type ProjectMeetingStatus =
+  | "draft"
+  | "lobby"
+  | "live"
+  | "processing_notes"
+  | "needs_review"
+  | "completed"
+  | "failed";
+
+export type MeetingProposal = {
+  id: string;
+  title: string;
+  desc?: string;
+  acceptance?: string;
+  priority?: string;
+  suggestedAgent?: string;
+  materializedTaskId?: string | null;
+};
+
+export type ProjectMeeting = {
+  id: string;
+  projectId: string;
+  title: string;
+  status: ProjectMeetingStatus;
+  pmAgent: string;
+  roomName: string;
+  notesDocId?: string | null;
+  transcriptPolicy: "ephemeral" | "saved";
+  recordingPolicy: "off" | "audio" | "video";
+  durationMinutes: number;
+  createdAt?: string | null;
+  startedAt?: string | null;
+  endedAt?: string | null;
+  proposals?: MeetingProposal[];
+};
+
 // ---------------------------------------------------------------------------
 // Collaborative docs workspace ("Notes")
 // ---------------------------------------------------------------------------
@@ -2408,6 +2444,90 @@ export async function wakeProjectTeam(input: {
     woke: (payload.woke as number) ?? 0,
     total: (payload.total as number) ?? 0,
   };
+}
+
+// ---- Project meetings ----------------------------------------------------
+
+async function meetingRequest<T>(path: string, init?: RequestInit): Promise<T> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(path, init);
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't complete the meeting request."));
+  return payload as T;
+}
+
+export async function listProjectMeetingsApi(input: { projectId: string; owner?: string }): Promise<ProjectMeeting[]> {
+  const query = input.owner ? `?owner=${encodeURIComponent(input.owner)}` : "";
+  const payload = await meetingRequest<{ meetings?: ProjectMeeting[] }>(`/api/projects/${encodeURIComponent(input.projectId)}/meetings${query}`);
+  return payload.meetings ?? [];
+}
+
+export async function createProjectMeetingApi(input: {
+  projectId: string;
+  owner?: string;
+  title: string;
+  pmAgent: string;
+  saveTranscript: boolean;
+}): Promise<ProjectMeeting> {
+  const payload = await meetingRequest<{ meeting: ProjectMeeting }>(`/api/projects/${encodeURIComponent(input.projectId)}/meetings`, {
+    method: "POST",
+    body: JSON.stringify({
+      owner: input.owner,
+      title: input.title,
+      pmAgent: input.pmAgent,
+      transcriptPolicy: input.saveTranscript ? "saved" : "ephemeral",
+      recordingPolicy: "off",
+      durationMinutes: 15,
+    }),
+  });
+  return payload.meeting;
+}
+
+export async function startProjectMeetingApi(input: { projectId: string; meetingId: string; owner?: string }): Promise<ProjectMeeting> {
+  const payload = await meetingRequest<{ meeting: ProjectMeeting }>(`/api/projects/${encodeURIComponent(input.projectId)}/meetings/${encodeURIComponent(input.meetingId)}/start`, {
+    method: "POST",
+    body: JSON.stringify({ owner: input.owner }),
+  });
+  return payload.meeting;
+}
+
+export async function createMeetingJoinSessionApi(input: {
+  projectId: string;
+  meetingId: string;
+  owner?: string;
+  displayName?: string;
+  voiceProcessingConsent: boolean;
+}): Promise<{ url: string; roomName: string; token: string }> {
+  return meetingRequest(`/api/projects/${encodeURIComponent(input.projectId)}/meetings/${encodeURIComponent(input.meetingId)}/token`, {
+    method: "POST",
+    body: JSON.stringify({ owner: input.owner, displayName: input.displayName, voiceProcessingConsent: input.voiceProcessingConsent }),
+  });
+}
+
+export async function endProjectMeetingApi(input: {
+  projectId: string;
+  meetingId: string;
+  owner?: string;
+  notes: string;
+  proposals: Array<{ title: string; description?: string }>;
+}): Promise<ProjectMeeting> {
+  const payload = await meetingRequest<{ meeting: ProjectMeeting }>(`/api/projects/${encodeURIComponent(input.projectId)}/meetings/${encodeURIComponent(input.meetingId)}/end`, {
+    method: "POST",
+    body: JSON.stringify({ owner: input.owner, notes: input.notes, proposals: input.proposals }),
+  });
+  return payload.meeting;
+}
+
+export async function approveMeetingProposalsApi(input: {
+  projectId: string;
+  meetingId: string;
+  owner?: string;
+  proposalIds: string[];
+}): Promise<{ created: number; taskIds: string[] }> {
+  return meetingRequest(`/api/projects/${encodeURIComponent(input.projectId)}/meetings/${encodeURIComponent(input.meetingId)}/proposals/approve`, {
+    method: "POST",
+    body: JSON.stringify({ owner: input.owner, proposalIds: input.proposalIds }),
+  });
 }
 
 export async function assistantChatStream(input: {
