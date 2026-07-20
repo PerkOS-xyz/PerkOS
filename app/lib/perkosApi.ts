@@ -38,6 +38,7 @@ import {
   type FirestoreDataConverter,
   type Timestamp,
 } from "firebase/firestore";
+import { isAllowedAgentHosting } from "@/app/lib/agentHostingPolicy";
 
 import { firebaseDb } from "./firebase";
 import { formatAddress } from "./format";
@@ -111,6 +112,42 @@ export type Task = {
   logs?: string[];
   createdAt?: string;
   updatedAt?: string;
+};
+
+export type ProjectMeetingStatus =
+  | "draft"
+  | "lobby"
+  | "live"
+  | "processing_notes"
+  | "needs_review"
+  | "completed"
+  | "failed";
+
+export type MeetingProposal = {
+  id: string;
+  title: string;
+  desc?: string;
+  acceptance?: string;
+  priority?: string;
+  suggestedAgent?: string;
+  materializedTaskId?: string | null;
+};
+
+export type ProjectMeeting = {
+  id: string;
+  projectId: string;
+  title: string;
+  status: ProjectMeetingStatus;
+  pmAgent: string;
+  roomName: string;
+  notesDocId?: string | null;
+  transcriptPolicy: "ephemeral" | "saved";
+  recordingPolicy: "off" | "audio" | "video";
+  durationMinutes: number;
+  createdAt?: string | null;
+  startedAt?: string | null;
+  endedAt?: string | null;
+  proposals?: MeetingProposal[];
 };
 
 // ---------------------------------------------------------------------------
@@ -401,6 +438,10 @@ const messageConverter: FirestoreDataConverter<ChatMessage> = {
  * infra, so they CAN'T be hibernated/woken (that's ECS scale-to-0, PerkOS-only).
  */
 export type AgentRow = Agent & {
+  /** True only for PerkOS-managed ECS agents (including legacy ECS records). */
+  managed?: boolean;
+  /** True for an agent installed by the user on their own VPS. */
+  selfHosted?: boolean;
   external?: boolean;
   /**
    * True for agents registered via the "invite" flow (deployMode "invited").
@@ -431,6 +472,7 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
     const data = snap.data();
     const rawDeployMode = typeof data.deployMode === "string" ? data.deployMode : undefined;
     const rawStatus = typeof data.status === "string" ? data.status : "unknown";
+    const ecsServiceArn = (data.ecs as { serviceArn?: unknown } | undefined)?.serviceArn;
     // The shared `Agent.status` enum only models the ECS lifecycle. Invited
     // agents add "invited"/"revoked" — fold those into "unknown" for the typed
     // field and surface them via the `invited`/`revoked` flags below.
@@ -460,6 +502,10 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
         rawDeployMode === "self-hosted" ||
         rawDeployMode === "imported",
       invited: rawDeployMode === "invited",
+      selfHosted: rawDeployMode === "self-hosted",
+      managed:
+        rawDeployMode === "perkos-managed" ||
+        (typeof ecsServiceArn === "string" && ecsServiceArn.length > 0),
       revoked: rawStatus === "revoked",
       bridgeConnected:
         typeof data.bridgeConnected === "boolean" ? data.bridgeConnected : undefined,
@@ -469,6 +515,10 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
     };
   },
 };
+
+function isAllowedAgentRow(agent: AgentRow): boolean {
+  return isAllowedAgentHosting(agent);
+}
 
 function projectsCol(walletAddress: string) {
   return collection(
@@ -628,7 +678,7 @@ export async function getWalletOverview(
   ]);
 
   const projects = projectsSnap.docs.map((d) => d.data());
-  const agents = agentsSnap.docs.map((d) => d.data());
+  const agents = agentsSnap.docs.map((d) => d.data()).filter(isAllowedAgentRow);
 
   // Pull recent tasks across all projects. Limited fan-out for now.
   const taskBundles = await Promise.all(
@@ -645,7 +695,7 @@ export async function getWalletOverview(
     activeProjects: projects.filter(
       (p) => (p.status ?? "").toLowerCase() === "active"
     ).length,
-    registeredAgents: agentsSnap.size,
+    registeredAgents: agents.length,
     activeTasks: tasks.filter(
       (t) => t.status === "In progress" || t.status === "Review"
     ).length,
@@ -953,7 +1003,9 @@ export async function getWalletProject(input: {
   if (agentsSnap) {
     const liveAgentNames = new Set(
       agentsSnap.docs
-        .map((d) => (d.data().name ?? "").trim().toLowerCase())
+        .map((d) => d.data())
+        .filter(isAllowedAgentRow)
+        .map((agent) => (agent.name ?? "").trim().toLowerCase())
         .filter((n) => n.length > 0)
     );
     const roster = (project.agentIds as string[] | undefined) ?? [];
@@ -1745,7 +1797,7 @@ export async function getWalletAgents(
   walletAddress: string
 ): Promise<AgentRow[]> {
   const snap = await getDocs(agentsCol(walletAddress));
-  return snap.docs.map((d) => d.data());
+  return snap.docs.map((d) => d.data()).filter(isAllowedAgentRow);
 }
 
 export async function updateAgent(input: {
@@ -2392,6 +2444,90 @@ export async function wakeProjectTeam(input: {
     woke: (payload.woke as number) ?? 0,
     total: (payload.total as number) ?? 0,
   };
+}
+
+// ---- Project meetings ----------------------------------------------------
+
+async function meetingRequest<T>(path: string, init?: RequestInit): Promise<T> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(path, init);
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't complete the meeting request."));
+  return payload as T;
+}
+
+export async function listProjectMeetingsApi(input: { projectId: string; owner?: string }): Promise<ProjectMeeting[]> {
+  const query = input.owner ? `?owner=${encodeURIComponent(input.owner)}` : "";
+  const payload = await meetingRequest<{ meetings?: ProjectMeeting[] }>(`/api/projects/${encodeURIComponent(input.projectId)}/meetings${query}`);
+  return payload.meetings ?? [];
+}
+
+export async function createProjectMeetingApi(input: {
+  projectId: string;
+  owner?: string;
+  title: string;
+  pmAgent: string;
+  saveTranscript: boolean;
+}): Promise<ProjectMeeting> {
+  const payload = await meetingRequest<{ meeting: ProjectMeeting }>(`/api/projects/${encodeURIComponent(input.projectId)}/meetings`, {
+    method: "POST",
+    body: JSON.stringify({
+      owner: input.owner,
+      title: input.title,
+      pmAgent: input.pmAgent,
+      transcriptPolicy: input.saveTranscript ? "saved" : "ephemeral",
+      recordingPolicy: "off",
+      durationMinutes: 15,
+    }),
+  });
+  return payload.meeting;
+}
+
+export async function startProjectMeetingApi(input: { projectId: string; meetingId: string; owner?: string }): Promise<ProjectMeeting> {
+  const payload = await meetingRequest<{ meeting: ProjectMeeting }>(`/api/projects/${encodeURIComponent(input.projectId)}/meetings/${encodeURIComponent(input.meetingId)}/start`, {
+    method: "POST",
+    body: JSON.stringify({ owner: input.owner }),
+  });
+  return payload.meeting;
+}
+
+export async function createMeetingJoinSessionApi(input: {
+  projectId: string;
+  meetingId: string;
+  owner?: string;
+  displayName?: string;
+  voiceProcessingConsent: boolean;
+}): Promise<{ url: string; roomName: string; token: string }> {
+  return meetingRequest(`/api/projects/${encodeURIComponent(input.projectId)}/meetings/${encodeURIComponent(input.meetingId)}/token`, {
+    method: "POST",
+    body: JSON.stringify({ owner: input.owner, displayName: input.displayName, voiceProcessingConsent: input.voiceProcessingConsent }),
+  });
+}
+
+export async function endProjectMeetingApi(input: {
+  projectId: string;
+  meetingId: string;
+  owner?: string;
+  notes: string;
+  proposals: Array<{ title: string; description?: string }>;
+}): Promise<ProjectMeeting> {
+  const payload = await meetingRequest<{ meeting: ProjectMeeting }>(`/api/projects/${encodeURIComponent(input.projectId)}/meetings/${encodeURIComponent(input.meetingId)}/end`, {
+    method: "POST",
+    body: JSON.stringify({ owner: input.owner, notes: input.notes, proposals: input.proposals }),
+  });
+  return payload.meeting;
+}
+
+export async function approveMeetingProposalsApi(input: {
+  projectId: string;
+  meetingId: string;
+  owner?: string;
+  proposalIds: string[];
+}): Promise<{ created: number; taskIds: string[] }> {
+  return meetingRequest(`/api/projects/${encodeURIComponent(input.projectId)}/meetings/${encodeURIComponent(input.meetingId)}/proposals/approve`, {
+    method: "POST",
+    body: JSON.stringify({ owner: input.owner, proposalIds: input.proposalIds }),
+  });
 }
 
 export async function assistantChatStream(input: {

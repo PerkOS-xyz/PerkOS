@@ -19,6 +19,7 @@ import {
   type AgentRow,
   type HibernationApiState,
 } from "../../lib/perkosApi";
+import { hasFreshAgentHeartbeat } from "../../lib/agentHostingPolicy";
 import { SearchInput, matchesQuery } from "../../components/SearchInput";
 import { EmptyState } from "../../components/EmptyState";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
@@ -451,6 +452,9 @@ function AgentCard({
             ) : null}
             <StatusBadge
               status={agent.status}
+              external={agent.external}
+              bridgeConnected={agent.bridgeConnected}
+              lastBridgeSeenAt={agent.lastBridgeSeenAt}
               hibernationState={hibState}
               syncing={syncing}
               invited={agent.invited}
@@ -557,6 +561,9 @@ function AgentPowerToggle({
 
 function StatusBadge({
   status,
+  external,
+  bridgeConnected,
+  lastBridgeSeenAt,
   hibernationState,
   syncing,
   invited,
@@ -564,6 +571,9 @@ function StatusBadge({
   invitedStale,
 }: {
   status: AgentRow["status"];
+  external?: boolean;
+  bridgeConnected?: boolean;
+  lastBridgeSeenAt?: string | null;
   hibernationState?: HibernationApiState;
   syncing?: boolean;
   invited?: boolean;
@@ -590,6 +600,17 @@ function StatusBadge({
     ) : (
       <span className="inline-flex items-center gap-1 rounded-full bg-sky-500/20 px-2 py-0.5 text-xs font-medium text-sky-300">
         {t("agents.status.invited")}
+      </span>
+    );
+  }
+  if (
+    external &&
+    status === "ready" &&
+    !hasFreshAgentHeartbeat({ bridgeConnected, lastBridgeSeenAt })
+  ) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-[#7975a8]/20 px-2 py-0.5 text-xs font-medium text-[#7975a8]">
+        {t("agents.status.offline")}
       </span>
     );
   }

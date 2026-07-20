@@ -575,6 +575,7 @@
       "hibernating": "Hibernando…",
       "waking": "Despertando…",
       "online": "En línea",
+      "offline": "Desconectado",
       "failed": "Falló",
       "provisioning": "Aprovisionando",
       "unknown": "Desconocido"
@@ -1115,6 +1116,7 @@
       "hibernating": "Hibernando…",
       "waking": "Despertando…",
       "online": "En línea",
+      "offline": "Desconectado",
       "failed": "Falló",
       "provisioning": "Aprovisionando",
       "unknown": "Desconocido"

@@ -62,7 +62,7 @@ export function useWalletAgents(
       walletAddress.toLowerCase(),
       "agents"
     );
-    return onSnapshot(
+    const unsubscribe = onSnapshot(
       ref,
       (snap) => {
         const byName: Record<string, AgentLiveStatus> = {};
@@ -89,6 +89,13 @@ export function useWalletAgents(
       },
       () => setState({ byName: {}, loaded: true })
     );
+    const freshnessTimer = window.setInterval(() => {
+      setState((current) => ({ ...current, byName: { ...current.byName } }));
+    }, 30_000);
+    return () => {
+      window.clearInterval(freshnessTimer);
+      unsubscribe();
+    };
   }, [walletAddress]);
 
   return state;
@@ -135,7 +142,12 @@ export function realtimeAgentStatus(a?: AgentLiveStatus): {
   // status:"ready" forever with no bridge; treating that as available showed
   // ghost agents as live (and made hibernation look broken). Such agents now
   // correctly read "Offline" until a bridge actually connects.
-  if (a.bridgeConnected && seen > 0 && seen >= woke)
+  if (
+    a.bridgeConnected &&
+    seen > 0 &&
+    seen >= woke &&
+    Date.now() - seen <= 90_000
+  )
     return { color: "bg-emerald-400", label: STATUS_AVAILABLE };
 
   if ((a.status ?? "").toLowerCase() === "provision-failed" ||

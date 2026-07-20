@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { use, useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -60,7 +61,12 @@ import { formatRelativeShort } from "../../../lib/format";
 import { logActivity } from "../../../lib/activityEvents";
 import { ProjectChatTab } from "../../../components/ProjectChatTab";
 
-type Tab = "tasks" | "docs" | "conductor" | "agents" | "map" | "chat" | "members";
+const ProjectMeetingsTab = dynamic(() => import("../../../components/ProjectMeetingsTab"), {
+  ssr: false,
+  loading: () => <div className="h-64 animate-pulse rounded-xl border border-border bg-card" />,
+});
+
+type Tab = "tasks" | "docs" | "conductor" | "agents" | "map" | "chat" | "meetings" | "members";
 
 type PageProps = {
   params: Promise<{ projectId: string }>;
@@ -78,7 +84,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
   const ownerWallet = ownerParam || address;
   const isShared = Boolean(ownerParam && ownerParam.toLowerCase() !== (address ?? "").toLowerCase());
   const initialTab = (searchParams.get("tab") as Tab) || "tasks";
-  const TABS: Tab[] = ["tasks", "docs", "conductor", "agents", "map", "chat", "members"];
+  const TABS: Tab[] = ["tasks", "docs", "conductor", "agents", "map", "chat", "meetings", "members"];
   const [tab, setTab] = useState<Tab>(
     TABS.includes(initialTab) ? initialTab : "tasks"
   );
@@ -195,6 +201,15 @@ export default function ProjectDetailPage({ params }: PageProps) {
               projectId={projectId}
               ownerWallet={ownerWallet ?? undefined}
               onDesignatePm={() => setTab("agents")}
+            />
+          ) : null}
+          {tab === "meetings" ? (
+            <ProjectMeetingsTab
+              projectId={projectId}
+              projectName={liveDetail.project.name}
+              pmAgent={liveDetail.project.pmAgent}
+              ownerWallet={ownerWallet ?? undefined}
+              canManage={!isShared}
             />
           ) : null}
           {tab === "members" ? (
@@ -706,6 +721,7 @@ function Tabs({
     { id: "agents", label: t("projectRoom.tabs.agents") },
     { id: "map", label: t("projectRoom.tabs.map") },
     { id: "chat", label: t("projectRoom.tabs.chat") },
+    { id: "meetings", label: "Meetings" },
     { id: "members", label: t("projectRoom.tabs.members") },
   ];
 

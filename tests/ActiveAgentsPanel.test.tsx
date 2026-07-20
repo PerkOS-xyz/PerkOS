@@ -83,8 +83,8 @@ describe("ActiveAgentsPanel", () => {
     // 2 of 3 have a real bridge heartbeat; the third is status:"ready" but
     // never connected (a ghost) — it must NOT count as online.
     mockByName = {
-      Apollo: live({ name: "Apollo", bridgeConnected: true, lastBridgeSeenMs: 1000 }),
-      Hermes: live({ id: "ag2", name: "Hermes", bridgeConnected: true, lastBridgeSeenMs: 2000 }),
+      Apollo: live({ name: "Apollo", bridgeConnected: true, lastBridgeSeenMs: Date.now() }),
+      Hermes: live({ id: "ag2", name: "Hermes", bridgeConnected: true, lastBridgeSeenMs: Date.now() }),
       Loki: live({ id: "ag3", name: "Loki" }),
     };
     render(
@@ -108,7 +108,7 @@ describe("ActiveAgentsPanel", () => {
 
   it("labels avatars with live status text", () => {
     mockByName = {
-      A: live({ name: "A", bridgeConnected: true, lastBridgeSeenMs: 1000 }),
+      A: live({ name: "A", bridgeConnected: true, lastBridgeSeenMs: Date.now() }),
       B: live({ id: "b", name: "B", hibernationState: "hibernated" }),
       // C has no live record → Unknown.
     };
@@ -138,5 +138,18 @@ describe("ActiveAgentsPanel", () => {
     expect(screen.getByText("Offline")).toBeInTheDocument();
     // formatRelativeShort renders something like "2h ago".
     expect(screen.getByText(/2h/)).toBeInTheDocument();
+  });
+
+  it("treats a stale connected heartbeat as offline", () => {
+    mockByName = {
+      Apollo: live({
+        name: "Apollo",
+        bridgeConnected: true,
+        lastBridgeSeenMs: Date.now() - 2 * 60 * 1000,
+      }),
+    };
+    render(<ActiveAgentsPanel agents={[agent({ id: "1", name: "Apollo" })]} />);
+    expect(screen.getByText("Offline")).toBeInTheDocument();
+    expect(screen.getByText(/0 of 1 available/)).toBeInTheDocument();
   });
 });

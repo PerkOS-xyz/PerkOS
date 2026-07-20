@@ -575,6 +575,7 @@
       "hibernating": "Ibernazione…",
       "waking": "Riattivazione…",
       "online": "Online",
+      "offline": "Offline",
       "failed": "Non riuscito",
       "provisioning": "Provisioning",
       "unknown": "Sconosciuto"
@@ -1123,6 +1124,7 @@
       "hibernating": "Ibernazione…",
       "waking": "Riattivazione…",
       "online": "Online",
+      "offline": "Offline",
       "failed": "Non riuscito",
       "provisioning": "Provisioning",
       "unknown": "Sconosciuto"
