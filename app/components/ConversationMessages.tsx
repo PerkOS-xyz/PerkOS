@@ -31,6 +31,8 @@ type Props = {
   onApprovePlan?: (planId: string) => void;
   onRequestPlanChanges?: (planId: string) => void;
   approvingPlanId?: string | null;
+  /** Only the current server-authorized proposal may expose decision buttons. */
+  actionablePlanId?: string | null;
 };
 
 export function ConversationMessages({
@@ -46,6 +48,7 @@ export function ConversationMessages({
   onApprovePlan,
   onRequestPlanChanges,
   approvingPlanId,
+  actionablePlanId,
 }: Props) {
   // Merge history + live + pending; dedupe by id, then sort.
   const merged = useMemo(() => {
@@ -69,6 +72,16 @@ export function ConversationMessages({
         ),
       ),
     [merged],
+  );
+  const latestProposalMessageId = useMemo(
+    () =>
+      [...merged].reverse().find(
+        (message) =>
+          message.event?.domain === "project_workflow" &&
+          message.event.type === "plan_proposed" &&
+          message.event.planId === actionablePlanId,
+      )?.id ?? null,
+    [merged, actionablePlanId],
   );
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -167,6 +180,7 @@ export function ConversationMessages({
             planAlreadyApproved={Boolean(
               m.event?.planId && approvedPlanIds.has(m.event.planId),
             )}
+            proposalActionable={m.id === latestProposalMessageId}
           />
         ))}
       </div>
@@ -181,6 +195,7 @@ function MessageRow({
   onRequestPlanChanges,
   approvingPlanId,
   planAlreadyApproved,
+  proposalActionable,
 }: {
   message: OptimisticMessage;
   walletAddress: string;
@@ -188,6 +203,7 @@ function MessageRow({
   onRequestPlanChanges?: (planId: string) => void;
   approvingPlanId?: string | null;
   planAlreadyApproved?: boolean;
+  proposalActionable?: boolean;
 }) {
   const me = `user:${walletAddress.toLowerCase()}`;
   const fromMe = message.from === me;
@@ -232,7 +248,7 @@ function MessageRow({
             ))}
           </div>
         ) : null}
-        {proposal && onApprovePlan && !planAlreadyApproved ? (
+        {proposal && onApprovePlan && proposalActionable && !planAlreadyApproved ? (
           <div className="mt-3 flex flex-col items-stretch gap-2 rounded-md border border-primary/30 bg-primary/5 p-2 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-xs text-muted-foreground">
               Approval is required before tasks start.

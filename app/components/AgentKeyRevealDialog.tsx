@@ -182,7 +182,7 @@ export function AgentKeyRevealDialog({ open, credentials, onClose }: Props) {
             onClick={onClose}
             disabled={!acknowledged}
           >
-            Done
+            Continue to agent
           </Button>
         </DialogFooter>
       </DialogContent>

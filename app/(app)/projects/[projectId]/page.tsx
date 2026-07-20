@@ -50,6 +50,7 @@ import type { SwarmDefinition } from "../../../lib/swarm";
 import { EmptyState } from "../../../components/EmptyState";
 import { DocsTab } from "../../../components/DocsTab";
 import { useProjectTasks } from "../../../lib/useProjectTasks";
+import { useProject } from "../../../lib/useProject";
 import { useWalletAgents, realtimeAgentStatus, STATUS_AVAILABLE, STATUS_RESTING, STATUS_GETTING_READY, STATUS_GOING_TO_REST, type AgentLiveStatus } from "../../../lib/useWalletAgents";
 import { MembersPanel } from "../../../components/MembersPanel";
 import { ProjectInsights } from "../../../components/ProjectInsights";
@@ -106,8 +107,16 @@ export default function ProjectDetailPage({ params }: PageProps) {
     ownerWallet,
     projectId
   );
+  const { project: liveProject, loaded: projectLoaded } = useProject(
+    ownerWallet,
+    projectId,
+  );
   const liveDetail = data
-    ? { ...data, tasks: tasksLoaded ? liveTasks : data.tasks }
+    ? {
+        ...data,
+        project: projectLoaded && liveProject ? liveProject : data.project,
+        tasks: tasksLoaded ? liveTasks : data.tasks,
+      }
     : null;
 
   // Speculative pre-warm: opening a project wakes its PM agent in the background
@@ -224,14 +233,8 @@ function DetailHeader({
   const inProgress = tasks.filter((t) => t.status === "In progress").length;
   const done = tasks.filter((t) => t.status === "Done").length;
 
-  // Principal agent: the user-designated PM, then the first explicit project
-  // assignment, then the first agent that appears on a task. The roster order
-  // is not a leadership signal (newly-added workers are often first).
-  const primaryAgent =
-    project.pmAgent ??
-    project.agentIds?.[0] ??
-    tasks.map((t) => t.agent).find((name) => name && name !== "App Agent") ??
-    null;
+  // Leadership is explicit. Roster order is never presented as a PM choice.
+  const primaryAgent = project.pmAgent ?? null;
 
   const router = useRouter();
   const queryClient = useQueryClient();

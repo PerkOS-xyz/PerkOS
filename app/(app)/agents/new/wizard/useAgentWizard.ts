@@ -142,6 +142,7 @@ export function useAgentWizard() {
   // ---- post-launch overlays ------------------------------------------------
   const [issuedCredentials, setIssuedCredentials] =
     useState<LaunchAgentCredentials | null>(null);
+  const [launchedAgentId, setLaunchedAgentId] = useState<string | null>(null);
   const [issuedBundle, setIssuedBundle] = useState<{
     bundle: DeployBundle;
     agentId: string;
@@ -286,6 +287,7 @@ export function useAgentWizard() {
       }
 
       const launchedAgentId = response?.result?.agent?.id ?? response?.launchId;
+      setLaunchedAgentId(launchedAgentId ?? null);
       if (
         response?.deployBundle &&
         launchedAgentId &&
@@ -389,7 +391,13 @@ export function useAgentWizard() {
   const closeOverlay = () => {
     setIssuedCredentials(null);
     setIssuedBundle(null);
-    router.replace(fromOnboarding ? "/dashboard" : "/agents");
+    router.replace(
+      fromOnboarding
+        ? "/dashboard"
+        : launchedAgentId
+          ? `/agents/${encodeURIComponent(launchedAgentId)}`
+          : "/agents",
+    );
   };
 
   return {

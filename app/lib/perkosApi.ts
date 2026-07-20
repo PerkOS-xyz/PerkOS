@@ -28,6 +28,7 @@ import {
   getDocs,
   increment,
   orderBy,
+  onSnapshot,
   query,
   runTransaction,
   serverTimestamp,
@@ -486,6 +487,20 @@ function projectDoc(walletAddress: string, projectId: string) {
     "projects",
     projectId
   ).withConverter(projectConverter);
+}
+
+/** Subscribe to the project document itself (status, PM and workflow phase). */
+export function subscribeProject(
+  walletAddress: string,
+  projectId: string,
+  onData: (project: Project | null) => void,
+  onError?: (error: Error) => void,
+): () => void {
+  return onSnapshot(
+    projectDoc(walletAddress, projectId),
+    (snapshot) => onData(snapshot.exists() ? snapshot.data() : null),
+    (error) => onError?.(error),
+  );
 }
 
 function tasksCol(walletAddress: string, projectId: string) {
