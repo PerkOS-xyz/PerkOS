@@ -575,6 +575,7 @@
       "hibernating": "休眠中…",
       "waking": "唤醒中…",
       "online": "在线",
+      "offline": "离线",
       "failed": "失败",
       "provisioning": "配置中",
       "unknown": "未知"
@@ -1123,6 +1124,7 @@
       "hibernating": "休眠中…",
       "waking": "唤醒中…",
       "online": "在线",
+      "offline": "离线",
       "failed": "失败",
       "provisioning": "配置中",
       "unknown": "未知"

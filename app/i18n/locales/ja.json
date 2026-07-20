@@ -575,6 +575,7 @@
       "hibernating": "休止処理中…",
       "waking": "起動中…",
       "online": "オンライン",
+      "offline": "オフライン",
       "failed": "失敗",
       "provisioning": "準備中",
       "unknown": "不明"
@@ -1123,6 +1124,7 @@
       "hibernating": "休止処理中…",
       "waking": "起動中…",
       "online": "オンライン",
+      "offline": "オフライン",
       "failed": "失敗",
       "provisioning": "準備中",
       "unknown": "不明"

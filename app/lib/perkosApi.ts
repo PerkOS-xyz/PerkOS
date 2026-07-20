@@ -38,6 +38,7 @@ import {
   type FirestoreDataConverter,
   type Timestamp,
 } from "firebase/firestore";
+import { isAllowedAgentHosting } from "@/app/lib/agentHostingPolicy";
 
 import { firebaseDb } from "./firebase";
 import { formatAddress } from "./format";
@@ -403,6 +404,8 @@ const messageConverter: FirestoreDataConverter<ChatMessage> = {
 export type AgentRow = Agent & {
   /** True only for PerkOS-managed ECS agents (including legacy ECS records). */
   managed?: boolean;
+  /** True for an agent installed by the user on their own VPS. */
+  selfHosted?: boolean;
   external?: boolean;
   /**
    * True for agents registered via the "invite" flow (deployMode "invited").
@@ -463,6 +466,7 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
         rawDeployMode === "self-hosted" ||
         rawDeployMode === "imported",
       invited: rawDeployMode === "invited",
+      selfHosted: rawDeployMode === "self-hosted",
       managed:
         rawDeployMode === "perkos-managed" ||
         (typeof ecsServiceArn === "string" && ecsServiceArn.length > 0),
@@ -477,7 +481,7 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
 };
 
 function isAllowedAgentRow(agent: AgentRow): boolean {
-  return agent.managed === true || agent.invited === true;
+  return isAllowedAgentHosting(agent);
 }
 
 function projectsCol(walletAddress: string) {

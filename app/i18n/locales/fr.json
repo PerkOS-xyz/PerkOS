@@ -575,6 +575,7 @@
       "hibernating": "Mise en veille…",
       "waking": "Réveil…",
       "online": "En ligne",
+      "offline": "Hors ligne",
       "failed": "Échec",
       "provisioning": "Provisionnement",
       "unknown": "Inconnu"
@@ -1123,6 +1124,7 @@
       "hibernating": "Mise en veille…",
       "waking": "Réveil…",
       "online": "En ligne",
+      "offline": "Hors ligne",
       "failed": "Échec",
       "provisioning": "Provisionnement",
       "unknown": "Inconnu"

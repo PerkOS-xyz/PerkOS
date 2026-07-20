@@ -1,7 +1,7 @@
 import { useChainId } from "wagmi";
 import { base, celo } from "wagmi/chains";
 import { useTranslation } from "react-i18next";
-import { Cloud, Loader2, UserPlus } from "lucide-react";
+import { Cloud, Loader2, Server, UserPlus } from "lucide-react";
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,8 @@ export function StepMethod({
   onChange,
   ecsAllowed,
   ecsAccessLoading,
+  vpsAllowed,
+  vpsAccessLoading,
 }: StepProps & {
   ecsAllowed: boolean;
   ecsAccessLoading: boolean;
@@ -46,6 +48,7 @@ export function StepMethod({
         value={state.method ?? ""}
         onValueChange={(v) => {
           if (v === "perkos" && !ecsAllowed) return;
+          if (v === "vps" && !vpsAllowed) return;
           pick(v as LaunchMethod);
         }}
         className="flex flex-col gap-3"
@@ -90,6 +93,46 @@ export function StepMethod({
               ) : null}
             </div>
             <RadioGroupItem value="perkos" id="method-perkos" disabled={ecsAccessLoading || !ecsAllowed} />
+          </div>
+        </SelectableCard>
+
+        <SelectableCard
+          selected={state.method === "vps"}
+          onClick={() => vpsAllowed && pick("vps")}
+          disabled={vpsAccessLoading || !vpsAllowed}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <Server className="h-4 w-4 text-primary" />
+                <span className="text-base font-medium text-foreground">
+                  {t("wizard.method.vps.title")}
+                </span>
+                {vpsAccessLoading ? (
+                  <Badge variant="secondary" className="gap-1">
+                    <Loader2 className="h-3 w-3 animate-spin" /> Checking access
+                  </Badge>
+                ) : !vpsAllowed ? (
+                  <Badge
+                    variant="secondary"
+                    className="border-amber-500/40 bg-amber-500/15 text-amber-300"
+                  >
+                    {t("wizard.method.comingSoon")}
+                  </Badge>
+                ) : null}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {t("wizard.method.vps.descLead")}{" "}
+                <code className="rounded bg-muted px-1 font-mono text-[11px]">docker compose up -d</code>{" "}
+                {t("wizard.method.vps.descTail")}
+              </p>
+              {!vpsAccessLoading && !vpsAllowed ? (
+                <p className="text-xs text-muted-foreground">
+                  {t("wizard.method.vps.inviteOnly")}
+                </p>
+              ) : null}
+            </div>
+            <RadioGroupItem value="vps" id="method-vps" disabled={vpsAccessLoading || !vpsAllowed} />
           </div>
         </SelectableCard>
 

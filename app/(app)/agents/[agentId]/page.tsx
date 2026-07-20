@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { hasFreshAgentHeartbeat } from "../../../lib/agentHostingPolicy";
 
 import {
   deleteAgent,
@@ -428,6 +429,9 @@ function AgentHeader({
             </Badge>
             <StatusBadge
               status={agent.status}
+              external={isExternal}
+              bridgeConnected={agent.bridgeConnected}
+              lastBridgeSeenAt={agent.lastBridgeSeenAt}
               hibernationState={hibState}
               syncing={hibSyncing}
             />
@@ -490,14 +494,31 @@ function AgentHeader({
 
 function StatusBadge({
   status,
+  external,
+  bridgeConnected,
+  lastBridgeSeenAt,
   hibernationState,
   syncing,
 }: {
   status: Agent["status"];
+  external?: boolean;
+  bridgeConnected?: boolean;
+  lastBridgeSeenAt?: string | null;
   hibernationState?: HibernationApiState;
   syncing?: boolean;
 }) {
   const { t } = useTranslation();
+  if (
+    external &&
+    status === "ready" &&
+    !hasFreshAgentHeartbeat({ bridgeConnected, lastBridgeSeenAt })
+  ) {
+    return (
+      <Badge variant="secondary" className="border-0 bg-muted text-muted-foreground">
+        {t("agentDetail.status.offline")}
+      </Badge>
+    );
+  }
   // Don't assert "Online" while the live hibernation status is still loading —
   // it may resolve to "Hibernated". Show a neutral syncing state instead.
   if (syncing) {
