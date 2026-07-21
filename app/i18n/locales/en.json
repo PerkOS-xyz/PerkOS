@@ -959,15 +959,19 @@
     },
     "channels": {
       "title": "Channels",
-      "description": "Optional. Let your agent receive and reply to messages from outside PerkOS, using each runtime's native messaging integration.",
+      "description": "Optional. Connect a channel through the adapter implemented by the selected agent runtime.",
       "secretsNote": "Secrets are stored in a managed vault under your wallet’s namespace: never in the agent doc, never in this browser tab beyond the launch request. You can also add a channel later from the agent’s settings.",
       "telegram": {
-        "blurb": "Your agent answers from a Telegram bot you create at @BotFather. Webhook mode is friendly to hibernation, no idle connection while the agent sleeps.",
+        "blurb": "{{runtime}} uses its native Telegram polling adapter with a bot you create at @BotFather.",
         "botToken": "Bot token",
         "botTokenHelp": "From @BotFather. Stored in a managed secrets vault; never returned by the API.",
-        "webhookUrl": "Webhook URL (optional)",
-        "webhookHelp": "Leave blank to use long-polling. Setting a webhook URL is recommended for hibernation friendliness."
+        "allowedUsers": "Allowed user IDs (optional)",
+        "allowedUsersHelp": "Comma-separated numeric Telegram user IDs. Leave empty to use the runtime's pairing policy.",
+        "homeChannel": "Default chat ID (optional)",
+        "homeChannelHelp": "Chat used for proactive messages. It may be a user, group, or channel ID.",
+        "alwaysOn": "Telegram currently uses native long polling. This agent will remain online and cannot hibernate while the channel is enabled."
       },
+      "moreComing": "WhatsApp, Slack and other channels will appear here only after their framework-specific adapters and login flows are available.",
       "slack": {
         "blurb": "Your agent answers in Slack channels it's invited to. Webhook-mode (Events API), hibernation-friendly. You create a Slack app, install it to your workspace, copy the bot token + signing secret.",
         "botToken": "Bot token (xoxb-...)",

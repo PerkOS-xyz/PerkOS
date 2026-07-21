@@ -959,15 +959,19 @@
     },
     "channels": {
       "title": "Canales",
-      "description": "Opcional. Permite que tu agente reciba y responda mensajes desde fuera de PerkOS, usando la integración de mensajería nativa de cada entorno de ejecución.",
+      "description": "Opcional. Conecta un canal mediante el adaptador implementado por el entorno de ejecución seleccionado.",
       "secretsNote": "Los secretos se guardan en una bóveda administrada dentro del espacio de tu billetera. Nunca se guardan en el documento del agente ni permanecen en esta pestaña del navegador más allá de la solicitud de lanzamiento. También puedes agregar un canal más adelante desde los ajustes del agente.",
       "telegram": {
-        "blurb": "Tu agente responde desde un bot de Telegram que creas en @BotFather. El modo webhook funciona bien con la hibernación: no hay conexión inactiva mientras el agente duerme.",
+        "blurb": "{{runtime}} usa su adaptador nativo de Telegram por polling con un bot que creas en @BotFather.",
         "botToken": "Token del bot",
         "botTokenHelp": "Lo obtienes de @BotFather. Se guarda en una bóveda de secretos administrada; la API nunca lo devuelve.",
-        "webhookUrl": "URL del webhook (opcional)",
-        "webhookHelp": "Déjalo en blanco para usar long-polling. Configurar una URL de webhook es recomendable para que funcione bien con la hibernación."
+        "allowedUsers": "IDs de usuarios permitidos (opcional)",
+        "allowedUsersHelp": "IDs numéricos de Telegram separados por comas. Déjalo vacío para usar la política de emparejamiento del runtime.",
+        "homeChannel": "ID del chat predeterminado (opcional)",
+        "homeChannelHelp": "Chat usado para mensajes proactivos. Puede ser el ID de un usuario, grupo o canal.",
+        "alwaysOn": "Telegram usa actualmente long polling nativo. Este agente permanecerá encendido y no podrá hibernar mientras el canal esté activo."
       },
+      "moreComing": "WhatsApp, Slack y otros canales aparecerán aquí cuando estén disponibles sus adaptadores y flujos de acceso específicos para cada framework.",
       "slack": {
         "blurb": "Tu agente responde en los canales de Slack a los que lo invites. Funciona en modo webhook (Events API), compatible con la hibernación. Tú creas una app de Slack, la instalas en tu espacio de trabajo y copias el token del bot y el signing secret.",
         "botToken": "Token del bot (xoxb-...)",

@@ -89,7 +89,8 @@ export type WizardState = {
   // never in the launch payload.
   gatewayTelegramEnabled: boolean;
   gatewayTelegramBotToken: string;
-  gatewayTelegramWebhookUrl: string;
+  gatewayTelegramAllowedUsers: string;
+  gatewayTelegramHomeChannel: string;
   gatewayFarcasterEnabled: boolean;
   gatewayFarcasterNeynarApiKey: string;
   gatewayFarcasterSignerUuid: string;
@@ -125,7 +126,8 @@ export const INITIAL_WIZARD_STATE: WizardState = {
   disabledTools: [],
   gatewayTelegramEnabled: false,
   gatewayTelegramBotToken: "",
-  gatewayTelegramWebhookUrl: "",
+  gatewayTelegramAllowedUsers: "",
+  gatewayTelegramHomeChannel: "",
   gatewayFarcasterEnabled: false,
   gatewayFarcasterNeynarApiKey: "",
   gatewayFarcasterSignerUuid: "",

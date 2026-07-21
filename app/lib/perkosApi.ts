@@ -2634,6 +2634,12 @@ export async function saveAgentGateway(
   agentId: string,
   input: {
     type: "telegram" | "farcaster" | "slack";
+    adapterId?: string;
+    transportMode?: "polling" | "webhook" | "socket" | "http" | "relay";
+    managementMode?:
+      | "runtime-native"
+      | "perkos-managed-relay"
+      | "user-managed-native";
     enabled: boolean;
     nonSecretConfig?: Record<string, string>;
     secrets?: Record<string, string>;
@@ -2647,6 +2653,52 @@ export async function saveAgentGateway(
   const payload = await parseJson(response);
   if (!response.ok) throw new Error(apiError(payload, "Saving gateway failed"));
   return payload;
+}
+
+export type AgentGatewayView = {
+  type: "telegram" | "farcaster" | "slack";
+  adapterId?: string;
+  framework?: "Hermes" | "OpenClaw";
+  transportMode?: "polling" | "webhook" | "socket" | "http" | "relay";
+  managementMode?:
+    | "runtime-native"
+    | "perkos-managed-relay"
+    | "user-managed-native";
+  requiresAlwaysOn?: boolean;
+  enabled: boolean;
+  status: "pending" | "active" | "error";
+  statusMessage?: string;
+  lastProbeAt?: string;
+};
+
+export type RuntimeChannelCapability = {
+  adapterId: string;
+  framework: "Hermes" | "OpenClaw";
+  provider: string;
+  label: string;
+  transportMode: string;
+  managementMode: string;
+  requiresAlwaysOn: boolean;
+};
+
+export async function getAgentGateways(agentId: string): Promise<{
+  gateways: AgentGatewayView[];
+  capabilities: RuntimeChannelCapability[];
+}> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/agents/${encodeURIComponent(agentId)}/gateways`,
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Loading gateways failed"));
+  const data = payload as {
+    gateways?: AgentGatewayView[];
+    capabilities?: RuntimeChannelCapability[];
+  };
+  return {
+    gateways: Array.isArray(data.gateways) ? data.gateways : [],
+    capabilities: Array.isArray(data.capabilities) ? data.capabilities : [],
+  };
 }
 
 export async function launchAgent(input: {

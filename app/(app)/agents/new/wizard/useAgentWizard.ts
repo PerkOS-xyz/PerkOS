@@ -220,11 +220,22 @@ export function useAgentWizard() {
           try {
             await saveAgentGateway(agentId, {
               type: "telegram",
+              adapterId:
+                state.runtime === "Hermes"
+                  ? "hermes.telegram.polling.v1"
+                  : "openclaw.telegram.polling.v1",
+              transportMode: "polling",
+              managementMode: "runtime-native",
               enabled: true,
               secrets: { botToken: state.gatewayTelegramBotToken },
-              nonSecretConfig: state.gatewayTelegramWebhookUrl
-                ? { webhookUrl: state.gatewayTelegramWebhookUrl }
-                : undefined,
+              nonSecretConfig: {
+                ...(state.gatewayTelegramAllowedUsers.trim()
+                  ? { allowedUsers: state.gatewayTelegramAllowedUsers.trim() }
+                  : {}),
+                ...(state.gatewayTelegramHomeChannel.trim()
+                  ? { homeChannel: state.gatewayTelegramHomeChannel.trim() }
+                  : {}),
+              },
             });
             toast.success(t("wizard.toast.telegramSaved"), {
               description: t("wizard.toast.gatewayActivate"),
@@ -353,7 +364,10 @@ export function useAgentWizard() {
       case "capabilities":
         return true;
       case "channels":
-        return true;
+        return (
+          !state.gatewayTelegramEnabled ||
+          state.gatewayTelegramBotToken.trim().length > 0
+        );
       case "review":
         // A PerkOS-hosted launch needs a concrete runtime image, else the
         // server rejects it (IMAGE_TAG_REQUIRED) and we'd strand a doc. Block
