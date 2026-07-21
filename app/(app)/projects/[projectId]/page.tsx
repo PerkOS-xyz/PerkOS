@@ -321,10 +321,14 @@ function DetailHeader({
         toast.error(t("projectRoom.header.toast.pickLeadFirst"));
       } else if (res.reason === "already-active") {
         toast.info(t("projectRoom.header.toast.alreadyWorking"));
-      } else if (res.status === "working") {
+      } else if (res.status === "working" && (res.created ?? 0) > 0) {
         toast.success(
           t("projectRoom.header.toast.leadAssigned", { count: res.created ?? 0 }),
         );
+      } else if (res.status === "working") {
+        // pm-turn dispatches the PM asynchronously. A zero count here means
+        // planning has started, not that the PM assigned zero tasks.
+        toast.success(t("projectRoom.header.toast.teamOnIt"));
       } else if (res.status === "done") {
         toast.success(t("projectRoom.header.toast.goalComplete"));
       } else {
