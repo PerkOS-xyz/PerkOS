@@ -40,12 +40,14 @@ import { hasFreshAgentHeartbeat } from "../../../lib/agentHostingPolicy";
 
 import {
   deleteAgent,
+  getAgentGateways,
   getHibernationStatusApi,
   getWalletAgents,
   getWalletProject,
   getWalletProjects,
   hibernateAgentApi,
   type Agent,
+  type AgentGatewayView,
   type AgentRow,
   type HibernationApiState,
   type HibernationStatus,
@@ -117,6 +119,12 @@ export default function AgentDetailPage({ params }: PageProps) {
 
   const agent = agentsQuery.data?.find((a) => a.id === agentId);
 
+  const gatewaysQuery = useQuery({
+    queryKey: ["agent-gateways", agentId],
+    queryFn: () => getAgentGateways(agentId),
+    enabled: Boolean(address) && Boolean(agent),
+  });
+
   const projectsQuery = useQuery({
     queryKey: ["wallet-projects", address],
     queryFn: () => getWalletProjects(address!),
@@ -161,17 +169,10 @@ export default function AgentDetailPage({ params }: PageProps) {
     return out;
   }, [agent, projectDetails]);
 
-  const channels = useMemo(() => {
-    if (!agent) return [] as { id: string; label: string; Icon: typeof Send }[];
-    return agent.plugins
-      .filter((p) => p.startsWith("channel:"))
-      .map((p) => p.slice("channel:".length))
-      .map((id) => ({
-        id,
-        label: CHANNEL_LABELS[id]?.label ?? id,
-        Icon: CHANNEL_LABELS[id]?.Icon ?? MessageSquare,
-      }));
-  }, [agent]);
+  const channels = useMemo(
+    () => (gatewaysQuery.data?.gateways ?? []).filter((gateway) => gateway.enabled),
+    [gatewaysQuery.data],
+  );
 
   const capabilities = useMemo(() => {
     if (!agent) return [] as string[];
@@ -186,6 +187,7 @@ export default function AgentDetailPage({ params }: PageProps) {
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ["wallet-agents", address] });
     queryClient.invalidateQueries({ queryKey: ["wallet-projects", address] });
+    queryClient.invalidateQueries({ queryKey: ["agent-gateways", agentId] });
     projectIds.forEach((pid) =>
       queryClient.invalidateQueries({
         queryKey: ["wallet-project", address, pid],
@@ -264,7 +266,12 @@ export default function AgentDetailPage({ params }: PageProps) {
         <CapabilitiesCard capabilities={capabilities} />
       </section>
 
-      <ChannelsSection channels={channels} runtime={agent.runtime} />
+      <ChannelsSection
+        channels={channels}
+        runtime={agent.runtime}
+        loading={gatewaysQuery.isLoading}
+        error={gatewaysQuery.error instanceof Error ? gatewaysQuery.error.message : undefined}
+      />
 
       {agent.invited ? <InvitedCredentialPanel agent={agent} /> : null}
 
@@ -729,9 +736,13 @@ function CapabilitiesCard({ capabilities }: { capabilities: string[] }) {
 function ChannelsSection({
   channels,
   runtime,
+  loading,
+  error,
 }: {
-  channels: { id: string; label: string; Icon: typeof Send }[];
+  channels: AgentGatewayView[];
   runtime: string;
+  loading: boolean;
+  error?: string;
 }) {
   const { t } = useTranslation();
   return (
@@ -743,21 +754,43 @@ function ChannelsSection({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {channels.length === 0 ? (
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Loading channels…</p>
+        ) : error ? (
+          <p className="text-sm text-destructive">{error}</p>
+        ) : channels.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             {t("agentDetail.channels.none", { runtime })}
           </p>
         ) : (
           <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {channels.map(({ id, label, Icon }) => (
+            {channels.map((channel) => {
+              const channelMeta = CHANNEL_LABELS[channel.type];
+              const Icon = channelMeta?.Icon ?? MessageSquare;
+              return (
               <li
-                key={id}
-                className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground"
+                key={channel.adapterId ?? channel.type}
+                className="flex flex-col gap-1 rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground"
               >
-                <Icon className="h-4 w-4 text-primary" />
-                {label}
+                <div className="flex items-center gap-2">
+                  <Icon className="h-4 w-4 text-primary" />
+                  <span>{channelMeta?.label ?? channel.type}</span>
+                  <Badge variant="outline" className="ml-auto capitalize">
+                    {channel.status}
+                  </Badge>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  {channel.framework ?? runtime} · {channel.transportMode ?? "native"}
+                  {channel.requiresAlwaysOn ? " · always on" : ""}
+                </span>
+                {channel.statusMessage ? (
+                  <span className="text-xs text-muted-foreground">
+                    {channel.statusMessage}
+                  </span>
+                ) : null}
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </CardContent>
