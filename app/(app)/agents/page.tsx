@@ -427,11 +427,16 @@ function AgentCard({
       >
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-3">
-            <Checkbox
-              checked={checked}
-              onCheckedChange={onToggle}
-              aria-label={t("agents.card.selectAria", { name: agent.name })}
-            />
+            <span
+              onClick={(event) => event.stopPropagation()}
+              onPointerDown={(event) => event.stopPropagation()}
+            >
+              <Checkbox
+                checked={checked}
+                onCheckedChange={onToggle}
+                aria-label={t("agents.card.selectAria", { name: agent.name })}
+              />
+            </span>
             <span className="grid h-9 w-9 place-items-center rounded-full bg-[#ec1b69]/20 text-xs font-medium text-[#ec1b69]">
               {initials(agent.name)}
             </span>

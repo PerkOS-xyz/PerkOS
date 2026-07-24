@@ -1155,7 +1155,7 @@
     "channels": {
       "title": "已连接的渠道",
       "description": "用户除了在 PerkOS 内部,还可以通过这些渠道联系到这个智能体。",
-      "none": "尚未配置任何渠道。{{runtime}} 智能体可以接入 Telegram、Discord、Slack 或 WhatsApp 等渠道。"
+      "none": "尚未配置渠道。目前已支持 Telegram，后续将提供更多针对不同运行时的适配器。"
     },
     "tasks": {
       "title": "分配给 {{name}} 的任务",

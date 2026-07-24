@@ -1146,7 +1146,7 @@
     "channels": {
       "title": "연결된 채널",
       "description": "PerkOS 안에서뿐 아니라 사용자가 이 에이전트에게 연락할 수 있는 곳이에요.",
-      "none": "설정된 채널이 없어요. {{runtime}} 에이전트는 Telegram, Discord, Slack, WhatsApp 같은 채널에 연결할 수 있어요."
+      "none": "설정된 채널이 없습니다. 현재 Telegram을 사용할 수 있으며 런타임별 추가 어댑터도 제공될 예정입니다."
     },
     "tasks": {
       "title": "{{name}}에게 배정된 작업",

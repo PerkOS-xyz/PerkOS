@@ -1151,7 +1151,7 @@
     "channels": {
       "title": "Canales conectados",
       "description": "Dónde más pueden contactar a este agente, además de dentro de PerkOS.",
-      "none": "Ninguno configurado. Los agentes {{runtime}} se pueden conectar a canales como Telegram, Discord, Slack o WhatsApp."
+      "none": "No hay canales configurados. Telegram está disponible ahora; próximamente habrá más adaptadores específicos para cada runtime."
     },
     "tasks": {
       "title": "Tareas asignadas a {{name}}",
@@ -1313,6 +1313,7 @@
       "runPmTitleNoPm": "Vas a elegir qué agente lidera el equipo",
       "teamWorking": "Equipo trabajando…",
       "putTeamToWork": "Poner al equipo a trabajar",
+      "cancelPlanning": "Cancelar planificación",
       "projectComplete": "Proyecto completado",
       "wakeTeamTitle": "Escala ahora a todos los agentes de este proyecto (precalienta al equipo)",
       "waking": "Despertando…",
@@ -1378,6 +1379,8 @@
         "goalComplete": "Tu líder de equipo dice que el objetivo ya está completo.",
         "teamOnIt": "El equipo ya se está encargando.",
         "startTeamError": "No se pudo poner en marcha al equipo",
+        "planningCancelled": "Planificación cancelada.",
+        "cancelPlanningError": "No se pudo cancelar la planificación",
         "nowLead": "{{name}} ahora es el líder de equipo.",
         "setLeadError": "No se pudo establecer el líder de equipo",
         "wakingTeam_one": "Despertando a {{count}} agente…",
@@ -1599,6 +1602,7 @@
       "paused": "Pausado",
       "round": "· ronda {{current}}/{{max}}",
       "lastRun": "· última ejecución {{time}}",
+      "planningAttempt": "· intento de planificación {{current}}/{{max}}",
       "reasons": {
         "goalMet": "Objetivo cumplido",
         "noMoreWork": "No queda nada por hacer",
@@ -1606,7 +1610,8 @@
         "badPlan": "No se pudo armar un plan válido",
         "emptyPlan": "No hay trabajo por hacer",
         "llmError": "El modelo tuvo un error",
-        "noPm": "No hay líder de equipo designado"
+        "noPm": "No hay líder de equipo designado",
+        "planningTimeout": "El líder del equipo no produjo un plan a tiempo"
       },
       "phases": {
         "plan": "Plan",

@@ -1151,7 +1151,7 @@
     "channels": {
       "title": "Connected channels",
       "description": "Where users can reach this agent in addition to inside PerkOS.",
-      "none": "None configured. {{runtime}} agents can be wired to channels like Telegram, Discord, Slack, or WhatsApp."
+      "none": "No channels configured. Telegram is available now; more runtime-specific channel adapters are coming."
     },
     "tasks": {
       "title": "Tasks assigned to {{name}}",
@@ -1313,6 +1313,7 @@
       "runPmTitleNoPm": "You'll pick which agent leads the team",
       "teamWorking": "Team working…",
       "putTeamToWork": "Put the team to work",
+      "cancelPlanning": "Cancel planning",
       "projectComplete": "Project complete",
       "wakeTeamTitle": "Scale up all of this project's agents now (pre-warm the team)",
       "waking": "Waking…",
@@ -1378,6 +1379,8 @@
         "goalComplete": "Your team lead says the goal is already complete.",
         "teamOnIt": "The team is on it.",
         "startTeamError": "Couldn't start the team",
+        "planningCancelled": "Planning cancelled.",
+        "cancelPlanningError": "Couldn't cancel planning",
         "nowLead": "{{name}} is now the team lead.",
         "setLeadError": "Couldn't set the team lead",
         "wakingTeam_one": "Waking {{count}} agent…",
@@ -1599,6 +1602,7 @@
       "paused": "Paused",
       "round": "· round {{current}}/{{max}}",
       "lastRun": "· last run {{time}}",
+      "planningAttempt": "· planning attempt {{current}}/{{max}}",
       "reasons": {
         "goalMet": "Goal met",
         "noMoreWork": "Nothing left to do",
@@ -1606,7 +1610,8 @@
         "badPlan": "Couldn't form a valid plan",
         "emptyPlan": "No work to do",
         "llmError": "The model errored",
-        "noPm": "No team lead designated"
+        "noPm": "No team lead designated",
+        "planningTimeout": "The team lead did not produce a plan in time"
       },
       "phases": {
         "plan": "Plan",
