@@ -354,6 +354,7 @@ function AgentHeader({
   const [editOpen, setEditOpen] = useState(false);
   const queryClient = useQueryClient();
   const isExternal = isExternalAgent(agent);
+  const displayName = agent.displayName ?? agent.name;
 
   // "Stop" hibernates the agent (ECS scale-to-0). It's reversible — the next
   // chat message wakes it — so no confirm dialog; the toast says as much.
@@ -410,7 +411,7 @@ function AgentHeader({
       <div className="flex items-start gap-4">
         <div className="relative">
           <div className="grid h-14 w-14 place-items-center rounded-full bg-primary/15 text-base font-medium text-primary">
-            {initials(agent.name)}
+            {initials(displayName)}
           </div>
           <span
             className={cn(
@@ -428,7 +429,7 @@ function AgentHeader({
         </div>
         <div className="flex flex-col gap-1">
           <h1 className="text-3xl font-medium leading-tight text-foreground">
-            {agent.name}
+            {displayName}
           </h1>
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary" className="border-0 bg-muted">
