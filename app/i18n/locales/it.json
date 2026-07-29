@@ -778,6 +778,12 @@
       "error": "Impossibile leggere i saldi.",
       "empty": "Il tuo Portafoglio PerkOS non contiene ancora fondi. Deposita token all'indirizzo qui sopra, poi aggiorna.",
       "unavailable": "Questa rete è temporaneamente non disponibile. Prova ad aggiornare."
+    },
+    "assets": {
+      "title": "Asset",
+      "showDetails": "Mostra dettagli di {{asset}}",
+      "hideDetails": "Nascondi dettagli di {{asset}}",
+      "unavailable": "{{network}} è temporaneamente non disponibile. Prova ad aggiornare."
     }
   },
   "notifications": {

@@ -778,6 +778,12 @@
       "error": "Couldn't read balances.",
       "empty": "Your PerkOS wallet has no funds yet. Deposit tokens to the address above, then refresh.",
       "unavailable": "This network is temporarily unavailable. Try refreshing."
+    },
+    "assets": {
+      "title": "Assets",
+      "showDetails": "Show {{asset}} details",
+      "hideDetails": "Hide {{asset}} details",
+      "unavailable": "{{network}} is temporarily unavailable. Try refreshing."
     }
   },
   "notifications": {

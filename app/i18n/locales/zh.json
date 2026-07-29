@@ -778,6 +778,12 @@
       "error": "无法读取余额。",
       "empty": "PerkOS 钱包目前没有资金。请向上面的地址存入代币，然后刷新。",
       "unavailable": "该网络暂时不可用，请尝试刷新。"
+    },
+    "assets": {
+      "title": "资产",
+      "showDetails": "显示 {{asset}} 详情",
+      "hideDetails": "隐藏 {{asset}} 详情",
+      "unavailable": "{{network}} 暂时不可用，请尝试刷新。"
     }
   },
   "notifications": {

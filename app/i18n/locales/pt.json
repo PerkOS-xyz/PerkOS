@@ -778,6 +778,12 @@
       "error": "Não foi possível ler os saldos.",
       "empty": "Sua Carteira PerkOS ainda não tem fundos. Deposite tokens no endereço acima e atualize.",
       "unavailable": "Esta rede está temporariamente indisponível. Tente atualizar."
+    },
+    "assets": {
+      "title": "Ativos",
+      "showDetails": "Mostrar detalhes de {{asset}}",
+      "hideDetails": "Ocultar detalhes de {{asset}}",
+      "unavailable": "{{network}} está temporariamente indisponível. Tente atualizar."
     }
   },
   "notifications": {
