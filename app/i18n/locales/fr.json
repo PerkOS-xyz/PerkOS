@@ -742,7 +742,7 @@
   "wallet": {
     "header": {
       "title": "Portefeuille",
-      "subtitle": "Consultez les soldes de votre portefeuille connecté ou de votre portefeuille distinct géré par PerkOS sur tous les réseaux compatibles."
+      "subtitle": "Consultez les soldes de votre portefeuille connecté ou de votre Portefeuille PerkOS sur tous les réseaux compatibles."
     },
     "loading": "Chargement de votre portefeuille…",
     "error": {
@@ -753,8 +753,8 @@
       "label": "Choisir le portefeuille",
       "connected": "Mon portefeuille connecté",
       "connectedDescription": "Votre portefeuille personnel connecté via MetaMask ou un autre fournisseur.",
-      "managed": "Portefeuille géré par PerkOS",
-      "managedDescription": "Un portefeuille distinct exploité par PerkOS pour les récompenses et les paiements des agents."
+      "managed": "Portefeuille PerkOS",
+      "managedDescription": "Un Portefeuille PerkOS distinct pour les récompenses et les paiements des agents."
     },
     "comingSoon": {
       "title": "Bientôt disponible",
@@ -762,9 +762,9 @@
     },
     "address": {
       "title": "Adresse de votre portefeuille",
-      "description": "Envoyez des tokens ici pour alimenter ce portefeuille géré sur Base, Celo ou Robinhood Chain.",
+      "description": "Envoyez des tokens ici pour alimenter votre Portefeuille PerkOS sur Base, Celo ou Robinhood Chain.",
       "connectedDescription": "Il s'agit du portefeuille personnel actuellement connecté à PerkOS.",
-      "managedDescription": "Ce portefeuille distinct est exploité par PerkOS pour les récompenses et les paiements des agents.",
+      "managedDescription": "Ce Portefeuille PerkOS est distinct de votre portefeuille connecté et sert aux récompenses et aux paiements des agents.",
       "copied": "Copié",
       "copy": "Copier",
       "deposit": "Dépôt : envoyez des USDC, USDG ou $PERKOS à {{addr}} depuis n'importe quel portefeuille.",
@@ -776,7 +776,7 @@
       "refresh": "Actualiser",
       "reading": "Lecture des soldes…",
       "error": "Impossible de lire les soldes.",
-      "empty": "Ce portefeuille géré ne contient pas encore de fonds. Déposez des tokens à l'adresse ci-dessus, puis actualisez.",
+      "empty": "Votre Portefeuille PerkOS ne contient pas encore de fonds. Déposez des tokens à l'adresse ci-dessus, puis actualisez.",
       "unavailable": "Ce réseau est temporairement indisponible. Essayez d'actualiser."
     }
   },

@@ -742,7 +742,7 @@
   "wallet": {
     "header": {
       "title": "Wallet",
-      "subtitle": "View balances for your connected wallet or your separate PerkOS-managed wallet across every supported network."
+      "subtitle": "View balances for your connected wallet or your PerkOS wallet across every supported network."
     },
     "loading": "Loading your wallet…",
     "error": {
@@ -753,8 +753,8 @@
       "label": "Choose wallet",
       "connected": "My connected wallet",
       "connectedDescription": "Your personal wallet connected through MetaMask or another provider.",
-      "managed": "PerkOS-managed wallet",
-      "managedDescription": "A separate wallet operated by PerkOS for rewards and agent payments."
+      "managed": "PerkOS wallet",
+      "managedDescription": "A separate PerkOS wallet for rewards and agent payments."
     },
     "comingSoon": {
       "title": "Coming soon",
@@ -762,9 +762,9 @@
     },
     "address": {
       "title": "Your wallet address",
-      "description": "Send tokens here to fund this managed wallet on Base, Celo, or Robinhood Chain.",
+      "description": "Send tokens here to fund your PerkOS wallet on Base, Celo, or Robinhood Chain.",
       "connectedDescription": "This is the personal wallet currently connected to PerkOS.",
-      "managedDescription": "This separate wallet is operated by PerkOS for rewards and agent payments.",
+      "managedDescription": "This PerkOS wallet is separate from your connected wallet and is used for rewards and agent payments.",
       "copied": "Copied",
       "copy": "Copy",
       "deposit": "Deposit: send USDC, USDG, or $PERKOS to {{addr}} from any wallet.",
@@ -776,7 +776,7 @@
       "refresh": "Refresh",
       "reading": "Reading balances…",
       "error": "Couldn't read balances.",
-      "empty": "This managed wallet has no funds yet. Deposit tokens to the address above, then refresh.",
+      "empty": "Your PerkOS wallet has no funds yet. Deposit tokens to the address above, then refresh.",
       "unavailable": "This network is temporarily unavailable. Try refreshing."
     }
   },

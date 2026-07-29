@@ -75,7 +75,7 @@ describe("WalletPage balances", () => {
     expect(screen.getByText("USDG")).toBeVisible();
     expect(
       screen.getByText(
-        "This managed wallet has no funds yet. Deposit tokens to the address above, then refresh.",
+        "Your PerkOS wallet has no funds yet. Deposit tokens to the address above, then refresh.",
       ),
     ).toBeVisible();
   });

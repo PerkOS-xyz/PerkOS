@@ -742,7 +742,7 @@
   "wallet": {
     "header": {
       "title": "Billetera",
-      "subtitle": "Consulta los saldos de tu billetera conectada o de tu billetera separada administrada por PerkOS en todas las redes compatibles."
+      "subtitle": "Consulta los saldos de tu billetera conectada o de tu Billetera PerkOS en todas las redes compatibles."
     },
     "loading": "Cargando tu billetera…",
     "error": {
@@ -753,8 +753,8 @@
       "label": "Elegir billetera",
       "connected": "Mi billetera conectada",
       "connectedDescription": "Tu billetera personal conectada mediante MetaMask u otro proveedor.",
-      "managed": "Billetera administrada por PerkOS",
-      "managedDescription": "Una billetera separada que PerkOS opera para recompensas y pagos de agentes."
+      "managed": "Billetera PerkOS",
+      "managedDescription": "Una billetera PerkOS separada para recompensas y pagos de agentes."
     },
     "comingSoon": {
       "title": "Próximamente",
@@ -762,9 +762,9 @@
     },
     "address": {
       "title": "Tu dirección de billetera",
-      "description": "Envía tokens aquí para cargar esta billetera administrada en Base, Celo o Robinhood Chain.",
+      "description": "Envía tokens aquí para cargar tu Billetera PerkOS en Base, Celo o Robinhood Chain.",
       "connectedDescription": "Esta es la billetera personal conectada actualmente a PerkOS.",
-      "managedDescription": "Esta billetera separada es operada por PerkOS para recompensas y pagos de agentes.",
+      "managedDescription": "Esta Billetera PerkOS es independiente de tu billetera conectada y se utiliza para recompensas y pagos de agentes.",
       "copied": "Copiado",
       "copy": "Copiar",
       "deposit": "Depósito: envía USDC, USDG o $PERKOS a {{addr}} desde cualquier billetera.",
@@ -776,7 +776,7 @@
       "refresh": "Actualizar",
       "reading": "Leyendo saldos…",
       "error": "No se pudieron leer los saldos.",
-      "empty": "Esta billetera administrada todavía no tiene fondos. Deposita tokens en la dirección anterior y luego actualiza.",
+      "empty": "Tu Billetera PerkOS todavía no tiene fondos. Deposita tokens en la dirección anterior y luego actualiza.",
       "unavailable": "Esta red no está disponible temporalmente. Intenta actualizar."
     }
   },
