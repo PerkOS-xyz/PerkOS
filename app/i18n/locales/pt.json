@@ -742,11 +742,19 @@
   "wallet": {
     "header": {
       "title": "Carteira",
-      "subtitle": "Sua carteira PerkOS: onde suas recompensas de fidelidade chegam e você pode reter e movimentar fundos. PerkOS executa isso para você; nenhuma frase inicial para gerenciar."
+      "subtitle": "Veja os saldos da sua carteira conectada ou da carteira separada gerenciada pela PerkOS em todas as redes compatíveis."
     },
     "loading": "Carregando sua carteira…",
     "error": {
-      "load": "Não foi possível carregar sua carteira."
+      "load": "Não foi possível carregar sua carteira.",
+      "connect": "Conecte sua carteira pessoal para ver o endereço e os saldos."
+    },
+    "source": {
+      "label": "Escolher carteira",
+      "connected": "Minha carteira conectada",
+      "connectedDescription": "Sua carteira pessoal conectada pelo MetaMask ou outro provedor.",
+      "managed": "Carteira gerenciada pela PerkOS",
+      "managedDescription": "Uma carteira separada operada pela PerkOS para recompensas e pagamentos de agentes."
     },
     "comingSoon": {
       "title": "Em breve",
@@ -754,16 +762,22 @@
     },
     "address": {
       "title": "Endereço da sua carteira",
-      "description": "Envie tokens aqui para financiar sua carteira, na Base ou Celo.",
+      "description": "Envie tokens aqui para financiar esta carteira gerenciada na Base, Celo ou Robinhood Chain.",
+      "connectedDescription": "Esta é a carteira pessoal atualmente conectada à PerkOS.",
+      "managedDescription": "Esta carteira separada é operada pela PerkOS para recompensas e pagamentos de agentes.",
       "copied": "Copiado",
       "copy": "Cópia",
-      "deposit": "Depósito: envie USDC ou $PERKOS para {{addr}} de qualquer carteira."
+      "deposit": "Depósito: envie USDC, USDG ou $PERKOS para {{addr}} de qualquer carteira.",
+      "connectedDeposit": "Carteira pessoal {{addr}}. Use o MetaMask ou seu provedor de carteira para enviar fundos.",
+      "managedDeposit": "Depósito: envie USDC, USDG ou $PERKOS para {{addr}} de qualquer carteira."
     },
     "balances": {
       "title": "Saldos",
       "refresh": "Atualizar",
       "reading": "Lendo saldos…",
-      "error": "Não foi possível ler os saldos."
+      "error": "Não foi possível ler os saldos.",
+      "empty": "Esta carteira gerenciada ainda não tem fundos. Deposite tokens no endereço acima e atualize.",
+      "unavailable": "Esta rede está temporariamente indisponível. Tente atualizar."
     }
   },
   "notifications": {

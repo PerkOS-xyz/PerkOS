@@ -60,4 +60,10 @@ describe("ChatbotTrigger route visibility", () => {
       expect(screen.queryByRole("button", { name: "Open your PerkOS assistant" })).toBeNull();
     },
   );
+
+  it("does not cover wallet balances or transfer controls", () => {
+    pathname = "/wallet";
+    render(<ChatbotTrigger />);
+    expect(screen.queryByRole("button", { name: "Open your PerkOS assistant" })).toBeNull();
+  });
 });

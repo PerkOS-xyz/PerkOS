@@ -742,11 +742,19 @@
   "wallet": {
     "header": {
       "title": "Wallet",
-      "subtitle": "Your PerkOS wallet: where your Loyalty rewards land and you can hold and move funds. PerkOS runs it for you; no seed phrase to manage."
+      "subtitle": "View balances for your connected wallet or your separate PerkOS-managed wallet across every supported network."
     },
     "loading": "Loading your wallet…",
     "error": {
-      "load": "Couldn't load your wallet."
+      "load": "Couldn't load your wallet.",
+      "connect": "Connect your personal wallet to view its address and balances."
+    },
+    "source": {
+      "label": "Choose wallet",
+      "connected": "My connected wallet",
+      "connectedDescription": "Your personal wallet connected through MetaMask or another provider.",
+      "managed": "PerkOS-managed wallet",
+      "managedDescription": "A separate wallet operated by PerkOS for rewards and agent payments."
     },
     "comingSoon": {
       "title": "Coming soon",
@@ -754,16 +762,22 @@
     },
     "address": {
       "title": "Your wallet address",
-      "description": "Send tokens here to fund your wallet, on Base or Celo.",
+      "description": "Send tokens here to fund this managed wallet on Base, Celo, or Robinhood Chain.",
+      "connectedDescription": "This is the personal wallet currently connected to PerkOS.",
+      "managedDescription": "This separate wallet is operated by PerkOS for rewards and agent payments.",
       "copied": "Copied",
       "copy": "Copy",
-      "deposit": "Deposit: send USDC or $PERKOS to {{addr}} from any wallet."
+      "deposit": "Deposit: send USDC, USDG, or $PERKOS to {{addr}} from any wallet.",
+      "connectedDeposit": "Personal wallet {{addr}}. Use MetaMask or your wallet provider to send funds.",
+      "managedDeposit": "Deposit: send USDC, USDG, or $PERKOS to {{addr}} from any wallet."
     },
     "balances": {
       "title": "Balances",
       "refresh": "Refresh",
       "reading": "Reading balances…",
-      "error": "Couldn't read balances."
+      "error": "Couldn't read balances.",
+      "empty": "This managed wallet has no funds yet. Deposit tokens to the address above, then refresh.",
+      "unavailable": "This network is temporarily unavailable. Try refreshing."
     }
   },
   "notifications": {

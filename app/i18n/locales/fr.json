@@ -742,11 +742,19 @@
   "wallet": {
     "header": {
       "title": "Portefeuille",
-      "subtitle": "Votre portefeuille PerkOS : l'endroit où arrivent vos récompenses de fidélité et où vous pouvez conserver et transférer des fonds. PerkOS le gère pour vous, sans phrase de récupération à retenir."
+      "subtitle": "Consultez les soldes de votre portefeuille connecté ou de votre portefeuille distinct géré par PerkOS sur tous les réseaux compatibles."
     },
     "loading": "Chargement de votre portefeuille…",
     "error": {
-      "load": "Impossible de charger votre portefeuille."
+      "load": "Impossible de charger votre portefeuille.",
+      "connect": "Connectez votre portefeuille personnel pour voir son adresse et ses soldes."
+    },
+    "source": {
+      "label": "Choisir le portefeuille",
+      "connected": "Mon portefeuille connecté",
+      "connectedDescription": "Votre portefeuille personnel connecté via MetaMask ou un autre fournisseur.",
+      "managed": "Portefeuille géré par PerkOS",
+      "managedDescription": "Un portefeuille distinct exploité par PerkOS pour les récompenses et les paiements des agents."
     },
     "comingSoon": {
       "title": "Bientôt disponible",
@@ -754,16 +762,22 @@
     },
     "address": {
       "title": "Adresse de votre portefeuille",
-      "description": "Envoyez des tokens ici pour alimenter votre portefeuille, sur Base ou Celo.",
+      "description": "Envoyez des tokens ici pour alimenter ce portefeuille géré sur Base, Celo ou Robinhood Chain.",
+      "connectedDescription": "Il s'agit du portefeuille personnel actuellement connecté à PerkOS.",
+      "managedDescription": "Ce portefeuille distinct est exploité par PerkOS pour les récompenses et les paiements des agents.",
       "copied": "Copié",
       "copy": "Copier",
-      "deposit": "Dépôt : envoyez des USDC ou des $PERKOS à {{addr}} depuis n'importe quel portefeuille."
+      "deposit": "Dépôt : envoyez des USDC, USDG ou $PERKOS à {{addr}} depuis n'importe quel portefeuille.",
+      "connectedDeposit": "Portefeuille personnel {{addr}}. Utilisez MetaMask ou votre fournisseur de portefeuille pour envoyer des fonds.",
+      "managedDeposit": "Dépôt : envoyez des USDC, USDG ou $PERKOS à {{addr}} depuis n'importe quel portefeuille."
     },
     "balances": {
       "title": "Soldes",
       "refresh": "Actualiser",
       "reading": "Lecture des soldes…",
-      "error": "Impossible de lire les soldes."
+      "error": "Impossible de lire les soldes.",
+      "empty": "Ce portefeuille géré ne contient pas encore de fonds. Déposez des tokens à l'adresse ci-dessus, puis actualisez.",
+      "unavailable": "Ce réseau est temporairement indisponible. Essayez d'actualiser."
     }
   },
   "notifications": {

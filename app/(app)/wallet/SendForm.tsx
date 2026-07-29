@@ -31,15 +31,21 @@ import {
   type TransferResult,
 } from "@/app/lib/serverWallet";
 
-type Chain = "base" | "celo";
+type Chain = "base" | "celo" | "robinhood";
 
-const CHAINS: Chain[] = ["base", "celo"];
-const NATIVE_SYMBOL: Record<Chain, string> = { base: "ETH", celo: "CELO" };
+const CHAINS: Chain[] = ["base", "celo", "robinhood"];
+const NATIVE_SYMBOL: Record<Chain, string> = {
+  base: "ETH",
+  celo: "CELO",
+  robinhood: "ETH",
+};
 
 /** Token options for a chain — `value` is what the API expects, `label` what we show. */
 function tokenOptions(chain: Chain): { value: string; label: string }[] {
   return [
-    { value: "USDC", label: "USDC" },
+    chain === "robinhood"
+      ? { value: "USDG", label: "USDG" }
+      : { value: "USDC", label: "USDC" },
     { value: "PERKOS", label: "$PERKOS" },
     { value: "native", label: NATIVE_SYMBOL[chain] },
   ];
@@ -155,7 +161,10 @@ export function SendForm({ address }: { address: string }) {
                   type="button"
                   size="sm"
                   variant={chain === c ? "default" : "outline"}
-                  onClick={() => setChain(c)}
+                  onClick={() => {
+                    setChain(c);
+                    setToken(c === "robinhood" ? "USDG" : "USDC");
+                  }}
                 >
                   {chainLabel(c)}
                 </Button>

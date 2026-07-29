@@ -27,13 +27,18 @@ export type WalletBalance = {
 export type ChainBalances = {
   chain: string;
   chainId: number;
+  /** False when that chain's RPC could not be read. Optional for older APIs. */
+  available?: boolean;
   balances: WalletBalance[];
 };
 
 export type WalletBalances = {
+  source?: WalletSource;
   address: string | null;
   chains: ChainBalances[];
 };
+
+export type WalletSource = "connected" | "managed";
 
 /**
  * Create-or-return the caller's server wallet. Returns `null` when server
@@ -48,21 +53,29 @@ export async function ensureServerWallet(): Promise<ServerWallet | null> {
   return data.wallet ?? null;
 }
 
-/** Read the server wallet's balances across chains. */
-export async function fetchWalletBalances(): Promise<WalletBalances> {
-  const res = await authedFetch("/api/wallet/balances");
+/** Read either the connected or PerkOS-managed wallet across all chains. */
+export async function fetchWalletBalances(
+  source: WalletSource = "managed",
+): Promise<WalletBalances> {
+  const res = await authedFetch(
+    `/api/wallet/balances?source=${encodeURIComponent(source)}`,
+  );
   if (!res.ok) throw new Error(`Couldn't load balances (${res.status})`);
   return (await res.json()) as WalletBalances;
 }
 
-const CHAIN_LABELS: Record<string, string> = { base: "Base", celo: "Celo" };
+const CHAIN_LABELS: Record<string, string> = {
+  base: "Base",
+  celo: "Celo",
+  robinhood: "Robinhood Chain",
+};
 export function chainLabel(chain: string): string {
   return CHAIN_LABELS[chain] ?? chain;
 }
 
 export type TransferInput = {
-  chain: "base" | "celo";
-  /** "USDC" | "PERKOS" | "native" */
+  chain: "base" | "celo" | "robinhood";
+  /** "USDC" | "USDG" | "PERKOS" | "native" */
   token: string;
   to: string;
   /** human amount, e.g. "1.5" */
@@ -94,6 +107,11 @@ export async function transferOut(input: TransferInput): Promise<TransferResult>
 
 /** Block explorer tx URL for a chain. */
 export function explorerTxUrl(chain: string, hash: string): string {
-  const base = chain === "celo" ? "https://celoscan.io/tx/" : "https://basescan.org/tx/";
+  const base =
+    chain === "celo"
+      ? "https://celoscan.io/tx/"
+      : chain === "robinhood"
+        ? "https://robinhoodchain.blockscout.com/tx/"
+        : "https://basescan.org/tx/";
   return base + hash;
 }

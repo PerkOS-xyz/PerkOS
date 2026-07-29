@@ -742,11 +742,19 @@
   "wallet": {
     "header": {
       "title": "钱包",
-      "subtitle": "这是你的 PerkOS 钱包,忠诚度奖励会存到这里,你也可以在这里持有和转移资金。PerkOS 会替你打理一切,无需管理助记词。"
+      "subtitle": "查看已连接钱包或独立的 PerkOS 托管钱包在所有支持网络上的余额。"
     },
     "loading": "正在加载你的钱包…",
     "error": {
-      "load": "无法加载你的钱包。"
+      "load": "无法加载你的钱包。",
+      "connect": "连接个人钱包后即可查看地址和余额。"
+    },
+    "source": {
+      "label": "选择钱包",
+      "connected": "我连接的钱包",
+      "connectedDescription": "通过 MetaMask 或其他提供商连接的个人钱包。",
+      "managed": "PerkOS 托管钱包",
+      "managedDescription": "由 PerkOS 运营、用于奖励和代理支付的独立钱包。"
     },
     "comingSoon": {
       "title": "即将推出",
@@ -754,16 +762,22 @@
     },
     "address": {
       "title": "你的钱包地址",
-      "description": "把代币发送到这里为钱包充值,支持 Base 或 Celo。",
+      "description": "可通过 Base、Celo 或 Robinhood Chain 向这个托管钱包发送代币。",
+      "connectedDescription": "这是当前连接到 PerkOS 的个人钱包。",
+      "managedDescription": "这是由 PerkOS 运营、用于奖励和代理支付的独立钱包。",
       "copied": "已复制",
       "copy": "复制",
-      "deposit": "充值:从任意钱包向 {{addr}} 发送 USDC 或 $PERKOS。"
+      "deposit": "充值：从任意钱包向 {{addr}} 发送 USDC、USDG 或 $PERKOS。",
+      "connectedDeposit": "个人钱包 {{addr}}。请使用 MetaMask 或钱包提供商发送资金。",
+      "managedDeposit": "充值：从任意钱包向 {{addr}} 发送 USDC、USDG 或 $PERKOS。"
     },
     "balances": {
       "title": "余额",
       "refresh": "刷新",
       "reading": "正在读取余额…",
-      "error": "无法读取余额。"
+      "error": "无法读取余额。",
+      "empty": "这个托管钱包目前没有资金。请向上面的地址存入代币，然后刷新。",
+      "unavailable": "该网络暂时不可用，请尝试刷新。"
     }
   },
   "notifications": {

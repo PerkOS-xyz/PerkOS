@@ -742,11 +742,19 @@
   "wallet": {
     "header": {
       "title": "Billetera",
-      "subtitle": "Tu billetera de PerkOS: aquí llegan tus recompensas Loyalty y puedes guardar y mover tus fondos. PerkOS la administra por ti, no tienes que manejar ninguna frase semilla."
+      "subtitle": "Consulta los saldos de tu billetera conectada o de tu billetera separada administrada por PerkOS en todas las redes compatibles."
     },
     "loading": "Cargando tu billetera…",
     "error": {
-      "load": "No se pudo cargar tu billetera."
+      "load": "No se pudo cargar tu billetera.",
+      "connect": "Conecta tu billetera personal para ver su dirección y sus saldos."
+    },
+    "source": {
+      "label": "Elegir billetera",
+      "connected": "Mi billetera conectada",
+      "connectedDescription": "Tu billetera personal conectada mediante MetaMask u otro proveedor.",
+      "managed": "Billetera administrada por PerkOS",
+      "managedDescription": "Una billetera separada que PerkOS opera para recompensas y pagos de agentes."
     },
     "comingSoon": {
       "title": "Próximamente",
@@ -754,16 +762,22 @@
     },
     "address": {
       "title": "Tu dirección de billetera",
-      "description": "Envía tokens aquí para cargar tu billetera, en Base o Celo.",
+      "description": "Envía tokens aquí para cargar esta billetera administrada en Base, Celo o Robinhood Chain.",
+      "connectedDescription": "Esta es la billetera personal conectada actualmente a PerkOS.",
+      "managedDescription": "Esta billetera separada es operada por PerkOS para recompensas y pagos de agentes.",
       "copied": "Copiado",
       "copy": "Copiar",
-      "deposit": "Depósito: envía USDC o $PERKOS a {{addr}} desde cualquier billetera."
+      "deposit": "Depósito: envía USDC, USDG o $PERKOS a {{addr}} desde cualquier billetera.",
+      "connectedDeposit": "Billetera personal {{addr}}. Usa MetaMask o tu proveedor de wallet para enviar fondos.",
+      "managedDeposit": "Depósito: envía USDC, USDG o $PERKOS a {{addr}} desde cualquier billetera."
     },
     "balances": {
       "title": "Saldos",
       "refresh": "Actualizar",
       "reading": "Leyendo saldos…",
-      "error": "No se pudieron leer los saldos."
+      "error": "No se pudieron leer los saldos.",
+      "empty": "Esta billetera administrada todavía no tiene fondos. Deposita tokens en la dirección anterior y luego actualiza.",
+      "unavailable": "Esta red no está disponible temporalmente. Intenta actualizar."
     }
   },
   "notifications": {
