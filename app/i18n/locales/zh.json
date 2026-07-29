@@ -1294,25 +1294,52 @@
     }
   },
   "walletSend": {
+    "compact": {
+      "title": "发送资产",
+      "description": "从你的 PerkOS 钱包发送。",
+      "action": "发送"
+    },
+    "empty": {
+      "title": "你的 PerkOS 钱包为空",
+      "description": "发送资产前请先充值。",
+      "copyAddress": "复制钱包地址"
+    },
     "success": {
       "title": "已发送",
       "description": "已在 {{chain}} 上发送 {{amount}} {{token}}。",
       "view": "查看",
-      "sendAnother": "再发一笔"
+      "sendAnother": "再发一笔",
+      "done": "完成"
     },
     "form": {
-      "title": "发送",
-      "description": "把资金从你的钱包转出。PerkOS 会替你签名并广播交易。",
+      "title": "发送资产",
+      "from": "来自 PerkOS 钱包 · {{address}}",
+      "asset": "资产",
       "network": "网络",
-      "token": "代币",
+      "amount": "金额",
+      "available": "可用: {{amount}} {{token}}",
+      "max": "最大",
+      "nativeGas": "请保留足够的原生代币支付网络费用。",
       "recipient": "收款地址",
       "recipientInvalid": "请输入有效的 0x… 地址。",
-      "recipientSelf": "提醒一下,这是你自己的钱包地址。",
-      "amount": "金额({{token}})",
+      "recipientSelf": "不能发送到同一个钱包。",
       "amountInvalid": "请输入大于 0 的金额。",
+      "insufficient": "{{network}} 上的 {{token}} 余额不足。",
+      "security": "此转账使用你的 PerkOS 钱包，而不是已连接的钱包。",
       "transferFailed": "转账失败。",
       "sending": "发送中…",
-      "send": "发送"
+      "review": "检查转账"
+    },
+    "review": {
+      "title": "检查转账",
+      "description": "确认前请核对所有详情。",
+      "youSend": "你将发送",
+      "from": "来自",
+      "network": "网络",
+      "to": "发送至",
+      "warning": "链上转账无法撤销。",
+      "back": "返回",
+      "confirm": "确认并发送"
     }
   },
   "projectRoom": {

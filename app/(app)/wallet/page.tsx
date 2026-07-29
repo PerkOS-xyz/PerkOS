@@ -116,7 +116,10 @@ export default function WalletPage() {
     enabled: Boolean(selectedAddress),
     staleTime: 30_000,
   });
-  const balanceChains = balancesQuery.data?.chains ?? [];
+  const balanceChains = useMemo(
+    () => balancesQuery.data?.chains ?? [],
+    [balancesQuery.data?.chains],
+  );
   const readableBalances = balanceChains
     .filter((chain) => chain.available !== false)
     .flatMap((chain) => chain.balances);
@@ -147,6 +150,11 @@ export default function WalletPage() {
   const hasNoFunds =
     readableBalances.length > 0 &&
     readableBalances.every((balance) => balance.raw === "0");
+  const canShowSend =
+    walletSource === "managed" &&
+    !balancesQuery.isLoading &&
+    !balancesQuery.isError &&
+    readableBalances.length > 0;
 
   const copy = async () => {
     if (!selectedAddress) return;
@@ -272,9 +280,9 @@ export default function WalletPage() {
             </CardContent>
           </Card>
 
-          {/* Send */}
-          {walletSource === "managed" ? (
-            <SendForm address={selectedAddress!} />
+          {/* Empty wallets need the deposit action before the zero-balance list. */}
+          {canShowSend && hasNoFunds ? (
+            <SendForm address={selectedAddress!} chains={balanceChains} />
           ) : null}
 
           {/* Assets */}
@@ -420,6 +428,11 @@ export default function WalletPage() {
               )}
             </CardContent>
           </Card>
+
+          {/* Send is a secondary wallet action, after the asset overview. */}
+          {canShowSend && !hasNoFunds ? (
+            <SendForm address={selectedAddress!} chains={balanceChains} />
+          ) : null}
         </>
       )}
     </div>

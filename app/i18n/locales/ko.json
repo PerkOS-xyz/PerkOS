@@ -1285,25 +1285,52 @@
     }
   },
   "walletSend": {
+    "compact": {
+      "title": "자산 보내기",
+      "description": "PerkOS 지갑에서 보냅니다.",
+      "action": "보내기"
+    },
+    "empty": {
+      "title": "PerkOS 지갑이 비어 있어요",
+      "description": "자산을 보내기 전에 입금하세요.",
+      "copyAddress": "지갑 주소 복사"
+    },
     "success": {
       "title": "전송 완료",
       "description": "{{chain}}에서 {{amount}} {{token}}을(를) 전송했어요.",
       "view": "보기",
-      "sendAnother": "다시 보내기"
+      "sendAnother": "다시 보내기",
+      "done": "완료"
     },
     "form": {
-      "title": "보내기",
-      "description": "지갑에서 자금을 내보내요. PerkOS가 대신 서명하고 전송해 드려요.",
+      "title": "자산 보내기",
+      "from": "PerkOS 지갑에서 · {{address}}",
+      "asset": "자산",
       "network": "네트워크",
-      "token": "토큰",
+      "amount": "금액",
+      "available": "사용 가능: {{amount}} {{token}}",
+      "max": "최대",
+      "nativeGas": "네트워크 수수료를 낼 네이티브 통화를 남겨 두세요.",
       "recipient": "받는 주소",
       "recipientInvalid": "유효한 0x… 주소를 입력하세요.",
-      "recipientSelf": "참고하세요: 본인의 지갑 주소예요.",
-      "amount": "금액 ({{token}})",
+      "recipientSelf": "같은 지갑으로 보낼 수 없어요.",
       "amountInvalid": "0보다 큰 금액을 입력하세요.",
+      "insufficient": "{{network}}의 {{token}} 잔액이 부족해요.",
+      "security": "이 전송은 연결된 지갑이 아니라 PerkOS 지갑을 사용해요.",
       "transferFailed": "전송에 실패했어요.",
       "sending": "보내는 중…",
-      "send": "보내기"
+      "review": "전송 검토"
+    },
+    "review": {
+      "title": "전송 검토",
+      "description": "확인하기 전에 모든 내용을 검토하세요.",
+      "youSend": "보내는 금액",
+      "from": "보내는 곳",
+      "network": "네트워크",
+      "to": "받는 곳",
+      "warning": "온체인 전송은 되돌릴 수 없어요.",
+      "back": "뒤로",
+      "confirm": "확인하고 보내기"
     }
   },
   "projectRoom": {

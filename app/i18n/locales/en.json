@@ -1290,25 +1290,52 @@
     }
   },
   "walletSend": {
+    "compact": {
+      "title": "Send assets",
+      "description": "Send from your PerkOS wallet.",
+      "action": "Send"
+    },
+    "empty": {
+      "title": "Your PerkOS wallet is empty",
+      "description": "Deposit funds before sending assets.",
+      "copyAddress": "Copy wallet address"
+    },
     "success": {
       "title": "Sent",
       "description": "{{amount}} {{token}} sent on {{chain}}.",
       "view": "View",
-      "sendAnother": "Send another"
+      "sendAnother": "Send another",
+      "done": "Done"
     },
     "form": {
-      "title": "Send",
-      "description": "Move funds out of your wallet. PerkOS signs and broadcasts for you.",
+      "title": "Send assets",
+      "from": "From PerkOS wallet · {{address}}",
+      "asset": "Asset",
       "network": "Network",
-      "token": "Token",
+      "amount": "Amount",
+      "available": "Available: {{amount}} {{token}}",
+      "max": "MAX",
+      "nativeGas": "Leave enough native currency to pay the network fee.",
       "recipient": "Recipient address",
       "recipientInvalid": "Enter a valid 0x… address.",
-      "recipientSelf": "Heads up: this is your own wallet address.",
-      "amount": "Amount ({{token}})",
+      "recipientSelf": "You cannot send to this same wallet.",
       "amountInvalid": "Enter an amount greater than 0.",
+      "insufficient": "Insufficient {{token}} on {{network}}.",
+      "security": "This transfer uses your PerkOS wallet, not your connected wallet.",
       "transferFailed": "Transfer failed.",
       "sending": "Sending…",
-      "send": "Send"
+      "review": "Review transfer"
+    },
+    "review": {
+      "title": "Review transfer",
+      "description": "Check every detail before confirming.",
+      "youSend": "You send",
+      "from": "From",
+      "network": "Network",
+      "to": "To",
+      "warning": "Onchain transfers cannot be reversed.",
+      "back": "Back",
+      "confirm": "Confirm and send"
     }
   },
   "projectRoom": {

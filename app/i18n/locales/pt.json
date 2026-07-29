@@ -1299,25 +1299,52 @@
     }
   },
   "walletSend": {
+    "compact": {
+      "title": "Enviar ativos",
+      "description": "Envie pela sua carteira PerkOS.",
+      "action": "Enviar"
+    },
+    "empty": {
+      "title": "Sua carteira PerkOS está vazia",
+      "description": "Deposite fundos antes de enviar ativos.",
+      "copyAddress": "Copiar endereço"
+    },
     "success": {
       "title": "Enviado",
       "description": "{{amount}} {{token}} enviado em {{chain}}.",
       "view": "Visualizar",
-      "sendAnother": "Envie outro"
+      "sendAnother": "Enviar outro",
+      "done": "Concluir"
     },
     "form": {
-      "title": "Enviar",
-      "description": "Retire fundos da sua carteira. PerkOS assina e transmite para você.",
+      "title": "Enviar ativos",
+      "from": "Da carteira PerkOS · {{address}}",
+      "asset": "Ativo",
       "network": "Rede",
-      "token": "Símbolo",
+      "amount": "Valor",
+      "available": "Disponível: {{amount}} {{token}}",
+      "max": "MÁX.",
+      "nativeGas": "Reserve moeda nativa suficiente para pagar a taxa de rede.",
       "recipient": "Endereço do destinatário",
       "recipientInvalid": "Insira um endereço 0x… válido.",
-      "recipientSelf": "Atenção: este é o endereço da sua carteira.",
-      "amount": "Quantidade ({{token}})",
+      "recipientSelf": "Você não pode enviar para esta mesma carteira.",
       "amountInvalid": "Insira um valor maior que 0.",
+      "insufficient": "Saldo de {{token}} insuficiente na {{network}}.",
+      "security": "Esta transferência usa sua carteira PerkOS, não sua carteira conectada.",
       "transferFailed": "Falha na transferência.",
       "sending": "Enviando…",
-      "send": "Enviar"
+      "review": "Revisar transferência"
+    },
+    "review": {
+      "title": "Revisar transferência",
+      "description": "Verifique todos os detalhes antes de confirmar.",
+      "youSend": "Você envia",
+      "from": "De",
+      "network": "Rede",
+      "to": "Para",
+      "warning": "Transferências em blockchain não podem ser revertidas.",
+      "back": "Voltar",
+      "confirm": "Confirmar e enviar"
     }
   },
   "projectRoom": {

@@ -1294,25 +1294,52 @@
     }
   },
   "walletSend": {
+    "compact": {
+      "title": "Invia asset",
+      "description": "Invia dal tuo portafoglio PerkOS.",
+      "action": "Invia"
+    },
+    "empty": {
+      "title": "Il tuo portafoglio PerkOS è vuoto",
+      "description": "Deposita fondi prima di inviare asset.",
+      "copyAddress": "Copia indirizzo"
+    },
     "success": {
       "title": "Inviato",
       "description": "{{amount}} {{token}} inviati su {{chain}}.",
       "view": "Vedi",
-      "sendAnother": "Invia un altro"
+      "sendAnother": "Invia un altro",
+      "done": "Fine"
     },
     "form": {
-      "title": "Invia",
-      "description": "Sposta fondi fuori dal tuo portafoglio. PerkOS firma e trasmette la transazione per te.",
+      "title": "Invia asset",
+      "from": "Dal portafoglio PerkOS · {{address}}",
+      "asset": "Asset",
       "network": "Rete",
-      "token": "Token",
+      "amount": "Importo",
+      "available": "Disponibile: {{amount}} {{token}}",
+      "max": "MAX",
+      "nativeGas": "Conserva abbastanza valuta nativa per pagare la commissione di rete.",
       "recipient": "Indirizzo del destinatario",
       "recipientInvalid": "Inserisci un indirizzo 0x… valido.",
-      "recipientSelf": "Attenzione: questo è l'indirizzo del tuo stesso portafoglio.",
-      "amount": "Importo ({{token}})",
+      "recipientSelf": "Non puoi inviare a questo stesso portafoglio.",
       "amountInvalid": "Inserisci un importo maggiore di 0.",
+      "insufficient": "Saldo {{token}} insufficiente su {{network}}.",
+      "security": "Questo trasferimento usa il tuo portafoglio PerkOS, non quello connesso.",
       "transferFailed": "Trasferimento non riuscito.",
       "sending": "Invio in corso…",
-      "send": "Invia"
+      "review": "Rivedi trasferimento"
+    },
+    "review": {
+      "title": "Rivedi trasferimento",
+      "description": "Controlla ogni dettaglio prima di confermare.",
+      "youSend": "Invii",
+      "from": "Da",
+      "network": "Rete",
+      "to": "A",
+      "warning": "I trasferimenti onchain non possono essere annullati.",
+      "back": "Indietro",
+      "confirm": "Conferma e invia"
     }
   },
   "projectRoom": {
