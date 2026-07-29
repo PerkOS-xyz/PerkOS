@@ -1294,25 +1294,52 @@
     }
   },
   "walletSend": {
+    "compact": {
+      "title": "Envoyer des actifs",
+      "description": "Envoyez depuis votre portefeuille PerkOS.",
+      "action": "Envoyer"
+    },
+    "empty": {
+      "title": "Votre portefeuille PerkOS est vide",
+      "description": "Déposez des fonds avant d'envoyer des actifs.",
+      "copyAddress": "Copier l'adresse"
+    },
     "success": {
       "title": "Envoyé",
       "description": "{{amount}} {{token}} envoyés sur {{chain}}.",
       "view": "Voir",
-      "sendAnother": "Envoyer un autre"
+      "sendAnother": "Envoyer un autre",
+      "done": "Terminé"
     },
     "form": {
-      "title": "Envoyer",
-      "description": "Transférez des fonds depuis votre portefeuille. PerkOS signe et diffuse la transaction pour vous.",
+      "title": "Envoyer des actifs",
+      "from": "Depuis le portefeuille PerkOS · {{address}}",
+      "asset": "Actif",
       "network": "Réseau",
-      "token": "Token",
+      "amount": "Montant",
+      "available": "Disponible : {{amount}} {{token}}",
+      "max": "MAX",
+      "nativeGas": "Conservez assez de monnaie native pour payer les frais réseau.",
       "recipient": "Adresse du destinataire",
       "recipientInvalid": "Saisissez une adresse 0x… valide.",
-      "recipientSelf": "Attention : il s'agit de l'adresse de votre propre portefeuille.",
-      "amount": "Montant ({{token}})",
+      "recipientSelf": "Vous ne pouvez pas envoyer vers ce même portefeuille.",
       "amountInvalid": "Saisissez un montant supérieur à 0.",
+      "insufficient": "Solde {{token}} insuffisant sur {{network}}.",
+      "security": "Ce transfert utilise votre portefeuille PerkOS, pas votre portefeuille connecté.",
       "transferFailed": "Échec du transfert.",
       "sending": "Envoi en cours…",
-      "send": "Envoyer"
+      "review": "Vérifier le transfert"
+    },
+    "review": {
+      "title": "Vérifier le transfert",
+      "description": "Vérifiez chaque détail avant de confirmer.",
+      "youSend": "Vous envoyez",
+      "from": "Depuis",
+      "network": "Réseau",
+      "to": "Vers",
+      "warning": "Les transferts onchain ne peuvent pas être annulés.",
+      "back": "Retour",
+      "confirm": "Confirmer et envoyer"
     }
   },
   "projectRoom": {

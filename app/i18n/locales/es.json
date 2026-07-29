@@ -1290,25 +1290,52 @@
     }
   },
   "walletSend": {
+    "compact": {
+      "title": "Enviar activos",
+      "description": "Envía desde tu billetera PerkOS.",
+      "action": "Enviar"
+    },
+    "empty": {
+      "title": "Tu billetera PerkOS está vacía",
+      "description": "Deposita fondos antes de enviar activos.",
+      "copyAddress": "Copiar dirección"
+    },
     "success": {
       "title": "Enviado",
       "description": "{{amount}} {{token}} enviado en {{chain}}.",
       "view": "Ver",
-      "sendAnother": "Enviar otro"
+      "sendAnother": "Enviar otro",
+      "done": "Listo"
     },
     "form": {
-      "title": "Enviar",
-      "description": "Mueve fondos fuera de tu billetera. PerkOS firma y transmite la transacción por ti.",
+      "title": "Enviar activos",
+      "from": "Desde billetera PerkOS · {{address}}",
+      "asset": "Activo",
       "network": "Red",
-      "token": "Token",
+      "amount": "Monto",
+      "available": "Disponible: {{amount}} {{token}}",
+      "max": "MÁX.",
+      "nativeGas": "Reserva suficiente moneda nativa para pagar la comisión de red.",
       "recipient": "Dirección del destinatario",
       "recipientInvalid": "Ingresa una dirección 0x… válida.",
-      "recipientSelf": "Atención: esta es la dirección de tu propia billetera.",
-      "amount": "Monto ({{token}})",
+      "recipientSelf": "No puedes enviar a esta misma billetera.",
       "amountInvalid": "Ingresa un monto mayor a 0.",
+      "insufficient": "Saldo de {{token}} insuficiente en {{network}}.",
+      "security": "Esta transferencia usa tu billetera PerkOS, no tu billetera conectada.",
       "transferFailed": "Falló la transferencia.",
       "sending": "Enviando…",
-      "send": "Enviar"
+      "review": "Revisar transferencia"
+    },
+    "review": {
+      "title": "Revisar transferencia",
+      "description": "Verifica cada detalle antes de confirmar.",
+      "youSend": "Envías",
+      "from": "Desde",
+      "network": "Red",
+      "to": "Para",
+      "warning": "Las transferencias en blockchain no se pueden revertir.",
+      "back": "Volver",
+      "confirm": "Confirmar y enviar"
     }
   },
   "projectRoom": {

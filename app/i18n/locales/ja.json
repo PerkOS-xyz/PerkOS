@@ -1294,25 +1294,52 @@
     }
   },
   "walletSend": {
+    "compact": {
+      "title": "資産を送る",
+      "description": "PerkOSウォレットから送金します。",
+      "action": "送る"
+    },
+    "empty": {
+      "title": "PerkOSウォレットは空です",
+      "description": "資産を送る前に入金してください。",
+      "copyAddress": "アドレスをコピー"
+    },
     "success": {
       "title": "送金完了",
       "description": "{{chain}}で{{amount}} {{token}}を送金しました。",
       "view": "表示",
-      "sendAnother": "もう一度送る"
+      "sendAnother": "もう一度送る",
+      "done": "完了"
     },
     "form": {
-      "title": "送金",
-      "description": "ウォレットから資金を送ります。署名とブロードキャストはPerkOSが代行します。",
+      "title": "資産を送る",
+      "from": "PerkOSウォレットから · {{address}}",
+      "asset": "資産",
       "network": "ネットワーク",
-      "token": "トークン",
+      "amount": "金額",
+      "available": "利用可能: {{amount}} {{token}}",
+      "max": "最大",
+      "nativeGas": "ネットワーク手数料用のネイティブ通貨を残してください。",
       "recipient": "送金先アドレス",
       "recipientInvalid": "有効な0x…アドレスを入力してください。",
-      "recipientSelf": "ご注意ください。これはご自身のウォレットアドレスです。",
-      "amount": "金額（{{token}}）",
+      "recipientSelf": "同じウォレットには送金できません。",
       "amountInvalid": "0より大きい金額を入力してください。",
+      "insufficient": "{{network}}の{{token}}残高が不足しています。",
+      "security": "この送金には接続中のウォレットではなくPerkOSウォレットを使用します。",
       "transferFailed": "送金に失敗しました。",
       "sending": "送金しています…",
-      "send": "送金"
+      "review": "送金内容を確認"
+    },
+    "review": {
+      "title": "送金内容を確認",
+      "description": "確定する前にすべての詳細を確認してください。",
+      "youSend": "送金額",
+      "from": "送金元",
+      "network": "ネットワーク",
+      "to": "送金先",
+      "warning": "オンチェーン送金は取り消せません。",
+      "back": "戻る",
+      "confirm": "確定して送る"
     }
   },
   "projectRoom": {
