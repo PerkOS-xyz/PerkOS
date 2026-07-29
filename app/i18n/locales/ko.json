@@ -742,11 +742,19 @@
   "wallet": {
     "header": {
       "title": "지갑",
-      "subtitle": "이곳은 PerkOS 지갑이에요. 적립된 리워드가 도착하고, 자금을 보관하고 옮길 수 있는 곳이죠. PerkOS가 대신 관리해서 시드 문구를 따로 챙기지 않아도 돼요."
+      "subtitle": "연결된 개인 지갑과 별도의 PerkOS 관리형 지갑 잔액을 지원되는 모든 네트워크에서 확인하세요."
     },
     "loading": "지갑을 불러오는 중…",
     "error": {
-      "load": "지갑을 불러오지 못했어요."
+      "load": "지갑을 불러오지 못했어요.",
+      "connect": "개인 지갑을 연결하면 주소와 잔액을 확인할 수 있어요."
+    },
+    "source": {
+      "label": "지갑 선택",
+      "connected": "연결된 내 지갑",
+      "connectedDescription": "MetaMask 또는 다른 제공업체를 통해 연결한 개인 지갑이에요.",
+      "managed": "PerkOS 관리형 지갑",
+      "managedDescription": "리워드와 에이전트 결제를 위해 PerkOS가 운영하는 별도의 지갑이에요."
     },
     "comingSoon": {
       "title": "곧 준비돼요",
@@ -754,16 +762,22 @@
     },
     "address": {
       "title": "내 지갑 주소",
-      "description": "이 주소로 토큰을 보내면 지갑에 충전돼요. Base 또는 Celo에서 가능해요.",
+      "description": "Base, Celo 또는 Robinhood Chain에서 이 관리형 지갑으로 토큰을 보낼 수 있어요.",
+      "connectedDescription": "현재 PerkOS에 연결된 개인 지갑이에요.",
+      "managedDescription": "리워드와 에이전트 결제를 위해 PerkOS가 운영하는 별도의 지갑이에요.",
       "copied": "복사됨",
       "copy": "복사",
-      "deposit": "충전: 어떤 지갑에서든 {{addr}}(으)로 USDC 또는 $PERKOS를 보내주세요."
+      "deposit": "충전: 어떤 지갑에서든 {{addr}}(으)로 USDC, USDG 또는 $PERKOS를 보내주세요.",
+      "connectedDeposit": "개인 지갑 {{addr}}. 송금하려면 MetaMask 또는 지갑 제공업체를 사용하세요.",
+      "managedDeposit": "충전: 어떤 지갑에서든 {{addr}}(으)로 USDC, USDG 또는 $PERKOS를 보내주세요."
     },
     "balances": {
       "title": "잔액",
       "refresh": "새로고침",
       "reading": "잔액을 불러오는 중…",
-      "error": "잔액을 불러오지 못했어요."
+      "error": "잔액을 불러오지 못했어요.",
+      "empty": "이 관리형 지갑에는 아직 자금이 없어요. 위 주소로 토큰을 입금한 뒤 새로고침하세요.",
+      "unavailable": "이 네트워크는 일시적으로 사용할 수 없어요. 새로고침해 보세요."
     }
   },
   "notifications": {

@@ -742,11 +742,19 @@
   "wallet": {
     "header": {
       "title": "ウォレット",
-      "subtitle": "あなたのPerkOSウォレットです。ロイヤルティ特典が届く場所であり、資金の保管や送金もここで行えます。PerkOSが管理するので、シードフレーズを扱う必要はありません。"
+      "subtitle": "接続済みウォレットとPerkOS管理ウォレットの残高を、対応するすべてのネットワークで確認できます。"
     },
     "loading": "ウォレットを読み込んでいます…",
     "error": {
-      "load": "ウォレットを読み込めませんでした。"
+      "load": "ウォレットを読み込めませんでした。",
+      "connect": "個人ウォレットを接続すると、アドレスと残高を確認できます。"
+    },
+    "source": {
+      "label": "ウォレットを選択",
+      "connected": "接続済みウォレット",
+      "connectedDescription": "MetaMaskなどを通じて接続した個人ウォレットです。",
+      "managed": "PerkOS管理ウォレット",
+      "managedDescription": "報酬とエージェント支払いのためにPerkOSが運用する別のウォレットです。"
     },
     "comingSoon": {
       "title": "近日公開",
@@ -754,16 +762,22 @@
     },
     "address": {
       "title": "あなたのウォレットアドレス",
-      "description": "BaseまたはCeloで、こちらのアドレスにトークンを送るとウォレットに入金されます。",
+      "description": "Base、Celo、またはRobinhood Chainからこの管理ウォレットにトークンを送金できます。",
+      "connectedDescription": "現在PerkOSに接続されている個人ウォレットです。",
+      "managedDescription": "報酬とエージェント支払いのためにPerkOSが運用する別のウォレットです。",
       "copied": "コピーしました",
       "copy": "コピー",
-      "deposit": "入金：どのウォレットからでも、{{addr}}宛にUSDCまたは$PERKOSを送ってください。"
+      "deposit": "入金：どのウォレットからでも、{{addr}}宛にUSDC、USDG、または$PERKOSを送ってください。",
+      "connectedDeposit": "個人ウォレット {{addr}}。送金にはMetaMaskまたはウォレットプロバイダーを使用してください。",
+      "managedDeposit": "入金：どのウォレットからでも、{{addr}}宛にUSDC、USDG、または$PERKOSを送ってください。"
     },
     "balances": {
       "title": "残高",
       "refresh": "更新",
       "reading": "残高を確認しています…",
-      "error": "残高を確認できませんでした。"
+      "error": "残高を確認できませんでした。",
+      "empty": "この管理ウォレットにはまだ資金がありません。上のアドレスにトークンを入金してから更新してください。",
+      "unavailable": "このネットワークは一時的に利用できません。更新をお試しください。"
     }
   },
   "notifications": {

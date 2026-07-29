@@ -22,7 +22,8 @@ export function ChatbotTrigger() {
   if (
     pathname?.startsWith("/agents/") ||
     pathname?.startsWith("/chat") ||
-    pathname?.startsWith("/projects/")
+    pathname?.startsWith("/projects/") ||
+    pathname === "/wallet"
   ) {
     return null;
   }
