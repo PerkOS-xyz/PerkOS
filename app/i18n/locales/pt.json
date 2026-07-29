@@ -1,0 +1,1915 @@
+{
+  "nav": {
+    "dashboard": "Painel",
+    "projects": "Projetos",
+    "tasks": "Tarefas",
+    "agents": "Agentes",
+    "chat": "Chat",
+    "organization": "Organização",
+    "wallet": "Carteira",
+    "settings": "Configurações"
+  },
+  "common": {
+    "language": "Idioma",
+    "loading": "Carregando…",
+    "skipToContent": "Pular para o conteúdo principal",
+    "openMenu": "Abrir menu",
+    "mainNavigation": "Navegação principal"
+  },
+  "signIn": {
+    "signingIn": "Fazendo login…",
+    "continueAs": "Continuar como {{address}}",
+    "retry": "Tentar login novamente",
+    "useDifferentAccount": "Use uma conta diferente",
+    "connectingWallet": "Conectando sua carteira…",
+    "restoringSession": "Restaurando sua sessão…",
+    "restoringPreviousSession": "Restaurando sessão anterior…",
+    "withEmail": "Faça login com e-mail",
+    "withWallet": "Faça login com carteira",
+    "backToLanding": "De volta ao pouso"
+  },
+  "landing": {
+    "nav": {
+      "forYourBusiness": "Para o seu negócio",
+      "howItWorks": "Como funciona",
+      "whyPerkos": "Por que PerkOS",
+      "pricing": "Preços",
+      "talkToUs": "Fale conosco",
+      "signIn": "Entrar",
+      "meetYourTeam": "Conheça sua equipe",
+      "start": "Começar"
+    },
+    "hero": {
+      "badge": "Acesso antecipado · Gratuito para começar",
+      "titleBefore": "Sua empresa acaba de contratar sua",
+      "titleHighlight": "primeira equipe",
+      "titleAfter": ".",
+      "subtitle": "Escolha o seu tipo de negócio e em dois minutos você terá uma pequena equipe que cuida do trabalho pesado e verifica primeiro com você.",
+      "ctaPrimary": "Conheça sua equipe",
+      "ctaSecondary": "Veja como funciona",
+      "trust": {
+        "approve": "Você aprova tudo",
+        "ready": "Pronto em 2 minutos",
+        "noTech": "Não são necessárias habilidades técnicas",
+        "cancel": "Cancele a qualquer momento"
+      }
+    },
+    "fearKillers": {
+      "items": {
+        "approval": {
+          "title": "Nada acontece sem o seu OK.",
+          "body": "Sua equipe elabora e sugere. Você revisa cada peça antes de ir a qualquer lugar."
+        },
+        "simple": {
+          "title": "Se você pode enviar mensagens de texto, você pode fazer isso.",
+          "body": "Diga à sua equipe o que você precisa em linguagem simples. Isso é tudo."
+        },
+        "affordable": {
+          "title": "Custa menos de uma hora de ajuda.",
+          "body": "Sem contratos, sem taxas de instalação. Quando sua equipe não está trabalhando, você mal paga."
+        }
+      }
+    },
+    "templates": {
+      "heading": "Criado para empresas como a sua.",
+      "subheading": "Escolha aquele que se parece com você. Sua equipe chega já conhecendo seu tipo de trabalho.",
+      "cardCta": "Conheça esta equipe",
+      "footNoteBefore": "Não vê sua empresa? Crie uma equipe personalizada nos mesmos dois minutos ou",
+      "footNoteLink": "diga-nos o que você precisa",
+      "footNoteAfter": ".",
+      "items": {
+        "restaurant": {
+          "name": "Restaurante",
+          "pitch": "Para proprietários que preferem cozinhar a postar: mesas cheias, menos tempo de tela."
+        },
+        "realEstate": {
+          "name": "Imobiliária",
+          "pitch": "Para agentes: listagens aprimoradas e acompanhamentos enviados enquanto você mostra as casas."
+        },
+        "growthAgency": {
+          "name": "Agência de Crescimento",
+          "pitch": "Para proprietários de agências: mais trabalhos de clientes entregues sem mais madrugadas."
+        },
+        "onlineStore": {
+          "name": "Loja on-line",
+          "pitch": "Para proprietários de lojas: páginas de produtos, promoções e respostas de clientes tratadas."
+        },
+        "consulting": {
+          "name": "Prática de Consultoria",
+          "pitch": "Para consultores: propostas e pesquisas feitas durante o atendimento aos clientes."
+        },
+        "healthWellness": {
+          "name": "Saúde e bem-estar",
+          "pitch": "Para estúdios e clínicas: turmas completas e clientes que voltam."
+        },
+        "coaching": {
+          "name": "Coaching e Cursos",
+          "pitch": "Para treinadores: mais alunos matriculados, menos tempo para se promover."
+        },
+        "trades": {
+          "name": "Negociações e Contratações",
+          "pitch": "Para empreiteiros: faça orçamentos rapidamente e retire a papelada do seu caminhão."
+        },
+        "finance": {
+          "name": "Finanças e Escrituração Contábil",
+          "pitch": "Para contadores: mais clientes atendidos, cada livro ainda impecável."
+        },
+        "localServices": {
+          "name": "Serviços locais",
+          "pitch": "Para salões de beleza, faxineiras e lojas: um fluxo constante de reservas."
+        }
+      }
+    },
+    "meetYourTeam": {
+      "heading": "Aqui está quem aparece no primeiro dia.",
+      "subheading": "Cada equipe vem com as pessoas que uma pequena empresa realmente precisa.",
+      "footNote": "Converse com qualquer um deles, troque-os ou adicione os seus próprios. É a sua equipe.",
+      "roles": {
+        "teamLead": {
+          "name": "Líder de equipe",
+          "blurb": "Pega seu objetivo, divide-o em um plano, distribui o trabalho e verifica tudo antes que chegue até você."
+        },
+        "distribution": {
+          "name": "Especialista em Distribuição",
+          "blurb": "Elabora suas postagens, e-mails e promoções (na sua voz) para que algo de bom seja publicado todas as semanas."
+        },
+        "research": {
+          "name": "Colega de equipe de pesquisa",
+          "blurb": "Analisa concorrentes, preços e tendências e, em seguida, entrega a você a versão resumida na qual você pode agir."
+        },
+        "bookkeeping": {
+          "name": "Companheiro de contabilidade",
+          "blurb": "Mantém seus números organizados e sinaliza o que precisa de atenção, para que a temporada de impostos deixe de ser uma surpresa."
+        }
+      }
+    },
+    "howItWorks": {
+      "heading": "Pronto e funcionando em minutos.",
+      "cta": "Experimente gratuitamente",
+      "steps": {
+        "pick": {
+          "title": "Escolha o seu negócio.",
+          "body": "Escolha o modelo que corresponde ao que você faz. Sua equipe estará pronta em cerca de dois minutos."
+        },
+        "say": {
+          "title": "Diga o que você precisa.",
+          "body": "Digite uma meta em linguagem simples, como “conseguir mais clientes para almoços durante a semana”. Seu líder de equipe transforma isso em um plano."
+        },
+        "review": {
+          "title": "Revise e aprove.",
+          "body": "A equipe faz o trabalho e envia rascunhos para você. Você diz sim, pede mudanças ou diz não. Sempre."
+        }
+      }
+    },
+    "expertise": {
+      "heading": "Por trás dos rostos amigáveis: IA séria.",
+      "introBefore": "PerkOS é baseado em",
+      "introAfter": "(equipes de trabalhadores de IA que podem planejar, dividir um trabalho e terminá-lo por conta própria, em vez de esperar instruções a cada passo). Aqui está o que isso significa para você:",
+      "footNote": "Esta não é uma demonstração. A equipe que executa o PerkOS é parcialmente IA, nesta mesma plataforma. E baseia-se em pesquisas reais: 73% das pequenas empresas dizem que querem ajuda para que a IA realmente funcione. Foi exatamente isso que construímos.",
+      "proofs": {
+        "plan": {
+          "title": "Eles planejam como uma equipe de verdade.",
+          "body": "Defina uma meta e o líder da equipe a divide em tarefas, atribui cada uma à pessoa certa e acompanha o trabalho até a conclusão, sem supervisão constante."
+        },
+        "quality": {
+          "title": "O trabalho fraco nunca chega até você.",
+          "body": "Cada peça é verificada antes de você vê-la. Se algo não for bom o suficiente, ele será devolvido e refeito automaticamente. Você apenas revisa trabalhos que valem a pena ser revisados."
+        },
+        "sleep": {
+          "title": "Eles trabalham enquanto você dorme, sem cobrar nada.",
+          "body": "Sua equipe continua progredindo durante a noite e depois descansa quando não há nada para fazer. O tempo de descanso não custa quase nada."
+        }
+      }
+    },
+    "beyondTeams": {
+      "heading": "Seja qual for a IA que sua empresa precisa, nós a configuramos.",
+      "body1": "Equipes prontas são apenas o começo. Também construímos IA personalizada para empresas com necessidades maiores ou mais incomuns: atender seus clientes, conectar as ferramentas que você já usa, automatizar o trabalho que ocupa sua semana. Já está usando IA em outro lugar? Traga-o com você; vai se encaixar perfeitamente.",
+      "body2": "Você não precisa saber o que pedir. Conte-nos o problema. Nós cuidaremos do resto.",
+      "cta": "Fale conosco"
+    },
+    "pricing": {
+      "heading": "Comece gratuitamente. Continua acessível.",
+      "subheading": "Uma equipe completa pelo preço de uma assinatura de streaming, e uma equipe em repouso não custa quase nada. Compare isso com uma contratação de meio período.",
+      "mostPopular": "Mais popular",
+      "footNote": "Você paga apenas pelas horas que sua equipe realmente trabalha. Alcance seu horário mensal e sua equipe simplesmente fará uma pausa. Recarregue ou atualize para continuar. Você nunca recebe uma conta surpresa.",
+      "tiers": {
+        "free": {
+          "name": "Livre",
+          "price": "Livre",
+          "cadence": "por 7 dias",
+          "tag": "Traga seus próprios agentes",
+          "cta": "Comece gratuitamente",
+          "bullets": [
+            "Conecte agentes de IA que você já administra",
+            "Espaço de trabalho completo: quadro, documentos, bate-papo",
+            "Eles elaboram, você aprova, sempre",
+            "Funciona na sua configuração, grátis por uma semana"
+          ]
+        },
+        "starter": {
+          "name": "Iniciante",
+          "price": "US$ 9,99",
+          "cadence": "/ mês",
+          "tag": "Nós hospedamos sua equipe, você traz a IA",
+          "cta": "Comece sua equipe",
+          "bullets": [
+            "Nós administramos sua equipe, nada para instalar",
+            "Traga sua própria chave AI (OpenAI e mais)",
+            "50 horas de trabalho da equipe/mês",
+            "Você paga diretamente ao seu provedor de IA"
+          ]
+        },
+        "pro": {
+          "name": "Pró",
+          "price": "US$ 29,99",
+          "cadence": "/ mês",
+          "tag": "Hospedamos sua equipe e administramos a IA",
+          "cta": "Comece sua equipe",
+          "bullets": [
+            "Nós administramos sua equipe E a IA, zero configuração",
+            "Nenhuma conta AI necessária",
+            "150 horas de trabalho da equipe/mês",
+            "Suporte prioritário"
+          ]
+        },
+        "scale": {
+          "name": "Escala",
+          "price": "US$ 79,99",
+          "cadence": "/ mês",
+          "tag": "Para equipes que correm o dia todo",
+          "cta": "Comece sua equipe",
+          "bullets": [
+            "Tudo em Pró",
+            "500 horas de trabalho da equipe/mês",
+            "Recarregue a qualquer momento se precisar de mais",
+            "Integração e um ser humano real"
+          ]
+        }
+      }
+    },
+    "buildersStrip": {
+      "heading": "Construindo algo maior?",
+      "links": {
+        "partners": {
+          "title": "Para parceiros",
+          "desc": "Integrações, tempos de execução e IA própria."
+        },
+        "developers": {
+          "title": "Para desenvolvedores",
+          "desc": "A plataforma subjacente: APIs, trilhos de pagamento, documentos."
+        }
+      }
+    },
+    "talkToUs": {
+      "heading": "Prefere falar primeiro com uma pessoa?",
+      "subheading": "Totalmente justo. Conte-nos sobre o seu negócio e o que está acontecendo na sua semana. Diremos honestamente se (e como) a IA pode ajudar.",
+      "followAlong": "Acompanhe",
+      "contacts": {
+        "general": {
+          "title": "Consultas gerais"
+        },
+        "partnerships": {
+          "title": "Parcerias"
+        },
+        "investors": {
+          "title": "Investidores"
+        }
+      }
+    },
+    "finalCTA": {
+      "heading": "Você já faz parte da equipe há tempo suficiente.",
+      "subheading": "Daqui a dois minutos você poderá ter ajuda, uma ajuda que rascunha, sugere e sempre pede antes de agir.",
+      "ctaPrimary": "Conheça sua equipe, livre para começar",
+      "ctaSecondary": "Fale conosco primeiro"
+    },
+    "footer": {
+      "tagline": "Equipes de IA para pequenas empresas. Eles elaboram, você aprova.",
+      "copyright": "© {{year}} PerkOS. Equipes de IA para pequenas empresas. Eles elaboram, você aprova.",
+      "links": {
+        "forYourBusiness": "Para o seu negócio",
+        "howItWorks": "Como funciona",
+        "whyPerkos": "Por que PerkOS",
+        "contact": "Contato",
+        "investors": "Investidores"
+      }
+    }
+  },
+  "onboarding": {
+    "shell": {
+      "next": "Próximo",
+      "back": "Voltar",
+      "stepOf": "{{current}} de {{total}}"
+    },
+    "welcome": {
+      "title": "Bem-vindo ao PerkOS",
+      "description": "PerkOS é o seu centro de comando para o trabalho responsável que prioriza a IA. Organize seus agentes, despache tarefas e acompanhe resultados, tudo em um só lugar. Vamos configurá-lo em algumas etapas rápidas.",
+      "stats": {
+        "projects": {
+          "label": "Projetos",
+          "suffix": "projetos ativos"
+        },
+        "tasks": {
+          "label": "Tarefas",
+          "suffix": "tarefas concluídas"
+        },
+        "agents": {
+          "label": "Agentes",
+          "suffix": "agentes registrados"
+        }
+      },
+      "emptyNote": "Seu painel começa vazio. Ao final desta configuração, você terá seu primeiro projeto e agente prontos para uso."
+    },
+    "workspace": {
+      "title": "Crie seu espaço de trabalho",
+      "description": "Um espaço de trabalho é a casa compartilhada da sua equipe no PerkOS. Ele agrupa seus projetos, agentes e membros sob o mesmo teto. Você pode renomeá-lo a qualquer momento nas configurações.",
+      "nameLabel": "Nome do espaço de trabalho",
+      "namePlaceholder": "Espaço de trabalho de software",
+      "usernameLabel": "Seu nome de usuário",
+      "optional": "(opcional)",
+      "usernameHelp": "Seu @handle é como seus colegas de equipe e agentes mencionam você nos chats. Você pode pular e configurá-lo mais tarde ou manter o endereço da sua carteira.",
+      "memberCount": "1 membro",
+      "ownedBy": "Propriedade de {{address}}",
+      "inviteHint": "Você pode convidar colegas de equipe para seu espaço de trabalho posteriormente no painel Configurações."
+    },
+    "project": {
+      "title": "Iniciar um projeto",
+      "description": "Os projetos mantêm seus agentes e tarefas organizados em torno de um objetivo compartilhado. Pense em cada projeto como uma missão com escopo próprio, agentes designados e tarefas a serem concluídas.",
+      "created": "Projeto criado",
+      "createCta": "Crie seu primeiro projeto",
+      "skip": "Pule esta etapa"
+    },
+    "agent": {
+      "title": "Cadastre seu primeiro agente",
+      "description": "Os agentes são os membros da sua equipe. Cada agente se conecta ao runtime Hermes ou OpenClaw, executa tarefas e informa os resultados. Registre um agora para poder atribuí-lo a um projeto.",
+      "finish": "Terminar",
+      "registered": "Agente registrado",
+      "registerCta": "Cadastre um agente",
+      "needsTitle": "O que você precisa",
+      "needs": {
+        "name": "Um nome de agente e uma descrição opcional",
+        "model": "Um modelo (Claude, GPT, etc.) e tempo de execução (Hermes ou OpenClaw)",
+        "skills": "Habilidades/plugins para habilitar"
+      },
+      "skip": "Pule esta etapa"
+    }
+  },
+  "dashboard": {
+    "greeting": {
+      "welcomeBack": "bem vindo de volta",
+      "intro": "Sou seu agente PerkOS. Ajudarei você a criar e executar os agentes e projetos necessários. Escolha onde focar hoje."
+    },
+    "workspace": {
+      "badge": "Espaço de trabalho",
+      "memberCount": "1 membro",
+      "ownedBy": "Propriedade de"
+    },
+    "personalWorkspace": "Espaço de trabalho pessoal",
+    "teamActivity": {
+      "title": "Atividade da equipe: últimas 12 semanas",
+      "recentEvents": "{{total}} eventos recentes"
+    },
+    "quickActions": {
+      "title": "Ações rápidas",
+      "cardDescription": "Volte para o fluxo de construção.",
+      "items": {
+        "createProject": {
+          "label": "Criar projeto",
+          "description": "Configure uma nova missão para seus agentes."
+        },
+        "createTask": {
+          "label": "Criar tarefa",
+          "description": "Adicione trabalho a um de seus projetos."
+        },
+        "registerAgent": {
+          "label": "Registrar agente",
+          "description": "Lance um novo trabalhador para sua equipe."
+        }
+      }
+    },
+    "sections": {
+      "projects": "Projetos",
+      "recentTasks": "Tarefas recentes",
+      "viewAll": "Ver tudo"
+    },
+    "projects": {
+      "empty": "Nenhum projeto ainda.",
+      "emptyCta": "Crie seu primeiro projeto"
+    },
+    "tasks": {
+      "empty": "Nenhuma tarefa ainda.",
+      "emptyCta": "Crie uma tarefa"
+    },
+    "projectRow": {
+      "agentCount_one": "Agente {{count}}",
+      "agentCount_other": "Agentes {{count}}",
+      "taskCount_one": "Tarefa {{count}}",
+      "taskCount_other": "Tarefas {{count}}",
+      "active": "ativo {{time}}"
+    },
+    "taskRow": {
+      "agentLabel": "Agente:"
+    },
+    "waiting": {
+      "planLabel": "Plano aguardando sua aprovação",
+      "planLabelWithObject": "Plano aguardando sua aprovação: {{object}}",
+      "proposedBy": "Proposto por {{actor}}",
+      "inReview": "Em revisão · {{agent}}",
+      "unassigned": "não atribuído",
+      "agentFailed": "{{name}} falhou ao iniciar",
+      "agentFailedHint": "Abra o agente para tentar novamente ou excluí-lo"
+    },
+    "starter": {
+      "title": "Novo aqui?",
+      "description": "Crie um projeto de demonstração com três tarefas de exemplo para que os fluxos de kanban, chat e agente tenham algo a mostrar.",
+      "creating": "Criando…",
+      "cta": "Criar projeto inicial",
+      "toastSuccessTitle": "Projeto inicial pronto",
+      "toastSuccessDesc": "Bem-vindo ao PerkOS. 3 tarefas de demonstração adicionadas.",
+      "toastErrorTitle": "Não foi possível criar o projeto inicial"
+    }
+  },
+  "projects": {
+    "header": {
+      "title": "Projetos",
+      "countInWorkspace_one": "Projeto {{count}} em seu espaço de trabalho.",
+      "countInWorkspace_other": "Projetos {{count}} em seu espaço de trabalho.",
+      "createFirst": "Crie seu primeiro projeto.",
+      "newProject": "Novo projeto"
+    },
+    "search": {
+      "placeholder": "Pesquise projetos por nome, objetivo ou status…",
+      "noResults": "Nenhum projeto corresponde a \"{{query}}\"."
+    },
+    "filter": {
+      "clearStatusAria": "Limpar filtro de status",
+      "statusPill": "status: {{status}}"
+    },
+    "bulk": {
+      "selectAllAria": "Selecione todos os projetos",
+      "selectAll": "Selecionar tudo",
+      "selectedCount": "{{count}} selecionado",
+      "archive": "Arquivo",
+      "unarchive": "Desarquivar",
+      "delete": "Excluir",
+      "clear": "Limpar"
+    },
+    "card": {
+      "selectAria": "Selecione {{name}}",
+      "agentCount_one": "Agente {{count}}",
+      "agentCount_other": "Agentes {{count}}",
+      "taskCount_one": "Tarefa {{count}}",
+      "taskCount_other": "Tarefas {{count}}",
+      "active": "ativo {{time}}"
+    },
+    "empty": {
+      "title": "Ainda não há projetos",
+      "description": "Os projetos agrupam seus agentes, tarefas e chats em torno de um objetivo. Comece criando um.",
+      "action": "Criar projeto"
+    },
+    "confirmDelete": {
+      "title_one": "Excluir projeto {{count}}?",
+      "title_other": "Excluir projetos {{count}}?",
+      "description": "Isso exclui permanentemente os projetos selecionados e os remove do seu espaço de trabalho. Isso não pode ser desfeito.",
+      "confirmLabel": "Excluir"
+    },
+    "toast": {
+      "archivedSomeFailed": "{{ok}} arquivado, {{failed}} falhou",
+      "archivedSuccess_one": "Projeto {{count}} arquivado",
+      "archivedSuccess_other": "Projetos {{count}} arquivados",
+      "unarchivedSomeFailed": "{{ok}} desarquivado, {{failed}} falhou",
+      "unarchivedSuccess_one": "Projeto {{count}} desarquivado",
+      "unarchivedSuccess_other": "Projetos {{count}} desarquivados",
+      "bulkUpdateFailed": "Falha na atualização em massa",
+      "deletedSomeFailed": "{{ok}} excluído, {{failed}} falhou",
+      "deletedSuccess_one": "Projeto {{count}} excluído",
+      "deletedSuccess_other": "Projetos {{count}} excluídos",
+      "bulkDeleteFailed": "Falha na exclusão em massa"
+    }
+  },
+  "agents": {
+    "header": {
+      "title": "Equipe de agentes",
+      "subtitle": "Conecte seus agentes, atribua-os a projetos e coloque-os para trabalhar.",
+      "addAgent": "Adicionar agente"
+    },
+    "search": {
+      "placeholder": "Pesquise agentes por nome, tempo de execução ou capacidade…",
+      "noResults": "Nenhum agente corresponde a \"{{query}}\"."
+    },
+    "bulk": {
+      "selectAllAria": "Selecione todos os agentes",
+      "selectAll": "Selecionar tudo",
+      "selectedCount": "{{count}} selecionado",
+      "assignToProject": "Atribuir ao projeto",
+      "hibernate": "Hibernar",
+      "wake": "Acordar",
+      "delete": "Excluir",
+      "clear": "Limpar"
+    },
+    "confirmDelete": {
+      "title_one": "Excluir agente {{count}}?",
+      "title_other": "Excluir agentes {{count}}?",
+      "description": "Desmonta cada contêiner em execução, revoga sua chave LLM e limpa seus registros (incluindo o registro de retransmissão). O faturamento é interrompido imediatamente. Isso não pode ser desfeito.",
+      "confirmLabel": "Excluir"
+    },
+    "toast": {
+      "deletedSomeFailed": "{{ok}} excluído, {{failed}} falhou",
+      "deletedSuccess_one": "Agente {{count}} excluído",
+      "deletedSuccess_other": "Agentes {{count}} excluídos",
+      "bulkDeleteFailed": "Falha na exclusão em massa",
+      "hibernatedSomeFailed": "{{ok}} hibernado, {{failed}} falhou",
+      "hibernatedSomeFailedDesc": "Os agentes não implantados na infraestrutura do PerkOS não podem hibernar.",
+      "hibernatedSuccess_one": "Agente {{count}} hibernado",
+      "hibernatedSuccess_other": "Agentes {{count}} hibernados",
+      "bulkHibernateFailed": "Falha na hibernação em massa",
+      "wokeSomeFailed": "{{ok}} ativados, {{failed}} falharam",
+      "wokeSomeFailedDesc": "Os agentes não implantados na infraestrutura do PerkOS não podem ser ativados.",
+      "wokeSuccess_one": "Agente {{count}} ativado",
+      "wokeSuccess_other": "{{count}} agentes ativados",
+      "bulkWakeFailed": "Falha na ativação em massa"
+    },
+    "assignDialog": {
+      "title": "Atribuir ao projeto",
+      "description_one": "Adicione o agente selecionado {{count}} à lista de um projeto.",
+      "description_other": "Adicione agentes selecionados {{count}} à lista de um projeto.",
+      "projectLabel": "Projeto",
+      "selectPlaceholder": "Selecione um projeto…",
+      "cancel": "Cancelar",
+      "assign": "Atribuir",
+      "assigning": "Atribuindo…",
+      "projectFallback": "projeto",
+      "assignedSuccess_one": "Agente {{count}} atribuído a {{name}}",
+      "assignedSuccess_other": "Agentes {{count}} atribuídos a {{name}}",
+      "alreadyOn": "Já em {{name}}, nada a acrescentar",
+      "assignFailed": "Falha na atribuição"
+    },
+    "card": {
+      "selectAria": "Selecione {{name}}",
+      "externalTitle": "Funciona em infra própria (convidado/auto-hospedado). PerkOS não pode hibernar",
+      "external": "Externo",
+      "capabilities": "Capacidades: {{list}}",
+      "noCapabilities": "Nenhum recurso configurado ainda.",
+      "projects": "Projetos: {{count}}",
+      "active": "{{time}} ativo",
+      "created": "Criado {{time}}",
+      "capabilitiesCount": "Capacidades: {{count}}"
+    },
+    "power": {
+      "waking": "Acordando {{name}}…",
+      "wakingDesc": "Boots + se conecta em aproximadamente 2–3 min.",
+      "hibernating": "Hibernando {{name}}…",
+      "hibernatingDesc": "Reduzindo para economizar custos.",
+      "error": "Não foi possível alterar o estado de energia",
+      "wakeAria": "Despertar {{name}}",
+      "hibernateAria": "Hibernar {{name}}",
+      "working": "Trabalhando…",
+      "wakeTitle": "Agente de despertar",
+      "hibernateTitle": "Agente de hibernação"
+    },
+    "status": {
+      "revoked": "Revogado",
+      "neverConnected": "Nunca conectado",
+      "invited": "Convidado",
+      "syncing": "Sincronizando…",
+      "hibernated": "Hibernado",
+      "hibernating": "Hibernando…",
+      "waking": "Acordando…",
+      "online": "On-line",
+      "offline": "Off-line",
+      "failed": "Com falha",
+      "provisioning": "Provisionamento",
+      "unknown": "Desconhecido"
+    },
+    "empty": {
+      "title": "Nenhum agente ainda",
+      "description": "Adicione um agente: crie um agente Hermes ou OpenClaw no PerkOS, execute um em seu próprio VPS ou convide um agente que você já administra em outro lugar para sua organização.",
+      "action": "Adicionar agente"
+    }
+  },
+  "tasks": {
+    "header": {
+      "title": "Tarefas",
+      "subtitle": "Tudo em voo em seus projetos.",
+      "createTask": "Criar tarefa"
+    },
+    "search": {
+      "placeholder": "Pesquise tarefas por nome, agente, projeto ou status…",
+      "noResults": "Nenhuma tarefa corresponde a \"{{query}}\"."
+    },
+    "filter": {
+      "statusPill": "status: {{status}}",
+      "inProgress": "em andamento",
+      "projectPill": "projeto: {{project}}",
+      "clearAria": "Limpar {{label}}"
+    },
+    "emptyProjects": {
+      "title": "Ainda não há projetos",
+      "description": "As tarefas residem dentro dos projetos. Crie um primeiro.",
+      "action": "Criar projeto"
+    },
+    "empty": {
+      "title": "Nenhuma tarefa ainda",
+      "description": "Adicione tarefas a um projeto e encaminhe-as para seus agentes.",
+      "action": "Criar tarefa"
+    },
+    "bulk": {
+      "selectedCount": "{{count}} selecionado",
+      "moveTo": "Mover para:",
+      "toDo": "Pendência",
+      "inProgress": "Em andamento",
+      "done": "Feito",
+      "delete": "Excluir",
+      "clear": "Limpar"
+    },
+    "card": {
+      "selectAria": "Selecione {{name}}",
+      "agent": "Agente: {{agent}}"
+    },
+    "dragHint": "Arrastar e soltar é local por enquanto. Sincronização de back-end chegando com o próximo lançamento.",
+    "projectFilter": {
+      "aria": "Filtrar tarefas por projeto",
+      "all": "Todos os projetos"
+    },
+    "confirmDelete": {
+      "title_one": "Excluir tarefa {{count}}?",
+      "title_other": "Excluir tarefas {{count}}?",
+      "description": "As tarefas selecionadas (entre projetos) e seu histórico serão removidos. Isso não pode ser desfeito.",
+      "confirmLabel": "Excluir"
+    },
+    "toast": {
+      "movedSomeFailed": "{{ok}} movido, {{failed}} falhou",
+      "movedSuccess_one": "Tarefa {{count}} movida",
+      "movedSuccess_other": "Tarefas {{count}} movidas",
+      "bulkMoveFailed": "Falha na movimentação em massa",
+      "deletedSomeFailed": "{{ok}} excluído, {{failed}} falhou",
+      "deletedSuccess_one": "Tarefa {{count}} excluída",
+      "deletedSuccess_other": "Tarefas {{count}} excluídas",
+      "bulkDeleteFailed": "Falha na exclusão em massa"
+    }
+  },
+  "settings": {
+    "header": {
+      "title": "Configurações",
+      "subtitle": "Gerencie sua carteira, espaço de trabalho e integrações."
+    },
+    "account": {
+      "title": "Conta",
+      "description": "Você fez login com esta carteira Base/Solana.",
+      "connectedWallet": "Carteira conectada",
+      "notConnected": "Não conectado",
+      "copied": "Copiado",
+      "copyFull": "Cópia completa",
+      "noKeys": "Nunca solicitamos chaves privadas ou frases iniciais.",
+      "disconnect": "Desconectar carteira"
+    },
+    "username": {
+      "title": "Nome de usuário",
+      "description": "Seu @handle: o que os colegas de equipe digitam para mencioná-lo nos bate-papos. Exclusivo; volta para o endereço da sua carteira quando não definido."
+    },
+    "avatar": {
+      "title": "Foto do perfil",
+      "description": "Seu avatar no aplicativo. Usa seu ENS ou Basename, se você tiver um, ou carrega o seu próprio.",
+      "sourceEns": "ENS",
+      "sourceBasename": "Nome base",
+      "sourceCustom": "Personalizado",
+      "sourceDefault": "Padrão",
+      "upload": "Carregar imagem",
+      "remove": "Remover",
+      "hint": "PNG, JPG ou WebP. Nós redimensionamos para você.",
+      "noOnchain": "Vincule um nome ENS ou Basename à sua carteira para usá-lo aqui.",
+      "updated": "Foto do perfil atualizada",
+      "uploadFailed": "Não foi possível fazer upload da imagem",
+      "refresh": "Atualizar",
+      "refreshHint": "Verifique novamente sua carteira em busca de um avatar ENS ou Basename",
+      "resolved": "Avatar encontrado e atualizado",
+      "noneFound": "Nenhum avatar ENS ou Basename encontrado para esta carteira"
+    },
+    "workspace": {
+      "title": "Espaço de trabalho",
+      "description": "Nome de exibição mostrado no painel e na integração.",
+      "nameLabel": "Nome do espaço de trabalho",
+      "namePlaceholder": "Espaço de trabalho de software",
+      "storedLocally": "Armazenado localmente até que o PerkOS adicione persistência do espaço de trabalho no back-end.",
+      "save": "Salvar alterações",
+      "toastUpdated": "Nome do espaço de trabalho atualizado"
+    },
+    "llm": {
+      "title": "Chaves do provedor LLM",
+      "description": "As chaves de API são atualmente configuradas por agente dentro do inicializador (Etapa 3 → BYOK). O armazenamento global de chaves está no roteiro.",
+      "infoBefore": "Por enquanto, cada agente vem com sua própria configuração BYOK. Use o",
+      "infoLink": "lançador de agente",
+      "infoAfter": "para anexar credenciais OpenAI, Anthropic ou OpenRouter.",
+      "infoNote": "Um cofre de chaves unificado com escopo para sua carteira está planejado para uma versão futura."
+    },
+    "network": {
+      "title": "Rede",
+      "description": "Endpoints de back-end e on-chain com os quais este aplicativo se comunica.",
+      "perkosApi": "API PerkOS",
+      "defaultChain": "Cadeia padrão",
+      "solanaCluster": "Aglomerado Solana",
+      "testnet": "Rede de teste"
+    },
+    "danger": {
+      "title": "Zona de perigo",
+      "description": "Ações apenas locais. Nada aqui afeta o back-end do PerkOS.",
+      "clearDraft": {
+        "title": "Rascunho claro da organização",
+        "description": "Limpa o formulário de organização em andamento armazenado neste dispositivo.",
+        "action": "Limpar rascunho"
+      },
+      "reset": {
+        "title": "Redefinir estado de integração",
+        "description": "Esquece o nome do espaço de trabalho salvo localmente, o marcador do projeto e o marcador do agente.",
+        "action": "Reiniciar"
+      },
+      "disconnect": {
+        "title": "Desconectar carteira",
+        "description": "Desconecta você deste dispositivo. Seus agentes e projetos no back-end permanecem intactos.",
+        "action": "Desconectar"
+      }
+    },
+    "resetDialog": {
+      "title": "Redefinir o estado de integração?",
+      "description": "Isso limpa o nome do espaço de trabalho local, o rascunho do projeto e os marcadores de configuração do agente. Seus dados no back-end permanecem intactos.",
+      "confirmLabel": "Redefinir estado"
+    },
+    "toast": {
+      "draftCleared": "Rascunho da organização limpo",
+      "draftClearFailed": "Não foi possível limpar o rascunho",
+      "stateReset": "Redefinição do estado do espaço de trabalho"
+    }
+  },
+  "wallet": {
+    "header": {
+      "title": "Carteira",
+      "subtitle": "Sua carteira PerkOS: onde suas recompensas de fidelidade chegam e você pode reter e movimentar fundos. PerkOS executa isso para você; nenhuma frase inicial para gerenciar."
+    },
+    "loading": "Carregando sua carteira…",
+    "error": {
+      "load": "Não foi possível carregar sua carteira."
+    },
+    "comingSoon": {
+      "title": "Em breve",
+      "description": "Sua carteira está sendo configurada para esta conta. Volte em breve. É onde suas recompensas de fidelidade chegarão."
+    },
+    "address": {
+      "title": "Endereço da sua carteira",
+      "description": "Envie tokens aqui para financiar sua carteira, na Base ou Celo.",
+      "copied": "Copiado",
+      "copy": "Cópia",
+      "deposit": "Depósito: envie USDC ou $PERKOS para {{addr}} de qualquer carteira."
+    },
+    "balances": {
+      "title": "Saldos",
+      "refresh": "Atualizar",
+      "reading": "Lendo saldos…",
+      "error": "Não foi possível ler os saldos."
+    }
+  },
+  "notifications": {
+    "header": {
+      "title": "Notificações",
+      "subtitle": "Conclusões de tarefas, alterações de status de agentes e menções de projetos."
+    },
+    "actions": {
+      "markAllRead": "Marcar tudo como lido",
+      "clearAll": "Limpar tudo"
+    },
+    "tabs": {
+      "filterAria": "Filtrar notificações",
+      "all": "Todos",
+      "allWithCount": "Todos ({{count}})",
+      "unread": "Não lido",
+      "unreadWithCount": "Não lido ({{count}})"
+    },
+    "emptyNone": {
+      "title": "Nenhuma notificação ainda",
+      "description": "Quando os agentes concluírem tarefas ou os projetos entrarem em atividade, os eventos aparecerão aqui."
+    },
+    "emptyCaughtUp": {
+      "title": "Você está todo preso",
+      "description": "Nenhuma notificação não lida. Mude para a guia Todos para revisar o histórico."
+    },
+    "clearDialog": {
+      "title": "Limpar todas as notificações?",
+      "description": "Isso remove todas as notificações deste dispositivo. Não pode ser desfeito.",
+      "confirmLabel": "Limpar tudo"
+    },
+    "time": {
+      "justNow": "agora mesmo",
+      "minutesAgo": "{{count}}m atrás",
+      "hoursAgo": "{{count}}h atrás",
+      "daysAgo": "{{count}}d atrás"
+    },
+    "row": {
+      "new": "Novo",
+      "dismissAria": "Ignorar notificação",
+      "dismiss": "Liberar"
+    }
+  },
+  "organizations": {
+    "header": {
+      "title": "Organizações",
+      "subtitle": "Agrupe seus projetos e os agentes que trabalham neles. Mude a organização ativa do cabeçalho.",
+      "newOrg": "Nova organização"
+    },
+    "toast": {
+      "renamed": "Organização renomeada",
+      "renameFailed": "Não foi possível renomear"
+    },
+    "rename": {
+      "save": "Salvar",
+      "cancel": "Cancelar"
+    },
+    "card": {
+      "default": "padrão",
+      "active": "ativo",
+      "projectCount_one": "Projeto {{count}}",
+      "projectCount_other": "Projetos {{count}}",
+      "ownerSuffix": "· proprietário {{address}}",
+      "setActive": "Definir ativo",
+      "members": "Membros",
+      "rename": "Renomear"
+    }
+  },
+  "wizard": {
+    "common": {
+      "goBack": "Volte para a equipe do agente",
+      "title": "Adicionar agente",
+      "stepOf": "Etapa {{current}} de {{total}}",
+      "chooseMethod": "Escolha um tipo de configuração para ver o fluxo completo",
+      "back": "Voltar",
+      "continue": "Continuar",
+      "launching": "Lançamento…",
+      "launch": "Agente de lançamento",
+      "creatingInvitation": "Criando convite…",
+      "generateInvitation": "Gerar convite",
+      "doneBackToAgents": "Feito. Voltar aos agentes"
+    },
+    "method": {
+      "title": "Como você deseja administrar este agente?",
+      "description": "Esta é a única escolha que molda o resto. A ponte sempre disca para o PerkOS, sem necessidade de portas de entrada para nenhuma opção.",
+      "comingSoon": "Em breve",
+      "recommended": "Recomendado",
+      "perkos": {
+        "title": "Infraestrutura PerkOS",
+        "descLead": "O PerkOS provisiona um contêiner gerenciado para seu agente. De",
+        "onNetwork": "em {{network}}",
+        "descTail": "cobrado via x402{{onNetwork}}. O status muda para “pronto” quando o contêiner está íntegro (cerca de 30s).",
+        "inviteOnly": "Atualmente apenas para convidados enquanto testamos. Escolha seu VPS ou “Já tenho um” por enquanto, ou entre em contato com um administrador para ser adicionado à lista de acesso antecipado."
+      },
+      "vps": {
+        "title": "Seu VPS (auto-hospedado)",
+        "descLead": "Geramos um pacote docker-compose (runtime + bridge sidecar). Execute",
+        "descTail": "em qualquer host com Docker (Hetzner, AWS EC2, em qualquer lugar). A ponte disca para fora, sem necessidade de portas de entrada ou acesso SSH.",
+        "inviteOnly": "Somente para convidados enquanto testamos a auto-hospedagem. Escolha “Já tenho um” por enquanto ou entre em contato com um administrador para ser adicionado à lista de acesso antecipado."
+      },
+      "external": {
+        "title": "Eu já tenho um agente",
+        "description": "Já possui seu próprio agente Hermes/OpenClaw/customizado, com conhecimento próprio? Convide-o. O PerkOS não fornece nada; você recebe um aviso ao seu agente para que ele se junte à sua organização e trabalhe no quadro com paridade com os agentes nativos."
+      }
+    },
+    "template": {
+      "filterAll": "Todos",
+      "pickTitle": "Escolha seu agente",
+      "pickDescription": "Escolha o agente com o qual deseja trabalhar: do PerkOS, das comunidades OpenClaw e Hermes, ou crie o seu próprio. Cada um pode ser editado posteriormente.",
+      "filterAria": "Filtrar agentes por origem",
+      "searchSr": "Agentes de pesquisa",
+      "searchPlaceholder": "Agentes de pesquisa…",
+      "clearSearch": "Limpar pesquisa",
+      "noMatchQuery": "Nenhum agente corresponde a “{{query}}”.",
+      "noMatchFilter": "Nenhum agente corresponde a este filtro.",
+      "showAll": "Mostrar todos os agentes",
+      "chooseAria": "Escolha uma persona de agente",
+      "viewSourceAria": "Veja a fonte {{origin}} no GitHub (abre em uma nova guia)",
+      "changePersona": "Mudar de personalidade",
+      "teammateTagline": "Seu companheiro de equipe {{name}}",
+      "viewSourceLink": "Ver fonte no GitHub",
+      "handCrafted": "Feito à mão por PerkOS",
+      "engine": "Motor",
+      "recommended": "recomendado",
+      "runtimeHint": {
+        "OpenClaw": "Autônomo: trabalho e ferramentas em várias etapas",
+        "Hermes": "Conversacional: rápido, orientado por bate-papo"
+      },
+      "agentName": "Nome do agente",
+      "hidePrompt": "Ocultar prompt do sistema",
+      "showPrompt": "Mostrar prompt do sistema",
+      "edited": "editado",
+      "systemPromptSr": "Alerta do sistema",
+      "systemPromptHelp": "Torna-se SOUL.md/IDENTITY.md dentro do contêiner de tempo de execução.",
+      "systemPromptPlaceholder": "Você é um…",
+      "resetToDefault": "Redefinir para o padrão {{name}}",
+      "advancedHide": "Avançado: ocultar toda a alma",
+      "advancedView": "Avançado: visualizar alma completa",
+      "soul": {
+        "identity": "Identidade",
+        "coreTruths": "Verdades Fundamentais",
+        "worldview": "Visão de mundo",
+        "communicationStyle": "Estilo de comunicação",
+        "expertise": "Experiência",
+        "primary": "Primário:",
+        "fluentIn": "Fluente em:",
+        "defersOn": "Adia:",
+        "boundaries": "Limites",
+        "memoryPolicy": "Política de memória",
+        "remember": "Lembrar:",
+        "dontRemember": "Não me lembro:",
+        "petPeeves": "Irritações"
+      }
+    },
+    "capabilities": {
+      "title": "Capacidades e habilidades",
+      "description": "Seu agente é fornecido com ferramentas básicas ativadas por padrão. Desative tudo o que não deveria e adicione pacotes de habilidades de código aberto para obter experiência no domínio. Ambos funcionam em Hermes e OpenClaw.",
+      "builtInTools": "Ferramentas integradas",
+      "builtInHelp": "Ativado por padrão. Desligue o que este agente não precisa. Um conjunto de ferramentas mais restrito é mais seguro e barato para agentes focados. As ferramentas do quadro do projeto não são afetadas.",
+      "on": "sobre",
+      "off": "desligado",
+      "toolSwitchAria": "{{label}}: {{state}}",
+      "turnedOffLabel": "Desligado:",
+      "turnedOffEffect": ". Entra em vigor na próxima vez que o agente provisionar.",
+      "tools": {
+        "web-search": {
+          "label": "Pesquisa na web",
+          "description": "Encontre e leia páginas na web pública."
+        },
+        "code-execution": {
+          "label": "Execução de código",
+          "description": "Execute Python/shell em uma sandbox."
+        },
+        "browser": {
+          "label": "Navegador sem cabeça",
+          "description": "Navegue em sites e capture conteúdo."
+        },
+        "memory": {
+          "label": "Memória",
+          "description": "Armazene e lembre-se de fatos durante a conversa."
+        }
+      },
+      "openSourceTitle": "Habilidades de código aberto",
+      "openSourceHelp": "Pacotes de habilidades de Markdown de repositórios públicos do GitHub. Eles são injetados nas instruções do seu agente. Você pode inspecionar cada um no GitHub.",
+      "recommended": "Recomendado",
+      "unverified": "Não verificado. Análise",
+      "openSource": "Código aberto",
+      "byAuthor": "por {{author}}",
+      "inspect": "Inspecionar",
+      "addGithubSkill": "Adicione uma habilidade do GitHub",
+      "repoError": "Somente URLs github.com / raw.githubusercontent.com SKILL.md são permitidos.",
+      "add": "Adicionar"
+    },
+    "channels": {
+      "title": "Canais",
+      "description": "Opcional. Conecte um canal por meio do adaptador implementado pelo tempo de execução do agente selecionado.",
+      "secretsNote": "Os segredos são armazenados em um cofre gerenciado no namespace da sua carteira: nunca no documento do agente, nunca nesta guia do navegador além da solicitação de inicialização. Você também pode adicionar um canal posteriormente nas configurações do agente.",
+      "telegram": {
+        "blurb": "{{runtime}} usa seu adaptador de pesquisa Telegram nativo com um bot que você cria em @BotFather.",
+        "botToken": "Token de bot",
+        "botTokenHelp": "De @BotFather. Armazenado em um cofre de segredos gerenciado; nunca retornado pela API.",
+        "allowedUsers": "IDs de usuário permitidos (opcional)",
+        "allowedUsersHelp": "IDs de usuário numéricos do Telegram separados por vírgula. Deixe em branco para usar a política de emparelhamento do tempo de execução.",
+        "homeChannel": "ID de bate-papo padrão (opcional)",
+        "homeChannelHelp": "Bate-papo usado para mensagens proativas. Pode ser um ID de usuário, grupo ou canal.",
+        "alwaysOn": "Atualmente, o Telegram usa pesquisas longas nativas. Este agente permanecerá online e não poderá hibernar enquanto o canal estiver habilitado."
+      },
+      "moreComing": "WhatsApp, Slack e outros canais aparecerão aqui somente depois que seus adaptadores e fluxos de login específicos da estrutura estiverem disponíveis.",
+      "slack": {
+        "blurb": "Seu agente responde nos canais do Slack para os quais foi convidado. Modo Webhook (API de eventos), compatível com hibernação. Você cria um aplicativo Slack, instala-o em seu espaço de trabalho, copia o token do bot + segredo de assinatura.",
+        "botToken": "Token de bot (xoxb-...)",
+        "botTokenHelp": "Aplicativo Slack → OAuth e permissões → Token OAuth do usuário do bot.",
+        "signingSecret": "Segredo de assinatura",
+        "signingSecretPlaceholder": "Hexadecimal de 32 caracteres nas configurações do aplicativo Slack",
+        "signingSecretHelp": "Aplicativo Slack → Informações básicas → Segredo de assinatura. Usado para verificar cargas úteis de webhook de entrada.",
+        "channelId": "ID do canal (opcional)",
+        "channelIdHelp": "Restrinja o agente a um único canal. Deixe em branco para menções + DMs em todos os canais em que o bot está."
+      },
+      "farcaster": {
+        "blurb": "Somente Hermes. Seu agente responde às menções no Farcaster via Neynar. Você precisa de um signatário gerenciado por Neynar para a identidade do agente.",
+        "webhookLabel": "URL do webhook Neynar: defina-o como o URL de destino do seu webhook Neynar",
+        "webhookHelp": "Use o segredo do webhook abaixo como segredo de assinatura do webhook. Se o nome do agente for usado, ele receberá um sufixo na inicialização. Use o nome final (mostrado após o lançamento) no URL.",
+        "fid": "FID",
+        "replyVisibility": "Visibilidade da resposta",
+        "visibilityMentions": "apenas menciona (recomendado)",
+        "visibilityAll": "todos (requer canal pai)",
+        "neynarApiKey": "Chave API Neynar",
+        "signerUuid": "UUID do assinante",
+        "webhookSecret": "Segredo do webhook",
+        "webhookSecretPlaceholder": "Segredo HMAC que você definiu no webhook Neynar",
+        "parentChannel": "Canal pai",
+        "parentChannelHelp": "Obrigatório quando a visibilidade é “toda”. Escopo do agente para um canal."
+      },
+      "farcasterUnavailableBefore": "Farcaster está disponível em agentes Hermes. Seu agente continua",
+      "farcasterUnavailableAfter": ", que não possui um canal Farcaster nativo."
+    },
+    "llm": {
+      "title": "Fonte LLM",
+      "description": "Escolha como o agente atinge seu modelo. Cada tempo de execução recebe um bloco de configuração em seu formato nativo. Pré-visualização na etapa de revisão.",
+      "comingSoon": "Em breve",
+      "perkos": {
+        "title": "Serviço PerkOS LLM",
+        "descBefore": "Gateway compatível com Ollama gerenciado em",
+        "descAfter": "(kimi-k2.6:nuvem + qwen 7B/14B). Nenhuma chave necessária; emitimos um escopo para seu agente.",
+        "inviteOnly": "Atualmente apenas para convidados enquanto testamos. Escolha BYOK ou “Configurar mais tarde” por enquanto ou entre em contato com um administrador para ser adicionado à lista de acesso antecipado."
+      },
+      "byok": {
+        "title": "Traga sua própria chave (BYOK)",
+        "description": "Use sua própria chave de provedor. Nós o encaminhamos para o tempo de execução do agente, nunca registramos ou proxy seu tráfego."
+      },
+      "skip": {
+        "title": "Configurar mais tarde",
+        "description": "O agente é inicializado sem uma origem LLM. Útil apenas para testar chamadas de transporte + ferramenta."
+      },
+      "providerSettings": {
+        "openclawTitle": "Configurações do provedor OpenClaw",
+        "hermesTitle": "Configurações do provedor Hermes",
+        "openclawDesc": "Os campos são mapeados 1:1 para um bloco em models.providers.* em openclaw.json.",
+        "hermesDesc": "Os campos são mapeados para Provider.* + Secrets.* no config.yaml do seu perfil Hermes.",
+        "provider": "Provedor",
+        "providerPlaceholder": "Escolha um provedor",
+        "defaultModel": "Modelo padrão",
+        "apiKey": "Chave de API"
+      }
+    },
+    "external": {
+      "title": "Convide seu agente existente",
+      "description": "Nada muda em seu tempo de execução, memória ou ferramentas. Seu agente apenas se conecta ao PerkOS (perkos-a2a + perkos-chat) e obtém o chat e o quadro de empregos da sua organização.",
+      "runtimeKinds": {
+        "hermes": {
+          "label": "Hermes",
+          "hint": "/v1/respostas"
+        },
+        "openclaw": {
+          "label": "OpenClaw",
+          "hint": "/v1/chat/conclusões"
+        },
+        "custom": {
+          "label": "Personalizado",
+          "hint": "seu próprio tempo de execução HTTP"
+        }
+      },
+      "nameLabel": "Nome do agente (identificador)",
+      "nameHelp": "Como é conhecido no relé + no chat. Deve ser único.",
+      "nameError": "2–32 caracteres, somente letras/números/_/-",
+      "runtimeLabel": "Tempo de execução",
+      "runtimeHelp": "O que seu agente fala. Define o endpoint da ponte no prompt.",
+      "noteLabel": "Nota para o agente (opcional)",
+      "noteHelp": "Contexto que o agente vê no prompt de convite.",
+      "notePlaceholder": "Você ajudará a equipe com pesquisas de mercado e relatórios semanais.",
+      "result": {
+        "registeredBefore": "registrado em sua organização. Mostra como",
+        "invited": "convidado",
+        "registeredAfter": "até que ele se conecte.",
+        "invitationPrompt": "Solicitação de convite",
+        "copyPrompt": "Solicitação de cópia",
+        "pasteHelp": "Cole isso no seu agente. Ele contém sua credencial (relayApiKey). Trate-a como uma senha e forneça-a apenas ao agente que você está convidando.",
+        "copyRelayKey": "Copiar relayApiKey",
+        "copied": "Copiado"
+      }
+    },
+    "review": {
+      "title": "Revisão + lançamento",
+      "description": "O que gravaremos no disco (ou no contêiner gerenciado) quando você clicar em Iniciar.",
+      "persona": "Pessoa",
+      "agentName": "Nome do agente",
+      "runtime": "Tempo de execução",
+      "deploy": "Implantar",
+      "deployPerkos": "Infraestrutura PerkOS",
+      "deployVps": "Auto-hospedado (sua infra)",
+      "llm": "LLM",
+      "llmPerkos": "Serviço PerkOS LLM",
+      "llmConfigureLater": "Configurar mais tarde",
+      "skills": "Habilidades",
+      "builtInTools": "Ferramentas integradas",
+      "skillPacks_one": "Pacote de habilidades {{count}}",
+      "skillPacks_other": "Pacotes de habilidades {{count}}",
+      "toolsOff_one": "· Ferramenta {{count}} desativada",
+      "toolsOff_other": "· Ferramentas {{count}} desativadas",
+      "channels": "Canais",
+      "channelsPerkosOnly": "Somente PerkOS",
+      "configPreview": "Pré-visualização da configuração",
+      "configPreviewDescBefore": "Este é o bloco literal que será gravado",
+      "configPreviewDescAfter": "no host do agente.",
+      "renameOrSkip": "Renomear ou pular",
+      "renameOrSkipDesc": "Pré-preenchido a partir da persona; ajuste aqui para lançamentos únicos.",
+      "agentNameLabel": "Nome do agente"
+    },
+    "toast": {
+      "launched": "Agente lançado",
+      "launchedSavedAs": "Salvo como \"{{launched}}\". Você já possui um agente chamado \"{{requested}}\".",
+      "launchedReady": "{{name}} está pronto.",
+      "telegramSaved": "Gateway de telegrama salvo",
+      "telegramNotSaved": "Gateway de telegrama não salvo",
+      "farcasterSaved": "Gateway Farcaster salvo",
+      "farcasterNotSaved": "Gateway Farcaster não salvo",
+      "slackSaved": "Gateway Slack salvo",
+      "slackNotSaved": "Gateway Slack não salvo",
+      "gatewayActivate": "Será ativado na próxima reinicialização do agente.",
+      "launchFailed": "Falha na inicialização",
+      "inviteFailed": "Falha no convite"
+    },
+    "error": {
+      "connectWallet": "Conecte uma carteira antes de lançar um agente.",
+      "pickRuntime": "Escolha um tempo de execução."
+    }
+  },
+  "agentDetail": {
+    "backLink": "Voltar para a equipe de agentes",
+    "notFound": "Agente não encontrado em sua equipe.",
+    "whatHappensNext": "O que acontece a seguir",
+    "header": {
+      "stop": "Parar",
+      "refresh": "Atualizar",
+      "edit": "Editar",
+      "alreadyStopped": "{{name}} já foi parado.",
+      "stopping": "{{name}} parando. Ele será ativado automaticamente na sua próxima mensagem.",
+      "stopError": "Não foi possível parar o agente"
+    },
+    "status": {
+      "syncing": "Sincronizando…",
+      "hibernated": "Hibernado",
+      "hibernating": "Hibernando…",
+      "waking": "Acordando…",
+      "online": "On-line",
+      "offline": "Off-line",
+      "failed": "Com falha",
+      "provisioning": "Provisionamento",
+      "unknown": "Desconhecido"
+    },
+    "activity": {
+      "title": "Atividade recente"
+    },
+    "metadata": {
+      "title": "Metadados de tempo de execução",
+      "agentId": "ID do agente",
+      "ownerWallet": "Carteira do proprietário",
+      "created": "Criado",
+      "lastActive": "Último ativo",
+      "connectedNow": "· conectado agora",
+      "neverConnected": "Nunca conectado",
+      "endpoint": "Ponto final",
+      "notProvisioned": "Ainda não provisionado",
+      "runtimeVersion": "Versão de tempo de execução",
+      "modelKey": "Chave do modelo",
+      "byok": "Fornecido pelo usuário (BYOK)",
+      "perkosManaged": "PerkOS gerenciado"
+    },
+    "capabilities": {
+      "title": "Capacidades",
+      "description": "Plug-ins que este agente pode usar durante a execução de tarefas.",
+      "empty": "Nenhum plug-in configurado ainda. Use Editar para adicionar alguns."
+    },
+    "channels": {
+      "title": "Canais conectados",
+      "description": "Onde os usuários podem entrar em contato com esse agente, além de dentro do PerkOS.",
+      "none": "Nenhum configurado. Os agentes {{runtime}} podem ser conectados a canais como Telegram, Discord, Slack ou WhatsApp."
+    },
+    "tasks": {
+      "title": "Tarefas atribuídas a {{name}}",
+      "description": "Em todos os seus projetos. Clique em uma tarefa para ver seus detalhes.",
+      "empty": "Nenhuma tarefa atribuída a este agente ainda."
+    },
+    "lifecycle": {
+      "title": "Vida útil",
+      "description": "Remova este agente da sua equipe.",
+      "delete": "Excluir",
+      "connectWallet": "Conecte uma carteira.",
+      "deletedTitle": "Agente excluído",
+      "deletedWithWarnings": "{{name}} foi removido. Algumas tarefas de limpeza relataram avisos (consulte o console).",
+      "deleted": "{{name}} foi removido da sua equipe.",
+      "deleteError": "Não foi possível excluir o agente",
+      "confirmTitle": "Excluir {{name}}?",
+      "confirmDescription": "Desmonta o contêiner em execução, revoga sua chave LLM e limpa seus registros. O faturamento é interrompido imediatamente. Conversas e tarefas foram atribuídas para manter seu histórico, mas perdem esta atribuição. Isso não pode ser desfeito.",
+      "confirmLabel": "Excluir agente"
+    }
+  },
+  "companyNew": {
+    "gallery": {
+      "title": "Novo projeto",
+      "intro": "Comece com um modelo de negócios, escolha sua própria equipe de funções ou crie um projeto vazio. Sua equipe elabora e sugere. Nada acontece sem o seu OK. Prefere um único agente?",
+      "introLink": "Crie um aqui",
+      "introAfter": ".",
+      "customCard": {
+        "title": "Equipe personalizada",
+        "kicker": "Construa o seu próprio",
+        "blurb": "Defina o projeto e escolha exatamente as funções necessárias: PM, pesquisador, especialista em distribuição, construtor… você escolhe quem lidera.",
+        "cta": "Escolha seus papéis"
+      },
+      "emptyCard": {
+        "title": "Projeto vazio",
+        "kicker": "Comece a luz",
+        "blurb": "Apenas o projeto. Atribua agentes existentes ou adicione uma equipe posteriormente.",
+        "cta": "Criar projeto vazio"
+      },
+      "myTemplates": "Meus modelos",
+      "myTemplateKicker": "Meu modelo",
+      "myTemplateBlurb": "Sua equipe salva. Ajuste as funções e lance-o em um novo projeto.",
+      "deleteTemplateAria": "Excluir modelo {{name}}",
+      "deleteTemplateTitle": "Excluir este modelo",
+      "deleteTemplateConfirm": "Excluir o modelo \"{{name}}\"?",
+      "deleteTemplateError": "Não foi possível excluir o modelo",
+      "businessTemplates": "Modelos de negócios PerkOS"
+    },
+    "config": {
+      "back": "Escolha um ponto de partida diferente",
+      "customTeamTitle": "Equipe personalizada",
+      "emptyProjectTitle": "Projeto vazio",
+      "myTeamSubtitle": "Sua equipe salva. Ajuste-o e inicie.",
+      "customTeamSubtitle": "Escolha as funções que seu projeto precisa e quem lidera.",
+      "emptyProjectSubtitle": "Apenas o projeto. Adicione agentes a qualquer momento mais tarde.",
+      "teamHeading_one": "Sua equipe (companheiro de equipe {{count}})",
+      "teamHeading_other": "Sua equipe (companheiros de equipe {{count}})",
+      "teamHintTemplate": "Recomendado para este negócio. Remova o que você não precisa, adicione mais funções abaixo e escolha quem lidera.",
+      "teamHintCustom": "Adicione ou remova funções e escolha quem lidera (o líder da equipe planeja o trabalho e coordena a equipe).",
+      "leadTitle": "O líder da equipe planeja o trabalho e coordena a equipe",
+      "lead": "Liderar",
+      "removeRoleAria": "Remover {{role}}",
+      "noRoles": "Ainda não há papéis. Adicione pelo menos um abaixo.",
+      "addRole": "Adicionar uma função",
+      "nameLabel": "Dê um nome ao seu projeto",
+      "namePlaceholder": "por exemplo Café de duas mesas NY",
+      "goalLabelTeam": "O que esta equipe deve alcançar?",
+      "goalLabelProject": "O que este projeto deve alcançar?",
+      "goalPlaceholderDefault": "Opcional. O padrão é: \"{{blurb}}\"",
+      "goalPlaceholder": "por exemplo Valide o conceito: pesquise o mercado, elabore o plano de lançamento, crie uma lista de espera.",
+      "goalHint": "O líder da sua equipe usa essa meta para planejar o quadro e informar a equipe.",
+      "sourceHeading": "Quem dirige esses agentes?",
+      "sourcePerkos": "Agentes PerkOS",
+      "sourcePerkosDesc": "Lançamos e hospedamos a equipe para você, online em minutos.",
+      "sourceInvite": "Convidar meus próprios agentes",
+      "sourceInviteDesc": "Registre cada função e conecte os agentes que você já administra, por meio de um prompt de integração. Nenhuma infra lançada.",
+      "llmHeading": "Onde a IA funciona?",
+      "llmPerkos": "PerkOS LLM",
+      "llmPerkosDesc": "Funciona na infraestrutura PerkOS, sem necessidade de chave de API.",
+      "llmByok": "Traga seu próprio modelo",
+      "llmByokDesc": "Use sua própria chave compatível com OpenAI. Implantado no PerkOS infra.",
+      "modelPlaceholder": "ID do modelo",
+      "keyPlaceholder": "sk-… (sua chave de API, armazenada criptografada, nunca no trabalho)",
+      "saveTemplateLabel": "Salve esta equipe como um dos meus modelos",
+      "saveTemplatePlaceholder": "Equipe {{name}}",
+      "saveTemplatePlaceholderFallback": "Meu",
+      "saveTemplateHint": "Você mudou a equipe recomendada. Salve-o para reutilizar no próximo projeto.",
+      "launching": "Lançamento…",
+      "createProject": "Criar projeto",
+      "inviteButton_one": "Criar + convidar companheiro de equipe {{count}}",
+      "inviteButton_other": "Crie e convide companheiros de equipe {{count}}",
+      "startTeam": "Comece sua equipe ({{count}})",
+      "dontClose": "Não feche esta guia até terminar."
+    },
+    "launch": {
+      "pickRole": "Escolha pelo menos uma função para sua equipe.",
+      "enterKey": "Insira a chave de API do seu modelo (ou mude para PerkOS LLM).",
+      "resolvingImages": "Resolvendo imagens de tempo de execução…",
+      "noRuntimeImage": "Nenhuma imagem de tempo de execução {{runtime}} ativa foi publicada. Um administrador precisa definir um antes do lançamento.",
+      "creatingProject": "Criando projeto…",
+      "projectNoId": "O projeto foi criado sem ID.",
+      "registering": "Registrando {{role}} ({{current}}/{{total}})…",
+      "launchingRole": "Iniciando {{role}} ({{current}}/{{total}})…",
+      "assigningTeam": "Atribuindo a equipe…",
+      "savingTemplate": "Salvando seu modelo…",
+      "defaultTemplateName": "Equipe {{name}}",
+      "templateSaveFailed": "A equipe foi iniciada, mas não foi possível salvar o modelo.",
+      "projectCreated": "Projeto criado",
+      "invitesRegistered_one": "Projeto criado: convite do agente {{count}} registrado",
+      "invitesRegistered_other": "Projeto criado: convites do agente {{count}} registrados",
+      "teamLaunched": "{{name}} lançado",
+      "yourTeamFallback": "Sua equipe",
+      "descNoAgents": "Adicione agentes a qualquer momento na guia Agentes.",
+      "descInvite": "Abra cada agente para copiar seu prompt de integração e conectar seu próprio tempo de execução.",
+      "descPerkos": "Sua equipe está inicializando. Eles ficarão online em alguns minutos.",
+      "createError": "Não foi possível criar o projeto"
+    }
+  },
+  "walletSend": {
+    "success": {
+      "title": "Enviado",
+      "description": "{{amount}} {{token}} enviado em {{chain}}.",
+      "view": "Visualizar",
+      "sendAnother": "Envie outro"
+    },
+    "form": {
+      "title": "Enviar",
+      "description": "Retire fundos da sua carteira. PerkOS assina e transmite para você.",
+      "network": "Rede",
+      "token": "Símbolo",
+      "recipient": "Endereço do destinatário",
+      "recipientInvalid": "Insira um endereço 0x… válido.",
+      "recipientSelf": "Atenção: este é o endereço da sua carteira.",
+      "amount": "Quantidade ({{token}})",
+      "amountInvalid": "Insira um valor maior que 0.",
+      "transferFailed": "Falha na transferência.",
+      "sending": "Enviando…",
+      "send": "Enviar"
+    }
+  },
+  "projectRoom": {
+    "backToProjects": "Voltar para os projetos",
+    "membersTab": {
+      "note": "Pessoas com acesso a este projeto. Os editores podem editar o quadro + chat; os visualizadores são somente leitura. (Os membros da organização já têm acesso.)"
+    },
+    "tabs": {
+      "tasks": "Tarefas",
+      "docs": "Documentos",
+      "conductor": "Condutor",
+      "agents": "Agentes",
+      "map": "Mapa",
+      "chat": "Bate-papo do projeto",
+      "members": "Membros"
+    },
+    "header": {
+      "lead": "Líder: {{name}}",
+      "noPrimaryAgent": "Nenhum agente principal atribuído",
+      "activeSuffix": "ativo {{time}}",
+      "runPmTitleWithPm": "O líder da sua equipe planeja a meta e distribui o trabalho",
+      "runPmTitleNoPm": "Você escolherá qual agente liderará a equipe",
+      "teamWorking": "Equipe trabalhando…",
+      "putTeamToWork": "Coloque a equipe para trabalhar",
+      "projectComplete": "Projeto concluído",
+      "wakeTeamTitle": "Aumente a escala de todos os agentes deste projeto agora (pré-aqueça a equipe)",
+      "waking": "Acordando…",
+      "wakeTeam": "Despertar equipe",
+      "members": "Membros",
+      "membersAria": "Gerenciar membros",
+      "membersTitle": "Compartilhe este projeto: convide carteiras + gerencie o acesso",
+      "edit": "Editar",
+      "editAria": "Editar projeto",
+      "editTitle": "Editar projeto",
+      "delete": "Excluir",
+      "deleteAria": "Excluir projeto",
+      "deleteTitle": "Excluir projeto",
+      "stats": {
+        "totalTasks": "Total de tarefas",
+        "inProgress": "Em andamento",
+        "done": "Feito",
+        "agents": "Agentes"
+      },
+      "avatar": {
+        "noPrimaryAgent": "Nenhum agente principal atribuído",
+        "primaryAgent": "Agente primário: {{name}}"
+      },
+      "firstRun": {
+        "title": "Sua equipe está pronta: veja como começar",
+        "step1Bold": "Coloque a equipe para trabalhar",
+        "step1WithPm": ". {{pmAgent}} lê sua meta, planeja o trabalho em tarefas e a equipe realiza isso sozinha. Esta é a maneira de um clique.",
+        "step1NoPm": ". Você escolherá qual agente liderará a equipe, então eles planejarão a meta em tarefas e a equipe realizará isso sozinha.",
+        "step2Before": "Ou diga à equipe o que você precisa",
+        "step2Bold": "Bate-papo do projeto",
+        "step2After": ". Eles respondem pessoalmente e você pode mencionar qualquer pessoa com @.",
+        "step3Before": "Ou adicione tarefas você mesmo no",
+        "step3Bold": "Tarefas",
+        "step3After": "e atribua-os a agentes específicos.",
+        "ctaWithPm": "Coloque a equipe para trabalhar",
+        "ctaNoPm": "Escolha um líder de equipe e comece",
+        "ctaHint": "Sua equipe elabora e sugere. Nada acontece sem o seu OK. Os colegas de equipe acordam automaticamente quando o trabalho é atribuído."
+      },
+      "choosePm": {
+        "title": "Escolha o líder da sua equipe",
+        "description": "Todo projeto precisa de um líder de equipe, o agente que planeja a meta em tarefas, as entrega à equipe e analisa os resultados. Escolha quem lidera este projeto:",
+        "noAgents": "Nenhum agente neste projeto ainda. Adicione agentes primeiro (guia Agentes).",
+        "cancel": "Cancelar",
+        "confirm": "Definir como líder e começar"
+      },
+      "confirmDelete": {
+        "title": "Excluir \"{{name}}\"?",
+        "description": "Isso removerá o projeto, suas tarefas e seu histórico de bate-papo. Esta ação não pode ser desfeita.",
+        "confirmLabel": "Excluir projeto"
+      },
+      "errors": {
+        "missingWalletOrProject": "Carteira ou ID do projeto ausente.",
+        "missingProjectId": "ID do projeto ausente."
+      },
+      "toast": {
+        "projectDeletedTitle": "Projeto excluído",
+        "projectDeletedDesc": "\"{{name}}\" foi removido.",
+        "projectDeleteError": "Não foi possível excluir o projeto",
+        "pickLeadFirst": "Escolha primeiro um líder de equipe. Consulte a guia Agentes.",
+        "alreadyWorking": "A equipe já está trabalhando neste projeto.",
+        "leadAssigned_one": "O líder da sua equipe atribuiu a tarefa {{count}}.",
+        "leadAssigned_other": "O líder da sua equipe atribuiu tarefas {{count}}.",
+        "goalComplete": "O líder da sua equipe diz que a meta já foi concluída.",
+        "teamOnIt": "A equipe está nisso.",
+        "startTeamError": "Não foi possível iniciar o time",
+        "nowLead": "{{name}} agora é o líder da equipe.",
+        "setLeadError": "Não foi possível definir o líder da equipe",
+        "wakingTeam_one": "Acordando agente {{count}}…",
+        "wakingTeam_other": "Acordando agentes {{count}}…",
+        "wakingTeamDesc": "Eles levam cerca de 2 a 3 minutos para inicializar e conectar.",
+        "wakeTeamError": "Não foi possível acordar o time"
+      }
+    },
+    "tasksTab": {
+      "createTask": "Criar tarefa",
+      "emptyMessage": "Arraste uma tarefa aqui ou crie uma.",
+      "bulk": {
+        "selectedCount": "{{count}} selecionado",
+        "moveTo": "Mover para:",
+        "toDo": "Pendência",
+        "inProgress": "Em andamento",
+        "done": "Feito",
+        "delete": "Excluir",
+        "clear": "Limpar"
+      },
+      "confirmDelete": {
+        "title_one": "Excluir tarefa {{count}}?",
+        "title_other": "Excluir tarefas {{count}}?",
+        "description": "As tarefas selecionadas e seu histórico serão removidos. Isso não pode ser desfeito.",
+        "confirmLabel": "Excluir"
+      },
+      "toast": {
+        "movedSomeFailed": "{{ok}} movido, {{failed}} falhou",
+        "movedSuccess_one": "Tarefa {{count}} movida",
+        "movedSuccess_other": "Tarefas {{count}} movidas",
+        "bulkMoveFailed": "Falha na movimentação em massa",
+        "deletedSomeFailed": "{{ok}} excluído, {{failed}} falhou",
+        "deletedSuccess_one": "Tarefa {{count}} excluída",
+        "deletedSuccess_other": "Tarefas {{count}} excluídas",
+        "bulkDeleteFailed": "Falha na exclusão em massa"
+      }
+    },
+    "board": {
+      "moveTaskError": "Não foi possível mover a tarefa",
+      "connectWalletMove": "Conecte sua carteira para mover tarefas."
+    },
+    "conductorTab": {
+      "rosterHint": "A lista mostra os trabalhadores ativos e sua carga em andamento."
+    },
+    "taskCard": {
+      "agent": "Agente: {{agent}}",
+      "selectAria": "Selecione {{name}}",
+      "editTask": "Editar tarefa",
+      "deleteTask": "Excluir tarefa",
+      "confirmDelete": {
+        "title": "Excluir \"{{name}}\"?",
+        "description": "Esta tarefa e seu histórico serão removidos.",
+        "confirmLabel": "Excluir tarefa"
+      },
+      "errors": {
+        "missingWalletOrTask": "Carteira ou ID de tarefa ausente."
+      },
+      "toast": {
+        "taskDeleted": "Tarefa excluída",
+        "deleteTaskError": "Não foi possível excluir a tarefa"
+      }
+    },
+    "mapTab": {
+      "activityTitle": "Atividade do projeto"
+    },
+    "agentsTab": {
+      "countOnProject_one": "Agente {{count}} neste projeto",
+      "countOnProject_other": "Agentes {{count}} neste projeto",
+      "addAgent": "Adicionar agente",
+      "pickLeadBefore": "Escolha um agente como",
+      "pickLeadEmphasis": "líder de equipe",
+      "pickLeadAfter": ". Ele planeja a meta e entrega as tarefas aos demais quando você coloca a equipe para trabalhar.",
+      "roleLead": "Líder de equipe ·",
+      "roleWorker": "Trabalhador ·",
+      "taskCount_one": "Tarefa {{count}}",
+      "taskCount_other": "Tarefas {{count}}",
+      "leadBadge": "Liderar",
+      "makeLead": "Faça a liderança",
+      "makeLeadTitle": "Faça deste agente o líder da equipe",
+      "empty": {
+        "title": "Nenhum agente neste projeto",
+        "description": "Adicione um agente da sua equipe ou inicie um novo para começar a trabalhar nas tarefas.",
+        "addExisting": "Adicionar agente existente",
+        "launch": "Agente de lançamento"
+      },
+      "toast": {
+        "nowLead": "{{name}} agora é o líder da equipe",
+        "clearedLead": "Limpou o líder da equipe do projeto",
+        "updateLeadError": "Não foi possível atualizar o líder da equipe"
+      }
+    },
+    "power": {
+      "error": "Não foi possível alterar o estado de energia",
+      "wakeAria": "Despertar {{name}}",
+      "hibernateAria": "Hibernar {{name}}",
+      "working": "Trabalhando…",
+      "wakeTitle": "Agente de despertar",
+      "hibernateTitle": "Agente de hibernação"
+    },
+    "addAgentDialog": {
+      "title": "Adicionar agentes a este projeto",
+      "description": "Escolha agentes de sua equipe para adicionar à lista deste projeto e, em seguida, você poderá atribuir tarefas a eles.",
+      "loading": "Carregando seus agentes…",
+      "noAgentsYet": "Você ainda não tem nenhum agente. Crie ou convide um primeiro.",
+      "allOnProject": "Todos os seus agentes já estão neste projeto.",
+      "externalSuffix": "· externo",
+      "cancel": "Cancelar",
+      "add": "Adicionar",
+      "toast": {
+        "added_one": "Adicionado agente {{count}} ao projeto",
+        "added_other": "Agentes {{count}} adicionados ao projeto",
+        "alreadyOnProject": "Esses agentes já estão no projeto",
+        "addError": "Não foi possível adicionar agentes"
+      }
+    },
+    "chat": {
+      "agentFallback": "Agente",
+      "memberCount_one": "Membro {{count}}",
+      "memberCount_other": "Membros {{count}}",
+      "noLeadWarning": "Nenhum líder de equipe neste projeto ainda. As mensagens aqui não iniciarão nenhum trabalho até que você escolha um líder de equipe. Ele planeja seu objetivo e entrega tarefas aos outros agentes.",
+      "makeLeadButton": "Faça de {{name}} o líder da equipe",
+      "makeLeadTitle": "Faça de {{name}} o líder da equipe",
+      "chooseAnother": "Escolha outro em Agentes",
+      "designate": "Designar em Agentes",
+      "emptyMessages": "Nenhuma mensagem ainda. Inicie a conversa com sua equipe e os agentes atribuídos a este projeto.",
+      "composerPlaceholder": "Mensagem #{{name}}…",
+      "membersHeading": "Membros",
+      "noMembers": "Nenhum membro ainda.",
+      "kindAgent": "Agente",
+      "kindHuman": "Humano",
+      "errors": {
+        "connectWalletFirst": "Conecte uma carteira primeiro.",
+        "connectWalletSend": "Conecte uma carteira para enviar mensagens."
+      },
+      "toast": {
+        "nowLead": "{{name}} agora é o líder da equipe",
+        "nowLeadDesc": "Envie sua meta no chat e o líder da sua equipe planejará e distribuirá o trabalho.",
+        "setLeadError": "Não foi possível definir o líder da equipe",
+        "mentionedYouTitle": "{{label}} mencionou você",
+        "sentTo": "Enviado para {{agents}}",
+        "noLeadTitle": "Nenhum líder de equipe neste projeto ainda",
+        "noLeadDescPick": "Escolha um líder de equipe para que ele possa planejar sua meta e distribuir o trabalho.",
+        "noLeadDescAdd": "Adicione agentes e escolha um líder de equipe para planejar e distribuir o trabalho."
+      }
+    }
+  },
+  "components": {
+    "kanban": {
+      "todo": "Pendência",
+      "inProgress": "Em andamento",
+      "done": "Feito",
+      "moveTaskAria": "Mover tarefa. Use a seta para a esquerda/direita para alterar a coluna e espaço para arrastar."
+    },
+    "conductor": {
+      "emptyMessage": "Nenhuma tarefa ainda. Adicione um para começar.",
+      "roster": "Lista",
+      "noSwarm": "Nenhum enxame definido para este projeto ainda. Adicione agentes para preencher a lista.",
+      "inProgressCount": "{{count}} em andamento"
+    },
+    "members": {
+      "inviteLabel": "Convide uma carteira para este {{kind}}",
+      "kindOrg": "organização",
+      "kindProject": "projeto",
+      "walletPlaceholder": "0x… endereço da carteira",
+      "roleEditor": "Editor",
+      "roleViewer": "Visualizador",
+      "inviting": "Convidativo…",
+      "invite": "Convidar",
+      "invalidWallet": "Insira um endereço de carteira 0x… válido (40 caracteres hexadecimais).",
+      "loadingMembers": "Carregando membros…",
+      "noMembers": "Nenhum membro ainda.",
+      "removeAria": "Remover {{wallet}}",
+      "removeTitle": "Remover membro",
+      "memberInvited": "Membro convidado",
+      "memberInvitedDesc": "{{address}} agora pode acessar este {{kind}}.",
+      "inviteFailed": "Não foi possível convidar o membro",
+      "memberRemoved": "Membro removido",
+      "removeFailed": "Não foi possível remover o membro"
+    },
+    "insights": {
+      "teamWorkload": "Carga de trabalho da equipe",
+      "percentComplete": "{{rate}}% concluído",
+      "taskLabel_one": "tarefa",
+      "taskLabel_other": "tarefas",
+      "donePerAgent": "Feito por agente",
+      "unassigned": "Não atribuído"
+    },
+    "contextMap": {
+      "empty": "O mapa é preenchido conforme você adiciona agentes e tarefas a este projeto.",
+      "caption": "Projeto no centro, agentes em órbita (líder da equipe em anel), suas tarefas no limite. As linhas sólidas são atribuições ativas, as tracejadas são tarefas concluídas.",
+      "hiddenTasks_one": "Tarefa mais antiga {{count}} não mostrada.",
+      "hiddenTasks_other": "Tarefas mais antigas do {{count}} não mostradas.",
+      "leadPrefix": "Liderar ·"
+    },
+    "activityFeed": {
+      "title": "Atividade recente",
+      "live": "ao vivo",
+      "loading": "Carregando atividade…",
+      "empty": "Nada ainda. Quando seus agentes planejam, iniciam e terminam o trabalho, isso aparece aqui no momento em que acontece.",
+      "verbs": {
+        "created": "criado",
+        "moved": "movido",
+        "startedWorkingOn": "comecei a trabalhar",
+        "completed": "concluído",
+        "sentBack": "enviado de volta para outro passe:",
+        "planned": "planejado",
+        "proposedPlanIn": "propôs um plano em",
+        "approvedPlanIn": "aprovou o plano em",
+        "reachedGoalOf": "atingiu a meta de",
+        "launched": "lançado",
+        "cameOnline": "ficou on-line",
+        "failedToStart": "não conseguiu iniciar",
+        "createdProject": "criado",
+        "flaggedOverlapOn": "sinalizou uma sobreposição em"
+      }
+    },
+    "pmBanner": {
+      "teamLead": "Líder de equipe",
+      "paused": "Pausado",
+      "round": "· redondo {{current}}/{{max}}",
+      "lastRun": "· última execução {{time}}",
+      "reasons": {
+        "goalMet": "Meta atingida",
+        "noMoreWork": "Nada mais para fazer",
+        "maxRounds": "Acerte o limite de rodadas. Corra novamente para continuar",
+        "badPlan": "Não foi possível formar um plano válido",
+        "emptyPlan": "Não há trabalho para fazer",
+        "llmError": "O modelo errou",
+        "noPm": "Nenhum líder de equipe designado"
+      },
+      "phases": {
+        "plan": "Plano",
+        "work": "Trabalhar",
+        "review": "Análise",
+        "done": "Feito"
+      }
+    },
+    "confirmDialog": {
+      "confirm": "Confirmar",
+      "cancel": "Cancelar"
+    },
+    "editProject": {
+      "title": "Editar projeto",
+      "description": "Atualize o nome e o objetivo. As tarefas e o histórico de bate-papo permanecem intactos.",
+      "name": "Nome",
+      "goal": "Meta",
+      "cancel": "Cancelar",
+      "save": "Salvar alterações",
+      "missingProjectId": "ID do projeto ausente.",
+      "updated": "Projeto atualizado",
+      "updateFailed": "Não foi possível atualizar o projeto"
+    },
+    "editTask": {
+      "title": "Editar tarefa",
+      "description": "Atualize o nome, a prioridade ou o agente atribuído. As mudanças de status acontecem no quadro Kanban.",
+      "name": "Nome",
+      "priority": "Prioridade",
+      "assignedAgent": "Agente atribuído",
+      "cancel": "Cancelar",
+      "save": "Salvar alterações",
+      "nameError": "O nome da tarefa deve ter pelo menos 2 caracteres.",
+      "missingTaskId": "ID de tarefa ausente.",
+      "updated": "Tarefa atualizada",
+      "updateFailed": "Não foi possível atualizar a tarefa"
+    }
+  },
+  "chrome": {
+    "network": {
+      "switchedTo": "Mudou para {{network}}",
+      "switchFailed": "Não foi possível mudar para {{network}}",
+      "unknownError": "Erro desconhecido",
+      "wrongNetwork": "Rede errada",
+      "loadingToken": "carregando {{token}}",
+      "tokenUnavailable": "Saldo {{token}} indisponível",
+      "usdcBalance": "${{amount}} USDC",
+      "perkosBalance": "{{amount}} PERKOS",
+      "balancesSummary": "{{usdc}}, {{perkos}}, em {{network}}",
+      "triggerAria": "Rede e saldos: {{summary}}",
+      "loadingBalance": "Carregando saldo {{token}}"
+    },
+    "userMenu": {
+      "accountMenu": "Menu da conta",
+      "ownerWallet": "Carteira do proprietário",
+      "copied": "Copiado",
+      "copyFullAddress": "Copiar endereço completo",
+      "disconnect": "Desconectar",
+      "notConnected": "Não conectado"
+    },
+    "orgSwitcher": {
+      "switchOrganization": "Mudar de organização",
+      "organizations": "Organizações",
+      "organizationRenamed": "Organização renomeada",
+      "renameFailed": "Não foi possível renomear",
+      "save": "Salvar",
+      "defaultBadge": "padrão",
+      "renameOrg": "Renomear “{{name}}”",
+      "createOrganization": "Criar organização",
+      "manageOrganizations": "Gerenciar organizações"
+    },
+    "projectPicker": {
+      "pickProject": "Escolha um projeto",
+      "projectsInOrg": "Projetos nesta organização",
+      "noProjects": "Nenhum projeto ainda.",
+      "taskCount_one": "Tarefa {{count}}",
+      "taskCount_other": "Tarefas {{count}}",
+      "allProjects": "Todos os projetos",
+      "newProject": "Novo projeto"
+    },
+    "notifications": {
+      "emptyHint": "Conclusões de tarefas, alterações de status de agentes e menções de projetos chegarão aqui.",
+      "viewAll": "Ver tudo",
+      "unreadAria_one": "Notificações ({{count}} não lidas)",
+      "unreadAria_other": "Notificações ({{count}} não lidas)"
+    },
+    "commandMenu": {
+      "title": "Menu de comando",
+      "description": "Pesquise e acesse qualquer projeto, tarefa, agente ou tela.",
+      "placeholder": "Digite um comando, projeto ou agente…",
+      "noResults": "Nenhum resultado encontrado.",
+      "navigation": "Navegação",
+      "createNew": "Criar novo",
+      "actions": "Ações",
+      "createProject": "Criar projeto",
+      "createTask": "Criar tarefa",
+      "registerAgent": "Registrar agente",
+      "createOrganization": "Criar organização",
+      "openPerkosAgent": "Abra o Agente PerkOS",
+      "disconnectWallet": "Desconectar carteira"
+    },
+    "accessGate": {
+      "privateAlpha": "Alfa privado",
+      "title": "Solicitar acesso alfa",
+      "titleSubmitted": "Solicitação recebida",
+      "description": "PerkOS está em alfa privado. Esta carteira ainda não tem acesso. Conte-nos um pouco sobre você e retornaremos.",
+      "descriptionSubmitted": "Entraremos em contato com o e-mail que você forneceu assim que a carteira for aprovada.",
+      "yourWallet": "Sua carteira",
+      "onTheList": "Você está na lista. Cuidado com sua caixa de entrada.",
+      "emailLabel": "E-mail",
+      "usernameLabel": "Nome de usuário",
+      "usernamePlaceholder": "Seu nome ou endereço",
+      "companyLabel": "Empresa/organização",
+      "companyPlaceholder": "Acme Inc.",
+      "websiteLabel": "Site (opcional)",
+      "requestFailed": "Falha na solicitação ({{status}})",
+      "submitError": "Não foi possível enviar a solicitação",
+      "sending": "Enviando…",
+      "requestAccessButton": "Solicitar acesso",
+      "useDifferentWallet": "Use uma carteira diferente",
+      "accessCodeLabel": "Código de acesso (opcional)",
+      "accessCodePlaceholder": "por exemplo, JULIO10",
+      "accessCodeHint": "Tem um código de um parceiro PerkOS? Insira-o para acesso instantâneo.",
+      "usernameInvalid": "3 a 20 caracteres: letras, números, _ ou -.",
+      "redeemButton": "Obtenha acesso instantâneo",
+      "granting": "Fazendo você entrar…"
+    },
+    "mobileNav": {
+      "home": "Lar",
+      "primaryNavigation": "Navegação primária"
+    }
+  },
+  "chat": {
+    "docs": {
+      "loadingDocs": "Carregando documentos…",
+      "untitled": "Sem título",
+      "docFallback": "Doutor",
+      "someone": "alguém",
+      "selectPrompt": "Selecione um documento ou crie um.",
+      "docType": {
+        "note": "Observação",
+        "plan": "Plano",
+        "spec": "Especificações"
+      },
+      "planStatus": {
+        "draft": "Rascunho",
+        "underDiscussion": "Em discussão",
+        "planProposed": "Plano proposto",
+        "approved": "Aprovado",
+        "materialized": "Materializado"
+      },
+      "empty": {
+        "title": "Ainda não há documentos",
+        "description": "Os documentos são onde sua equipe e seu líder pensam juntos: um plano de sprint, uma especificação, notas de reunião. Inicie o plano do sprint ou crie uma nota de formato livre.",
+        "starting": "Começando…",
+        "startSprintPlan": "Iniciar plano de sprint",
+        "newNote": "Nova nota"
+      },
+      "tree": {
+        "heading": "Documentos",
+        "newDocAria": "Novo documento",
+        "noDocsYet": "Ainda não há documentos.",
+        "teamLeadDrafts": "Rascunhos de líderes de equipe",
+        "planBadge": "plano"
+      },
+      "newDoc": {
+        "titlePlaceholder": "Título…",
+        "cancel": "Cancelar",
+        "create": "Criar"
+      },
+      "toast": {
+        "startPlanError": "Não foi possível iniciar o plano",
+        "createDocError": "Não foi possível criar o documento"
+      },
+      "editor": {
+        "leadsDraft": "rascunho do lead",
+        "promote": "Promover",
+        "discussion": "Discussão",
+        "deleteDocAria": "Excluir documento",
+        "draftTaskCount_one": "Rascunho de tarefa {{count}}",
+        "draftTaskCount_other": "Rascunho de tarefas {{count}}",
+        "approving": "Aprovando…",
+        "approveAndCreate_one": "Aprovar e criar tarefa {{count}}",
+        "approveAndCreate_other": "Aprovar e criar tarefas {{count}}",
+        "tasksCreatedNote": "Tarefas criadas no quadro.",
+        "proposedNoTasks": "Proposto: ainda não há rascunhos de tarefas para criar.",
+        "emptyDocPlan": "Documento vazio. Adicione uma observação abaixo ou peça ao líder da equipe na discussão para elaborar o plano.",
+        "emptyDocNote": "Documento vazio. Adicione uma observação abaixo.",
+        "untitledGroup": "Grupo sem título",
+        "notePlaceholder": "Adicione uma nota (contexto, restrições, feedback)…",
+        "addNote": "Adicionar nota",
+        "addNoteError": "Não foi possível adicionar nota",
+        "confirmDeleteDoc": "Excluir este documento?",
+        "deleteDocError": "Não foi possível excluir o documento",
+        "promotedSuccess": "Doc promovido à árvore",
+        "promoteError": "Não foi possível promover",
+        "tasksCreatedOnBoard_one": "Tarefa {{count}} criada na placa",
+        "tasksCreatedOnBoard_other": "Tarefas {{count}} criadas no quadro",
+        "planApproved": "Plano aprovado",
+        "approvePlanError": "Não foi possível aprovar o plano"
+      },
+      "note": {
+        "saveError": "Não foi possível salvar a nota",
+        "cancel": "Cancelar",
+        "save": "Salvar",
+        "editAria": "Editar nota",
+        "deleteAria": "Excluir nota"
+      },
+      "task": {
+        "untitledTask": "Tarefa sem título",
+        "doneWhen": "Feito quando:",
+        "proposedBy": "Proposto por {{owner}} · rascunho"
+      },
+      "docChat": {
+        "sendError": "Não foi possível enviar",
+        "headerTitle": "{{title}}: Discussão",
+        "closeAria": "Fechar discussão",
+        "empty": "Discuta este documento com sua equipe e seu líder de equipe. O lead publica aqui quando edita o documento.",
+        "you": "Você",
+        "composerPlaceholder": "Mensagem… (digite @ para mencionar)",
+        "send": "Enviar"
+      }
+    },
+    "composer": {
+      "messagePlaceholder": "Escreva uma mensagem…",
+      "listening": "Audição…",
+      "slashCommandsAria": "Comandos de barra",
+      "uploadFailed": "Falha no upload",
+      "unknownError": "Erro desconhecido",
+      "removeAttachment": "Remover {{name}}",
+      "attachFiles": "Anexar arquivos",
+      "attach": "Anexar",
+      "attachComingSoon": "Anexos em breve",
+      "pauseDictation": "Pausar ditado",
+      "dictate": "Ditar",
+      "dictateWithMic": "Ditar com microfone",
+      "send": "Enviar",
+      "dictationError": "Ditado: {{error}}",
+      "slash": {
+        "task": {
+          "label": "Criar tarefa",
+          "description": "Abra o criador de tarefas."
+        },
+        "project": {
+          "label": "Criar projeto",
+          "description": "Abra o criador do projeto."
+        },
+        "agent": {
+          "label": "Agente de lançamento",
+          "description": "Inicie o iniciador do agente em 7 etapas."
+        },
+        "perkos": {
+          "label": "Abra o Agente PerkOS",
+          "description": "Obtenha ajuda do assistente no aplicativo."
+        },
+        "clear": {
+          "label": "Limpar conversa",
+          "description": "Redefina este histórico de bate-papo."
+        }
+      }
+    },
+    "assistant": {
+      "quickActions": {
+        "project": "Crie um projeto",
+        "task": "Crie uma tarefa",
+        "agent": "Cadastre um agente"
+      },
+      "system": {
+        "connectWallet": "⚠ Conecte uma carteira para conversar com o assistente.",
+        "stillOpening": "⚠ Ainda abrindo sua conversa com o Assistente, tente novamente em alguns instantes.",
+        "openError": "⚠ Não foi possível abrir o bate-papo do Assistente: {{error}}"
+      },
+      "status": {
+        "openingChat": "Abrindo bate-papo…",
+        "offline": "Off-line",
+        "online": "On-line",
+        "connecting": "Conectando…"
+      },
+      "header": {
+        "loadHistory": "Carregar conversa anterior",
+        "clearAria": "Limpar conversa",
+        "clearTitle": "Claro: inicie uma nova conversa",
+        "close": "Fechar"
+      },
+      "empty": {
+        "greeting": "Olá, como posso ajudá-lo hoje?",
+        "intro": "Eu sou o agente PerkOS. Eu ajudo você a conhecer a plataforma e a configurar os agentes de trabalho que você usará em seus projetos.",
+        "quickActionsLabel": "Ações rápidas",
+        "footer": "Ou pergunte-me qualquer coisa sobre PerkOS (projetos, agentes, tempos de execução) e eu o orientarei."
+      },
+      "reactions": {
+        "copy": "Cópia",
+        "thumbsUp": "Afirmativo",
+        "thumbsDown": "Não gostei"
+      }
+    }
+  }
+}

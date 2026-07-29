@@ -169,7 +169,7 @@
       "proofs": {
         "plan": {
           "title": "Planean como un equipo de verdad.",
-          "body": "Dale un solo objetivo, y tu Líder de Equipo lo divide en tareas, se las asigna a la persona correcta y le da seguimiento hasta terminarlo, sin que tengas que estar encima."
+          "body": "Asigna un solo objetivo y tu Líder de Equipo lo divide en tareas, se las asigna a la persona correcta y les da seguimiento hasta completarlas, sin que tengas que supervisar cada paso."
         },
         "quality": {
           "title": "El trabajo flojo nunca te llega.",
@@ -668,15 +668,15 @@
     },
     "avatar": {
       "title": "Foto de perfil",
-      "description": "Tu avatar en toda la app. Usa tu ENS o Basename si tenés uno, o subí el tuyo.",
+      "description": "Tu avatar en toda la app. Usa tu ENS o Basename si tienes uno, o sube el tuyo.",
       "sourceEns": "ENS",
       "sourceBasename": "Basename",
       "sourceCustom": "Personalizada",
       "sourceDefault": "Predeterminada",
       "upload": "Subir imagen",
       "remove": "Quitar",
-      "hint": "PNG, JPG o WebP. La redimensionamos por vos.",
-      "noOnchain": "Vinculá un nombre ENS o Basename a tu wallet para usarlo acá.",
+      "hint": "PNG, JPG o WebP. La redimensionamos por ti.",
+      "noOnchain": "Vincula un nombre ENS o Basename a tu billetera para usarlo aquí.",
       "updated": "Foto de perfil actualizada",
       "uploadFailed": "No se pudo subir la imagen",
       "refresh": "Actualizar",
@@ -1728,7 +1728,7 @@
       "useDifferentWallet": "Usar otra billetera",
       "accessCodeLabel": "Código de acceso (opcional)",
       "accessCodePlaceholder": "ej. JULIO10",
-      "accessCodeHint": "¿Tenés un código de un partner de PerkOS? Ingresalo para acceso instantáneo.",
+      "accessCodeHint": "¿Tienes un código de un socio de PerkOS? Ingrésalo para obtener acceso instantáneo.",
       "usernameInvalid": "3-20 caracteres: letras, números, _ o -.",
       "redeemButton": "Obtener acceso",
       "granting": "Entrando…"
