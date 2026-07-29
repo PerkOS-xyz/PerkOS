@@ -742,7 +742,7 @@
   "wallet": {
     "header": {
       "title": "Portafoglio",
-      "subtitle": "Visualizza i saldi del portafoglio collegato o del portafoglio separato gestito da PerkOS su tutte le reti supportate."
+      "subtitle": "Visualizza i saldi del portafoglio collegato o del tuo Portafoglio PerkOS su tutte le reti supportate."
     },
     "loading": "Caricamento del tuo portafoglio…",
     "error": {
@@ -753,8 +753,8 @@
       "label": "Scegli portafoglio",
       "connected": "Il mio portafoglio collegato",
       "connectedDescription": "Il tuo portafoglio personale collegato tramite MetaMask o un altro provider.",
-      "managed": "Portafoglio gestito da PerkOS",
-      "managedDescription": "Un portafoglio separato gestito da PerkOS per ricompense e pagamenti degli agenti."
+      "managed": "Portafoglio PerkOS",
+      "managedDescription": "Un Portafoglio PerkOS separato per ricompense e pagamenti degli agenti."
     },
     "comingSoon": {
       "title": "In arrivo",
@@ -762,9 +762,9 @@
     },
     "address": {
       "title": "Il tuo indirizzo del portafoglio",
-      "description": "Invia token qui per finanziare questo portafoglio gestito su Base, Celo o Robinhood Chain.",
+      "description": "Invia token qui per finanziare il tuo Portafoglio PerkOS su Base, Celo o Robinhood Chain.",
       "connectedDescription": "Questo è il portafoglio personale attualmente collegato a PerkOS.",
-      "managedDescription": "Questo portafoglio separato è gestito da PerkOS per ricompense e pagamenti degli agenti.",
+      "managedDescription": "Questo Portafoglio PerkOS è separato dal portafoglio collegato e viene usato per ricompense e pagamenti degli agenti.",
       "copied": "Copiato",
       "copy": "Copia",
       "deposit": "Deposito: invia USDC, USDG o $PERKOS a {{addr}} da qualsiasi portafoglio.",
@@ -776,7 +776,7 @@
       "refresh": "Aggiorna",
       "reading": "Lettura dei saldi…",
       "error": "Impossibile leggere i saldi.",
-      "empty": "Questo portafoglio gestito non contiene ancora fondi. Deposita token all'indirizzo qui sopra, poi aggiorna.",
+      "empty": "Il tuo Portafoglio PerkOS non contiene ancora fondi. Deposita token all'indirizzo qui sopra, poi aggiorna.",
       "unavailable": "Questa rete è temporaneamente non disponibile. Prova ad aggiornare."
     }
   },

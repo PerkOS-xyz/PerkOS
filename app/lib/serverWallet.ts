@@ -53,7 +53,7 @@ export async function ensureServerWallet(): Promise<ServerWallet | null> {
   return data.wallet ?? null;
 }
 
-/** Read either the connected or PerkOS-managed wallet across all chains. */
+/** Read either the connected or PerkOS wallet across all chains. */
 export async function fetchWalletBalances(
   source: WalletSource = "managed",
 ): Promise<WalletBalances> {
