@@ -356,19 +356,19 @@ function StarterCallout({ address }: { address: string }) {
           {
             name: "Tour the dashboard",
             priority: "Low",
-            agent: "PerkOS Agent",
+            agent: "Ask PerkOS Agent",
             prompt: "Walk me through what's on the dashboard.",
           },
           {
             name: "Launch your first agent",
             priority: "Medium",
-            agent: "PerkOS Agent",
+            agent: "Ask PerkOS Agent",
             prompt: "Help me launch a Hermes agent for content and promotions.",
           },
           {
             name: "Try the project chat",
             priority: "Low",
-            agent: "PerkOS Agent",
+            agent: "Ask PerkOS Agent",
             prompt: "Open the project chat and say hi.",
           },
         ],

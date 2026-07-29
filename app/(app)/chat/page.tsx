@@ -88,7 +88,7 @@ export default function ChatHubPage() {
         </p>
       </header>
 
-      <PerkOSAgentRow onOpen={() => setOpen(true)} />
+      <AskPerkOSAgentRow onOpen={() => setOpen(true)} />
 
       {showSearch ? (
         <SearchInput
@@ -170,7 +170,7 @@ function InlineEmptyRow({ href, label }: { href: string; label: string }) {
   );
 }
 
-function PerkOSAgentRow({ onOpen }: { onOpen: () => void }) {
+function AskPerkOSAgentRow({ onOpen }: { onOpen: () => void }) {
   // Single-row banner that matches AgentChatRow + ProjectChannelRow height
   // so the chat landing page reads as a uniform list of entities you can
   // talk to — instead of one big featured Card sitting above two
@@ -183,7 +183,7 @@ function PerkOSAgentRow({ onOpen }: { onOpen: () => void }) {
       className="glow-card flex w-full items-center gap-3 rounded-md border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent px-4 py-3 text-left transition-colors hover:border-primary/50"
     >
       <div className="relative shrink-0">
-        <AgentOrb name="PerkOS Assistant" presetId="assistant" size={40} />
+        <AgentOrb name="Ask PerkOS Agent" presetId="assistant" size={40} />
         <span
           className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-card"
           aria-hidden
@@ -192,7 +192,7 @@ function PerkOSAgentRow({ onOpen }: { onOpen: () => void }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <span className="flex items-center gap-1.5 text-sm font-medium text-foreground">
           <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden />
-          PerkOS Agent
+          Ask PerkOS Agent
         </span>
         <span className="hidden truncate text-xs text-muted-foreground sm:block">
           Your guide — ask about the platform, navigate flows, spin up

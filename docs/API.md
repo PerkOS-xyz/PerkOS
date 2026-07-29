@@ -306,7 +306,7 @@ DELETE /wallets/{walletAddress}/agents/{agentId}
 
 ---
 
-### Assistant chat (PerkOS Agent + 1-on-1)
+### Assistant chat (Ask PerkOS Agent + 1-on-1)
 
 #### Buffered (default)
 

@@ -274,7 +274,7 @@ export function ChatbotPanel() {
 
       <div
         role="dialog"
-        aria-label="PerkOS Agent"
+        aria-label="Ask PerkOS Agent"
         className={cn(
           "fixed z-50 flex flex-col border border-primary/40 bg-card shadow-[0_0_32px_rgba(236,27,105,0.25)]",
           // Mobile: near-fullscreen sheet (small gap at the top to peek the page behind)
@@ -284,7 +284,7 @@ export function ChatbotPanel() {
         )}
       >
         <Header
-          title="PerkOS Agent"
+          title="Ask PerkOS Agent"
           subtitle={
             loadingConv
               ? t("chat.assistant.status.openingChat")

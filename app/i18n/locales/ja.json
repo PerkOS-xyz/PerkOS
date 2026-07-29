@@ -356,7 +356,7 @@
   "dashboard": {
     "greeting": {
       "welcomeBack": "おかえりなさい",
-      "intro": "私はあなたのPerkOSエージェントです。必要なエージェントやプロジェクトの構築と運用をお手伝いします。今日はどこから始めるか選んでください。"
+      "intro": "私はAsk PerkOS Agentです。必要なエージェントやプロジェクトの構築と運用をお手伝いします。今日はどこから始めるか選んでください。"
     },
     "workspace": {
       "badge": "ワークスペース",
@@ -1755,7 +1755,7 @@
       "createTask": "タスクを作成",
       "registerAgent": "エージェントを登録",
       "createOrganization": "組織を作成",
-      "openPerkosAgent": "PerkOSエージェントを開く",
+      "openPerkosAgent": "Ask PerkOS Agentを開く",
       "disconnectWallet": "ウォレットを切断"
     },
     "accessGate": {
@@ -1909,7 +1909,7 @@
           "description": "7ステップのエージェント起動ウィザードを開始します。"
         },
         "perkos": {
-          "label": "PerkOSエージェントを開く",
+          "label": "Ask PerkOS Agentを開く",
           "description": "アプリ内アシスタントに相談します。"
         },
         "clear": {
@@ -1943,7 +1943,7 @@
       },
       "empty": {
         "greeting": "こんにちは、今日はどのようなご用件でしょうか？",
-        "intro": "私はPerkOSエージェントです。プラットフォームの使い方を学んだり、プロジェクトで使う作業エージェントを設定したりするお手伝いをします。",
+        "intro": "私はAsk PerkOS Agentです。プラットフォームの使い方を学んだり、プロジェクトで使う作業エージェントを設定したりするお手伝いをします。",
         "quickActionsLabel": "クイックアクション",
         "footer": "または、プロジェクト、エージェント、ランタイムなど、PerkOSについて何でも聞いてください。ご案内します。"
       },
