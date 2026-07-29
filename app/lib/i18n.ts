@@ -10,17 +10,19 @@ import fr from "../i18n/locales/fr.json";
 import ko from "../i18n/locales/ko.json";
 import zh from "../i18n/locales/zh.json";
 import ja from "../i18n/locales/ja.json";
+import pt from "../i18n/locales/pt.json";
 
-export type LanguageCode = "en" | "es" | "it" | "fr" | "ko" | "zh" | "ja";
+export type LanguageCode = "en" | "es" | "it" | "fr" | "pt" | "ko" | "zh" | "ja";
 
 // Ordered for the selector (per UX spec): English pinned first, then the Latin-script
-// languages alphabetical by endonym (Español, Français, Italiano), then CJK alphabetical
+// languages alphabetical by endonym (Español, Français, Italiano, Português), then CJK alphabetical
 // by English name (Chinese, Japanese, Korean). `label` is the native endonym.
 export const SUPPORTED_LANGUAGES: { code: LanguageCode; label: string; english: string }[] = [
   { code: "en", label: "English", english: "English" },
   { code: "es", label: "Español", english: "Spanish" },
   { code: "fr", label: "Français", english: "French" },
   { code: "it", label: "Italiano", english: "Italian" },
+  { code: "pt", label: "Português", english: "Portuguese" },
   { code: "zh", label: "中文", english: "Chinese" },
   { code: "ja", label: "日本語", english: "Japanese" },
   { code: "ko", label: "한국어", english: "Korean" },
@@ -71,10 +73,11 @@ if (!i18n.isInitialized) {
       ko: { translation: ko },
       zh: { translation: zh },
       ja: { translation: ja },
+      pt: { translation: pt },
     },
     lng: "en",
     fallbackLng: "en",
-    supportedLngs: ["en", "es", "it", "fr", "ko", "zh", "ja"],
+    supportedLngs: ["en", "es", "it", "fr", "pt", "ko", "zh", "ja"],
     load: "languageOnly", // fr-CA → fr, zh-CN → zh, ja-JP → ja
     nonExplicitSupportedLngs: true,
     interpolation: { escapeValue: false }, // React already escapes
