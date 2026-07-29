@@ -778,6 +778,12 @@
       "error": "잔액을 불러오지 못했어요.",
       "empty": "PerkOS 지갑에는 아직 자금이 없어요. 위 주소로 토큰을 입금한 뒤 새로고침하세요.",
       "unavailable": "이 네트워크는 일시적으로 사용할 수 없어요. 새로고침해 보세요."
+    },
+    "assets": {
+      "title": "자산",
+      "showDetails": "{{asset}} 상세 정보 보기",
+      "hideDetails": "{{asset}} 상세 정보 숨기기",
+      "unavailable": "{{network}}은(는) 일시적으로 사용할 수 없어요. 새로고침해 보세요."
     }
   },
   "notifications": {

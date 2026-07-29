@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { WalletBalances } from "../app/lib/serverWallet";
+import i18n from "../app/lib/i18n";
 
 let balanceData: WalletBalances;
 
@@ -49,7 +50,8 @@ const zero = (symbol: string) => ({
 });
 
 describe("WalletPage balances", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    await i18n.changeLanguage("en");
     balanceData = {
       address: "0x83990f7b43A2d34061aF0551785bF9F072062d19",
       chains: [
@@ -71,7 +73,7 @@ describe("WalletPage balances", () => {
     expect(
       screen.getByRole("combobox", { name: "Choose wallet" }),
     ).toHaveTextContent("My connected wallet");
-    expect(screen.getByText("Robinhood Chain")).toBeVisible();
+    expect(screen.getAllByText("Robinhood Chain").length).toBeGreaterThan(0);
     expect(screen.getByText("USDG")).toBeVisible();
     expect(
       screen.getByText(
@@ -91,21 +93,30 @@ describe("WalletPage balances", () => {
     render(<WalletPage />);
 
     expect(
-      screen.getByText("This network is temporarily unavailable. Try refreshing."),
+      screen.getByText(
+        "Robinhood Chain is temporarily unavailable. Try refreshing.",
+      ),
     ).toBeVisible();
   });
 
-  it("keeps real balances readable without losing the exact value", () => {
+  it("groups the same asset across networks and reveals exact per-network details", () => {
     balanceData.chains[0]!.balances = [
       {
-        symbol: "USDC",
+        symbol: "ETH",
         address: null,
-        decimals: 6,
-        raw: "3093347",
-        formatted: "3.093347",
+        decimals: 18,
+        raw: "4756825000000000",
+        formatted: "0.004756825",
       },
     ];
     balanceData.chains[2]!.balances = [
+      {
+        symbol: "ETH",
+        address: null,
+        decimals: 18,
+        raw: "5821606000000000",
+        formatted: "0.005821606",
+      },
       {
         symbol: "PERKOS",
         address: null,
@@ -117,9 +128,43 @@ describe("WalletPage balances", () => {
 
     render(<WalletPage />);
 
-    expect(screen.getByTitle("3.093347")).toHaveTextContent("3.09");
+    expect(screen.getByText("Assets")).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Show ETH details" }),
+    ).toHaveTextContent("0.010578");
+    expect(
+      screen.getByRole("button", { name: "Show ETH details" }),
+    ).toHaveTextContent("Base");
+    expect(
+      screen.getByRole("button", { name: "Show ETH details" }),
+    ).toHaveTextContent("Robinhood Chain");
+
+    fireEvent.click(screen.getByRole("button", { name: "Show ETH details" }));
+
+    expect(
+      screen.getByRole("button", { name: "Hide ETH details" }),
+    ).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByTitle("0.004756825")).toHaveTextContent("0.004757");
+    expect(screen.getByTitle("0.005821606")).toHaveTextContent("0.005822");
+
+    expect(
+      screen.getByRole("button", { name: "Show $PERKOS details" }),
+    ).toHaveTextContent("220.6M");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Show $PERKOS details" }),
+    );
     expect(
       screen.getByTitle("220567985.609118027764504614"),
-    ).toHaveTextContent("220.6M");
+    ).toBeVisible();
+  });
+
+  it("updates the assets heading when the language changes", async () => {
+    await i18n.changeLanguage("es");
+    render(<WalletPage />);
+    expect(screen.getByText("Activos")).toBeVisible();
+
+    await i18n.changeLanguage("en");
+    await waitFor(() => expect(screen.getByText("Assets")).toBeVisible());
   });
 });

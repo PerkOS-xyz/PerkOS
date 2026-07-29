@@ -778,6 +778,12 @@
       "error": "Impossible de lire les soldes.",
       "empty": "Votre Portefeuille PerkOS ne contient pas encore de fonds. Déposez des tokens à l'adresse ci-dessus, puis actualisez.",
       "unavailable": "Ce réseau est temporairement indisponible. Essayez d'actualiser."
+    },
+    "assets": {
+      "title": "Actifs",
+      "showDetails": "Afficher les détails de {{asset}}",
+      "hideDetails": "Masquer les détails de {{asset}}",
+      "unavailable": "{{network}} est temporairement indisponible. Essayez d'actualiser."
     }
   },
   "notifications": {

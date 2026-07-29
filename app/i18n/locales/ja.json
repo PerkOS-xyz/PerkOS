@@ -778,6 +778,12 @@
       "error": "残高を確認できませんでした。",
       "empty": "PerkOSウォレットにはまだ資金がありません。上のアドレスにトークンを入金してから更新してください。",
       "unavailable": "このネットワークは一時的に利用できません。更新をお試しください。"
+    },
+    "assets": {
+      "title": "資産",
+      "showDetails": "{{asset}}の詳細を表示",
+      "hideDetails": "{{asset}}の詳細を非表示",
+      "unavailable": "{{network}}は一時的に利用できません。更新をお試しください。"
     }
   },
   "notifications": {

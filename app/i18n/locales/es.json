@@ -778,6 +778,12 @@
       "error": "No se pudieron leer los saldos.",
       "empty": "Tu Billetera PerkOS todavía no tiene fondos. Deposita tokens en la dirección anterior y luego actualiza.",
       "unavailable": "Esta red no está disponible temporalmente. Intenta actualizar."
+    },
+    "assets": {
+      "title": "Activos",
+      "showDetails": "Mostrar detalles de {{asset}}",
+      "hideDetails": "Ocultar detalles de {{asset}}",
+      "unavailable": "{{network}} no está disponible temporalmente. Intenta actualizar."
     }
   },
   "notifications": {
