@@ -356,7 +356,7 @@
   "dashboard": {
     "greeting": {
       "welcomeBack": "다시 오신 걸 환영해요",
-      "intro": "저는 사장님의 PerkOS 에이전트예요. 필요한 에이전트와 프로젝트를 만들고 운영하는 걸 도와드릴게요. 오늘은 어디에 집중할지 골라보세요."
+      "intro": "저는 Ask PerkOS Agent예요. 필요한 에이전트와 프로젝트를 만들고 운영하는 걸 도와드릴게요. 오늘은 어디에 집중할지 골라보세요."
     },
     "workspace": {
       "badge": "워크스페이스",
@@ -1746,7 +1746,7 @@
       "createTask": "작업 만들기",
       "registerAgent": "에이전트 등록",
       "createOrganization": "조직 만들기",
-      "openPerkosAgent": "PerkOS 에이전트 열기",
+      "openPerkosAgent": "Ask PerkOS Agent 열기",
       "disconnectWallet": "지갑 연결 해제"
     },
     "accessGate": {
@@ -1900,7 +1900,7 @@
           "description": "7단계 에이전트 실행 마법사를 시작해요."
         },
         "perkos": {
-          "label": "PerkOS 에이전트 열기",
+          "label": "Ask PerkOS Agent 열기",
           "description": "앱 내 어시스턴트의 도움을 받아요."
         },
         "clear": {
@@ -1934,7 +1934,7 @@
       },
       "empty": {
         "greeting": "안녕하세요, 오늘은 무엇을 도와드릴까요?",
-        "intro": "저는 PerkOS 에이전트예요. 플랫폼 사용법을 안내하고, 프로젝트 전반에서 사용할 업무 에이전트를 설정하는 걸 도와드려요.",
+        "intro": "저는 Ask PerkOS Agent예요. 플랫폼 사용법을 안내하고, 프로젝트 전반에서 사용할 업무 에이전트를 설정하는 걸 도와드려요.",
         "quickActionsLabel": "빠른 작업",
         "footer": "또는 프로젝트, 에이전트, 런타임 등 PerkOS에 대해 무엇이든 물어보세요. 안내해 드릴게요."
       },

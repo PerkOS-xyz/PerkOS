@@ -356,7 +356,7 @@
   "dashboard": {
     "greeting": {
       "welcomeBack": "欢迎回来",
-      "intro": "我是你的 PerkOS 智能体,会帮你搭建并运行你需要的智能体和项目。选一个今天想专注的方向吧。"
+      "intro": "我是 Ask PerkOS Agent,会帮你搭建并运行你需要的智能体和项目。选一个今天想专注的方向吧。"
     },
     "workspace": {
       "badge": "工作空间",
@@ -1755,7 +1755,7 @@
       "createTask": "创建任务",
       "registerAgent": "注册智能体",
       "createOrganization": "创建组织",
-      "openPerkosAgent": "打开 PerkOS 智能体",
+      "openPerkosAgent": "打开 Ask PerkOS Agent",
       "disconnectWallet": "断开钱包连接"
     },
     "accessGate": {
@@ -1909,7 +1909,7 @@
           "description": "启动 7 步智能体启动向导。"
         },
         "perkos": {
-          "label": "打开 PerkOS 智能体",
+          "label": "打开 Ask PerkOS Agent",
           "description": "从应用内助手获取帮助。"
         },
         "clear": {
@@ -1943,7 +1943,7 @@
       },
       "empty": {
         "greeting": "你好,今天有什么可以帮你的?",
-        "intro": "我是 PerkOS 智能体,可以帮助你了解平台,并设置你将在各个项目中使用的工作智能体。",
+        "intro": "我是 Ask PerkOS Agent,可以帮助你了解平台,并设置你将在各个项目中使用的工作智能体。",
         "quickActionsLabel": "快捷操作",
         "footer": "或者向我询问关于 PerkOS 的任何问题,例如项目、智能体、运行环境,我会为你解答。"
       },

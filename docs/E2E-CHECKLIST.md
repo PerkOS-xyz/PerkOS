@@ -71,7 +71,7 @@ Object.keys(localStorage)
         project appears in the list with 3 demo tasks
 - [ ] Workspace name from settings shows in the WorkspaceCard
 - [ ] Quick actions (mobile) work
-- [ ] PerkOS Agent panel (chatbot) opens from the floating trigger
+- [ ] Ask PerkOS Agent panel (chatbot) opens from the floating trigger
 
 ## 5. Command menu (⌘K)
 
@@ -167,7 +167,7 @@ Object.keys(localStorage)
 
 ## 9. Chat
 
-### PerkOS Agent (floating)
+### Ask PerkOS Agent (floating)
 - [ ] Trigger button opens panel
 - [ ] Empty state shows quick actions
 - [ ] Type a message → reply appears with Markdown rendering (test with `**bold** *italic* \`code\``)

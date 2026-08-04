@@ -126,7 +126,7 @@ app/
     auth/nonce              Issues a sign-in nonce per wallet
     auth/wallet-signin      Verifies signature, mints Firebase custom token
     agents/launch           Provisions an agent runtime (ECS / Cloud Run)
-    assistant/chat          PerkOS Agent + per-agent chat (buffered or SSE)
+    assistant/chat          Ask PerkOS Agent + per-agent chat (buffered or SSE)
     contact, request-access Public form handlers
   lib/
     perkosApi.ts            Firestore-backed data layer (Project / Task / Agent / ChatMessage)
