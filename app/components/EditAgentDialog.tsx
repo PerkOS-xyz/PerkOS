@@ -18,12 +18,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 
-import { updateAgent, type Agent } from "../lib/perkosApi";
+import { updateAgent, type AgentRow } from "../lib/perkosApi";
 
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  agent: Agent;
+  agent: AgentRow;
   walletAddress: string;
 };
 
@@ -34,42 +34,47 @@ export function EditAgentDialog({
   walletAddress,
 }: Props) {
   const queryClient = useQueryClient();
-  const [name, setName] = useState(agent.name);
+  const [displayName, setDisplayName] = useState(agent.displayName ?? agent.name);
   const [plugins, setPlugins] = useState<string[]>(agent.plugins ?? []);
   const [pluginInput, setPluginInput] = useState("");
   const [attempted, setAttempted] = useState(false);
 
   useEffect(() => {
     if (open) {
-      setName(agent.name);
+      setDisplayName(agent.displayName ?? agent.name);
       setPlugins(agent.plugins ?? []);
       setPluginInput("");
       setAttempted(false);
     }
-  }, [open, agent.name, agent.plugins]);
+  }, [open, agent.displayName, agent.name, agent.plugins]);
 
   const nameError =
-    name.trim().length < 2 ? "Name must be at least 2 characters." : null;
+    displayName.trim().length < 2 ? "Display name must be at least 2 characters." : null;
 
   const dirty = useMemo(() => {
-    if (name.trim() !== agent.name) return true;
+    if (displayName.trim() !== (agent.displayName ?? agent.name)) return true;
     const a = [...(agent.plugins ?? [])].sort().join(",");
     const b = [...plugins].sort().join(",");
     return a !== b;
-  }, [name, plugins, agent.name, agent.plugins]);
+  }, [displayName, plugins, agent.displayName, agent.name, agent.plugins]);
 
   const mutation = useMutation({
     mutationFn: () =>
       updateAgent({
         walletAddress,
         agentId: agent.id,
-        patch: { name: name.trim(), plugins },
+        patch: { displayName: displayName.trim(), plugins },
       }),
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({
         queryKey: ["wallet-agents", walletAddress],
       });
-      toast.success("Agent updated");
+      toast.success(
+        result.applied ? "Agent updated" : "Agent profile saved",
+        result.applyError
+          ? { description: `Runtime update will retry on the next restart: ${result.applyError}` }
+          : undefined,
+      );
       onOpenChange(false);
     },
     onError: (err: Error) => {
@@ -112,17 +117,17 @@ export function EditAgentDialog({
         <DialogHeader>
           <DialogTitle>Edit agent</DialogTitle>
           <DialogDescription>
-            Rename the agent or adjust its capabilities. Runtime and channels
-            stay the same.
+            Change the user-facing label or capabilities. The immutable runtime
+            identity remains <span className="font-mono">{agent.name}</span>.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="edit-agent-name">Name</Label>
+            <Label htmlFor="edit-agent-name">Display name</Label>
             <Input
               id="edit-agent-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
               aria-invalid={attempted && Boolean(nameError)}
             />
             {attempted && nameError ? (

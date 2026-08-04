@@ -438,6 +438,11 @@ const messageConverter: FirestoreDataConverter<ChatMessage> = {
  * infra, so they CAN'T be hibernated/woken (that's ECS scale-to-0, PerkOS-only).
  */
 export type AgentRow = Agent & {
+  /** User-facing label; `name` remains the immutable relay/runtime identity. */
+  displayName?: string;
+  soul?: string;
+  skillIds?: string[];
+  disabledTools?: string[];
   /** True only for PerkOS-managed ECS agents (including legacy ECS records). */
   managed?: boolean;
   /** True for an agent installed by the user on their own VPS. */
@@ -482,10 +487,14 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
     return {
       id: snap.id,
       name: (data.name as string) ?? "",
+      displayName: (data.displayName as string | undefined) ?? undefined,
       runtime: (data.runtime as AgentRuntime) ?? "Hermes",
       status,
       walletAddress: (data.walletAddress as string) ?? "",
       plugins: (data.plugins as string[] | undefined) ?? [],
+      soul: (data.soul as string | undefined) ?? undefined,
+      skillIds: (data.skillIds as string[] | undefined) ?? [],
+      disabledTools: (data.disabledTools as string[] | undefined) ?? [],
       taskArn: (data.taskArn as string | undefined) ?? undefined,
       endpoint: (data.endpoint as string | undefined) ?? undefined,
       createdAt: tsToIso(data.createdAt),
@@ -1803,18 +1812,31 @@ export async function getWalletAgents(
 export async function updateAgent(input: {
   walletAddress: string;
   agentId: string;
-  patch: Partial<{ name: string; plugins: string[] }>;
-}): Promise<{ agent: Agent }> {
-  const ref = agentDoc(input.walletAddress, input.agentId);
-  await updateDoc(ref, {
-    ...input.patch,
-    updatedAt: serverTimestamp(),
-  });
-  const fresh = await getDoc(ref);
-  if (!fresh.exists()) {
-    throw new Error("Agent not found after update.");
+  patch: Partial<{
+    displayName: string;
+    soul: string;
+    plugins: string[];
+    skillIds: string[];
+    disabledTools: string[];
+  }>;
+}): Promise<{ agent: AgentRow; applied: boolean; applyError?: string }> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/agents/${encodeURIComponent(input.agentId)}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(input.patch),
+    },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) {
+    throw new Error(apiError(payload, "Couldn't update agent."));
   }
-  return { agent: fresh.data() };
+  return payload as unknown as {
+    agent: AgentRow;
+    applied: boolean;
+    applyError?: string;
+  };
 }
 
 export type HibernationApiState = "active" | "hibernating" | "hibernated" | "waking";
