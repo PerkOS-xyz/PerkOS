@@ -16,6 +16,7 @@ const REASON_KEYS: Record<string, string> = {
   "empty-plan": "components.pmBanner.reasons.emptyPlan",
   "llm-error": "components.pmBanner.reasons.llmError",
   "no-pm": "components.pmBanner.reasons.noPm",
+  "planning-timeout": "components.pmBanner.reasons.planningTimeout",
 };
 
 // The PM loop's phases, in order — rendered as a mini pipeline so the owner
@@ -35,9 +36,15 @@ const PHASES: { id: string; labelKey: string }[] = [
 export function PmSessionBanner({
   session,
   pmAgent,
+  planningAttempt,
+  planningMaxAttempts,
+  failureReason,
 }: {
   session?: PmSession;
   pmAgent?: string | null;
+  planningAttempt?: number;
+  planningMaxAttempts?: number;
+  failureReason?: string;
 }) {
   const { t } = useTranslation();
   if (!session) return null;
@@ -109,7 +116,16 @@ export function PmSessionBanner({
           })}
         </span>
       ) : null}
+      {session.status === "planning" && planningAttempt && planningMaxAttempts ? (
+        <span className="opacity-70">
+          {t("components.pmBanner.planningAttempt", {
+            current: planningAttempt,
+            max: planningMaxAttempts,
+          })}
+        </span>
+      ) : null}
       {reason ? <span className="opacity-70">· {reason}</span> : null}
+      {failureReason ? <span className="basis-full opacity-80">{failureReason}</span> : null}
     </div>
   );
 }

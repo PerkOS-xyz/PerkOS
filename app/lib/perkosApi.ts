@@ -90,9 +90,12 @@ export type Project = {
   pmSession?: PmSession;
   /** API-owned workflow; clients use it to disable invalid repeated actions. */
   workflow?: {
-    phase?: "draft" | "planning" | "awaiting_approval" | "approved" | "running" | "pm_review" | "complete" | "cancelled";
+    phase?: "draft" | "planning" | "planning_failed" | "awaiting_approval" | "approved" | "running" | "pm_review" | "complete" | "cancelled";
     planId?: string;
     taskIds?: string[];
+    planningAttempt?: number;
+    planningMaxAttempts?: number;
+    failureReason?: string;
   };
   createdAt?: string;
   updatedAt?: string;
@@ -370,6 +373,9 @@ const projectConverter: FirestoreDataConverter<Project> = {
         taskIds: Array.isArray(value.taskIds)
           ? value.taskIds.filter((id): id is string => typeof id === "string")
           : [],
+        planningAttempt: typeof value.planningAttempt === "number" ? value.planningAttempt : undefined,
+        planningMaxAttempts: typeof value.planningMaxAttempts === "number" ? value.planningMaxAttempts : undefined,
+        failureReason: typeof value.failureReason === "string" ? value.failureReason : undefined,
       };
     }
     return {
@@ -2281,6 +2287,25 @@ export async function pmTurn(input: {
     throw new Error(apiError(payload, "PM unavailable"));
   }
   return (payload.data ?? payload) as PmTurnResult;
+}
+
+export async function cancelProjectPlanning(input: {
+  projectId: string;
+  owner?: string;
+}): Promise<{ ok: boolean; status?: string }> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/projects/${input.projectId}/planning/cancel`,
+    {
+      method: "POST",
+      body: JSON.stringify({ owner: input.owner }),
+    },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) {
+    throw new Error(apiError(payload, "Planning could not be cancelled"));
+  }
+  return (payload.data ?? payload) as { ok: boolean; status?: string };
 }
 
 export async function ensureProjectChat(input: {

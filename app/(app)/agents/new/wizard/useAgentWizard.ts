@@ -315,7 +315,9 @@ export function useAgentWizard() {
         });
         return;
       }
-      if (response?.credentials) {
+      // Managed relay keys are internal provisioning material. Never reveal
+      // them in the browser, even while rolling against an older API build.
+      if (response?.credentials && state.deployMode !== "perkos-ecs") {
         setIssuedCredentials(response.credentials);
         return;
       }

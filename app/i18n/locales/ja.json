@@ -1175,7 +1175,7 @@
     "channels": {
       "title": "接続済みのチャネル",
       "description": "PerkOS内に加えて、ユーザーがこのエージェントに連絡できる場所です。",
-      "none": "まだ設定されていません。{{runtime}}エージェントは、Telegram、Discord、Slack、WhatsAppなどのチャネルに接続できます。"
+      "none": "チャネルは未設定です。現在はTelegramが利用でき、ランタイム別の追加アダプターも順次提供予定です。"
     },
     "tasks": {
       "title": "{{name}}に割り当てられたタスク",

@@ -1175,7 +1175,7 @@
     "channels": {
       "title": "Canaux connectés",
       "description": "Où les utilisateurs peuvent joindre cet agent, en plus de PerkOS.",
-      "none": "Aucun canal configuré. Les agents {{runtime}} peuvent être connectés à des canaux comme Telegram, Discord, Slack ou WhatsApp."
+      "none": "Aucun canal configuré. Telegram est disponible maintenant ; d’autres adaptateurs propres à chaque runtime arrivent."
     },
     "tasks": {
       "title": "Tâches assignées à {{name}}",

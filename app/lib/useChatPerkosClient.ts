@@ -89,6 +89,14 @@ function newId(): string {
   return Math.random().toString(36).slice(2, 14);
 }
 
+/** User sockets receive frames for every joined conversation. Keep panels isolated. */
+export function frameBelongsToConversation(
+  frame: Record<string, unknown>,
+  convId: string,
+): boolean {
+  return typeof frame.convId === "string" && frame.convId === convId;
+}
+
 export function useChatPerkosClient(opts: Options): ChatPerkosState {
   const { convId, enabled, onMessage, onHistory } = opts;
   const [authed, setAuthed] = useState(false);
@@ -140,6 +148,7 @@ export function useChatPerkosClient(opts: Options): ChatPerkosState {
       setAuthed(false);
       return;
     }
+    const activeConvId = convId;
 
     let cancelled = false;
 
@@ -218,6 +227,7 @@ export function useChatPerkosClient(opts: Options): ChatPerkosState {
           case "chat_message": {
             // Server-broadcast of a message in the conversation, sent to
             // every participant including the original sender.
+            if (!frameBelongsToConversation(frame, activeConvId)) return;
             const fromValue = frame.from as string | undefined;
             const textValue = frame.text as string | undefined;
             if (!fromValue || typeof textValue !== "string") return;
@@ -237,6 +247,7 @@ export function useChatPerkosClient(opts: Options): ChatPerkosState {
             // Agent's reply to a previous `requestHistory()` (or to the
             // server's auto-fanout when the user joins). Server already
             // verified the requester is a participant, so we just forward.
+            if (!frameBelongsToConversation(frame, activeConvId)) return;
             const rawMessages = Array.isArray(frame.messages)
               ? (frame.messages as Array<Record<string, unknown>>)
               : [];

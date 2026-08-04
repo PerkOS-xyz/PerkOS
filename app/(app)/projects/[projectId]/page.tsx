@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 
 import {
   assignAgentsToProject,
+  cancelProjectPlanning,
   deleteProject,
   deleteTask,
   getWalletAgents,
@@ -339,6 +340,26 @@ function DetailHeader({
       toast.error(t("projectRoom.header.toast.startTeamError"), { description: err.message }),
   });
 
+  const cancelPlanningMutation = useMutation({
+    mutationFn: () => {
+      if (!project.id) throw new Error(t("projectRoom.header.errors.missingProjectId"));
+      return cancelProjectPlanning({
+        projectId: project.id,
+        owner: isShared ? ownerWallet : undefined,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["wallet-project", address, project.id],
+      });
+      toast.success(t("projectRoom.header.toast.planningCancelled"));
+    },
+    onError: (err: Error) =>
+      toast.error(t("projectRoom.header.toast.cancelPlanningError"), {
+        description: err.message,
+      }),
+  });
+
   // Designate the coordinator the USER picked in the popup, then run the PM.
   const choosePmMutation = useMutation({
     mutationFn: (name: string) => {
@@ -449,6 +470,22 @@ function DetailHeader({
                 ? t("projectRoom.header.teamWorking")
                 : t("projectRoom.header.putTeamToWork")}
           </Button>
+          {project.workflow?.phase === "planning" ? (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              disabled={cancelPlanningMutation.isPending}
+              onClick={() => cancelPlanningMutation.mutate()}
+            >
+              {cancelPlanningMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Pause className="h-4 w-4" />
+              )}
+              {t("projectRoom.header.cancelPlanning")}
+            </Button>
+          ) : null}
           <Button
             variant="outline"
             size="sm"
@@ -506,7 +543,13 @@ function DetailHeader({
 
       {!compact && project.pmSession ? (
         pmRunRecent ? (
-        <PmSessionBanner session={project.pmSession} pmAgent={project.pmAgent} />
+        <PmSessionBanner
+          session={project.pmSession}
+          pmAgent={project.pmAgent}
+          planningAttempt={project.workflow?.planningAttempt}
+          planningMaxAttempts={project.workflow?.planningMaxAttempts}
+          failureReason={project.workflow?.failureReason}
+        />
         ) : null
       ) : null}
 
