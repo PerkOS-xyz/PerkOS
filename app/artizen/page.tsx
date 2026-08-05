@@ -15,20 +15,24 @@ import {
 import { cn } from "@/lib/utils";
 
 // ============================================================================
-// /artizen — public, no-auth page that explains why PerkOS qualifies for
-// Artizen match funds (community, open source, humanity, frontier tech).
-// Meant to be linked from an Artizen submission's "Link" field, so grant
-// reviewers can open it and click through to live proof. Deliberately free of
-// any token / $PERKOS / investment language: Artizen is a public-good platform,
-// so this page speaks only to open source, community, human benefit, and the
-// working product. Payments are framed as stablecoins (people getting paid for
-// work), and on-chain as trust infrastructure, never as speculation.
+// /artizen — public, no-auth page that explains what PerkOS is and who it is
+// for. It is linked from grant and community submissions, so readers arrive
+// with no context and click through to the live product and the open code.
+//
+// Editorial guidelines for this page:
+//   - Plain language. Describe what people can do, not how the system works.
+//   - The audience is a community manager, a small business, or an early
+//     stage startup, so lead with community, open source, the languages the
+//     product speaks, and the fact that anyone can run it themselves.
+//   - Infrastructure and payment details belong on the product and developer
+//     pages, where there is room to explain them properly.
+//   - No em dashes in visible copy.
 // ============================================================================
 
 export const metadata: Metadata = {
   title: "Why PerkOS qualifies — open-source community AI",
   description:
-    "PerkOS is open-source AI infrastructure that lets anyone build helpful AI for their community and get paid for real work. See how it meets Artizen's community, open-source, human-benefit, and frontier-tech criteria.",
+    "PerkOS is open-source AI infrastructure that lets anyone build a small team of helpful AI for their community, in plain words and in their own language. See how it meets Artizen's community, open-source, human-benefit, and frontier-tech criteria.",
   // Unlisted: reachable only by direct link (used in grant submissions), kept
   // out of search and out of the site nav.
   robots: { index: false, follow: false },
@@ -37,30 +41,30 @@ export const metadata: Metadata = {
 const STATS = [
   { value: "80+", label: "Open-source repositories" },
   { value: "Live", label: "In production at app.perkos.xyz" },
-  { value: "EVM + BTC", label: "On-chain across Base, Celo, and Stacks" },
-  { value: "0", label: "Outside investors — independent" },
+  { value: "7", label: "Languages, Spanish and Portuguese included" },
+  { value: "0", label: "Outside investors, fully independent" },
 ];
 
 const PILLARS = [
   {
     Icon: Users,
     title: "Community",
-    copy: "Anyone can build a small team of AI helpers for the people they serve. A teacher, a shop owner, or a local organizer creates them in plain words, and the value those helpers create stays with the community.",
+    copy: "Anyone can build a small team of AI helpers for the people they serve. A community manager, a small business, or an early stage startup creates them in plain words, and what those helpers produce stays with the community.",
   },
   {
     Icon: Code,
     title: "Open source",
-    copy: "The whole stack is public. 80+ open repositories cover the AI runtimes, the payment rails, and on-chain identity, escrow, and reputation, so anyone can inspect it, fork it, and build on it.",
+    copy: "The whole stack is public. 80+ open repositories cover the AI runtimes, the shared knowledge commons, and the tools that connect them, so anyone can inspect it, fork it, and run it themselves.",
   },
   {
     Icon: HeartHandshake,
     title: "Human benefit",
-    copy: "PerkOS gives regular people something usually reserved for big tech: the ability to own AI that works for them and earns them a living in stablecoins, with no bank required. It grows what everyday people can do.",
+    copy: "PerkOS gives regular people something usually reserved for big tech: a small team of AI that works for them, speaks their language, and can run on a machine they control. It grows what everyday people can do.",
   },
   {
     Icon: Cpu,
     title: "Frontier tech",
-    copy: "PerkOS joins AI with open on-chain rails, live across EVM (Base, Celo) and Bitcoin (Stacks). Like the best frontier tech, it is built to quietly fade into the background and power millions of small helpers.",
+    copy: "PerkOS is multi-agent AI in production. Helpers plan a goal together, split the work on a shared board, and report back. Like the best frontier tech, it is built to quietly fade into the background.",
   },
 ];
 
@@ -75,11 +79,11 @@ const CRITERIA = [
   },
   {
     title: "Working and live today",
-    copy: "In production at app.perkos.xyz, with a marketplace already moving real stablecoin payments between people.",
+    copy: "In production at app.perkos.xyz, with a knowledge commons communities already share and learn from.",
   },
   {
     title: "Direct human agency",
-    copy: "Everyday people own income-earning AI and get paid for real work, no bank needed.",
+    copy: "Everyday people own AI that works for them, described in plain words, in their own language.",
   },
   {
     title: "Independent and unfunded",
@@ -87,7 +91,7 @@ const CRITERIA = [
   },
   {
     title: "Built to scale",
-    copy: "Open, foundational rails meant to reach millions of community helpers worldwide.",
+    copy: "Open, foundational infrastructure meant to reach millions of community helpers worldwide.",
   },
 ];
 
@@ -98,19 +102,19 @@ const PROOF = [
     href: "https://app.perkos.xyz",
   },
   {
+    label: "Anna, on your phone",
+    detail: "A helper for small teams",
+    href: "https://minipay.perkos.xyz",
+  },
+  {
     label: "Read the code",
     detail: "80+ open repositories",
     href: "https://github.com/PerkOS-xyz",
   },
   {
-    label: "Knowledge marketplace",
-    detail: "Real payments between people",
-    href: "https://knowledge.perkos.xyz",
-  },
-  {
-    label: "On-chain, on Bitcoin",
-    detail: "Agent identity, escrow, reputation",
-    href: "https://stacks.perkos.xyz",
+    label: "Run it yourself",
+    detail: "Public runtimes, one command",
+    href: "https://github.com/PerkOS-xyz/Perkos-Containers",
   },
 ];
 
@@ -153,10 +157,10 @@ export default function ArtizenPage() {
                 AI that belongs to people, built in the open.
               </h1>
               <p className="max-w-2xl text-base text-muted-foreground md:text-lg">
-                PerkOS is open-source infrastructure that lets anyone build helpful
-                AI for their community and get paid for real work, in stablecoins,
-                with no bank required. It is live today, independent, and free for
-                anyone to inspect and build on.
+                PerkOS is open-source infrastructure that lets anyone build a small
+                team of helpful AI for their community, in plain words and in their
+                own language. It is live today, independent, and free for anyone to
+                inspect, fork, and run.
               </p>
               <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
                 <a
