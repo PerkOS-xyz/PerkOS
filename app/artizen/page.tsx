@@ -40,7 +40,7 @@ export const metadata: Metadata = {
 
 const STATS = [
   { value: "80+", label: "Open-source repositories" },
-  { value: "Live", label: "In production at app.perkos.xyz" },
+  { value: "Running", label: "In closed beta at app.perkos.xyz" },
   { value: "7", label: "Languages, Spanish and Portuguese included" },
   { value: "0", label: "Outside investors, fully independent" },
 ];
@@ -78,8 +78,8 @@ const CRITERIA = [
     copy: "The entire stack is public across 80+ repositories under the PerkOS org.",
   },
   {
-    title: "Working and live today",
-    copy: "In production at app.perkos.xyz, with a knowledge commons communities already share and learn from.",
+    title: "Working today, in closed beta",
+    copy: "Running at app.perkos.xyz with a small group of people, while we make sure it holds up before we open it wider.",
   },
   {
     title: "Direct human agency",
@@ -97,8 +97,8 @@ const CRITERIA = [
 
 const PROOF = [
   {
-    label: "Try it live",
-    detail: "The product, in production",
+    label: "See it running",
+    detail: "The product, in closed beta",
     href: "https://app.perkos.xyz",
   },
   {
@@ -159,8 +159,8 @@ export default function ArtizenPage() {
               <p className="max-w-2xl text-base text-muted-foreground md:text-lg">
                 PerkOS is open-source infrastructure that lets anyone build a small
                 team of helpful AI for their community, in plain words and in their
-                own language. It is live today, independent, and free for anyone to
-                inspect, fork, and run.
+                own language. It is running today in a closed beta, independent, and free
+                for anyone to inspect, fork, and run.
               </p>
               <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
                 <a
@@ -169,7 +169,7 @@ export default function ArtizenPage() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
                 >
-                  See it live
+                  See it running
                   <ArrowUpRight className="h-4 w-4" />
                 </a>
                 <a
