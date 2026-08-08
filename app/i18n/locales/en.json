@@ -1161,6 +1161,7 @@
       "runtimeVersion": "Runtime version",
       "modelKey": "Model key",
       "byok": "User-provided (BYOK)",
+      "runtimeOwned": "Runtime-owned (external)",
       "perkosManaged": "PerkOS managed"
     },
     "capabilities": {

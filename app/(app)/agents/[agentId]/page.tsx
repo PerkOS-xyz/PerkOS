@@ -678,7 +678,9 @@ function MetadataCard({ agent }: { agent: Agent }) {
           )}
         </MetaRow>
         <MetaRow Icon={KeyRound} label={t("agentDetail.metadata.modelKey")}>
-          {agent.modelKeyProvided ? (
+          {isExternalAgent(agent) ? (
+            <span className="text-muted-foreground">{t("agentDetail.metadata.runtimeOwned")}</span>
+          ) : agent.modelKeyProvided ? (
             <span className="text-emerald-300">{t("agentDetail.metadata.byok")}</span>
           ) : (
             <span className="text-muted-foreground">{t("agentDetail.metadata.perkosManaged")}</span>

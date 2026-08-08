@@ -1161,6 +1161,7 @@
       "runtimeVersion": "Versión del entorno de ejecución",
       "modelKey": "Clave del modelo",
       "byok": "Provista por el usuario (BYOK)",
+      "runtimeOwned": "Gestionada por el runtime externo",
       "perkosManaged": "Administrada por PerkOS"
     },
     "capabilities": {

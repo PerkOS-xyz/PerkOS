@@ -1170,6 +1170,7 @@
       "runtimeVersion": "Versão de tempo de execução",
       "modelKey": "Chave do modelo",
       "byok": "Fornecido pelo usuário (BYOK)",
+      "runtimeOwned": "Gerenciada pelo runtime externo",
       "perkosManaged": "PerkOS gerenciado"
     },
     "capabilities": {
