@@ -115,6 +115,15 @@ export default function AgentDetailPage({ params }: PageProps) {
     queryKey: ["wallet-agents", address],
     queryFn: () => getWalletAgents(address!),
     enabled: Boolean(address),
+    // External invitations become online when their bridge posts its first
+    // authenticated heartbeat. Keep the detail view live while an invited
+    // agent is open so the user does not have to guess when to press Refresh.
+    refetchInterval: (query) => {
+      const agents = query.state.data as AgentRow[] | undefined;
+      return agents?.some((candidate) => candidate.id === agentId && candidate.invited)
+        ? 5_000
+        : false;
+    },
   });
 
   const agent = agentsQuery.data?.find((a) => a.id === agentId);
