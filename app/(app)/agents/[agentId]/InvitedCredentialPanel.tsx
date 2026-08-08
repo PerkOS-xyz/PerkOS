@@ -22,6 +22,7 @@ import {
   type AgentRow,
 } from "../../../lib/perkosApi";
 import { ConfirmDialog } from "../../../components/ConfirmDialog";
+import { hasFreshAgentHeartbeat } from "../../../lib/agentHostingPolicy";
 
 /** An invite that hasn't connected within this window reads as "never connected". */
 const STALE_AFTER_MS = 30 * 60 * 1000;
@@ -34,7 +35,7 @@ type ConnState =
 
 function connState(agent: AgentRow): ConnState {
   if (agent.revoked) return { kind: "revoked" };
-  if (agent.bridgeConnected === true) return { kind: "connected" };
+  if (hasFreshAgentHeartbeat(agent)) return { kind: "connected" };
   const everSeen = Boolean(agent.lastBridgeSeenAt);
   if (everSeen) return { kind: "waiting" }; // connected before, currently away
   const created = agent.createdAt ? Date.parse(agent.createdAt) : NaN;
