@@ -1054,7 +1054,7 @@
         },
         "openclaw": {
           "label": "OpenClaw",
-          "hint": "/v1/chat/completions"
+          "hint": "plugin integrato"
         },
         "custom": {
           "label": "Personalizzato",
@@ -1065,7 +1065,7 @@
       "nameHelp": "Come viene identificato sul relay e in chat. Deve essere univoco.",
       "nameError": "2–32 caratteri, solo lettere/numeri/_/-",
       "runtimeLabel": "Runtime",
-      "runtimeHelp": "Cosa parla il tuo agente: imposta l'endpoint del bridge nel prompt.",
+      "runtimeHelp": "Seleziona il plugin integrato per OpenClaw o il bridge HTTP per Hermes/runtime personalizzato.",
       "noteLabel": "Nota per l'agente (facoltativo)",
       "noteHelp": "Contesto che l'agente vede nel suo prompt di invito.",
       "notePlaceholder": "Aiuterai il team con ricerche di mercato e report settimanali.",

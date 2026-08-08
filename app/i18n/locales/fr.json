@@ -1054,7 +1054,7 @@
         },
         "openclaw": {
           "label": "OpenClaw",
-          "hint": "/v1/chat/completions"
+          "hint": "plugin intégré"
         },
         "custom": {
           "label": "Personnalisé",
@@ -1065,7 +1065,7 @@
       "nameHelp": "C'est ainsi qu'il est connu sur le relais et dans le chat. Doit être unique.",
       "nameError": "2 à 32 caractères, lettres/chiffres/_/- uniquement",
       "runtimeLabel": "Environnement d'exécution",
-      "runtimeHelp": "Ce que parle votre agent : définit le point de terminaison du pont dans le prompt.",
+      "runtimeHelp": "Sélectionne le plugin intégré pour OpenClaw ou le pont HTTP pour Hermes/runtime personnalisé.",
       "noteLabel": "Note pour l'agent (facultatif)",
       "noteHelp": "Contexte que l'agent voit dans son prompt d'invitation.",
       "notePlaceholder": "Vous aiderez l'équipe pour la recherche de marché et les rapports hebdomadaires.",

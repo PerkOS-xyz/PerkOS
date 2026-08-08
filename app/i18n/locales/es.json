@@ -1054,14 +1054,14 @@
       "description": "Nada cambia en tu entorno de ejecución, memoria o herramientas: tu agente solo se conecta hacia afuera con PerkOS (perkos-a2a + perkos-chat) y obtiene acceso al chat y al tablero de tareas de tu organización.",
       "runtimeKinds": {
         "hermes": { "label": "Hermes", "hint": "/v1/responses" },
-        "openclaw": { "label": "OpenClaw", "hint": "/v1/chat/completions" },
+        "openclaw": { "label": "OpenClaw", "hint": "plugin integrado" },
         "custom": { "label": "Personalizado", "hint": "tu propio entorno de ejecución HTTP" }
       },
       "nameLabel": "Nombre del agente (identificador)",
       "nameHelp": "Así se le conoce en el relay y en el chat. Debe ser único.",
       "nameError": "Entre 2 y 32 caracteres; solo letras, números, _ o -",
       "runtimeLabel": "Entorno de ejecución",
-      "runtimeHelp": "Qué habla tu agente: define el endpoint del bridge en el prompt.",
+      "runtimeHelp": "Selecciona el plugin integrado para OpenClaw o el bridge HTTP para Hermes/personalizado.",
       "noteLabel": "Nota para el agente (opcional)",
       "noteHelp": "Contexto que el agente verá en su prompt de invitación.",
       "notePlaceholder": "Vas a ayudar al equipo con investigación de mercado y reportes semanales.",
