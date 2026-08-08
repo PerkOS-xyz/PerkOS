@@ -1156,6 +1156,7 @@
       "runtimeVersion": "런타임 버전",
       "modelKey": "모델 키",
       "byok": "사용자 제공(BYOK)",
+      "runtimeOwned": "외부 런타임에서 관리",
       "perkosManaged": "PerkOS 관리"
     },
     "capabilities": {
