@@ -35,6 +35,10 @@ type Props = {
   chatEnabled: boolean;
   /** PerkOS-managed ECS agents can hibernate. External agents cannot. */
   hibernationEnabled: boolean;
+  /** External runtimes are operated by their owner, not by PerkOS. */
+  externalAgent?: boolean;
+  /** User-facing runtime label, for example OpenClaw. */
+  runtimeKind?: string;
 };
 
 type Bubble = {
@@ -57,11 +61,33 @@ function formatTime(ts?: number): string {
   }
 }
 
+export function agentResponseTimeoutMessage(input: {
+  agentName: string;
+  externalAgent: boolean;
+  runtimeKind?: string;
+}): string {
+  if (input.externalAgent) {
+    const runtime = input.runtimeKind?.trim();
+    return (
+      `No response from ${input.agentName} after 90s. ` +
+      `The external${runtime ? ` ${runtime}` : ""} agent is connected but did not return a reply. ` +
+      "Check the external runtime/plugin logs or model routing."
+    );
+  }
+  return (
+    `No response from ${input.agentName} after 90s. ` +
+    "If the agent was hibernated, give it another moment to wake — " +
+    "your message should land once the runtime is online."
+  );
+}
+
 export function AgentChatPanel({
   agentId,
   agentName,
   chatEnabled,
   hibernationEnabled,
+  externalAgent = false,
+  runtimeKind,
 }: Props) {
   const { address, isConnected } = useConnection();
   const queryClient = useQueryClient();
@@ -171,23 +197,18 @@ export function AgentChatPanel({
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages.length, showTyping]);
 
-  // Timeout fallback for the "thinking…" indicator. If the agent was
-  // hibernated when the user sent, wake takes 30-60s and the chat
-  // server doesn't queue messages indefinitely; without this the
-  // bubble would spin forever. After 90s we clear the indicator and
-  // surface a recoverable error string instead.
+  // Timeout fallback for the "thinking…" indicator. Managed runtimes may be
+  // waking from hibernation; external runtimes instead need their own plugin
+  // and model-routing diagnostics. Never suggest PerkOS container lifecycle
+  // actions for infrastructure the owner operates.
   useEffect(() => {
     if (!awaitingReply) return;
     const timer = setTimeout(() => {
       setAwaitingReply(false);
-      setError(
-        `No response from ${agentName} after 90s. ` +
-          `If the agent was hibernated, give it another moment to wake — ` +
-          `your message should land once the runtime is online.`,
-      );
+      setError(agentResponseTimeoutMessage({ agentName, externalAgent, runtimeKind }));
     }, 90_000);
     return () => clearTimeout(timer);
-  }, [awaitingReply, agentName]);
+  }, [awaitingReply, agentName, externalAgent, runtimeKind]);
 
   async function send(text: string) {
     const trimmed = text.trim();
