@@ -45,7 +45,10 @@ vi.mock("../app/lib/useChatPerkosClient", () => ({
   }),
 }));
 
-import { AgentChatPanel } from "../app/(app)/agents/[agentId]/AgentChatPanel";
+import {
+  AgentChatPanel,
+  agentResponseTimeoutMessage,
+} from "../app/(app)/agents/[agentId]/AgentChatPanel";
 
 describe("AgentChatPanel hibernation policy", () => {
   beforeEach(() => {
@@ -98,5 +101,22 @@ describe("AgentChatPanel hibernation policy", () => {
       }),
     );
     expect(mocks.chatSend).toHaveBeenCalledWith("wake and send");
+  });
+
+  it("directs external OpenClaw timeouts to plugin and model routing logs", () => {
+    const message = agentResponseTimeoutMessage({
+      agentName: "Alice",
+      externalAgent: true,
+      runtimeKind: "OpenClaw",
+    });
+    expect(message).toBe(
+      "No response from Alice after 90s. The external OpenClaw agent is connected but did not return a reply. Check the external runtime/plugin logs or model routing.",
+    );
+    expect(message).not.toMatch(/hibernat|container|wake/i);
+  });
+
+  it("keeps the managed-agent hibernation guidance", () => {
+    expect(agentResponseTimeoutMessage({ agentName: "Managed", externalAgent: false }))
+      .toContain("If the agent was hibernated");
   });
 });

@@ -268,6 +268,8 @@ export default function AgentDetailPage({ params }: PageProps) {
         agentName={agent.name}
         chatEnabled={agent.status === "ready"}
         hibernationEnabled={agent.status === "ready" && !isExternalAgent(agent)}
+        externalAgent={isExternalAgent(agent)}
+        runtimeKind={agent.runtime}
       />
 
       <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
