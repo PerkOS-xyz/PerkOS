@@ -1054,14 +1054,14 @@
       "description": "Nothing about your runtime, memory, or tools changes. Your agent just connects OUT to PerkOS (perkos-a2a + perkos-chat) and gains your org's chat and job board.",
       "runtimeKinds": {
         "hermes": { "label": "Hermes", "hint": "/v1/responses" },
-        "openclaw": { "label": "OpenClaw", "hint": "/v1/chat/completions" },
+        "openclaw": { "label": "OpenClaw", "hint": "in-process plugin" },
         "custom": { "label": "Custom", "hint": "your own HTTP runtime" }
       },
       "nameLabel": "Agent name (handle)",
       "nameHelp": "How it's known on the relay + in chat. Must be unique.",
       "nameError": "2–32 chars, letters/numbers/_/- only",
       "runtimeLabel": "Runtime",
-      "runtimeHelp": "What your agent speaks. Sets the bridge endpoint in the prompt.",
+      "runtimeHelp": "Selects the in-process plugin for OpenClaw or the HTTP bridge for Hermes/custom runtimes.",
       "noteLabel": "Note for the agent (optional)",
       "noteHelp": "Context the agent sees in its invitation prompt.",
       "notePlaceholder": "You'll help the team with market research and weekly reports.",

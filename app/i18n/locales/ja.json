@@ -1054,7 +1054,7 @@
         },
         "openclaw": {
           "label": "OpenClaw",
-          "hint": "/v1/chat/completions"
+          "hint": "組み込みプラグイン"
         },
         "custom": {
           "label": "カスタム",
@@ -1065,7 +1065,7 @@
       "nameHelp": "リレー上とチャットで使われる識別名です。一意である必要があります。",
       "nameError": "半角英数字、_、- のみ使用可、2〜32文字",
       "runtimeLabel": "ランタイム",
-      "runtimeHelp": "エージェントが使用するプロトコルです。プロンプト内のブリッジのエンドポイントが決まります。",
+      "runtimeHelp": "OpenClaw では組み込みプラグイン、Hermes/カスタムでは HTTP ブリッジを選択します。",
       "noteLabel": "エージェントへのメモ（任意）",
       "noteHelp": "招待プロンプト内で、エージェントに伝わる背景情報です。",
       "notePlaceholder": "市場調査や週次レポートの作成でチームをサポートしてください。",

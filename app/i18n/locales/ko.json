@@ -1049,14 +1049,14 @@
       "description": "런타임, 메모리, 도구는 그대로 유지돼요. 에이전트가 PerkOS(perkos-a2a + perkos-chat)로 아웃바운드 연결만 하면, 조직의 채팅과 작업 보드를 사용할 수 있게 돼요.",
       "runtimeKinds": {
         "hermes": { "label": "Hermes", "hint": "/v1/responses" },
-        "openclaw": { "label": "OpenClaw", "hint": "/v1/chat/completions" },
+        "openclaw": { "label": "OpenClaw", "hint": "내장 플러그인" },
         "custom": { "label": "커스텀", "hint": "직접 준비한 HTTP 런타임" }
       },
       "nameLabel": "에이전트 이름(핸들)",
       "nameHelp": "릴레이와 채팅에서 사용되는 이름이에요. 고유해야 해요.",
       "nameError": "2~32자, 영문/숫자/_/- 만 사용 가능",
       "runtimeLabel": "런타임",
-      "runtimeHelp": "에이전트가 사용하는 프로토콜이에요. 프롬프트 안의 브리지 엔드포인트를 결정해요.",
+      "runtimeHelp": "OpenClaw는 내장 플러그인, Hermes/사용자 지정 런타임은 HTTP 브리지를 선택합니다.",
       "noteLabel": "에이전트에게 전할 메모(선택 사항)",
       "noteHelp": "초대 프롬프트에서 에이전트가 보게 될 맥락 정보예요.",
       "notePlaceholder": "시장 조사와 주간 보고서 작성을 도와줄 거예요.",

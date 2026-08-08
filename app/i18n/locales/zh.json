@@ -1054,7 +1054,7 @@
         },
         "openclaw": {
           "label": "OpenClaw",
-          "hint": "/v1/chat/completions"
+          "hint": "进程内插件"
         },
         "custom": {
           "label": "自定义",
@@ -1065,7 +1065,7 @@
       "nameHelp": "它在中继和聊天中的显示名称,必须唯一。",
       "nameError": "2-32 个字符,仅限字母、数字、_、-",
       "runtimeLabel": "运行环境",
-      "runtimeHelp": "你的智能体使用的协议,决定提示词中桥接端点的设置。",
+      "runtimeHelp": "OpenClaw 使用进程内插件，Hermes/自定义运行时使用 HTTP 桥接。",
       "noteLabel": "给智能体的备注(可选)",
       "noteHelp": "智能体在其邀请提示词中会看到的背景信息。",
       "notePlaceholder": "你将协助团队进行市场调研,并撰写每周报告。",
