@@ -43,14 +43,17 @@ import {
   assignAgentsToProject,
   createWalletProject,
   deleteTeamTemplate,
+  getWalletAgents,
   inviteAgent,
   launchAgent,
   listTeamTemplates,
   saveTeamTemplate,
   setProjectPm,
+  type AgentRow,
   type TeamTemplate,
 } from "../../../lib/perkosApi";
 import { useActiveOrg } from "../../../lib/useActiveOrg";
+import { buildExistingTeamRoster } from "../../../lib/existingAgentTeam";
 import { fetchActiveRuntimes } from "../../../lib/runtimeImages";
 import {
   BRAND_ACCENT,
@@ -124,9 +127,13 @@ export default function NewCompanyPage() {
   const [seedJson, setSeedJson] = useState("[]");
   const [projectName, setProjectName] = useState("");
   const [goal, setGoal] = useState("");
-  // Who runs the team: launch managed PerkOS agents, or register the user's
-  // own external agents (invite — no infra, they connect via onboarding prompt).
-  const [agentSource, setAgentSource] = useState<"perkos" | "invite">("perkos");
+  // Who runs the team: launch managed agents, register a new external agent,
+  // or reuse agents that are already registered to this wallet.
+  const [agentSource, setAgentSource] = useState<"perkos" | "invite" | "existing">("perkos");
+  const [walletAgents, setWalletAgents] = useState<AgentRow[]>([]);
+  const [loadingWalletAgents, setLoadingWalletAgents] = useState(false);
+  const [existingAgentNames, setExistingAgentNames] = useState<string[]>([]);
+  const [existingPm, setExistingPm] = useState("");
   const [saveAsTemplate, setSaveAsTemplate] = useState(false);
   const [templateName, setTemplateName] = useState("");
   const [myTemplates, setMyTemplates] = useState<TeamTemplate[]>([]);
@@ -143,6 +150,29 @@ export default function NewCompanyPage() {
       .then(setMyTemplates)
       .catch(() => {});
   }, [address]);
+
+  useEffect(() => {
+    if (!address || agentSource !== "existing") return;
+    let cancelled = false;
+    getWalletAgents(address)
+      .then((agents) => {
+        if (!cancelled) setWalletAgents(agents);
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setWalletAgents([]);
+          toast.error(t("companyNew.config.existingLoadError"), {
+            description: error instanceof Error ? error.message : String(error),
+          });
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingWalletAgents(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [address, agentSource, t]);
 
   const tmpl =
     selectedId && !selectedId.startsWith("my:") && selectedId !== "custom" && selectedId !== "empty"
@@ -171,6 +201,8 @@ export default function NewCompanyPage() {
     setProjectName("");
     setGoal("");
     setAgentSource("perkos");
+    setExistingAgentNames([]);
+    setExistingPm("");
     setSaveAsTemplate(false);
     setTemplateName("");
   }
@@ -194,6 +226,19 @@ export default function NewCompanyPage() {
     );
   }
 
+  function toggleExistingAgent(name: string) {
+    setExistingAgentNames((current) => {
+      if (current.includes(name)) {
+        const next = current.filter((item) => item !== name);
+        if (existingPm === name) setExistingPm(next[0] ?? "");
+        return next;
+      }
+      const next = [...current, name];
+      if (!existingPm) setExistingPm(name);
+      return next;
+    });
+  }
+
   const teamNames = new Set(teamRoles.map((r) => r.role.toLowerCase()));
   const addablePresets = AGENT_PRESETS.filter(
     (p) => p.id !== "custom" && !teamNames.has(p.name.toLowerCase()),
@@ -208,8 +253,12 @@ export default function NewCompanyPage() {
   async function launchCompany() {
     if (!address || !mode || !projectName.trim()) return;
     const roles = teamRoles;
-    if (mode !== "empty" && roles.length === 0) {
+    if (mode !== "empty" && agentSource !== "existing" && roles.length === 0) {
       toast.error(t("companyNew.launch.pickRole"));
+      return;
+    }
+    if (mode !== "empty" && agentSource === "existing" && existingAgentNames.length === 0) {
+      toast.error(t("companyNew.launch.pickExistingAgent"));
       return;
     }
     if (
@@ -263,47 +312,51 @@ export default function NewCompanyPage() {
 
       const slug = slugify(projectName);
       const launched: { name: string; isPM?: boolean }[] = [];
-      let i = 0;
-      for (const role of roles) {
-        i++;
-        const reqName = `${slug}-${slugify(role.role)}`;
-        if (agentSource === "invite") {
-          setProgress(
-            t("companyNew.launch.registering", {
-              role: role.role,
-              current: i,
-              total: roles.length,
-            }),
-          );
-          const res = await inviteAgent({
-            name: reqName,
-            runtimeKind: "custom",
-            note: role.role,
-          });
-          launched.push({ name: res.agentName, isPM: role.isPM });
-        } else {
-          setProgress(
-            t("companyNew.launch.launchingRole", {
-              role: role.role,
-              current: i,
-              total: roles.length,
-            }),
-          );
-          const r = resolveRole(role, reqName);
-          const res = await launchAgent({
-            walletAddress: address,
-            name: reqName,
-            runtime: role.runtime,
-            imageTag: tagFor(role.runtime),
-            soul: r.soul,
-            plugins: r.plugins,
-            skills: r.skills,
-            ...llm,
-          });
-          launched.push({
-            name: res.result?.agent?.name ?? reqName,
-            isPM: role.isPM,
-          });
+      if (agentSource === "existing") {
+        launched.push(...buildExistingTeamRoster(existingAgentNames, existingPm));
+      } else {
+        let i = 0;
+        for (const role of roles) {
+          i++;
+          const reqName = `${slug}-${slugify(role.role)}`;
+          if (agentSource === "invite") {
+            setProgress(
+              t("companyNew.launch.registering", {
+                role: role.role,
+                current: i,
+                total: roles.length,
+              }),
+            );
+            const res = await inviteAgent({
+              name: reqName,
+              runtimeKind: "custom",
+              note: role.role,
+            });
+            launched.push({ name: res.agentName, isPM: role.isPM });
+          } else {
+            setProgress(
+              t("companyNew.launch.launchingRole", {
+                role: role.role,
+                current: i,
+                total: roles.length,
+              }),
+            );
+            const r = resolveRole(role, reqName);
+            const res = await launchAgent({
+              walletAddress: address,
+              name: reqName,
+              runtime: role.runtime,
+              imageTag: tagFor(role.runtime),
+              soul: r.soul,
+              plugins: r.plugins,
+              skills: r.skills,
+              ...llm,
+            });
+            launched.push({
+              name: res.result?.agent?.name ?? reqName,
+              isPM: role.isPM,
+            });
+          }
         }
       }
 
@@ -326,7 +379,7 @@ export default function NewCompanyPage() {
 
       // Persist the edited team as a personal template (best-effort — a save
       // hiccup must not fail a launch that already happened).
-      if (saveAsTemplate && roles.length > 0) {
+      if (agentSource !== "existing" && saveAsTemplate && roles.length > 0) {
         setProgress(t("companyNew.launch.savingTemplate"));
         await saveTeamTemplate({
           walletAddress: address,
@@ -343,18 +396,22 @@ export default function NewCompanyPage() {
       toast.success(
         launched.length === 0
           ? t("companyNew.launch.projectCreated")
-          : agentSource === "invite"
-            ? t("companyNew.launch.invitesRegistered", { count: launched.length })
-            : t("companyNew.launch.teamLaunched", {
-                name: tmpl?.name ?? myTmpl?.name ?? t("companyNew.launch.yourTeamFallback"),
-              }),
+          : agentSource === "existing"
+            ? t("companyNew.launch.existingAssigned", { count: launched.length })
+            : agentSource === "invite"
+              ? t("companyNew.launch.invitesRegistered", { count: launched.length })
+              : t("companyNew.launch.teamLaunched", {
+                  name: tmpl?.name ?? myTmpl?.name ?? t("companyNew.launch.yourTeamFallback"),
+                }),
         {
           description:
             launched.length === 0
               ? t("companyNew.launch.descNoAgents")
-              : agentSource === "invite"
-                ? t("companyNew.launch.descInvite")
-                : t("companyNew.launch.descPerkos"),
+              : agentSource === "existing"
+                ? t("companyNew.launch.descExisting")
+                : agentSource === "invite"
+                  ? t("companyNew.launch.descInvite")
+                  : t("companyNew.launch.descPerkos"),
         },
       );
       router.push(`/projects/${projectId}`);
@@ -377,8 +434,10 @@ export default function NewCompanyPage() {
           ? Users
           : Briefcase;
     const teamSize = mode === "empty" ? 0 : teamRoles.length;
+    const configuredTeamSize =
+      agentSource === "existing" ? existingAgentNames.length : teamSize;
     const canSaveTemplate =
-      teamSize > 0 && (mode === "custom" || modified);
+      agentSource !== "existing" && teamSize > 0 && (mode === "custom" || modified);
     return (
       <div className="flex flex-col gap-6">
         <button
@@ -417,7 +476,7 @@ export default function NewCompanyPage() {
         </header>
 
         {/* Team editor — recommended roles, fully editable */}
-        {mode !== "empty" ? (
+        {mode !== "empty" && agentSource !== "existing" ? (
           <section className="flex flex-col gap-2">
             <h2 className="text-sm font-medium text-foreground">
               {t("companyNew.config.teamHeading", { count: teamRoles.length })}
@@ -514,7 +573,7 @@ export default function NewCompanyPage() {
         {/* Goal — feeds the PM's planning */}
         <section className="flex max-w-lg flex-col gap-2">
           <label htmlFor="project-goal" className="text-sm font-medium text-foreground">
-            {teamSize > 0
+            {configuredTeamSize > 0
               ? t("companyNew.config.goalLabelTeam")
               : t("companyNew.config.goalLabelProject")}
           </label>
@@ -532,7 +591,7 @@ export default function NewCompanyPage() {
             maxLength={500}
             className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground"
           />
-          {teamSize > 0 ? (
+          {configuredTeamSize > 0 ? (
             <p className="text-xs text-muted-foreground">
               {t("companyNew.config.goalHint")}
             </p>
@@ -540,10 +599,10 @@ export default function NewCompanyPage() {
         </section>
 
         {/* Agent source — managed PerkOS agents vs the user's own */}
-        {teamSize > 0 ? (
+        {mode !== "empty" ? (
           <section className="flex max-w-lg flex-col gap-2">
             <span className="text-sm font-medium text-foreground">{t("companyNew.config.sourceHeading")}</span>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               <button
                 type="button"
                 onClick={() => setAgentSource("perkos")}
@@ -588,7 +647,120 @@ export default function NewCompanyPage() {
                   {t("companyNew.config.sourceInviteDesc")}
                 </span>
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (agentSource !== "existing") setLoadingWalletAgents(true);
+                  setAgentSource("existing");
+                }}
+                disabled={launching}
+                className={cn(
+                  "flex flex-col gap-1 rounded-md border p-3 text-left text-sm transition-colors",
+                  agentSource === "existing"
+                    ? "border-primary/60 bg-primary/5"
+                    : "border-border hover:border-primary/40",
+                )}
+              >
+                <span className="flex items-center gap-1.5 font-medium text-foreground">
+                  {agentSource === "existing" ? (
+                    <Check className="h-3.5 w-3.5 text-primary" />
+                  ) : (
+                    <Users className="h-3.5 w-3.5" />
+                  )}
+                  {t("companyNew.config.sourceExisting")}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {t("companyNew.config.sourceExistingDesc")}
+                </span>
+              </button>
             </div>
+
+            {agentSource === "existing" ? (
+              <div className="mt-1 flex flex-col gap-2 rounded-md border border-border bg-card p-3">
+                <div>
+                  <h3 className="text-sm font-medium text-foreground">
+                    {t("companyNew.config.existingHeading", {
+                      count: existingAgentNames.length,
+                    })}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    {t("companyNew.config.existingHint")}
+                  </p>
+                </div>
+
+                {loadingWalletAgents ? (
+                  <p className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {t("companyNew.config.existingLoading")}
+                  </p>
+                ) : walletAgents.length === 0 ? (
+                  <p className="rounded-md border border-dashed border-border px-3 py-2 text-sm text-muted-foreground">
+                    {t("companyNew.config.existingEmpty")}
+                  </p>
+                ) : (
+                  <ul className="flex max-h-72 flex-col gap-2 overflow-y-auto">
+                    {walletAgents.map((agent) => {
+                      const selected = existingAgentNames.includes(agent.name);
+                      return (
+                        <li
+                          key={agent.id}
+                          className={cn(
+                            "flex items-center gap-3 rounded-md border px-3 py-2",
+                            selected
+                              ? "border-primary/40 bg-primary/5"
+                              : "border-border bg-background",
+                          )}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selected}
+                            onChange={() => toggleExistingAgent(agent.name)}
+                            disabled={launching}
+                            aria-label={t("companyNew.config.selectExistingAria", {
+                              name: agent.name,
+                            })}
+                            className="h-4 w-4 accent-primary"
+                          />
+                          <Bot className="h-4 w-4 shrink-0 text-primary" />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium text-foreground">
+                              {agent.name}
+                            </p>
+                            <p className="truncate text-xs text-muted-foreground">
+                              {agent.runtime}
+                              {agent.external
+                                ? ` · ${t("companyNew.config.externalAgent")}`
+                                : ""}
+                            </p>
+                          </div>
+                          {selected ? (
+                            <label
+                              className={cn(
+                                "flex shrink-0 cursor-pointer items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium",
+                                existingPm === agent.name
+                                  ? "border-primary/40 bg-primary/10 text-primary"
+                                  : "border-border text-muted-foreground hover:border-primary/40",
+                              )}
+                              title={t("companyNew.config.leadTitle")}
+                            >
+                              <input
+                                type="radio"
+                                name="existing-pm"
+                                checked={existingPm === agent.name}
+                                onChange={() => setExistingPm(agent.name)}
+                                disabled={launching}
+                                className="sr-only"
+                              />
+                              {t("companyNew.config.lead")}
+                            </label>
+                          ) : null}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            ) : null}
           </section>
         ) : null}
 
@@ -712,7 +884,10 @@ export default function NewCompanyPage() {
               launching ||
               !projectName.trim() ||
               !address ||
-              (mode !== "empty" && teamRoles.length === 0)
+              (mode !== "empty" &&
+                (agentSource === "existing"
+                  ? existingAgentNames.length === 0 || !existingPm
+                  : teamRoles.length === 0))
             }
             className="gap-2"
           >
@@ -725,9 +900,13 @@ export default function NewCompanyPage() {
               ? progress || t("companyNew.config.launching")
               : mode === "empty"
                 ? t("companyNew.config.createProject")
-                : agentSource === "invite"
-                  ? t("companyNew.config.inviteButton", { count: teamRoles.length })
-                  : t("companyNew.config.startTeam", { count: teamRoles.length })}
+                : agentSource === "existing"
+                  ? t("companyNew.config.existingButton", {
+                      count: existingAgentNames.length,
+                    })
+                  : agentSource === "invite"
+                    ? t("companyNew.config.inviteButton", { count: teamRoles.length })
+                    : t("companyNew.config.startTeam", { count: teamRoles.length })}
           </Button>
           {launching ? (
             <span className="text-xs text-muted-foreground">
