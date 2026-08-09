@@ -27,6 +27,7 @@ import {
   FearKillersV2,
   HowItWorksV2,
   ExpertiseV2,
+  ComparisonV2,
   BeyondTeamsV2,
   PricingV2,
   BuildersStripV2,
@@ -61,6 +62,7 @@ export function LandingContentV2() {
           <TeamShowcase />
           <HowItWorksV2 />
           <ExpertiseV2 />
+          <ComparisonV2 />
           <BeyondTeamsV2 />
           <PricingV2 />
           <BuildersStripV2 />

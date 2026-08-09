@@ -181,6 +181,38 @@
         }
       }
     },
+    "comparison": {
+      "eyebrow": "Por qué PerkOS",
+      "heading": "No necesitas otra caja de chat. Necesitas un equipo que haga avanzar el negocio.",
+      "subheading": "PerkOS convierte un objetivo en trabajo coordinado, con roles especializados, seguimiento y tu aprobación integrada.",
+      "caption": "Comparación de capacidades entre PerkOS y otros productos de IA",
+      "feature": "Ventaja para tu negocio",
+      "recommended": "Creado para negocios",
+      "products": {
+        "perkos": { "name": "PerkOS", "tagline": "Equipo de IA listo para trabajar" },
+        "chatgpt": { "name": "ChatGPT Business", "tagline": "Espacio general de IA" },
+        "claudeCode": { "name": "Claude Code", "tagline": "Desarrollo de software" },
+        "openclaw": { "name": "OpenClaw", "tagline": "Asistente personal de IA" },
+        "hermes": { "name": "Hermes Agent", "tagline": "Agente que aprende" }
+      },
+      "features": {
+        "industryTemplates": "Plantillas para industrias y pequeños negocios",
+        "specialistTeam": "Equipo con roles especializados",
+        "teamLead": "Líder que asigna y revisa el trabajo",
+        "workspace": "Tablero, documentos, chat y seguimiento",
+        "humanApproval": "Aprobación humana integrada en el flujo",
+        "lowSetup": "Listo sin configuración técnica",
+        "businessWorkflows": "Flujos de marketing y operaciones",
+        "providerChoice": "Elección de proveedores de IA"
+      },
+      "legend": {
+        "ready": "Incluido y listo",
+        "config": "Disponible con configuración",
+        "notFocus": "No es su enfoque principal"
+      },
+      "note": "Cada producto es potente en una categoría diferente. Esta comparación se enfoca en lo que recibe el dueño de un pequeño negocio sin tener que construir primero el flujo de trabajo.",
+      "cta": "Conoce a tu equipo"
+    },
     "beyondTeams": {
       "heading": "La IA que tu negocio necesite, nosotros la configuramos.",
       "body1": "Los equipos listos para usar son solo el comienzo. También creamos IA a medida para negocios con necesidades más grandes o distintas: responder a tus clientes, conectar las herramientas que ya usas, automatizar el trabajo que te consume la semana. ¿Ya usas IA en otro lado? Tráela contigo, va a encajar perfecto.",

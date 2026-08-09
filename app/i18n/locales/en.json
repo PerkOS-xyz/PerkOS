@@ -181,6 +181,38 @@
         }
       }
     },
+    "comparison": {
+      "eyebrow": "Why PerkOS",
+      "heading": "You don't need another chat box. You need a team that moves the business forward.",
+      "subheading": "PerkOS turns one goal into coordinated work, with specialist roles, progress tracking and your approval built in.",
+      "caption": "Capability comparison between PerkOS and other AI products",
+      "feature": "Business advantage",
+      "recommended": "Built for business",
+      "products": {
+        "perkos": { "name": "PerkOS", "tagline": "Ready-to-work AI team" },
+        "chatgpt": { "name": "ChatGPT Business", "tagline": "General AI workspace" },
+        "claudeCode": { "name": "Claude Code", "tagline": "Software development" },
+        "openclaw": { "name": "OpenClaw", "tagline": "Personal AI assistant" },
+        "hermes": { "name": "Hermes Agent", "tagline": "Self-improving agent" }
+      },
+      "features": {
+        "industryTemplates": "Templates for small-business industries",
+        "specialistTeam": "Team with specialized roles",
+        "teamLead": "Team Lead that assigns and reviews work",
+        "workspace": "Board, documents, chat and progress tracking",
+        "humanApproval": "Human approval built into the workflow",
+        "lowSetup": "Ready without technical setup",
+        "businessWorkflows": "Marketing and operations workflows",
+        "providerChoice": "Choice of AI providers"
+      },
+      "legend": {
+        "ready": "Included and ready",
+        "config": "Available with configuration",
+        "notFocus": "Not the primary focus"
+      },
+      "note": "Each product is powerful in a different category. This comparison focuses on what a small-business owner receives without building the workflow first.",
+      "cta": "Meet your team"
+    },
     "beyondTeams": {
       "heading": "Whatever AI your business needs, we set it up.",
       "body1": "Ready-made teams are just the start. We also build custom AI for businesses with bigger or more unusual needs: answering your customers, connecting the tools you already use, automating the work that eats your week. Already using AI somewhere else? Bring it with you; it'll fit right in.",

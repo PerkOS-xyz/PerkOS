@@ -20,8 +20,10 @@ import { useTranslation } from "react-i18next";
 import {
   ArrowRight,
   BadgeCheck,
+  CircleDashed,
   Check,
   MessageSquare,
+  Minus,
   Moon,
   Route,
   type LucideIcon,
@@ -343,6 +345,205 @@ function ProofPoster({ proofKey, index }: { proofKey: string; index: number }) {
         </ParallaxLayer>
       </motion.div>
     </div>
+  );
+}
+
+// ============================================================================
+// Comparison — an at-a-glance, capability-based matrix. The symbols avoid
+// presenting different product categories as a simplistic winner/loser list:
+// PerkOS is ready for the business workflow, while a dashed circle means the
+// capability can be assembled and a dash means it is not the product's focus.
+// ============================================================================
+
+type ComparisonStatus = "ready" | "config" | "notFocus";
+type ComparisonProduct = "perkos" | "chatgpt" | "claudeCode" | "openclaw" | "hermes";
+
+const COMPARISON_PRODUCTS: ComparisonProduct[] = [
+  "perkos",
+  "chatgpt",
+  "claudeCode",
+  "openclaw",
+  "hermes",
+];
+
+const COMPARISON_ROWS: Array<{
+  key: string;
+  statuses: Record<ComparisonProduct, ComparisonStatus>;
+}> = [
+  {
+    key: "industryTemplates",
+    statuses: { perkos: "ready", chatgpt: "config", claudeCode: "notFocus", openclaw: "config", hermes: "config" },
+  },
+  {
+    key: "specialistTeam",
+    statuses: { perkos: "ready", chatgpt: "config", claudeCode: "config", openclaw: "config", hermes: "config" },
+  },
+  {
+    key: "teamLead",
+    statuses: { perkos: "ready", chatgpt: "config", claudeCode: "config", openclaw: "config", hermes: "config" },
+  },
+  {
+    key: "workspace",
+    statuses: { perkos: "ready", chatgpt: "config", claudeCode: "notFocus", openclaw: "notFocus", hermes: "notFocus" },
+  },
+  {
+    key: "humanApproval",
+    statuses: { perkos: "ready", chatgpt: "config", claudeCode: "config", openclaw: "config", hermes: "config" },
+  },
+  {
+    key: "lowSetup",
+    statuses: { perkos: "ready", chatgpt: "ready", claudeCode: "config", openclaw: "notFocus", hermes: "notFocus" },
+  },
+  {
+    key: "businessWorkflows",
+    statuses: { perkos: "ready", chatgpt: "config", claudeCode: "notFocus", openclaw: "config", hermes: "config" },
+  },
+  {
+    key: "providerChoice",
+    statuses: { perkos: "ready", chatgpt: "notFocus", claudeCode: "config", openclaw: "ready", hermes: "ready" },
+  },
+];
+
+function ComparisonMark({ status }: { status: ComparisonStatus }) {
+  const { t } = useTranslation();
+  const label = t(`landing.comparison.legend.${status}`);
+
+  if (status === "ready") {
+    return (
+      <span className="inline-flex items-center justify-center" title={label} aria-label={label}>
+        <Check className="h-5 w-5 stroke-[3] text-emerald-400" aria-hidden />
+      </span>
+    );
+  }
+  if (status === "config") {
+    return (
+      <span className="inline-flex items-center justify-center" title={label} aria-label={label}>
+        <CircleDashed className="h-5 w-5 text-amber-300/80" aria-hidden />
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center justify-center" title={label} aria-label={label}>
+      <Minus className="h-5 w-5 text-muted-foreground/55" aria-hidden />
+    </span>
+  );
+}
+
+export function ComparisonV2() {
+  const { t } = useTranslation();
+
+  return (
+    <section id="comparison" className="relative overflow-hidden border-y border-border/60 bg-card/25 py-24 md:py-32">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage:
+            "radial-gradient(ellipse 45% 55% at 50% 40%, rgba(236,27,105,0.12) 0%, transparent 72%)",
+        }}
+      />
+      <div className="relative mx-auto max-w-7xl px-4 md:px-8">
+        <div className="mx-auto mb-12 max-w-3xl text-center">
+          <span className="mb-4 inline-flex rounded-full border border-primary/30 bg-primary/10 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.18em] text-primary">
+            {t("landing.comparison.eyebrow")}
+          </span>
+          <h2 className="text-3xl font-semibold leading-tight tracking-tight md:text-5xl">
+            {t("landing.comparison.heading")}
+          </h2>
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
+            {t("landing.comparison.subheading")}
+          </p>
+        </div>
+
+        <div className="overflow-x-auto rounded-3xl border border-border bg-background/75 shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
+          <table className="w-full min-w-[1010px] border-separate border-spacing-0 text-sm">
+            <caption className="sr-only">{t("landing.comparison.caption")}</caption>
+            <thead>
+              <tr>
+                <th className="sticky left-0 z-20 w-[190px] min-w-[190px] border-b border-border bg-background px-5 py-5 text-left font-medium text-muted-foreground md:w-[250px] md:min-w-[250px]">
+                  {t("landing.comparison.feature")}
+                </th>
+                {COMPARISON_PRODUCTS.map((product) => {
+                  const isPerkos = product === "perkos";
+                  return (
+                    <th
+                      key={product}
+                      scope="col"
+                      className={cn(
+                        "w-[164px] min-w-[164px] border-b border-border px-4 py-5 text-center align-top",
+                        isPerkos && "border-x border-x-primary/35 bg-primary/10",
+                      )}
+                    >
+                      {isPerkos ? (
+                        <span className="mb-2 inline-flex rounded-full bg-primary px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">
+                          {t("landing.comparison.recommended")}
+                        </span>
+                      ) : null}
+                      <span className={cn("block text-base font-semibold", isPerkos ? "text-primary" : "text-foreground")}>
+                        {t(`landing.comparison.products.${product}.name`)}
+                      </span>
+                      <span className="mt-1 block text-xs font-normal leading-snug text-muted-foreground">
+                        {t(`landing.comparison.products.${product}.tagline`)}
+                      </span>
+                    </th>
+                  );
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              {COMPARISON_ROWS.map((row, index) => (
+                <tr key={row.key}>
+                  <th
+                    scope="row"
+                    className={cn(
+                      "sticky left-0 z-10 border-b border-border bg-background px-5 py-4 text-left font-medium text-foreground",
+                      index === COMPARISON_ROWS.length - 1 && "border-b-0",
+                    )}
+                  >
+                    {t(`landing.comparison.features.${row.key}`)}
+                  </th>
+                  {COMPARISON_PRODUCTS.map((product) => (
+                    <td
+                      key={product}
+                      className={cn(
+                        "border-b border-border px-4 py-4 text-center",
+                        product === "perkos" && "border-x border-x-primary/35 bg-primary/[0.07]",
+                        index === COMPARISON_ROWS.length - 1 && "border-b-0",
+                      )}
+                    >
+                      <ComparisonMark status={row.statuses[product]} />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-xs text-muted-foreground">
+          {(["ready", "config", "notFocus"] as ComparisonStatus[]).map((status) => (
+            <span key={status} className="inline-flex items-center gap-2">
+              <ComparisonMark status={status} />
+              {t(`landing.comparison.legend.${status}`)}
+            </span>
+          ))}
+        </div>
+
+        <p className="mx-auto mt-7 max-w-3xl text-center text-xs leading-relaxed text-muted-foreground">
+          {t("landing.comparison.note")}
+        </p>
+        <div className="mt-8 flex justify-center">
+          <SmartCTA
+            href="/sign-in"
+            analyticsId="comparison_primary"
+            className="brand-gradient inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-[15px] font-semibold text-primary-foreground shadow-[0_0_36px_rgba(236,27,105,0.35)] transition-transform hover:scale-[1.03]"
+          >
+            {t("landing.comparison.cta")}
+            <ArrowRight className="h-4 w-4" />
+          </SmartCTA>
+        </div>
+      </div>
+    </section>
   );
 }
 
