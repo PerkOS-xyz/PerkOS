@@ -181,6 +181,38 @@
         }
       }
     },
+    "comparison": {
+      "eyebrow": "PerkOSが選ばれる理由",
+      "heading": "必要なのは新しいチャットではなく、ビジネスを前進させるチームです。",
+      "subheading": "PerkOSは、1つの目標を専門的な役割、進捗管理、あなたの承認を備えた連携作業へ変えます。",
+      "caption": "PerkOSと他のAI製品の機能比較",
+      "feature": "ビジネス上の利点",
+      "recommended": "ビジネス向け",
+      "products": {
+        "perkos": { "name": "PerkOS", "tagline": "すぐに働けるAIチーム" },
+        "chatgpt": { "name": "ChatGPT Business", "tagline": "汎用AIワークスペース" },
+        "claudeCode": { "name": "Claude Code", "tagline": "ソフトウェア開発" },
+        "openclaw": { "name": "OpenClaw", "tagline": "個人向けAIアシスタント" },
+        "hermes": { "name": "Hermes Agent", "tagline": "学習するエージェント" }
+      },
+      "features": {
+        "industryTemplates": "中小企業の業種別テンプレート",
+        "specialistTeam": "専門的な役割を持つチーム",
+        "teamLead": "仕事を割り当てて確認するチームリーダー",
+        "workspace": "ボード、文書、チャット、進捗管理",
+        "humanApproval": "ワークフローに組み込まれた人の承認",
+        "lowSetup": "技術的な設定なしですぐに利用可能",
+        "businessWorkflows": "マーケティングと業務のワークフロー",
+        "providerChoice": "AIプロバイダーを選択可能"
+      },
+      "legend": {
+        "ready": "標準搭載ですぐ使える",
+        "config": "設定すれば利用可能",
+        "notFocus": "主な用途ではない"
+      },
+      "note": "各製品は異なる分野で優れています。この比較は、中小企業の経営者がワークフローを一から構築せずに得られるものに焦点を当てています。",
+      "cta": "チームを見る"
+    },
     "beyondTeams": {
       "heading": "どんなAIが必要でも、私たちが用意します。",
       "body1": "既製のチームは、あくまで出発点です。より大きな、あるいは独自のニーズを持つビジネスのために、カスタムAIも構築します。お客様への対応、すでにお使いのツールとの連携、週の大半を占める作業の自動化まで。すでに他の場所でAIを使っていますか？そのまま持ち込んでいただいても、問題なく組み込めます。",

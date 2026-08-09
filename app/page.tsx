@@ -24,8 +24,8 @@ export const metadata: Metadata = {
 //
 // Structure (strategy blueprint): hero → fear-killer → templates (the
 // conversion centerpiece) → meet your team → how it works → expertise
-// (authority without jargon) → beyond teams (AI services in general) →
-// pricing teaser → builders strip → talk to us → final CTA.
+// (authority without jargon) → product comparison → beyond teams (AI services
+// in general) → pricing teaser → builders strip → talk to us → final CTA.
 //
 // Vocabulary contract: teammates/team, drafts, you approve, set up, ready in
 // minutes. Banned on this page: agent (as a buyer-facing noun), bot, robot,

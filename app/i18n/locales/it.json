@@ -181,6 +181,38 @@
         }
       }
     },
+    "comparison": {
+      "eyebrow": "Perché PerkOS",
+      "heading": "Non ti serve un'altra chat. Ti serve un team che faccia avanzare l'azienda.",
+      "subheading": "PerkOS trasforma un obiettivo in lavoro coordinato, con ruoli specializzati, monitoraggio e la tua approvazione integrata.",
+      "caption": "Confronto delle funzionalità tra PerkOS e altri prodotti di IA",
+      "feature": "Vantaggio per l'azienda",
+      "recommended": "Creato per le aziende",
+      "products": {
+        "perkos": { "name": "PerkOS", "tagline": "Team IA pronto a lavorare" },
+        "chatgpt": { "name": "ChatGPT Business", "tagline": "Workspace IA generalista" },
+        "claudeCode": { "name": "Claude Code", "tagline": "Sviluppo software" },
+        "openclaw": { "name": "OpenClaw", "tagline": "Assistente IA personale" },
+        "hermes": { "name": "Hermes Agent", "tagline": "Agente che impara" }
+      },
+      "features": {
+        "industryTemplates": "Modelli per settori e piccole imprese",
+        "specialistTeam": "Team con ruoli specializzati",
+        "teamLead": "Team Lead che assegna e verifica il lavoro",
+        "workspace": "Bacheca, documenti, chat e monitoraggio",
+        "humanApproval": "Approvazione umana integrata nel flusso",
+        "lowSetup": "Pronto senza configurazione tecnica",
+        "businessWorkflows": "Flussi di marketing e operazioni",
+        "providerChoice": "Scelta dei provider di IA"
+      },
+      "legend": {
+        "ready": "Incluso e pronto",
+        "config": "Disponibile con configurazione",
+        "notFocus": "Non è l'obiettivo principale"
+      },
+      "note": "Ogni prodotto è potente in una categoria diversa. Questo confronto considera ciò che riceve una piccola impresa senza dover prima costruire il flusso di lavoro.",
+      "cta": "Conosci il tuo team"
+    },
     "beyondTeams": {
       "heading": "Qualunque AI serva alla tua attività, la mettiamo a punto noi.",
       "body1": "I team già pronti sono solo l'inizio. Costruiamo anche soluzioni di AI su misura per attività con esigenze più grandi o particolari: rispondere ai tuoi clienti, collegare gli strumenti che usi già, automatizzare il lavoro che ti consuma la settimana. Usi già un'AI altrove? Portala con te, si integrerà perfettamente.",

@@ -181,6 +181,38 @@
         }
       }
     },
+    "comparison": {
+      "eyebrow": "PerkOS를 선택하는 이유",
+      "heading": "또 하나의 채팅창이 아니라 비즈니스를 앞으로 이끌 팀이 필요합니다.",
+      "subheading": "PerkOS는 하나의 목표를 전문 역할, 진행 상황 추적, 사용자의 승인이 포함된 협업으로 전환합니다.",
+      "caption": "PerkOS와 다른 AI 제품의 기능 비교",
+      "feature": "비즈니스 이점",
+      "recommended": "비즈니스용으로 설계",
+      "products": {
+        "perkos": { "name": "PerkOS", "tagline": "바로 일하는 AI 팀" },
+        "chatgpt": { "name": "ChatGPT Business", "tagline": "범용 AI 워크스페이스" },
+        "claudeCode": { "name": "Claude Code", "tagline": "소프트웨어 개발" },
+        "openclaw": { "name": "OpenClaw", "tagline": "개인 AI 어시스턴트" },
+        "hermes": { "name": "Hermes Agent", "tagline": "학습하는 에이전트" }
+      },
+      "features": {
+        "industryTemplates": "소규모 비즈니스 업종별 템플릿",
+        "specialistTeam": "전문 역할로 구성된 팀",
+        "teamLead": "업무를 배정하고 검토하는 팀 리드",
+        "workspace": "보드, 문서, 채팅 및 진행 상황 추적",
+        "humanApproval": "워크플로에 내장된 사용자 승인",
+        "lowSetup": "기술 설정 없이 바로 사용",
+        "businessWorkflows": "마케팅 및 운영 워크플로",
+        "providerChoice": "AI 제공업체 선택"
+      },
+      "legend": {
+        "ready": "포함되어 바로 사용 가능",
+        "config": "설정 후 사용 가능",
+        "notFocus": "주요 목적이 아님"
+      },
+      "note": "각 제품은 서로 다른 분야에서 강점을 가집니다. 이 비교는 소규모 비즈니스 운영자가 워크플로를 직접 구축하지 않고 얻는 기능에 초점을 둡니다.",
+      "cta": "팀 만나보기"
+    },
     "beyondTeams": {
       "heading": "사업에 필요한 AI라면 무엇이든 저희가 준비해 드립니다.",
       "body1": "미리 만들어진 팀은 시작일 뿐이에요. 더 크거나 특별한 요구가 있는 사업을 위해 맞춤 AI도 만들어 드립니다. 고객 응대, 이미 쓰고 계신 도구와의 연결, 한 주를 다 잡아먹는 업무의 자동화까지요. 이미 다른 곳에서 AI를 쓰고 계신가요? 그대로 가져오세요. 잘 어울릴 거예요.",

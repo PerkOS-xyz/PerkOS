@@ -181,6 +181,38 @@
         }
       }
     },
+    "comparison": {
+      "eyebrow": "为什么选择 PerkOS",
+      "heading": "你需要的不是另一个聊天框，而是一支推动业务前进的团队。",
+      "subheading": "PerkOS 将一个目标转化为协同工作，并内置专业角色、进度跟踪和你的审批。",
+      "caption": "PerkOS 与其他 AI 产品的功能比较",
+      "feature": "业务优势",
+      "recommended": "专为企业打造",
+      "products": {
+        "perkos": { "name": "PerkOS", "tagline": "开箱即用的 AI 团队" },
+        "chatgpt": { "name": "ChatGPT Business", "tagline": "通用 AI 工作空间" },
+        "claudeCode": { "name": "Claude Code", "tagline": "软件开发" },
+        "openclaw": { "name": "OpenClaw", "tagline": "个人 AI 助手" },
+        "hermes": { "name": "Hermes Agent", "tagline": "持续学习的智能体" }
+      },
+      "features": {
+        "industryTemplates": "面向小企业行业的模板",
+        "specialistTeam": "具有专业角色的团队",
+        "teamLead": "分配并审核工作的团队负责人",
+        "workspace": "看板、文档、聊天和进度跟踪",
+        "humanApproval": "工作流程内置人工审批",
+        "lowSetup": "无需技术配置即可使用",
+        "businessWorkflows": "营销和运营工作流程",
+        "providerChoice": "可选择 AI 提供商"
+      },
+      "legend": {
+        "ready": "已包含并可直接使用",
+        "config": "配置后可用",
+        "notFocus": "并非主要用途"
+      },
+      "note": "每款产品都在不同领域具有优势。本比较关注小企业经营者无需先自行搭建工作流程即可获得的能力。",
+      "cta": "认识你的团队"
+    },
     "beyondTeams": {
       "heading": "无论你的企业需要什么样的 AI,我们都能帮你搭建。",
       "body1": "现成的团队只是个开始。对于需求更大或更特殊的企业,我们还能为你打造定制化的 AI:回复客户咨询、连接你已经在用的工具、把占用你一整周时间的工作自动化。已经在别处用上 AI 了?带过来就行,它能无缝融入。",
