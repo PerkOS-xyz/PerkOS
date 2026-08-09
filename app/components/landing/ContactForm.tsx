@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { trackEvent } from "../../lib/analytics";
 
 type Status = "idle" | "loading" | "success" | "error";
 
@@ -50,6 +51,9 @@ export function ContactForm() {
       if (!res.ok) {
         throw new Error(data.error || `Request failed (${res.status})`);
       }
+      trackEvent("generate_lead", {
+        lead_source: "landing_contact_form",
+      });
       setStatus("success");
       setForm({ name: "", email: "", subject: "", message: "" });
     } catch (err) {

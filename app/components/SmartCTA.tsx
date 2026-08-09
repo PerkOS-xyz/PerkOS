@@ -39,6 +39,7 @@ import {
 import { toast } from "sonner";
 
 import { useIsInMiniApp } from "../lib/useIsInMiniApp";
+import { trackEvent } from "../lib/analytics";
 
 const COINBASE_WALLET_RDNS = "com.coinbase.wallet";
 
@@ -55,9 +56,11 @@ type Props = {
   href: string;
   className?: string;
   children: ReactNode;
+  /** Stable funnel label shown in GA4 reports. */
+  analyticsId?: string;
 };
 
-export function SmartCTA({ href, className, children }: Props) {
+export function SmartCTA({ href, className, children, analyticsId = "generic" }: Props) {
   const router = useRouter();
   const isInMiniApp = useIsInMiniApp();
   const { isConnected } = useAccount();
@@ -79,6 +82,12 @@ export function SmartCTA({ href, className, children }: Props) {
   const fallbackHref = href;
 
   async function onClick(e: MouseEvent<HTMLAnchorElement>) {
+    trackEvent("begin_signup", {
+      cta_id: analyticsId,
+      destination: href,
+      host_context: isInMiniApp ? "mini_app" : "web",
+    });
+
     if (skipConnectForm) {
       e.preventDefault();
       router.push("/continue");

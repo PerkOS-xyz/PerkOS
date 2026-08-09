@@ -6,11 +6,20 @@ import { Bot, Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { OnboardingShell } from "../../components/OnboardingShell";
 import { useOnboarding } from "../../lib/onboardingState";
+import { trackEvent } from "../../lib/analytics";
 
 export default function AgentPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { hasAgent } = useOnboarding();
+
+  function finishOnboarding(skipped: boolean) {
+    trackEvent("onboarding_complete", {
+      agent_created: hasAgent,
+      skipped_agent_step: skipped,
+    });
+    router.push("/dashboard");
+  }
 
   return (
     <OnboardingShell
@@ -19,7 +28,7 @@ export default function AgentPage() {
       description={t("onboarding.agent.description")}
       nextHref="/dashboard"
       nextLabel={t("onboarding.agent.finish")}
-      onNext={() => router.push("/dashboard")}
+      onNext={() => finishOnboarding(false)}
     >
       {hasAgent ? (
         <div className="flex items-center justify-center gap-2 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-6 py-4 font-medium text-emerald-300">
@@ -55,7 +64,7 @@ export default function AgentPage() {
         <div className="flex justify-center">
           <button
             type="button"
-            onClick={() => router.push("/dashboard")}
+            onClick={() => finishOnboarding(true)}
             className="text-sm text-[#ec1b69] hover:underline"
           >
             {t("onboarding.agent.skip")}

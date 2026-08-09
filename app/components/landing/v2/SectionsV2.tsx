@@ -34,6 +34,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { SmartCTA } from "../../SmartCTA";
 import { ContactForm } from "../ContactForm";
+import { trackEvent } from "../../../lib/analytics";
 import { KineticHeading } from "./KineticHeading";
 import { Marquee } from "./Marquee";
 import { WordReveal } from "./WordReveal";
@@ -110,8 +111,6 @@ export function HowItWorksV2() {
   // State-driven active step: exactly one visible at a time — no overlap and
   // no stale "step 3 showing at the start" from unmeasured progress values.
   const active = useActiveSlot(scrollYProgress, HOW_IT_WORKS_STEPS.length);
-  const mounted = useMounted();
-
   return (
     <section
       id="how-it-works"
@@ -127,52 +126,49 @@ export function HowItWorksV2() {
 
         {/* Stage: only the active step is visible; swaps as you scroll */}
         <div className="relative mx-auto w-full max-w-4xl flex-1 px-4 md:px-8">
-          {mounted
-            ? HOW_IT_WORKS_STEPS.map((s, i) => (
-                <motion.div
-                  key={s.key}
-                  className="absolute inset-x-4 top-1/2 md:inset-x-8"
-                  initial={false}
-                  animate={{
-                    opacity: active === i ? 1 : 0,
-                    y: active === i ? "-50%" : active > i ? "-62%" : "-34%",
-                  }}
-                  transition={{ duration: 0.45, ease: EASE }}
+          {HOW_IT_WORKS_STEPS.map((s, i) => (
+            <motion.div
+              key={s.key}
+              className="absolute inset-x-4 top-1/2 md:inset-x-8"
+              initial={false}
+              animate={{
+                opacity: active === i ? 1 : 0,
+                y: active === i ? "-50%" : active > i ? "-62%" : "-34%",
+              }}
+              transition={{ duration: 0.45, ease: EASE }}
+            >
+              <div className="flex flex-col items-start gap-6 md:flex-row md:items-center md:gap-12">
+                <span
+                  className="brand-gradient-text font-semibold"
+                  style={{ fontSize: "clamp(6rem, 18vw, 13rem)", lineHeight: 0.9 }}
                 >
-                  <div className="flex flex-col items-start gap-6 md:flex-row md:items-center md:gap-12">
-                    <span
-                      className="brand-gradient-text font-semibold"
-                      style={{ fontSize: "clamp(6rem, 18vw, 13rem)", lineHeight: 0.9 }}
-                    >
-                      {s.n}
-                    </span>
-                    <div className="flex max-w-md flex-col gap-3">
-                      <h3 className="text-2xl font-semibold text-foreground md:text-3xl">
-                        {t(`landing.howItWorks.steps.${s.key}.title`)}
-                      </h3>
-                      <p className="text-base leading-relaxed text-muted-foreground">
-                        {t(`landing.howItWorks.steps.${s.key}.body`)}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))
-            : null}
+                  {s.n}
+                </span>
+                <div className="flex max-w-md flex-col gap-3">
+                  <h3 className="text-2xl font-semibold text-foreground md:text-3xl">
+                    {t(`landing.howItWorks.steps.${s.key}.title`)}
+                  </h3>
+                  <p className="text-base leading-relaxed text-muted-foreground">
+                    {t(`landing.howItWorks.steps.${s.key}.body`)}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
 
           {/* Progress rail */}
           <div className="absolute right-4 top-1/2 hidden h-40 w-px -translate-y-1/2 bg-border md:block">
-            {mounted ? (
-              <motion.div
-                className="brand-gradient w-px origin-top"
-                style={{ height: "100%", scaleY: scrollYProgress }}
-              />
-            ) : null}
+            <motion.div
+              className="brand-gradient w-px origin-top"
+              style={{ height: "100%", scaleY: scrollYProgress }}
+            />
           </div>
         </div>
 
         <div className="flex justify-center pb-16">
           <SmartCTA
             href="/sign-in"
+            analyticsId="how_it_works_primary"
             className="brand-gradient inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-[15px] font-semibold text-primary-foreground shadow-[0_0_36px_rgba(236,27,105,0.4)] transition-transform hover:scale-[1.03]"
           >
             {t("landing.howItWorks.cta")}
@@ -470,6 +466,7 @@ export function PricingV2() {
                   </ul>
                   <SmartCTA
                     href={tier.ctaHref}
+                    analyticsId={`pricing_${tier.key}`}
                     className={cn(
                       "mt-auto inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-medium transition-transform hover:scale-[1.02]",
                       tier.featured
@@ -626,14 +623,25 @@ export function TalkToUsV2() {
                     href="https://x.com/perk_os"
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => trackEvent("social_click", { platform: "x", location: "landing_contact" })}
                     className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-foreground transition-colors hover:border-primary/40"
                   >
                     X / Twitter ↗
                   </Link>
                   <Link
+                    href="https://www.instagram.com/perkos.xyz/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => trackEvent("social_click", { platform: "instagram", location: "landing_contact" })}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-foreground transition-colors hover:border-primary/40"
+                  >
+                    Instagram ↗
+                  </Link>
+                  <Link
                     href="https://farcaster.xyz/perkos"
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => trackEvent("social_click", { platform: "farcaster", location: "landing_contact" })}
                     className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-foreground transition-colors hover:border-primary/40"
                   >
                     Farcaster ↗
@@ -642,6 +650,7 @@ export function TalkToUsV2() {
                     href="https://www.linkedin.com/company/perkos/"
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => trackEvent("social_click", { platform: "linkedin", location: "landing_contact" })}
                     className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-foreground transition-colors hover:border-primary/40"
                   >
                     LinkedIn ↗

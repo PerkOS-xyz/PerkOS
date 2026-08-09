@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useConnect, useConnection, useDisconnect } from "wagmi";
 import { formatAddress } from "../../lib/format";
@@ -12,6 +12,7 @@ import { useWalletSession } from "../../lib/useWalletSession";
 import { useIsInMiniApp } from "../../lib/useIsInMiniApp";
 import { dynamicBrowserEnabled } from "../../lib/dynamicBrowser";
 import { AccessGate } from "../../components/AccessGate";
+import { trackEvent } from "../../lib/analytics";
 
 // Code-split: @dynamic-labs loads only when the Dynamic browser button is
 // actually rendered (browser + env id set).
@@ -39,6 +40,7 @@ export default function SignInPage() {
   // In a browser (with Dynamic configured) offer Dynamic's connect modal
   // instead of the baseAccount / injected buttons. Off everywhere else.
   const dynamicEnabled = dynamicBrowserEnabled(isInMiniApp);
+  const loginTracked = useRef(false);
 
   const baseAccountConnector = connectors.find((c) => c.id === "baseAccount");
   const injectedConnector = connectors.find((c) => c.id === "injected");
@@ -89,9 +91,15 @@ export default function SignInPage() {
   // CTA; the guided wizard stays available but isn't forced.
   useEffect(() => {
     if (session.status === "signed-in") {
+      if (!loginTracked.current) {
+        loginTracked.current = true;
+        trackEvent("login", {
+          method: dynamicEnabled ? "dynamic" : "wallet",
+        });
+      }
       router.replace("/continue");
     }
-  }, [session.status, router]);
+  }, [session.status, dynamicEnabled, router]);
 
   // Auto-recover from the half-hydrated wagmi state. Disconnect clears
   // the stale `current` connector UID in the store and reset() clears

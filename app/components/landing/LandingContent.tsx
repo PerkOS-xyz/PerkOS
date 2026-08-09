@@ -686,6 +686,9 @@ function TalkToUs() {
                 <Link href="https://x.com/perk_os" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-foreground transition-colors hover:border-primary/40">
                   X / Twitter ↗
                 </Link>
+                <Link href="https://www.instagram.com/perkos.xyz/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-foreground transition-colors hover:border-primary/40">
+                  Instagram ↗
+                </Link>
                 <Link href="https://farcaster.xyz/perkos" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-foreground transition-colors hover:border-primary/40">
                   Farcaster ↗
                 </Link>
