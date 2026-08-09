@@ -4,9 +4,9 @@ import { LandingAutoRoute } from "./components/LandingAutoRoute";
 import { LandingContentV2 } from "./components/landing/v2/LandingContentV2";
 
 export const metadata: Metadata = {
-  title: "PerkOS — Your business just hired its first team",
+  title: "PerkOS AI — AI Teams for Small Businesses",
   description:
-    "Pick your type of business and in two minutes you have a small AI team that handles the busywork — content, customer replies, research, the books — and checks with you first. They draft, you approve. No tech skills needed.",
+    "PerkOS AI gives small businesses a ready-to-work AI team for marketing, research, customer support and operations. Start free—no technical skills required.",
 };
 
 // ============================================================================
@@ -44,12 +44,15 @@ const JSON_LD = {
       "@type": "Organization",
       "@id": `${SITE}/#org`,
       name: "PerkOS",
+      alternateName: ["PerkOS AI", "Perk OS"],
       url: SITE,
       logo: `${SITE}/logo.png`,
+      slogan: "AI teams for small businesses. They draft, you approve.",
       description:
         "PerkOS gives small businesses a team of AI teammates that handle the busywork — content, customer replies, research, the books. They draft, you approve.",
       sameAs: [
         "https://x.com/perk_os",
+        "https://www.instagram.com/perkos.xyz/",
         "https://farcaster.xyz/perkos",
         "https://www.linkedin.com/company/perkos/",
       ],
@@ -58,6 +61,7 @@ const JSON_LD = {
       "@type": "WebSite",
       "@id": `${SITE}/#website`,
       name: "PerkOS",
+      alternateName: "PerkOS AI",
       url: SITE,
       publisher: { "@id": `${SITE}/#org` },
     },
@@ -67,7 +71,13 @@ const JSON_LD = {
       applicationCategory: "BusinessApplication",
       operatingSystem: "Web",
       url: SITE,
-      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+      offers: {
+        "@type": "AggregateOffer",
+        lowPrice: "0",
+        highPrice: "79.99",
+        priceCurrency: "USD",
+        offerCount: "4",
+      },
       description:
         "Launch a team of AI teammates for your small business in one click — they draft, you approve.",
     },
@@ -79,7 +89,9 @@ export default function LandingPage() {
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(JSON_LD).replace(/</g, "\\u003c"),
+        }}
       />
       <LandingAutoRoute />
       <LandingContentV2 />

@@ -11,6 +11,7 @@ import { useActiveOrg } from "../../../lib/useActiveOrg";
 import { useOnboarding } from "../../../lib/onboardingState";
 import { useFormDraft } from "../../../lib/useFormDraft";
 import { fieldErrors, projectSchema } from "../../../lib/validators";
+import { trackEvent } from "../../../lib/analytics";
 
 export default function CreateProjectPage() {
   const router = useRouter();
@@ -59,6 +60,9 @@ export default function CreateProjectPage() {
       });
     },
     onSuccess: () => {
+      trackEvent("project_created", {
+        creation_flow: fromOnboarding ? "onboarding" : "direct",
+      });
       queryClient.invalidateQueries({ queryKey: ["wallet-projects"] });
       if (fromOnboarding) markProjectCreated();
       toast.success("Project created", {
@@ -226,4 +230,3 @@ function PlusIcon() {
     </svg>
   );
 }
-

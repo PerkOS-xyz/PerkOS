@@ -62,6 +62,7 @@ import {
   TEMPLATE_ACCENTS,
   TeamTemplateCard,
 } from "../../../components/TeamTemplateCard";
+import { trackEvent } from "../../../lib/analytics";
 
 const ICONS: Record<string, LucideIcon> = {
   Briefcase,
@@ -414,6 +415,18 @@ export default function NewCompanyPage() {
                   : t("companyNew.launch.descPerkos"),
         },
       );
+      trackEvent("project_created", {
+        creation_flow: "company_wizard",
+        template_id: tmpl?.id ?? (myTmpl ? "saved_template" : mode),
+      });
+      if (launched.length > 0) {
+        trackEvent("team_created", {
+          creation_flow: "company_wizard",
+          agent_source: agentSource,
+          team_size: launched.length,
+          template_id: tmpl?.id ?? (myTmpl ? "saved_template" : mode),
+        });
+      }
       router.push(`/projects/${projectId}`);
     } catch (e) {
       toast.error(t("companyNew.launch.createError"), {

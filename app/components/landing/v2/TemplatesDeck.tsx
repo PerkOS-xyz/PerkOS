@@ -23,7 +23,6 @@ import {
 
 import { SmartCTA } from "../../SmartCTA";
 import { KineticHeading } from "./KineticHeading";
-import { useMounted } from "./useMounted";
 import { TEMPLATE_PITCHES, type TemplatePitch } from "./landingData";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -57,8 +56,6 @@ export function TemplatesDeck() {
     const idx = v < BOUNDS[1] ? 0 : v < BOUNDS[2] ? 1 : 2;
     setActive((prev) => (prev === idx ? prev : idx));
   });
-  const mounted = useMounted();
-
   return (
     <section
       id="templates"
@@ -76,17 +73,15 @@ export function TemplatesDeck() {
         </p>
 
         <div className="relative flex-1">
-          {mounted
-            ? TRIOS.map((trio, i) => (
-                <DeckTrio
-                  key={trio[0].key}
-                  trio={trio}
-                  index={i}
-                  progress={scrollYProgress}
-                  activeNow={active === i}
-                />
-              ))
-            : null}
+          {TRIOS.map((trio, i) => (
+            <DeckTrio
+              key={trio[0].key}
+              trio={trio}
+              index={i}
+              progress={scrollYProgress}
+              activeNow={active === i}
+            />
+          ))}
         </div>
 
         <p className="pb-6 text-center text-xs text-muted-foreground">
@@ -163,6 +158,7 @@ function DeckCard({ tp, number }: { tp: TemplatePitch; number: number }) {
   return (
     <SmartCTA
       href="/sign-in"
+      analyticsId={`industry_${key}`}
       className="group relative block overflow-hidden rounded-3xl border border-white/10 shadow-[0_40px_120px_rgba(0,0,0,0.6)]"
     >
       {/* Poster background: shared texture + industry accent veil */}

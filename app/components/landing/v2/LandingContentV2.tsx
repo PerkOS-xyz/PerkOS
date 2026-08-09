@@ -98,7 +98,7 @@ function TopNavV2() {
         <Link href="/" className="flex items-center gap-2">
           <Image
             src="/perkos-header.png"
-            alt="PerkOS"
+            alt="PerkOS AI"
             width={150}
             height={52}
             priority
@@ -128,6 +128,7 @@ function TopNavV2() {
           <LanguageSelector />
           <SmartCTA
             href="/sign-in"
+            analyticsId="nav_primary"
             className="brand-gradient inline-flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.03] sm:px-4"
           >
             <span className="hidden sm:inline">{t("landing.nav.meetYourTeam")}</span>
@@ -190,6 +191,7 @@ function FinalCTAV2() {
         <div className="flex flex-col gap-3 sm:flex-row">
           <SmartCTA
             href="/sign-in"
+            analyticsId="final_primary"
             className="brand-gradient inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-[15px] font-semibold text-primary-foreground shadow-[0_0_44px_rgba(236,27,105,0.5)] transition-transform hover:scale-[1.03]"
           >
             {t("landing.finalCTA.ctaPrimary")}
@@ -215,13 +217,34 @@ function FooterV2() {
         <div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
           <div className="flex flex-col gap-3">
             <Link href="/" className="inline-flex items-center gap-2">
-              <Image src="/perkos-header.png" alt="PerkOS" width={130} height={28} />
+              <Image src="/perkos-header.png" alt="PerkOS AI" width={130} height={28} />
             </Link>
             <p className="max-w-xs text-sm text-muted-foreground">
               {t("landing.footer.tagline")}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+            <Link href="/about" className="transition-colors hover:text-foreground">
+              About
+            </Link>
+            <Link href="/ai-teams-for-small-business" className="transition-colors hover:text-foreground">
+              AI teams
+            </Link>
+            <Link href="/privacy" className="transition-colors hover:text-foreground">
+              Privacy
+            </Link>
+            <Link href="/solutions/restaurants" className="transition-colors hover:text-foreground">
+              Restaurants
+            </Link>
+            <Link href="/solutions/real-estate" className="transition-colors hover:text-foreground">
+              Real estate
+            </Link>
+            <Link href="/solutions/ecommerce" className="transition-colors hover:text-foreground">
+              Ecommerce
+            </Link>
+            <Link href="/solutions/agencies" className="transition-colors hover:text-foreground">
+              Agencies
+            </Link>
             <a href="#templates" className="transition-colors hover:text-foreground">
               {t("landing.footer.links.forYourBusiness")}
             </a>

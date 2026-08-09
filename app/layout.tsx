@@ -6,6 +6,7 @@ import { MiniAppReady } from "./components/MiniAppReady";
 import { DevAuthIndicator } from "./components/DevAuthIndicator";
 import { LocaleProvider } from "./components/LocaleProvider";
 import { cn } from "@/lib/utils";
+import { GoogleAnalytics } from "./components/GoogleAnalytics";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -26,14 +27,14 @@ const SITE_URL =
 const CANONICAL_URL =
   process.env.NEXT_PUBLIC_CANONICAL_URL ?? "https://perkos.xyz";
 
-const OG_TITLE = "PerkOS — Your business just hired its first team";
+const OG_TITLE = "PerkOS AI — AI Teams for Small Businesses";
 const OG_DESC =
-  "Pick your type of business and in two minutes you have a small AI team that handles the busywork — content, customer replies, research, the books. They draft, you approve. No tech skills needed.";
+  "PerkOS AI gives small businesses a ready-to-work AI team for marketing, research, customer support and operations. Start free—no technical skills required.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(CANONICAL_URL),
   title: {
-    default: "PerkOS — AI teams that run your small business",
+    default: "PerkOS AI — AI Teams for Small Businesses",
     template: "%s · PerkOS",
   },
   description: OG_DESC,
@@ -123,6 +124,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        <GoogleAnalytics />
         <MiniAppReady />
         <Providers>
           <DevAuthIndicator />

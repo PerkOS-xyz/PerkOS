@@ -132,6 +132,7 @@ export function HeroV2() {
               <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
                 <SmartCTA
                   href="/sign-in"
+                  analyticsId="hero_primary"
                   className="brand-gradient group inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-[15px] font-semibold text-primary-foreground shadow-[0_0_44px_rgba(236,27,105,0.5)] transition-transform hover:scale-[1.03]"
                 >
                   {t("landing.hero.ctaPrimary")}
