@@ -11,19 +11,40 @@ type Props = {
   intro: string;
   children: ReactNode;
   ctaId: string;
+  breadcrumbs: Array<{ name: string; path: string }>;
 };
 
-export function PublicPageShell({ eyebrow, title, intro, children, ctaId }: Props) {
+const SITE = process.env.NEXT_PUBLIC_CANONICAL_URL ?? "https://perkos.xyz";
+
+export function PublicPageShell({ eyebrow, title, intro, children, ctaId, breadcrumbs }: Props) {
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: breadcrumbs.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: `${SITE}${item.path === "/" ? "" : item.path}`,
+    })),
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbJsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
       <header className="border-b border-border/60 bg-background/90">
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4 md:px-8">
           <Link href="/" aria-label="PerkOS AI home">
             <Image src="/perkos-header.png" alt="PerkOS AI" width={150} height={52} priority />
           </Link>
           <nav className="flex items-center gap-4 text-sm text-muted-foreground">
-            <Link href="/about" className="hidden hover:text-foreground sm:inline">About</Link>
-            <Link href="/ai-teams-for-small-business" className="hidden hover:text-foreground md:inline">AI teams</Link>
+            <Link href="/solutions" className="hidden transition-colors hover:text-foreground sm:inline">Solutions</Link>
+            <Link href="/pricing" className="hidden transition-colors hover:text-foreground md:inline">Pricing</Link>
+            <Link href="/about" className="hidden transition-colors hover:text-foreground lg:inline">About</Link>
             <SmartCTA
               href="/sign-in"
               analyticsId={`${ctaId}_nav`}
@@ -39,6 +60,23 @@ export function PublicPageShell({ eyebrow, title, intro, children, ctaId }: Prop
         <section className="relative overflow-hidden border-b border-border/60 py-24 md:py-32">
           <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_70%_20%,rgba(236,27,105,0.18),transparent_38%)]" />
           <div className="relative mx-auto max-w-4xl px-4 md:px-8">
+            <nav aria-label="Breadcrumb" className="mb-7 text-sm text-muted-foreground">
+              <ol className="flex flex-wrap items-center gap-2">
+                {breadcrumbs.map((item, index) => {
+                  const current = index === breadcrumbs.length - 1;
+                  return (
+                    <li key={item.path} className="inline-flex items-center gap-2">
+                      {index > 0 ? <span aria-hidden className="text-border">/</span> : null}
+                      {current ? (
+                        <span aria-current="page" className="text-foreground">{item.name}</span>
+                      ) : (
+                        <Link href={item.path} className="transition-colors hover:text-foreground">{item.name}</Link>
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            </nav>
             <p className="mb-5 font-mono text-xs uppercase tracking-[0.2em] text-primary">{eyebrow}</p>
             <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight md:text-6xl">{title}</h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">{intro}</p>
@@ -79,8 +117,10 @@ export function PublicPageShell({ eyebrow, title, intro, children, ctaId }: Prop
           <p>© {new Date().getFullYear()} PerkOS AI. AI teams for small businesses.</p>
           <div className="flex flex-wrap gap-5">
             <Link href="/">Home</Link>
-            <Link href="/about">About</Link>
             <Link href="/ai-teams-for-small-business">AI teams</Link>
+            <Link href="/solutions">Solutions</Link>
+            <Link href="/pricing">Pricing</Link>
+            <Link href="/about">About</Link>
             <Link href="/solutions/restaurants">Restaurants</Link>
             <Link href="/solutions/real-estate">Real estate</Link>
             <Link href="/solutions/ecommerce">Ecommerce</Link>

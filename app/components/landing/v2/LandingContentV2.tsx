@@ -106,22 +106,22 @@ function TopNavV2() {
             priority
           />
         </Link>
-        {/* Hash links are plain <a> (not next/link): the router's own hash
-            scroll bypasses Lenis; plain anchors let Lenis' `anchors` handler
-            drive the smooth scroll. */}
+        {/* In-page links stay as plain anchors so Lenis owns smooth scrolling.
+            Primary discovery links use real routes to reinforce the public
+            site hierarchy for visitors and search engines. */}
         <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-          <a href="#templates" className="transition-colors hover:text-foreground">
+          <Link href="/solutions" className="transition-colors hover:text-foreground">
             {t("landing.nav.forYourBusiness")}
-          </a>
+          </Link>
           <a href="#how-it-works" className="transition-colors hover:text-foreground">
             {t("landing.nav.howItWorks")}
           </a>
           <a href="#expertise" className="transition-colors hover:text-foreground">
             {t("landing.nav.whyPerkos")}
           </a>
-          <a href="#pricing" className="transition-colors hover:text-foreground">
+          <Link href="/pricing" className="transition-colors hover:text-foreground">
             {t("landing.nav.pricing")}
-          </a>
+          </Link>
           <a href="#talk-to-us" className="transition-colors hover:text-foreground">
             {t("landing.nav.talkToUs")}
           </a>
@@ -226,6 +226,12 @@ function FooterV2() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+            <Link href="/solutions" className="transition-colors hover:text-foreground">
+              Solutions
+            </Link>
+            <Link href="/pricing" className="transition-colors hover:text-foreground">
+              Pricing
+            </Link>
             <Link href="/about" className="transition-colors hover:text-foreground">
               About
             </Link>

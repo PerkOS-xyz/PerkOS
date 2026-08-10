@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { ContentSection, FeatureGrid, PublicPageShell } from "../components/marketing/PublicPageShell";
 
 export const metadata: Metadata = {
-  title: "About PerkOS AI",
+  title: "About",
   description: "Learn how PerkOS AI helps small businesses use practical AI teams while keeping people in control of every action.",
   alternates: { canonical: "/about" },
 };
@@ -15,6 +15,7 @@ export default function AboutPage() {
       title="Practical AI help, built for the people doing everything themselves."
       intro="PerkOS AI gives small-business owners a coordinated team for the work that steals time from customers, craft and growth."
       ctaId="about"
+      breadcrumbs={[{ name: "Home", path: "/" }, { name: "About", path: "/about" }]}
     >
       <ContentSection title="Why we built PerkOS AI">
         <p>Most AI products give you another blank chat box. PerkOS starts with a team that already understands common business jobs: planning, marketing, research, customer replies and keeping work organized.</p>

@@ -75,6 +75,11 @@ export default async function IndustryPage({ params }: { params: Promise<{ indus
       title={solution.title}
       intro={solution.intro}
       ctaId={`solution_${industry}`}
+      breadcrumbs={[
+        { name: "Home", path: "/" },
+        { name: "Solutions", path: "/solutions" },
+        { name: solution.label, path: `/solutions/${industry}` },
+      ]}
     >
       <ContentSection title={`What PerkOS can help ${solution.label.toLowerCase()} accomplish`}>
         <FeatureGrid items={[...solution.outcomes]} />

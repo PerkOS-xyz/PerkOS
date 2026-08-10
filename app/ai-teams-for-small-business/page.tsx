@@ -34,6 +34,10 @@ export default function AiTeamsPage() {
       title="A small AI team that turns one business goal into finished work."
       intro="PerkOS AI coordinates specialized teammates for planning, marketing, research, customer support and operations—with you approving every result."
       ctaId="ai_teams"
+      breadcrumbs={[
+        { name: "Home", path: "/" },
+        { name: "AI Teams for Small Business", path: "/ai-teams-for-small-business" },
+      ]}
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <ContentSection title="What an AI team can handle">

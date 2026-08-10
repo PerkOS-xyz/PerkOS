@@ -4,7 +4,7 @@ import { LandingAutoRoute } from "./components/LandingAutoRoute";
 import { LandingContentV2 } from "./components/landing/v2/LandingContentV2";
 
 export const metadata: Metadata = {
-  title: "PerkOS AI — AI Teams for Small Businesses",
+  title: "PerkOS AI: AI Teams for Small Businesses",
   description:
     "PerkOS AI gives small businesses a ready-to-work AI team for marketing, research, customer support and operations. Start free—no technical skills required.",
 };
@@ -43,8 +43,8 @@ const JSON_LD = {
     {
       "@type": "Organization",
       "@id": `${SITE}/#org`,
-      name: "PerkOS",
-      alternateName: ["PerkOS AI", "Perk OS"],
+      name: "PerkOS AI",
+      alternateName: ["PerkOS", "Perk OS"],
       url: SITE,
       logo: `${SITE}/logo.png`,
       slogan: "AI teams for small businesses. They draft, you approve.",
@@ -60,14 +60,15 @@ const JSON_LD = {
     {
       "@type": "WebSite",
       "@id": `${SITE}/#website`,
-      name: "PerkOS",
-      alternateName: "PerkOS AI",
+      name: "PerkOS AI",
+      alternateName: ["PerkOS", "Perk OS"],
       url: SITE,
       publisher: { "@id": `${SITE}/#org` },
     },
     {
       "@type": "SoftwareApplication",
-      name: "PerkOS",
+      name: "PerkOS AI",
+      alternateName: "PerkOS",
       applicationCategory: "BusinessApplication",
       operatingSystem: "Web",
       url: SITE,
