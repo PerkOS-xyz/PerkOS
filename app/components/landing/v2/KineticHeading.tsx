@@ -3,7 +3,8 @@
 // ============================================================================
 // KineticHeading — giant section heading that slides horizontally as you
 // scroll (Palmer's "Featured Works" move). Semantic <h2>, same i18n text,
-// nowrap, scrubbed x travel.
+// scrubbed x travel on wide desktops and a readable wrapped layout on
+// mobile, tablet, and compact laptop screens.
 //
 // Non-pinned: percentage travel over the heading's own transit (original).
 // pinned: the heading lives in a sticky stage, where its own rect freezes at
@@ -12,14 +13,15 @@
 // anchors: sweep in from the travel side → at pin start the sentence's lead
 // edge is fully visible → drift slowly across the FULL line while the stage
 // is pinned (you read the whole sentence as the cards pass) → accelerate out.
-// On mobile (text fits the screen) the same math yields a tiny, fully-visible
-// drift. Direction follows the section's travel side.
+// On narrower screens, translated headings can be substantially wider than
+// the viewport. They therefore wrap in place instead of moving horizontally.
+// Direction follows the section's travel side on wide desktops.
 // ============================================================================
 
 import { motion, useScroll, useTransform } from "motion/react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
-import { useMounted, useMdUp } from "./useMounted";
+import { use2xlUp, useMounted } from "./useMounted";
 
 // paddingBottom reserves room for descenders (g/p/y) — with lineHeight ~1 the
 // wrapper's overflow-hidden was clipping them.
@@ -38,13 +40,17 @@ const DESKTOP_COMPACT_STYLE: React.CSSProperties = {
   paddingBottom: "0.14em",
 };
 
-// Mobile: small enough that the longest heading fits the viewport in one line.
-const MOBILE_STYLE: React.CSSProperties = {
-  fontSize: "clamp(1.25rem, 6vw, 2.5rem)",
+// Mobile through compact laptop: full-width and allowed to wrap so every
+// translation remains legible without oversized tablet typography.
+const READABLE_STYLE: React.CSSProperties = {
+  fontSize: "clamp(1.75rem, 5vw, 3.5rem)",
   lineHeight: 1.1,
   letterSpacing: "-0.03em",
   paddingBottom: "0.14em",
 };
+
+const HEADING_CLASS_NAME =
+  "w-full whitespace-normal break-words px-4 text-center font-semibold text-foreground 2xl:whitespace-nowrap 2xl:px-0 2xl:text-left";
 
 export function KineticHeading({
   children,
@@ -67,7 +73,7 @@ export function KineticHeading({
   const ref = useRef<HTMLDivElement>(null);
   const h2Ref = useRef<HTMLHeadingElement>(null);
   const mounted = useMounted();
-  const mdUp = useMdUp();
+  const twoXlUp = use2xlUp();
 
   // Own-transit progress (non-pinned sections).
   const { scrollYProgress } = useScroll({
@@ -103,7 +109,7 @@ export function KineticHeading({
       ro.disconnect();
       window.removeEventListener("resize", measure);
     };
-  }, [mdUp]);
+  }, [twoXlUp]);
 
   // Pixel anchors: lead edge visible ↔ tail edge visible.
   const dir = parseFloat(from) >= 0 ? 1 : -1;
@@ -117,27 +123,30 @@ export function KineticHeading({
       : [endAnchor - dims.V * 0.35, endAnchor, startAnchor, startAnchor + dims.V * 0.18],
   );
 
-  const style = mdUp
+  const style = twoXlUp
     ? compact
       ? DESKTOP_COMPACT_STYLE
       : DESKTOP_STYLE
-    : MOBILE_STYLE;
-  const x = pinned ? xPinned : xOwn;
+    : READABLE_STYLE;
+  // Long translated headings must never slide beyond a narrow viewport.
+  // Keep the kinetic treatment at 2xl+ and render the complete text in place
+  // below that breakpoint, including tablets and compact laptops.
+  const x = twoXlUp ? (pinned ? xPinned : xOwn) : 0;
 
   return (
     <div ref={ref} className={`overflow-hidden ${className ?? ""}`}>
       {mounted ? (
         <motion.h2
           ref={h2Ref}
-          className="whitespace-nowrap px-4 font-semibold text-foreground md:px-0"
-          style={{ ...style, x, willChange: "transform" }}
+          className={HEADING_CLASS_NAME}
+          style={{ ...style, x, willChange: twoXlUp ? "transform" : "auto" }}
         >
           {children}
         </motion.h2>
       ) : (
         <h2
           ref={h2Ref}
-          className="whitespace-nowrap px-4 font-semibold text-foreground md:px-0"
+          className={HEADING_CLASS_NAME}
           style={style}
         >
           {children}
