@@ -33,3 +33,18 @@ export function useMdUp() {
   }, []);
   return mdUp;
 }
+
+// True only on wide desktop viewports (Tailwind's 1536px `2xl` breakpoint).
+// Large kinetic typography needs this extra horizontal room; tablets and
+// compact laptops use the wrapped, stationary treatment instead.
+export function use2xlUp() {
+  const [twoXlUp, setTwoXlUp] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1536px)");
+    const update = () => setTwoXlUp(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  return twoXlUp;
+}
