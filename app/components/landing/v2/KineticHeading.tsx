@@ -3,7 +3,7 @@
 // ============================================================================
 // KineticHeading — giant section heading that slides horizontally as you
 // scroll (Palmer's "Featured Works" move). Semantic <h2>, same i18n text,
-// nowrap, scrubbed x travel.
+// scrubbed x travel on desktop and a readable wrapped layout on mobile.
 //
 // Non-pinned: percentage travel over the heading's own transit (original).
 // pinned: the heading lives in a sticky stage, where its own rect freezes at
@@ -12,8 +12,9 @@
 // anchors: sweep in from the travel side → at pin start the sentence's lead
 // edge is fully visible → drift slowly across the FULL line while the stage
 // is pinned (you read the whole sentence as the cards pass) → accelerate out.
-// On mobile (text fits the screen) the same math yields a tiny, fully-visible
-// drift. Direction follows the section's travel side.
+// On mobile, translated headings can be substantially wider than the viewport.
+// They therefore wrap in place instead of moving horizontally. Direction
+// follows the section's travel side on desktop.
 // ============================================================================
 
 import { motion, useScroll, useTransform } from "motion/react";
@@ -38,13 +39,16 @@ const DESKTOP_COMPACT_STYLE: React.CSSProperties = {
   paddingBottom: "0.14em",
 };
 
-// Mobile: small enough that the longest heading fits the viewport in one line.
+// Mobile: full-width and allowed to wrap so every translation remains legible.
 const MOBILE_STYLE: React.CSSProperties = {
-  fontSize: "clamp(1.25rem, 6vw, 2.5rem)",
+  fontSize: "clamp(1.75rem, 7.5vw, 2.25rem)",
   lineHeight: 1.1,
   letterSpacing: "-0.03em",
   paddingBottom: "0.14em",
 };
+
+const HEADING_CLASS_NAME =
+  "w-full whitespace-normal break-words px-4 text-center font-semibold text-foreground md:whitespace-nowrap md:px-0 md:text-left";
 
 export function KineticHeading({
   children,
@@ -122,22 +126,25 @@ export function KineticHeading({
       ? DESKTOP_COMPACT_STYLE
       : DESKTOP_STYLE
     : MOBILE_STYLE;
-  const x = pinned ? xPinned : xOwn;
+  // Long translated headings must never slide beyond a narrow viewport.
+  // Keep the kinetic treatment at md+ and render the complete text in place
+  // below that breakpoint.
+  const x = mdUp ? (pinned ? xPinned : xOwn) : 0;
 
   return (
     <div ref={ref} className={`overflow-hidden ${className ?? ""}`}>
       {mounted ? (
         <motion.h2
           ref={h2Ref}
-          className="whitespace-nowrap px-4 font-semibold text-foreground md:px-0"
-          style={{ ...style, x, willChange: "transform" }}
+          className={HEADING_CLASS_NAME}
+          style={{ ...style, x, willChange: mdUp ? "transform" : "auto" }}
         >
           {children}
         </motion.h2>
       ) : (
         <h2
           ref={h2Ref}
-          className="whitespace-nowrap px-4 font-semibold text-foreground md:px-0"
+          className={HEADING_CLASS_NAME}
           style={style}
         >
           {children}
