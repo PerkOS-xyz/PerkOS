@@ -8,11 +8,13 @@ const SITE =
  * robots; these URLs are intentionally written for search and discovery.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const lastModified = new Date("2026-08-09");
+  const lastModified = new Date("2026-08-10");
   const pages = [
     { path: "", priority: 1, changeFrequency: "weekly" as const },
     { path: "/about", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/ai-teams-for-small-business", priority: 0.9, changeFrequency: "monthly" as const },
+    { path: "/solutions", priority: 0.9, changeFrequency: "monthly" as const },
+    { path: "/pricing", priority: 0.9, changeFrequency: "monthly" as const },
     { path: "/privacy", priority: 0.4, changeFrequency: "yearly" as const },
     { path: "/solutions/restaurants", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/solutions/real-estate", priority: 0.8, changeFrequency: "monthly" as const },

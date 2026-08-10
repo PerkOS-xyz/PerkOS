@@ -27,18 +27,18 @@ const SITE_URL =
 const CANONICAL_URL =
   process.env.NEXT_PUBLIC_CANONICAL_URL ?? "https://perkos.xyz";
 
-const OG_TITLE = "PerkOS AI — AI Teams for Small Businesses";
+const OG_TITLE = "PerkOS AI: AI Teams for Small Businesses";
 const OG_DESC =
   "PerkOS AI gives small businesses a ready-to-work AI team for marketing, research, customer support and operations. Start free—no technical skills required.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(CANONICAL_URL),
   title: {
-    default: "PerkOS AI — AI Teams for Small Businesses",
-    template: "%s · PerkOS",
+    default: OG_TITLE,
+    template: "%s | PerkOS AI",
   },
   description: OG_DESC,
-  applicationName: "PerkOS",
+  applicationName: "PerkOS AI",
   alternates: { canonical: "/" },
   keywords: [
     "AI for small business",
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     "no-code AI",
     "PerkOS",
   ],
-  authors: [{ name: "PerkOS", url: CANONICAL_URL }],
+  authors: [{ name: "PerkOS AI", url: CANONICAL_URL }],
   icons: {
     icon: [{ url: "/icon.png", type: "image/png", sizes: "380x380" }],
     shortcut: "/icon.png",
@@ -61,12 +61,12 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    siteName: "PerkOS",
+    siteName: "PerkOS AI",
     title: OG_TITLE,
     description: OG_DESC,
     url: CANONICAL_URL,
     images: [
-      { url: "/banner.png", width: 2371, height: 1421, alt: "PerkOS — AI teams for small businesses" },
+      { url: "/banner.png", width: 2371, height: 1421, alt: "PerkOS AI — AI teams for small businesses" },
     ],
   },
   twitter: {
