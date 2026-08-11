@@ -47,6 +47,11 @@ services:
       # ADMIN_TOKEN on the gateway VPS (/opt/Perkos-llm/.env).
       PERKOS_LLM_GATEWAY_URL: ${PERKOS_LLM_GATEWAY_URL:-https://api.llm.perkos.xyz}
       PERKOS_LLM_ADMIN_TOKEN: ${PERKOS_LLM_ADMIN_TOKEN:-}
+      # Transactional email — /api/contact persists the message first, then
+      # sends a non-fatal Resend notification to the contact mailbox.
+      RESEND_API: ${RESEND_API:-}
+      EMAIL_FROM: ${EMAIL_FROM:-PerkOS <noreply@perkos.xyz>}
+      CONTACT_EMAIL_TO: ${CONTACT_EMAIL_TO:-contact@perkos.xyz}
       # Prometheus metrics — /api/metrics responds when this token is
       # set. The scraper (Grafana Agent / Alloy) presents it as a
       # Bearer header. Without it the route returns 503.
