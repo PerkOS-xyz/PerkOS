@@ -15,15 +15,16 @@ import pt from "../i18n/locales/pt.json";
 export type LanguageCode = "en" | "es" | "it" | "fr" | "pt" | "ko" | "zh" | "ja";
 
 // Ordered for the selector (per UX spec): English pinned first, then the Latin-script
-// languages alphabetical by endonym (Español, Français, Italiano, Português), then CJK alphabetical
-// by English name (Chinese, Japanese, Korean). `label` is the native endonym.
+// languages alphabetical by endonym (Español, Français, Italiano, Português),
+// then Japanese and Korean. Chinese remains translated in resources but is
+// temporarily hidden from the public selector. `label` is the native endonym.
 export const SUPPORTED_LANGUAGES: { code: LanguageCode; label: string; english: string }[] = [
   { code: "en", label: "English", english: "English" },
   { code: "es", label: "Español", english: "Spanish" },
   { code: "fr", label: "Français", english: "French" },
   { code: "it", label: "Italiano", english: "Italian" },
   { code: "pt", label: "Português", english: "Portuguese" },
-  { code: "zh", label: "中文", english: "Chinese" },
+  // { code: "zh", label: "中文", english: "Chinese" },
   { code: "ja", label: "日本語", english: "Japanese" },
   { code: "ko", label: "한국어", english: "Korean" },
 ];
