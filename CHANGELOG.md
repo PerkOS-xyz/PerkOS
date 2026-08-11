@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-08-11 — PerkOS A2A 0.12.43 immutable artifact
+
+- Published the exact npm 0.12.43 tarball and SHA-256 for the external-agent
+  flow. The release prevents internal PerkOS Chat routing markers from leaking
+  into an external agent's visible reply.
+
 ## 2026-08-10 — PerkOS A2A 0.12.42 immutable artifact
 
 - Published the exact npm 0.12.42 tarball and SHA-256 under
