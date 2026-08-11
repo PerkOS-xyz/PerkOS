@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-08-10 — PerkOS A2A 0.12.42 immutable artifact
+
+- Published the exact npm 0.12.42 tarball and SHA-256 under
+  `/artifacts/perkos-a2a-0.12.42.tgz` for version-pinned external-agent
+  onboarding. The release forwards OpenClaw's runtime-owned model route into
+  legacy embedded chat runs without imposing a PerkOS model default.
+
 ## 2026-07-17 — Project chat available across the authenticated app
 
 - Mounted the shared `ChatClientProvider` at the authenticated-app layout so
