@@ -16,13 +16,14 @@ import type { MentionParticipant } from "./mentions";
  */
 export function useMentionParticipants(
   detail: ProjectDetail | null | undefined,
-  projectId: string
+  projectId: string,
+  ownerWallet?: string,
 ): MentionParticipant[] {
   const { address } = useConnection();
 
   const { data: members } = useQuery({
-    queryKey: ["project-members", projectId],
-    queryFn: () => listProjectMembers(projectId),
+    queryKey: ["project-members", projectId, ownerWallet],
+    queryFn: () => listProjectMembers(projectId, ownerWallet),
     enabled: Boolean(projectId),
   });
 
@@ -52,10 +53,11 @@ export function useMentionParticipants(
   }
 
   if (detail) {
-    const agents = new Set<string>();
-    for (const t of detail.tasks) if (t.agent) agents.add(t.agent);
-    for (const a of detail.project.agentIds ?? []) agents.add(a);
-    for (const n of agents) out.push({ id: `agent:${n}`, label: n, kind: "agent" });
+    // The project roster is authoritative. Historical tasks may still refer
+    // to a removed agent, but that does not make it a current chat member.
+    for (const name of new Set(detail.project.agentIds ?? [])) {
+      out.push({ id: `agent:${name}`, label: name, kind: "agent" });
+    }
   }
 
   return out;
