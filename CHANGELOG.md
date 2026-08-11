@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-08-11 — PerkOS A2A 0.12.44 immutable artifact
+
+- Published the exact npm 0.12.44 tarball and SHA-256 for external OpenClaw
+  onboarding. This release recovers supervisor locks safely when a real
+  container restart reuses the prior Linux PID.
+
 ## 2026-08-11 — PerkOS A2A 0.12.43 immutable artifact
 
 - Published the exact npm 0.12.43 tarball and SHA-256 for the external-agent
