@@ -4,13 +4,13 @@
  * Billing section of the user dashboard. Shows THIS wallet's own usage for the
  * current month — team working hours (the billable unit), agents, and AI tokens
  * — plus what they've paid. Deliberately usage-facing: no platform cost/margin.
- * Reads GET /billing/me. Charges/plan/included-hours appear here once the
- * charging engine + prepaid credits land.
+ * Reads GET /billing/me. Managed compute is server-gated on a positive prepaid
+ * balance; this card makes the entitlement and remaining hours visible.
  */
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Banknote, Clock, Bot, Sparkles, Plus } from "lucide-react";
+import { Banknote, Clock, Bot, Sparkles, Plus, LockKeyhole } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -30,6 +30,22 @@ export function BillingCard({ address }: { address: string }) {
   });
 
   const b = query.data;
+  // Keep the dashboard safe during a rolling deploy where the web app may
+  // briefly reach an older API instance that does not return `infra` yet.
+  const infra = b
+    ? (b.infra ?? {
+        allowed: b.exempt || b.creditsUsd > 0,
+        reason: b.exempt
+          ? ("exempt" as const)
+          : b.creditsUsd > 0
+            ? ("funded" as const)
+            : b.enrolled
+              ? ("credits-exhausted" as const)
+              : ("payment-required" as const),
+        hoursRemaining: b.exempt ? null : b.creditsUsd / 0.15,
+        rateUsdPerTeamHour: 0.15,
+      })
+    : null;
   const [showDeposit, setShowDeposit] = useState(false);
 
   return (
@@ -44,11 +60,11 @@ export function BillingCard({ address }: { address: string }) {
         ) : null}
       </div>
 
-      {query.isLoading || !b ? (
+      {query.isLoading || !b || !infra ? (
         <p className="text-xs text-muted-foreground">Loading usage…</p>
       ) : (
         <>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             <Metric
               icon={<Clock className="h-3.5 w-3.5 text-primary" />}
               label="Team hours"
@@ -68,6 +84,15 @@ export function BillingCard({ address }: { address: string }) {
                   : b.usage.llmTokens >= 1000
                     ? `${(b.usage.llmTokens / 1e3).toFixed(0)}k`
                     : String(b.usage.llmTokens)
+              }
+            />
+            <Metric
+              icon={<LockKeyhole className="h-3.5 w-3.5 text-primary" />}
+              label="Infra left"
+              value={
+                infra.hoursRemaining === null
+                  ? "Sponsored"
+                  : `${fmtHours(infra.hoursRemaining)}h`
               }
             />
           </div>
@@ -104,21 +129,48 @@ export function BillingCard({ address }: { address: string }) {
                 </div>
               </div>
 
+              <div
+                className={cn(
+                  "rounded-md border px-3 py-2",
+                  infra.allowed
+                    ? "border-emerald-500/30 bg-emerald-500/5"
+                    : "border-amber-500/30 bg-amber-500/5",
+                )}
+              >
+                <span
+                  className={cn(
+                    "text-xs font-medium",
+                    infra.allowed ? "text-emerald-300" : "text-amber-300",
+                  )}
+                >
+                  {infra.allowed
+                    ? "PerkOS Infra enabled"
+                    : infra.reason === "credits-exhausted"
+                      ? "PerkOS Infra paused — credits exhausted"
+                      : "PerkOS Infra locked — payment required"}
+                </span>
+                <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
+                  Managed agents can only launch or wake while prepaid Infra
+                  credits are available.
+                </p>
+              </div>
+
               {showDeposit ? (
                 <DepositDialog address={address} onDeposited={() => query.refetch()} />
               ) : null}
 
               {b.enrolled ? (
                 <p className="text-[11px] leading-snug text-muted-foreground">
-                  You only pay for the hours your team actually works ($0.15 /
-                  team-hour). Top up your USDC balance to keep your team running; at
-                  $0 it pauses until you add more.
+                  Active agents use {infra.rateUsdPerTeamHour.toLocaleString(undefined, {
+                    style: "currency",
+                    currency: "USD",
+                  })} per team-hour. At $0, managed agents pause and cannot wake
+                  until you add more credits.
                 </p>
               ) : (
                 <p className="text-[11px] leading-snug text-muted-foreground">
-                  Your team runs free for now. Add USDC credits to switch to
-                  pay-as-you-go ($0.15 / team-hour) — you only pay for the hours
-                  your team actually works.
+                  Add prepaid USDC credits to activate PerkOS Infra. No managed
+                  agent can launch or wake before payment is confirmed.
                 </p>
               )}
             </>

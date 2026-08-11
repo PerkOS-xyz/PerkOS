@@ -2102,6 +2102,12 @@ export type MyBilling = {
   usage: { agentCount: number; activeHours: number; llmTokens: number };
   creditsUsd: number;
   enrolled: boolean;
+  infra?: {
+    allowed: boolean;
+    reason: "exempt" | "funded" | "payment-required" | "credits-exhausted";
+    hoursRemaining: number | null;
+    rateUsdPerTeamHour: number;
+  };
   /** PerkOS internal / tester wallet — runs free, never charged or paused. */
   exempt: boolean;
   paymentsUsd: number;
