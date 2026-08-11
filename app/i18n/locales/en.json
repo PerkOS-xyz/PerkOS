@@ -220,10 +220,10 @@
       "cta": "Talk to us"
     },
     "pricing": {
-      "heading": "Start free. It stays affordable.",
-      "subheading": "A full team for the price of a streaming subscription, and a resting team costs almost nothing. Compare that to one part-time hire.",
+      "heading": "Start free. Scale with clear limits.",
+      "subheading": "Every paid plan includes PerkOS Infra hours. Managed AI uses separate prepaid credits, or you can connect your own AI provider.",
       "mostPopular": "Most popular",
-      "footNote": "You only pay for the hours your team actually works. Reach your monthly hours and your team simply pauses. Top up or upgrade to keep going. You never get a surprise bill.",
+      "footNote": "PerkOS Infra hours and Managed AI credits are tracked separately. When either prepaid balance reaches zero, your team pauses until you top up, upgrade, or connect your own AI provider. You never get a surprise bill.",
       "tiers": {
         "free": {
           "name": "Free",
@@ -255,25 +255,25 @@
           "name": "Pro",
           "price": "$89.97",
           "cadence": "/ month",
-          "tag": "We host your team and run the AI",
+          "tag": "We host your team; prepaid Managed AI is available",
           "cta": "Start your team",
           "bullets": [
-            "We run your team AND the AI, zero setup",
-            "No AI account needed",
+            "We run your team, zero setup",
+            "Managed AI with prepaid usage credits",
             "150 team working hours / month (PerkOS Infra)",
-            "Priority support"
+            "Connect your own AI provider at any time"
           ]
         },
         "scale": {
           "name": "Scale",
           "price": "$239.97",
           "cadence": "/ month",
-          "tag": "For teams running all day",
+          "tag": "For larger, recurring workflows",
           "cta": "Start your team",
           "bullets": [
             "Everything in Pro",
             "500 team working hours / month (PerkOS Infra)",
-            "Top up anytime if you need more",
+            "Top up PerkOS Infra or Managed AI credits anytime",
             "Onboarding & a real human"
           ]
         }

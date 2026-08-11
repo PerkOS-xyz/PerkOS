@@ -220,10 +220,10 @@
       "cta": "Contactez-nous"
     },
     "pricing": {
-      "heading": "Commencez gratuitement. Ça reste abordable.",
-      "subheading": "Une équipe complète pour le prix d'un abonnement de streaming, et une équipe au repos ne coûte presque rien. Comparez ça à l'embauche d'une seule personne à temps partiel.",
+      "heading": "Commencez gratuitement. Évoluez avec des limites claires.",
+      "subheading": "Chaque offre payante comprend des heures PerkOS Infra. Managed AI utilise des crédits prépayés séparés, ou vous pouvez connecter votre propre fournisseur d'IA.",
       "mostPopular": "Le plus populaire",
-      "footNote": "Vous ne payez que les heures que votre équipe travaille réellement. Une fois votre quota mensuel atteint, votre équipe se met simplement en pause : rechargez ou passez à une offre supérieure pour continuer. Vous ne recevez jamais de facture surprise.",
+      "footNote": "Les heures PerkOS Infra et les crédits Managed AI sont suivis séparément. Quand l'un des soldes prépayés atteint zéro, votre équipe se met en pause jusqu'à ce que vous rechargiez, changiez d'offre ou connectiez votre propre fournisseur d'IA. Aucune facture surprise.",
       "tiers": {
         "free": {
           "name": "Gratuit",
@@ -255,25 +255,25 @@
           "name": "Pro",
           "price": "$89.97",
           "cadence": "/ mois",
-          "tag": "Nous hébergeons votre équipe et faisons tourner l'IA",
+          "tag": "Nous hébergeons votre équipe ; Managed AI prépayé est disponible",
           "cta": "Lancez votre équipe",
           "bullets": [
-            "Nous faisons tourner votre équipe ET l'IA : zéro installation",
-            "Aucun compte IA nécessaire",
+            "Nous faisons tourner votre équipe : zéro installation",
+            "Managed AI avec des crédits d'utilisation prépayés",
             "150 heures de travail d'équipe / mois (PerkOS Infra)",
-            "Support prioritaire"
+            "Connectez votre propre fournisseur d'IA à tout moment"
           ]
         },
         "scale": {
           "name": "Scale",
           "price": "$239.97",
           "cadence": "/ mois",
-          "tag": "Pour les équipes qui tournent toute la journée",
+          "tag": "Pour les workflows plus importants et récurrents",
           "cta": "Lancez votre équipe",
           "bullets": [
             "Tout ce qu'il y a dans Pro",
             "500 heures de travail d'équipe / mois (PerkOS Infra)",
-            "Rechargez à tout moment si vous en avez besoin",
+            "Rechargez PerkOS Infra ou vos crédits Managed AI à tout moment",
             "Accompagnement au démarrage et un vrai humain"
           ]
         }
