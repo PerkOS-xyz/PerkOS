@@ -182,7 +182,7 @@ export function InvitedCredentialPanel({ agent }: { agent: AgentRow }) {
 function StatusBadge({ state }: { state: ConnState }) {
   switch (state.kind) {
     case "connected":
-      return <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-300">Connected</Badge>;
+      return <Badge className="bg-sky-500/15 text-sky-600 dark:text-sky-300">Bridge connected</Badge>;
     case "revoked":
       return <Badge variant="destructive">Revoked</Badge>;
     case "stale":

@@ -103,6 +103,25 @@ describe("AgentChatPanel hibernation policy", () => {
     expect(mocks.chatSend).toHaveBeenCalledWith("wake and send");
   });
 
+  it("does not expose a live-runtime chat state when only the bridge is connected", () => {
+    render(
+      <AgentChatPanel
+        agentId="ghost"
+        agentName="Ghost"
+        chatEnabled
+        hibernationEnabled={false}
+        externalAgent
+        runtimeKind="OpenClaw"
+        runtimeAvailability="unavailable"
+      />,
+    );
+
+    expect(screen.getByText("Runtime unavailable")).toBeVisible();
+    expect(screen.getByText(/bridge is connected to PerkOS/i)).toBeVisible();
+    expect(screen.getByPlaceholderText("Message Ghost…")).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
+  });
+
   it("directs external OpenClaw timeouts to plugin and model routing logs", () => {
     const message = agentResponseTimeoutMessage({
       agentName: "Alice",

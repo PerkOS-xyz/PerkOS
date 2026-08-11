@@ -472,6 +472,11 @@ export type AgentRow = Agent & {
   /** When set, this agent is a CO-RESIDENT running inside the host agent named
    *  here (Phase 1 multi-agent), not on its own runtime. */
   hostAgent?: string | null;
+  /** Bridge-reported execution readiness; distinct from relay/chat transport. */
+  runtimeStatus?: "healthy" | "unreachable" | "unknown" | null;
+  runtimeHealthy?: boolean;
+  runtimeHealthCheckedAt?: string | null;
+  lastRuntimeSeenAt?: string | null;
 };
 
 const agentConverter: FirestoreDataConverter<AgentRow> = {
@@ -525,6 +530,15 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
       bridgeConnected:
         typeof data.bridgeConnected === "boolean" ? data.bridgeConnected : undefined,
       lastBridgeSeenAt: tsToIso(data.lastBridgeSeenAt),
+      runtimeStatus:
+        data.runtimeStatus === "healthy" ||
+        data.runtimeStatus === "unreachable" ||
+        data.runtimeStatus === "unknown"
+          ? data.runtimeStatus
+          : null,
+      runtimeHealthy: data.runtimeHealthy === true,
+      runtimeHealthCheckedAt: tsToIso(data.runtimeHealthCheckedAt),
+      lastRuntimeSeenAt: tsToIso(data.lastRuntimeSeenAt),
       note: typeof data.note === "string" ? data.note : null,
       hostAgent: typeof data.hostAgent === "string" ? data.hostAgent : null,
     };
@@ -2974,6 +2988,10 @@ export async function fetchAgent(agentId: string): Promise<{
   bridgeConnected?: boolean;
   lastBridgeSeenAt?: string | null;
   runtimeVersion?: string | null;
+  runtimeStatus?: "healthy" | "unreachable" | "unknown" | null;
+  runtimeHealthy?: boolean;
+  runtimeHealthCheckedAt?: string | null;
+  lastRuntimeSeenAt?: string | null;
 }> {
   const { authedFetch } = await import("./apiClient");
   const response = await authedFetch(

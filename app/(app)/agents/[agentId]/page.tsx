@@ -36,7 +36,10 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { hasFreshAgentHeartbeat } from "../../../lib/agentHostingPolicy";
+import {
+  externalRuntimeAvailability,
+  hasFreshAgentHeartbeat,
+} from "../../../lib/agentHostingPolicy";
 
 import {
   deleteAgent,
@@ -270,6 +273,9 @@ export default function AgentDetailPage({ params }: PageProps) {
         hibernationEnabled={agent.status === "ready" && !isExternalAgent(agent)}
         externalAgent={isExternalAgent(agent)}
         runtimeKind={agent.runtime}
+        runtimeAvailability={isExternalAgent(agent)
+          ? externalRuntimeAvailability(agent)
+          : undefined}
       />
 
       <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -365,6 +371,9 @@ function AgentHeader({
   const [editOpen, setEditOpen] = useState(false);
   const queryClient = useQueryClient();
   const isExternal = isExternalAgent(agent);
+  const externalAvailability = isExternal
+    ? externalRuntimeAvailability(agent)
+    : undefined;
   const displayName = agent.displayName ?? agent.name;
 
   // "Stop" hibernates the agent (ECS scale-to-0). It's reversible — the next
@@ -427,7 +436,7 @@ function AgentHeader({
           <span
             className={cn(
               "absolute -bottom-0.5 -right-0.5 grid h-3 w-3 place-items-center rounded-full ring-2 ring-background",
-              isRunning
+              isRunning || externalAvailability === "online"
                 ? "bg-emerald-400"
                 : sleeping
                 ? "bg-slate-400"
@@ -451,6 +460,8 @@ function AgentHeader({
               external={isExternal}
               bridgeConnected={agent.bridgeConnected}
               lastBridgeSeenAt={agent.lastBridgeSeenAt}
+              runtimeStatus={agent.runtimeStatus}
+              runtimeHealthCheckedAt={agent.runtimeHealthCheckedAt}
               hibernationState={hibState}
               syncing={hibSyncing}
             />
@@ -516,6 +527,8 @@ function StatusBadge({
   external,
   bridgeConnected,
   lastBridgeSeenAt,
+  runtimeStatus,
+  runtimeHealthCheckedAt,
   hibernationState,
   syncing,
 }: {
@@ -523,18 +536,29 @@ function StatusBadge({
   external?: boolean;
   bridgeConnected?: boolean;
   lastBridgeSeenAt?: string | null;
+  runtimeStatus?: AgentRow["runtimeStatus"];
+  runtimeHealthCheckedAt?: string | null;
   hibernationState?: HibernationApiState;
   syncing?: boolean;
 }) {
   const { t } = useTranslation();
-  if (
-    external &&
-    status === "ready" &&
-    !hasFreshAgentHeartbeat({ bridgeConnected, lastBridgeSeenAt })
-  ) {
+  if (external && status === "ready") {
+    const availability = externalRuntimeAvailability({
+      bridgeConnected,
+      lastBridgeSeenAt,
+      runtimeStatus,
+      runtimeHealthCheckedAt,
+    });
+    const state = availability === "online"
+      ? { tone: "bg-emerald-500/20 text-emerald-300", label: t("agentDetail.status.online") }
+      : availability === "unavailable"
+        ? { tone: "bg-red-500/20 text-red-300", label: "Runtime unavailable" }
+        : availability === "unverified"
+          ? { tone: "bg-amber-500/20 text-amber-300", label: "Runtime unverified" }
+          : { tone: "bg-muted text-muted-foreground", label: t("agentDetail.status.offline") };
     return (
-      <Badge variant="secondary" className="border-0 bg-muted text-muted-foreground">
-        {t("agentDetail.status.offline")}
+      <Badge variant="secondary" className={cn("border-0", state.tone)}>
+        {state.label}
       </Badge>
     );
   }
@@ -630,7 +654,7 @@ function AgentActivitySection({
   );
 }
 
-function MetadataCard({ agent }: { agent: Agent }) {
+function MetadataCard({ agent }: { agent: AgentRow }) {
   const { t } = useTranslation();
   return (
     <Card>
@@ -651,7 +675,7 @@ function MetadataCard({ agent }: { agent: Agent }) {
           {agent.lastBridgeSeenAt ? (
             <span title={agent.lastBridgeSeenAt}>
               {formatRelativeShort(agent.lastBridgeSeenAt)}
-              {agent.bridgeConnected ? (
+              {hasFreshAgentHeartbeat(agent) ? (
                 <span className="ml-1.5 text-emerald-300">{t("agentDetail.metadata.connectedNow")}</span>
               ) : null}
             </span>
@@ -677,6 +701,24 @@ function MetadataCard({ agent }: { agent: Agent }) {
             <span className="text-muted-foreground">—</span>
           )}
         </MetaRow>
+        {isExternalAgent(agent) ? (
+          <MetaRow Icon={Server} label="Runtime health">
+            <span className={cn(
+              "text-xs",
+              agent.runtimeStatus === "healthy"
+                ? "text-emerald-300"
+                : agent.runtimeStatus === "unreachable"
+                  ? "text-red-300"
+                  : "text-amber-300",
+            )}>
+              {agent.runtimeStatus === "healthy"
+                ? "Available"
+                : agent.runtimeStatus === "unreachable"
+                  ? "Unavailable"
+                  : "Unverified"}
+            </span>
+          </MetaRow>
+        ) : null}
         <MetaRow Icon={KeyRound} label={t("agentDetail.metadata.modelKey")}>
           {isExternalAgent(agent) ? (
             <span className="text-muted-foreground">{t("agentDetail.metadata.runtimeOwned")}</span>

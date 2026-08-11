@@ -4,6 +4,7 @@ import { collection, onSnapshot, type Timestamp } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
 import { firebaseDb } from "./firebase";
+import { externalRuntimeAvailability } from "./agentHostingPolicy";
 
 export type AgentLiveStatus = {
   id: string; // the agent doc id (for wake/hibernate calls)
@@ -16,6 +17,9 @@ export type AgentLiveStatus = {
   wakeStartedMs?: number; // last wake-from-sleep (epoch ms)
   presetId?: string; // role preset — drives the AgentOrb hue/glyph
   role?: string; // role label — keyword-matched orb when no presetId
+  external?: boolean;
+  runtimeStatus?: "healthy" | "unreachable" | "unknown" | null;
+  runtimeHealthCheckedAt?: string | null;
 };
 
 type State = {
@@ -83,6 +87,16 @@ export function useWalletAgents(
             presetId:
               typeof data.presetId === "string" ? (data.presetId as string) : undefined,
             role: typeof data.role === "string" ? (data.role as string) : undefined,
+            external:
+              data.external === true ||
+              ["invited", "self-hosted", "imported"].includes(String(data.deployMode ?? "")),
+            runtimeStatus:
+              data.runtimeStatus === "healthy" ||
+              data.runtimeStatus === "unreachable" ||
+              data.runtimeStatus === "unknown"
+                ? data.runtimeStatus
+                : null,
+            runtimeHealthCheckedAt: tsToIsoOrNull(data.runtimeHealthCheckedAt),
           };
         });
         setState({ byName, loaded: true });
@@ -115,6 +129,13 @@ export const STATUS_AVAILABLE = "Available";
 export const STATUS_RESTING = "Resting";
 export const STATUS_GOING_TO_REST = "Going to rest";
 export const STATUS_GETTING_READY = "Getting ready";
+export const STATUS_RUNTIME_UNAVAILABLE = "Runtime unavailable";
+export const STATUS_RUNTIME_UNVERIFIED = "Runtime unverified";
+
+function tsToIsoOrNull(value: unknown): string | null {
+  const ms = toMs(value);
+  return ms > 0 ? new Date(ms).toISOString() : null;
+}
 
 export function realtimeAgentStatus(a?: AgentLiveStatus): {
   color: string;
@@ -134,6 +155,22 @@ export function realtimeAgentStatus(a?: AgentLiveStatus): {
     return { color: "bg-amber-400 animate-pulse", label: STATUS_GETTING_READY };
   if ((a.status ?? "").toLowerCase() === "provisioning")
     return { color: "bg-amber-400 animate-pulse", label: STATUS_GETTING_READY };
+
+  if (a.external) {
+    const availability = externalRuntimeAvailability({
+      bridgeConnected: a.bridgeConnected,
+      lastBridgeSeenAt: a.lastBridgeSeenMs ? new Date(a.lastBridgeSeenMs).toISOString() : null,
+      runtimeStatus: a.runtimeStatus,
+      runtimeHealthCheckedAt: a.runtimeHealthCheckedAt,
+    });
+    if (availability === "online")
+      return { color: "bg-emerald-400", label: STATUS_AVAILABLE };
+    if (availability === "unavailable")
+      return { color: "bg-red-500", label: STATUS_RUNTIME_UNAVAILABLE };
+    if (availability === "unverified")
+      return { color: "bg-amber-400", label: STATUS_RUNTIME_UNVERIFIED };
+    return { color: "bg-[#7975a8]", label: "Offline" };
+  }
 
   // Connected: phoned home, and — if it was ever woken — since that wake.
   // "Available" REQUIRES a real bridge heartbeat — do NOT infer it from

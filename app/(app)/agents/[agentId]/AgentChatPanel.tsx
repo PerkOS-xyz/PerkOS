@@ -27,6 +27,7 @@ import {
 import { useChatPerkosClient } from "../../../lib/useChatPerkosClient";
 import { getHibernationStatusApi } from "../../../lib/perkosApi";
 import { ConfirmDialog } from "../../../components/ConfirmDialog";
+import type { ExternalRuntimeAvailability } from "../../../lib/agentHostingPolicy";
 
 type Props = {
   agentId: string;
@@ -39,6 +40,8 @@ type Props = {
   externalAgent?: boolean;
   /** User-facing runtime label, for example OpenClaw. */
   runtimeKind?: string;
+  /** Execution readiness, independent from this browser's chat websocket. */
+  runtimeAvailability?: ExternalRuntimeAvailability;
 };
 
 type Bubble = {
@@ -88,6 +91,7 @@ export function AgentChatPanel({
   hibernationEnabled,
   externalAgent = false,
   runtimeKind,
+  runtimeAvailability,
 }: Props) {
   const { address, isConnected } = useConnection();
   const queryClient = useQueryClient();
@@ -190,6 +194,8 @@ export function AgentChatPanel({
   // semantics are cleaner: if the WS drops we hide the typing bubble
   // immediately without a render cycle's lag.
   const showTyping = awaitingReply && chatAuthed;
+  const runtimeBlocked = externalAgent &&
+    (runtimeAvailability === "offline" || runtimeAvailability === "unavailable");
 
   // Auto-scroll to bottom on new messages / typing indicator changes.
   useEffect(() => {
@@ -216,6 +222,14 @@ export function AgentChatPanel({
     setError(null);
     if (!isConnected || !address) {
       setError("Connect a wallet to chat with this agent.");
+      return;
+    }
+    if (runtimeBlocked) {
+      setError(
+        runtimeAvailability === "unavailable"
+          ? `${agentName}'s bridge is connected, but its external runtime is unavailable.`
+          : `${agentName}'s external runtime is offline.`,
+      );
       return;
     }
     if (!convId) {
@@ -299,8 +313,18 @@ export function AgentChatPanel({
   }
 
   const connError = chat.error ?? error;
-  const wsBadge = chat.authed ? (
-    <span className="text-xs text-emerald-300">Connected</span>
+  const wsBadge = chat.authed && externalAgent ? (
+    runtimeAvailability === "online" ? (
+      <span className="text-xs text-emerald-300">Agent connected</span>
+    ) : runtimeAvailability === "unavailable" ? (
+      <span className="text-xs text-red-300">Runtime unavailable</span>
+    ) : runtimeAvailability === "offline" ? (
+      <span className="text-xs text-muted-foreground">Agent offline</span>
+    ) : (
+      <span className="text-xs text-amber-300">Runtime unverified</span>
+    )
+  ) : chat.authed ? (
+    <span className="text-xs text-emerald-300">Chat service connected</span>
   ) : convQuery.isFetching || !convId ? (
     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
       <Loader2 className="h-3 w-3 animate-spin" />
@@ -399,6 +423,19 @@ export function AgentChatPanel({
           <p className="text-xs text-destructive">{connError}</p>
         ) : null}
 
+        {externalAgent && runtimeAvailability === "unavailable" ? (
+          <p className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+            The bridge is connected to PerkOS, but the external runtime did not
+            answer its health probe. Start or repair the owner-operated runtime
+            before sending messages.
+          </p>
+        ) : externalAgent && runtimeAvailability === "unverified" ? (
+          <p className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
+            The transport is connected, but this legacy client has not verified
+            execution-runtime health yet.
+          </p>
+        ) : null}
+
         <form className="flex flex-col gap-2" onSubmit={onSubmit}>
           <Textarea
             value={draft}
@@ -406,7 +443,7 @@ export function AgentChatPanel({
             placeholder={`Message ${agentName}…`}
             rows={2}
             onKeyDown={onKey}
-            disabled={!chat.authed && (convQuery.isFetching || !convId)}
+            disabled={runtimeBlocked || (!chat.authed && (convQuery.isFetching || !convId))}
           />
           <div className="flex items-center justify-between gap-2">
             <p className="text-xs text-muted-foreground">
@@ -423,7 +460,7 @@ export function AgentChatPanel({
             <Button
               type="submit"
               size="sm"
-              disabled={!draft.trim() || (!chat.authed && !convId)}
+              disabled={runtimeBlocked || !draft.trim() || (!chat.authed && !convId)}
               className="gap-1.5"
             >
               <Send className="h-3.5 w-3.5" />
