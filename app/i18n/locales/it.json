@@ -220,10 +220,10 @@
       "cta": "Contattaci"
     },
     "pricing": {
-      "heading": "Inizia gratis. Resta conveniente.",
-      "subheading": "Un intero team al prezzo di un abbonamento streaming, e un team a riposo costa quasi nulla. Confrontalo con l'assunzione di una sola persona part-time.",
+      "heading": "Inizia gratis. Cresci con limiti chiari.",
+      "subheading": "Ogni piano a pagamento include ore PerkOS Infra. Managed AI utilizza crediti prepagati separati, oppure puoi collegare il tuo provider AI.",
       "mostPopular": "Il più scelto",
-      "footNote": "Paghi solo per le ore in cui il tuo team lavora davvero. Se raggiungi il limite mensile, il team si mette semplicemente in pausa: ricarica o passa a un piano superiore per continuare. Niente sorprese in fattura.",
+      "footNote": "Le ore PerkOS Infra e i crediti Managed AI sono conteggiati separatamente. Quando uno dei saldi prepagati arriva a zero, il team si mette in pausa finché non ricarichi, cambi piano o colleghi il tuo provider AI. Nessuna sorpresa in fattura.",
       "tiers": {
         "free": {
           "name": "Gratis",
@@ -240,7 +240,7 @@
         },
         "starter": {
           "name": "Starter",
-          "price": "$9.99",
+          "price": "$29.97",
           "cadence": "/ mese",
           "tag": "Ospitiamo noi il tuo team, tu porti l'AI",
           "cta": "Avvia il tuo team",
@@ -253,27 +253,27 @@
         },
         "pro": {
           "name": "Pro",
-          "price": "$29.99",
+          "price": "$89.97",
           "cadence": "/ mese",
-          "tag": "Ospitiamo noi il tuo team e gestiamo anche l'AI",
+          "tag": "Ospitiamo il tuo team; Managed AI prepagata è disponibile",
           "cta": "Avvia il tuo team",
           "bullets": [
-            "Gestiamo noi il team E l'AI: zero configurazione",
-            "Nessun account AI necessario",
+            "Gestiamo noi il tuo team: zero configurazione",
+            "Managed AI con crediti di utilizzo prepagati",
             "150 ore di lavoro del team al mese (PerkOS Infra)",
-            "Supporto prioritario"
+            "Collega il tuo provider AI in qualsiasi momento"
           ]
         },
         "scale": {
           "name": "Scale",
-          "price": "$79.99",
+          "price": "$239.97",
           "cadence": "/ mese",
-          "tag": "Per team operativi tutto il giorno",
+          "tag": "Per flussi di lavoro più grandi e ricorrenti",
           "cta": "Avvia il tuo team",
           "bullets": [
             "Tutto quello incluso in Pro",
             "500 ore di lavoro del team al mese (PerkOS Infra)",
-            "Ricarica in qualsiasi momento se ti serve di più",
+            "Ricarica PerkOS Infra o i crediti Managed AI in qualsiasi momento",
             "Onboarding e una persona reale a disposizione"
           ]
         }

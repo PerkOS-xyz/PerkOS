@@ -433,9 +433,9 @@ function SlideDifferent() {
 function SlidePricing() {
   const tiers = [
     { name: "Free", price: "$0", tag: "7 days · bring your own agents", featured: false },
-    { name: "Starter", price: "$9.99", tag: "We host your team · your AI key", featured: false },
-    { name: "Pro", price: "$29.99", tag: "We host the team AND the AI", featured: true },
-    { name: "Scale", price: "$79.99", tag: "For teams running all day", featured: false },
+    { name: "Starter", price: "$29.97", tag: "50 Infra hours · BYOK", featured: false },
+    { name: "Pro", price: "$89.97", tag: "150 Infra hours · prepaid Managed AI", featured: true },
+    { name: "Scale", price: "$239.97", tag: "500 Infra hours · prepaid Managed AI", featured: false },
   ];
   return (
     <SlideFrame footer="06 — Get started">

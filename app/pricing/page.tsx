@@ -6,15 +6,15 @@ import { ContentSection, PublicPageShell } from "../components/marketing/PublicP
 export const metadata: Metadata = {
   title: "Pricing",
   description:
-    "Compare PerkOS AI plans for small businesses, from a free 7-day start to larger AI teams. Clear monthly pricing with no setup fees or surprise bills.",
+    "Compare PerkOS AI plans with included PerkOS Infra hours, optional prepaid Managed AI, BYOK support, and no surprise bills.",
   alternates: { canonical: "/pricing" },
 };
 
 const PLANS = [
-  { name: "Free", price: "$0", detail: "7 days to meet your first AI team" },
-  { name: "Starter", price: "$9.99", detail: "A focused team for essential business work" },
-  { name: "Pro", price: "$29.99", detail: "More teammates and capacity for growing businesses" },
-  { name: "Scale", price: "$79.99", detail: "Expanded capacity for larger, recurring workflows" },
+  { name: "Free", price: "$0", detail: "7 days with the AI agents you already run" },
+  { name: "Starter", price: "$29.97", detail: "50 PerkOS Infra hours; bring your own AI provider" },
+  { name: "Pro", price: "$89.97", detail: "150 PerkOS Infra hours; prepaid Managed AI available" },
+  { name: "Scale", price: "$239.97", detail: "500 PerkOS Infra hours; prepaid Managed AI available" },
 ];
 
 export default function PricingPage() {
@@ -22,7 +22,7 @@ export default function PricingPage() {
     <PublicPageShell
       eyebrow="PerkOS AI pricing"
       title="Start free. Add capacity when the work proves its value."
-      intro="Choose a predictable monthly plan for your business. There are no setup fees, long-term contracts or surprise usage bills."
+      intro="Choose a monthly PerkOS Infra allowance, then use prepaid Managed AI credits or connect your own provider. Usage pauses at zero, so there are no surprise bills."
       ctaId="pricing"
       breadcrumbs={[
         { name: "Home", path: "/" },
@@ -43,7 +43,7 @@ export default function PricingPage() {
       </ContentSection>
       <ContentSection title="Simple by design">
         <div className="grid gap-4 md:grid-cols-3">
-          {["No setup fees", "No long-term contracts", "No surprise usage bills"].map((item) => (
+          {["No setup fees", "No long-term contracts", "Separate prepaid usage limits"].map((item) => (
             <div key={item} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-5 text-foreground">
               <Check className="h-5 w-5 shrink-0 text-primary" />
               <span className="font-medium">{item}</span>

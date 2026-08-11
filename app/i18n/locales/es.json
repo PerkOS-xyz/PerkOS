@@ -220,10 +220,10 @@
       "cta": "Habla con nosotros"
     },
     "pricing": {
-      "heading": "Empieza gratis. Se mantiene accesible.",
-      "subheading": "Un equipo completo por el precio de una suscripción de streaming, y un equipo en descanso casi no cuesta nada. Compáralo con contratar a una sola persona a tiempo parcial.",
+      "heading": "Empieza gratis. Crece con límites claros.",
+      "subheading": "Cada plan de pago incluye horas de PerkOS Infra. Managed AI utiliza créditos prepagados separados, o puedes conectar tu propio proveedor de IA.",
       "mostPopular": "Más popular",
-      "footNote": "Solo pagas por las horas que tu equipo realmente trabaja. Si llegas al límite mensual de horas, tu equipo simplemente se pausa: recarga o mejora tu plan para seguir. Nunca te vas a llevar una sorpresa en la cuenta.",
+      "footNote": "Las horas de PerkOS Infra y los créditos de Managed AI se controlan por separado. Cuando uno de los saldos prepagados llega a cero, tu equipo se pausa hasta que recargues, mejores el plan o conectes tu propio proveedor de IA. Nunca recibirás una factura sorpresa.",
       "tiers": {
         "free": {
           "name": "Gratis",
@@ -240,7 +240,7 @@
         },
         "starter": {
           "name": "Starter",
-          "price": "$9.99",
+          "price": "$29.97",
           "cadence": "/ mes",
           "tag": "Nosotros alojamos tu equipo, tú traes la IA",
           "cta": "Inicia tu equipo",
@@ -253,27 +253,27 @@
         },
         "pro": {
           "name": "Pro",
-          "price": "$29.99",
+          "price": "$89.97",
           "cadence": "/ mes",
-          "tag": "Nosotros alojamos tu equipo y operamos la IA",
+          "tag": "Alojamos tu equipo; Managed AI prepago está disponible",
           "cta": "Inicia tu equipo",
           "bullets": [
-            "Nosotros operamos tu equipo Y la IA: cero configuración",
-            "No necesitas una cuenta de IA",
+            "Nosotros operamos tu equipo: cero configuración",
+            "Managed AI con créditos de uso prepagados",
             "150 horas de trabajo del equipo / mes (PerkOS Infra)",
-            "Soporte prioritario"
+            "Conecta tu propio proveedor de IA cuando quieras"
           ]
         },
         "scale": {
           "name": "Scale",
-          "price": "$79.99",
+          "price": "$239.97",
           "cadence": "/ mes",
-          "tag": "Para equipos que trabajan todo el día",
+          "tag": "Para flujos de trabajo más grandes y recurrentes",
           "cta": "Inicia tu equipo",
           "bullets": [
             "Todo lo incluido en Pro",
             "500 horas de trabajo del equipo / mes (PerkOS Infra)",
-            "Recarga cuando quieras si necesitas más",
+            "Recarga PerkOS Infra o créditos de Managed AI cuando quieras",
             "Incorporación guiada y una persona real"
           ]
         }
