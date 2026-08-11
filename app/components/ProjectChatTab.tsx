@@ -4,11 +4,13 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Crown,
   Loader2,
   MessageSquarePlus,
   PanelRightClose,
   PanelRightOpen,
   Play,
+  UserRound,
   Users,
   X,
 } from "lucide-react";
@@ -38,6 +40,14 @@ import {
 } from "../lib/useChatClient";
 import { extractMentions } from "../lib/mentions";
 import { useMentionParticipants } from "../lib/useMentionParticipants";
+import {
+  realtimeAgentStatus,
+  STATUS_AVAILABLE,
+  STATUS_RESTING,
+  type AgentLiveStatus,
+  useWalletAgents,
+} from "../lib/useWalletAgents";
+import { formatRelativeShort } from "../lib/format";
 import { entityKey, writeEdge } from "../lib/edges";
 import { uploadAttachment } from "../lib/uploadAttachment";
 import { projectChatAvailableHeight } from "../lib/projectChatLayout";
@@ -48,6 +58,7 @@ import {
   type OptimisticMessage,
 } from "./ConversationMessages";
 import { OfflineBanner } from "./OfflineBanner";
+import { AgentOrb } from "./AgentOrb";
 
 export function ProjectChatTab({
   detail,
@@ -76,7 +87,8 @@ export function ProjectChatTab({
     ownerWallet && ownerWallet.toLowerCase() !== (address ?? "").toLowerCase(),
   );
   const owner = shared ? ownerWallet : undefined;
-  const participants = useMentionParticipants(detail, projectId);
+  const participants = useMentionParticipants(detail, projectId, ownerWallet);
+  const { byName: liveAgents } = useWalletAgents(ownerWallet ?? address);
   const pmAgent = detail.project.pmAgent ?? null;
   const workflowPhase = detail.project.workflow?.phase ?? "draft";
   const canStartPlanning = ["draft", "cancelled"].includes(workflowPhase);
@@ -491,7 +503,10 @@ export function ProjectChatTab({
         <ProjectTeamPanel
           className="hidden min-h-0 lg:flex"
           participants={participants}
+          liveAgents={liveAgents}
           pmAgent={pmAgent}
+          currentWallet={address}
+          chatConnected={status === "connected"}
           onDesignatePm={onDesignatePm}
         />
       ) : null}
@@ -508,7 +523,10 @@ export function ProjectChatTab({
             id="project-team-mobile"
             className="relative z-10 h-full w-[min(20rem,calc(100vw-1rem))] rounded-md shadow-2xl"
             participants={participants}
+            liveAgents={liveAgents}
             pmAgent={pmAgent}
+            currentWallet={address}
+            chatConnected={status === "connected"}
             onDesignatePm={onDesignatePm}
             onClose={() => setMobileTeamOpen(false)}
           />
@@ -529,21 +547,51 @@ function formatThreadLabel(
   return `${latest ? "Latest · " : ""}${thread.title} · ${stamp}`;
 }
 
-function ProjectTeamPanel({
+export function findLiveAgent(
+  name: string,
+  liveAgents: Record<string, AgentLiveStatus>,
+): AgentLiveStatus | undefined {
+  const target = name.trim().toLocaleLowerCase();
+  return Object.values(liveAgents).find(
+    (agent) => agent.name.trim().toLocaleLowerCase() === target,
+  );
+}
+
+function humanInitials(label: string): string {
+  const words = label.trim().split(/\s+/u).filter(Boolean);
+  if (words.length === 0) return "?";
+  return words.slice(0, 2).map((word) => word[0]?.toLocaleUpperCase() ?? "").join("");
+}
+
+export function ProjectTeamPanel({
   id,
   className,
   participants,
+  liveAgents,
   pmAgent,
+  currentWallet,
+  chatConnected,
   onDesignatePm,
   onClose,
 }: {
   id?: string;
   className?: string;
   participants: ReturnType<typeof useMentionParticipants>;
+  liveAgents: Record<string, AgentLiveStatus>;
   pmAgent: string | null;
+  currentWallet?: string;
+  chatConnected: boolean;
   onDesignatePm: () => void;
   onClose?: () => void;
 }) {
+  const availableAgents = participants.filter((participant) => {
+    if (participant.kind !== "agent") return false;
+    const live = findLiveAgent(participant.label, liveAgents);
+    return realtimeAgentStatus(live).label === STATUS_AVAILABLE;
+  }).length;
+  const agentCount = participants.filter((participant) => participant.kind === "agent").length;
+  const currentIdentity = currentWallet ? `user:${currentWallet.toLowerCase()}` : "";
+
   return (
     <aside
       id={id}
@@ -552,8 +600,13 @@ function ProjectTeamPanel({
         className,
       )}
     >
-      <div className="flex shrink-0 items-center justify-between gap-2">
-        <span className="text-sm font-medium">Project team</span>
+      <div className="flex shrink-0 items-start justify-between gap-2">
+        <div>
+          <span className="text-sm font-medium">Project team</span>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">
+            {availableAgents} of {agentCount} agents available
+          </p>
+        </div>
         <div className="flex items-center gap-1">
           <span className="text-xs text-muted-foreground">{participants.length}</span>
           {onClose ? (
@@ -573,13 +626,90 @@ function ProjectTeamPanel({
       {!pmAgent ? (
         <Button size="sm" variant="outline" onClick={onDesignatePm}>Designate PM</Button>
       ) : null}
-      <ul className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
-        {participants.map((participant) => (
-          <li key={participant.id} className="flex items-center justify-between gap-2 text-sm">
-            <span className="truncate">{participant.label}</span>
-            <span className="text-[10px] uppercase text-muted-foreground">{participant.kind}</span>
-          </li>
-        ))}
+      <ul className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-1">
+        {participants.map((participant) => {
+          const agentName = participant.kind === "agent" ? participant.id.slice("agent:".length) : "";
+          const live = participant.kind === "agent" ? findLiveAgent(agentName, liveAgents) : undefined;
+          const presence = realtimeAgentStatus(live);
+          const isCoordinator = participant.kind === "agent"
+            && pmAgent?.toLocaleLowerCase() === agentName.toLocaleLowerCase();
+          const isCurrentUser = participant.id.toLocaleLowerCase() === currentIdentity;
+          const detail = participant.kind === "agent"
+            ? [live?.runtime, isCoordinator ? "Coordinator" : "Agent"].filter(Boolean).join(" · ")
+            : isCurrentUser ? "You · Project member" : "Project member";
+          const statusText = participant.kind === "agent"
+            ? presence.label
+            : isCurrentUser && chatConnected ? "In this chat" : "Member";
+          const card = (
+            <div className="group flex min-w-0 items-center gap-3 rounded-xl border border-border/80 bg-background/55 px-3 py-2.5 transition-colors hover:border-primary/35 hover:bg-primary/[0.04]">
+              <div className="relative shrink-0">
+                {participant.kind === "agent" ? (
+                  <AgentOrb
+                    name={participant.label}
+                    presetId={live?.presetId}
+                    role={live?.role}
+                    size={40}
+                    status={presence.label === STATUS_AVAILABLE ? "available" : presence.label === STATUS_RESTING ? "resting" : null}
+                  />
+                ) : (
+                  <span className="grid h-10 w-10 place-items-center rounded-full bg-violet-500/15 text-xs font-semibold text-violet-200 ring-1 ring-violet-400/25">
+                    {humanInitials(participant.label)}
+                  </span>
+                )}
+                <span
+                  className={cn(
+                    "absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-card",
+                    participant.kind === "agent"
+                      ? presence.color
+                      : isCurrentUser && chatConnected
+                        ? "bg-emerald-400"
+                        : "bg-[#7975a8]",
+                  )}
+                  aria-hidden
+                />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex min-w-0 items-center gap-1.5">
+                  <span className="truncate text-sm font-medium text-foreground">{participant.label}</span>
+                  {isCoordinator ? (
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-primary">
+                      <Crown className="h-2.5 w-2.5" /> Lead
+                    </span>
+                  ) : null}
+                </div>
+                <p className="truncate text-[11px] text-muted-foreground">{detail}</p>
+                <p className={cn(
+                  "mt-0.5 truncate text-[11px]",
+                  statusText === STATUS_AVAILABLE || statusText === "In this chat"
+                    ? "text-emerald-400"
+                    : presence.label === "Runtime unavailable"
+                      ? "text-red-400"
+                      : "text-muted-foreground",
+                )}>
+                  {statusText}
+                  {participant.kind === "agent" && statusText !== STATUS_AVAILABLE && live?.lastBridgeSeenMs
+                    ? ` · seen ${formatRelativeShort(new Date(live.lastBridgeSeenMs))}`
+                    : ""}
+                </p>
+              </div>
+              {participant.kind === "human" ? (
+                <UserRound className="h-4 w-4 shrink-0 text-muted-foreground/60" />
+              ) : null}
+            </div>
+          );
+          return (
+            <li key={participant.id}>
+              {participant.kind === "agent" && live?.id ? (
+                <Link
+                  href={`/chat/agent/${encodeURIComponent(live.id)}`}
+                  aria-label={`Open chat with ${participant.label}`}
+                >
+                  {card}
+                </Link>
+              ) : card}
+            </li>
+          );
+        })}
       </ul>
     </aside>
   );

@@ -118,7 +118,7 @@ export function DocsTab({
   const pmDrafts = useMemo(() => docs.filter((d) => d.draft), [docs]);
 
   // @-mention participants: human members (by username) + project agents.
-  const participants = useMentionParticipants(detail, projectId);
+  const participants = useMentionParticipants(detail, projectId, ownerWallet);
 
   // Default selection: the active plan, else the first live doc.
   useEffect(() => {

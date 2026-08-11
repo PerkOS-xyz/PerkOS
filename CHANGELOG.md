@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-08-11 — Context-aware project chat and participant presence
+
+- Project chat now builds mention candidates from the current project roster
+  rather than historical task assignments and requests shared membership using
+  the project owner scope.
+- Replace the plain participant-name list with contact-style cards showing
+  avatars, coordinator/lead role, runtime kind, real agent availability, and
+  last-seen state. External agent cards link to direct chat when available.
+- Publish the immutable PerkOS A2A 0.12.50 artifact used by official onboarding
+  and the project Context Plane integration.
+
 ## 2026-08-11 — External runtime health is not transport presence
 
 - External-agent cards and details now reserve green `Online` for a fresh,

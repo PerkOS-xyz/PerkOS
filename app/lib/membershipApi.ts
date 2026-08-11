@@ -77,9 +77,11 @@ export async function inviteProjectMember(input: {
 }
 
 export async function listProjectMembers(
-  projectId: string
+  projectId: string,
+  owner?: string,
 ): Promise<Member[]> {
-  const res = await authedFetch(`/projects/${projectId}/members`);
+  const query = owner ? `?owner=${encodeURIComponent(owner)}` : "";
+  const res = await authedFetch(`/projects/${projectId}/members${query}`);
   const data = (await jsonOrThrow(res, "Failed to load members")) as {
     members?: Member[];
   };
