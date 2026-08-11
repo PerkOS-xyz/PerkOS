@@ -19,7 +19,9 @@ import {
   type AgentRow,
   type HibernationApiState,
 } from "../../lib/perkosApi";
-import { hasFreshAgentHeartbeat } from "../../lib/agentHostingPolicy";
+import {
+  externalRuntimeAvailability,
+} from "../../lib/agentHostingPolicy";
 import { SearchInput, matchesQuery } from "../../components/SearchInput";
 import { EmptyState } from "../../components/EmptyState";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
@@ -460,6 +462,8 @@ function AgentCard({
               external={agent.external}
               bridgeConnected={agent.bridgeConnected}
               lastBridgeSeenAt={agent.lastBridgeSeenAt}
+              runtimeStatus={agent.runtimeStatus}
+              runtimeHealthCheckedAt={agent.runtimeHealthCheckedAt}
               hibernationState={hibState}
               syncing={syncing}
               invited={agent.invited}
@@ -569,6 +573,8 @@ function StatusBadge({
   external,
   bridgeConnected,
   lastBridgeSeenAt,
+  runtimeStatus,
+  runtimeHealthCheckedAt,
   hibernationState,
   syncing,
   invited,
@@ -579,6 +585,8 @@ function StatusBadge({
   external?: boolean;
   bridgeConnected?: boolean;
   lastBridgeSeenAt?: string | null;
+  runtimeStatus?: AgentRow["runtimeStatus"];
+  runtimeHealthCheckedAt?: string | null;
   hibernationState?: HibernationApiState;
   syncing?: boolean;
   invited?: boolean;
@@ -608,14 +616,24 @@ function StatusBadge({
       </span>
     );
   }
-  if (
-    external &&
-    status === "ready" &&
-    !hasFreshAgentHeartbeat({ bridgeConnected, lastBridgeSeenAt })
-  ) {
+  if (external && status === "ready") {
+    const availability = externalRuntimeAvailability({
+      bridgeConnected,
+      lastBridgeSeenAt,
+      runtimeStatus,
+      runtimeHealthCheckedAt,
+    });
+    const externalState = availability === "online"
+      ? { tone: "bg-emerald-500/20 text-emerald-300", label: t("agents.status.online") }
+      : availability === "unavailable"
+        ? { tone: "bg-red-500/20 text-red-300", label: "Runtime unavailable" }
+        : availability === "unverified"
+          ? { tone: "bg-amber-500/20 text-amber-300", label: "Runtime unverified" }
+          : { tone: "bg-[#7975a8]/20 text-[#7975a8]", label: t("agents.status.offline") };
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-[#7975a8]/20 px-2 py-0.5 text-xs font-medium text-[#7975a8]">
-        {t("agents.status.offline")}
+      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${externalState.tone}`}>
+        {availability === "online" ? <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> : null}
+        {externalState.label}
       </span>
     );
   }

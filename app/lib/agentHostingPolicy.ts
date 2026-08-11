@@ -17,3 +17,33 @@ export function hasFreshAgentHeartbeat(
   const seen = Date.parse(agent.lastBridgeSeenAt);
   return !Number.isNaN(seen) && now - seen <= 90_000;
 }
+
+export type ExternalRuntimeAvailability =
+  | "online"
+  | "unavailable"
+  | "unverified"
+  | "offline";
+
+/**
+ * A live bridge proves transport connectivity, not execution readiness.
+ * Runtime evidence is intentionally tri-state so legacy clients cannot be
+ * silently promoted to healthy merely because they omitted the new field.
+ */
+export function externalRuntimeAvailability(
+  agent: {
+    bridgeConnected?: boolean;
+    lastBridgeSeenAt?: string | null;
+    runtimeStatus?: "healthy" | "unreachable" | "unknown" | null;
+    runtimeHealthCheckedAt?: string | null;
+  },
+  now = Date.now(),
+): ExternalRuntimeAvailability {
+  if (!hasFreshAgentHeartbeat(agent, now)) return "offline";
+  const checked = agent.runtimeHealthCheckedAt
+    ? Date.parse(agent.runtimeHealthCheckedAt)
+    : NaN;
+  if (Number.isNaN(checked) || now - checked > 90_000) return "unverified";
+  if (agent.runtimeStatus === "healthy") return "online";
+  if (agent.runtimeStatus === "unreachable") return "unavailable";
+  return "unverified";
+}

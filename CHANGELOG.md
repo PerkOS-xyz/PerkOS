@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-08-11 — External runtime health is not transport presence
+
+- External-agent cards and details now reserve green `Online` for a fresh,
+  healthy execution runtime. A live bridge with a failed probe renders
+  `Runtime unavailable`; legacy clients render `Runtime unverified`.
+- Direct chat no longer labels the browser's websocket as if the agent were
+  connected. It shows agent/runtime readiness and disables sending when the
+  external runtime is known offline or unreachable.
+- The credential panel says `Bridge connected`, preserving the useful
+  transport/auth signal without conflating it with model execution.
+
 ## 2026-08-11 — PerkOS A2A 0.12.44 immutable artifact
 
 - Published the exact npm 0.12.44 tarball and SHA-256 for external OpenClaw
