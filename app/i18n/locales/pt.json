@@ -240,7 +240,7 @@
         },
         "starter": {
           "name": "Iniciante",
-          "price": "US$ 9,99",
+          "price": "US$ 29,97",
           "cadence": "/ mês",
           "tag": "Nós hospedamos sua equipe, você traz a IA",
           "cta": "Comece sua equipe",
@@ -253,7 +253,7 @@
         },
         "pro": {
           "name": "Pró",
-          "price": "US$ 29,99",
+          "price": "US$ 89,97",
           "cadence": "/ mês",
           "tag": "Hospedamos sua equipe e administramos a IA",
           "cta": "Comece sua equipe",
@@ -266,7 +266,7 @@
         },
         "scale": {
           "name": "Escala",
-          "price": "US$ 79,99",
+          "price": "US$ 239,97",
           "cadence": "/ mês",
           "tag": "Para equipes que correm o dia todo",
           "cta": "Comece sua equipe",

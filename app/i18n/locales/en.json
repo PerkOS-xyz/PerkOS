@@ -240,7 +240,7 @@
         },
         "starter": {
           "name": "Starter",
-          "price": "$9.99",
+          "price": "$29.97",
           "cadence": "/ month",
           "tag": "We host your team, you bring the AI",
           "cta": "Start your team",
@@ -253,7 +253,7 @@
         },
         "pro": {
           "name": "Pro",
-          "price": "$29.99",
+          "price": "$89.97",
           "cadence": "/ month",
           "tag": "We host your team and run the AI",
           "cta": "Start your team",
@@ -266,7 +266,7 @@
         },
         "scale": {
           "name": "Scale",
-          "price": "$79.99",
+          "price": "$239.97",
           "cadence": "/ month",
           "tag": "For teams running all day",
           "cta": "Start your team",

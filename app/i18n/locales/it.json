@@ -240,7 +240,7 @@
         },
         "starter": {
           "name": "Starter",
-          "price": "$9.99",
+          "price": "$29.97",
           "cadence": "/ mese",
           "tag": "Ospitiamo noi il tuo team, tu porti l'AI",
           "cta": "Avvia il tuo team",
@@ -253,7 +253,7 @@
         },
         "pro": {
           "name": "Pro",
-          "price": "$29.99",
+          "price": "$89.97",
           "cadence": "/ mese",
           "tag": "Ospitiamo noi il tuo team e gestiamo anche l'AI",
           "cta": "Avvia il tuo team",
@@ -266,7 +266,7 @@
         },
         "scale": {
           "name": "Scale",
-          "price": "$79.99",
+          "price": "$239.97",
           "cadence": "/ mese",
           "tag": "Per team operativi tutto il giorno",
           "cta": "Avvia il tuo team",

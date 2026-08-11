@@ -12,9 +12,9 @@ export const metadata: Metadata = {
 
 const PLANS = [
   { name: "Free", price: "$0", detail: "7 days to meet your first AI team" },
-  { name: "Starter", price: "$9.99", detail: "A focused team for essential business work" },
-  { name: "Pro", price: "$29.99", detail: "More teammates and capacity for growing businesses" },
-  { name: "Scale", price: "$79.99", detail: "Expanded capacity for larger, recurring workflows" },
+  { name: "Starter", price: "$29.97", detail: "A focused team for essential business work" },
+  { name: "Pro", price: "$89.97", detail: "More teammates and capacity for growing businesses" },
+  { name: "Scale", price: "$239.97", detail: "Expanded capacity for larger, recurring workflows" },
 ];
 
 export default function PricingPage() {

@@ -240,7 +240,7 @@
         },
         "starter": {
           "name": "Starter",
-          "price": "$9.99",
+          "price": "$29.97",
           "cadence": "/ mes",
           "tag": "Nosotros alojamos tu equipo, tú traes la IA",
           "cta": "Inicia tu equipo",
@@ -253,7 +253,7 @@
         },
         "pro": {
           "name": "Pro",
-          "price": "$29.99",
+          "price": "$89.97",
           "cadence": "/ mes",
           "tag": "Nosotros alojamos tu equipo y operamos la IA",
           "cta": "Inicia tu equipo",
@@ -266,7 +266,7 @@
         },
         "scale": {
           "name": "Scale",
-          "price": "$79.99",
+          "price": "$239.97",
           "cadence": "/ mes",
           "tag": "Para equipos que trabajan todo el día",
           "cta": "Inicia tu equipo",
