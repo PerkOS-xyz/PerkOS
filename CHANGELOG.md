@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-08-12 — Sparky takes the landing hero
+
+- The hero art is now a clip of the mascot turning to face the viewer, scrubbed
+  by scroll instead of played on a clock: he turns as fast as you scroll and
+  turns back if you scroll up.
+- Two takes chosen by viewport — 16:9 with him beside the copy on desktop, 9:16
+  with him centred on phones. The background is baked in, so framing has to be
+  composed per orientation rather than cropped with CSS.
+- Phones play the pinned hero in two beats over an extra screen of scroll: the
+  copy alone first, then the veil lifts and Sparky has the stage. Each line of
+  copy leaves on its own timing rather than the block dissolving at once.
+- `prefers-reduced-motion` gets a still frame. See `docs/SPARKY-HERO.md`.
+
 ## 2026-08-11 — Context-aware project chat and participant presence
 
 - Project chat now builds mention candidates from the current project roster
