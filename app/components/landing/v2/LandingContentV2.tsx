@@ -53,6 +53,11 @@ export function LandingContentV2() {
       <main>
         {/* Pinned hero (z-0) … */}
         <HeroV2 />
+        {/* Phones get an extra screen of scroll while the hero stays pinned, so
+            its two beats — copy first, then Sparky alone — have room to play
+            out before the cover block arrives. Desktop shows both at once and
+            needs none of it. */}
+        <div aria-hidden className="h-screen md:hidden" />
         {/* … covered by everything below (z-10, opaque). Section order mirrors
             the original landing so nothing is skipped. */}
         <div className="relative z-10 bg-background">
