@@ -2,7 +2,7 @@
 
 import { useEffect, type ReactNode } from "react";
 import { I18nextProvider } from "react-i18next";
-import i18n, { detectInitialLanguage, LANGUAGE_STORAGE_KEY } from "../lib/i18n";
+import i18n, { detectInitialLanguage, isSupportedLanguage, persistLanguagePreference } from "../lib/i18n";
 
 /**
  * Mounts the (client-side) i18n instance. i18next starts at English so SSR and the
@@ -12,26 +12,27 @@ import i18n, { detectInitialLanguage, LANGUAGE_STORAGE_KEY } from "../lib/i18n";
  */
 export function LocaleProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
-    const initial = detectInitialLanguage();
-    if (initial !== i18n.resolvedLanguage) {
-      void i18n.changeLanguage(initial);
-    }
+    const syncLanguage = () => {
+      const initial = detectInitialLanguage();
+      if (initial !== i18n.resolvedLanguage) {
+        void i18n.changeLanguage(initial);
+      }
+    };
+    syncLanguage();
 
     const onLanguageChanged = (lng: string) => {
       const base = (lng || "en").split("-")[0];
       if (typeof document !== "undefined") {
         document.documentElement.lang = base;
       }
-      try {
-        window.localStorage.setItem(LANGUAGE_STORAGE_KEY, base);
-      } catch {
-        // localStorage blocked — selection just won't persist across reloads
-      }
+      if (isSupportedLanguage(base)) persistLanguagePreference(base);
     };
     onLanguageChanged(i18n.resolvedLanguage || i18n.language);
     i18n.on("languageChanged", onLanguageChanged);
+    window.addEventListener("pageshow", syncLanguage);
     return () => {
       i18n.off("languageChanged", onLanguageChanged);
+      window.removeEventListener("pageshow", syncLanguage);
     };
   }, []);
 

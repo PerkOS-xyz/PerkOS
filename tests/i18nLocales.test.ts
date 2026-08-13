@@ -10,8 +10,25 @@ import pt from "../app/i18n/locales/pt.json";
 import zh from "../app/i18n/locales/zh.json";
 import {
   isSupportedLanguage,
+  resolveInitialLanguage,
   SUPPORTED_LANGUAGES,
 } from "../app/lib/i18n";
+
+const SHARED_PRODUCT_LANGUAGES = ["en", "es", "fr", "pt", "ja", "ko"];
+
+describe("shared PerkOS product language contract", () => {
+  it("exposes the canonical App/Grow language set in order", () => {
+    expect(SUPPORTED_LANGUAGES.map(({ code }) => code)).toEqual(SHARED_PRODUCT_LANGUAGES);
+  });
+
+  it("prefers URL, then the shared cookie, then local preference, then browser", () => {
+    expect(resolveInitialLanguage({ query: "es", sharedCookie: "ja", saved: "ko", browserLanguages: ["fr-FR"] })).toBe("es");
+    expect(resolveInitialLanguage({ sharedCookie: "ja", saved: "ko", browserLanguages: ["fr-FR"] })).toBe("ja");
+    expect(resolveInitialLanguage({ saved: "ko", browserLanguages: ["fr-FR"] })).toBe("ko");
+    expect(resolveInitialLanguage({ browserLanguages: ["fr-FR"] })).toBe("fr");
+    expect(resolveInitialLanguage({ browserLanguages: ["de-DE"] })).toBe("en");
+  });
+});
 
 function scalarPaths(value: unknown, prefix = ""): string[] {
   if (!value || typeof value !== "object") return [prefix];
