@@ -19,11 +19,9 @@
  *   3. No wallet signal at all (plain browser) → follow the original
  *      href to /sign-up or /sign-in so the user can pick a method.
  *
- * Why we keep AutoConnect for the EIP-6963 case too: when the wallet
- * has already authorised app.perkos.xyz in a previous session, wagmi
- * rehydrates silently without needing a user click, and isConnected
- * flips before the user even taps anything. The click-time connect is
- * the fallback for the first-time authorisation.
+ * Browser wallets are deliberately connected only in this click handler.
+ * AutoConnect is reserved for verified Mini App hosts so opening the public
+ * landing never triggers a wallet permission prompt.
  */
 
 import Link from "next/link";

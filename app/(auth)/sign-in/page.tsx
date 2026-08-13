@@ -70,9 +70,8 @@ export default function SignInPage() {
   //  - loading / syncing: a sign-in is IN PROGRESS on this page (e.g. the
   //    wallet-signature popup is open). Handing off mid-sync navigates away
   //    from the page driving the signature and thrashes /sign-in ↔ /continue.
-  // This matters on the browser/Dynamic path, where AutoConnect can connect
-  // wagmi to a Coinbase EIP-6963 provider while the real sign-in runs through
-  // Dynamic — so `isConnected` (wagmi) is true throughout the Dynamic sync.
+  // Browser wallet connections begin only from an explicit user action;
+  // verified Mini App hosts may still settle automatically through wagmi.
   const sessionSettled =
     session.status === "signed-in" || session.status === "not-allowlisted";
   useEffect(() => {
