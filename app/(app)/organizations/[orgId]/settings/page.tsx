@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../../../../lib/useAppAccount";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ChevronLeft, Building2 } from "lucide-react";
@@ -18,7 +18,7 @@ import { updateOrgName } from "../../../../lib/perkosApi";
 export default function OrgSettingsPage() {
   const params = useParams<{ orgId: string }>();
   const orgId = params.orgId;
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const { orgs, refresh } = useActiveOrg();
   const org = orgs.find((o) => o.id === orgId) ?? null;
   const isOwner = org?.role === "owner" || (!org?.shared && Boolean(org));

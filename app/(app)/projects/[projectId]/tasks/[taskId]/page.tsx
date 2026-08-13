@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../../../../../lib/useAppAccount";
 import { toast } from "sonner";
 import {
   ArrowLeft,
@@ -48,7 +48,7 @@ export default function TaskDetailPage({ params }: PageProps) {
   const { projectId, taskId } = use(params);
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 

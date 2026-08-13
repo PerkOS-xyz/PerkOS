@@ -684,25 +684,28 @@
   "settings": {
     "header": {
       "title": "Ajustes",
-      "subtitle": "Administra tu billetera, tu espacio de trabajo y tus integraciones."
+      "subtitle": "Administra tu cuenta, tu espacio de trabajo y tus integraciones."
     },
     "account": {
       "title": "Cuenta",
-      "description": "Iniciaste sesión con esta billetera de Base / Solana.",
+      "description": "Tu acceso seguro a PerkOS y los controles de tu cuenta.",
+      "signedInAccount": "Cuenta conectada",
+      "secureAccount": "Cuenta segura de PerkOS",
+      "simpleModeHint": "PerkOS administra los detalles técnicos en segundo plano.",
       "connectedWallet": "Billetera conectada",
       "notConnected": "No conectada",
       "copied": "Copiado",
       "copyFull": "Copiar completa",
       "noKeys": "Nunca te pedimos claves privadas ni frases semilla.",
-      "disconnect": "Desconectar billetera"
+      "disconnect": "Cerrar sesión"
     },
     "username": {
       "title": "Nombre de usuario",
-      "description": "Tu @usuario: lo que tus compañeros escriben para mencionarte en los chats. Es único, y si no lo configuras, se usa la dirección de tu billetera."
+      "description": "Tu @usuario es lo que tus compañeros escriben para mencionarte en los chats. Es único para tu cuenta."
     },
     "avatar": {
       "title": "Foto de perfil",
-      "description": "Tu avatar en toda la app. Usa tu ENS o Basename si tienes uno, o sube el tuyo.",
+      "description": "Tu avatar en toda la app. Sube una imagen o usa el avatar generado.",
       "sourceEns": "ENS",
       "sourceBasename": "Basename",
       "sourceCustom": "Personalizada",
@@ -733,7 +736,14 @@
       "infoBefore": "Por ahora, cada agente se configura con su propio BYOK. Usa el",
       "infoLink": "asistente de creación de agentes",
       "infoAfter": "para conectar credenciales de OpenAI, Anthropic u OpenRouter.",
-      "infoNote": "Una bóveda de claves unificada, vinculada a tu billetera, está planeada para una futura versión."
+      "infoNote": "Una bóveda de claves unificada, vinculada a tu cuenta, está planeada para una futura versión."
+    },
+    "advanced": {
+      "title": "Opciones avanzadas",
+      "description": "Controles opcionales para quienes desean administrar directamente redes, activos digitales y cuentas de pago.",
+      "toggle": "Mostrar detalles de blockchain y pagos",
+      "disabledHint": "Desactivado por defecto. PerkOS usa Base de forma segura en segundo plano sin mostrar detalles técnicos.",
+      "enabledHint": "Ahora puedes ver el selector de red, saldos, direcciones y herramientas de tokens."
     },
     "network": {
       "title": "Red",
@@ -757,9 +767,9 @@
         "action": "Reiniciar"
       },
       "disconnect": {
-        "title": "Desconectar billetera",
+        "title": "Cerrar sesión",
         "description": "Cierra tu sesión en este dispositivo. Tus agentes y proyectos en el servidor permanecen intactos.",
-        "action": "Desconectar"
+        "action": "Cerrar sesión"
       }
     },
     "resetDialog": {
@@ -1650,6 +1660,7 @@
       "invalidWallet": "Ingresa una dirección de billetera 0x… válida (40 caracteres hexadecimales).",
       "loadingMembers": "Cargando miembros…",
       "noMembers": "Todavía no hay miembros.",
+      "teamMember": "Miembro del equipo {{number}}",
       "removeAria": "Quitar {{wallet}}",
       "removeTitle": "Quitar miembro",
       "memberInvited": "Miembro invitado",
@@ -1763,6 +1774,8 @@
     },
     "userMenu": {
       "accountMenu": "Menú de la cuenta",
+      "account": "Tu cuenta",
+      "secureAccount": "Cuenta segura",
       "ownerWallet": "Billetera del propietario",
       "copied": "Copiado",
       "copyFullAddress": "Copiar dirección completa",
@@ -1808,15 +1821,16 @@
       "registerAgent": "Registrar agente",
       "createOrganization": "Crear organización",
       "openPerkosAgent": "Abrir Ask PerkOS Agent",
-      "disconnectWallet": "Desconectar billetera"
+      "disconnectWallet": "Cerrar sesión"
     },
     "accessGate": {
       "privateAlpha": "Alfa privada",
       "title": "Solicitar acceso a la alfa",
       "titleSubmitted": "Solicitud recibida",
-      "description": "PerkOS está en alfa privada. Esta billetera todavía no tiene acceso. Cuéntanos un poco sobre ti y te responderemos.",
-      "descriptionSubmitted": "Te contactaremos al correo que nos diste en cuanto esta billetera sea aprobada.",
-      "yourWallet": "Tu billetera",
+      "description": "PerkOS está en alfa privada. Esta cuenta todavía no tiene acceso. Cuéntanos un poco sobre ti y te responderemos.",
+      "descriptionSubmitted": "Te contactaremos al correo que nos diste en cuanto esta cuenta sea aprobada.",
+      "yourWallet": "Tu cuenta",
+      "secureAccount": "Cuenta segura de PerkOS",
       "onTheList": "Ya estás en la lista. Revisa tu correo.",
       "emailLabel": "Correo electrónico",
       "usernameLabel": "Nombre de usuario",
@@ -1828,7 +1842,7 @@
       "submitError": "No se pudo enviar la solicitud",
       "sending": "Enviando…",
       "requestAccessButton": "Solicitar acceso",
-      "useDifferentWallet": "Usar otra billetera",
+      "useDifferentWallet": "Usar otra cuenta",
       "accessCodeLabel": "Código de acceso (opcional)",
       "accessCodePlaceholder": "ej. JULIO10",
       "accessCodeHint": "¿Tienes un código de un socio de PerkOS? Ingrésalo para obtener acceso instantáneo.",

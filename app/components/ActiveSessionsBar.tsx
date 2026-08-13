@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../lib/useAppAccount";
 
 import {
   useWalletAgents,
@@ -28,7 +28,7 @@ import { AgentOrb } from "./AgentOrb";
  * fear-reduction redesign — never "sessions" / "agents" / "online".
  */
 export function ActiveSessionsBar() {
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const { byName, loaded } = useWalletAgents(address);
 
   if (!address || !loaded) return null;

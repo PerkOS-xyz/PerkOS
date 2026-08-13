@@ -13,7 +13,7 @@ export function PrivySignInButton() {
       className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#ec1b69] px-6 py-4 font-medium text-[#ececff] transition-opacity hover:opacity-90 disabled:opacity-60"
     >
       <Image src="/brand/icon-mail.svg" alt="" width={16} height={16} />
-      <span className="text-base leading-none">Continue with email or wallet</span>
+      <span className="text-base leading-none">Continue with Google or email</span>
     </button>
   );
 }

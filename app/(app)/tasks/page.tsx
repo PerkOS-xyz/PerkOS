@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../../lib/useAppAccount";
 import { Plus, Folder, ListTodo, Trash2, X, ChevronDown } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -39,7 +39,7 @@ type EnrichedTask = {
 
 export default function TasksPage() {
   const { t } = useTranslation();
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const queryClient = useQueryClient();
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());

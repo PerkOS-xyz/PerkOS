@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../../lib/useAppAccount";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -17,7 +17,7 @@ import { getWalletProjects, updateOrgName } from "../../lib/perkosApi";
 
 export default function OrganizationsPage() {
   const { t } = useTranslation();
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const {
     orgs,
     activeOrgId,

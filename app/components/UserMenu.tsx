@@ -23,6 +23,7 @@ import { formatAddress } from "../lib/format";
 import { useWalletSession } from "../lib/useWalletSession";
 import { useUserProfile } from "../lib/useUserProfile";
 import { effectiveAvatarUrl } from "../lib/perkosApi";
+import { useAdvancedFeatures } from "../lib/advancedFeatures";
 import { UserAvatar } from "./UserAvatar";
 
 export function UserMenu({ onLogout }: { onLogout?: () => void }) {
@@ -34,12 +35,16 @@ export function UserMenu({ onLogout }: { onLogout?: () => void }) {
   // landing page); fall back to session.logout() if no handler was provided.
   const session = useWalletSession();
   const address = session.address;
+  const advancedFeatures = useAdvancedFeatures(address);
   const { data: profile } = useUserProfile(address);
   const avatarUrl = effectiveAvatarUrl(profile);
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(false);
 
   if (!address) return null;
+
+  const accountLabel =
+    profile?.username || session.identityLabel || t("chrome.userMenu.account");
 
   function copy() {
     navigator.clipboard
@@ -73,9 +78,14 @@ export function UserMenu({ onLogout }: { onLogout?: () => void }) {
           />
         }
       >
-        <UserAvatar address={address} avatarUrl={avatarUrl} size={28} title={address} />
-        <span className="hidden font-mono text-xs text-foreground md:inline">
-          {formatAddress(address)}
+        <UserAvatar
+          address={address}
+          avatarUrl={avatarUrl}
+          size={28}
+          title={advancedFeatures.enabled ? address : accountLabel}
+        />
+        <span className="hidden max-w-36 truncate text-xs text-foreground md:inline">
+          {advancedFeatures.enabled ? formatAddress(address) : accountLabel}
         </span>
       </PopoverTrigger>
       <PopoverContent
@@ -83,36 +93,48 @@ export function UserMenu({ onLogout }: { onLogout?: () => void }) {
         className="w-64 border-border bg-card p-2"
       >
         <div className="flex items-center gap-2 rounded-md px-2 py-2">
-          <UserAvatar address={address} avatarUrl={avatarUrl} size={36} title={address} />
+          <UserAvatar
+            address={address}
+            avatarUrl={avatarUrl}
+            size={36}
+            title={advancedFeatures.enabled ? address : accountLabel}
+          />
           <div className="flex min-w-0 flex-col">
-            <span className="truncate font-mono text-xs text-foreground" title={address}>
-              {formatAddress(address)}
+            <span
+              className="truncate text-xs text-foreground"
+              title={advancedFeatures.enabled ? address : accountLabel}
+            >
+              {advancedFeatures.enabled ? formatAddress(address) : accountLabel}
             </span>
             <span className="text-[10px] text-muted-foreground">
-              {t("chrome.userMenu.ownerWallet")}
+              {advancedFeatures.enabled
+                ? t("chrome.userMenu.ownerWallet")
+                : t("chrome.userMenu.secureAccount")}
             </span>
           </div>
         </div>
 
         <Separator className="my-1 bg-border" />
 
-        <button
-          type="button"
-          onClick={copy}
-          className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm text-foreground hover:bg-muted/40"
-        >
-          {copied ? (
-            <>
-              <Check className="h-3.5 w-3.5 text-primary" />
-              {t("chrome.userMenu.copied")}
-            </>
-          ) : (
-            <>
-              <Copy className="h-3.5 w-3.5 text-muted-foreground" />
-              {t("chrome.userMenu.copyFullAddress")}
-            </>
-          )}
-        </button>
+        {advancedFeatures.enabled ? (
+          <button
+            type="button"
+            onClick={copy}
+            className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm text-foreground hover:bg-muted/40"
+          >
+            {copied ? (
+              <>
+                <Check className="h-3.5 w-3.5 text-primary" />
+                {t("chrome.userMenu.copied")}
+              </>
+            ) : (
+              <>
+                <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                {t("chrome.userMenu.copyFullAddress")}
+              </>
+            )}
+          </button>
+        ) : null}
 
         <Link
           href="/settings"

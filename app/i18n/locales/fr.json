@@ -684,25 +684,28 @@
   "settings": {
     "header": {
       "title": "Paramètres",
-      "subtitle": "Gérez votre portefeuille, votre espace de travail et vos intégrations."
+      "subtitle": "Gérez votre compte, votre espace de travail et vos intégrations."
     },
     "account": {
       "title": "Compte",
-      "description": "Vous vous êtes connecté avec ce portefeuille Base / Solana.",
+      "description": "Votre connexion sécurisée à PerkOS et les contrôles du compte.",
+      "signedInAccount": "Compte connecté",
+      "secureAccount": "Compte PerkOS sécurisé",
+      "simpleModeHint": "PerkOS gère les détails techniques en arrière-plan.",
       "connectedWallet": "Portefeuille connecté",
       "notConnected": "Non connecté",
       "copied": "Copié",
       "copyFull": "Copier en entier",
       "noKeys": "Nous ne demandons jamais vos clés privées ni vos phrases de récupération.",
-      "disconnect": "Déconnecter le portefeuille"
+      "disconnect": "Se déconnecter"
     },
     "username": {
       "title": "Nom d'utilisateur",
-      "description": "Votre @identifiant : ce que vos coéquipiers tapent pour vous mentionner dans les discussions. Unique, il utilise par défaut l'adresse de votre portefeuille si vous ne le définissez pas."
+      "description": "Votre @identifiant permet à vos coéquipiers de vous mentionner. Il est unique à votre compte."
     },
     "avatar": {
       "title": "Photo de profil",
-      "description": "Votre avatar dans toute l'application. Utilise votre ENS ou Basename si vous en avez un, ou importez le vôtre.",
+      "description": "Votre avatar dans toute l'application. Importez une image ou utilisez l'avatar généré.",
       "sourceEns": "ENS",
       "sourceBasename": "Basename",
       "sourceCustom": "Personnalisée",
@@ -733,7 +736,14 @@
       "infoBefore": "Pour l'instant, chaque agent est fourni avec sa propre configuration BYOK. Utilisez l'",
       "infoLink": "assistant de lancement d'agent",
       "infoAfter": "pour associer des identifiants OpenAI, Anthropic ou OpenRouter.",
-      "infoNote": "Un coffre-fort de clés unifié, lié à votre portefeuille, est prévu pour une prochaine version."
+      "infoNote": "Un coffre-fort de clés unifié, lié à votre compte, est prévu pour une prochaine version."
+    },
+    "advanced": {
+      "title": "Options avancées",
+      "description": "Contrôles facultatifs pour gérer directement les réseaux, actifs numériques et comptes de paiement.",
+      "toggle": "Afficher les détails blockchain et de paiement",
+      "disabledHint": "Désactivé par défaut. PerkOS utilise Base en arrière-plan sans afficher les détails techniques.",
+      "enabledHint": "Le sélecteur de réseau, les soldes, les adresses et les outils de jetons sont visibles."
     },
     "network": {
       "title": "Réseau",
@@ -757,9 +767,9 @@
         "action": "Réinitialiser"
       },
       "disconnect": {
-        "title": "Déconnecter le portefeuille",
+        "title": "Se déconnecter",
         "description": "Vous déconnecte de cet appareil. Vos agents et projets sur le serveur restent intacts.",
-        "action": "Déconnecter"
+        "action": "Se déconnecter"
       }
     },
     "resetDialog": {
@@ -1635,6 +1645,7 @@
       "invalidWallet": "Saisissez une adresse de portefeuille 0x… valide (40 caractères hexadécimaux).",
       "loadingMembers": "Chargement des membres…",
       "noMembers": "Pas encore de membres.",
+      "teamMember": "Membre de l'équipe {{number}}",
       "removeAria": "Retirer {{wallet}}",
       "removeTitle": "Retirer le membre",
       "memberInvited": "Membre invité",
@@ -1746,6 +1757,8 @@
     },
     "userMenu": {
       "accountMenu": "Menu du compte",
+      "account": "Votre compte",
+      "secureAccount": "Compte sécurisé",
       "ownerWallet": "Portefeuille propriétaire",
       "copied": "Copié",
       "copyFullAddress": "Copier l'adresse complète",
@@ -1791,15 +1804,16 @@
       "registerAgent": "Enregistrer un agent",
       "createOrganization": "Créer une organisation",
       "openPerkosAgent": "Ouvrir Ask PerkOS Agent",
-      "disconnectWallet": "Déconnecter le portefeuille"
+      "disconnectWallet": "Se déconnecter"
     },
     "accessGate": {
       "privateAlpha": "Alpha privée",
       "title": "Demander l'accès à l'alpha",
       "titleSubmitted": "Demande reçue",
-      "description": "PerkOS est en alpha privée. Ce portefeuille n'a pas encore accès. Parlez-nous un peu de vous et nous vous répondrons.",
-      "descriptionSubmitted": "Nous vous contacterons à l'adresse e-mail que vous avez fournie une fois ce portefeuille approuvé.",
-      "yourWallet": "Votre portefeuille",
+      "description": "PerkOS est en alpha privée. Ce compte n'a pas encore accès. Parlez-nous un peu de vous et nous vous répondrons.",
+      "descriptionSubmitted": "Nous vous contacterons à l'adresse e-mail fournie une fois ce compte approuvé.",
+      "yourWallet": "Votre compte",
+      "secureAccount": "Compte PerkOS sécurisé",
       "onTheList": "Vous êtes sur la liste. Surveillez votre boîte de réception.",
       "emailLabel": "E-mail",
       "usernameLabel": "Nom d'utilisateur",
@@ -1811,7 +1825,7 @@
       "submitError": "Impossible d'envoyer la demande",
       "sending": "Envoi en cours…",
       "requestAccessButton": "Demander l'accès",
-      "useDifferentWallet": "Utiliser un autre portefeuille",
+      "useDifferentWallet": "Utiliser un autre compte",
       "accessCodeLabel": "Code d'accès (facultatif)",
       "accessCodePlaceholder": "ex. JULIO10",
       "accessCodeHint": "Vous avez un code d'un partenaire PerkOS ? Saisissez-le pour un accès immédiat.",

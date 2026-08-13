@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatAddress } from "../lib/format";
 import { effectiveAvatarUrl, getUserProfiles } from "../lib/perkosApi";
+import { useAdvancedFeatures } from "../lib/advancedFeatures";
+import { useAppAccount } from "../lib/useAppAccount";
 import { UserAvatar } from "./UserAvatar";
 import {
   inviteOrgMember,
@@ -38,6 +40,8 @@ export function MembersPanel({
   canManage?: boolean;
 }) {
   const { t } = useTranslation();
+  const account = useAppAccount();
+  const advanced = useAdvancedFeatures(account.address);
   const qc = useQueryClient();
   const key = ["members", kind, id];
   const [wallet, setWallet] = useState("");
@@ -114,7 +118,7 @@ export function MembersPanel({
 
   return (
     <div className="flex flex-col gap-4">
-      {canManage ? (
+      {canManage && advanced.enabled ? (
         <form onSubmit={onInvite} className="flex flex-col gap-2">
           <label className="text-xs font-medium text-muted-foreground">
             {t("components.members.inviteLabel", { kind: kindLabel })}
@@ -168,7 +172,15 @@ export function MembersPanel({
               : t("components.members.noMembers")}
           </li>
         ) : (
-          members.map((m) => (
+          members.map((m, index) => {
+            const profile = profilesQuery.data?.[m.wallet.toLowerCase()];
+            const memberLabel = profile?.username
+              ? `@${profile.username}`
+              : advanced.enabled
+                ? formatAddress(m.wallet)
+                : t("components.members.teamMember", { number: index + 1 });
+
+            return (
             <li
               key={m.wallet}
               className="flex items-center justify-between gap-2 px-4 py-2.5"
@@ -177,16 +189,16 @@ export function MembersPanel({
                 <UserAvatar
                   address={m.wallet}
                   avatarUrl={effectiveAvatarUrl(
-                    profilesQuery.data?.[m.wallet.toLowerCase()]
+                    profile
                   )}
                   size={28}
-                  title={m.wallet}
+                  title={memberLabel}
                 />
                 <span
-                  className="truncate font-mono text-xs text-foreground"
-                  title={m.wallet}
+                  className="truncate text-xs text-foreground"
+                  title={memberLabel}
                 >
-                  {formatAddress(m.wallet)}
+                  {memberLabel}
                 </span>
                 <span className="rounded border border-border px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
                   {m.role}
@@ -198,7 +210,7 @@ export function MembersPanel({
                   onClick={() => removeMut.mutate(m.wallet)}
                   disabled={removeMut.isPending}
                   aria-label={t("components.members.removeAria", {
-                    wallet: m.wallet,
+                    wallet: memberLabel,
                   })}
                   title={t("components.members.removeTitle")}
                   className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-destructive"
@@ -207,7 +219,8 @@ export function MembersPanel({
                 </button>
               ) : null}
             </li>
-          ))
+            );
+          })
         )}
       </ul>
     </div>

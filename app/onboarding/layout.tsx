@@ -2,15 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
-import { useConnection } from "wagmi";
-
 import { useWalletSession } from "../lib/useWalletSession";
 import { AccessGate } from "../components/AccessGate";
 
 export default function OnboardingLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const { address } = useConnection();
   const session = useWalletSession();
+  const address = session.address;
 
   useEffect(() => {
     if (session.status === "signed-out") router.replace("/sign-in");

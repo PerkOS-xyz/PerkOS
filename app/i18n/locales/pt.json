@@ -684,25 +684,28 @@
   "settings": {
     "header": {
       "title": "Configurações",
-      "subtitle": "Gerencie sua carteira, espaço de trabalho e integrações."
+      "subtitle": "Gerencie sua conta, espaço de trabalho e integrações."
     },
     "account": {
       "title": "Conta",
-      "description": "Você fez login com esta carteira Base/Solana.",
+      "description": "Seu acesso seguro ao PerkOS e os controles da conta.",
+      "signedInAccount": "Conta conectada",
+      "secureAccount": "Conta PerkOS segura",
+      "simpleModeHint": "O PerkOS gerencia os detalhes técnicos em segundo plano.",
       "connectedWallet": "Carteira conectada",
       "notConnected": "Não conectado",
       "copied": "Copiado",
       "copyFull": "Cópia completa",
       "noKeys": "Nunca solicitamos chaves privadas ou frases iniciais.",
-      "disconnect": "Desconectar carteira"
+      "disconnect": "Sair"
     },
     "username": {
       "title": "Nome de usuário",
-      "description": "Seu @handle: o que os colegas de equipe digitam para mencioná-lo nos bate-papos. Exclusivo; volta para o endereço da sua carteira quando não definido."
+      "description": "Seu @handle é usado pela equipe para mencionar você nas conversas e é exclusivo da sua conta."
     },
     "avatar": {
       "title": "Foto do perfil",
-      "description": "Seu avatar no aplicativo. Usa seu ENS ou Basename, se você tiver um, ou carrega o seu próprio.",
+      "description": "Seu avatar no aplicativo. Envie uma imagem ou use o avatar gerado.",
       "sourceEns": "ENS",
       "sourceBasename": "Nome base",
       "sourceCustom": "Personalizado",
@@ -733,7 +736,14 @@
       "infoBefore": "Por enquanto, cada agente vem com sua própria configuração BYOK. Use o",
       "infoLink": "lançador de agente",
       "infoAfter": "para anexar credenciais OpenAI, Anthropic ou OpenRouter.",
-      "infoNote": "Um cofre de chaves unificado com escopo para sua carteira está planejado para uma versão futura."
+      "infoNote": "Um cofre de chaves unificado com escopo para sua conta está planejado para uma versão futura."
+    },
+    "advanced": {
+      "title": "Opções avançadas",
+      "description": "Controles opcionais para gerenciar diretamente redes, ativos digitais e contas de pagamento.",
+      "toggle": "Mostrar detalhes de blockchain e pagamentos",
+      "disabledHint": "Desativado por padrão. O PerkOS usa a Base em segundo plano sem mostrar detalhes técnicos.",
+      "enabledHint": "O seletor de rede, saldos, endereços e ferramentas de tokens estão visíveis."
     },
     "network": {
       "title": "Rede",
@@ -757,9 +767,9 @@
         "action": "Reiniciar"
       },
       "disconnect": {
-        "title": "Desconectar carteira",
+        "title": "Sair",
         "description": "Desconecta você deste dispositivo. Seus agentes e projetos no back-end permanecem intactos.",
-        "action": "Desconectar"
+        "action": "Sair"
       }
     },
     "resetDialog": {
@@ -1659,6 +1669,7 @@
       "invalidWallet": "Insira um endereço de carteira 0x… válido (40 caracteres hexadecimais).",
       "loadingMembers": "Carregando membros…",
       "noMembers": "Nenhum membro ainda.",
+      "teamMember": "Membro da equipe {{number}}",
       "removeAria": "Remover {{wallet}}",
       "removeTitle": "Remover membro",
       "memberInvited": "Membro convidado",
@@ -1772,6 +1783,8 @@
     },
     "userMenu": {
       "accountMenu": "Menu da conta",
+      "account": "Sua conta",
+      "secureAccount": "Conta segura",
       "ownerWallet": "Carteira do proprietário",
       "copied": "Copiado",
       "copyFullAddress": "Copiar endereço completo",
@@ -1817,15 +1830,16 @@
       "registerAgent": "Registrar agente",
       "createOrganization": "Criar organização",
       "openPerkosAgent": "Abrir Ask PerkOS Agent",
-      "disconnectWallet": "Desconectar carteira"
+      "disconnectWallet": "Sair"
     },
     "accessGate": {
       "privateAlpha": "Alfa privado",
       "title": "Solicitar acesso alfa",
       "titleSubmitted": "Solicitação recebida",
-      "description": "PerkOS está em alfa privado. Esta carteira ainda não tem acesso. Conte-nos um pouco sobre você e retornaremos.",
-      "descriptionSubmitted": "Entraremos em contato com o e-mail que você forneceu assim que a carteira for aprovada.",
-      "yourWallet": "Sua carteira",
+      "description": "PerkOS está em alfa privado. Esta conta ainda não tem acesso. Conte-nos um pouco sobre você e retornaremos.",
+      "descriptionSubmitted": "Entraremos em contato pelo e-mail informado assim que esta conta for aprovada.",
+      "yourWallet": "Sua conta",
+      "secureAccount": "Conta PerkOS segura",
       "onTheList": "Você está na lista. Cuidado com sua caixa de entrada.",
       "emailLabel": "E-mail",
       "usernameLabel": "Nome de usuário",
@@ -1837,7 +1851,7 @@
       "submitError": "Não foi possível enviar a solicitação",
       "sending": "Enviando…",
       "requestAccessButton": "Solicitar acesso",
-      "useDifferentWallet": "Use uma carteira diferente",
+      "useDifferentWallet": "Usar outra conta",
       "accessCodeLabel": "Código de acesso (opcional)",
       "accessCodePlaceholder": "por exemplo, JULIO10",
       "accessCodeHint": "Tem um código de um parceiro PerkOS? Insira-o para acesso instantâneo.",

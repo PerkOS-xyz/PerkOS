@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useMemo, useState } from "react";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../../../lib/useAppAccount";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import {
@@ -112,7 +112,7 @@ export default function AgentDetailPage({ params }: PageProps) {
   const { t } = useTranslation();
   const { agentId } = use(params);
   const queryClient = useQueryClient();
-  const { address } = useConnection();
+  const { address } = useAppAccount();
 
   const agentsQuery = useQuery({
     queryKey: ["wallet-agents", address],
@@ -931,7 +931,7 @@ function ActionsPanel({ agent }: { agent: Agent }) {
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const deleteMutation = useMutation({

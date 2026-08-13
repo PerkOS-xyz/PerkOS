@@ -38,6 +38,7 @@ import { ActiveOrgProvider } from "../lib/useActiveOrg";
 import { formatAddress } from "../lib/format";
 import { useIsInMiniApp } from "../lib/useIsInMiniApp";
 import { useWalletSession } from "../lib/useWalletSession";
+import { useAdvancedFeatures } from "../lib/advancedFeatures";
 import { useTranslation } from "react-i18next";
 
 const NAV_ITEMS = [
@@ -61,6 +62,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const { address: wagmiAddress, connector } = useConnection();
   const session = useWalletSession();
   const address = session.address ?? wagmiAddress;
+  const advancedFeatures = useAdvancedFeatures(address);
   // Inside a Mini App host (Base App / Farcaster) the wallet IS the host's
   // identity — there is no meaningful "log out", so the button is hidden.
   // In a regular browser, logging out returns to the public landing page.
@@ -99,6 +101,19 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     setMobileMenuOpen(false);
   }, [pathname]);
 
+  // Wallet balances, networks and token actions are intentionally opt-in.
+  // A bookmarked /wallet URL must not reveal the advanced surface until the
+  // account has explicitly enabled it in Settings.
+  useEffect(() => {
+    if (
+      advancedFeatures.ready &&
+      !advancedFeatures.enabled &&
+      pathname?.startsWith("/wallet")
+    ) {
+      router.replace("/settings#advanced-features");
+    }
+  }, [advancedFeatures.enabled, advancedFeatures.ready, pathname, router]);
+
   // Alpha gate: wagmi connected but Firebase rejected (wallet not allowlisted).
   if (session.status === "not-allowlisted" && address) {
     return <AccessGate address={address} />;
@@ -129,8 +144,12 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         {/* Desktop sidebar */}
         <aside className="hidden w-60 shrink-0 flex-col gap-6 border-r border-border bg-card p-6 md:flex">
           <Brand />
-          <NavList pathname={pathname} />
-          <WalletFooter address={address} onDisconnect={hideLogout ? null : logout} />
+          <NavList pathname={pathname} showBlockchain={advancedFeatures.enabled} />
+          <WalletFooter
+            address={address}
+            showBlockchain={advancedFeatures.enabled}
+            onDisconnect={hideLogout ? null : logout}
+          />
         </aside>
 
         <main className="min-w-0 flex-1 overflow-x-hidden">
@@ -146,7 +165,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             <div className="flex shrink-0 items-center gap-1.5 lg:gap-2">
               <CommandHint />
               <RefreshButton />
-              <NetworkPill />
+              {advancedFeatures.enabled ? <NetworkPill /> : null}
               <NotificationsBell />
               <LanguageSelector />
               <UserMenu onLogout={hideLogout ? undefined : logout} />
@@ -165,7 +184,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             </Link>
 
             <div className="flex items-center gap-1">
-              <NetworkPill />
+              {advancedFeatures.enabled ? <NetworkPill /> : null}
               <RefreshButton />
               <UserMenu onLogout={hideLogout ? undefined : logout} />
 
@@ -200,7 +219,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                     </SheetDescription>
                   </SheetHeader>
 
-                  <NavList pathname={pathname} />
+                  <NavList pathname={pathname} showBlockchain={advancedFeatures.enabled} />
 
                   <div className="px-1">
                     <LanguageSelector />
@@ -210,6 +229,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
                   <WalletFooter
                     address={address}
+                    showBlockchain={advancedFeatures.enabled}
                     onDisconnect={hideLogout ? null : logout}
                   />
                 </SheetContent>
@@ -303,11 +323,20 @@ function Brand() {
   );
 }
 
-function NavList({ pathname }: { pathname: string | null }) {
+function NavList({
+  pathname,
+  showBlockchain,
+}: {
+  pathname: string | null;
+  showBlockchain: boolean;
+}) {
   const { t } = useTranslation();
+  const visibleItems = showBlockchain
+    ? NAV_ITEMS
+    : NAV_ITEMS.filter((item) => item.href !== "/wallet");
   return (
     <nav aria-label="Primary" className="flex flex-1 flex-col gap-1">
-      {NAV_ITEMS.map((item) => {
+      {visibleItems.map((item) => {
         const active = pathname?.startsWith(item.href);
         return (
           <Link
@@ -331,15 +360,17 @@ function NavList({ pathname }: { pathname: string | null }) {
 
 function WalletFooter({
   address,
+  showBlockchain,
   onDisconnect,
 }: {
   address?: string;
+  showBlockchain: boolean;
   /** null → no logout affordance (Mini App hosts own the identity). */
   onDisconnect: (() => void) | null;
 }) {
   return (
     <div className="flex flex-col gap-2 border-t border-border pt-4">
-      {address ? (
+      {address && showBlockchain ? (
         <p
           className="truncate font-mono text-xs text-muted-foreground"
           title={address}

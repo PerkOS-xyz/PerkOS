@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { useConnection, useDisconnect } from "wagmi";
+import { useAppAccount } from "../lib/useAppAccount";
+import { useWalletSession } from "../lib/useWalletSession";
 import {
   ArrowRight,
   Bot,
@@ -39,8 +40,8 @@ export function CommandMenu() {
   const { t } = useTranslation();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const { address, isConnected } = useConnection();
-  const { disconnect } = useDisconnect();
+  const { address, isConnected } = useAppAccount();
+  const { logout } = useWalletSession();
   const { setOpen: setChatbotOpen } = useChatbot();
 
   // ⌘K / Ctrl+K to toggle
@@ -247,11 +248,10 @@ export function CommandMenu() {
             {t("chrome.commandMenu.openPerkosAgent")}
           </CommandItem>
           <CommandItem
-            value="disconnect wallet"
+            value="sign out"
             onSelect={() => {
               setOpen(false);
-              disconnect();
-              router.replace("/sign-in");
+              void logout().then(() => router.replace("/sign-in"));
             }}
           >
             <LogOut className="mr-2 h-4 w-4 text-destructive" />

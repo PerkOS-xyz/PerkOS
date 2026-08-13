@@ -57,7 +57,7 @@ const SOURCE_LABEL: Record<AvatarSource, string> = {
   default: "settings.avatar.sourceDefault",
 };
 
-export function ProfileAvatarCard() {
+export function ProfileAvatarCard({ showOnchain = false }: { showOnchain?: boolean }) {
   const { t } = useTranslation();
   const session = useWalletSession();
   const address = session.address;
@@ -67,7 +67,9 @@ export function ProfileAvatarCard() {
   const [busy, setBusy] = useState(false);
   const [resolving, setResolving] = useState(false);
 
-  const sources = availableAvatarSources(profile);
+  const sources = availableAvatarSources(profile).filter(
+    (source) => showOnchain || (source !== "ens" && source !== "basename"),
+  );
   const current: AvatarSource = profile?.avatarSource ?? "default";
   const previewUrl = effectiveAvatarUrl(profile);
   const hasOnchain = !!profile?.ensAvatarUrl || !!profile?.basenameAvatarUrl;
@@ -83,6 +85,7 @@ export function ProfileAvatarCard() {
   // without a re-login. Fire-and-forget — no synchronous state writes here.
   const autoTried = useRef(false);
   useEffect(() => {
+    if (!showOnchain) return;
     if (autoTried.current || !address || profile === undefined) return;
     if (profile?.avatarResolvedAt) return;
     autoTried.current = true;
@@ -90,7 +93,7 @@ export function ProfileAvatarCard() {
       .then(() => invalidate())
       .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address, profile]);
+  }, [address, profile, showOnchain]);
 
   async function refresh() {
     if (!address || resolving) return;
@@ -180,20 +183,22 @@ export function ProfileAvatarCard() {
               )}
               {t("settings.avatar.upload")}
             </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              className="gap-1.5 text-muted-foreground"
-              disabled={resolving || !address}
-              onClick={refresh}
-              title={t("settings.avatar.refreshHint")}
-            >
-              <RefreshCw
-                className={cn("h-3.5 w-3.5", resolving && "animate-spin")}
-              />
-              {t("settings.avatar.refresh")}
-            </Button>
+            {showOnchain ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="gap-1.5 text-muted-foreground"
+                disabled={resolving || !address}
+                onClick={refresh}
+                title={t("settings.avatar.refreshHint")}
+              >
+                <RefreshCw
+                  className={cn("h-3.5 w-3.5", resolving && "animate-spin")}
+                />
+                {t("settings.avatar.refresh")}
+              </Button>
+            ) : null}
             {profile?.avatarCustomUrl ? (
               <Button
                 type="button"
@@ -234,7 +239,7 @@ export function ProfileAvatarCard() {
         ))}
       </div>
 
-      {!hasOnchain ? (
+      {showOnchain && !hasOnchain ? (
         <p className="text-xs text-muted-foreground">
           {t("settings.avatar.noOnchain")}
         </p>

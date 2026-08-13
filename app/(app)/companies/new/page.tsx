@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../../../lib/useAppAccount";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import {
@@ -117,7 +117,7 @@ const PROVIDERS = byokProviderOptions("OpenClaw");
 export default function NewCompanyPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const { activeOrgId } = useActiveOrg();
 
   // Selection: a business-template id, "my:<id>", or "custom" / "empty".

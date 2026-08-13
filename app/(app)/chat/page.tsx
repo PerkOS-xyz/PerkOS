@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../../lib/useAppAccount";
 import {
   useWalletAgents,
   realtimeAgentStatus,
@@ -40,7 +40,7 @@ function initials(name: string): string {
 }
 
 export default function ChatHubPage() {
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const { setOpen } = useChatbot();
   const [query, setQuery] = useState("");
   // Realtime per-agent status (live hibernation + heartbeat), keyed by name.

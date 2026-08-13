@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../lib/useAppAccount";
 
 import { ensureAssistantConv } from "../lib/perkosApi";
 
@@ -43,7 +43,7 @@ type ChatbotState = {
 const Ctx = createContext<ChatbotState | null>(null);
 
 export function ChatbotProvider({ children }: { children: ReactNode }) {
-  const { isConnected } = useConnection();
+  const { isConnected } = useAppAccount();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatBubble[]>([]);
   const [convId, setConvId] = useState<string | null>(null);

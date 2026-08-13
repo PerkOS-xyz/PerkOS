@@ -21,7 +21,13 @@ function fmtHours(h: number): string {
   return h.toLocaleString(undefined, { maximumFractionDigits: 1 });
 }
 
-export function BillingCard({ address }: { address: string }) {
+export function BillingCard({
+  address,
+  showBlockchain = false,
+}: {
+  address: string;
+  showBlockchain?: boolean;
+}) {
   const query = useQuery({
     queryKey: ["my-billing", address],
     queryFn: getMyBilling,
@@ -101,7 +107,7 @@ export function BillingCard({ address }: { address: string }) {
             <div className="rounded-md border border-sky-500/30 bg-sky-500/5 px-3 py-2">
               <span className="text-xs font-medium text-sky-300">Sponsored — runs free</span>
               <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
-                This is a PerkOS internal / tester wallet. Your team is never
+                This is a PerkOS internal / tester account. Your team is never
                 charged or paused.
               </p>
             </div>
@@ -118,14 +124,16 @@ export function BillingCard({ address }: { address: string }) {
                   >
                     {b.creditsUsd.toLocaleString(undefined, { style: "currency", currency: "USD" })}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => setShowDeposit((v) => !v)}
-                    className="inline-flex items-center gap-0.5 rounded border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/20"
-                  >
-                    <Plus className="h-3 w-3" />
-                    Add
-                  </button>
+                  {showBlockchain ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowDeposit((v) => !v)}
+                      className="inline-flex items-center gap-0.5 rounded border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[11px] font-medium text-primary hover:bg-primary/20"
+                    >
+                      <Plus className="h-3 w-3" />
+                      Add
+                    </button>
+                  ) : null}
                 </div>
               </div>
 
@@ -155,7 +163,7 @@ export function BillingCard({ address }: { address: string }) {
                 </p>
               </div>
 
-              {showDeposit ? (
+              {showBlockchain && showDeposit ? (
                 <DepositDialog address={address} onDeposited={() => query.refetch()} />
               ) : null}
 
@@ -169,8 +177,9 @@ export function BillingCard({ address }: { address: string }) {
                 </p>
               ) : (
                 <p className="text-[11px] leading-snug text-muted-foreground">
-                  Add prepaid USDC credits to activate PerkOS Infra. No managed
-                  agent can launch or wake before payment is confirmed.
+                  {showBlockchain
+                    ? "Add prepaid USDC credits to activate PerkOS Infra. No managed agent can launch or wake before payment is confirmed."
+                    : "Contact PerkOS to add credits and activate managed infrastructure."}
                 </p>
               )}
             </>

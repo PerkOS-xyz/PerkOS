@@ -4,7 +4,7 @@ import Link from "next/link";
 import { use, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../../../../lib/useAppAccount";
 
 import { Button } from "@/components/ui/button";
 
@@ -30,7 +30,7 @@ export default function AgentChatRoute({ params }: PageProps) {
 
 export function AgentChatRedirect({ agentId }: { agentId: string }) {
   const router = useRouter();
-  const { address, isConnected } = useConnection();
+  const { address, isConnected } = useAppAccount();
 
   const conversation = useQuery({
     queryKey: ["agent-conv", agentId, address],

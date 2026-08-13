@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../../lib/useAppAccount";
 import { Bot, FolderPlus, Loader2, Moon, Pause, Play, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -40,7 +40,7 @@ import {
 
 export default function AgentsPage() {
   const { t } = useTranslation();
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const qc = useQueryClient();
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -305,7 +305,7 @@ function AssignToProjectDialog({
   onAssigned: () => void;
 }) {
   const { t } = useTranslation();
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const qc = useQueryClient();
   const [projectId, setProjectId] = useState("");
 

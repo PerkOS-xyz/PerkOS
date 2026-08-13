@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "@/app/lib/useAppAccount";
 import { useTranslation } from "react-i18next";
 import { OnboardingShell } from "../../components/OnboardingShell";
 import { UsernameCard } from "../../components/UsernameCard";
@@ -12,7 +12,7 @@ export default function WorkspacePage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { workspaceName, setWorkspaceName } = useOnboarding();
-  const { address } = useConnection();
+  const { address } = useAppAccount();
 
   const trimmed = workspaceName.trim();
   const canContinue = trimmed.length > 0;

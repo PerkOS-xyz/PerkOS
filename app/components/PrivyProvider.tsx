@@ -13,7 +13,16 @@ export function PrivyOuter({ children }: { children: ReactNode }) {
       appId={PRIVY_APP_ID}
       clientId={PRIVY_CLIENT_ID || undefined}
       config={{
-        loginMethods: ["email", "wallet"],
+        loginMethodsAndOrder: {
+          primary: ["google", "email"],
+          overflow: [
+            "base_account",
+            "coinbase_wallet",
+            "metamask",
+            "detected_ethereum_wallets",
+            "wallet_connect_qr",
+          ],
+        },
         supportedChains: [base, celo, robinhoodChain, baseSepolia],
         defaultChain: base,
         embeddedWallets: {
@@ -23,6 +32,7 @@ export function PrivyOuter({ children }: { children: ReactNode }) {
           theme: "dark",
           accentColor: "#ec1b69",
           logo: "/perkos-landing-logo.png",
+          showWalletLoginFirst: false,
           walletList: [
             "base_account",
             "coinbase_wallet",

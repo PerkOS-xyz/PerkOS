@@ -13,6 +13,12 @@ export function PrivyWalletBridge({ children }: { children: ReactNode }) {
   const { ready: walletsReady, wallets } = useWallets();
 
   const preferredAddress = user?.wallet?.address?.toLowerCase();
+  const googleAccount = user?.linkedAccounts.find(
+    (account) => account.type === "google_oauth",
+  );
+  const identityLabel =
+    user?.email?.address ??
+    (googleAccount?.type === "google_oauth" ? googleAccount.email : undefined);
   const wallet =
     wallets.find((candidate) =>
       preferredAddress
@@ -27,6 +33,7 @@ export function PrivyWalletBridge({ children }: { children: ReactNode }) {
       return {
         loading: !ready || !walletsReady || (authenticated && !wallet),
         address: undefined,
+        identityLabel,
         isConnected: false,
         signMessage: async () => {
           throw new Error("No Privy wallet is connected.");
@@ -38,11 +45,12 @@ export function PrivyWalletBridge({ children }: { children: ReactNode }) {
     return {
       loading: false,
       address,
+      identityLabel,
       isConnected: true,
       signMessage: (message: string) => wallet.sign(message),
       logout,
     };
-  }, [ready, walletsReady, authenticated, wallet, logout]);
+  }, [ready, walletsReady, authenticated, wallet, identityLabel, logout]);
 
   return (
     <BrowserWalletContext.Provider value={value}>

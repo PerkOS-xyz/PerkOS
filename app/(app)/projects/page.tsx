@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../../lib/useAppAccount";
 import { Archive, ArchiveRestore, Folder, Plus, Trash2, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -24,7 +24,7 @@ import { Button } from "@/components/ui/button";
 
 export default function ProjectsPage() {
   const { t } = useTranslation();
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const { activeOrgId, defaultOrgId, activeOrg } = useActiveOrg();
   const qc = useQueryClient();
   const [query, setQuery] = useState("");

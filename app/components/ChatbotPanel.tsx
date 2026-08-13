@@ -11,7 +11,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../lib/useAppAccount";
 import { useTranslation } from "react-i18next";
 import {
   X,
@@ -77,7 +77,7 @@ export function ChatbotPanel() {
     convError,
   } = useChatbot();
   const router = useRouter();
-  const { address, isConnected } = useConnection();
+  const { address, isConnected } = useAppAccount();
   const [draft, setDraft] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [uploading, setUploading] = useState(false);

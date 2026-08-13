@@ -50,6 +50,7 @@ export type WalletSessionStatus =
 type Result = {
   status: WalletSessionStatus;
   address?: string;
+  identityLabel?: string;
   error?: string;
   retry: () => void;
   signOutFirebase: () => Promise<void>;
@@ -282,6 +283,7 @@ export function useWalletSession(): Result {
   return {
     status,
     address: normalizedAddress,
+    identityLabel: browserWallet?.identityLabel,
     error: errorMessage,
     retry: runSignIn,
     signOutFirebase: () => signOut(firebaseAuth()),

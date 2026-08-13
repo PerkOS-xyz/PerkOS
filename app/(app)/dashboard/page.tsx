@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../../lib/useAppAccount";
+import { useAdvancedFeatures } from "../../lib/advancedFeatures";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import {
@@ -76,7 +77,8 @@ const QUICK_ACTIONS = [
 
 export default function DashboardPage() {
   const { t } = useTranslation();
-  const { address } = useConnection();
+  const { address } = useAppAccount();
+  const advancedFeatures = useAdvancedFeatures(address);
   const { workspaceName } = useOnboarding();
   const { activeOrg, activeOrgId, defaultOrgId } = useActiveOrg();
 
@@ -327,7 +329,9 @@ export default function DashboardPage() {
       {/* Quick Actions — desktop sidebar */}
       <aside className="hidden flex-col gap-4 lg:flex">
         <QuickActionsCard />
-        {address ? <BillingCard address={address} /> : null}
+        {address ? (
+          <BillingCard address={address} showBlockchain={advancedFeatures.enabled} />
+        ) : null}
         <ModelUsagePanel agents={allAgents} tasks={allTasks} />
       </aside>
     </div>

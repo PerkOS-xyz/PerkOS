@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../../../lib/useAppAccount";
 import { Loader2, MessageSquare, Send, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -93,7 +93,7 @@ export function AgentChatPanel({
   runtimeKind,
   runtimeAvailability,
 }: Props) {
-  const { address, isConnected } = useConnection();
+  const { address, isConnected } = useAppAccount();
   const queryClient = useQueryClient();
   const [messages, setMessages] = useState<Bubble[]>([]);
   const [draft, setDraft] = useState("");
