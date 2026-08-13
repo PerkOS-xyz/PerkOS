@@ -4,8 +4,8 @@ import { resolveWalletSessionStatus } from "../app/lib/useWalletSession";
 
 const settled = {
   firebaseLoading: false,
-  dynamicLoading: false,
-  hasDynamicWallet: true,
+  browserWalletLoading: false,
+  hasBrowserWallet: true,
   wagmiStatus: "disconnected",
   isConnected: true,
   denial: null,
@@ -14,18 +14,18 @@ const settled = {
 } as const;
 
 describe("resolveWalletSessionStatus", () => {
-  it("waits for Dynamic to restore a persisted wallet on a deep reload", () => {
+  it("waits for Privy to restore a persisted wallet on a deep reload", () => {
     expect(
       resolveWalletSessionStatus({
         ...settled,
-        dynamicLoading: true,
+        browserWalletLoading: true,
         isConnected: false,
         inSync: false,
       }),
     ).toBe("loading");
   });
 
-  it("reports signed out only after Dynamic has finished loading", () => {
+  it("reports signed out only after Privy has finished loading", () => {
     expect(
       resolveWalletSessionStatus({
         ...settled,

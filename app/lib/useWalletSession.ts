@@ -7,7 +7,7 @@ import { signOut } from "firebase/auth";
 import { firebaseAuth } from "./firebase";
 import { signInWithWallet } from "./walletAuth";
 import { useFirebaseUser } from "./useFirebaseUser";
-import { DynamicWalletContext } from "./dynamicWallet";
+import { BrowserWalletContext } from "./browserWallet";
 
 /**
  * Module-level mutex shared by every useWalletSession() consumer in
@@ -54,17 +54,17 @@ type Result = {
   retry: () => void;
   signOutFirebase: () => Promise<void>;
   /**
-   * Full sign-out: tears down the wallet (Dynamic in the browser, wagmi in
+   * Full sign-out: tears down the wallet (Privy in the browser, wagmi in
    * Mini App hosts) AND the Firebase session. Use this for the logout button,
-   * not a bare wagmi `disconnect()` (a no-op on the browser/Dynamic path).
+   * not a bare wagmi `disconnect()` (a no-op on the browser/Privy path).
    */
   logout: () => Promise<void>;
 };
 
 export function resolveWalletSessionStatus({
   firebaseLoading,
-  dynamicLoading,
-  hasDynamicWallet,
+  browserWalletLoading,
+  hasBrowserWallet,
   wagmiStatus,
   isConnected,
   denial,
@@ -72,17 +72,17 @@ export function resolveWalletSessionStatus({
   inSync,
 }: {
   firebaseLoading: boolean;
-  dynamicLoading: boolean;
-  hasDynamicWallet: boolean;
+  browserWalletLoading: boolean;
+  hasBrowserWallet: boolean;
   wagmiStatus: string;
   isConnected: boolean;
   denial: "not-allowlisted" | "error" | null;
   syncing: boolean;
   inSync: boolean;
 }): WalletSessionStatus {
-  if (firebaseLoading || dynamicLoading) return "loading";
+  if (firebaseLoading || browserWalletLoading) return "loading";
   if (
-    !hasDynamicWallet &&
+    !hasBrowserWallet &&
     (wagmiStatus === "connecting" || wagmiStatus === "reconnecting")
   ) {
     return "loading";
@@ -107,10 +107,9 @@ export function resolveWalletSessionStatus({
  * Wallet source depends on the host:
  *  - Mini App hosts (Farcaster / Base App): wagmi (`useConnection`), connected
  *    by AutoConnect through the host connector.
- *  - Regular browser tab: Dynamic, via DynamicWalletContext. We do NOT bridge
- *    Dynamic into wagmi (`@dynamic-labs/wagmi-connector` drops the connection
- *    on wagmi v3 → ConnectorNotConnectedError on sign-in), so the browser path
- *    reads address + connection + signer straight from Dynamic.
+ *  - Regular browser tab: Privy, via BrowserWalletContext. The browser path
+ *    reads address + connection + signer straight from Privy and leaves the
+ *    Mini App wagmi connector tree isolated.
  *
  * Components that just need "is this user authorized?" check `status === "signed-in"`.
  */
@@ -124,22 +123,24 @@ export function useWalletSession(): Result {
   const { disconnect } = useDisconnect();
   const { user: firebaseUser, loading: firebaseLoading } = useFirebaseUser();
 
-  // Browser/Dynamic path: when the context is present, Dynamic owns the wallet
+  // Browser/Privy path: when the context is present, Privy owns the wallet
   // and we read everything from it. In Mini App hosts it's null → use wagmi.
-  const dyn = useContext(DynamicWalletContext);
-  const address = dyn ? dyn.address : wagmiAddress;
-  const isConnected = dyn ? dyn.isConnected : wagmiIsConnected;
+  const browserWallet = useContext(BrowserWalletContext);
+  const address = browserWallet ? browserWallet.address : wagmiAddress;
+  const isConnected = browserWallet
+    ? browserWallet.isConnected
+    : wagmiIsConnected;
 
-  // Active signer (Dynamic-native or wagmi) held in a ref so runSignIn's
+  // Active signer (Privy-native or wagmi) held in a ref so runSignIn's
   // callback doesn't churn its deps when the source flips.
   const signMessageRef = useRef<(message: string) => Promise<string>>(
     (message) => signMessageAsync({ message }),
   );
   useEffect(() => {
-    signMessageRef.current = dyn
-      ? dyn.signMessage
+    signMessageRef.current = browserWallet
+      ? browserWallet.signMessage
       : (message: string) => signMessageAsync({ message });
-  }, [dyn, signMessageAsync]);
+  }, [browserWallet, signMessageAsync]);
 
   const [syncing, setSyncing] = useState(false);
   const [denial, setDenial] = useState<"not-allowlisted" | "error" | null>(null);
@@ -225,13 +226,13 @@ export function useWalletSession(): Result {
   ]);
 
   // If wagmi disconnects, drop the Firebase session too. Mini App path only —
-  // in the browser (Dynamic) path wagmi is always disconnected (no bridge),
+  // in the browser (Privy) path wagmi is always disconnected (no bridge),
   // which would spuriously sign the user out.
   useEffect(() => {
-    if (!dyn && wagmiStatus === "disconnected" && firebaseUser) {
+    if (!browserWallet && wagmiStatus === "disconnected" && firebaseUser) {
       void signOut(firebaseAuth());
     }
-  }, [dyn, wagmiStatus, firebaseUser]);
+  }, [browserWallet, wagmiStatus, firebaseUser]);
 
   // Full logout: drop the wallet on whichever path owns it, then the Firebase
   // session. `loggingOut` suppresses the auto-sign-in effect so clearing
@@ -241,10 +242,10 @@ export function useWalletSession(): Result {
   const logout = useCallback(async () => {
     loggingOut = true;
     try {
-      // Browser/Dynamic path: clears primaryWallet. No-op elsewhere.
-      if (dyn) {
+      // Browser/Privy path: clears the active user. No-op elsewhere.
+      if (browserWallet) {
         try {
-          await dyn.logout();
+          await browserWallet.logout();
         } catch {
           // best-effort — still clear the rest below
         }
@@ -265,12 +266,12 @@ export function useWalletSession(): Result {
     } finally {
       loggingOut = false;
     }
-  }, [dyn, disconnect]);
+  }, [browserWallet, disconnect]);
 
   const status = resolveWalletSessionStatus({
     firebaseLoading,
-    dynamicLoading: dyn?.loading ?? false,
-    hasDynamicWallet: Boolean(dyn),
+    browserWalletLoading: browserWallet?.loading ?? false,
+    hasBrowserWallet: Boolean(browserWallet),
     wagmiStatus,
     isConnected,
     denial,

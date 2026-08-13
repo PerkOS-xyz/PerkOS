@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-08-13 — Privy browser authentication
+
+- Replace Dynamic with Privy for normal browser sign-in, including email and
+  external wallets, while preserving the existing wallet-signature to Firebase
+  session boundary.
+- Keep Farcaster and Base Mini App hosts on their native Wagmi connectors; the
+  Privy SDK is code-split out of those host flows and never auto-opens a wallet
+  on the public landing.
+- Browser email users receive a Privy embedded EVM wallet. Existing users can
+  preserve their wallet-keyed PerkOS account by signing in with the same
+  external wallet; test email accounts may receive new wallet identities.
+
 ## 2026-08-12 — Sparky takes the landing hero
 
 - The hero art is now a clip of the mascot turning to face the viewer, scrubbed
