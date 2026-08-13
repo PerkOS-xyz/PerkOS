@@ -67,7 +67,7 @@ export default function PresentationPage() {
             href="/deck"
             className="text-sm text-[#7975a8] underline-offset-4 hover:text-[#ececff] hover:underline"
           >
-            Or flip through the 6-slide deck →
+            Or explore the investor deck →
           </Link>
         </div>
       </div>
