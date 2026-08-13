@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { Menu, X } from "lucide-react";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../../lib/useAppAccount";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -28,7 +28,7 @@ import { NewConversationDialog } from "../../components/NewConversationDialog";
  * navigations — no flash, no refetch when opening a conversation.
  */
 export default function ChatLayout({ children }: { children: ReactNode }) {
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [newOpen, setNewOpen] = useState(false);
 

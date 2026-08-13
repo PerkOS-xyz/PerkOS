@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../../../lib/useAppAccount";
 import { toast } from "sonner";
 import { ChevronLeft } from "lucide-react";
 
@@ -16,7 +16,7 @@ import { useActiveOrg } from "../../../lib/useActiveOrg";
 
 export default function CreateOrganizationPage() {
   const router = useRouter();
-  const { address, isConnected } = useConnection();
+  const { address, isConnected } = useAppAccount();
   const { refresh, setActiveOrgId } = useActiveOrg();
   const [name, setName] = useState("");
 

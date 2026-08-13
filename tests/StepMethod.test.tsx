@@ -1,7 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("wagmi", () => ({ useChainId: () => 8453 }));
+vi.mock("wagmi", () => ({
+  useChainId: () => 8453,
+  useConnection: () => ({ address: "0xtest", isConnected: true }),
+}));
 
 import { StepMethod } from "@/app/(app)/agents/new/wizard/steps/StepMethod";
 import { INITIAL_WIZARD_STATE } from "@/app/(app)/agents/new/wizard/types";

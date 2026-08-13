@@ -15,7 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../lib/useAppAccount";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -71,7 +71,7 @@ export function ProjectChatTab({
   ownerWallet?: string;
   onDesignatePm: () => void;
 }) {
-  const { address, isConnected } = useConnection();
+  const { address, isConnected } = useAppAccount();
   const client = useChatClient();
   const queryClient = useQueryClient();
   const { status } = useChatClientStatus();

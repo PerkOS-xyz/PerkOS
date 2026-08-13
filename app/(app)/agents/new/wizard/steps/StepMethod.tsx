@@ -10,6 +10,8 @@ import type { LaunchMethod, StepProps } from "../types";
 import { methodToDeployMode } from "../types";
 import { StepHeader } from "../ui/StepHeader";
 import { SelectableCard } from "../ui/SelectableCard";
+import { useAppAccount } from "@/app/lib/useAppAccount";
+import { useAdvancedFeatures } from "@/app/lib/advancedFeatures";
 
 // The root fork. Picking a method also seeds the managed deploy mode so the
 // downstream launch mutation keeps reading `deployMode` unchanged; the
@@ -28,9 +30,16 @@ export function StepMethod({
   vpsAccessLoading: boolean;
 }) {
   const { t } = useTranslation();
+  const { address } = useAppAccount();
+  const advancedFeatures = useAdvancedFeatures(address);
   const chainId = useChainId();
-  const networkName =
-    chainId === base.id ? "Base" : chainId === celo.id ? "Celo" : null;
+  const networkName = advancedFeatures.enabled
+    ? chainId === base.id
+      ? "Base"
+      : chainId === celo.id
+        ? "Celo"
+        : null
+    : null;
   const onNetwork = networkName
     ? t("wizard.method.perkos.onNetwork", { network: networkName })
     : "";

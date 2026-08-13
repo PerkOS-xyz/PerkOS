@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../../../lib/useAppAccount";
 import { toast } from "sonner";
 import {
   createProjectTasks,
@@ -21,7 +21,7 @@ export default function CreateTaskPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
-  const { address, isConnected } = useConnection();
+  const { address, isConnected } = useAppAccount();
 
   const initialProjectId = searchParams.get("projectId") ?? "";
 
@@ -388,4 +388,3 @@ function PlusIcon() {
     </svg>
   );
 }
-

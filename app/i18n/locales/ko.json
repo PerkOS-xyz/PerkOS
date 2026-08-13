@@ -684,25 +684,28 @@
   "settings": {
     "header": {
       "title": "설정",
-      "subtitle": "지갑, 워크스페이스, 연동을 관리하세요."
+      "subtitle": "계정, 워크스페이스, 연동을 관리하세요."
     },
     "account": {
       "title": "계정",
-      "description": "이 Base / Solana 지갑으로 로그인했어요.",
+      "description": "PerkOS의 안전한 로그인과 계정 설정입니다.",
+      "signedInAccount": "로그인한 계정",
+      "secureAccount": "안전한 PerkOS 계정",
+      "simpleModeHint": "기술적인 세부 정보는 PerkOS가 백그라운드에서 관리합니다.",
       "connectedWallet": "연결된 지갑",
       "notConnected": "연결되지 않음",
       "copied": "복사됨",
       "copyFull": "전체 복사",
       "noKeys": "저희는 개인 키나 시드 문구를 절대 요청하지 않아요.",
-      "disconnect": "지갑 연결 해제"
+      "disconnect": "로그아웃"
     },
     "username": {
       "title": "사용자 이름",
-      "description": "@핸들은 채팅에서 팀원들이 사장님을 언급할 때 입력하는 이름이에요. 다른 사람과 겹칠 수 없고, 설정하지 않으면 지갑 주소로 대신 표시돼요."
+      "description": "@핸들은 팀원이 채팅에서 언급할 때 사용하는 계정 고유 이름입니다."
     },
     "avatar": {
       "title": "프로필 사진",
-      "description": "앱 전체에서 사용하는 아바타입니다. ENS나 Basename이 있으면 사용하고, 없으면 직접 업로드하세요.",
+      "description": "앱 전체에서 사용하는 아바타입니다. 이미지를 업로드하거나 생성된 기본값을 사용할 수 있습니다.",
       "sourceEns": "ENS",
       "sourceBasename": "Basename",
       "sourceCustom": "사용자 지정",
@@ -733,7 +736,14 @@
       "infoBefore": "지금은 각 에이전트가 자체 BYOK 설정으로 제공돼요.",
       "infoLink": "에이전트 실행 마법사",
       "infoAfter": "에서 OpenAI, Anthropic, OpenRouter 자격 증명을 연결할 수 있어요.",
-      "infoNote": "지갑 단위로 통합된 키 보관함은 다음 업데이트에서 계획하고 있어요."
+      "infoNote": "계정 단위의 통합 키 보관함은 다음 업데이트에서 계획하고 있어요."
+    },
+    "advanced": {
+      "title": "고급 옵션",
+      "description": "네트워크, 디지털 자산, 결제 계정을 직접 관리하려는 사용자를 위한 선택 설정입니다.",
+      "toggle": "블록체인 및 결제 세부 정보 표시",
+      "disabledHint": "기본값은 꺼짐입니다. PerkOS는 기술 정보를 표시하지 않고 백그라운드에서 Base를 사용합니다.",
+      "enabledHint": "네트워크 선택, 잔액, 주소, 토큰 도구가 표시됩니다."
     },
     "network": {
       "title": "네트워크",
@@ -757,9 +767,9 @@
         "action": "초기화"
       },
       "disconnect": {
-        "title": "지갑 연결 해제",
+        "title": "로그아웃",
         "description": "이 기기에서 로그아웃돼요. 서버에 있는 에이전트와 프로젝트는 그대로 유지돼요.",
-        "action": "연결 해제"
+        "action": "로그아웃"
       }
     },
     "resetDialog": {
@@ -1626,6 +1636,7 @@
       "invalidWallet": "올바른 0x… 지갑 주소를 입력하세요(16진수 40자).",
       "loadingMembers": "멤버를 불러오는 중…",
       "noMembers": "아직 멤버가 없어요.",
+      "teamMember": "팀 멤버 {{number}}",
       "removeAria": "{{wallet}} 삭제",
       "removeTitle": "멤버 삭제",
       "memberInvited": "멤버를 초대했어요",
@@ -1737,6 +1748,8 @@
     },
     "userMenu": {
       "accountMenu": "계정 메뉴",
+      "account": "내 계정",
+      "secureAccount": "안전한 계정",
       "ownerWallet": "소유자 지갑",
       "copied": "복사됨",
       "copyFullAddress": "전체 주소 복사",
@@ -1782,15 +1795,16 @@
       "registerAgent": "에이전트 등록",
       "createOrganization": "조직 만들기",
       "openPerkosAgent": "Ask PerkOS Agent 열기",
-      "disconnectWallet": "지갑 연결 해제"
+      "disconnectWallet": "로그아웃"
     },
     "accessGate": {
       "privateAlpha": "비공개 알파",
       "title": "알파 접근 요청하기",
       "titleSubmitted": "요청 접수 완료",
-      "description": "PerkOS는 현재 비공개 알파예요. 이 지갑은 아직 접근 권한이 없어요. 간단히 소개해 주시면 저희가 다시 연락드릴게요.",
-      "descriptionSubmitted": "이 지갑이 승인되면 입력하신 이메일로 연락드릴게요.",
-      "yourWallet": "내 지갑",
+      "description": "PerkOS는 현재 비공개 알파예요. 이 계정은 아직 접근 권한이 없어요. 간단히 소개해 주시면 저희가 다시 연락드릴게요.",
+      "descriptionSubmitted": "이 계정이 승인되면 입력하신 이메일로 연락드릴게요.",
+      "yourWallet": "내 계정",
+      "secureAccount": "안전한 PerkOS 계정",
       "onTheList": "명단에 등록됐어요. 메일함을 확인해 주세요.",
       "emailLabel": "이메일",
       "usernameLabel": "사용자 이름",
@@ -1802,7 +1816,7 @@
       "submitError": "요청을 제출하지 못했어요",
       "sending": "보내는 중…",
       "requestAccessButton": "접근 요청",
-      "useDifferentWallet": "다른 지갑 사용",
+      "useDifferentWallet": "다른 계정 사용",
       "accessCodeLabel": "액세스 코드 (선택)",
       "accessCodePlaceholder": "예: JULIO10",
       "accessCodeHint": "PerkOS 파트너에게 받은 코드가 있나요? 입력하면 즉시 액세스할 수 있어요.",

@@ -684,25 +684,28 @@
   "settings": {
     "header": {
       "title": "設定",
-      "subtitle": "ウォレット、ワークスペース、連携機能を管理します。"
+      "subtitle": "アカウント、ワークスペース、連携機能を管理します。"
     },
     "account": {
       "title": "アカウント",
-      "description": "このBase／Solanaウォレットでサインインしています。",
+      "description": "PerkOSへの安全なサインインとアカウント設定です。",
+      "signedInAccount": "サインイン中のアカウント",
+      "secureAccount": "安全なPerkOSアカウント",
+      "simpleModeHint": "技術的な詳細はPerkOSがバックグラウンドで管理します。",
       "connectedWallet": "接続中のウォレット",
       "notConnected": "未接続",
       "copied": "コピーしました",
       "copyFull": "すべてコピー",
       "noKeys": "秘密鍵やシードフレーズをお尋ねすることは決してありません。",
-      "disconnect": "ウォレットを切断"
+      "disconnect": "ログアウト"
     },
     "username": {
       "title": "ユーザー名",
-      "description": "あなたの@ハンドルです。チームメイトがチャットであなたにメンションする際に使われます。一意である必要があり、未設定の場合はウォレットアドレスが表示されます。"
+      "description": "チームメイトがチャットでメンションするための、アカウント固有の@ハンドルです。"
     },
     "avatar": {
       "title": "プロフィール画像",
-      "description": "アプリ全体で使うアバターです。ENS または Basename があればそれを使い、なければ画像をアップロードできます。",
+      "description": "アプリ全体で使うアバターです。画像をアップロードするか、自動生成されたものを使えます。",
       "sourceEns": "ENS",
       "sourceBasename": "Basename",
       "sourceCustom": "カスタム",
@@ -733,7 +736,14 @@
       "infoBefore": "現時点では、各エージェントは独自のBYOK設定を持っています。詳しくは",
       "infoLink": "エージェントランチャー",
       "infoAfter": "から、OpenAI、Anthropic、OpenRouterの認証情報を接続してください。",
-      "infoNote": "ウォレットに紐づく統一キーボールトは、今後のリリースで提供予定です。"
+      "infoNote": "アカウントに紐づく統一キーボールトは、今後のリリースで提供予定です。"
+    },
+    "advanced": {
+      "title": "詳細オプション",
+      "description": "ネットワーク、デジタル資産、支払いアカウントを直接管理するための任意設定です。",
+      "toggle": "ブロックチェーンと支払いの詳細を表示",
+      "disabledHint": "初期設定はオフです。PerkOSは技術的な詳細を表示せず、バックグラウンドでBaseを使用します。",
+      "enabledHint": "ネットワーク選択、残高、アドレス、トークンツールが表示されます。"
     },
     "network": {
       "title": "ネットワーク",
@@ -757,9 +767,9 @@
         "action": "リセット"
       },
       "disconnect": {
-        "title": "ウォレットを切断",
+        "title": "ログアウト",
         "description": "この端末からサインアウトします。バックエンド上のエージェントとプロジェクトはそのまま残ります。",
-        "action": "切断"
+        "action": "ログアウト"
       }
     },
     "resetDialog": {
@@ -1635,6 +1645,7 @@
       "invalidWallet": "有効な0x…ウォレットアドレス（16進数40桁）を入力してください。",
       "loadingMembers": "メンバーを読み込み中…",
       "noMembers": "まだメンバーがいません。",
+      "teamMember": "チームメンバー {{number}}",
       "removeAria": "{{wallet}}を削除",
       "removeTitle": "メンバーを削除",
       "memberInvited": "メンバーを招待しました",
@@ -1746,6 +1757,8 @@
     },
     "userMenu": {
       "accountMenu": "アカウントメニュー",
+      "account": "あなたのアカウント",
+      "secureAccount": "安全なアカウント",
       "ownerWallet": "オーナーウォレット",
       "copied": "コピーしました",
       "copyFullAddress": "アドレス全体をコピー",
@@ -1791,15 +1804,16 @@
       "registerAgent": "エージェントを登録",
       "createOrganization": "組織を作成",
       "openPerkosAgent": "Ask PerkOS Agentを開く",
-      "disconnectWallet": "ウォレットを切断"
+      "disconnectWallet": "ログアウト"
     },
     "accessGate": {
       "privateAlpha": "プライベートアルファ",
       "title": "アルファ版へのアクセスをリクエスト",
       "titleSubmitted": "リクエストを受け付けました",
-      "description": "PerkOSは現在プライベートアルファの段階です。このウォレットはまだアクセス権がありません。簡単な自己紹介をお送りいただければ、こちらからご連絡します。",
-      "descriptionSubmitted": "このウォレットが承認され次第、ご入力いただいたメールアドレスにご連絡します。",
-      "yourWallet": "あなたのウォレット",
+      "description": "PerkOSは現在プライベートアルファの段階です。このアカウントはまだアクセス権がありません。簡単な自己紹介をお送りいただければ、こちらからご連絡します。",
+      "descriptionSubmitted": "このアカウントが承認され次第、ご入力いただいたメールアドレスにご連絡します。",
+      "yourWallet": "あなたのアカウント",
+      "secureAccount": "安全なPerkOSアカウント",
       "onTheList": "リストに登録されました。メールをご確認ください。",
       "emailLabel": "メールアドレス",
       "usernameLabel": "ユーザー名",
@@ -1811,7 +1825,7 @@
       "submitError": "リクエストを送信できませんでした",
       "sending": "送信中…",
       "requestAccessButton": "アクセスをリクエスト",
-      "useDifferentWallet": "別のウォレットを使用",
+      "useDifferentWallet": "別のアカウントを使用",
       "accessCodeLabel": "アクセスコード（任意）",
       "accessCodePlaceholder": "例: JULIO10",
       "accessCodeHint": "PerkOS パートナーからのコードをお持ちですか？入力するとすぐにアクセスできます。",

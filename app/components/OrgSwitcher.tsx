@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../lib/useAppAccount";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Building2,
@@ -32,7 +32,7 @@ import { getOrgProjects, updateOrgName } from "../lib/perkosApi";
  *  and links to create / manage organizations. */
 export function OrgSwitcher() {
   const { t } = useTranslation();
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const qc = useQueryClient();
   const {
     orgs,
@@ -178,7 +178,7 @@ export function OrgSwitcher() {
  *  the one you want to work on. */
 export function ProjectPicker() {
   const { t } = useTranslation();
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const router = useRouter();
   const { activeOrg, activeOrgId, defaultOrgId } = useActiveOrg();
   const [open, setOpen] = useState(false);

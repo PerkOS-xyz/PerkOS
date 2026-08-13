@@ -2,7 +2,7 @@
 
 import { notFound, useParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../../../lib/useAppAccount";
 
 import { useConversation } from "../../../lib/useConversation";
 import {
@@ -22,7 +22,7 @@ import { OfflineBanner } from "../../../components/OfflineBanner";
 export default function ConversationPage() {
   const params = useParams<{ convId: string }>();
   const convId = params?.convId ?? null;
-  const { address, isConnected } = useConnection();
+  const { address, isConnected } = useAppAccount();
 
   const { conversation, loading: convLoading, error: convError } = useConversation(
     address,

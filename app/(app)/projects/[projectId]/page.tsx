@@ -5,7 +5,8 @@ import dynamic from "next/dynamic";
 import { use, useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../../../lib/useAppAccount";
+import { useAdvancedFeatures } from "../../../lib/advancedFeatures";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { Pencil, Trash2, Sparkles, Compass, Users, Zap, Play, Pause } from "lucide-react";
@@ -77,7 +78,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
   const { projectId } = use(params);
   const { t } = useTranslation();
   const searchParams = useSearchParams();
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   // For a SHARED project (owned by another wallet), the owner is passed as
   // ?owner=. All reads then target the owner's subtree (the membership rules
   // permit it). For own projects it's just the connected wallet.
@@ -254,7 +255,8 @@ function DetailHeader({
 
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { address } = useConnection();
+  const { address } = useAppAccount();
+  const advancedFeatures = useAdvancedFeatures(address);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   // "Choose your coordinator" popup — the PM role is the USER's choice. Shown
@@ -497,9 +499,11 @@ function DetailHeader({
             <Zap className="h-4 w-4" />
             {wakeTeamMutation.isPending ? t("projectRoom.header.waking") : t("projectRoom.header.wakeTeam")}
           </Button>
-          <span className="mr-1 text-xs text-[#7975a8]">
-            {project.budget || "0 USDC"}
-          </span>
+          {advancedFeatures.enabled ? (
+            <span className="mr-1 text-xs text-[#7975a8]">
+              {project.budget || "0 USDC"}
+            </span>
+          ) : null}
           <Button
             variant="outline"
             size="sm"
@@ -828,7 +832,7 @@ function TasksTab({
    *  are permitted by the rules). Falls back to the connected wallet. */
   ownerWallet?: string;
 }) {
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const { t } = useTranslation();
   const effWallet = ownerWallet ?? address;
   const queryClient = useQueryClient();
@@ -1024,7 +1028,7 @@ function ConductorTab({
   /** Owner wallet for a SHARED project (editors write to it). */
   ownerWallet?: string;
 }) {
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const { t } = useTranslation();
   const effWallet = ownerWallet ?? address;
   const queryClient = useQueryClient();
@@ -1091,7 +1095,7 @@ function TaskCard({
 }) {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const effWallet = ownerWallet ?? address;
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -1255,7 +1259,7 @@ function MapTab({
   projectId: string;
   ownerWallet?: string;
 }) {
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const { t } = useTranslation();
   const { byName } = useWalletAgents(ownerWallet ?? address);
   const agentNames = uniqueAgents(detail.tasks, detail.project.agentIds ?? []);
@@ -1280,7 +1284,7 @@ function MapTab({
 }
 
 function AgentsTab({ detail }: { detail: ProjectDetail }) {
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [addOpen, setAddOpen] = useState(false);
@@ -1467,7 +1471,7 @@ function AddAgentToProjectDialog({
   projectId: string;
   existingNames: string[];
 }) {
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [selected, setSelected] = useState<Set<string>>(new Set());

@@ -684,25 +684,28 @@
   "settings": {
     "header": {
       "title": "Settings",
-      "subtitle": "Manage your wallet, workspace and integrations."
+      "subtitle": "Manage your account, workspace and integrations."
     },
     "account": {
       "title": "Account",
-      "description": "You signed in with this Base / Solana wallet.",
+      "description": "Your secure PerkOS sign-in and account controls.",
+      "signedInAccount": "Signed-in account",
+      "secureAccount": "Secure PerkOS account",
+      "simpleModeHint": "PerkOS handles the technical details in the background.",
       "connectedWallet": "Connected wallet",
       "notConnected": "Not connected",
       "copied": "Copied",
       "copyFull": "Copy full",
       "noKeys": "We never request private keys or seed phrases.",
-      "disconnect": "Disconnect wallet"
+      "disconnect": "Sign out"
     },
     "username": {
       "title": "Username",
-      "description": "Your @handle: what teammates type to mention you in chats. Unique; falls back to your wallet address when unset."
+      "description": "Your @handle: what teammates type to mention you in chats. It is unique to your account."
     },
     "avatar": {
       "title": "Profile picture",
-      "description": "Your avatar across the app. Uses your ENS or Basename if you have one, or upload your own.",
+      "description": "Your avatar across the app. Upload an image or use the generated default.",
       "sourceEns": "ENS",
       "sourceBasename": "Basename",
       "sourceCustom": "Custom",
@@ -733,7 +736,14 @@
       "infoBefore": "For now, each agent ships with its own BYOK setup. Use the",
       "infoLink": "agent launcher",
       "infoAfter": "to attach OpenAI, Anthropic or OpenRouter credentials.",
-      "infoNote": "A unified key vault scoped to your wallet is planned for a future release."
+      "infoNote": "A unified key vault scoped to your account is planned for a future release."
+    },
+    "advanced": {
+      "title": "Advanced options",
+      "description": "Optional controls for users who want to manage networks, digital assets and payment accounts directly.",
+      "toggle": "Show blockchain and payment details",
+      "disabledHint": "Off by default. PerkOS uses Base securely in the background without showing technical details.",
+      "enabledHint": "Network selector, balances, wallet addresses and token tools are now visible."
     },
     "network": {
       "title": "Network",
@@ -757,9 +767,9 @@
         "action": "Reset"
       },
       "disconnect": {
-        "title": "Disconnect wallet",
+        "title": "Sign out",
         "description": "Signs you out of this device. Your agents and projects on the backend stay intact.",
-        "action": "Disconnect"
+        "action": "Sign out"
       }
     },
     "resetDialog": {
@@ -1650,6 +1660,7 @@
       "invalidWallet": "Enter a valid 0x… wallet address (40 hex chars).",
       "loadingMembers": "Loading members…",
       "noMembers": "No members yet.",
+      "teamMember": "Team member {{number}}",
       "removeAria": "Remove {{wallet}}",
       "removeTitle": "Remove member",
       "memberInvited": "Member invited",
@@ -1763,6 +1774,8 @@
     },
     "userMenu": {
       "accountMenu": "Account menu",
+      "account": "Your account",
+      "secureAccount": "Secure account",
       "ownerWallet": "Owner wallet",
       "copied": "Copied",
       "copyFullAddress": "Copy full address",
@@ -1808,15 +1821,16 @@
       "registerAgent": "Register agent",
       "createOrganization": "Create organization",
       "openPerkosAgent": "Open Ask PerkOS Agent",
-      "disconnectWallet": "Disconnect wallet"
+      "disconnectWallet": "Sign out"
     },
     "accessGate": {
       "privateAlpha": "Private alpha",
       "title": "Request alpha access",
       "titleSubmitted": "Request received",
-      "description": "PerkOS is in private alpha. This wallet doesn't have access yet. Tell us a bit about you and we'll get back.",
-      "descriptionSubmitted": "We'll reach out to the email you provided once this wallet is approved.",
-      "yourWallet": "Your wallet",
+      "description": "PerkOS is in private alpha. This account doesn't have access yet. Tell us a bit about you and we'll get back.",
+      "descriptionSubmitted": "We'll reach out to the email you provided once this account is approved.",
+      "yourWallet": "Your account",
+      "secureAccount": "Secure PerkOS account",
       "onTheList": "You're on the list. Watch your inbox.",
       "emailLabel": "Email",
       "usernameLabel": "Username",
@@ -1828,7 +1842,7 @@
       "submitError": "Could not submit request",
       "sending": "Sending…",
       "requestAccessButton": "Request access",
-      "useDifferentWallet": "Use a different wallet",
+      "useDifferentWallet": "Use a different account",
       "accessCodeLabel": "Access code (optional)",
       "accessCodePlaceholder": "e.g. JULIO10",
       "accessCodeHint": "Have a code from a PerkOS partner? Enter it for instant access.",

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../../../lib/useAppAccount";
 import { toast } from "sonner";
 import { createWalletProject } from "../../../lib/perkosApi";
 import { useActiveOrg } from "../../../lib/useActiveOrg";
@@ -17,7 +17,7 @@ export default function CreateProjectPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
-  const { address, isConnected } = useConnection();
+  const { address, isConnected } = useAppAccount();
   const { activeOrgId } = useActiveOrg();
   const { markProjectCreated } = useOnboarding();
 

@@ -3,9 +3,7 @@
 import Image from "next/image";
 import { useMemo, useState, type FormEvent } from "react";
 import {
-  Check,
   CheckCircle2,
-  Copy,
   Loader2,
   ShieldAlert,
   LogOut,
@@ -41,7 +39,6 @@ export function AccessGate({ address }: Props) {
   // the wallet). In Farcaster / Base App the wallet is the host identity.
   const privyEnabled = privyBrowserEnabled(isInMiniApp);
   const [loggingOut, setLoggingOut] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [accessCode, setAccessCode] = useState("");
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
@@ -58,16 +55,6 @@ export function AccessGate({ address }: Props) {
   // request-access flow (email + username + company).
   const hasCode = accessCode.trim().length > 0;
   const usernameValid = /^[a-z0-9_-]{3,20}$/.test(username.trim().toLowerCase());
-
-  function copyAddress() {
-    navigator.clipboard
-      .writeText(address)
-      .then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
-      })
-      .catch(() => {});
-  }
 
   async function useDifferentWallet() {
     // Fully log out the Privy wallet + Firebase (a bare wagmi disconnect() is
@@ -204,28 +191,9 @@ export function AccessGate({ address }: Props) {
             <span className="uppercase tracking-wider text-muted-foreground">
               {t("chrome.accessGate.yourWallet")}
             </span>
-            <div className="flex items-start gap-2">
-              <span className="min-w-0 flex-1 break-all font-mono text-foreground">
-                {address}
-              </span>
-              <button
-                type="button"
-                onClick={copyAddress}
-                aria-label={t("chrome.userMenu.copyFullAddress")}
-                title={
-                  copied
-                    ? t("chrome.userMenu.copied")
-                    : t("chrome.userMenu.copyFullAddress")
-                }
-                className="shrink-0 rounded p-1 text-muted-foreground transition-colors hover:text-foreground"
-              >
-                {copied ? (
-                  <Check className="h-3.5 w-3.5 text-primary" />
-                ) : (
-                  <Copy className="h-3.5 w-3.5" />
-                )}
-              </button>
-            </div>
+            <span className="text-foreground">
+              {session.identityLabel || t("chrome.accessGate.secureAccount")}
+            </span>
           </div>
 
           {submitted ? (

@@ -5,7 +5,7 @@ import { Bot, Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type { Agent } from "../lib/perkosApi";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../lib/useAppAccount";
 import { formatRelativeShort } from "../lib/format";
 import {
   useWalletAgents,
@@ -28,7 +28,7 @@ type Props = {
  * or still-booting agent doesn't falsely read "Online".
  */
 export function ActiveAgentsPanel({ agents, isLoading }: Props) {
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const { byName } = useWalletAgents(address);
 
   const labelFor = (a: Agent) => realtimeAgentStatus(byName[a.name]).label;

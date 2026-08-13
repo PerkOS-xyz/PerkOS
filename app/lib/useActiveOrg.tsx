@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "./useAppAccount";
 
 import {
   ensureDefaultOrg,
@@ -65,7 +65,7 @@ const ActiveOrgContext = createContext<ActiveOrgState | null>(null);
  * active org from localStorage. Wrap the authed app shell with this.
  */
 export function ActiveOrgProvider({ children }: { children: ReactNode }) {
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const [orgs, setOrgs] = useState<Organization[]>([]);
   const [activeOrgId, setActiveOrgIdState] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);

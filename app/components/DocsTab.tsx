@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "../lib/useAppAccount";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
@@ -106,7 +106,7 @@ export function DocsTab({
   ownerWallet?: string;
 }) {
   const { t } = useTranslation();
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const wallet = ownerWallet ?? address ?? undefined;
   const { docs, loading } = useDocs(wallet, projectId);
   const activePlanId = useActivePlanId(wallet, projectId);
@@ -824,7 +824,7 @@ function DocChat({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
-  const { address } = useConnection();
+  const { address } = useAppAccount();
   const { messages } = useDocMessages(wallet, projectId, docId);
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);

@@ -2,7 +2,6 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { useConnection, useDisconnect } from "wagmi";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import {
@@ -19,6 +18,7 @@ import {
   Info,
   AtSign,
   UserCircle,
+  SlidersHorizontal,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
 import { useOnboarding } from "../../lib/onboardingState";
@@ -41,14 +42,17 @@ import { perkosApiBaseUrl } from "../../lib/perkosApi";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { UsernameCard } from "../../components/UsernameCard";
 import { ProfileAvatarCard } from "../../components/ProfileAvatarCard";
+import { useWalletSession } from "../../lib/useWalletSession";
+import { useAdvancedFeatures } from "../../lib/advancedFeatures";
 
 const ORG_DRAFT_KEY = "swarm.organization.draft.v1";
 
 export default function SettingsPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { address } = useConnection();
-  const { disconnect } = useDisconnect();
+  const session = useWalletSession();
+  const address = session.address;
+  const advancedFeatures = useAdvancedFeatures(address);
   const { workspaceName, setWorkspaceName, reset: resetOnboarding } =
     useOnboarding();
 
@@ -93,8 +97,8 @@ export default function SettingsPage() {
     toast.success(t("settings.toast.stateReset"));
   }
 
-  function handleDisconnect() {
-    disconnect();
+  async function handleDisconnect() {
+    await session.logout();
     router.replace("/sign-in");
   }
 
@@ -122,13 +126,24 @@ export default function SettingsPage() {
           <CardContent className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
               <Label className="text-xs uppercase tracking-wide text-muted-foreground">
-                {t("settings.account.connectedWallet")}
+                {advancedFeatures.enabled
+                  ? t("settings.account.connectedWallet")
+                  : t("settings.account.signedInAccount")}
               </Label>
               <div className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2">
-                <span className="flex-1 truncate font-mono text-sm text-foreground">
-                  {address ? formatAddress(address) : t("settings.account.notConnected")}
+                <span
+                  className={cn(
+                    "flex-1 truncate text-sm text-foreground",
+                    advancedFeatures.enabled && "font-mono",
+                  )}
+                >
+                  {advancedFeatures.enabled
+                    ? address
+                      ? formatAddress(address)
+                      : t("settings.account.notConnected")
+                    : session.identityLabel || t("settings.account.secureAccount")}
                 </span>
-                {address ? (
+                {address && advancedFeatures.enabled ? (
                   <Button
                     type="button"
                     variant="ghost"
@@ -151,7 +166,9 @@ export default function SettingsPage() {
                 ) : null}
               </div>
               <p className="text-xs text-muted-foreground">
-                {t("settings.account.noKeys")}
+                {advancedFeatures.enabled
+                  ? t("settings.account.noKeys")
+                  : t("settings.account.simpleModeHint")}
               </p>
             </div>
 
@@ -197,7 +214,7 @@ export default function SettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ProfileAvatarCard />
+            <ProfileAvatarCard showOnchain={advancedFeatures.enabled} />
           </CardContent>
         </Card>
 
@@ -272,8 +289,43 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Advanced product surfaces are opt-in. The setting is scoped to the
+          signed-in account and defaults to off on every new browser/account. */}
+      <Card id="advanced-features">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <SlidersHorizontal className="h-4 w-4 text-primary" />
+            {t("settings.advanced.title")}
+          </CardTitle>
+          <CardDescription>
+            {t("settings.advanced.description")}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-start gap-3 rounded-md border border-border bg-card/50 p-4">
+            <Checkbox
+              checked={advancedFeatures.enabled}
+              onCheckedChange={advancedFeatures.setEnabled}
+              aria-label={t("settings.advanced.toggle")}
+              className="mt-0.5"
+              disabled={!advancedFeatures.ready}
+            />
+            <span className="flex flex-col gap-1">
+              <span className="text-sm font-medium text-foreground">
+                {t("settings.advanced.toggle")}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {advancedFeatures.enabled
+                  ? t("settings.advanced.enabledHint")
+                  : t("settings.advanced.disabledHint")}
+              </span>
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Network */}
-      <Card>
+      {advancedFeatures.enabled ? <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Network className="h-4 w-4 text-primary" />
@@ -290,16 +342,10 @@ export default function SettingsPage() {
           />
           <ReadOnlyRow
             label={t("settings.network.defaultChain")}
-            value="Base Sepolia"
-            badge={t("settings.network.testnet")}
-          />
-          <ReadOnlyRow
-            label={t("settings.network.solanaCluster")}
-            value="testnet"
-            badge={t("settings.network.testnet")}
+            value="Base Mainnet"
           />
         </CardContent>
-      </Card>
+      </Card> : null}
 
       {/* Danger zone */}
       <Card className="border-destructive/40">
