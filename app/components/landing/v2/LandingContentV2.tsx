@@ -36,6 +36,7 @@ import {
 import { ParallaxLayer } from "./ParallaxLayer";
 import { Particles } from "./Particles";
 import { ScrubBlock } from "./Scrub";
+import { trackEvent } from "../../../lib/analytics";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -133,15 +134,20 @@ function TopNavV2() {
         </nav>
         <div className="flex items-center gap-2">
           <LanguageSelector />
-          <SmartCTA
-            href="/sign-in"
-            analyticsId="nav_primary"
+          <a
+            href="/grow"
+            onClick={() =>
+              trackEvent("select_content", {
+                content_type: "business_diagnostic",
+                item_id: "nav_grow_business",
+              })
+            }
             className="brand-gradient inline-flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium text-primary-foreground transition-transform hover:scale-[1.03] sm:px-4"
           >
-            <span className="hidden sm:inline">{t("landing.nav.meetYourTeam")}</span>
-            <span className="sm:hidden">{t("landing.nav.start")}</span>
+            <span className="hidden sm:inline">{t("landing.nav.growYourBusiness")}</span>
+            <span className="sm:hidden">{t("landing.nav.grow")}</span>
             <ArrowRight className="h-3.5 w-3.5" />
-          </SmartCTA>
+          </a>
         </div>
       </div>
     </motion.header>
