@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 /**
  * Sign-up was merged into sign-in. There is no separate sign-up step:
  *
- *   - In a browser tab, Dynamic's modal ("Log in or sign up") creates the
+ *   - In a browser tab, Privy's modal ("Log in or sign up") creates the
  *     account on first connect.
  *   - In a Mini App host (Farcaster / Base App), the wallet is already
  *     connected, so the user just signs in.

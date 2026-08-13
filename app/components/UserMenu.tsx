@@ -28,7 +28,7 @@ import { UserAvatar } from "./UserAvatar";
 export function UserMenu({ onLogout }: { onLogout?: () => void }) {
   const { t } = useTranslation();
   const router = useRouter();
-  // Read the wallet from the session (Dynamic in a browser, wagmi in a Mini
+  // Read the wallet from the session (Privy in a browser, wagmi in a Mini
   // App) so the menu renders on both paths. Logout goes through the layout's
   // handler (single path: it tears down wallet + Firebase and routes to the
   // landing page); fall back to session.logout() if no handler was provided.

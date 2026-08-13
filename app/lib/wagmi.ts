@@ -30,13 +30,7 @@ export const wagmiConfig = createConfig({
   // Anchor contract lives there during alpha — receipt code keeps
   // talking to Sepolia even when the user switches header chain.
   //
-  // IMPORTANT: this set MUST match the EVM networks enabled in the Dynamic
-  // dashboard (Base + Celo + Robinhood Chain + Base Sepolia). A chain present
-  // here but not in
-  // Dynamic — or in Dynamic but not here — makes DynamicWagmiConnector drop
-  // the wallet mid-sign-in (the wallet's active chain can't be reconciled),
-  // surfacing as ConnectorNotConnectedError on personal_sign. celoSepolia was
-  // removed for exactly that reason: unused in-app and absent from Dynamic.
+  // Browser Privy and Mini App wagmi paths expose this same chain set.
   chains: [base, celo, robinhoodChain, baseSepolia],
   connectors: [
     // Auto-detected when running inside Farcaster (Warpcast web/mobile)

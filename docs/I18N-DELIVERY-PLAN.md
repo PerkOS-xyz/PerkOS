@@ -16,7 +16,7 @@ Grounding facts from the audit:
   suppressHydrationWarning>` with `<body suppressHydrationWarning>`. Metadata/OG
   are declared here and are server-rendered.
 - Providers compose in `app/providers.tsx` and have TWO return branches
-  (Dynamic-browser vs plain wagmi). The i18n provider must wrap BOTH.
+  (Privy-browser vs plain wagmi). The i18n provider must wrap BOTH.
 - App shell + header + `NAV_ITEMS` live in `app/(app)/layout.tsx` (client).
 - `@/*` in tsconfig maps to the repo root, so `@/components/ui/*` and
   `@/lib/utils` are the shadcn primitives. App code uses RELATIVE imports
@@ -82,7 +82,7 @@ Header selector
 
 - `app/providers.tsx` — wrap the children of BOTH return branches in
   `<I18nProvider>`. Placing it just inside `QueryClientProvider` (and inside
-  `DynamicProviders`) keeps it above every `"use client"` screen. It is
+  `PrivyProviders`) keeps it above every `"use client"` screen. It is
   host-agnostic (i18n runs in Mini App hosts too; only the selector is gated).
 - `app/(app)/layout.tsx` — mount `<LanguageSelector />` in the desktop header
   cluster next to `<UserMenu />` (line ~140) and in the mobile menu sheet; drive
@@ -243,7 +243,7 @@ screens (they stay English).
 - Not breaking Mini App hosts. i18n runs everywhere, but the SELECTOR is gated on
   `useIsInMiniApp() === false` (hidden while `null` and inside Farcaster/Base App),
   mirroring the existing logout-hiding logic. The provider adds no host-specific
-  connectors and does not touch wagmi/Dynamic, so the Mini App connect path is
+  connectors and does not touch wagmi/Privy, so the Mini App connect path is
   untouched. Verify the plain-wagmi branch of `app/providers.tsx` still renders
   (the provider must wrap BOTH branches).
 - Bundle size. Bundling all 7 langs x N namespaces inflates the client JS. For
@@ -327,7 +327,7 @@ Host gating
 Stability
 - [ ] No React hydration warning in the console on first load for en and for a
       non-en detected language (accepted brief FOUE is not an error).
-- [ ] Both `app/providers.tsx` branches (Dynamic-browser and plain-wagmi) render
+- [ ] Both `app/providers.tsx` branches (Privy-browser and plain-wagmi) render
       with the provider in place.
 - [ ] `npm run build` passes (standalone output).
 - [ ] `npm run typecheck` passes (namespaces/keys typed or at least `t()` calls

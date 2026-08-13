@@ -57,7 +57,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   // `connector` must come from wagmi (used to detect the Base App in-app
   // browser). The displayed/gated address prefers the session's wallet so the
-  // browser/Dynamic path (where wagmi holds no address) still shows the wallet.
+  // browser/Privy path (where wagmi holds no address) still shows the wallet.
   const { address: wagmiAddress, connector } = useConnection();
   const session = useWalletSession();
   const address = session.address ?? wagmiAddress;
@@ -78,9 +78,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const hideLogout = inMiniApp === true || isBaseAppBrowser;
   // Intentional logout goes to the LANDING page; the signed-out effect below
   // otherwise bounces to /sign-in (its job for unexpected session loss).
-  // session.logout() tears down the real wallet (Dynamic in a browser, wagmi
+  // session.logout() tears down the real wallet (Privy in a browser, wagmi
   // in a Mini App) AND Firebase — a bare wagmi disconnect() is a no-op on the
-  // browser/Dynamic path, which is why the logout button "did nothing" there.
+  // browser/Privy path, which is why a bare wagmi logout would do nothing there.
   const loggingOut = useRef(false);
   const logout = async () => {
     loggingOut.current = true;

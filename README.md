@@ -104,6 +104,7 @@ Open <http://localhost:3000>.
 See [`.env.example`](./.env.example) for the full list. Minimum to boot:
 
 - `NEXT_PUBLIC_SITE_URL` — canonical origin (used in OG tags, sitemap, Farcaster manifest).
+- `NEXT_PUBLIC_PRIVY_APP_ID` — Privy browser auth app; optional `NEXT_PUBLIC_PRIVY_CLIENT_ID` selects a client configuration.
 - `NEXT_PUBLIC_FIREBASE_*` — Firebase web SDK config (public).
 - `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` — Admin SDK (server only).
 - `NEXT_PUBLIC_PERKOS_WHITELIST` — comma-separated wallet allowlist for the private alpha. **If empty, no wallet has access.**
