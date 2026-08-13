@@ -86,9 +86,13 @@ export function LandingContentV2() {
 // ============================================================================
 
 function TopNavV2() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { scrollY } = useScroll();
   const [hidden, setHidden] = useState(false);
+  const currentLanguage = (i18n.resolvedLanguage || i18n.language || "en")
+    .split("-")[0]
+    .toLowerCase();
+  const growHref = `/grow?lang=${encodeURIComponent(currentLanguage)}`;
 
   useMotionValueEvent(scrollY, "change", (y) => {
     const prev = scrollY.getPrevious() ?? 0;
@@ -135,7 +139,7 @@ function TopNavV2() {
         <div className="flex items-center gap-2">
           <LanguageSelector />
           <a
-            href="/grow"
+            href={growHref}
             onClick={() =>
               trackEvent("select_content", {
                 content_type: "business_diagnostic",
