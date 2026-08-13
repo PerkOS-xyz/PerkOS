@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import en from "../app/i18n/locales/en.json";
 import es from "../app/i18n/locales/es.json";
+import fr from "../app/i18n/locales/fr.json";
+import italian from "../app/i18n/locales/it.json";
+import ja from "../app/i18n/locales/ja.json";
+import ko from "../app/i18n/locales/ko.json";
 import pt from "../app/i18n/locales/pt.json";
+import zh from "../app/i18n/locales/zh.json";
 import {
   isSupportedLanguage,
   SUPPORTED_LANGUAGES,
@@ -59,5 +64,21 @@ describe("international Spanish locale", () => {
     expect(serialized).not.toMatch(
       /\b(tenés|podés|querés|sabés|sos|subí|vinculá|ingresalo|por vos|acá)\b/i,
     );
+  });
+});
+
+describe("Grow landing call to action", () => {
+  it.each([
+    ["en", en],
+    ["es", es],
+    ["fr", fr],
+    ["it", italian],
+    ["ja", ja],
+    ["ko", ko],
+    ["pt", pt],
+    ["zh", zh],
+  ])("has desktop and mobile copy in %s", (_code, locale) => {
+    expect(locale.landing.nav.growYourBusiness.trim()).not.toBe("");
+    expect(locale.landing.nav.grow.trim()).not.toBe("");
   });
 });
