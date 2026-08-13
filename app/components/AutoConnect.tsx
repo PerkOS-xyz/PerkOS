@@ -12,15 +12,10 @@
  *   2. Base App Mini App host (clientFid 309857)
  *      → baseAccount connector. Picks up the user's Base smart wallet.
  *
- *   3. Base App's in-app browser (NOT a Mini App host — sdk.isInMiniApp()
- *      returns false) — but the host injects the user's Coinbase Smart
- *      Wallet as an EIP-6963 provider. wagmi v3 auto-discovers EIP-6963
- *      providers and exposes them as connectors. We look for the one
- *      whose rdns is "com.coinbase.wallet" and connect through it so
- *      the user doesn't see the manual sign-up buttons.
- *
- * Anywhere else (plain Safari without a Coinbase provider) we do
- * nothing and the user uses the /sign-up | /sign-in connect buttons.
+ * Browser tabs — including Chrome with Coinbase Wallet installed and Base
+ * App's in-app browser — never auto-connect. They must wait for an explicit
+ * user gesture on a sign-in CTA. This prevents a wallet permission popup from
+ * appearing merely because a visitor opened the public landing page.
  *
  * Recovery from the "Connector already connected" trap
  * ----------------------------------------------------
@@ -37,27 +32,12 @@ import {
   useConnect,
   useConnectors,
   useReconnect,
-  type Connector,
 } from "wagmi";
 import { sdk } from "@farcaster/miniapp-sdk";
 
 // Public host IDs. Stable per host app.
 const FARCASTER_CLIENT_FID = 9152;
 const BASE_APP_CLIENT_FID = 309857;
-const COINBASE_WALLET_RDNS = "com.coinbase.wallet";
-
-/**
- * EIP-6963 providers are exposed by wagmi v3 either as a top-level
- * `rdns` on the connector or inside a nested `info.rdns`. Check both
- * so we are resilient to minor wagmi-version differences.
- */
-function rdnsOf(connector: Connector): string | undefined {
-  const c = connector as Connector & {
-    rdns?: string;
-    info?: { rdns?: string };
-  };
-  return c.rdns ?? c.info?.rdns;
-}
 
 export function AutoConnect() {
   const { isConnected, isConnecting, isReconnecting } = useAccount();
@@ -77,35 +57,29 @@ export function AutoConnect() {
         const inMiniApp = await sdk.isInMiniApp();
         if (cancelled) return;
 
+        // A browser-discovered extension is only a signal that a wallet is
+        // available, never consent to connect it. Wallet access outside a
+        // verified Mini App host must begin from an explicit user click.
+        if (!inMiniApp) return;
+
         const findById = (id: string) =>
           connectors.find((c) => c.id === id);
-        const findByRdns = (rdns: string) =>
-          connectors.find((c) => c.id === rdns || rdnsOf(c) === rdns);
 
-        let connector: Connector | undefined;
+        const context = await sdk.context;
+        if (cancelled) return;
 
-        if (inMiniApp) {
-          const context = await sdk.context;
-          if (cancelled) return;
+        const clientFid = context?.client?.clientFid;
+        let connector;
 
-          const clientFid = context?.client?.clientFid;
-
-          if (clientFid === FARCASTER_CLIENT_FID) {
-            connector = findById("farcasterMiniApp");
-          } else if (clientFid === BASE_APP_CLIENT_FID) {
-            connector = findById("baseAccount");
-          } else {
-            // Unknown host — try Farcaster first since the SDK runs there.
-            connector =
-              findById("farcasterMiniApp") ?? findById("baseAccount");
-          }
+        if (clientFid === FARCASTER_CLIENT_FID) {
+          connector = findById("farcasterMiniApp");
+        } else if (clientFid === BASE_APP_CLIENT_FID) {
+          connector = findById("baseAccount");
         } else {
-          // Base App's in-app browser: EIP-6963 announces Coinbase
-          // Smart Wallet. The announce event arrives asynchronously
-          // after page load, which is why we depend on `connectors` in
-          // useEffect — when wagmi registers the discovered provider
-          // the effect re-runs and we find it here.
-          connector = findByRdns(COINBASE_WALLET_RDNS);
+          // Unknown verified host — try Farcaster first since the SDK runs
+          // there, then Base Account as the compatible fallback.
+          connector =
+            findById("farcasterMiniApp") ?? findById("baseAccount");
         }
 
         if (!connector) return;
