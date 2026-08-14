@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Mic, MicOff } from "lucide-react";
+import { Loader2, Mic, MicOff, PhoneOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,11 +25,15 @@ export function AgentVoiceCallCard({
   capability,
   callState,
   onStart,
+  onEnd,
+  error,
 }: {
   agentName: string;
   capability?: AgentVoiceCapability | null;
   callState?: AgentVoiceState;
   onStart?: () => void;
+  onEnd?: () => void;
+  error?: string | null;
 }) {
   const state = callState ?? resolveAgentVoiceState(capability);
   const busy = BUSY_STATES.includes(state);
@@ -52,10 +56,11 @@ export function AgentVoiceCallCard({
             ? `${agentName} has not reported a verified voice gateway and speech provider. Text availability does not enable voice.`
             : "Voice calls use an active project meeting and temporary microphone processing consent."}
         </p>
-        <Button className="gap-2" disabled={!enabled || busy} aria-disabled={!enabled || busy} onClick={onStart}>
+        {state === "in-call" ? <Button variant="destructive" className="gap-2" onClick={onEnd}><PhoneOff className="h-4 w-4" />End call</Button> : <Button className="gap-2" disabled={!enabled || busy} aria-disabled={!enabled || busy} onClick={onStart}>
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mic className="h-4 w-4" />}
           {state === "failed" || state === "ended" ? "Retry voice call" : `Call ${agentName}`}
-        </Button>
+        </Button>}
+        {error ? <p className="text-xs text-red-300" role="alert">{error}</p> : null}
         {state === "unavailable" ? (
           <p className="text-xs text-amber-300">
             Pending gateway capability and speech-provider configuration.

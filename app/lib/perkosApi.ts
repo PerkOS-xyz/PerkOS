@@ -2578,6 +2578,30 @@ export type VoiceGatewayGrant = {
   expiresAt: string;
 };
 
+export type AgentVoiceCapabilityApi = { available: boolean; status: "ready" | "unavailable"; reason?: "gateway_pending" | "provider_pending" | "not_supported"; expiresAt?: string };
+export type VoiceSessionApi = { id: string; status: "pending" | "claimed" | "joined" | "completed" | "failed" | "cancelled" | "expired"; expiresAt: string; reason?: string };
+
+export async function getAgentVoiceCapabilityApi(input: { projectId: string; agentId: string; owner?: string }): Promise<AgentVoiceCapabilityApi> {
+  const query = input.owner ? `?owner=${encodeURIComponent(input.owner)}` : "";
+  const payload = await meetingRequest<{ capability: AgentVoiceCapabilityApi }>(`/api/projects/${encodeURIComponent(input.projectId)}/agents/${encodeURIComponent(input.agentId)}/voice-capability${query}`);
+  return payload.capability;
+}
+
+export async function createVoiceSessionApi(input: { projectId: string; meetingId: string; agentId: string; owner?: string }): Promise<VoiceSessionApi> {
+  const payload = await meetingRequest<{ session: VoiceSessionApi }>(`/api/projects/${encodeURIComponent(input.projectId)}/meetings/${encodeURIComponent(input.meetingId)}/voice-sessions`, { method: "POST", body: JSON.stringify({ owner: input.owner, agentId: input.agentId, voiceProcessingConsent: true }) });
+  return payload.session;
+}
+
+export async function getVoiceSessionApi(input: { projectId: string; meetingId: string; sessionId: string; agentId: string; owner?: string }): Promise<VoiceSessionApi> {
+  const params = new URLSearchParams({ agentId: input.agentId }); if (input.owner) params.set("owner", input.owner);
+  const payload = await meetingRequest<{ session: VoiceSessionApi }>(`/api/projects/${encodeURIComponent(input.projectId)}/meetings/${encodeURIComponent(input.meetingId)}/voice-sessions/${encodeURIComponent(input.sessionId)}?${params}`);
+  return payload.session;
+}
+
+export async function cancelVoiceSessionApi(input: { projectId: string; meetingId: string; sessionId: string; agentId: string; owner?: string }): Promise<void> {
+  await meetingRequest(`/api/projects/${encodeURIComponent(input.projectId)}/meetings/${encodeURIComponent(input.meetingId)}/voice-sessions/${encodeURIComponent(input.sessionId)}/cancel`, { method: "POST", body: JSON.stringify({ owner: input.owner, agentId: input.agentId }) });
+}
+
 /** Request the documented agent grant without logging or rendering it. */
 export async function createVoiceGatewayGrantApi(input: {
   projectId: string;

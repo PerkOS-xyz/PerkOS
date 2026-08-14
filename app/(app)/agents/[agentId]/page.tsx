@@ -70,7 +70,7 @@ import { TeamPanel } from "./TeamPanel";
 import { UpgradePanel } from "./UpgradePanel";
 import { AutoWakeBanner } from "./AutoWakeBanner";
 import { AgentChatPanel } from "./AgentChatPanel";
-import { AgentVoiceCallCard } from "./AgentVoiceCallCard";
+import { AgentVoiceCallController } from "./AgentVoiceCallController";
 
 type PageProps = {
   params: Promise<{ agentId: string }>;
@@ -182,6 +182,8 @@ export default function AgentDetailPage({ params }: PageProps) {
     return out;
   }, [agent, projectDetails]);
 
+  const voiceProject = useMemo(() => agent ? projectDetails.map((query) => query.data).find((detail) => detail?.project.agentIds?.includes(agent.name)) : undefined, [agent, projectDetails]);
+
   const channels = useMemo(
     () => (gatewaysQuery.data?.gateways ?? []).filter((gateway) => gateway.enabled),
     [gatewaysQuery.data],
@@ -279,7 +281,7 @@ export default function AgentDetailPage({ params }: PageProps) {
           : undefined}
       />
 
-      <AgentVoiceCallCard agentName={agent.name} />
+      <AgentVoiceCallController agentId={agent.id} agentName={agent.name} project={voiceProject} />
 
       <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <MetadataCard agent={agent} />
