@@ -39,6 +39,8 @@ import { formatAddress } from "../lib/format";
 import { useIsInMiniApp } from "../lib/useIsInMiniApp";
 import { useWalletSession } from "../lib/useWalletSession";
 import { useAdvancedFeatures } from "../lib/advancedFeatures";
+import { firebaseAuth } from "../lib/firebase";
+import { recordActivity } from "../lib/activityTelemetry";
 import { useTranslation } from "react-i18next";
 
 const NAV_ITEMS = [
@@ -95,6 +97,12 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     if (session.status === "signed-out" && !loggingOut.current)
       router.replace("/sign-in");
   }, [session.status, router]);
+
+  useEffect(() => {
+    if (session.status !== "signed-in") return;
+    const user = firebaseAuth().currentUser;
+    if (user) void recordActivity(user, "session_start", "app", session.address);
+  }, [session.address, session.status]);
 
   // Close the mobile drawer when the route changes.
   useEffect(() => {

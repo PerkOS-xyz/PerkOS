@@ -76,11 +76,19 @@ export async function recordUserLogin(
     const wallet = address.toLowerCase();
     const ip = clientIp(request);
     const ref = adminDb().collection("user_logins").doc(wallet);
+    const now = new Date().toISOString();
+    const existing = await ref.get();
 
     // Write the IP + timestamp first so we always have the latest connection,
     // even if the geo lookup fails or is slow.
     await ref.set(
-      { lastSeenAt: new Date().toISOString(), ip: ip ?? null },
+      {
+        firstSeenAt: existing.exists ? existing.get("firstSeenAt") ?? now : now,
+        lastSeenAt: now,
+        lastLoginAt: now,
+        loginCount: FieldValue.increment(1),
+        ip: ip ?? null,
+      },
       { merge: true },
     );
 
