@@ -35,6 +35,9 @@ describe("platform API same-origin proxy", () => {
           "content-type": "application/json",
           cookie: "must-not-leave-the-app=1",
           origin: "http://localhost:3000",
+          "user-agent": "Mozilla/5.0 Chrome/140.0.0.0 Safari/537.36",
+          "x-forwarded-for": "203.0.113.9",
+          "x-real-ip": "203.0.113.9",
         },
         body: JSON.stringify({ message: "hello" }),
       }),
@@ -53,6 +56,11 @@ describe("platform API same-origin proxy", () => {
     const headers = new Headers(init.headers);
     expect(headers.get("authorization")).toBe("Bearer firebase-token");
     expect(headers.get("content-type")).toBe("application/json");
+    expect(headers.get("user-agent")).toBe(
+      "Mozilla/5.0 Chrome/140.0.0.0 Safari/537.36",
+    );
+    expect(headers.get("x-forwarded-for")).toBe("203.0.113.9");
+    expect(headers.get("x-real-ip")).toBe("203.0.113.9");
     expect(headers.has("cookie")).toBe(false);
     expect(headers.has("origin")).toBe(false);
     expect(Buffer.from(init.body as ArrayBuffer).toString("utf8")).toBe(

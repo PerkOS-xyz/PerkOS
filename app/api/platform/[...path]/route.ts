@@ -10,6 +10,12 @@ const REQUEST_HEADERS = [
   "accept",
   "authorization",
   "content-type",
+  // Preserve the browser context needed by the central activity service.
+  // Caddy provides the trusted forwarding headers on the request received by
+  // this server; cookies and origin still never leave the App boundary.
+  "user-agent",
+  "x-forwarded-for",
+  "x-real-ip",
   "x-idempotency-key",
   "x-payment",
 ] as const;
