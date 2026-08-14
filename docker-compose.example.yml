@@ -28,6 +28,10 @@ services:
     networks:
       - perkos-knowledge_default
     environment:
+      # Server-side platform traffic stays on the private Docker network. This
+      # preserves the browser context attached by the trusted App proxy and
+      # avoids an unnecessary round trip through the public API reverse proxy.
+      PERKOS_API_URL: ${PERKOS_API_URL:-http://perkos-api:8080}
       # Server-only secrets (Firebase Admin + LLM keys) read at runtime
       FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
       FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
