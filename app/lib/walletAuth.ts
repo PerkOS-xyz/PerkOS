@@ -3,6 +3,7 @@
 import { signInWithCustomToken } from "firebase/auth";
 
 import { firebaseAuth } from "./firebase";
+import { recordActivity } from "./activityTelemetry";
 
 /**
  * Full wallet → Firebase sign-in dance.
@@ -55,5 +56,6 @@ export async function signInWithWallet(input: {
 
   // 4. Sign into Firebase ---------------------------------------------
   const credential = await signInWithCustomToken(firebaseAuth(), token);
+  void recordActivity(credential.user, "login", "app", address);
   return credential.user;
 }
