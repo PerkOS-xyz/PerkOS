@@ -70,6 +70,7 @@ import { TeamPanel } from "./TeamPanel";
 import { UpgradePanel } from "./UpgradePanel";
 import { AutoWakeBanner } from "./AutoWakeBanner";
 import { AgentChatPanel } from "./AgentChatPanel";
+import { AgentVoiceCallCard } from "./AgentVoiceCallCard";
 
 type PageProps = {
   params: Promise<{ agentId: string }>;
@@ -277,6 +278,8 @@ export default function AgentDetailPage({ params }: PageProps) {
           ? externalRuntimeAvailability(agent)
           : undefined}
       />
+
+      <AgentVoiceCallCard agentName={agent.name} />
 
       <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <MetadataCard agent={agent} />

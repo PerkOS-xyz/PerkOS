@@ -2571,6 +2571,41 @@ export async function createMeetingJoinSessionApi(input: {
   });
 }
 
+export type VoiceGatewayGrant = {
+  url: string;
+  roomName: string;
+  token: string;
+  expiresAt: string;
+};
+
+/** Request the documented agent grant without logging or rendering it. */
+export async function createVoiceGatewayGrantApi(input: {
+  projectId: string;
+  meetingId: string;
+  agentId: string;
+  owner?: string;
+  voiceProcessingConsent: true;
+}): Promise<VoiceGatewayGrant> {
+  const path = `/api/projects/${encodeURIComponent(input.projectId)}/meetings/${encodeURIComponent(input.meetingId)}/voice-gateway-grant`;
+  const payload = await meetingRequest<{ grant?: VoiceGatewayGrant }>(path, {
+    method: "POST",
+    body: JSON.stringify({
+      ...(input.owner ? { owner: input.owner } : {}),
+      projectId: input.projectId,
+      meetingId: input.meetingId,
+      agentId: input.agentId,
+      voiceProcessingConsent: input.voiceProcessingConsent,
+    }),
+  });
+  const grant = payload.grant;
+  if (!grant || typeof grant.url !== "string" || typeof grant.roomName !== "string"
+    || typeof grant.token !== "string" || typeof grant.expiresAt !== "string"
+    || !Number.isFinite(Date.parse(grant.expiresAt))) {
+    throw new Error("Voice gateway returned an invalid session grant.");
+  }
+  return grant;
+}
+
 export async function endProjectMeetingApi(input: {
   projectId: string;
   meetingId: string;
