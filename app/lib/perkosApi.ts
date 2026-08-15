@@ -3066,7 +3066,7 @@ export type EncryptedVoiceCredentialDelivery = {
   id: string;
   claimId: string;
   algorithm: "RSA-OAEP-256";
-  audience: "perkos-voice-gateway-v1";
+  audience: "perkos-voice-gateway-grant:v1";
   publicKeyFingerprint: string;
   expiresAt: string;
 };
@@ -3096,7 +3096,7 @@ export async function rotateEncryptedVoiceCredentialDelivery(
     typeof (candidate as { id?: unknown }).id !== "string" ||
     typeof (candidate as { claimId?: unknown }).claimId !== "string" ||
     (candidate as { algorithm?: unknown }).algorithm !== "RSA-OAEP-256" ||
-    (candidate as { audience?: unknown }).audience !== "perkos-voice-gateway-v1" ||
+    (candidate as { audience?: unknown }).audience !== "perkos-voice-gateway-grant:v1" ||
     typeof (candidate as { publicKeyFingerprint?: unknown }).publicKeyFingerprint !== "string" ||
     typeof (candidate as { expiresAt?: unknown }).expiresAt !== "string" ||
     !Number.isFinite(Date.parse((candidate as { expiresAt: string }).expiresAt))
@@ -3107,7 +3107,7 @@ export async function rotateEncryptedVoiceCredentialDelivery(
     id: (candidate as { id: string }).id,
     claimId: (candidate as { claimId: string }).claimId,
     algorithm: "RSA-OAEP-256",
-    audience: "perkos-voice-gateway-v1",
+    audience: "perkos-voice-gateway-grant:v1",
     publicKeyFingerprint: (candidate as { publicKeyFingerprint: string }).publicKeyFingerprint,
     expiresAt: (candidate as { expiresAt: string }).expiresAt,
   };
