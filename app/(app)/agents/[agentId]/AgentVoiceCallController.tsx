@@ -13,6 +13,7 @@ import {
 
 export function AgentVoiceCallController({ agentId, agentName, project }: { agentId: string; agentName: string; project?: ProjectDetail }) {
   const [callState, setCallState] = useState<AgentVoiceState | null>(null); const [error, setError] = useState<string | null>(null);
+  const [activeSession, setActiveSession] = useState<VoiceSessionApi | null>(null);
   const roomRef = useRef<Room | null>(null); const meetingRef = useRef<ProjectMeeting | null>(null); const sessionRef = useRef<VoiceSessionApi | null>(null);
   const projectId = project?.project.id ?? "";
   const capability = useQuery({ queryKey: ["agent-voice-capability", projectId, agentId], queryFn: () => getAgentVoiceCapabilityApi({ projectId, agentId }), enabled: Boolean(projectId), refetchInterval: 15_000 });
@@ -23,18 +24,19 @@ export function AgentVoiceCallController({ agentId, agentName, project }: { agen
       : capability.data?.available && capability.data.status === "ready" ? "ready" : "unavailable";
   const state = callState ?? capabilityState;
   useEffect(() => {
-    const session = sessionRef.current; const meeting = meetingRef.current;
+    const session = activeSession; const meeting = meetingRef.current;
     if (!session || !meeting || !["connecting", "reconnecting"].includes(state)) return;
     const timer = window.setInterval(async () => {
       try {
         const next = await getVoiceSessionApi({ projectId, meetingId: meeting.id, sessionId: session.id, agentId });
         sessionRef.current = next;
+        setActiveSession(next);
         if (next.status === "joined") setCallState("in-call");
         if (["failed", "cancelled", "expired"].includes(next.status)) { setError(`Voice session ${next.status}.`); setCallState("failed"); window.clearInterval(timer); }
       } catch { setCallState("reconnecting"); }
     }, 1_000);
     return () => window.clearInterval(timer);
-  }, [agentId, projectId, state]);
+  }, [activeSession, agentId, projectId, state]);
   useEffect(() => () => { void roomRef.current?.disconnect(); }, []);
 
   const start = async () => {
@@ -48,11 +50,14 @@ export function AgentVoiceCallController({ agentId, agentName, project }: { agen
       room.on(RoomEvent.TrackUnsubscribed, (track) => { track.detach().forEach((element) => element.remove()); });
       room.on(RoomEvent.Disconnected, () => { if (sessionRef.current) setCallState("reconnecting"); });
       await room.connect(human.url, human.token); await room.localParticipant.setMicrophoneEnabled(true);
-      sessionRef.current = await createVoiceSessionApi({ projectId, meetingId: meeting.id, agentId });
+      const session = await createVoiceSessionApi({ projectId, meetingId: meeting.id, agentId });
+      sessionRef.current = session;
+      setActiveSession(session);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Voice call failed."); setCallState("failed");
       const meeting = meetingRef.current; const session = sessionRef.current;
       sessionRef.current = null;
+      setActiveSession(null);
       try { if (meeting && session) await cancelVoiceSessionApi({ projectId, meetingId: meeting.id, sessionId: session.id, agentId }); } catch { /* already fail closed */ }
       try { await roomRef.current?.disconnect(); } catch { /* already fail closed */ }
       try { if (meeting) await endProjectMeetingApi({ projectId, meetingId: meeting.id, notes: "", proposals: [] }); } catch { /* surface original failure */ }
@@ -64,11 +69,12 @@ export function AgentVoiceCallController({ agentId, agentName, project }: { agen
     try {
       if (meeting && session) await cancelVoiceSessionApi({ projectId, meetingId: meeting.id, sessionId: session.id, agentId });
       sessionRef.current = null;
+      setActiveSession(null);
       await roomRef.current?.disconnect();
       if (meeting) await endProjectMeetingApi({ projectId, meetingId: meeting.id, notes: "", proposals: [] });
       setCallState("ended"); setError(null);
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not end voice call."); setCallState("failed"); }
-    finally { roomRef.current = null; meetingRef.current = null; sessionRef.current = null; }
+    finally { roomRef.current = null; meetingRef.current = null; sessionRef.current = null; setActiveSession(null); }
   };
   return <AgentVoiceCallCard agentName={agentName} capability={capability.data ?? null} callState={state} onStart={project ? () => void start() : undefined} onEnd={() => void end()} error={error} />;
 }
