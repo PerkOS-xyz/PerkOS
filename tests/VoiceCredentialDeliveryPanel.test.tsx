@@ -3,10 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   rotate: vi.fn(),
-  clipboard: vi.fn(),
 }));
 vi.mock("../app/lib/perkosApi", () => ({
-  rotateEncryptedVoiceCredential: mocks.rotate,
+  rotateEncryptedVoiceCredentialDelivery: mocks.rotate,
 }));
 
 import { VoiceCredentialDeliveryPanel } from "../app/(app)/agents/[agentId]/VoiceCredentialDeliveryPanel";
@@ -14,11 +13,6 @@ import { VoiceCredentialDeliveryPanel } from "../app/(app)/agents/[agentId]/Voic
 describe("VoiceCredentialDeliveryPanel", () => {
   beforeEach(() => {
     mocks.rotate.mockReset();
-    mocks.clipboard.mockReset();
-    Object.defineProperty(navigator, "clipboard", {
-      configurable: true,
-      value: { writeText: mocks.clipboard },
-    });
   });
 
   it("does not render for a non-owner", () => {
@@ -28,9 +22,19 @@ describe("VoiceCredentialDeliveryPanel", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("requires acknowledgement, copies ciphertext only, and clears state", async () => {
-    mocks.rotate.mockResolvedValue({ algorithm: "RSA-OAEP-256", ciphertext: "ciphertext" });
-    mocks.clipboard.mockResolvedValue(undefined);
+  it("does not render for a non-Bragi agent", () => {
+    const { container } = render(
+      <VoiceCredentialDeliveryPanel agentId="other" agentName="Other" owner />,
+    );
+    expect(container.firstChild).toBeNull();
+  });
+
+  it("requires acknowledgement and shows only safe delivery metadata", async () => {
+    mocks.rotate.mockResolvedValue({
+      id: "delivery-id", claimId: "claim-id", algorithm: "RSA-OAEP-256",
+      audience: "perkos-voice-gateway-v1", publicKeyFingerprint: "fingerprint",
+      expiresAt: "2026-08-15T01:00:00.000Z",
+    });
     render(<VoiceCredentialDeliveryPanel agentId="bragi" agentName="Bragi" owner />);
 
     const key = screen.getByLabelText("Ephemeral gateway public key");
@@ -41,24 +45,11 @@ describe("VoiceCredentialDeliveryPanel", () => {
     fireEvent.click(rotate);
 
     await waitFor(() => expect(mocks.rotate).toHaveBeenCalledWith("bragi", "PUBLIC KEY"));
-    fireEvent.click(await screen.findByRole("button", { name: "Copy encrypted envelope" }));
-    await waitFor(() => expect(mocks.clipboard).toHaveBeenCalledWith(
-      JSON.stringify({ algorithm: "RSA-OAEP-256", ciphertext: "ciphertext" }),
-    ));
+    expect(await screen.findByRole("status")).toHaveTextContent("Delivery pending for Bragi");
+    expect(screen.getByRole("status")).toHaveTextContent("fingerprint");
+    expect(screen.queryByText(/ciphertext$/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /copy/i })).not.toBeInTheDocument();
     expect(key).toHaveValue("");
     expect(screen.getByRole("checkbox")).not.toBeChecked();
-    expect(screen.queryByRole("button", { name: "Copy encrypted envelope" })).not.toBeInTheDocument();
-  });
-
-  it("retains the in-memory envelope when clipboard access fails", async () => {
-    mocks.rotate.mockResolvedValue({ algorithm: "RSA-OAEP-256", ciphertext: "ciphertext" });
-    mocks.clipboard.mockRejectedValue(new Error("blocked"));
-    render(<VoiceCredentialDeliveryPanel agentId="bragi" agentName="Bragi" owner />);
-    fireEvent.change(screen.getByLabelText("Ephemeral gateway public key"), { target: { value: "PUBLIC KEY" } });
-    fireEvent.click(screen.getByRole("checkbox"));
-    fireEvent.click(screen.getByRole("button", { name: "Rotate and encrypt" }));
-    fireEvent.click(await screen.findByRole("button", { name: "Copy encrypted envelope" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("Clipboard access failed");
-    expect(screen.getByRole("button", { name: "Copy encrypted envelope" })).toBeInTheDocument();
   });
 });

@@ -3062,19 +3062,23 @@ export async function fetchAgent(agentId: string): Promise<{
   return payload as never;
 }
 
-export type EncryptedVoiceCredentialEnvelope = {
+export type EncryptedVoiceCredentialDelivery = {
+  id: string;
+  claimId: string;
   algorithm: "RSA-OAEP-256";
-  ciphertext: string;
+  audience: "perkos-voice-gateway-v1";
+  publicKeyFingerprint: string;
+  expiresAt: string;
 };
 
-/** Rotate a voice M2M credential without exposing its plaintext to Web. */
-export async function rotateEncryptedVoiceCredential(
+/** Create the Bragi-only encrypted pull delivery without returning ciphertext to Web. */
+export async function rotateEncryptedVoiceCredentialDelivery(
   agentId: string,
   publicKeyPem: string,
-): Promise<EncryptedVoiceCredentialEnvelope> {
+): Promise<EncryptedVoiceCredentialDelivery> {
   const { authedFetch } = await import("./apiClient");
   const response = await authedFetch(
-    `/api/agents/${encodeURIComponent(agentId)}/voice-credential/rotate-encrypted`,
+    `/api/agents/${encodeURIComponent(agentId)}/voice-credential/rotate-encrypted-delivery`,
     {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -3083,21 +3087,29 @@ export async function rotateEncryptedVoiceCredential(
   );
   const payload = await parseJson(response);
   if (!response.ok) {
-    throw new Error(apiError(payload, "Couldn't rotate the encrypted voice credential"));
+    throw new Error(apiError(payload, "Couldn't create the encrypted Bragi delivery"));
   }
-  const candidate = (payload as { encryptedCredential?: unknown } | null)?.encryptedCredential;
+  const candidate = (payload as { delivery?: unknown } | null)?.delivery;
   if (
     !candidate ||
     typeof candidate !== "object" ||
+    typeof (candidate as { id?: unknown }).id !== "string" ||
+    typeof (candidate as { claimId?: unknown }).claimId !== "string" ||
     (candidate as { algorithm?: unknown }).algorithm !== "RSA-OAEP-256" ||
-    typeof (candidate as { ciphertext?: unknown }).ciphertext !== "string" ||
-    (candidate as { ciphertext: string }).ciphertext.length === 0
+    (candidate as { audience?: unknown }).audience !== "perkos-voice-gateway-v1" ||
+    typeof (candidate as { publicKeyFingerprint?: unknown }).publicKeyFingerprint !== "string" ||
+    typeof (candidate as { expiresAt?: unknown }).expiresAt !== "string" ||
+    !Number.isFinite(Date.parse((candidate as { expiresAt: string }).expiresAt))
   ) {
-    throw new Error("Voice credential API returned an invalid encrypted envelope.");
+    throw new Error("Voice credential API returned invalid delivery metadata.");
   }
   return {
+    id: (candidate as { id: string }).id,
+    claimId: (candidate as { claimId: string }).claimId,
     algorithm: "RSA-OAEP-256",
-    ciphertext: (candidate as { ciphertext: string }).ciphertext,
+    audience: "perkos-voice-gateway-v1",
+    publicKeyFingerprint: (candidate as { publicKeyFingerprint: string }).publicKeyFingerprint,
+    expiresAt: (candidate as { expiresAt: string }).expiresAt,
   };
 }
 
