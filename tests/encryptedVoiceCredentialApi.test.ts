@@ -14,7 +14,7 @@ describe("rotateEncryptedVoiceCredentialDelivery", () => {
         id: "delivery-id",
         claimId: "claim-id",
         algorithm: "RSA-OAEP-256",
-        audience: "perkos-voice-gateway-v1",
+        audience: "perkos-voice-gateway-grant:v1",
         publicKeyFingerprint: "fingerprint",
         expiresAt: "2026-08-15T01:00:00.000Z",
         ciphertext: "must-not-be-forwarded",
@@ -32,7 +32,7 @@ describe("rotateEncryptedVoiceCredentialDelivery", () => {
     expect(JSON.parse(String(init.body))).toEqual({ publicKeyPem: "PUBLIC KEY" });
     expect(result).toEqual({
       id: "delivery-id", claimId: "claim-id", algorithm: "RSA-OAEP-256",
-      audience: "perkos-voice-gateway-v1", publicKeyFingerprint: "fingerprint",
+      audience: "perkos-voice-gateway-grant:v1", publicKeyFingerprint: "fingerprint",
       expiresAt: "2026-08-15T01:00:00.000Z",
     });
   });

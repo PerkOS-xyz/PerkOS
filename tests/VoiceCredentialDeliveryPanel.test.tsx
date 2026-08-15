@@ -32,7 +32,7 @@ describe("VoiceCredentialDeliveryPanel", () => {
   it("requires acknowledgement and shows only safe delivery metadata", async () => {
     mocks.rotate.mockResolvedValue({
       id: "delivery-id", claimId: "claim-id", algorithm: "RSA-OAEP-256",
-      audience: "perkos-voice-gateway-v1", publicKeyFingerprint: "fingerprint",
+      audience: "perkos-voice-gateway-grant:v1", publicKeyFingerprint: "fingerprint",
       expiresAt: "2026-08-15T01:00:00.000Z",
     });
     render(<VoiceCredentialDeliveryPanel agentId="bragi" agentName="Bragi" owner />);
