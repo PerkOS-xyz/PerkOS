@@ -21,6 +21,7 @@ vi.mock("../app/lib/perkosApi", () => ({
   createMeetingJoinSessionApi: mocks.joinMeeting, createVoiceSessionApi: mocks.createSession,
   getVoiceSessionApi: mocks.getSession, cancelVoiceSessionApi: mocks.cancelSession,
   endProjectMeetingApi: mocks.endMeeting, getAgentVoiceCapabilityApi: vi.fn(),
+  ensureAgentConv: vi.fn(),
 }));
 
 import { AgentVoiceCallController } from "../app/(app)/agents/[agentId]/AgentVoiceCallController";
@@ -101,7 +102,7 @@ describe("AgentVoiceCallController", () => {
     render(<AgentVoiceCallController agentId="bragi-enrollment" agentName="Bragi" project={project} />);
 
     fireEvent.click(screen.getByRole("checkbox", { name: "Save final voice turns to direct chat" }));
-    expect(screen.getByText("Private call: no final user or agent text will be saved.")).toBeVisible();
+    expect(screen.getByRole("button", { name: /Private · Don't save/i })).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(screen.getByRole("button", { name: "Call Bragi" }));
 
     await waitFor(() => expect(mocks.createSession).toHaveBeenCalledWith({
@@ -174,5 +175,19 @@ describe("AgentVoiceCallController", () => {
       projectId: "project-1", meetingId: "meeting-1", sessionId: "session-1", agentId: "bragi-enrollment",
     }));
     expect(await screen.findByRole("button", { name: "End call" })).toBeVisible();
+  });
+
+  it("mutes and unmutes the live microphone without creating another session", async () => {
+    const project = { project: { id: "project-1", pmAgent: "Bragi" } } as never;
+    render(<AgentVoiceCallController agentId="bragi-enrollment" agentName="Bragi" project={project} />);
+    fireEvent.click(screen.getByRole("button", { name: "Call Bragi" }));
+    await waitFor(() => expect(mocks.createSession).toHaveBeenCalledOnce());
+    await vi.advanceTimersByTimeAsync(1_000);
+    const mute = await screen.findByRole("button", { name: "Mute" });
+    fireEvent.click(mute);
+    await waitFor(() => expect(mocks.microphone).toHaveBeenLastCalledWith(false));
+    fireEvent.click(screen.getByRole("button", { name: "Unmute" }));
+    await waitFor(() => expect(mocks.microphone).toHaveBeenLastCalledWith(true));
+    expect(mocks.createSession).toHaveBeenCalledOnce();
   });
 });

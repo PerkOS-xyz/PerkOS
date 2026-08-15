@@ -270,6 +270,8 @@ export default function AgentDetailPage({ params }: PageProps) {
         />
       ) : null}
 
+      <AgentVoiceCallController agentId={agent.id} agentName={agent.name} project={voiceProject} chatCommitScopeKind="direct" />
+
       <AgentChatPanel
         agentId={agent.id}
         agentName={agent.name}
@@ -282,11 +284,9 @@ export default function AgentDetailPage({ params }: PageProps) {
           : undefined}
       />
 
-      <AgentVoiceCallController agentId={agent.id} agentName={agent.name} project={voiceProject} chatCommitScopeKind="direct" />
-
       <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <MetadataCard agent={agent} />
-        <CapabilitiesCard capabilities={capabilities} />
+        {!isExternalAgent(agent) ? <CapabilitiesCard capabilities={capabilities} /> : null}
       </section>
 
       <ChannelsSection
@@ -370,6 +370,14 @@ function isExternalAgent(a: { external?: boolean; deployMode?: string | null }):
   );
 }
 
+export function agentHeaderActionPolicy(input: { external: boolean; authorized: boolean }) {
+  return {
+    refreshLabel: "Refresh status",
+    showManage: !input.external && input.authorized,
+    manageLabel: "Manage agent",
+  } as const;
+}
+
 function AgentHeader({
   agent,
   onRefresh,
@@ -389,6 +397,7 @@ function AgentHeader({
     ? externalRuntimeAvailability(agent)
     : undefined;
   const displayName = agent.displayName ?? agent.name;
+  const actionPolicy = agentHeaderActionPolicy({ external: isExternal, authorized: Boolean(walletAddress) });
 
   // "Stop" hibernates the agent (ECS scale-to-0). It's reversible — the next
   // chat message wakes it — so no confirm dialog; the toast says as much.
@@ -466,6 +475,9 @@ function AgentHeader({
             {displayName}
           </h1>
           <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline" className={isExternal ? "border-sky-400/40 text-sky-200" : "border-violet-400/40 text-violet-200"}>
+              {isExternal ? "External agent" : "PerkOS infrastructure"}
+            </Badge>
             <Badge variant="secondary" className="border-0 bg-muted">
               {agent.runtime}
             </Badge>
@@ -480,6 +492,15 @@ function AgentHeader({
               syncing={hibSyncing}
             />
           </div>
+          {isExternal && externalAvailability && externalAvailability !== "unverified" ? (
+            <p className="max-w-xl text-xs text-muted-foreground">
+              Declared availability: {externalAvailability}. Runtime, skills, and provider configuration remain owner-operated.
+            </p>
+          ) : !isExternal ? (
+            <p className="max-w-xl text-xs text-muted-foreground">
+              Hosted and operated on PerkOS infrastructure. Authorized controls and declared capabilities appear below.
+            </p>
+          ) : null}
         </div>
       </div>
 
@@ -510,9 +531,9 @@ function AgentHeader({
           <RefreshCw
             className={cn("h-3.5 w-3.5", refreshing && "animate-spin")}
           />
-          {t("agentDetail.header.refresh")}
+          {actionPolicy.refreshLabel}
         </Button>
-        <Button
+        {actionPolicy.showManage ? <Button
           variant="outline"
           size="sm"
           onClick={() => setEditOpen(true)}
@@ -520,11 +541,11 @@ function AgentHeader({
           className="gap-1.5"
         >
           <Pencil className="h-3.5 w-3.5" />
-          {t("agentDetail.header.edit")}
-        </Button>
+          {actionPolicy.manageLabel}
+        </Button> : null}
       </div>
 
-      {walletAddress ? (
+      {actionPolicy.showManage ? (
         <EditAgentDialog
           open={editOpen}
           onOpenChange={setEditOpen}

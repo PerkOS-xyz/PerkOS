@@ -39,7 +39,18 @@ export type ChatPerkosMessage = {
   timestamp: string;
   /** Optional id of the message this one replies to. */
   replyTo?: string | null;
+  /** Safe provenance metadata used to distinguish persisted voice turns. */
+  event?: { domain?: string; type?: string } | null;
 };
+
+function safeEvent(value: unknown): ChatPerkosMessage["event"] {
+  if (!value || typeof value !== "object") return null;
+  const raw = value as Record<string, unknown>;
+  return {
+    domain: typeof raw.domain === "string" ? raw.domain : undefined,
+    type: typeof raw.type === "string" ? raw.type : undefined,
+  };
+}
 
 export type ChatPerkosState = {
   /** WebSocket is open and we've completed `auth_ok`. */
@@ -107,9 +118,9 @@ export function useChatPerkosClient(opts: Options): ChatPerkosState {
   // time the caller re-renders.
   const wsRef = useRef<WebSocket | null>(null);
   const onMessageRef = useRef(onMessage);
-  onMessageRef.current = onMessage;
   const onHistoryRef = useRef(onHistory);
-  onHistoryRef.current = onHistory;
+  useEffect(() => { onMessageRef.current = onMessage; }, [onMessage]);
+  useEffect(() => { onHistoryRef.current = onHistory; }, [onHistory]);
 
   const reconnectAttemptsRef = useRef(0);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -145,6 +156,7 @@ export function useChatPerkosClient(opts: Options): ChatPerkosState {
         wsRef.current.close(1000, "disabled");
         wsRef.current = null;
       }
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- disabling the socket must synchronously clear its authenticated UI state
       setAuthed(false);
       return;
     }
@@ -239,6 +251,7 @@ export function useChatPerkosClient(opts: Options): ChatPerkosState {
                 (frame.timestamp as string | undefined) ??
                 new Date().toISOString(),
               replyTo: (frame.replyTo as string | null | undefined) ?? null,
+              event: safeEvent(frame.event),
             });
             return;
           }
@@ -264,6 +277,7 @@ export function useChatPerkosClient(opts: Options): ChatPerkosState {
                   typeof m.replyTo === "string"
                     ? m.replyTo
                     : null,
+                event: safeEvent(m.event),
               }))
               .filter((m) => m.from && m.text);
             onHistoryRef.current?.({
@@ -287,7 +301,6 @@ export function useChatPerkosClient(opts: Options): ChatPerkosState {
 
           default:
             // Unknown frame type — log for debugging, ignore otherwise.
-            // eslint-disable-next-line no-console
             console.debug("[chat-perkos] unknown frame", frame);
         }
       });
