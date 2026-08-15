@@ -16,6 +16,7 @@ export type AgentVoiceCapability = {
   available: boolean;
   status: "pending" | "ready" | "unavailable";
   reason?: "gateway_pending" | "provider_pending" | "not_supported";
+  supportsFinalChatMirror?: boolean;
 };
 
 export function resolveAgentVoiceState(

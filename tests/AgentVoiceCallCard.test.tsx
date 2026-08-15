@@ -33,4 +33,18 @@ describe("AgentVoiceCallCard", () => {
     render(<AgentVoiceCallCard agentName="Bragi" callState="in-call" remoteAudioStatus="Remote audio playing." />);
     expect(screen.getByRole("status")).toHaveTextContent("Remote audio playing.");
   });
+
+  it("shows default-on final-turn history with a private opt-out", () => {
+    render(<AgentVoiceCallCard
+      agentName="Bragi"
+      callState="ready"
+      chatMirrorAvailable
+      chatMirrorEnabled
+      onChatMirrorEnabledChange={() => undefined}
+    />);
+
+    expect(screen.getByRole("checkbox", { name: "Save final voice turns to direct chat" })).toBeChecked();
+    expect(screen.getByText(/turn this off for a private, non-transcribed call/i)).toBeVisible();
+    expect(screen.getByText(/no raw audio or interim text is saved/i)).toBeVisible();
+  });
 });
