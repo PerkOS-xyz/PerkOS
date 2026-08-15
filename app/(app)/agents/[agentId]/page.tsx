@@ -250,7 +250,7 @@ export default function AgentDetailPage({ params }: PageProps) {
         <AgentHeader agent={agent} onRefresh={refresh} refreshing={agentsQuery.isFetching} walletAddress={address ?? ""} />
       </div>
 
-      <section role="tabpanel" aria-label="Conversation" className={cn("min-h-0 flex-col gap-3 md:flex md:gap-6", mobileView === "conversation" ? "flex h-[calc(100dvh-9rem)] overflow-hidden" : "hidden")}>
+      <section role="tabpanel" aria-label="Conversation" className={cn("min-h-0 flex-col gap-3 md:flex md:gap-6", mobileView === "conversation" ? "flex h-[calc(100dvh-20rem)] overflow-hidden" : "hidden")}>
 
       {agent.status === "provisioning" ||
       agent.status === "failed" ||
