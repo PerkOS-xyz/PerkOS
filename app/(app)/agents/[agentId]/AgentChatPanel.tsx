@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAppAccount } from "../../../lib/useAppAccount";
-import { Loader2, MessageSquare, Send, Trash2 } from "lucide-react";
+import { Loader2, MessageSquare, Mic2, Send, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -49,7 +49,12 @@ type Bubble = {
   role: "user" | "agent";
   text: string;
   ts?: number;
+  voice?: boolean;
 };
+
+function isPersistedVoiceMessage(event?: { domain?: string; type?: string } | null): boolean {
+  return event?.domain === "voice" || event?.domain === "voice_session";
+}
 
 /** Short local time (HH:MM) for a message timestamp. */
 function formatTime(ts?: number): string {
@@ -149,6 +154,7 @@ export function AgentChatPanel({
           role: isFromAgent ? "agent" : "user",
           text: msg.text,
           ts: msg.timestamp ? new Date(msg.timestamp).getTime() : Date.now(),
+          voice: isPersistedVoiceMessage(msg.event),
         },
       ]);
       if (isFromAgent) setAwaitingReply(false);
@@ -166,6 +172,7 @@ export function AgentChatPanel({
             role: m.from.startsWith("agent:") ? "agent" : "user",
             text: m.text,
             ts: m.timestamp ? new Date(m.timestamp).getTime() : Date.now(),
+            voice: isPersistedVoiceMessage(m.event),
           }));
         return [...incoming, ...prev];
       });
@@ -335,19 +342,15 @@ export function AgentChatPanel({
   );
 
   return (
-    <Card>
+    <Card className="overflow-hidden border-border/80 bg-card/80 shadow-sm">
       <CardHeader>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <CardTitle className="flex items-center gap-2 text-base">
+            <CardTitle className="flex items-center gap-2 text-lg">
               <MessageSquare className="h-4 w-4 text-primary" />
               Chat with {agentName}
             </CardTitle>
-            <CardDescription>
-              Direct conversation routed through chat.perkos.xyz. The
-              agent receives messages via its bridge sidecar and replies
-              with the runtime&apos;s configured LLM.
-            </CardDescription>
+            <CardDescription>Messages and completed saved voice turns share this conversation.</CardDescription>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {messages.length > 0 ? (
@@ -369,7 +372,8 @@ export function AgentChatPanel({
       <CardContent className="flex flex-col gap-3">
         <div
           ref={scrollRef}
-          className="flex max-h-96 min-h-48 flex-col gap-2 overflow-y-auto rounded-md border border-border bg-background/40 p-3"
+          aria-label={`Conversation history with ${agentName}`}
+          className="flex min-h-[28rem] max-h-[42rem] flex-col gap-3 overflow-y-auto rounded-xl border border-border bg-background/50 p-3 sm:p-5"
         >
           {messages.length === 0 && !showTyping ? (
             <p className="my-auto text-center text-sm text-muted-foreground">
@@ -386,12 +390,17 @@ export function AgentChatPanel({
               >
                 <div
                   className={cn(
-                    "max-w-[85%] rounded-lg px-3 py-2 text-sm leading-relaxed",
+                    "max-w-[92%] rounded-2xl px-4 py-3 text-base leading-7 sm:max-w-[78%]",
                     m.role === "user"
                       ? "bg-primary/15 text-foreground"
                       : "border border-border bg-card text-foreground",
                   )}
                 >
+                  {m.voice ? (
+                    <span className="mb-2 inline-flex items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-primary">
+                      <Mic2 className="h-3 w-3" aria-hidden="true" /> Saved voice turn
+                    </span>
+                  ) : null}
                   <pre className="whitespace-pre-wrap break-words font-sans">
                     {m.text}
                   </pre>
@@ -413,7 +422,7 @@ export function AgentChatPanel({
             <div className="flex justify-start">
               <div className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm text-muted-foreground">
                 <Loader2 className="h-3 w-3 animate-spin" />
-                {agentName} is thinking…
+                {agentName} is responding live…
               </div>
             </div>
           ) : null}

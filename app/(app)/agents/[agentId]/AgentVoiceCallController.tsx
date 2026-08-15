@@ -16,6 +16,9 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
   const [activeSession, setActiveSession] = useState<VoiceSessionApi | null>(null);
   const [remoteAudioStatus, setRemoteAudioStatus] = useState<string | null>(null);
   const [mirrorFinalTurns, setMirrorFinalTurns] = useState(true);
+  const [muted, setMuted] = useState(false);
+  const [callStartedAt, setCallStartedAt] = useState<number | null>(null);
+  const [durationSeconds, setDurationSeconds] = useState(0);
   const roomRef = useRef<Room | null>(null); const meetingRef = useRef<ProjectMeeting | null>(null); const sessionRef = useRef<VoiceSessionApi | null>(null);
   const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
   const remoteAudioTrackRef = useRef<{ detach: (element?: HTMLMediaElement) => HTMLMediaElement[] } | null>(null);
@@ -45,12 +48,19 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
         const next = await getVoiceSessionApi({ projectId, meetingId: meeting.id, sessionId: session.id, agentId });
         sessionRef.current = next;
         setActiveSession(next);
-        if (next.status === "joined") setCallState("in-call");
+        if (next.status === "joined") { setCallState("in-call"); setCallStartedAt((current) => current ?? Date.now()); }
         if (["failed", "cancelled", "expired"].includes(next.status)) { setError(`Voice session ${next.status}.`); setCallState("failed"); window.clearInterval(timer); }
       } catch { setCallState("reconnecting"); }
     }, 1_000);
     return () => window.clearInterval(timer);
   }, [activeSession, agentId, projectId, state]);
+  useEffect(() => {
+    if (!callStartedAt || state !== "in-call") return;
+    const tick = () => setDurationSeconds(Math.max(0, Math.floor((Date.now() - callStartedAt) / 1_000)));
+    tick();
+    const timer = window.setInterval(tick, 1_000);
+    return () => window.clearInterval(timer);
+  }, [callStartedAt, state]);
   const cleanupRemoteAudio = useCallback(() => {
     const audio = remoteAudioRef.current;
     if (audio) {
@@ -64,7 +74,7 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
   useEffect(() => () => { cleanupRemoteAudio(); void roomRef.current?.disconnect(); }, [cleanupRemoteAudio]);
 
   const start = async () => {
-    if (!project) return; setError(null); setRemoteAudioStatus(null); setCallState("connecting");
+    if (!project) return; setError(null); setRemoteAudioStatus(null); setMuted(false); setCallStartedAt(null); setDurationSeconds(0); setCallState("connecting");
     try {
       const created = await createProjectMeetingApi({ projectId, title: `${agentName} voice call`, pmAgent: project.project.pmAgent || agentName, saveTranscript: false });
       const meeting = await startProjectMeetingApi({ projectId, meetingId: created.id }); meetingRef.current = meeting;
@@ -126,9 +136,20 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
       await roomRef.current?.disconnect();
       cleanupRemoteAudio();
       if (meeting) await endProjectMeetingApi({ projectId, meetingId: meeting.id, notes: "", proposals: [] });
-      setCallState("ended"); setError(null);
+      setCallState("ended"); setError(null); setCallStartedAt(null); setDurationSeconds(0); setMuted(false);
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not end voice call."); setCallState("failed"); }
     finally { roomRef.current = null; meetingRef.current = null; sessionRef.current = null; setActiveSession(null); }
+  };
+  const toggleMute = async () => {
+    const room = roomRef.current;
+    if (!room || state !== "in-call") return;
+    try {
+      const next = !muted;
+      await room.localParticipant.setMicrophoneEnabled(!next);
+      setMuted(next);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not change microphone state.");
+    }
   };
   return <AgentVoiceCallCard
     agentName={agentName}
@@ -138,6 +159,9 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
     onEnd={() => void end()}
     error={error}
     remoteAudioStatus={remoteAudioStatus}
+    muted={muted}
+    durationSeconds={durationSeconds}
+    onToggleMute={() => void toggleMute()}
     chatMirrorAvailable={chatMirrorAvailable}
     chatMirrorEnabled={chatMirrorAvailable && mirrorFinalTurns}
     chatMirrorScope={chatCommitScopeKind}

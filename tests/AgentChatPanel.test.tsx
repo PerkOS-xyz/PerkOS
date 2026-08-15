@@ -1,10 +1,11 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   ensureAgentAwakeApi: vi.fn(),
   recordAgentActivityApi: vi.fn(),
   chatSend: vi.fn(() => "message-1"),
+  chatOptions: null as null | { onMessage: (message: { id: string; from: string; text: string; timestamp: string; event?: { domain?: string } }) => void },
 }));
 
 vi.mock("wagmi", async () => {
@@ -37,12 +38,15 @@ vi.mock("../app/lib/perkosApi", () => ({
 }));
 
 vi.mock("../app/lib/useChatPerkosClient", () => ({
-  useChatPerkosClient: () => ({
+  useChatPerkosClient: (options: typeof mocks.chatOptions) => {
+    mocks.chatOptions = options;
+    return ({
     authed: true,
     error: null,
     requestHistory: vi.fn(() => false),
     send: mocks.chatSend,
-  }),
+    });
+  },
 }));
 
 import {
@@ -57,6 +61,7 @@ describe("AgentChatPanel hibernation policy", () => {
     mocks.recordAgentActivityApi.mockReset();
     mocks.recordAgentActivityApi.mockResolvedValue(undefined);
     mocks.chatSend.mockClear();
+    mocks.chatOptions = null;
   });
 
   it("sends directly to an invited agent without trying to wake it", async () => {
@@ -137,5 +142,22 @@ describe("AgentChatPanel hibernation policy", () => {
   it("keeps the managed-agent hibernation guidance", () => {
     expect(agentResponseTimeoutMessage({ agentName: "Managed", externalAgent: false }))
       .toContain("If the agent was hibernated");
+  });
+
+  it("distinguishes persisted final voice messages from live response status", () => {
+    render(<AgentChatPanel agentId="morpheus" agentName="Morpheus" chatEnabled hibernationEnabled={false} />);
+    act(() => {
+      mocks.chatOptions?.onMessage({
+        id: "voice-message",
+        from: "agent:Morpheus",
+        text: "A completed response",
+        timestamp: new Date().toISOString(),
+        event: { domain: "voice_session" },
+      });
+    });
+
+    expect(screen.getByText("Saved voice turn")).toBeVisible();
+    expect(screen.getByText("A completed response")).toBeVisible();
+    expect(screen.queryByText(/responding live/i)).not.toBeInTheDocument();
   });
 });
