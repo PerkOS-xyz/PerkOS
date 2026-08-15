@@ -342,8 +342,8 @@ export function AgentChatPanel({
   );
 
   return (
-    <Card className="overflow-hidden border-border/80 bg-card/80 shadow-sm">
-      <CardHeader>
+    <Card className="flex min-h-0 flex-1 flex-col overflow-hidden border-border/80 bg-card/80 shadow-sm">
+      <CardHeader className="shrink-0 px-3 py-2 md:p-6">
         <div className="flex items-start justify-between gap-3">
           <div>
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -369,11 +369,11 @@ export function AgentChatPanel({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="flex flex-col gap-3">
+      <CardContent className="flex min-h-0 flex-1 flex-col gap-2 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:gap-3 md:p-6 md:pt-0">
         <div
           ref={scrollRef}
           aria-label={`Conversation history with ${agentName}`}
-          className="flex min-h-[28rem] max-h-[42rem] flex-col gap-3 overflow-y-auto rounded-xl border border-border bg-background/50 p-3 sm:p-5"
+          className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain rounded-xl border border-border bg-background/50 p-3 sm:p-5 md:min-h-[28rem] md:max-h-[42rem] md:flex-none"
         >
           {messages.length === 0 && !showTyping ? (
             <p className="my-auto text-center text-sm text-muted-foreground">

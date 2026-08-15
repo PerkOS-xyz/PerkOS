@@ -102,7 +102,7 @@ describe("AgentVoiceCallController", () => {
     render(<AgentVoiceCallController agentId="bragi-enrollment" agentName="Bragi" project={project} />);
 
     fireEvent.click(screen.getByRole("checkbox", { name: "Save final voice turns to direct chat" }));
-    expect(screen.getByRole("button", { name: /Private · Don't save/i })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getAllByRole("button", { name: /Private · Don't save/i }).some((button) => button.getAttribute("aria-pressed") === "true")).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: "Call Bragi" }));
 
     await waitFor(() => expect(mocks.createSession).toHaveBeenCalledWith({

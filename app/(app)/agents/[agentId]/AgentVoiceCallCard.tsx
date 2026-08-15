@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Headphones, Loader2, Mic, MicOff, PhoneOff, ShieldCheck } from "lucide-react";
+import { ChevronDown, Headphones, Loader2, Mic, MicOff, Phone, PhoneOff, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -61,11 +61,11 @@ export function AgentVoiceCallCard({
   const active = state === "in-call";
 
   return (
-    <Card className={active ? "overflow-hidden border-emerald-400/40 bg-gradient-to-br from-emerald-500/10 via-card to-card shadow-lg shadow-emerald-950/20" : "overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-card to-card"}>
-      <CardHeader className="gap-3 pb-4">
+    <Card className={active ? "sticky top-[3.6rem] z-20 shrink-0 overflow-hidden border-emerald-400/40 bg-gradient-to-br from-emerald-500/10 via-card to-card shadow-lg shadow-emerald-950/20 md:static" : "sticky top-[3.6rem] z-20 shrink-0 overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-card to-card md:static"}>
+      <CardHeader className="gap-2 p-3 pb-2 md:gap-3 md:p-6 md:pb-4">
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <div>
-            <CardTitle className="flex items-center gap-2 text-xl sm:text-2xl">
+            <CardTitle className="flex items-center gap-2 text-base md:text-2xl">
               <span className={active ? "relative flex h-3 w-3" : "hidden"} aria-hidden="true"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" /><span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-400" /></span>
               {state === "unavailable" ? <MicOff className="h-5 w-5" /> : <Headphones className="h-5 w-5" />}
               {active ? `Live with ${agentName}` : `Call ${agentName}`}
@@ -75,12 +75,17 @@ export function AgentVoiceCallCard({
           {active ? <div className="font-mono text-2xl font-semibold tabular-nums" aria-label={`Call duration ${duration}`}>{duration}</div> : null}
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-2 p-3 pt-0 md:space-y-4 md:p-6 md:pt-0">
         {state === "unavailable" ? (
           <p className="text-sm text-muted-foreground">{agentName} has not reported a verified voice gateway and speech provider. Text availability does not enable voice.</p>
         ) : null}
         {chatMirrorAvailable ? (
-          <div className="grid gap-2 rounded-xl border border-border/70 bg-background/50 p-3 sm:grid-cols-2" aria-label="Call privacy mode">
+          <>
+          <div className="flex items-center gap-2 md:hidden" aria-label="Call privacy mode">
+            <button type="button" disabled={mirrorLocked} onClick={() => onChatMirrorEnabledChange?.(true)} className={chatMirrorEnabled ? "rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary" : "rounded-full px-3 py-1 text-xs text-muted-foreground"} aria-pressed={chatMirrorEnabled}>Normal · Save</button>
+            <button type="button" disabled={mirrorLocked} onClick={() => onChatMirrorEnabledChange?.(false)} className={!chatMirrorEnabled ? "rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary" : "rounded-full px-3 py-1 text-xs text-muted-foreground"} aria-pressed={!chatMirrorEnabled}>Private · Don&apos;t save</button>
+          </div>
+          <div className="hidden gap-2 rounded-xl border border-border/70 bg-background/50 p-3 md:grid md:grid-cols-2" aria-label="Call privacy mode">
             <label className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 ${chatMirrorEnabled ? "border-primary/50 bg-primary/10" : "border-transparent"}`}>
               <Checkbox
                 aria-label={`Save final voice turns to ${mirrorDestination}`}
@@ -93,13 +98,46 @@ export function AgentVoiceCallCard({
             <button type="button" disabled={mirrorLocked} onClick={() => onChatMirrorEnabledChange?.(false)} className={`flex items-start gap-3 rounded-lg border p-3 text-left ${!chatMirrorEnabled ? "border-primary/50 bg-primary/10" : "border-transparent"}`} aria-pressed={!chatMirrorEnabled}>
               <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" /><span><span className="block text-sm font-semibold">Private · Don&apos;t save</span><span className="mt-1 block text-xs text-muted-foreground">No final text, raw audio, or interim speech is persisted.</span></span>
             </button>
-          </div>
+          </div></>
         ) : null}
-        <div className="flex flex-col gap-2 sm:flex-row">
-        {active ? <><Button type="button" variant="outline" className="min-h-12 flex-1 gap-2 py-3" onClick={onToggleMute} aria-pressed={muted}>{muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}{muted ? "Unmute" : "Mute"}</Button><Button variant="destructive" className="min-h-12 flex-1 gap-2 py-3" onClick={onEnd}><PhoneOff className="h-5 w-5" />End call</Button></> : <Button className="min-h-12 w-full gap-2 py-3 text-base" disabled={!enabled || busy} aria-disabled={!enabled || busy} onClick={onStart}>
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mic className="h-4 w-4" />}
-          {state === "failed" || state === "ended" ? "Retry voice call" : `Call ${agentName}`}
-        </Button>}
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border/60 bg-background/40 p-3">
+          {active ? (
+            <>
+              <Button type="button" variant="outline" className="min-h-11 gap-2 px-3" onClick={onToggleMute} aria-pressed={muted}>
+                {muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}{muted ? "Unmute" : "Mute"}
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                className="size-12 rounded-full bg-red-600 text-white shadow-sm hover:bg-red-500 focus-visible:border-red-300 focus-visible:ring-red-400/50 dark:bg-red-600 dark:hover:bg-red-500"
+                onClick={onEnd}
+                aria-label="End call"
+                title="End call"
+              >
+                <PhoneOff className="h-5 w-5" />
+              </Button>
+              <span className="text-sm font-medium text-red-300">End call</span>
+            </>
+          ) : (
+            <>
+              <Button
+                type="button"
+                size="icon"
+                className="size-12 rounded-full bg-emerald-600 text-white shadow-sm hover:bg-emerald-500 focus-visible:border-emerald-300 focus-visible:ring-emerald-400/50 disabled:bg-muted disabled:text-muted-foreground"
+                disabled={!enabled || busy}
+                aria-disabled={!enabled || busy}
+                aria-label={busy ? AGENT_VOICE_STATE_LABELS[state] : state === "failed" || state === "ended" ? "Retry voice call" : `Call ${agentName}`}
+                title={busy ? AGENT_VOICE_STATE_LABELS[state] : state === "failed" || state === "ended" ? "Retry voice call" : `Call ${agentName}`}
+                onClick={onStart}
+              >
+                {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <Phone className="h-5 w-5" />}
+              </Button>
+              <span className="text-sm font-medium" aria-live="polite">
+                {busy ? AGENT_VOICE_STATE_LABELS[state] : state === "failed" || state === "ended" ? "Retry voice call" : `Call ${agentName}`}
+              </span>
+            </>
+          )}
         </div>
         {error ? <p className="text-xs text-red-300" role="alert">{error}</p> : null}
         {remoteAudioStatus ? <p className="text-xs text-muted-foreground" role="status">{remoteAudioStatus}</p> : null}
@@ -108,7 +146,7 @@ export function AgentVoiceCallCard({
             Pending gateway capability and speech-provider configuration.
           </p>
         ) : null}
-        <details className="group rounded-lg border border-border/60 bg-background/30 px-3 py-2">
+        <details className="group hidden rounded-lg border border-border/60 bg-background/30 px-3 py-2 md:block">
           <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium">Call settings <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" /></summary>
           <div className="mt-3 grid gap-2 border-t border-border/60 pt-3 text-xs text-muted-foreground sm:grid-cols-2">
             <p><strong className="text-foreground">Audio:</strong> echo cancellation, noise suppression, and automatic gain control.</p>
