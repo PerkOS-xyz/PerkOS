@@ -61,7 +61,7 @@ export function AgentVoiceCallCard({
   const active = state === "in-call";
 
   return (
-    <Card className={active ? "sticky top-[3.6rem] z-20 shrink-0 overflow-hidden border-emerald-400/40 bg-gradient-to-br from-emerald-500/10 via-card to-card shadow-lg shadow-emerald-950/20 md:static" : "sticky top-[3.6rem] z-20 shrink-0 overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-card to-card md:static"}>
+    <Card className={active ? "shrink-0 overflow-hidden border-emerald-400/40 bg-gradient-to-br from-emerald-500/10 via-card to-card shadow-lg shadow-emerald-950/20" : "shrink-0 overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-card to-card"}>
       <CardHeader data-testid="desktop-voice-heading" className="hidden gap-2 md:grid md:gap-3 md:p-6 md:pb-4">
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <div>
