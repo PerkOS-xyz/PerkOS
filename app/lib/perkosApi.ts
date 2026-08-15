@@ -3062,6 +3062,45 @@ export async function fetchAgent(agentId: string): Promise<{
   return payload as never;
 }
 
+export type EncryptedVoiceCredentialEnvelope = {
+  algorithm: "RSA-OAEP-256";
+  ciphertext: string;
+};
+
+/** Rotate a voice M2M credential without exposing its plaintext to Web. */
+export async function rotateEncryptedVoiceCredential(
+  agentId: string,
+  publicKeyPem: string,
+): Promise<EncryptedVoiceCredentialEnvelope> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/agents/${encodeURIComponent(agentId)}/voice-credential/rotate-encrypted`,
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ publicKeyPem }),
+    },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) {
+    throw new Error(apiError(payload, "Couldn't rotate the encrypted voice credential"));
+  }
+  const candidate = (payload as { encryptedCredential?: unknown } | null)?.encryptedCredential;
+  if (
+    !candidate ||
+    typeof candidate !== "object" ||
+    (candidate as { algorithm?: unknown }).algorithm !== "RSA-OAEP-256" ||
+    typeof (candidate as { ciphertext?: unknown }).ciphertext !== "string" ||
+    (candidate as { ciphertext: string }).ciphertext.length === 0
+  ) {
+    throw new Error("Voice credential API returned an invalid encrypted envelope.");
+  }
+  return {
+    algorithm: "RSA-OAEP-256",
+    ciphertext: (candidate as { ciphertext: string }).ciphertext,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Personal team templates ("My templates")
 // ---------------------------------------------------------------------------

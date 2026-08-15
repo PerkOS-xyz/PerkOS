@@ -71,6 +71,7 @@ import { UpgradePanel } from "./UpgradePanel";
 import { AutoWakeBanner } from "./AutoWakeBanner";
 import { AgentChatPanel } from "./AgentChatPanel";
 import { AgentVoiceCallController } from "./AgentVoiceCallController";
+import { VoiceCredentialDeliveryPanel } from "./VoiceCredentialDeliveryPanel";
 
 type PageProps = {
   params: Promise<{ agentId: string }>;
@@ -296,6 +297,14 @@ export default function AgentDetailPage({ params }: PageProps) {
       />
 
       {agent.invited ? <InvitedCredentialPanel agent={agent} /> : null}
+
+      {agent.invited ? (
+        <VoiceCredentialDeliveryPanel
+          agentId={agent.id}
+          agentName={agent.name}
+          owner={Boolean(address) && address!.toLowerCase() === agent.walletAddress.toLowerCase()}
+        />
+      ) : null}
 
       <WebhookPanel agent={agent} />
 
