@@ -73,7 +73,12 @@ export function AgentVoiceCallController({ agentId, agentName, project }: { agen
       });
       room.on(RoomEvent.TrackUnsubscribed, (track) => { if (track === remoteAudioTrackRef.current) { cleanupRemoteAudio(); setRemoteAudioStatus(null); } });
       room.on(RoomEvent.Disconnected, () => { if (sessionRef.current) setCallState("reconnecting"); });
-      await room.connect(human.url, human.token); await room.localParticipant.setMicrophoneEnabled(true);
+      await room.connect(human.url, human.token);
+      await room.localParticipant.setMicrophoneEnabled(true, {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+      });
       const session = await createVoiceSessionApi({ projectId, meetingId: meeting.id, agentId });
       sessionRef.current = session;
       setActiveSession(session);

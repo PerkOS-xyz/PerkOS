@@ -60,6 +60,31 @@ describe("AgentVoiceCallController", () => {
     expect(audio.isConnected).toBe(false);
     play.mockRestore(); pause.mockRestore();
   });
+
+  it("enables the microphone with browser audio processing", async () => {
+    const project = { project: { id: "project-1", pmAgent: "Bragi" } } as never;
+    render(<AgentVoiceCallController agentId="bragi-enrollment" agentName="Bragi" project={project} />);
+    fireEvent.click(screen.getByRole("button", { name: "Call Bragi" }));
+
+    await waitFor(() => expect(mocks.microphone).toHaveBeenCalledWith(true, {
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true,
+    }));
+  });
+
+  it("fails closed when microphone audio processing cannot be enabled", async () => {
+    mocks.microphone.mockRejectedValueOnce(new Error("Microphone unavailable"));
+    const project = { project: { id: "project-1", pmAgent: "Bragi" } } as never;
+    render(<AgentVoiceCallController agentId="bragi-enrollment" agentName="Bragi" project={project} />);
+    fireEvent.click(screen.getByRole("button", { name: "Call Bragi" }));
+
+    expect(await screen.findByText("Microphone unavailable")).toBeVisible();
+    expect(mocks.createSession).not.toHaveBeenCalled();
+    expect(mocks.disconnect).toHaveBeenCalledOnce();
+    expect(mocks.endMeeting).toHaveBeenCalledOnce();
+  });
+
   afterEach(() => vi.useRealTimers());
 
   it("polls after session creation and shows End call when the gateway joins", async () => {
