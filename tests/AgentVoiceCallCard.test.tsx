@@ -28,4 +28,9 @@ describe("AgentVoiceCallCard", () => {
     expect(screen.getByText("Voice call failed")).toBeVisible();
     expect(screen.getByRole("button", { name: "Retry voice call" })).toBeDisabled();
   });
+
+  it("renders only safe remote audio status", () => {
+    render(<AgentVoiceCallCard agentName="Bragi" callState="in-call" remoteAudioStatus="Remote audio playing." />);
+    expect(screen.getByRole("status")).toHaveTextContent("Remote audio playing.");
+  });
 });

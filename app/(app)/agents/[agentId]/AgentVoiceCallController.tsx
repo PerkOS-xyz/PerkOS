@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Room, RoomEvent, Track } from "livekit-client";
 import { AgentVoiceCallCard } from "./AgentVoiceCallCard";
@@ -14,7 +14,10 @@ import {
 export function AgentVoiceCallController({ agentId, agentName, project }: { agentId: string; agentName: string; project?: ProjectDetail }) {
   const [callState, setCallState] = useState<AgentVoiceState | null>(null); const [error, setError] = useState<string | null>(null);
   const [activeSession, setActiveSession] = useState<VoiceSessionApi | null>(null);
+  const [remoteAudioStatus, setRemoteAudioStatus] = useState<string | null>(null);
   const roomRef = useRef<Room | null>(null); const meetingRef = useRef<ProjectMeeting | null>(null); const sessionRef = useRef<VoiceSessionApi | null>(null);
+  const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
+  const remoteAudioTrackRef = useRef<{ detach: (element?: HTMLMediaElement) => HTMLMediaElement[] } | null>(null);
   const projectId = project?.project.id ?? "";
   const capability = useQuery({ queryKey: ["agent-voice-capability", projectId, agentId], queryFn: () => getAgentVoiceCapabilityApi({ projectId, agentId }), enabled: Boolean(projectId), refetchInterval: 15_000 });
   const capabilityState: AgentVoiceState = !projectId || capability.isError
@@ -37,17 +40,38 @@ export function AgentVoiceCallController({ agentId, agentName, project }: { agen
     }, 1_000);
     return () => window.clearInterval(timer);
   }, [activeSession, agentId, projectId, state]);
-  useEffect(() => () => { void roomRef.current?.disconnect(); }, []);
+  const cleanupRemoteAudio = useCallback(() => {
+    const audio = remoteAudioRef.current;
+    if (audio) {
+      remoteAudioTrackRef.current?.detach(audio);
+      audio.pause();
+      audio.remove();
+    }
+    remoteAudioRef.current = null;
+    remoteAudioTrackRef.current = null;
+  }, []);
+  useEffect(() => () => { cleanupRemoteAudio(); void roomRef.current?.disconnect(); }, [cleanupRemoteAudio]);
 
   const start = async () => {
-    if (!project) return; setError(null); setCallState("connecting");
+    if (!project) return; setError(null); setRemoteAudioStatus(null); setCallState("connecting");
     try {
       const created = await createProjectMeetingApi({ projectId, title: `${agentName} voice call`, pmAgent: project.project.pmAgent || agentName, saveTranscript: false });
       const meeting = await startProjectMeetingApi({ projectId, meetingId: created.id }); meetingRef.current = meeting;
       const human = await createMeetingJoinSessionApi({ projectId, meetingId: meeting.id, displayName: "Project member", voiceProcessingConsent: true });
       const room = new Room({ adaptiveStream: true, dynacast: true }); roomRef.current = room;
-      room.on(RoomEvent.TrackSubscribed, (track) => { if (track.kind === Track.Kind.Audio) document.body.appendChild(track.attach()); });
-      room.on(RoomEvent.TrackUnsubscribed, (track) => { track.detach().forEach((element) => element.remove()); });
+      room.on(RoomEvent.TrackSubscribed, (track) => {
+        if (track.kind !== Track.Kind.Audio) return;
+        cleanupRemoteAudio();
+        const audio = document.createElement("audio");
+        audio.autoplay = true; (audio as HTMLAudioElement & { playsInline: boolean }).playsInline = true; audio.controls = false; audio.muted = false;
+        track.attach(audio); document.body.appendChild(audio);
+        remoteAudioRef.current = audio; remoteAudioTrackRef.current = track;
+        setRemoteAudioStatus("Remote audio connected.");
+        void Promise.resolve(audio.play())
+          .then(() => setRemoteAudioStatus("Remote audio playing."))
+          .catch(() => setRemoteAudioStatus("Remote audio playback needs browser permission."));
+      });
+      room.on(RoomEvent.TrackUnsubscribed, (track) => { if (track === remoteAudioTrackRef.current) { cleanupRemoteAudio(); setRemoteAudioStatus(null); } });
       room.on(RoomEvent.Disconnected, () => { if (sessionRef.current) setCallState("reconnecting"); });
       await room.connect(human.url, human.token); await room.localParticipant.setMicrophoneEnabled(true);
       const session = await createVoiceSessionApi({ projectId, meetingId: meeting.id, agentId });
@@ -60,6 +84,7 @@ export function AgentVoiceCallController({ agentId, agentName, project }: { agen
       setActiveSession(null);
       try { if (meeting && session) await cancelVoiceSessionApi({ projectId, meetingId: meeting.id, sessionId: session.id, agentId }); } catch { /* already fail closed */ }
       try { await roomRef.current?.disconnect(); } catch { /* already fail closed */ }
+      cleanupRemoteAudio();
       try { if (meeting) await endProjectMeetingApi({ projectId, meetingId: meeting.id, notes: "", proposals: [] }); } catch { /* surface original failure */ }
       roomRef.current = null; meetingRef.current = null;
     }
@@ -71,10 +96,11 @@ export function AgentVoiceCallController({ agentId, agentName, project }: { agen
       sessionRef.current = null;
       setActiveSession(null);
       await roomRef.current?.disconnect();
+      cleanupRemoteAudio();
       if (meeting) await endProjectMeetingApi({ projectId, meetingId: meeting.id, notes: "", proposals: [] });
       setCallState("ended"); setError(null);
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not end voice call."); setCallState("failed"); }
     finally { roomRef.current = null; meetingRef.current = null; sessionRef.current = null; setActiveSession(null); }
   };
-  return <AgentVoiceCallCard agentName={agentName} capability={capability.data ?? null} callState={state} onStart={project ? () => void start() : undefined} onEnd={() => void end()} error={error} />;
+  return <AgentVoiceCallCard agentName={agentName} capability={capability.data ?? null} callState={state} onStart={project ? () => void start() : undefined} onEnd={() => void end()} error={error} remoteAudioStatus={remoteAudioStatus} />;
 }
