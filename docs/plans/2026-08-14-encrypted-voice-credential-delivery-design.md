@@ -1,0 +1,9 @@
+# Encrypted voice credential delivery
+
+The invited-agent detail page provides an owner-only operator control for rotating a voice gateway credential without returning plaintext to the browser. The operator generates an ephemeral key pair on the intended gateway and pastes only its public key. The existing Firebase-authenticated API request binds rotation to the agent owner and sends that public key to the encrypted rotation endpoint.
+
+The API contract is `POST /api/agents/:agentId/voice-credential/rotate-encrypted` with exactly `{ publicKeyPem }`. Its response is read only from `encryptedCredential` and reduced to the allow-listed `{ algorithm: "RSA-OAEP-256", ciphertext }` envelope. The UI never requests, renders, logs, stores, or exports the plaintext credential or private key. The operator must explicitly acknowledge that the key belongs to the intended gateway and that rotation invalidates the previous credential. While the request is active, controls show an explicit progress state and prevent duplicate submissions.
+
+After success, the only available export copies the complete encrypted envelope to the clipboard. A successful copy immediately clears the pasted public key, ciphertext envelope, and acknowledgement from React state. If clipboard access fails, the envelope remains in memory so the operator can retry; it is never written to local storage, session storage, URL state, analytics, logs, or tracked files. Navigation or refresh naturally discards all component state.
+
+Authorization remains server-enforced. The panel renders only when the connected wallet matches the agent owner, while the API independently verifies Firebase owner identity and invited-agent ownership. Tests cover owner gating, explicit acknowledgement, ciphertext-only request/response handling, successful state clearing, and clipboard failure behavior.
