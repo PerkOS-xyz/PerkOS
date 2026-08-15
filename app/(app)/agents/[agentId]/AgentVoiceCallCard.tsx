@@ -62,7 +62,7 @@ export function AgentVoiceCallCard({
 
   return (
     <Card className={active ? "sticky top-[3.6rem] z-20 shrink-0 overflow-hidden border-emerald-400/40 bg-gradient-to-br from-emerald-500/10 via-card to-card shadow-lg shadow-emerald-950/20 md:static" : "sticky top-[3.6rem] z-20 shrink-0 overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-card to-card md:static"}>
-      <CardHeader className="gap-2 p-3 pb-2 md:gap-3 md:p-6 md:pb-4">
+      <CardHeader data-testid="desktop-voice-heading" className="hidden gap-2 md:grid md:gap-3 md:p-6 md:pb-4">
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <div>
             <CardTitle className="flex items-center gap-2 text-base md:text-2xl">
@@ -72,13 +72,56 @@ export function AgentVoiceCallCard({
             </CardTitle>
             <CardDescription className="mt-1 text-sm" aria-live="polite">{AGENT_VOICE_STATE_LABELS[state]}</CardDescription>
           </div>
-          {active ? <div className="font-mono text-2xl font-semibold tabular-nums" aria-label={`Call duration ${duration}`}>{duration}</div> : null}
         </div>
       </CardHeader>
-      <CardContent className="space-y-2 p-3 pt-0 md:space-y-4 md:p-6 md:pt-0">
+      <CardContent className="space-y-2 p-2.5 md:space-y-4 md:p-6 md:pt-0">
         {state === "unavailable" ? (
-          <p className="text-sm text-muted-foreground">{agentName} has not reported a verified voice gateway and speech provider. Text availability does not enable voice.</p>
+          <p className="hidden text-sm text-muted-foreground md:block">{agentName} has not reported a verified voice gateway and speech provider. Text availability does not enable voice.</p>
         ) : null}
+        <div data-testid="mobile-voice-header" className="flex min-h-14 items-center gap-3 md:rounded-xl md:border md:border-border/60 md:bg-background/40 md:p-3">
+          {active ? (
+            <>
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                className="size-12 shrink-0 rounded-full bg-red-600 text-white shadow-sm hover:bg-red-500 focus-visible:border-red-300 focus-visible:ring-red-400/50 dark:bg-red-600 dark:hover:bg-red-500"
+                onClick={onEnd}
+                aria-label="End call"
+                title="End call"
+              >
+                <PhoneOff className="h-5 w-5" />
+              </Button>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold">{agentName}</p>
+                <p className="text-xs text-muted-foreground" aria-live="polite">{AGENT_VOICE_STATE_LABELS[state]}</p>
+              </div>
+              <span className="font-mono text-sm font-semibold tabular-nums" aria-label={`Call duration ${duration}`}>{duration}</span>
+              <Button type="button" variant="outline" size="icon" className="size-11 shrink-0 rounded-full" onClick={onToggleMute} aria-pressed={muted} aria-label={muted ? "Unmute" : "Mute"} title={muted ? "Unmute" : "Mute"}>
+                {muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                type="button"
+                size="icon"
+                className="size-12 shrink-0 rounded-full bg-emerald-600 text-white shadow-sm hover:bg-emerald-500 focus-visible:border-emerald-300 focus-visible:ring-emerald-400/50 disabled:bg-muted disabled:text-muted-foreground"
+                disabled={!enabled || busy}
+                aria-disabled={!enabled || busy}
+                aria-label={busy ? AGENT_VOICE_STATE_LABELS[state] : state === "failed" || state === "ended" ? "Retry voice call" : `Call ${agentName}`}
+                title={busy ? AGENT_VOICE_STATE_LABELS[state] : state === "failed" || state === "ended" ? "Retry voice call" : `Call ${agentName}`}
+                onClick={onStart}
+              >
+                {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <Phone className="h-5 w-5" />}
+              </Button>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold">{agentName}</p>
+                <p className="text-xs text-muted-foreground" aria-live="polite">{AGENT_VOICE_STATE_LABELS[state]}</p>
+              </div>
+            </>
+          )}
+        </div>
         {chatMirrorAvailable ? (
           <>
           <div className="flex items-center gap-2 md:hidden" aria-label="Call privacy mode">
@@ -100,49 +143,10 @@ export function AgentVoiceCallCard({
             </button>
           </div></>
         ) : null}
-        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border/60 bg-background/40 p-3">
-          {active ? (
-            <>
-              <Button type="button" variant="outline" className="min-h-11 gap-2 px-3" onClick={onToggleMute} aria-pressed={muted}>
-                {muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}{muted ? "Unmute" : "Mute"}
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                size="icon"
-                className="size-12 rounded-full bg-red-600 text-white shadow-sm hover:bg-red-500 focus-visible:border-red-300 focus-visible:ring-red-400/50 dark:bg-red-600 dark:hover:bg-red-500"
-                onClick={onEnd}
-                aria-label="End call"
-                title="End call"
-              >
-                <PhoneOff className="h-5 w-5" />
-              </Button>
-              <span className="text-sm font-medium text-red-300">End call</span>
-            </>
-          ) : (
-            <>
-              <Button
-                type="button"
-                size="icon"
-                className="size-12 rounded-full bg-emerald-600 text-white shadow-sm hover:bg-emerald-500 focus-visible:border-emerald-300 focus-visible:ring-emerald-400/50 disabled:bg-muted disabled:text-muted-foreground"
-                disabled={!enabled || busy}
-                aria-disabled={!enabled || busy}
-                aria-label={busy ? AGENT_VOICE_STATE_LABELS[state] : state === "failed" || state === "ended" ? "Retry voice call" : `Call ${agentName}`}
-                title={busy ? AGENT_VOICE_STATE_LABELS[state] : state === "failed" || state === "ended" ? "Retry voice call" : `Call ${agentName}`}
-                onClick={onStart}
-              >
-                {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <Phone className="h-5 w-5" />}
-              </Button>
-              <span className="text-sm font-medium" aria-live="polite">
-                {busy ? AGENT_VOICE_STATE_LABELS[state] : state === "failed" || state === "ended" ? "Retry voice call" : `Call ${agentName}`}
-              </span>
-            </>
-          )}
-        </div>
         {error ? <p className="text-xs text-red-300" role="alert">{error}</p> : null}
         {remoteAudioStatus ? <p className="text-xs text-muted-foreground" role="status">{remoteAudioStatus}</p> : null}
         {state === "unavailable" ? (
-          <p className="text-xs text-amber-300">
+          <p className="hidden text-xs text-amber-300 md:block">
             Pending gateway capability and speech-provider configuration.
           </p>
         ) : null}

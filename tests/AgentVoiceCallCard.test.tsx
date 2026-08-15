@@ -35,7 +35,9 @@ describe("AgentVoiceCallCard", () => {
     const call = screen.getByRole("button", { name: "Call Bragi" });
     expect(call).toHaveClass("size-12", "rounded-full", "bg-emerald-600");
     expect(call).toHaveAttribute("title", "Call Bragi");
-    expect(screen.getAllByText("Call Bragi").length).toBeGreaterThan(0);
+    expect(screen.getByTestId("desktop-voice-heading")).toHaveClass("hidden");
+    expect(screen.getByTestId("mobile-voice-header")).toHaveTextContent("BragiReady for voice");
+    expect(screen.getByTestId("mobile-voice-header")).not.toHaveTextContent("Call Bragi");
   });
 
   it("shows a compact connecting indicator without a large action label", () => {
@@ -76,5 +78,6 @@ describe("AgentVoiceCallCard", () => {
     expect(screen.getByRole("button", { name: "End call" })).toBeVisible();
     expect(screen.getByRole("button", { name: "End call" })).toHaveClass("size-12", "rounded-full", "bg-red-600");
     expect(screen.getByText("Call settings")).toBeVisible();
+    expect(screen.getByTestId("mobile-voice-header")).toHaveTextContent("BragiVoice call in progress01:05");
   });
 });

@@ -159,5 +159,6 @@ describe("AgentChatPanel hibernation policy", () => {
     expect(screen.getByText("Saved voice turn")).toBeVisible();
     expect(screen.getByText("A completed response")).toBeVisible();
     expect(screen.queryByText(/responding live/i)).not.toBeInTheDocument();
+    expect(screen.getByTestId("desktop-chat-heading")).toHaveClass("hidden", "md:grid");
   });
 });
