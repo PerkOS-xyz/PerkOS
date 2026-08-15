@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy, KeyRound, Loader2, ShieldCheck } from "lucide-react";
+import { Check, KeyRound, Loader2, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { rotateEncryptedVoiceCredential, type EncryptedVoiceCredentialEnvelope } from "@/app/lib/perkosApi";
+import { rotateEncryptedVoiceCredentialDelivery, type EncryptedVoiceCredentialDelivery } from "@/app/lib/perkosApi";
 
 type Props = {
   agentId: string;
@@ -16,43 +16,29 @@ type Props = {
 export function VoiceCredentialDeliveryPanel({ agentId, agentName, owner }: Props) {
   const [publicKey, setPublicKey] = useState("");
   const [acknowledged, setAcknowledged] = useState(false);
-  const [envelope, setEnvelope] = useState<EncryptedVoiceCredentialEnvelope | null>(null);
-  const [state, setState] = useState<"idle" | "rotating" | "ready" | "copying" | "copied" | "failed">("idle");
+  const [delivery, setDelivery] = useState<EncryptedVoiceCredentialDelivery | null>(null);
+  const [state, setState] = useState<"idle" | "rotating" | "ready" | "failed">("idle");
   const [error, setError] = useState<string | null>(null);
 
-  if (!owner) return null;
+  if (!owner || agentName !== "Bragi") return null;
 
   const resetSensitiveState = () => {
     setPublicKey("");
-    setEnvelope(null);
     setAcknowledged(false);
   };
 
   const rotate = async () => {
     setState("rotating");
     setError(null);
-    setEnvelope(null);
+    setDelivery(null);
     try {
-      const result = await rotateEncryptedVoiceCredential(agentId, publicKey.trim());
-      setEnvelope(result);
+      const result = await rotateEncryptedVoiceCredentialDelivery(agentId, publicKey.trim());
+      setDelivery(result);
+      resetSensitiveState();
       setState("ready");
     } catch (cause) {
       setState("failed");
       setError(cause instanceof Error ? cause.message : "Encrypted rotation failed");
-    }
-  };
-
-  const copy = async () => {
-    if (!envelope) return;
-    setState("copying");
-    setError(null);
-    try {
-      await navigator.clipboard.writeText(JSON.stringify(envelope));
-      resetSensitiveState();
-      setState("copied");
-    } catch {
-      setState("ready");
-      setError("Clipboard access failed. Nothing was cleared; retry the copy from this browser.");
     }
   };
 
@@ -65,7 +51,8 @@ export function VoiceCredentialDeliveryPanel({ agentId, agentName, owner }: Prop
         </CardTitle>
         <CardDescription>
           Owner-only rotation for {agentName}. The API encrypts the new credential to your
-          gateway&apos;s ephemeral public key; this browser receives ciphertext only.
+          gateway&apos;s ephemeral public key. Bragi pulls the encrypted payload directly;
+          this browser receives safe delivery metadata only.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
@@ -80,14 +67,14 @@ export function VoiceCredentialDeliveryPanel({ agentId, agentName, owner }: Prop
           <textarea
             aria-label="Ephemeral gateway public key"
             className="min-h-28 rounded-md border border-input bg-background px-3 py-2 font-mono text-xs"
-            disabled={state === "rotating" || state === "copying"}
+            disabled={state === "rotating"}
             placeholder="Paste the gateway-generated public key"
             spellCheck={false}
             autoComplete="off"
             value={publicKey}
             onChange={(event) => {
               setPublicKey(event.target.value);
-              setEnvelope(null);
+              setDelivery(null);
               setState("idle");
               setError(null);
             }}
@@ -99,7 +86,7 @@ export function VoiceCredentialDeliveryPanel({ agentId, agentName, owner }: Prop
             type="checkbox"
             className="mt-0.5"
             checked={acknowledged}
-            disabled={state === "rotating" || state === "copying"}
+            disabled={state === "rotating"}
             onChange={(event) => setAcknowledged(event.target.checked)}
           />
           <span>I generated this public key on the intended gateway and understand this rotates the current voice credential.</span>
@@ -110,30 +97,24 @@ export function VoiceCredentialDeliveryPanel({ agentId, agentName, owner }: Prop
             type="button"
             variant="outline"
             className="gap-2"
-            disabled={!acknowledged || publicKey.trim().length === 0 || state === "rotating" || state === "copying"}
+            disabled={!acknowledged || publicKey.trim().length === 0 || state === "rotating"}
             onClick={() => void rotate()}
           >
             {state === "rotating" ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
             {state === "rotating" ? "Encrypting new credential…" : "Rotate and encrypt"}
           </Button>
 
-          {envelope ? (
-            <Button type="button" className="gap-2" disabled={state === "copying"} onClick={() => void copy()}>
-              {state === "copying" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Copy className="h-4 w-4" />}
-              {state === "copying" ? "Copying…" : "Copy encrypted envelope"}
-            </Button>
-          ) : null}
         </div>
 
-        {envelope ? (
-          <p role="status" className="text-xs text-emerald-700 dark:text-emerald-300">
-            Encrypted envelope ready. Copy it now; only ciphertext and non-secret metadata will leave this page.
-          </p>
-        ) : null}
-        {state === "copied" ? (
-          <p role="status" className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-300">
-            <Check className="h-4 w-4" /> Encrypted envelope copied. Public key and ciphertext were cleared from this page.
-          </p>
+        {delivery ? (
+          <div role="status" className="space-y-1 rounded-md border px-3 py-2 text-xs text-emerald-700 dark:text-emerald-300">
+            <p className="flex items-center gap-2 font-medium"><Check className="h-4 w-4" /> Delivery pending for Bragi</p>
+            <p>Algorithm: {delivery.algorithm}</p>
+            <p>Audience: {delivery.audience}</p>
+            <p>Public-key fingerprint: <span className="font-mono">{delivery.publicKeyFingerprint}</span></p>
+            <p>Expires: {new Date(delivery.expiresAt).toLocaleString()}</p>
+            <p className="text-muted-foreground">Delivery and claim identifiers are retained by the API and Bragi receiver; ciphertext is never exposed here.</p>
+          </div>
         ) : null}
         {error ? <p role="alert" className="text-xs text-destructive">{error}</p> : null}
       </CardContent>
