@@ -27,6 +27,7 @@ export function AgentVoiceCallCard({
   onStart,
   onEnd,
   error,
+  remoteAudioStatus,
 }: {
   agentName: string;
   capability?: AgentVoiceCapability | null;
@@ -34,6 +35,7 @@ export function AgentVoiceCallCard({
   onStart?: () => void;
   onEnd?: () => void;
   error?: string | null;
+  remoteAudioStatus?: string | null;
 }) {
   const state = callState ?? resolveAgentVoiceState(capability);
   const busy = BUSY_STATES.includes(state);
@@ -61,6 +63,7 @@ export function AgentVoiceCallCard({
           {state === "failed" || state === "ended" ? "Retry voice call" : `Call ${agentName}`}
         </Button>}
         {error ? <p className="text-xs text-red-300" role="alert">{error}</p> : null}
+        {remoteAudioStatus ? <p className="text-xs text-muted-foreground" role="status">{remoteAudioStatus}</p> : null}
         {state === "unavailable" ? (
           <p className="text-xs text-amber-300">
             Pending gateway capability and speech-provider configuration.
