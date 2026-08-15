@@ -115,6 +115,7 @@ export default function AgentDetailPage({ params }: PageProps) {
   const { agentId } = use(params);
   const queryClient = useQueryClient();
   const { address } = useAppAccount();
+  const [mobileView, setMobileView] = useState<"conversation" | "settings">("conversation");
 
   const agentsQuery = useQuery({
     queryKey: ["wallet-agents", address],
@@ -238,15 +239,18 @@ export default function AgentDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <BackLink />
+    <div className="flex min-h-0 flex-col gap-4 md:gap-6">
+      <div className="sticky top-0 z-30 grid grid-cols-2 gap-1 border-b border-border bg-background/95 p-1 pb-2 backdrop-blur md:hidden" role="tablist" aria-label="Agent view">
+        <button type="button" role="tab" aria-selected={mobileView === "conversation"} onClick={() => setMobileView("conversation")} className={cn("min-h-11 rounded-lg px-3 text-sm font-medium", mobileView === "conversation" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}>Conversation</button>
+        <button type="button" role="tab" aria-selected={mobileView === "settings"} onClick={() => setMobileView("settings")} className={cn("min-h-11 rounded-lg px-3 text-sm font-medium", mobileView === "settings" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted")}>Settings</button>
+      </div>
 
-      <AgentHeader
-        agent={agent}
-        onRefresh={refresh}
-        refreshing={agentsQuery.isFetching}
-        walletAddress={address ?? ""}
-      />
+      <div className="hidden flex-col gap-6 md:flex">
+        <BackLink />
+        <AgentHeader agent={agent} onRefresh={refresh} refreshing={agentsQuery.isFetching} walletAddress={address ?? ""} />
+      </div>
+
+      <section role="tabpanel" aria-label="Conversation" className={cn("min-h-0 flex-col gap-3 md:flex md:gap-6", mobileView === "conversation" ? "flex h-[calc(100dvh-9rem)] overflow-hidden" : "hidden")}>
 
       {agent.status === "provisioning" ||
       agent.status === "failed" ||
@@ -283,6 +287,14 @@ export default function AgentDetailPage({ params }: PageProps) {
           ? externalRuntimeAvailability(agent)
           : undefined}
       />
+
+      </section>
+
+      <section role="tabpanel" aria-label="Settings" className={cn("flex-col gap-6 md:flex", mobileView === "settings" ? "flex" : "hidden")}>
+      <div className="flex flex-col gap-4 md:hidden">
+        <BackLink />
+        <AgentHeader agent={agent} onRefresh={refresh} refreshing={agentsQuery.isFetching} walletAddress={address ?? ""} />
+      </div>
 
       <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <MetadataCard agent={agent} />
@@ -340,6 +352,7 @@ export default function AgentDetailPage({ params }: PageProps) {
       />
 
       <ActionsPanel agent={agent} />
+      </section>
     </div>
   );
 }

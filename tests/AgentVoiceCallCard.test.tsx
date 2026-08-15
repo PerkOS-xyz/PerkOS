@@ -29,6 +29,24 @@ describe("AgentVoiceCallCard", () => {
     expect(screen.getByRole("button", { name: "Retry voice call" })).toBeDisabled();
   });
 
+  it("uses a compact circular phone control with adjacent status text", () => {
+    render(<AgentVoiceCallCard agentName="Bragi" callState="ready" onStart={() => undefined} />);
+
+    const call = screen.getByRole("button", { name: "Call Bragi" });
+    expect(call).toHaveClass("size-12", "rounded-full", "bg-emerald-600");
+    expect(call).toHaveAttribute("title", "Call Bragi");
+    expect(screen.getAllByText("Call Bragi").length).toBeGreaterThan(0);
+  });
+
+  it("shows a compact connecting indicator without a large action label", () => {
+    render(<AgentVoiceCallCard agentName="Bragi" callState="connecting" onStart={() => undefined} />);
+
+    const connecting = screen.getByRole("button", { name: "Connecting voice call" });
+    expect(connecting).toHaveClass("size-12", "rounded-full");
+    expect(connecting).toBeDisabled();
+    expect(screen.getAllByText("Connecting voice call").length).toBeGreaterThan(0);
+  });
+
   it("renders only safe remote audio status", () => {
     render(<AgentVoiceCallCard agentName="Bragi" callState="in-call" remoteAudioStatus="Remote audio playing." />);
     expect(screen.getByRole("status")).toHaveTextContent("Remote audio playing.");
@@ -45,7 +63,7 @@ describe("AgentVoiceCallCard", () => {
 
     expect(screen.getByRole("checkbox", { name: "Save final voice turns to direct chat" })).toBeChecked();
     expect(screen.getByText("Normal · Save final turns")).toBeVisible();
-    expect(screen.getByRole("button", { name: /Private · Don't save/i })).toBeVisible();
+    expect(screen.getAllByRole("button", { name: /Private · Don't save/i }).length).toBeGreaterThan(0);
     expect(screen.getByText(/no final text, raw audio, or interim speech is persisted/i)).toBeVisible();
   });
 
@@ -56,6 +74,7 @@ describe("AgentVoiceCallCard", () => {
     expect(screen.getByLabelText("Call duration 01:05")).toBeVisible();
     expect(screen.getByRole("button", { name: "Unmute" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: "End call" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "End call" })).toHaveClass("size-12", "rounded-full", "bg-red-600");
     expect(screen.getByText("Call settings")).toBeVisible();
   });
 });
