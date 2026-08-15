@@ -2578,7 +2578,15 @@ export type VoiceGatewayGrant = {
   expiresAt: string;
 };
 
-export type AgentVoiceCapabilityApi = { available: boolean; status: "ready" | "unavailable"; reason?: "gateway_pending" | "provider_pending" | "not_supported"; expiresAt?: string };
+export type VoiceChatCommit =
+  | { policy: "none" }
+  | {
+      policy: "final_pair";
+      consent: true;
+      scope: { kind: "direct" | "project"; conversationId: string };
+    };
+
+export type AgentVoiceCapabilityApi = { available: boolean; status: "ready" | "unavailable"; reason?: "gateway_pending" | "provider_pending" | "not_supported"; expiresAt?: string; supportsFinalChatMirror?: boolean };
 export type VoiceSessionApi = { id: string; status: "pending" | "claimed" | "joined" | "completed" | "failed" | "cancelled" | "expired"; expiresAt: string; reason?: string };
 
 export async function getAgentVoiceCapabilityApi(input: { projectId: string; agentId: string; owner?: string }): Promise<AgentVoiceCapabilityApi> {
@@ -2587,8 +2595,16 @@ export async function getAgentVoiceCapabilityApi(input: { projectId: string; age
   return payload.capability;
 }
 
-export async function createVoiceSessionApi(input: { projectId: string; meetingId: string; agentId: string; owner?: string }): Promise<VoiceSessionApi> {
-  const payload = await meetingRequest<{ session: VoiceSessionApi }>(`/api/projects/${encodeURIComponent(input.projectId)}/meetings/${encodeURIComponent(input.meetingId)}/voice-sessions`, { method: "POST", body: JSON.stringify({ owner: input.owner, agentId: input.agentId, voiceProcessingConsent: true }) });
+export async function createVoiceSessionApi(input: { projectId: string; meetingId: string; agentId: string; owner?: string; chatCommit: VoiceChatCommit }): Promise<VoiceSessionApi> {
+  const payload = await meetingRequest<{ session: VoiceSessionApi }>(`/api/projects/${encodeURIComponent(input.projectId)}/meetings/${encodeURIComponent(input.meetingId)}/voice-sessions`, {
+    method: "POST",
+    body: JSON.stringify({
+      owner: input.owner,
+      agentId: input.agentId,
+      voiceProcessingConsent: true,
+      chatCommit: input.chatCommit,
+    }),
+  });
   return payload.session;
 }
 

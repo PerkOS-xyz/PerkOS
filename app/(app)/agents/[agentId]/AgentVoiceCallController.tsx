@@ -7,25 +7,36 @@ import { AgentVoiceCallCard } from "./AgentVoiceCallCard";
 import type { AgentVoiceState } from "../../../lib/agentVoice";
 import {
   cancelVoiceSessionApi, createMeetingJoinSessionApi, createProjectMeetingApi, createVoiceSessionApi,
-  endProjectMeetingApi, getAgentVoiceCapabilityApi, getVoiceSessionApi, startProjectMeetingApi,
+  endProjectMeetingApi, ensureAgentConv, getAgentVoiceCapabilityApi, getVoiceSessionApi, startProjectMeetingApi,
   type ProjectDetail, type ProjectMeeting, type VoiceSessionApi,
 } from "../../../lib/perkosApi";
 
-export function AgentVoiceCallController({ agentId, agentName, project }: { agentId: string; agentName: string; project?: ProjectDetail }) {
+export function AgentVoiceCallController({ agentId, agentName, project, chatCommitScopeKind = "direct", chatConversationId }: { agentId: string; agentName: string; project?: ProjectDetail; chatCommitScopeKind?: "direct" | "project"; chatConversationId?: string }) {
   const [callState, setCallState] = useState<AgentVoiceState | null>(null); const [error, setError] = useState<string | null>(null);
   const [activeSession, setActiveSession] = useState<VoiceSessionApi | null>(null);
   const [remoteAudioStatus, setRemoteAudioStatus] = useState<string | null>(null);
+  const [mirrorFinalTurns, setMirrorFinalTurns] = useState(true);
   const roomRef = useRef<Room | null>(null); const meetingRef = useRef<ProjectMeeting | null>(null); const sessionRef = useRef<VoiceSessionApi | null>(null);
   const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
   const remoteAudioTrackRef = useRef<{ detach: (element?: HTMLMediaElement) => HTMLMediaElement[] } | null>(null);
   const projectId = project?.project.id ?? "";
   const capability = useQuery({ queryKey: ["agent-voice-capability", projectId, agentId], queryFn: () => getAgentVoiceCapabilityApi({ projectId, agentId }), enabled: Boolean(projectId), refetchInterval: 15_000 });
+  const directConversation = useQuery({
+    queryKey: ["agent-conv", agentId, "voice-chat-commit"],
+    queryFn: () => ensureAgentConv({ agentId }),
+    enabled: chatCommitScopeKind === "direct" && capability.data?.supportsFinalChatMirror === true,
+    staleTime: 5 * 60 * 1000,
+  });
   const capabilityState: AgentVoiceState = !projectId || capability.isError
     ? "unavailable"
     : capability.isFetching && !capability.data
       ? "checking"
       : capability.data?.available && capability.data.status === "ready" ? "ready" : "unavailable";
   const state = callState ?? capabilityState;
+  const resolvedConversationId = chatCommitScopeKind === "direct"
+    ? directConversation.data?.convId
+    : chatConversationId;
+  const chatMirrorAvailable = capability.data?.supportsFinalChatMirror === true && Boolean(resolvedConversationId);
   useEffect(() => {
     const session = activeSession; const meeting = meetingRef.current;
     if (!session || !meeting || !["connecting", "reconnecting"].includes(state)) return;
@@ -79,7 +90,19 @@ export function AgentVoiceCallController({ agentId, agentName, project }: { agen
         noiseSuppression: true,
         autoGainControl: true,
       });
-      const session = await createVoiceSessionApi({ projectId, meetingId: meeting.id, agentId });
+      const mirrorEnabled = chatMirrorAvailable && mirrorFinalTurns && Boolean(resolvedConversationId);
+      const session = await createVoiceSessionApi({
+        projectId,
+        meetingId: meeting.id,
+        agentId,
+        chatCommit: mirrorEnabled
+          ? {
+              policy: "final_pair",
+              consent: true,
+              scope: { kind: chatCommitScopeKind, conversationId: resolvedConversationId! },
+            }
+          : { policy: "none" },
+      });
       sessionRef.current = session;
       setActiveSession(session);
     } catch (cause) {
@@ -107,5 +130,17 @@ export function AgentVoiceCallController({ agentId, agentName, project }: { agen
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not end voice call."); setCallState("failed"); }
     finally { roomRef.current = null; meetingRef.current = null; sessionRef.current = null; setActiveSession(null); }
   };
-  return <AgentVoiceCallCard agentName={agentName} capability={capability.data ?? null} callState={state} onStart={project ? () => void start() : undefined} onEnd={() => void end()} error={error} remoteAudioStatus={remoteAudioStatus} />;
+  return <AgentVoiceCallCard
+    agentName={agentName}
+    capability={capability.data ?? null}
+    callState={state}
+    onStart={project ? () => void start() : undefined}
+    onEnd={() => void end()}
+    error={error}
+    remoteAudioStatus={remoteAudioStatus}
+    chatMirrorAvailable={chatMirrorAvailable}
+    chatMirrorEnabled={chatMirrorAvailable && mirrorFinalTurns}
+    chatMirrorScope={chatCommitScopeKind}
+    onChatMirrorEnabledChange={setMirrorFinalTurns}
+  />;
 }

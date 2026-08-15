@@ -282,7 +282,7 @@ export default function AgentDetailPage({ params }: PageProps) {
           : undefined}
       />
 
-      <AgentVoiceCallController agentId={agent.id} agentName={agent.name} project={voiceProject} />
+      <AgentVoiceCallController agentId={agent.id} agentName={agent.name} project={voiceProject} chatCommitScopeKind="direct" />
 
       <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
         <MetadataCard agent={agent} />
