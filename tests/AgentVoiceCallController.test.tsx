@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
 }));
 vi.mock("@tanstack/react-query", () => ({
   useQuery: ({ queryKey }: { queryKey: string[] }) => queryKey[0] === "agent-conv"
-    ? { data: { convId: "canonical-direct-conv" }, isError: false, isFetching: false }
+    ? { data: { convId: "canonical-direct-conv" }, isError: false, isFetching: false, isLoading: false }
     : { data: { available: true, status: "ready", supportsFinalChatMirror: true }, isError: false, isFetching: false },
 }));
 vi.mock("livekit-client", () => ({
@@ -53,7 +53,7 @@ describe("AgentVoiceCallController", () => {
     };
     const project = { project: { id: "project-1", pmAgent: "Bragi" } } as never;
     render(<AgentVoiceCallController agentId="bragi-enrollment" agentName="Bragi" project={project} />);
-    fireEvent.click(screen.getByRole("button", { name: "Call Bragi" }));
+    fireEvent.click(screen.getByRole("button", { name: "Working call Bragi" }));
     await waitFor(() => expect(mocks.createSession).toHaveBeenCalledOnce());
 
     mocks.handlers.get("subscribed")?.(track);
@@ -72,7 +72,7 @@ describe("AgentVoiceCallController", () => {
   it("enables the microphone with browser audio processing", async () => {
     const project = { project: { id: "project-1", pmAgent: "Bragi" } } as never;
     render(<AgentVoiceCallController agentId="bragi-enrollment" agentName="Bragi" project={project} />);
-    fireEvent.click(screen.getByRole("button", { name: "Call Bragi" }));
+    fireEvent.click(screen.getByRole("button", { name: "Working call Bragi" }));
 
     await waitFor(() => expect(mocks.microphone).toHaveBeenCalledWith(true, {
       echoCancellation: true,
@@ -81,12 +81,11 @@ describe("AgentVoiceCallController", () => {
     }));
   });
 
-  it("mirrors final turns to direct chat by default", async () => {
+  it("starts a Working call with final_pair chat commit", async () => {
     const project = { project: { id: "project-1", pmAgent: "Bragi" } } as never;
     render(<AgentVoiceCallController agentId="bragi-enrollment" agentName="Bragi" project={project} />);
 
-    expect(screen.getByRole("checkbox", { name: "Save final voice turns to direct chat" })).toBeChecked();
-    fireEvent.click(screen.getByRole("button", { name: "Call Bragi" }));
+    fireEvent.click(screen.getByRole("button", { name: "Working call Bragi" }));
 
     await waitFor(() => expect(mocks.createSession).toHaveBeenCalledWith({
       projectId: "project-1",
@@ -100,13 +99,11 @@ describe("AgentVoiceCallController", () => {
     }));
   });
 
-  it("sends an explicit off policy for a private call", async () => {
+  it("starts a Private call with an explicit off policy", async () => {
     const project = { project: { id: "project-1", pmAgent: "Bragi" } } as never;
     render(<AgentVoiceCallController agentId="bragi-enrollment" agentName="Bragi" project={project} />);
 
-    fireEvent.click(screen.getByRole("checkbox", { name: "Save final voice turns to direct chat" }));
-    expect(screen.getAllByRole("button", { name: /Private · Don't save/i }).some((button) => button.getAttribute("aria-pressed") === "true")).toBe(true);
-    fireEvent.click(screen.getByRole("button", { name: "Call Bragi" }));
+    fireEvent.click(screen.getByRole("button", { name: "Private call Bragi" }));
 
     await waitFor(() => expect(mocks.createSession).toHaveBeenCalledWith({
       projectId: "project-1",
@@ -116,7 +113,7 @@ describe("AgentVoiceCallController", () => {
     }));
   });
 
-  it("preserves an explicit project-chat scope in the session payload", async () => {
+  it("preserves an explicit project-chat scope in the Working call payload", async () => {
     const project = { project: { id: "project-1", pmAgent: "Bragi" } } as never;
     render(<AgentVoiceCallController
       agentId="bragi-enrollment"
@@ -126,8 +123,7 @@ describe("AgentVoiceCallController", () => {
       chatConversationId="canonical-project-conv"
     />);
 
-    expect(screen.getByRole("checkbox", { name: "Save final voice turns to project chat" })).toBeChecked();
-    fireEvent.click(screen.getByRole("button", { name: "Call Bragi" }));
+    fireEvent.click(screen.getByRole("button", { name: "Working call Bragi" }));
 
     await waitFor(() => expect(mocks.createSession).toHaveBeenCalledWith(expect.objectContaining({
       chatCommit: {
@@ -147,8 +143,8 @@ describe("AgentVoiceCallController", () => {
       chatCommitScopeKind="project"
     />);
 
-    expect(screen.queryByRole("checkbox", { name: "Save final voice turns to project chat" })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Call Bragi" }));
+    expect(screen.getByRole("button", { name: "Working call Bragi" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Private call Bragi" }));
     await waitFor(() => expect(mocks.createSession).toHaveBeenCalledWith(expect.objectContaining({
       chatCommit: { policy: "none" },
     })));
@@ -158,7 +154,7 @@ describe("AgentVoiceCallController", () => {
     mocks.microphone.mockRejectedValueOnce(new Error("Microphone unavailable"));
     const project = { project: { id: "project-1", pmAgent: "Bragi" } } as never;
     render(<AgentVoiceCallController agentId="bragi-enrollment" agentName="Bragi" project={project} />);
-    fireEvent.click(screen.getByRole("button", { name: "Call Bragi" }));
+    fireEvent.click(screen.getByRole("button", { name: "Working call Bragi" }));
 
     expect(await screen.findByText("Microphone unavailable")).toBeVisible();
     expect(mocks.createSession).not.toHaveBeenCalled();
@@ -171,7 +167,7 @@ describe("AgentVoiceCallController", () => {
   it("polls after session creation and shows End call when the gateway joins", async () => {
     const project = { project: { id: "project-1", pmAgent: "Bragi" } } as never;
     render(<AgentVoiceCallController agentId="bragi-enrollment" agentName="Bragi" project={project} />);
-    fireEvent.click(screen.getByRole("button", { name: "Call Bragi" }));
+    fireEvent.click(screen.getByRole("button", { name: "Working call Bragi" }));
     await waitFor(() => expect(mocks.createSession).toHaveBeenCalledOnce());
     await vi.advanceTimersByTimeAsync(1_000);
     await waitFor(() => expect(mocks.getSession).toHaveBeenCalledWith({
@@ -185,7 +181,7 @@ describe("AgentVoiceCallController", () => {
   it("mutes and unmutes the live microphone without creating another session", async () => {
     const project = { project: { id: "project-1", pmAgent: "Bragi" } } as never;
     render(<AgentVoiceCallController agentId="bragi-enrollment" agentName="Bragi" project={project} />);
-    fireEvent.click(screen.getByRole("button", { name: "Call Bragi" }));
+    fireEvent.click(screen.getByRole("button", { name: "Working call Bragi" }));
     await waitFor(() => expect(mocks.createSession).toHaveBeenCalledOnce());
     await vi.advanceTimersByTimeAsync(1_000);
     const mute = await screen.findByRole("button", { name: "Mute" });
@@ -199,7 +195,7 @@ describe("AgentVoiceCallController", () => {
   it("surfaces SDK reconnection and returns to the active call", async () => {
     const project = { project: { id: "project-1", pmAgent: "Bragi" } } as never;
     render(<AgentVoiceCallController agentId="bragi-enrollment" agentName="Bragi" project={project} />);
-    fireEvent.click(screen.getByRole("button", { name: "Call Bragi" }));
+    fireEvent.click(screen.getByRole("button", { name: "Working call Bragi" }));
     await waitFor(() => expect(mocks.createSession).toHaveBeenCalledOnce());
     await vi.advanceTimersByTimeAsync(1_000);
     expect(await screen.findByRole("button", { name: "End call" })).toBeVisible();
@@ -213,7 +209,7 @@ describe("AgentVoiceCallController", () => {
   it("uses a fresh media grant after automatic reconnect is exhausted", async () => {
     const project = { project: { id: "project-1", pmAgent: "Bragi" } } as never;
     render(<AgentVoiceCallController agentId="bragi-enrollment" agentName="Bragi" project={project} />);
-    fireEvent.click(screen.getByRole("button", { name: "Call Bragi" }));
+    fireEvent.click(screen.getByRole("button", { name: "Working call Bragi" }));
     await waitFor(() => expect(mocks.createSession).toHaveBeenCalledOnce());
     await vi.advanceTimersByTimeAsync(1_000);
     mocks.joinMeeting.mockResolvedValueOnce({ url: "wss://media.invalid", token: "fresh-human-token" });
