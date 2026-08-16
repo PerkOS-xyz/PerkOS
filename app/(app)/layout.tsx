@@ -31,7 +31,7 @@ import { UserMenu } from "../components/UserMenu";
 import { LanguageSelector } from "../components/LanguageSelector";
 import { RefreshButton } from "../components/RefreshButton";
 import { PullToRefresh } from "../components/PullToRefresh";
-import { OrgSwitcher, ProjectPicker } from "../components/OrgSwitcher";
+import { AgentPicker, OrgSwitcher, ProjectPicker } from "../components/OrgSwitcher";
 import { ActiveSessionsBar } from "../components/ActiveSessionsBar";
 import { ChatClientProvider } from "../lib/useChatClient";
 import { ActiveOrgProvider } from "../lib/useActiveOrg";
@@ -168,7 +168,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             <div className="flex min-w-0 flex-1 items-center gap-1">
               <OrgSwitcher />
               <span className="shrink-0 text-muted-foreground/50">/</span>
-              <ProjectPicker />
+              {pathname?.startsWith("/agents") ? <AgentPicker /> : <ProjectPicker />}
             </div>
             <div className="flex shrink-0 items-center gap-1.5 lg:gap-2">
               <CommandHint />
@@ -252,7 +252,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             </div>
             <span className="shrink-0 text-muted-foreground/50">/</span>
             <div className="min-w-0 flex-1">
-              <ProjectPicker />
+              {pathname?.startsWith("/agents") ? <AgentPicker /> : <ProjectPicker />}
             </div>
           </div>
 

@@ -18,7 +18,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 
-import { updateAgent, type AgentRow } from "../lib/perkosApi";
+import { SPEECH_VOICES, updateAgent, type AgentRow, type SpeechVoice } from "../lib/perkosApi";
+
+const SPEECH_VOICE_LABELS: Record<SpeechVoice, string> = {
+  alloy: "Alloy — balanced", ash: "Ash — clear", ballad: "Ballad — expressive",
+  coral: "Coral — warm", echo: "Echo — steady", fable: "Fable — narrative",
+  onyx: "Onyx — deep", nova: "Nova — bright", sage: "Sage — calm",
+  shimmer: "Shimmer — light", verse: "Verse — dynamic", marin: "Marin — natural",
+  cedar: "Cedar — grounded",
+};
 
 type Props = {
   open: boolean;
@@ -36,6 +44,7 @@ export function EditAgentDialog({
   const queryClient = useQueryClient();
   const [displayName, setDisplayName] = useState(agent.displayName ?? agent.name);
   const [plugins, setPlugins] = useState<string[]>(agent.plugins ?? []);
+  const [speechVoice, setSpeechVoice] = useState<SpeechVoice>(agent.speechVoice ?? "alloy");
   const [pluginInput, setPluginInput] = useState("");
   const [attempted, setAttempted] = useState(false);
 
@@ -43,27 +52,29 @@ export function EditAgentDialog({
     if (open) {
       setDisplayName(agent.displayName ?? agent.name);
       setPlugins(agent.plugins ?? []);
+      setSpeechVoice(agent.speechVoice ?? "alloy");
       setPluginInput("");
       setAttempted(false);
     }
-  }, [open, agent.displayName, agent.name, agent.plugins]);
+  }, [open, agent.displayName, agent.name, agent.plugins, agent.speechVoice]);
 
   const nameError =
     displayName.trim().length < 2 ? "Display name must be at least 2 characters." : null;
 
   const dirty = useMemo(() => {
     if (displayName.trim() !== (agent.displayName ?? agent.name)) return true;
+    if (speechVoice !== (agent.speechVoice ?? "alloy")) return true;
     const a = [...(agent.plugins ?? [])].sort().join(",");
     const b = [...plugins].sort().join(",");
     return a !== b;
-  }, [displayName, plugins, agent.displayName, agent.name, agent.plugins]);
+  }, [displayName, plugins, speechVoice, agent.displayName, agent.name, agent.plugins, agent.speechVoice]);
 
   const mutation = useMutation({
     mutationFn: () =>
       updateAgent({
         walletAddress,
         agentId: agent.id,
-        patch: { displayName: displayName.trim(), plugins },
+        patch: { displayName: displayName.trim(), plugins, speechVoice },
       }),
     onSuccess: (result) => {
       queryClient.invalidateQueries({
@@ -133,6 +144,23 @@ export function EditAgentDialog({
             {attempted && nameError ? (
               <p className="text-xs text-destructive">{nameError}</p>
             ) : null}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="edit-agent-speech-voice">Spoken audio voice</Label>
+            <select
+              id="edit-agent-speech-voice"
+              value={speechVoice}
+              onChange={(event) => setSpeechVoice(event.target.value as SpeechVoice)}
+              className="h-10 rounded-md border border-input bg-card px-3 text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            >
+              {SPEECH_VOICES.map((voice) => (
+                <option key={voice} value={voice}>{SPEECH_VOICE_LABELS[voice]}</option>
+              ))}
+            </select>
+            <p className="text-xs text-muted-foreground">
+              Used for synthesized speech in the next voice call. This does not change the agent&apos;s written personality.
+            </p>
           </div>
 
           <div className="flex flex-col gap-2">
