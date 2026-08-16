@@ -81,7 +81,7 @@ export const agentDetailResponsiveLayout = {
   tabs: "xl:hidden",
   conversationBase: "min-h-0 flex-col gap-2 xl:flex xl:gap-6",
   conversationActive:
-    "flex h-[calc(100svh-18rem)] overflow-hidden md:h-[calc(100dvh-11.5rem)] xl:h-auto xl:overflow-visible",
+    "flex h-[calc(100svh-18rem)] overflow-hidden md:h-[calc(100dvh-13rem)] xl:h-auto xl:overflow-visible",
   settingsBase: "flex-col gap-6 xl:flex",
 } as const;
 
