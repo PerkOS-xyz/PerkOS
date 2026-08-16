@@ -443,9 +443,20 @@ const messageConverter: FirestoreDataConverter<ChatMessage> = {
  * `external` agents (invited / self-hosted / imported) run on the user's own
  * infra, so they CAN'T be hibernated/woken (that's ECS scale-to-0, PerkOS-only).
  */
+export const SPEECH_VOICES = [
+  "alloy", "ash", "ballad", "coral", "echo", "fable", "onyx",
+  "nova", "sage", "shimmer", "verse", "marin", "cedar",
+] as const;
+export type SpeechVoice = (typeof SPEECH_VOICES)[number];
+export function isSpeechVoice(value: unknown): value is SpeechVoice {
+  return typeof value === "string" && (SPEECH_VOICES as readonly string[]).includes(value);
+}
+
 export type AgentRow = Agent & {
   /** User-facing label; `name` remains the immutable relay/runtime identity. */
   displayName?: string;
+  /** Spoken TTS voice. Distinct from `soul.voice`, which is textual persona. */
+  speechVoice?: SpeechVoice;
   soul?: string;
   skillIds?: string[];
   disabledTools?: string[];
@@ -499,6 +510,7 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
       id: snap.id,
       name: (data.name as string) ?? "",
       displayName: (data.displayName as string | undefined) ?? undefined,
+      speechVoice: isSpeechVoice(data.speechVoice) ? data.speechVoice : "alloy",
       runtime: (data.runtime as AgentRuntime) ?? "Hermes",
       status,
       walletAddress: (data.walletAddress as string) ?? "",
@@ -1838,6 +1850,7 @@ export async function updateAgent(input: {
     plugins: string[];
     skillIds: string[];
     disabledTools: string[];
+    speechVoice: SpeechVoice;
   }>;
 }): Promise<{ agent: AgentRow; applied: boolean; applyError?: string }> {
   const { authedFetch } = await import("./apiClient");

@@ -127,6 +127,23 @@ describe("AgentChatPanel hibernation policy", () => {
     expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
   });
 
+  it("does not show a warning when a connected legacy client simply omits runtime health evidence", () => {
+    render(
+      <AgentChatPanel
+        agentId="alice"
+        agentName="Alice"
+        chatEnabled
+        hibernationEnabled={false}
+        externalAgent
+        runtimeKind="OpenClaw"
+        runtimeAvailability="unverified"
+      />,
+    );
+    expect(screen.queryByText(/legacy client/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/runtime unavailable/i)).not.toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Message Alice…")).toBeEnabled();
+  });
+
   it("directs external OpenClaw timeouts to plugin and model routing logs", () => {
     const message = agentResponseTimeoutMessage({
       agentName: "Alice",

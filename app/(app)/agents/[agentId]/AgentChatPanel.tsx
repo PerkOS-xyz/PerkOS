@@ -439,11 +439,6 @@ export function AgentChatPanel({
             answer its health probe. Start or repair the owner-operated runtime
             before sending messages.
           </p>
-        ) : externalAgent && runtimeAvailability === "unverified" ? (
-          <p className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
-            The transport is connected, but this legacy client has not verified
-            execution-runtime health yet.
-          </p>
         ) : null}
 
         <form data-testid="agent-chat-composer" className="shrink-0 border-t border-border/60 bg-card/95 pt-2 supports-[backdrop-filter]:backdrop-blur" onSubmit={onSubmit}>

@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAppAccount } from "../lib/useAppAccount";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Bot,
   Building2,
   Check,
   ChevronsUpDown,
@@ -26,7 +27,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 
 import { useActiveOrg } from "../lib/useActiveOrg";
-import { getOrgProjects, updateOrgName } from "../lib/perkosApi";
+import { getOrgProjects, getWalletAgents, updateOrgName } from "../lib/perkosApi";
 
 /** Header org chip: shows the active org, switches between orgs, renames it,
  *  and links to create / manage organizations. */
@@ -263,6 +264,51 @@ export function ProjectPicker() {
         >
           <Plus className="h-3.5 w-3.5 text-muted-foreground" />
           {t("chrome.projectPicker.newProject")}
+        </Link>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+/** Contextual picker for `/agents/*`: switch agents or return to the list. */
+export function AgentPicker() {
+  const { address } = useAppAccount();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const agentsQuery = useQuery({
+    queryKey: ["wallet-agents", address],
+    queryFn: () => getWalletAgents(address!),
+    enabled: Boolean(address),
+  });
+  const agents = agentsQuery.data ?? [];
+  const currentId = pathname?.match(/^\/agents\/([^/?#]+)/)?.[1];
+  const current = agents.find((agent) => agent.id === currentId);
+  const label = current ? current.displayName ?? current.name : "Agents";
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger render={<Button variant="ghost" size="sm" aria-label="Switch agent" className="min-w-0 max-w-[170px] gap-2 px-2 hover:bg-muted/40" />}>
+        <Bot className="h-4 w-4 shrink-0 text-primary" />
+        <span className="truncate text-sm text-foreground">{label}</span>
+        <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-72 max-w-[calc(100vw-2rem)] border-border bg-card p-2">
+        <p className="px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Agents</p>
+        <ul className="flex max-h-72 flex-col gap-0.5 overflow-y-auto">
+          {agents.map((agent) => (
+            <li key={agent.id}>
+              <button type="button" onClick={() => { setOpen(false); router.push(`/agents/${agent.id}`); }} className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm text-foreground hover:bg-muted/40">
+                <Bot className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                <span className="truncate">{agent.displayName ?? agent.name}</span>
+                {agent.id === currentId ? <Check className="ml-auto h-3.5 w-3.5 text-primary" /> : null}
+              </button>
+            </li>
+          ))}
+        </ul>
+        <Separator className="my-1 bg-border" />
+        <Link href="/agents" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-muted/40">
+          <Bot className="h-3.5 w-3.5" /> All agents
         </Link>
       </PopoverContent>
     </Popover>
