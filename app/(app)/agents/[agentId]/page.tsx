@@ -282,7 +282,7 @@ export default function AgentDetailPage({ params }: PageProps) {
         />
       ) : null}
 
-      <AgentVoiceCallController agentId={agent.id} agentName={agent.name} project={voiceProject} chatCommitScopeKind="direct" />
+      <AgentVoiceCallController agentId={agent.id} agentName={agent.name} project={voiceProject} chatCommitScopeKind="direct" speechVoice={agent.speechVoice} />
 
       <AgentChatPanel
         agentId={agent.id}

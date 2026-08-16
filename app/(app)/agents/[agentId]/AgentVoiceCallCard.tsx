@@ -17,6 +17,8 @@ import {
   type AgentVoiceCapability,
   type AgentVoiceState,
 } from "../../../lib/agentVoice";
+import { speechVoiceChipLabel } from "../../../lib/speechVoiceLabels";
+import type { SpeechVoice } from "../../../lib/perkosApi";
 
 const BUSY_STATES: AgentVoiceState[] = ["checking", "connecting", "reconnecting"];
 
@@ -43,7 +45,6 @@ function VoiceActivityBars({ active, muted }: { active: boolean; muted?: boolean
     </div>
   );
 }
-
 export function AgentVoiceCallCard({
   agentName,
   capability,
@@ -58,6 +59,7 @@ export function AgentVoiceCallCard({
   muted = false,
   durationSeconds = 0,
   onToggleMute,
+  speechVoice = null,
 }: {
   agentName: string;
   capability?: AgentVoiceCapability | null;
@@ -73,11 +75,14 @@ export function AgentVoiceCallCard({
   muted?: boolean;
   durationSeconds?: number;
   onToggleMute?: () => void;
+  /** Owner-selected TTS voice for the next/active call (presentation only). */
+  speechVoice?: SpeechVoice | string | null;
 }) {
   const state = callState ?? resolveAgentVoiceState(capability);
   const busy = BUSY_STATES.includes(state);
   const canStart = canStartAgentVoiceCall(state) && Boolean(onStart);
   const duration = `${String(Math.floor(durationSeconds / 60)).padStart(2, "0")}:${String(durationSeconds % 60).padStart(2, "0")}`;
+  const voiceChip = speechVoiceChipLabel(speechVoice as SpeechVoice | null | undefined);
   const active = state === "in-call";
   const audioLive =
     active &&
@@ -109,6 +114,7 @@ export function AgentVoiceCallCard({
             <CardDescription className="mt-1 text-sm" aria-live="polite">
               {AGENT_VOICE_STATE_LABELS[state]}
               {active && activeCallMode ? ` · ${activeCallMode === "working" ? "Working call" : "Private call"}` : ""}
+              {voiceChip ? ` · Voice ${voiceChip}` : ""}
             </CardDescription>
           </div>
           {active ? <VoiceActivityBars active={audioLive || active} muted={muted} /> : null}
@@ -143,6 +149,7 @@ export function AgentVoiceCallCard({
               <p className="text-xs text-muted-foreground" aria-live="polite">
                 {AGENT_VOICE_STATE_LABELS[state]}
                 {activeCallMode ? ` · ${activeCallMode === "working" ? "Working" : "Private"}` : ""}
+                {voiceChip ? ` · ${voiceChip}` : ""}
               </p>
             </div>
             <VoiceActivityBars active={audioLive || active} muted={muted} />
@@ -178,8 +185,9 @@ export function AgentVoiceCallCard({
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold">{agentName}</p>
-                <p className="text-xs text-muted-foreground" aria-live="polite">
+                <p className="text-xs text-muted-foreground" aria-live="polite" data-testid="voice-speech-chip">
                   {AGENT_VOICE_STATE_LABELS[state]}
+                  {voiceChip ? ` · ${voiceChip}` : ""}
                 </p>
               </div>
             </div>
