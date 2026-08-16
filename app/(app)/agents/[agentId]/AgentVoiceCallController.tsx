@@ -16,7 +16,7 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
   const [callState, setCallState] = useState<AgentVoiceState | null>(null); const [error, setError] = useState<string | null>(null);
   const [activeSession, setActiveSession] = useState<VoiceSessionApi | null>(null);
   const [remoteAudioStatus, setRemoteAudioStatus] = useState<string | null>(null);
-  const [mirrorFinalTurns, setMirrorFinalTurns] = useState(true);
+  const [activeCallMode, setActiveCallMode] = useState<"working" | "private" | null>(null);
   const [muted, setMuted] = useState(false);
   const [callStartedAt, setCallStartedAt] = useState<number | null>(null);
   const [durationSeconds, setDurationSeconds] = useState(0);
@@ -31,7 +31,7 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
   const directConversation = useQuery({
     queryKey: ["agent-conv", agentId, "voice-chat-commit"],
     queryFn: () => ensureAgentConv({ agentId }),
-    enabled: chatCommitScopeKind === "direct" && capability.data?.supportsFinalChatMirror === true,
+    enabled: chatCommitScopeKind === "direct" && (capability.data?.supportsFinalChatMirror === true || capability.data?.available === true),
     staleTime: 5 * 60 * 1000,
   });
   const capabilityState: AgentVoiceState = !projectId || capability.isError
@@ -43,7 +43,15 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
   const resolvedConversationId = chatCommitScopeKind === "direct"
     ? directConversation.data?.convId
     : chatConversationId;
-  const chatMirrorAvailable = capability.data?.supportsFinalChatMirror === true && Boolean(resolvedConversationId);
+  // Platform feature: Working Call (final_pair). Prefer explicit capability flag when present;
+  // also allow when voice is ready so older gateways without the flag still unlock Working once chat exists.
+  const platformSupportsMirror = capability.data?.supportsFinalChatMirror === true
+    || (capability.data?.available === true && capability.data.status === "ready");
+  const chatMirrorAvailable = platformSupportsMirror && Boolean(resolvedConversationId);
+  const chatMirrorPreparing = platformSupportsMirror
+    && chatCommitScopeKind === "direct"
+    && !resolvedConversationId
+    && (directConversation.isFetching || directConversation.isLoading);
   useEffect(() => {
     const session = activeSession; const meeting = meetingRef.current;
     if (!session || !meeting || !["connecting", "reconnecting"].includes(state)) return;
@@ -78,8 +86,13 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
   }, []);
   useEffect(() => () => { reconnectGenerationRef.current += 1; callStartToneRef.current?.stop(); cleanupRemoteAudio(); void roomRef.current?.disconnect(); }, [cleanupRemoteAudio]);
 
-  const start = async () => {
-    if (!project) return; callStartToneRef.current?.stop(); callStartToneRef.current = startCallStartTone(); setError(null); setRemoteAudioStatus(null); setMuted(false); setCallStartedAt(null); setDurationSeconds(0); setCallState("connecting");
+  const start = async (mode: "working" | "private") => {
+    if (!project) return;
+    if (mode === "working" && !chatMirrorAvailable) {
+      setError(chatMirrorPreparing ? "Preparing chat for Working call…" : "Working call needs a chat conversation.");
+      return;
+    }
+    callStartToneRef.current?.stop(); callStartToneRef.current = startCallStartTone(); setError(null); setRemoteAudioStatus(null); setMuted(false); setCallStartedAt(null); setDurationSeconds(0); setActiveCallMode(mode); setCallState("connecting");
     try {
       const created = await createProjectMeetingApi({ projectId, title: `${agentName} voice call`, pmAgent: project.project.pmAgent || agentName, saveTranscript: false });
       const meeting = await startProjectMeetingApi({ projectId, meetingId: created.id }); meetingRef.current = meeting;
@@ -151,7 +164,7 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
         noiseSuppression: true,
         autoGainControl: true,
       });
-      const mirrorEnabled = chatMirrorAvailable && mirrorFinalTurns && Boolean(resolvedConversationId);
+      const mirrorEnabled = mode === "working" && chatMirrorAvailable && Boolean(resolvedConversationId);
       const session = await createVoiceSessionApi({
         projectId,
         meetingId: meeting.id,
@@ -190,7 +203,7 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
       await roomRef.current?.disconnect();
       cleanupRemoteAudio();
       if (meeting) await endProjectMeetingApi({ projectId, meetingId: meeting.id, notes: "", proposals: [] });
-      setCallState("ended"); setError(null); setCallStartedAt(null); setDurationSeconds(0); setMuted(false);
+      setCallState("ended"); setError(null); setCallStartedAt(null); setDurationSeconds(0); setMuted(false); setActiveCallMode(null);
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not end voice call."); setCallState("failed"); }
     finally { roomRef.current = null; meetingRef.current = null; sessionRef.current = null; setActiveSession(null); }
   };
@@ -209,7 +222,7 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
     agentName={agentName}
     capability={capability.data ?? null}
     callState={state}
-    onStart={project ? () => void start() : undefined}
+    onStart={project ? (mode) => void start(mode) : undefined}
     onEnd={() => void end()}
     error={error}
     remoteAudioStatus={remoteAudioStatus}
@@ -217,8 +230,7 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
     durationSeconds={durationSeconds}
     onToggleMute={() => void toggleMute()}
     chatMirrorAvailable={chatMirrorAvailable}
-    chatMirrorEnabled={chatMirrorAvailable && mirrorFinalTurns}
-    chatMirrorScope={chatCommitScopeKind}
-    onChatMirrorEnabledChange={setMirrorFinalTurns}
+    chatMirrorPreparing={chatMirrorPreparing}
+    activeCallMode={activeCallMode}
   />;
 }
