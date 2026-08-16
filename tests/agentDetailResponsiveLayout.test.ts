@@ -9,7 +9,7 @@ describe("agent detail responsive layout", () => {
       "h-[calc(100svh-18rem)]",
     );
     expect(agentDetailResponsiveLayout.conversationActive).toContain(
-      "md:h-[calc(100dvh-11.5rem)]",
+      "md:h-[calc(100dvh-13rem)]",
     );
     expect(agentDetailResponsiveLayout.settingsBase).toContain("xl:flex");
     expect(agentDetailResponsiveLayout.settingsBase).not.toContain("md:flex");

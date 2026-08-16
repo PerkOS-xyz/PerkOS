@@ -12,6 +12,8 @@ At a 1024 × 768 authenticated agent page, the conversation history was 672px ta
 
 This uses layout behavior rather than device detection or a list of device-specific pixel heights. `svh` protects the phone layout from expanding browser chrome, while `dvh` follows the usable tablet viewport.
 
+The live production check deliberately reserves a 24px tablet bottom inset: at 768 × 1024 portrait and 1024 × 768 landscape, both the textarea and Send control remain fully inside the viewport instead of touching its edge.
+
 ## Accessibility and invariants
 
 - Existing tab roles, labels, keyboard focus, call controls, Normal/Private policy, direct/project context, message behavior, and settings content are unchanged.
