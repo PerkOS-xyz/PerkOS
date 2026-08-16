@@ -2608,6 +2608,53 @@ export async function getAgentVoiceCapabilityApi(input: { projectId: string; age
   return payload.capability;
 }
 
+export type AgentVoiceHealthPlaybookApi = {
+  code: string;
+  title: string;
+  ownerActions: string[];
+  platformNotes: string[];
+};
+
+export type AgentVoiceHealthApi = {
+  available: boolean;
+  status: "ready" | "unavailable" | "stale" | "unknown";
+  ready: boolean;
+  codes: string[];
+  checkedAt?: string;
+  source?: string;
+  stage?: string;
+  playbooks: AgentVoiceHealthPlaybookApi[];
+  capabilityAvailable?: boolean;
+  capabilityStatus?: string;
+  capabilityReason?: string;
+  capabilityExpiresAt?: string;
+};
+
+export type AgentVoiceHealthEventApi = {
+  ready: boolean;
+  codes: string[];
+  checkedAt?: string;
+  source?: string;
+  stage?: string;
+  recordedAt?: string;
+  playbooks: AgentVoiceHealthPlaybookApi[];
+};
+
+/** Owner-only Voice Health (codes + playbooks; no chat/audio/secrets). */
+export async function getAgentVoiceHealthApi(agentId: string): Promise<{
+  health: AgentVoiceHealthApi;
+  recent: AgentVoiceHealthEventApi[];
+}> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(`/api/agents/${encodeURIComponent(agentId)}/voice-health`);
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't load voice health"));
+  const health = payload.health as AgentVoiceHealthApi | undefined;
+  const recent = payload.recent as AgentVoiceHealthEventApi[] | undefined;
+  if (!health || typeof health !== "object") throw new Error("Couldn't load voice health");
+  return { health, recent: Array.isArray(recent) ? recent : [] };
+}
+
 export async function createVoiceSessionApi(input: { projectId: string; meetingId: string; agentId: string; owner?: string; chatCommit: VoiceChatCommit }): Promise<VoiceSessionApi> {
   const payload = await meetingRequest<{ session: VoiceSessionApi }>(`/api/projects/${encodeURIComponent(input.projectId)}/meetings/${encodeURIComponent(input.meetingId)}/voice-sessions`, {
     method: "POST",

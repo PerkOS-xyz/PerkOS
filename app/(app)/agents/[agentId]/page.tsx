@@ -72,6 +72,7 @@ import { AutoWakeBanner } from "./AutoWakeBanner";
 import { AgentChatPanel } from "./AgentChatPanel";
 import { AgentVoiceCallController } from "./AgentVoiceCallController";
 import { VoiceCredentialDeliveryPanel } from "./VoiceCredentialDeliveryPanel";
+import { VoiceHealthPanel } from "./VoiceHealthPanel";
 
 type PageProps = {
   params: Promise<{ agentId: string }>;
@@ -325,6 +326,12 @@ export default function AgentDetailPage({ params }: PageProps) {
           owner={Boolean(address) && address!.toLowerCase() === agent.walletAddress.toLowerCase()}
         />
       ) : null}
+
+      <VoiceHealthPanel
+        agentId={agent.id}
+        agentName={agent.name}
+        owner={Boolean(address) && address!.toLowerCase() === agent.walletAddress.toLowerCase()}
+      />
 
       <WebhookPanel agent={agent} />
 
