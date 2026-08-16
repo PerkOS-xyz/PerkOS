@@ -12,7 +12,7 @@ import {
   type ProjectDetail, type ProjectMeeting, type VoiceSessionApi,
 } from "../../../lib/perkosApi";
 
-export function AgentVoiceCallController({ agentId, agentName, project, chatCommitScopeKind = "direct", chatConversationId }: { agentId: string; agentName: string; project?: ProjectDetail; chatCommitScopeKind?: "direct" | "project"; chatConversationId?: string }) {
+export function AgentVoiceCallController({ agentId, agentName, project, chatCommitScopeKind = "direct", chatConversationId, speechVoice }: { agentId: string; agentName: string; project?: ProjectDetail; chatCommitScopeKind?: "direct" | "project"; chatConversationId?: string; speechVoice?: string | null }) {
   const [callState, setCallState] = useState<AgentVoiceState | null>(null); const [error, setError] = useState<string | null>(null);
   const [activeSession, setActiveSession] = useState<VoiceSessionApi | null>(null);
   const [remoteAudioStatus, setRemoteAudioStatus] = useState<string | null>(null);
@@ -232,5 +232,6 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
     chatMirrorAvailable={chatMirrorAvailable}
     chatMirrorPreparing={chatMirrorPreparing}
     activeCallMode={activeCallMode}
+    speechVoice={speechVoice}
   />;
 }

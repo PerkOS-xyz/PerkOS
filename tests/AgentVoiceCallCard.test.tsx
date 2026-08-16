@@ -74,6 +74,19 @@ describe("AgentVoiceCallCard", () => {
     expect(screen.getByRole("status")).toHaveTextContent("Remote audio playing.");
   });
 
+  it("shows the configured speech voice lean on the idle call header", () => {
+    render(
+      <AgentVoiceCallCard
+        agentName="Athena"
+        callState="ready"
+        chatMirrorAvailable
+        speechVoice="nova"
+        onStart={() => undefined}
+      />,
+    );
+    expect(screen.getByTestId("voice-speech-chip")).toHaveTextContent(/nova · feminine/i);
+  });
+
   it("makes the active call unmistakable with duration, mute, end, mode label, and activity bars", () => {
     render(
       <AgentVoiceCallCard

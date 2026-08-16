@@ -19,14 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 
 import { SPEECH_VOICES, updateAgent, type AgentRow, type SpeechVoice } from "../lib/perkosApi";
-
-const SPEECH_VOICE_LABELS: Record<SpeechVoice, string> = {
-  alloy: "Alloy — balanced", ash: "Ash — clear", ballad: "Ballad — expressive",
-  coral: "Coral — warm", echo: "Echo — steady", fable: "Fable — narrative",
-  onyx: "Onyx — deep", nova: "Nova — bright", sage: "Sage — calm",
-  shimmer: "Shimmer — light", verse: "Verse — dynamic", marin: "Marin — natural",
-  cedar: "Cedar — grounded",
-};
+import { speechVoiceOptionLabel } from "../lib/speechVoiceLabels";
 
 type Props = {
   open: boolean;
@@ -155,11 +148,12 @@ export function EditAgentDialog({
               className="h-10 rounded-md border border-input bg-card px-3 text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             >
               {SPEECH_VOICES.map((voice) => (
-                <option key={voice} value={voice}>{SPEECH_VOICE_LABELS[voice]}</option>
+                <option key={voice} value={voice}>{speechVoiceOptionLabel(voice)}</option>
               ))}
             </select>
             <p className="text-xs text-muted-foreground">
-              Used for synthesized speech in the next voice call. This does not change the agent&apos;s written personality.
+              Used for synthesized speech on the next voice call. Labels are presentation-only
+              (provider voices are not strictly gendered). Does not change the agent&apos;s written personality.
             </p>
           </div>
 
