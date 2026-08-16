@@ -343,7 +343,7 @@ export function AgentChatPanel({
 
   return (
     <Card className="flex min-h-0 flex-1 flex-col overflow-hidden border-border/80 bg-card/80 shadow-sm">
-      <CardHeader data-testid="desktop-chat-heading" className="hidden shrink-0 md:grid md:p-6">
+      <CardHeader data-testid="desktop-chat-heading" className="hidden shrink-0 xl:grid xl:p-6">
         <div className="flex items-start justify-between gap-3">
           <div>
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -369,11 +369,12 @@ export function AgentChatPanel({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="flex min-h-0 flex-1 flex-col gap-2 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] md:gap-3 md:p-6 md:pt-0">
+      <CardContent className="flex min-h-0 flex-1 flex-col gap-2 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] xl:gap-3 xl:p-6 xl:pt-0">
         <div
           ref={scrollRef}
+          data-testid="agent-chat-history"
           aria-label={`Conversation history with ${agentName}`}
-          className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain rounded-xl border border-border bg-background/50 p-3 sm:p-5 md:min-h-[28rem] md:max-h-[42rem] md:flex-none"
+          className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain rounded-xl border border-border bg-background/50 p-3 sm:p-5 xl:min-h-[28rem] xl:max-h-[42rem] xl:flex-none"
         >
           {messages.length === 0 && !showTyping ? (
             <p className="my-auto text-center text-sm text-muted-foreground">
@@ -445,36 +446,38 @@ export function AgentChatPanel({
           </p>
         ) : null}
 
-        <form className="flex flex-col gap-2" onSubmit={onSubmit}>
-          <Textarea
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder={`Message ${agentName}…`}
-            rows={2}
-            onKeyDown={onKey}
-            disabled={runtimeBlocked || (!chat.authed && (convQuery.isFetching || !convId))}
-          />
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-xs text-muted-foreground">
-              {hibernationEnabled && hibernation?.state === "hibernated" ? (
-                <>Agent is hibernated — sending will wake it.</>
-              ) : hibernationEnabled && hibernation?.state === "waking" ? (
-                <>Agent is waking up…</>
-              ) : hibernationEnabled && hibernation?.state === "hibernating" ? (
-                <>Agent is hibernating; message will queue.</>
-              ) : (
-                <>Enter to send · Shift+Enter for a new line</>
-              )}
-            </p>
-            <Button
-              type="submit"
-              size="sm"
-              disabled={runtimeBlocked || !draft.trim() || (!chat.authed && !convId)}
-              className="gap-1.5"
-            >
-              <Send className="h-3.5 w-3.5" />
-              Send
-            </Button>
+        <form data-testid="agent-chat-composer" className="shrink-0 border-t border-border/60 bg-card/95 pt-2 supports-[backdrop-filter]:backdrop-blur" onSubmit={onSubmit}>
+          <div className="flex flex-col gap-2">
+            <Textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder={`Message ${agentName}…`}
+              rows={2}
+              onKeyDown={onKey}
+              disabled={runtimeBlocked || (!chat.authed && (convQuery.isFetching || !convId))}
+            />
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-xs text-muted-foreground">
+                {hibernationEnabled && hibernation?.state === "hibernated" ? (
+                  <>Agent is hibernated — sending will wake it.</>
+                ) : hibernationEnabled && hibernation?.state === "waking" ? (
+                  <>Agent is waking up…</>
+                ) : hibernationEnabled && hibernation?.state === "hibernating" ? (
+                  <>Agent is hibernating; message will queue.</>
+                ) : (
+                  <>Enter to send · Shift+Enter for a new line</>
+                )}
+              </p>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={runtimeBlocked || !draft.trim() || (!chat.authed && !convId)}
+                className="gap-1.5"
+              >
+                <Send className="h-3.5 w-3.5" />
+                Send
+              </Button>
+            </div>
           </div>
         </form>
       </CardContent>

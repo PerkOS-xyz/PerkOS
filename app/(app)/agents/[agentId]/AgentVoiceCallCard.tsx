@@ -62,10 +62,10 @@ export function AgentVoiceCallCard({
 
   return (
     <Card className={active ? "shrink-0 overflow-hidden border-emerald-400/40 bg-gradient-to-br from-emerald-500/10 via-card to-card shadow-lg shadow-emerald-950/20" : "shrink-0 overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-card to-card"}>
-      <CardHeader data-testid="desktop-voice-heading" className="hidden gap-2 md:grid md:gap-3 md:p-6 md:pb-4">
+      <CardHeader data-testid="desktop-voice-heading" className="hidden gap-2 xl:grid xl:gap-3 xl:p-6 xl:pb-4">
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <div>
-            <CardTitle className="flex items-center gap-2 text-base md:text-2xl">
+            <CardTitle className="flex items-center gap-2 text-base xl:text-2xl">
               <span className={active ? "relative flex h-3 w-3" : "hidden"} aria-hidden="true"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" /><span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-400" /></span>
               {state === "unavailable" ? <MicOff className="h-5 w-5" /> : <Headphones className="h-5 w-5" />}
               {active ? `Live with ${agentName}` : `Call ${agentName}`}
@@ -74,11 +74,11 @@ export function AgentVoiceCallCard({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-2 p-2.5 md:space-y-4 md:p-6 md:pt-0">
+      <CardContent className="space-y-2 p-2.5 xl:space-y-4 xl:p-6 xl:pt-0">
         {state === "unavailable" ? (
-          <p className="hidden text-sm text-muted-foreground md:block">{agentName} has not reported a verified voice gateway and speech provider. Text availability does not enable voice.</p>
+          <p className="hidden text-sm text-muted-foreground xl:block">{agentName} has not reported a verified voice gateway and speech provider. Text availability does not enable voice.</p>
         ) : null}
-        <div data-testid="mobile-voice-header" className="flex min-h-14 items-center gap-3 md:rounded-xl md:border md:border-border/60 md:bg-background/40 md:p-3">
+        <div data-testid="mobile-voice-header" className="flex min-h-14 items-center gap-3 xl:rounded-xl xl:border xl:border-border/60 xl:bg-background/40 xl:p-3">
           {active ? (
             <>
               <Button
@@ -124,11 +124,11 @@ export function AgentVoiceCallCard({
         </div>
         {chatMirrorAvailable ? (
           <>
-          <div className="flex items-center gap-2 md:hidden" aria-label="Call privacy mode">
+          <div className="flex items-center gap-2 xl:hidden" aria-label="Call privacy mode">
             <button type="button" disabled={mirrorLocked} onClick={() => onChatMirrorEnabledChange?.(true)} className={chatMirrorEnabled ? "rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary" : "rounded-full px-3 py-1 text-xs text-muted-foreground"} aria-pressed={chatMirrorEnabled}>Normal · Save</button>
             <button type="button" disabled={mirrorLocked} onClick={() => onChatMirrorEnabledChange?.(false)} className={!chatMirrorEnabled ? "rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary" : "rounded-full px-3 py-1 text-xs text-muted-foreground"} aria-pressed={!chatMirrorEnabled}>Private · Don&apos;t save</button>
           </div>
-          <div className="hidden gap-2 rounded-xl border border-border/70 bg-background/50 p-3 md:grid md:grid-cols-2" aria-label="Call privacy mode">
+          <div className="hidden gap-2 rounded-xl border border-border/70 bg-background/50 p-3 xl:grid xl:grid-cols-2" aria-label="Call privacy mode">
             <label className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 ${chatMirrorEnabled ? "border-primary/50 bg-primary/10" : "border-transparent"}`}>
               <Checkbox
                 aria-label={`Save final voice turns to ${mirrorDestination}`}
@@ -146,7 +146,7 @@ export function AgentVoiceCallCard({
         {error ? <p className="text-xs text-red-300" role="alert">{error}</p> : null}
         {remoteAudioStatus ? <p className="text-xs text-muted-foreground" role="status">{remoteAudioStatus}</p> : null}
         {state === "unavailable" ? (
-          <p className="hidden text-xs text-amber-300 md:block">
+          <p className="hidden text-xs text-amber-300 xl:block">
             Pending gateway capability and speech-provider configuration.
           </p>
         ) : null}
