@@ -1,6 +1,7 @@
 "use client";
 
 import { Briefcase, ChevronDown, Headphones, Loader2, Mic, MicOff, Phone, PhoneOff, Shield } from "lucide-react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -60,6 +61,7 @@ export function AgentVoiceCallCard({
   durationSeconds = 0,
   onToggleMute,
   speechVoice = null,
+  ending = false,
 }: {
   agentName: string;
   capability?: AgentVoiceCapability | null;
@@ -77,19 +79,30 @@ export function AgentVoiceCallCard({
   onToggleMute?: () => void;
   /** Owner-selected TTS voice for the next/active call (presentation only). */
   speechVoice?: SpeechVoice | string | null;
+  /** True while hang-up is in flight (disables re-taps; shows Ending…). */
+  ending?: boolean;
 }) {
   const state = callState ?? resolveAgentVoiceState(capability);
   const busy = BUSY_STATES.includes(state);
   const canStart = canStartAgentVoiceCall(state) && Boolean(onStart);
   const duration = `${String(Math.floor(durationSeconds / 60)).padStart(2, "0")}:${String(durationSeconds % 60).padStart(2, "0")}`;
   const voiceChip = speechVoiceChipLabel(speechVoice as SpeechVoice | null | undefined);
-  const active = state === "in-call";
+  const active = state === "in-call" || ending;
   const audioLive =
-    active &&
+    state === "in-call" &&
+    !ending &&
     Boolean(
       remoteAudioStatus?.toLowerCase().includes("playing") ||
         remoteAudioStatus?.toLowerCase().includes("connected"),
     );
+  const [endPressed, setEndPressed] = useState(false);
+  const endBusy = ending || endPressed;
+
+  const handleEnd = () => {
+    if (endBusy || !onEnd) return;
+    setEndPressed(true);
+    onEnd();
+  };
 
   return (
     <Card
@@ -104,7 +117,7 @@ export function AgentVoiceCallCard({
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <div>
             <CardTitle className="flex items-center gap-2 text-base xl:text-2xl">
-              <span className={active ? "relative flex h-3 w-3" : "hidden"} aria-hidden="true">
+              <span className={active && !endBusy ? "relative flex h-3 w-3" : "hidden"} aria-hidden="true">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
                 <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-400" />
               </span>
@@ -112,12 +125,12 @@ export function AgentVoiceCallCard({
               {active ? `Live with ${agentName}` : `Call ${agentName}`}
             </CardTitle>
             <CardDescription className="mt-1 text-sm" aria-live="polite">
-              {AGENT_VOICE_STATE_LABELS[state]}
+              {endBusy ? "Ending call…" : AGENT_VOICE_STATE_LABELS[state]}
               {active && activeCallMode ? ` · ${activeCallMode === "working" ? "Working call" : "Private call"}` : ""}
               {voiceChip ? ` · Voice ${voiceChip}` : ""}
             </CardDescription>
           </div>
-          {active ? <VoiceActivityBars active={audioLive || active} muted={muted} /> : null}
+          {active ? <VoiceActivityBars active={audioLive || (active && !endBusy)} muted={muted || endBusy} /> : null}
         </div>
       </CardHeader>
       <CardContent className="space-y-2 p-2 xl:space-y-4 xl:p-6 xl:pt-0">
@@ -129,44 +142,55 @@ export function AgentVoiceCallCard({
         ) : null}
 
         {active ? (
-          <div
-            data-testid="mobile-voice-header"
-            className="flex min-h-11 items-center gap-2 xl:min-h-14 xl:gap-3 xl:rounded-xl xl:border xl:border-border/60 xl:bg-background/40 xl:p-3"
-          >
+          <div className="space-y-2" data-testid="active-call-controls">
+            <div
+              data-testid="mobile-voice-header"
+              className="flex min-h-12 items-center gap-2 xl:min-h-14 xl:gap-3 xl:rounded-xl xl:border xl:border-border/60 xl:bg-background/40 xl:p-3"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold">{agentName}</p>
+                <p className="text-xs text-muted-foreground" aria-live="polite">
+                  {endBusy ? "Ending call…" : AGENT_VOICE_STATE_LABELS[state]}
+                  {activeCallMode ? ` · ${activeCallMode === "working" ? "Working" : "Private"}` : ""}
+                  {voiceChip ? ` · ${voiceChip}` : ""}
+                </p>
+              </div>
+              <VoiceActivityBars active={audioLive || (active && !endBusy)} muted={muted || endBusy} />
+              <span className="font-mono text-sm font-semibold tabular-nums" aria-label={`Call duration ${duration}`}>
+                {duration}
+              </span>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="size-12 shrink-0 rounded-full xl:size-12"
+                onClick={onToggleMute}
+                disabled={endBusy}
+                aria-pressed={muted}
+                aria-label={muted ? "Unmute" : "Mute"}
+                title={muted ? "Unmute" : "Mute"}
+              >
+                {muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+              </Button>
+            </div>
+
             <Button
               type="button"
               variant="destructive"
-              size="icon"
-              className="size-11 shrink-0 rounded-full bg-red-600 text-white shadow-sm hover:bg-red-500 focus-visible:border-red-300 focus-visible:ring-red-400/50 dark:bg-red-600 dark:hover:bg-red-500 xl:size-12"
-              onClick={onEnd}
-              aria-label="End call"
-              title="End call"
+              data-testid="voice-end-call"
+              className="h-14 min-h-14 w-full gap-2 rounded-2xl bg-red-600 text-base font-semibold text-white shadow-md shadow-red-950/30 hover:bg-red-500 focus-visible:border-red-300 focus-visible:ring-red-400/50 active:scale-[0.99] disabled:opacity-80 dark:bg-red-600 dark:hover:bg-red-500 xl:h-16 xl:min-h-16 xl:text-lg"
+              onClick={handleEnd}
+              disabled={endBusy || !onEnd}
+              aria-busy={endBusy}
+              aria-label={endBusy ? "Ending call" : "End call"}
+              title={endBusy ? "Ending call…" : "End call"}
             >
-              <PhoneOff className="h-5 w-5" />
-            </Button>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold">{agentName}</p>
-              <p className="text-xs text-muted-foreground" aria-live="polite">
-                {AGENT_VOICE_STATE_LABELS[state]}
-                {activeCallMode ? ` · ${activeCallMode === "working" ? "Working" : "Private"}` : ""}
-                {voiceChip ? ` · ${voiceChip}` : ""}
-              </p>
-            </div>
-            <VoiceActivityBars active={audioLive || active} muted={muted} />
-            <span className="font-mono text-sm font-semibold tabular-nums" aria-label={`Call duration ${duration}`}>
-              {duration}
-            </span>
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              className="size-11 shrink-0 rounded-full"
-              onClick={onToggleMute}
-              aria-pressed={muted}
-              aria-label={muted ? "Unmute" : "Mute"}
-              title={muted ? "Unmute" : "Mute"}
-            >
-              {muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+              {endBusy ? (
+                <Loader2 className="h-6 w-6 shrink-0 animate-spin xl:h-7 xl:w-7" />
+              ) : (
+                <PhoneOff className="h-6 w-6 shrink-0 xl:h-7 xl:w-7" />
+              )}
+              {endBusy ? "Ending…" : "End call"}
             </Button>
           </div>
         ) : (
@@ -259,7 +283,7 @@ export function AgentVoiceCallCard({
             {error}
           </p>
         ) : null}
-        {remoteAudioStatus ? (
+        {remoteAudioStatus && !endBusy ? (
           <p className="text-xs text-muted-foreground" role="status">
             {remoteAudioStatus}
           </p>

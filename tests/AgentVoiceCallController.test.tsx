@@ -24,7 +24,10 @@ vi.mock("../app/lib/perkosApi", () => ({
   endProjectMeetingApi: mocks.endMeeting, getAgentVoiceCapabilityApi: vi.fn(),
   ensureAgentConv: vi.fn(),
 }));
-vi.mock("../app/lib/callStartTone", () => ({ startCallStartTone: mocks.startTone }));
+vi.mock("../app/lib/callStartTone", () => ({
+  startCallStartTone: mocks.startTone,
+  playCallEndTone: vi.fn(() => ({ stop: mocks.stopTone })),
+}));
 
 import { AgentVoiceCallController } from "../app/(app)/agents/[agentId]/AgentVoiceCallController";
 

@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { AgentVoiceCallCard } from "../app/(app)/agents/[agentId]/AgentVoiceCallCard";
 
@@ -87,7 +87,7 @@ describe("AgentVoiceCallCard", () => {
     expect(screen.getByTestId("voice-speech-chip")).toHaveTextContent(/nova · feminine/i);
   });
 
-  it("makes the active call unmistakable with duration, mute, end, mode label, and activity bars", () => {
+  it("makes the active call unmistakable with duration, mute, large end control, mode label, and activity bars", () => {
     render(
       <AgentVoiceCallCard
         agentName="Bragi"
@@ -97,16 +97,39 @@ describe("AgentVoiceCallCard", () => {
         activeCallMode="working"
         remoteAudioStatus="Remote audio playing."
         onToggleMute={() => undefined}
+        onEnd={() => undefined}
       />,
     );
 
     expect(screen.getByText("Live with Bragi")).toBeVisible();
     expect(screen.getByLabelText("Call duration 01:05")).toBeVisible();
     expect(screen.getByRole("button", { name: "Unmute" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "End call" })).toBeVisible();
-    expect(screen.getByRole("button", { name: "End call" })).toHaveClass("size-11", "xl:size-12", "rounded-full", "bg-red-600");
+    const end = screen.getByTestId("voice-end-call");
+    expect(end).toBeVisible();
+    expect(end).toHaveTextContent("End call");
+    expect(end).toHaveClass("h-14", "min-h-14", "w-full", "rounded-2xl", "bg-red-600");
     expect(screen.getByText("Call settings")).toBeVisible();
     expect(screen.getByTestId("mobile-voice-header")).toHaveTextContent("BragiVoice call in progress · Working01:05");
     expect(screen.getAllByTestId("voice-activity").length).toBeGreaterThan(0);
+  });
+
+  it("locks the end control and shows Ending while hang-up is in flight", async () => {
+    const { userEvent } = await import("@testing-library/user-event");
+    const user = userEvent.setup();
+    const onEnd = vi.fn();
+    render(
+      <AgentVoiceCallCard
+        agentName="Bragi"
+        callState="in-call"
+        onEnd={onEnd}
+        ending
+      />,
+    );
+    const end = screen.getByTestId("voice-end-call");
+    expect(end).toBeDisabled();
+    expect(end).toHaveAttribute("aria-busy", "true");
+    expect(end).toHaveTextContent("Ending");
+    await user.click(end);
+    expect(onEnd).not.toHaveBeenCalled();
   });
 });

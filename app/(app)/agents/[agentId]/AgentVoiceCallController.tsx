@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Room, RoomEvent, Track } from "livekit-client";
 import { AgentVoiceCallCard } from "./AgentVoiceCallCard";
 import type { AgentVoiceState } from "../../../lib/agentVoice";
-import { startCallStartTone, type CallStartTone } from "../../../lib/callStartTone";
+import { startCallStartTone, playCallEndTone, type CallToneHandle } from "../../../lib/callStartTone";
 import {
   cancelVoiceSessionApi, createMeetingJoinSessionApi, createProjectMeetingApi, createVoiceSessionApi,
   endProjectMeetingApi, ensureAgentConv, getAgentVoiceCapabilityApi, getVoiceSessionApi, startProjectMeetingApi,
@@ -23,7 +23,9 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
   const roomRef = useRef<Room | null>(null); const meetingRef = useRef<ProjectMeeting | null>(null); const sessionRef = useRef<VoiceSessionApi | null>(null);
   const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
   const remoteAudioTrackRef = useRef<{ detach: (element?: HTMLMediaElement) => HTMLMediaElement[] } | null>(null);
-  const callStartToneRef = useRef<CallStartTone | null>(null);
+  const callStartToneRef = useRef<CallToneHandle | null>(null);
+  const endingRef = useRef(false);
+  const [ending, setEnding] = useState(false);
   const reconnectGenerationRef = useRef(0);
   const mutedRef = useRef(false);
   const projectId = project?.project.id ?? "";
@@ -193,6 +195,11 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
     }
   };
   const end = async () => {
+    if (endingRef.current) return;
+    endingRef.current = true;
+    setEnding(true);
+    // Fire hang-up cue immediately under the user gesture (iOS requires this path).
+    playCallEndTone();
     reconnectGenerationRef.current += 1;
     callStartToneRef.current?.stop(); callStartToneRef.current = null;
     const meeting = meetingRef.current; const session = sessionRef.current;
@@ -205,7 +212,11 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
       if (meeting) await endProjectMeetingApi({ projectId, meetingId: meeting.id, notes: "", proposals: [] });
       setCallState("ended"); setError(null); setCallStartedAt(null); setDurationSeconds(0); setMuted(false); setActiveCallMode(null);
     } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not end voice call."); setCallState("failed"); }
-    finally { roomRef.current = null; meetingRef.current = null; sessionRef.current = null; setActiveSession(null); }
+    finally {
+      roomRef.current = null; meetingRef.current = null; sessionRef.current = null; setActiveSession(null);
+      endingRef.current = false;
+      setEnding(false);
+    }
   };
   const toggleMute = async () => {
     const room = roomRef.current;
@@ -233,5 +244,6 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
     chatMirrorPreparing={chatMirrorPreparing}
     activeCallMode={activeCallMode}
     speechVoice={speechVoice}
+    ending={ending}
   />;
 }
