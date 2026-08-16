@@ -222,4 +222,20 @@ describe("AgentVoiceCallController", () => {
     expect(await screen.findByText("Call reconnected. Waiting for remote audio.")).toBeVisible();
     expect(mocks.createSession).toHaveBeenCalledOnce();
   });
+
+  it("ends private calls by disconnecting media first even if cancel API stalls", async () => {
+    mocks.cancelSession.mockImplementation(() => new Promise(() => undefined));
+    const project = { project: { id: "project-1", pmAgent: "Bragi" } } as never;
+    render(<AgentVoiceCallController agentId="bragi-enrollment" agentName="Bragi" project={project} />);
+    fireEvent.click(screen.getByRole("button", { name: "Private call Bragi" }));
+    await waitFor(() => expect(mocks.createSession).toHaveBeenCalledWith(expect.objectContaining({
+      chatCommit: { policy: "none" },
+    })));
+    await vi.advanceTimersByTimeAsync(1_000);
+    fireEvent.click(await screen.findByRole("button", { name: "End call" }));
+    await waitFor(() => expect(mocks.disconnect).toHaveBeenCalled());
+    await vi.advanceTimersByTimeAsync(6_500);
+    await waitFor(() => expect(screen.getByRole("button", { name: "Retry private call" })).toBeEnabled());
+    expect(screen.getByText(/Hang-up sent; server cancel timed out/i)).toBeVisible();
+  });
 });

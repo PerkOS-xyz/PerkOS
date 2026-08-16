@@ -1,7 +1,7 @@
 "use client";
 
 import { Briefcase, ChevronDown, Headphones, Loader2, Mic, MicOff, Phone, PhoneOff, Shield } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -97,6 +97,10 @@ export function AgentVoiceCallCard({
     );
   const [endPressed, setEndPressed] = useState(false);
   const endBusy = ending || endPressed;
+
+  useEffect(() => {
+    if (!active || (!ending && state !== "in-call")) setEndPressed(false);
+  }, [active, ending, state]);
 
   const handleEnd = () => {
     if (endBusy || !onEnd) return;

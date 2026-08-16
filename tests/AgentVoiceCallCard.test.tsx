@@ -132,4 +132,14 @@ describe("AgentVoiceCallCard", () => {
     await user.click(end);
     expect(onEnd).not.toHaveBeenCalled();
   });
+
+  it("re-enables End after hang-up completes and call leaves active", () => {
+    const { rerender } = render(
+      <AgentVoiceCallCard agentName="Bragi" callState="in-call" ending onEnd={() => undefined} onStart={() => undefined} chatMirrorAvailable />,
+    );
+    expect(screen.getByTestId("voice-end-call")).toBeDisabled();
+    rerender(<AgentVoiceCallCard agentName="Bragi" callState="ended" ending={false} onEnd={() => undefined} onStart={() => undefined} chatMirrorAvailable />);
+    expect(screen.queryByTestId("voice-end-call")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Retry private call" })).toBeEnabled();
+  });
 });

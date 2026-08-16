@@ -202,21 +202,60 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
     playCallEndTone();
     reconnectGenerationRef.current += 1;
     callStartToneRef.current?.stop(); callStartToneRef.current = null;
-    const meeting = meetingRef.current; const session = sessionRef.current;
+
+    // Snapshot then clear refs so reconnect/poll loops cannot revive the session.
+    const meeting = meetingRef.current;
+    const session = sessionRef.current;
+    const room = roomRef.current;
+    meetingRef.current = null;
+    sessionRef.current = null;
+    roomRef.current = null;
+    setActiveSession(null);
+
+    const withTimeout = async <T,>(promise: Promise<T>, ms: number): Promise<T | "timeout"> => {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        return await Promise.race([
+          promise,
+          new Promise<"timeout">((resolve) => { timer = setTimeout(() => resolve("timeout"), ms); }),
+        ]);
+      } finally {
+        if (timer) clearTimeout(timer);
+      }
+    };
+
+    // Local media first — user must leave the call even if control-plane APIs stall.
+    try { await withTimeout(Promise.resolve(room?.disconnect() ?? Promise.resolve()), 4_000); } catch { /* fail open */ }
+    cleanupRemoteAudio();
+
+    let remoteError: string | null = null;
     try {
-      if (meeting && session) await cancelVoiceSessionApi({ projectId, meetingId: meeting.id, sessionId: session.id, agentId });
-      sessionRef.current = null;
-      setActiveSession(null);
-      await roomRef.current?.disconnect();
-      cleanupRemoteAudio();
-      if (meeting) await endProjectMeetingApi({ projectId, meetingId: meeting.id, notes: "", proposals: [] });
-      setCallState("ended"); setError(null); setCallStartedAt(null); setDurationSeconds(0); setMuted(false); setActiveCallMode(null);
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not end voice call."); setCallState("failed"); }
-    finally {
-      roomRef.current = null; meetingRef.current = null; sessionRef.current = null; setActiveSession(null);
-      endingRef.current = false;
-      setEnding(false);
+      if (meeting && session) {
+        const cancelled = await withTimeout(
+          cancelVoiceSessionApi({ projectId, meetingId: meeting.id, sessionId: session.id, agentId }),
+          6_000,
+        );
+        if (cancelled === "timeout") remoteError = "Hang-up sent; server cancel timed out.";
+      }
+    } catch (cause) {
+      remoteError = cause instanceof Error ? cause.message : "Could not cancel voice session.";
     }
+    try {
+      if (meeting) {
+        await withTimeout(endProjectMeetingApi({ projectId, meetingId: meeting.id, notes: "", proposals: [] }), 6_000);
+      }
+    } catch (cause) {
+      if (!remoteError) remoteError = cause instanceof Error ? cause.message : "Could not end meeting.";
+    }
+
+    setCallState("ended");
+    setCallStartedAt(null);
+    setDurationSeconds(0);
+    setMuted(false);
+    setActiveCallMode(null);
+    setError(remoteError);
+    endingRef.current = false;
+    setEnding(false);
   };
   const toggleMute = async () => {
     const room = roomRef.current;
