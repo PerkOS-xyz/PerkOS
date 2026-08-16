@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   createMeeting: vi.fn(), startMeeting: vi.fn(), joinMeeting: vi.fn(), createSession: vi.fn(),
   getSession: vi.fn(), cancelSession: vi.fn(), endMeeting: vi.fn(), connect: vi.fn(), disconnect: vi.fn(), microphone: vi.fn(),
   handlers: new Map<string, (track: unknown) => void>(),
+  startTone: vi.fn(), stopTone: vi.fn(),
 }));
 vi.mock("@tanstack/react-query", () => ({
   useQuery: ({ queryKey }: { queryKey: string[] }) => queryKey[0] === "agent-conv"
@@ -13,7 +14,7 @@ vi.mock("@tanstack/react-query", () => ({
 }));
 vi.mock("livekit-client", () => ({
   Track: { Kind: { Audio: "audio" } },
-  RoomEvent: { TrackSubscribed: "subscribed", TrackUnsubscribed: "unsubscribed", Disconnected: "disconnected" },
+  RoomEvent: { TrackSubscribed: "subscribed", TrackUnsubscribed: "unsubscribed", Reconnecting: "reconnecting", Reconnected: "reconnected", Disconnected: "disconnected" },
   Room: class { localParticipant = { setMicrophoneEnabled: mocks.microphone }; on(event: string, handler: (track: unknown) => void) { mocks.handlers.set(event, handler); return this; } connect = mocks.connect; disconnect = mocks.disconnect; },
 }));
 vi.mock("../app/lib/perkosApi", () => ({
@@ -23,6 +24,7 @@ vi.mock("../app/lib/perkosApi", () => ({
   endProjectMeetingApi: mocks.endMeeting, getAgentVoiceCapabilityApi: vi.fn(),
   ensureAgentConv: vi.fn(),
 }));
+vi.mock("../app/lib/callStartTone", () => ({ startCallStartTone: mocks.startTone }));
 
 import { AgentVoiceCallController } from "../app/(app)/agents/[agentId]/AgentVoiceCallController";
 
@@ -37,6 +39,7 @@ describe("AgentVoiceCallController", () => {
     mocks.createSession.mockResolvedValue({ id: "session-1", status: "pending" });
     mocks.getSession.mockResolvedValue({ id: "session-1", status: "joined" });
     mocks.connect.mockResolvedValue(undefined); mocks.microphone.mockResolvedValue(undefined);
+    mocks.startTone.mockReturnValue({ stop: mocks.stopTone });
   });
 
   it("plays remote audio explicitly and removes it when unsubscribed", async () => {
@@ -175,6 +178,8 @@ describe("AgentVoiceCallController", () => {
       projectId: "project-1", meetingId: "meeting-1", sessionId: "session-1", agentId: "bragi-enrollment",
     }));
     expect(await screen.findByRole("button", { name: "End call" })).toBeVisible();
+    expect(mocks.startTone).toHaveBeenCalledOnce();
+    expect(mocks.stopTone).toHaveBeenCalledOnce();
   });
 
   it("mutes and unmutes the live microphone without creating another session", async () => {
@@ -188,6 +193,34 @@ describe("AgentVoiceCallController", () => {
     await waitFor(() => expect(mocks.microphone).toHaveBeenLastCalledWith(false));
     fireEvent.click(screen.getByRole("button", { name: "Unmute" }));
     await waitFor(() => expect(mocks.microphone).toHaveBeenLastCalledWith(true));
+    expect(mocks.createSession).toHaveBeenCalledOnce();
+  });
+
+  it("surfaces SDK reconnection and returns to the active call", async () => {
+    const project = { project: { id: "project-1", pmAgent: "Bragi" } } as never;
+    render(<AgentVoiceCallController agentId="bragi-enrollment" agentName="Bragi" project={project} />);
+    fireEvent.click(screen.getByRole("button", { name: "Call Bragi" }));
+    await waitFor(() => expect(mocks.createSession).toHaveBeenCalledOnce());
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(await screen.findByRole("button", { name: "End call" })).toBeVisible();
+    mocks.handlers.get("reconnecting")?.(undefined);
+    expect(await screen.findByText("Network changed. Reconnecting call…")).toBeVisible();
+    mocks.handlers.get("reconnected")?.(undefined);
+    expect(await screen.findByText("Call reconnected. Waiting for remote audio.")).toBeVisible();
+    expect(screen.getByRole("button", { name: "End call" })).toBeVisible();
+  });
+
+  it("uses a fresh media grant after automatic reconnect is exhausted", async () => {
+    const project = { project: { id: "project-1", pmAgent: "Bragi" } } as never;
+    render(<AgentVoiceCallController agentId="bragi-enrollment" agentName="Bragi" project={project} />);
+    fireEvent.click(screen.getByRole("button", { name: "Call Bragi" }));
+    await waitFor(() => expect(mocks.createSession).toHaveBeenCalledOnce());
+    await vi.advanceTimersByTimeAsync(1_000);
+    mocks.joinMeeting.mockResolvedValueOnce({ url: "wss://media.invalid", token: "fresh-human-token" });
+    mocks.handlers.get("disconnected")?.(undefined);
+    await waitFor(() => expect(mocks.joinMeeting).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(mocks.connect).toHaveBeenLastCalledWith("wss://media.invalid", "fresh-human-token"));
+    expect(await screen.findByText("Call reconnected. Waiting for remote audio.")).toBeVisible();
     expect(mocks.createSession).toHaveBeenCalledOnce();
   });
 });
