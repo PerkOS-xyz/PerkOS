@@ -61,7 +61,7 @@ export function AgentVoiceCallCard({
   const active = state === "in-call";
 
   return (
-    <Card className={active ? "shrink-0 overflow-hidden border-emerald-400/40 bg-gradient-to-br from-emerald-500/10 via-card to-card shadow-lg shadow-emerald-950/20" : "shrink-0 overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-card to-card"}>
+    <Card data-testid="agent-voice-card" className={active ? "shrink-0 gap-0 overflow-hidden border-emerald-400/40 bg-gradient-to-br from-emerald-500/10 via-card to-card py-0 shadow-lg shadow-emerald-950/20 xl:gap-4 xl:py-4" : "shrink-0 gap-0 overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-card to-card py-0 xl:gap-4 xl:py-4"}>
       <CardHeader data-testid="desktop-voice-heading" className="hidden gap-2 xl:grid xl:gap-3 xl:p-6 xl:pb-4">
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <div>
@@ -74,18 +74,18 @@ export function AgentVoiceCallCard({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-2 p-2.5 xl:space-y-4 xl:p-6 xl:pt-0">
+      <CardContent className="space-y-1.5 p-1.5 xl:space-y-4 xl:p-6 xl:pt-0">
         {state === "unavailable" ? (
           <p className="hidden text-sm text-muted-foreground xl:block">{agentName} has not reported a verified voice gateway and speech provider. Text availability does not enable voice.</p>
         ) : null}
-        <div data-testid="mobile-voice-header" className="flex min-h-14 items-center gap-3 xl:rounded-xl xl:border xl:border-border/60 xl:bg-background/40 xl:p-3">
+        <div data-testid="mobile-voice-header" className="flex min-h-11 items-center gap-2 xl:min-h-14 xl:gap-3 xl:rounded-xl xl:border xl:border-border/60 xl:bg-background/40 xl:p-3">
           {active ? (
             <>
               <Button
                 type="button"
                 variant="destructive"
                 size="icon"
-                className="size-12 shrink-0 rounded-full bg-red-600 text-white shadow-sm hover:bg-red-500 focus-visible:border-red-300 focus-visible:ring-red-400/50 dark:bg-red-600 dark:hover:bg-red-500"
+                className="size-11 shrink-0 rounded-full bg-red-600 text-white shadow-sm hover:bg-red-500 focus-visible:border-red-300 focus-visible:ring-red-400/50 dark:bg-red-600 dark:hover:bg-red-500 xl:size-12"
                 onClick={onEnd}
                 aria-label="End call"
                 title="End call"
@@ -106,7 +106,7 @@ export function AgentVoiceCallCard({
               <Button
                 type="button"
                 size="icon"
-                className="size-12 shrink-0 rounded-full bg-emerald-600 text-white shadow-sm hover:bg-emerald-500 focus-visible:border-emerald-300 focus-visible:ring-emerald-400/50 disabled:bg-muted disabled:text-muted-foreground"
+                className="size-11 shrink-0 rounded-full bg-emerald-600 text-white shadow-sm hover:bg-emerald-500 focus-visible:border-emerald-300 focus-visible:ring-emerald-400/50 disabled:bg-muted disabled:text-muted-foreground xl:size-12"
                 disabled={!enabled || busy}
                 aria-disabled={!enabled || busy}
                 aria-label={busy ? AGENT_VOICE_STATE_LABELS[state] : state === "failed" || state === "ended" ? "Retry voice call" : `Call ${agentName}`}

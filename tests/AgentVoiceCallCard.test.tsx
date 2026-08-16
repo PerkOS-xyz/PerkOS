@@ -33,8 +33,9 @@ describe("AgentVoiceCallCard", () => {
     render(<AgentVoiceCallCard agentName="Bragi" callState="ready" onStart={() => undefined} />);
 
     const call = screen.getByRole("button", { name: "Call Bragi" });
-    expect(call).toHaveClass("size-12", "rounded-full", "bg-emerald-600");
+    expect(call).toHaveClass("size-11", "xl:size-12", "rounded-full", "bg-emerald-600");
     expect(call).toHaveAttribute("title", "Call Bragi");
+    expect(screen.getByTestId("agent-voice-card")).toHaveClass("gap-0", "py-0", "xl:gap-4", "xl:py-4");
     expect(screen.getByTestId("desktop-voice-heading")).toHaveClass("hidden");
     expect(screen.getByTestId("mobile-voice-header")).toHaveTextContent("BragiReady for voice");
     expect(screen.getByTestId("mobile-voice-header")).not.toHaveTextContent("Call Bragi");
@@ -44,7 +45,7 @@ describe("AgentVoiceCallCard", () => {
     render(<AgentVoiceCallCard agentName="Bragi" callState="connecting" onStart={() => undefined} />);
 
     const connecting = screen.getByRole("button", { name: "Connecting voice call" });
-    expect(connecting).toHaveClass("size-12", "rounded-full");
+    expect(connecting).toHaveClass("size-11", "xl:size-12", "rounded-full");
     expect(connecting).toBeDisabled();
     expect(screen.getAllByText("Connecting voice call").length).toBeGreaterThan(0);
   });
@@ -76,7 +77,7 @@ describe("AgentVoiceCallCard", () => {
     expect(screen.getByLabelText("Call duration 01:05")).toBeVisible();
     expect(screen.getByRole("button", { name: "Unmute" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: "End call" })).toBeVisible();
-    expect(screen.getByRole("button", { name: "End call" })).toHaveClass("size-12", "rounded-full", "bg-red-600");
+    expect(screen.getByRole("button", { name: "End call" })).toHaveClass("size-11", "xl:size-12", "rounded-full", "bg-red-600");
     expect(screen.getByText("Call settings")).toBeVisible();
     expect(screen.getByTestId("mobile-voice-header")).toHaveTextContent("BragiVoice call in progress01:05");
   });

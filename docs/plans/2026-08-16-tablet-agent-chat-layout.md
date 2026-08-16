@@ -14,6 +14,8 @@ This uses layout behavior rather than device detection or a list of device-speci
 
 The live production check deliberately reserves a 24px tablet bottom inset: at 768 × 1024 portrait and 1024 × 768 landscape, both the textarea and Send control remain fully inside the viewport instead of touching its edge.
 
+The mobile and tablet call surface also overrides the shared Card component's structural padding. Its phone/hang-up action remains an accessible 44px circle, status stays adjacent, and the larger padded treatment returns only on wide desktop. This removes decorative empty height without hiding call state, privacy mode, duration, mute, or errors.
+
 ## Accessibility and invariants
 
 - Existing tab roles, labels, keyboard focus, call controls, Normal/Private policy, direct/project context, message behavior, and settings content are unchanged.
