@@ -77,6 +77,14 @@ type PageProps = {
   params: Promise<{ agentId: string }>;
 };
 
+export const agentDetailResponsiveLayout = {
+  tabs: "xl:hidden",
+  conversationBase: "min-h-0 flex-col gap-2 xl:flex xl:gap-6",
+  conversationActive:
+    "flex h-[calc(100svh-18rem)] overflow-hidden md:h-[calc(100dvh-11.5rem)] xl:h-auto xl:overflow-visible",
+  settingsBase: "flex-col gap-6 xl:flex",
+} as const;
+
 function initials(name: string): string {
   return name
     .split(/\s+|-/)
@@ -239,18 +247,18 @@ export default function AgentDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="flex min-h-0 flex-col gap-4 md:gap-6">
-      <div className="sticky top-0 z-30 grid grid-cols-2 gap-1 rounded-xl border border-border bg-background/95 p-1 shadow-sm backdrop-blur md:hidden" role="tablist" aria-label="Agent view">
+    <div className="flex min-h-0 flex-col gap-4 xl:gap-6">
+      <div className={cn("sticky top-0 z-30 grid grid-cols-2 gap-1 rounded-xl border border-border bg-background/95 p-1 shadow-sm backdrop-blur", agentDetailResponsiveLayout.tabs)} role="tablist" aria-label="Agent view">
         <button type="button" role="tab" aria-selected={mobileView === "conversation"} onClick={() => setMobileView("conversation")} className={cn("min-h-11 rounded-lg border px-3 text-sm font-semibold transition-colors", mobileView === "conversation" ? "border-primary/60 bg-primary text-primary-foreground shadow-sm" : "border-transparent text-muted-foreground hover:bg-muted")}>Conversation</button>
         <button type="button" role="tab" aria-selected={mobileView === "settings"} onClick={() => setMobileView("settings")} className={cn("min-h-11 rounded-lg border px-3 text-sm font-semibold transition-colors", mobileView === "settings" ? "border-primary/60 bg-primary text-primary-foreground shadow-sm" : "border-transparent text-muted-foreground hover:bg-muted")}>Settings</button>
       </div>
 
-      <div className="hidden flex-col gap-6 md:flex">
+      <div className="hidden flex-col gap-6 xl:flex">
         <BackLink />
         <AgentHeader agent={agent} onRefresh={refresh} refreshing={agentsQuery.isFetching} walletAddress={address ?? ""} />
       </div>
 
-      <section role="tabpanel" aria-label="Conversation" className={cn("min-h-0 flex-col gap-2 md:flex md:gap-6", mobileView === "conversation" ? "flex h-[calc(100dvh-18rem)] overflow-hidden" : "hidden")}>
+      <section role="tabpanel" aria-label="Conversation" className={cn(agentDetailResponsiveLayout.conversationBase, mobileView === "conversation" ? agentDetailResponsiveLayout.conversationActive : "hidden")}>
 
       {agent.status === "provisioning" ||
       agent.status === "failed" ||
@@ -290,8 +298,8 @@ export default function AgentDetailPage({ params }: PageProps) {
 
       </section>
 
-      <section role="tabpanel" aria-label="Settings" className={cn("flex-col gap-6 md:flex", mobileView === "settings" ? "flex" : "hidden")}>
-      <div className="flex flex-col gap-4 md:hidden">
+      <section role="tabpanel" aria-label="Settings" className={cn(agentDetailResponsiveLayout.settingsBase, mobileView === "settings" ? "flex" : "hidden")}>
+      <div className="flex flex-col gap-4 xl:hidden">
         <BackLink />
         <AgentHeader agent={agent} onRefresh={refresh} refreshing={agentsQuery.isFetching} walletAddress={address ?? ""} />
       </div>

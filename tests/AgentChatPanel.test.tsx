@@ -159,6 +159,18 @@ describe("AgentChatPanel hibernation policy", () => {
     expect(screen.getByText("Saved voice turn")).toBeVisible();
     expect(screen.getByText("A completed response")).toBeVisible();
     expect(screen.queryByText(/responding live/i)).not.toBeInTheDocument();
-    expect(screen.getByTestId("desktop-chat-heading")).toHaveClass("hidden", "md:grid");
+    expect(screen.getByTestId("desktop-chat-heading")).toHaveClass("hidden", "xl:grid");
+  });
+
+  it("keeps the tablet composer fixed while only the history scrolls", () => {
+    render(<AgentChatPanel agentId="alice" agentName="Alice" chatEnabled hibernationEnabled={false} />);
+
+    expect(screen.getByTestId("agent-chat-history")).toHaveClass(
+      "min-h-0",
+      "flex-1",
+      "overflow-y-auto",
+      "xl:min-h-[28rem]",
+    );
+    expect(screen.getByTestId("agent-chat-composer")).toHaveClass("shrink-0");
   });
 });
