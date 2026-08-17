@@ -30,23 +30,22 @@ export type RuntimeImage = {
  * Returns empty arrays if nothing is active — the caller renders an
  * empty-state telling the user to contact admin.
  */
-export async function fetchActiveRuntimes(): Promise<{
-  openclaw: RuntimeImage[];
-  hermes: RuntimeImage[];
-}> {
+export type RuntimeImagesByRuntime = Partial<Record<AgentRuntime, RuntimeImage[]>>;
+
+export async function fetchActiveRuntimes(): Promise<RuntimeImagesByRuntime> {
   const res = await authedFetch("/api/runtimes");
   if (!res.ok) {
     throw new Error(`Failed to load runtimes (${res.status})`);
   }
   const { runtimes } = (await res.json()) as { runtimes: RuntimeImage[] };
 
-  const grouped: { openclaw: RuntimeImage[]; hermes: RuntimeImage[] } = {
-    openclaw: [],
-    hermes: [],
-  };
+  // Keyed by runtime rather than a fixed pair. The previous shape pushed
+  // anything that was not OpenClaw into `hermes`, so a third runtime's images
+  // were silently offered as Hermes images and the wizard auto-selected a
+  // Hermes tag for it.
+  const grouped: RuntimeImagesByRuntime = {};
   for (const r of runtimes) {
-    if (r.runtime === "OpenClaw") grouped.openclaw.push(r);
-    else grouped.hermes.push(r);
+    (grouped[r.runtime] ??= []).push(r);
   }
   return grouped;
 }

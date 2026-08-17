@@ -21,11 +21,12 @@
  */
 
 import type { SoulFields } from "./agentPresets";
+import type { AgentRuntime } from "./perkosApi";
 
 export type CompanyRole = {
   /** Human label shown in the gallery, e.g. "Listing Copywriter". */
   role: string;
-  runtime: "OpenClaw" | "Hermes";
+  runtime: AgentRuntime;
   /** Exactly one role per template is the PM (project orchestrator). */
   isPM?: boolean;
   /** Reuse an existing agent preset's soul/skills/plugins (generic roles). */

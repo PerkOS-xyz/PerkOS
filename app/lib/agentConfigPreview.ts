@@ -167,8 +167,62 @@ export function buildHermesPreview(input: ConfigPreviewInput): string {
   ].join("\n");
 }
 
+
+/**
+ * ZeroClaw renders TOML at `$HOME/.zeroclaw/config.toml`, and PerkOS writes it
+ * by driving `zeroclaw config set --no-interactive` rather than templating a
+ * file — the runtime encrypts secrets at rest, so the key never appears in
+ * plaintext on disk. The preview shows the resulting shape.
+ *
+ * Two fields are easy to get wrong by analogy with the other runtimes: the
+ * endpoint field is `uri` (there is no `base_url` on a ZeroClaw model provider),
+ * and an agent MUST reference a configured `[risk_profiles.<alias>]` or every
+ * message fails with a generic "LLM request failed" without the model ever
+ * being called.
+ */
+export function buildZeroClawPreview(input: ConfigPreviewInput): string {
+  const { llmSource, byokProvider, modelId } = input;
+
+  if (llmSource === "skip") {
+    return [
+      "# No LLM source configured yet.",
+      "# Add a provider block before the agent can run.",
+      "# See https://docs.perkos.xyz/agents/llm",
+    ].join("\n");
+  }
+
+  const isPerkos = llmSource === "perkos";
+  const provider = byokProvider ?? "openai";
+  const uri = isPerkos ? "https://api.llm.perkos.xyz/v1" : byokBaseUrl(provider);
+  const model = isPerkos
+    ? "kimi-k2.6:cloud"
+    : byokDefaultModel(provider, modelId);
+
+  return [
+    "[providers.models.custom.perkos]",
+    `uri = "${uri}"`,
+    `model = "${model}"`,
+    'wire_api = "chat_completions"',
+    'kind = "openai-compatible"',
+    'api_key = "enc2:<encrypted-at-rest>"',
+    "",
+    "[agents.default]",
+    'model_provider = "custom.perkos"',
+    'risk_profile = "perkos"',
+    "",
+    "[risk_profiles.perkos]",
+    'level = "supervised"',
+    "workspace_only = true",
+    "",
+    "[gateway]",
+    'host = "0.0.0.0"',
+    "port = 42617",
+    "paired_tokens = [\"<issued-by-perkos>\"]",
+  ].join("\n");
+}
+
 export function buildConfigPreview(input: ConfigPreviewInput): {
-  language: "jsonc" | "yaml";
+  language: "jsonc" | "yaml" | "toml";
   content: string;
   configPath: string;
 } {
@@ -177,6 +231,13 @@ export function buildConfigPreview(input: ConfigPreviewInput): {
       language: "jsonc",
       content: buildOpenClawPreview(input),
       configPath: "~/.openclaw/openclaw.json",
+    };
+  }
+  if (input.runtime === "ZeroClaw") {
+    return {
+      language: "toml",
+      content: buildZeroClawPreview(input),
+      configPath: "~/.zeroclaw/config.toml",
     };
   }
   return {
@@ -200,7 +261,7 @@ export function byokProviderOptions(runtime: AgentRuntime): {
   label: string;
   defaultModel: string;
 }[] {
-  if (runtime === "OpenClaw") {
+  if (runtime === "OpenClaw" || runtime === "ZeroClaw") {
     return [
       { id: "openai", label: "OpenAI", defaultModel: "gpt-4o-mini" },
       { id: "openrouter", label: "OpenRouter (incl. Claude)", defaultModel: "openai/gpt-4o-mini" },

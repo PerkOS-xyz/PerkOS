@@ -63,6 +63,7 @@ import {
   TeamTemplateCard,
 } from "../../../components/TeamTemplateCard";
 import { trackEvent } from "../../../lib/analytics";
+import type { AgentRuntime } from "@/app/lib/perkosApi";
 
 const ICONS: Record<string, LucideIcon> = {
   Briefcase,
@@ -276,13 +277,11 @@ export default function NewCompanyPage() {
       // Resolve the active runtime image per runtime FIRST — without an
       // imageTag the launch route registers the agent but never provisions an
       // ECS service ("no service"), so the whole team would be dead-on-arrival.
-      let tagFor: (rt: "OpenClaw" | "Hermes") => string | null = () => null;
+      let tagFor: (rt: AgentRuntime) => string | null = () => null;
       if (roles.length > 0 && agentSource === "perkos") {
         setProgress(t("companyNew.launch.resolvingImages"));
         const runtimes = await fetchActiveRuntimes();
-        tagFor = (rt) =>
-          (rt === "Hermes" ? runtimes.hermes : runtimes.openclaw)[0]
-            ?.primaryTag ?? null;
+        tagFor = (rt) => runtimes[rt]?.[0]?.primaryTag ?? null;
         for (const role of roles) {
           if (!tagFor(role.runtime)) {
             throw new Error(
