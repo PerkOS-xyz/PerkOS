@@ -112,20 +112,23 @@ export function StepTemplate({
 
   const { data: runtimes } = useQuery({ queryKey: ["wizard", "runtimes"], queryFn: fetchActiveRuntimes });
   const tagFor = (rt: AgentRuntime): string | null => {
-    const list = rt === "OpenClaw" ? runtimes?.openclaw : runtimes?.hermes;
+    const list = runtimes?.[rt];
     return list && list.length ? list[0].primaryTag : null;
   };
-  const available: AgentRuntime[] = [
-    ...(runtimes?.openclaw?.length ? (["OpenClaw"] as AgentRuntime[]) : []),
-    ...(runtimes?.hermes?.length ? (["Hermes"] as AgentRuntime[]) : []),
-  ];
+  // Offer every runtime the catalogue actually has images for, in the order the
+  // API returned them. Hard-coding the pair here meant a new runtime could be
+  // published, registered and still never appear as a choice.
+  const available: AgentRuntime[] = runtimes
+    ? (Object.keys(runtimes) as AgentRuntime[]).filter(
+        (rt) => runtimes[rt]?.length,
+      )
+    : [];
   // A persona can be selected before the runtime query settles. Resolve the
   // concrete image as soon as it arrives so Review never becomes silently
   // blocked by that network race.
   useEffect(() => {
     if (!state.runtime || state.imageTag) return;
-    const runtimeImages =
-      state.runtime === "OpenClaw" ? runtimes?.openclaw : runtimes?.hermes;
+    const runtimeImages = runtimes?.[state.runtime];
     const imageTag = runtimeImages?.[0]?.primaryTag ?? null;
     if (imageTag) onChange({ imageTag });
   }, [runtimes, state.runtime, state.imageTag, onChange]);
