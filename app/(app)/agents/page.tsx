@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAppAccount } from "../../lib/useAppAccount";
+import { useActiveOrg } from "../../lib/useActiveOrg";
 import { Bot, FolderPlus, Loader2, Moon, Pause, Play, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -27,6 +28,7 @@ import { EmptyState } from "../../components/EmptyState";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { ProvisionPipeline } from "../../components/ProvisionPipeline";
 import { formatRelativeShort } from "../../lib/format";
+import { agentMatchesOrgFilter, type AgentOrgFilter } from "../../lib/agentOrgFilter";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,8 +43,10 @@ import {
 export default function AgentsPage() {
   const { t } = useTranslation();
   const { address } = useAppAccount();
+  const { activeOrg } = useActiveOrg();
   const qc = useQueryClient();
   const [query, setQuery] = useState("");
+  const [orgFilter, setOrgFilter] = useState<AgentOrgFilter>("all");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
@@ -76,8 +80,11 @@ export default function AgentsPage() {
   }, [projectsQuery.data]);
 
   const allAgents = useMemo(() => data ?? [], [data]);
-  const agents = allAgents.filter((a) =>
-    matchesQuery(query, [a.name, a.runtime, a.status, ...a.plugins])
+  const orgName = activeOrg?.name?.trim() || undefined;
+  const agents = allAgents.filter(
+    (a) =>
+      agentMatchesOrgFilter(a, orgName, orgFilter) &&
+      matchesQuery(query, [a.name, a.runtime, a.status, a.sharedVia ?? "", ...a.plugins]),
   );
   const hasAgents = allAgents.length > 0;
   const noResults = hasAgents && agents.length === 0;
@@ -181,9 +188,16 @@ export default function AgentsPage() {
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
+          {orgName ? (
+            <p className="text-[11px] font-medium uppercase tracking-wide text-primary">
+              {orgName}
+            </p>
+          ) : null}
           <h1 className="text-3xl font-medium text-[#ececff]">{t("agents.header.title")}</h1>
           <p className="max-w-xl text-sm text-[#7975a8]">
-            {t("agents.header.subtitle")}
+            {orgName
+              ? t("agents.header.subtitleWithOrg", { org: orgName })
+              : t("agents.header.subtitle")}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -198,11 +212,37 @@ export default function AgentsPage() {
       </header>
 
       {hasAgents ? (
-        <SearchInput
-          value={query}
-          onChange={setQuery}
-          placeholder={t("agents.search.placeholder")}
-        />
+        <div className="flex flex-col gap-3">
+          <SearchInput
+            value={query}
+            onChange={setQuery}
+            placeholder={t("agents.search.placeholder")}
+          />
+          <div className="flex flex-wrap gap-1.5" role="tablist" aria-label={t("agents.filter.orgAria")}>
+            {(
+              [
+                ["all", t("agents.filter.all")],
+                ["org", orgName ?? t("nav.organization")],
+                ["shared", t("agents.filter.shared")],
+              ] as const
+            ).map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={orgFilter === id}
+                onClick={() => setOrgFilter(id)}
+                className={
+                  orgFilter === id
+                    ? "rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-xs text-foreground"
+                    : "rounded-full border border-border px-3 py-1 text-xs text-muted-foreground hover:text-foreground"
+                }
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
       ) : null}
 
       {/* A badge nobody explained: users saw SHARED without being told what it
