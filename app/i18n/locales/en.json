@@ -603,7 +603,8 @@
       "created": "Created {{time}}",
       "capabilitiesCount": "Capabilities: {{count}}",
       "shared": "Shared",
-      "sharedTitle": "Shared with you through {{org}}. Its owner manages it."
+      "sharedTitle": "Shared with you through {{org}}. Its owner manages it.",
+      "sharedVia": "Shared · {{org}}"
     },
     "power": {
       "waking": "Waking {{name}}…",

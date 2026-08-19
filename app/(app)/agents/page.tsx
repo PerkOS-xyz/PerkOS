@@ -455,10 +455,14 @@ function AgentCard({
             <AgentPowerToggle agent={agent} hibState={hibState} />
             {agent.shared ? (
               <span
-                className="rounded border border-[#1b1833] px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-[#7975a8]"
+                className="max-w-[12rem] truncate rounded border border-[#1b1833] px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-[#7975a8]"
                 title={t("agents.card.sharedTitle", { org: agent.sharedVia ?? "" })}
               >
-                {t("agents.card.shared")}
+                {/* Naming the org is the point: "SHARED" alone left the user
+                    unable to tell whose agent this is or where it came from. */}
+                {agent.sharedVia
+                  ? t("agents.card.sharedVia", { org: agent.sharedVia })
+                  : t("agents.card.shared")}
               </span>
             ) : null}
             {agent.external ? (

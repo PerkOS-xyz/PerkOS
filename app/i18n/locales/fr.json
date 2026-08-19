@@ -603,7 +603,8 @@
       "created": "Créé {{time}}",
       "capabilitiesCount": "Compétences : {{count}}",
       "shared": "Partagé",
-      "sharedTitle": "Partagé avec vous via {{org}}. Son propriétaire le gère."
+      "sharedTitle": "Partagé avec vous via {{org}}. Son propriétaire le gère.",
+      "sharedVia": "Partagé · {{org}}"
     },
     "power": {
       "waking": "Réveil de {{name}} en cours…",
