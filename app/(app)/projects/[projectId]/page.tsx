@@ -448,9 +448,25 @@ function DetailHeader({
               </span>
             </div>
             <span className="text-xs text-muted-foreground">
-              {primaryAgent
-                ? t("projectRoom.header.lead", { name: primaryAgent })
-                : t("projectRoom.header.noPrimaryAgent")}
+              {/* The lead was only ever reported here; changing it meant finding
+                  "Make lead" inside the Agents tab. The picker already existed
+                  for the no-lead case, so the label just becomes its entry
+                  point — same dialog, discoverable where the lead is shown. */}
+              <button
+                type="button"
+                onClick={() => {
+                  setChoosePmPick(project.pmAgent ?? project.agentIds?.[0] ?? "");
+                  setChoosePmOpen(true);
+                }}
+                disabled={!project.agentIds?.length}
+                aria-label={t("projectRoom.header.chooseLeadAria")}
+                title={t("projectRoom.header.chooseLeadAria")}
+                className="underline decoration-dotted underline-offset-2 hover:text-foreground disabled:no-underline disabled:hover:text-muted-foreground"
+              >
+                {primaryAgent
+                  ? t("projectRoom.header.lead", { name: primaryAgent })
+                  : t("projectRoom.header.noPrimaryAgent")}
+              </button>
               {project.updatedAt ? (
                 <> · {t("projectRoom.header.activeSuffix", { time: formatRelativeShort(project.updatedAt) })}</>
               ) : null}
@@ -1392,17 +1408,24 @@ function AgentsTab({
                     {agentStatus[name]?.runtime
                       ? `${agentStatus[name]?.runtime} · `
                       : ""}
-                    <span
-                      className={
-                        !workingAgents.has(name) && realtimeAgentStatus(agentStatus[name]).label ===
-                        STATUS_AVAILABLE
-                          ? "text-emerald-400"
-                          : ""
-                      }
-                    >
-                      {workingAgents.has(name) ? "Working" : realtimeAgentStatus(agentStatus[name]).label}
-                    </span>
-                    {" · "}
+                    {workingAgents.has(name) ||
+                    realtimeAgentStatus(agentStatus[name]).known !== false ? (
+                      <>
+                        <span
+                          className={
+                            !workingAgents.has(name) &&
+                            realtimeAgentStatus(agentStatus[name]).label === STATUS_AVAILABLE
+                              ? "text-emerald-400"
+                              : ""
+                          }
+                        >
+                          {workingAgents.has(name)
+                            ? "Working"
+                            : realtimeAgentStatus(agentStatus[name]).label}
+                        </span>
+                        {" · "}
+                      </>
+                    ) : null}
                     {name === pmAgent ? t("projectRoom.agentsTab.roleLead") : t("projectRoom.agentsTab.roleWorker")}
                     {t("projectRoom.agentsTab.taskCount", { count: countTasksFor(name, detail.tasks) })}
                   </span>

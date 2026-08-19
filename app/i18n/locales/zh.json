@@ -1410,8 +1410,8 @@
       "members": "成员"
     },
     "header": {
-      "lead": "负责人:{{name}}",
-      "noPrimaryAgent": "尚未指定主要智能体",
+      "lead": "负责人：{{name}}",
+      "noPrimaryAgent": "尚未指定负责人",
       "activeSuffix": "活跃于 {{time}}",
       "runPmTitleWithPm": "你的团队负责人会规划目标并分配工作",
       "runPmTitleNoPm": "你需要选择由哪个智能体来带领团队",
@@ -1437,8 +1437,8 @@
         "agents": "智能体"
       },
       "avatar": {
-        "noPrimaryAgent": "尚未指定主要智能体",
-        "primaryAgent": "主要智能体:{{name}}"
+        "noPrimaryAgent": "尚未指定负责人",
+        "primaryAgent": "负责人：{{name}}"
       },
       "firstRun": {
         "title": "你的团队已经准备就绪,以下是开始方式",
@@ -1488,7 +1488,8 @@
         "wakingTeam_other": "正在唤醒 {{count}} 个智能体…",
         "wakingTeamDesc": "启动并连接大约需要 2-3 分钟。",
         "wakeTeamError": "无法唤醒团队"
-      }
+      },
+      "chooseLeadAria": "选择负责人"
     },
     "tasksTab": {
       "createTask": "创建任务",

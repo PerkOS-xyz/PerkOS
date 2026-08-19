@@ -140,8 +140,15 @@ function tsToIsoOrNull(value: unknown): string | null {
 export function realtimeAgentStatus(a?: AgentLiveStatus): {
   color: string;
   label: string;
+  /** False when we have no status for the agent yet (see below). */
+  known?: boolean;
 } {
-  if (!a) return { color: "bg-[#7975a8]", label: "Unknown" };
+  // No status entry means we have not heard from the agent yet. That is worth
+  // saying in an accessible label ("Alice (Unknown)"), but not worth printing
+  // as a bare "Unknown ·" in front of the real information on a card. `known`
+  // lets each caller choose: keep the word where a label is required, drop the
+  // segment where it is just noise.
+  if (!a) return { color: "bg-[#7975a8]", label: "Unknown", known: false };
   const hs = (a.hibernationState ?? "").toLowerCase();
   if (hs === "hibernated")
     return { color: "bg-[#7975a8]", label: STATUS_RESTING };

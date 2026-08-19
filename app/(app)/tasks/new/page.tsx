@@ -8,12 +8,14 @@ import { useAppAccount } from "../../../lib/useAppAccount";
 import { toast } from "sonner";
 import {
   createProjectTasks,
+  setProjectPm,
   getWalletAgents,
   type Project,
 } from "../../../lib/perkosApi";
 import { useFormDraft } from "../../../lib/useFormDraft";
 import { fieldErrors, taskSchema } from "../../../lib/validators";
 import { useVisibleProjects } from "../../../lib/useVisibleProjects";
+import { Button } from "@/components/ui/button";
 
 type Priority = "High" | "Medium" | "Low";
 
@@ -55,6 +57,27 @@ export default function CreateTaskPage() {
 
   const projects = projectsQuery.projects;
   const selectedProject = projects.find((p) => p.id === projectId) ?? null;
+  const projectAgents = selectedProject?.agentIds ?? [];
+  const [leadPick, setLeadPick] = useState("");
+
+  // Setting the lead from here keeps the fix next to the problem: the warning
+  // used to end by sending the user to another page to do one click.
+  const setLeadMut = useMutation({
+    mutationFn: () =>
+      setProjectPm({
+        walletAddress: selectedProject?.ownerWallet ?? address!,
+        projectId,
+        pmAgent: leadPick,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["wallet-projects"] });
+      toast.success(`${leadPick} is now the lead`, {
+        description: `New tasks on ${selectedProject?.name ?? "this project"} will be picked up.`,
+      });
+    },
+    onError: (e: Error) =>
+      toast.error("Couldn't set the lead", { description: e.message }),
+  });
   const registeredAgents = agentsQuery.data ?? [];
 
   useEffect(() => {
@@ -178,14 +201,44 @@ export default function CreateTaskPage() {
         {selectedProject && !selectedProject.pmAgent ? (
           <div className="rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2.5">
             <p className="text-sm font-medium text-amber-200">
-              No PM agent on this project, so nobody will pick this task up
+              No lead on this project, so nobody will pick this task up
             </p>
             <p className="mt-1 text-xs text-amber-200/70">
               The task will be created and sit in Backlog. Work is dispatched
-              from a project's board, and a board only becomes active once a PM
-              agent plans on it. Assign a PM to "{selectedProject.name}" from the
-              project page, then create the task.
+              from a project&apos;s board, and a board only becomes active once
+              its lead plans on it.
             </p>
+            {projectAgents.length ? (
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <select
+                  aria-label="Choose the lead"
+                  value={leadPick}
+                  onChange={(e) => setLeadPick(e.target.value)}
+                  className="rounded-md border border-amber-500/30 bg-transparent px-2 py-1 text-xs text-amber-100"
+                >
+                  <option value="">Choose the lead…</option>
+                  {projectAgents.map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+                <Button
+                  type="button"
+                  size="xs"
+                  variant="outline"
+                  disabled={!leadPick || setLeadMut.isPending}
+                  onClick={() => setLeadMut.mutate()}
+                >
+                  {setLeadMut.isPending ? "Setting…" : "Set lead"}
+                </Button>
+              </div>
+            ) : (
+              <p className="mt-2 text-xs text-amber-200/70">
+                Add an agent to “{selectedProject.name}” first, from the project
+                page.
+              </p>
+            )}
           </div>
         ) : null}
 
