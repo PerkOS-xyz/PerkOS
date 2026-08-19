@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatAddress } from "../lib/format";
-import { effectiveAvatarUrl, getUserProfiles } from "../lib/perkosApi";
+import { effectiveAvatarUrl, getUsernameOwner, getUserProfiles } from "../lib/perkosApi";
 import { useAdvancedFeatures } from "../lib/advancedFeatures";
 import { useAppAccount } from "../lib/useAppAccount";
 import { UserAvatar } from "./UserAvatar";
@@ -69,23 +69,32 @@ export function MembersPanel({
     staleTime: 60_000,
   });
 
-  const isWallet = /^0x[a-fA-F0-9]{40}$/.test(wallet.trim());
+  // Invitar acepta una address 0x… o un @username. Pedir siempre una address
+  // convertía "sumar a alguien al equipo" en una operación técnica: el invitado
+  // tenía que activar el modo avanzado solo para poder leer la suya y pasarla.
+  const identifier = wallet.trim();
+  const isWallet = /^0x[a-fA-F0-9]{40}$/.test(identifier);
+  const isUsername = /^@?[a-z0-9_]{3,20}$/i.test(identifier) && !identifier.startsWith("0x");
+  const canInvite = isWallet || isUsername;
 
   const inviteMut = useMutation({
-    mutationFn: () =>
-      kind === "org"
-        ? inviteOrgMember({ orgId: id, memberWallet: wallet.trim(), role })
-        : inviteProjectMember({
-            projectId: id,
-            memberWallet: wallet.trim(),
-            role,
-          }),
+    mutationFn: async () => {
+      let memberWallet = identifier;
+      if (!isWallet) {
+        const owner = await getUsernameOwner(identifier.replace(/^@/, ""));
+        if (!owner) throw new Error(t("components.members.unknownUsername"));
+        memberWallet = owner;
+      }
+      return kind === "org"
+        ? inviteOrgMember({ orgId: id, memberWallet, role })
+        : inviteProjectMember({ projectId: id, memberWallet, role });
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: key });
       setWallet("");
       toast.success(t("components.members.memberInvited"), {
         description: t("components.members.memberInvitedDesc", {
-          address: formatAddress(wallet.trim()),
+          address: isWallet ? formatAddress(identifier) : identifier,
           kind: kindLabel,
         }),
       });
@@ -118,7 +127,7 @@ export function MembersPanel({
 
   return (
     <div className="flex flex-col gap-4">
-      {canManage && advanced.enabled ? (
+      {canManage ? (
         <form onSubmit={onInvite} className="flex flex-col gap-2">
           <label className="text-xs font-medium text-muted-foreground">
             {t("components.members.inviteLabel", { kind: kindLabel })}
@@ -147,7 +156,7 @@ export function MembersPanel({
                 type="submit"
                 size="sm"
                 className="gap-1.5"
-                disabled={!isWallet || inviteMut.isPending}
+                disabled={!canInvite || inviteMut.isPending}
               >
                 <UserPlus className="h-3.5 w-3.5" />
                 {inviteMut.isPending

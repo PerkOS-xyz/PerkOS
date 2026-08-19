@@ -191,11 +191,26 @@
       "feature": "业务优势",
       "recommended": "专为企业打造",
       "products": {
-        "perkos": { "name": "PerkOS", "tagline": "开箱即用的 AI 团队" },
-        "chatgpt": { "name": "ChatGPT Business", "tagline": "通用 AI 工作空间" },
-        "claudeCode": { "name": "Claude Code", "tagline": "软件开发" },
-        "openclaw": { "name": "OpenClaw", "tagline": "个人 AI 助手" },
-        "hermes": { "name": "Hermes Agent", "tagline": "持续学习的智能体" }
+        "perkos": {
+          "name": "PerkOS",
+          "tagline": "开箱即用的 AI 团队"
+        },
+        "chatgpt": {
+          "name": "ChatGPT Business",
+          "tagline": "通用 AI 工作空间"
+        },
+        "claudeCode": {
+          "name": "Claude Code",
+          "tagline": "软件开发"
+        },
+        "openclaw": {
+          "name": "OpenClaw",
+          "tagline": "个人 AI 助手"
+        },
+        "hermes": {
+          "name": "Hermes Agent",
+          "tagline": "持续学习的智能体"
+        }
       },
       "features": {
         "industryTemplates": "面向小企业行业的模板",
@@ -1624,15 +1639,15 @@
       "inProgressCount": "{{count}} 个进行中"
     },
     "members": {
-      "inviteLabel": "邀请一个钱包加入此{{kind}}",
+      "inviteLabel": "邀请某人加入{{kind}}",
       "kindOrg": "组织",
       "kindProject": "项目",
-      "walletPlaceholder": "0x… 钱包地址",
+      "walletPlaceholder": "@用户名 或 0x… 地址",
       "roleEditor": "编辑者",
       "roleViewer": "查看者",
       "inviting": "邀请中…",
       "invite": "邀请",
-      "invalidWallet": "请输入有效的 0x… 钱包地址(40 位十六进制字符)。",
+      "invalidWallet": "请输入 @用户名 或有效的 0x… 钱包地址。",
       "loadingMembers": "正在加载成员…",
       "noMembers": "还没有成员。",
       "removeAria": "移除 {{wallet}}",
@@ -1641,7 +1656,8 @@
       "memberInvitedDesc": "{{address}} 现在可以访问此{{kind}}了。",
       "inviteFailed": "无法邀请成员",
       "memberRemoved": "成员已移除",
-      "removeFailed": "无法移除成员"
+      "removeFailed": "无法移除成员",
+      "unknownUsername": "找不到该用户名。请检查名称或改用其 0x… 地址。"
     },
     "insights": {
       "teamWorkload": "团队工作量",

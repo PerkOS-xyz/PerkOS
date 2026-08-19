@@ -191,11 +191,26 @@
       "feature": "Vantaggio per l'azienda",
       "recommended": "Creato per le aziende",
       "products": {
-        "perkos": { "name": "PerkOS", "tagline": "Team IA pronto a lavorare" },
-        "chatgpt": { "name": "ChatGPT Business", "tagline": "Workspace IA generalista" },
-        "claudeCode": { "name": "Claude Code", "tagline": "Sviluppo software" },
-        "openclaw": { "name": "OpenClaw", "tagline": "Assistente IA personale" },
-        "hermes": { "name": "Hermes Agent", "tagline": "Agente che impara" }
+        "perkos": {
+          "name": "PerkOS",
+          "tagline": "Team IA pronto a lavorare"
+        },
+        "chatgpt": {
+          "name": "ChatGPT Business",
+          "tagline": "Workspace IA generalista"
+        },
+        "claudeCode": {
+          "name": "Claude Code",
+          "tagline": "Sviluppo software"
+        },
+        "openclaw": {
+          "name": "OpenClaw",
+          "tagline": "Assistente IA personale"
+        },
+        "hermes": {
+          "name": "Hermes Agent",
+          "tagline": "Agente che impara"
+        }
       },
       "features": {
         "industryTemplates": "Modelli per settori e piccole imprese",
@@ -1624,15 +1639,15 @@
       "inProgressCount": "{{count}} in corso"
     },
     "members": {
-      "inviteLabel": "Invita un portafoglio in questo {{kind}}",
+      "inviteLabel": "Invita qualcuno a {{kind}}",
       "kindOrg": "spazio di lavoro",
       "kindProject": "progetto",
-      "walletPlaceholder": "0x… indirizzo del portafoglio",
+      "walletPlaceholder": "@nomeutente o indirizzo 0x…",
       "roleEditor": "Editor",
       "roleViewer": "Visualizzatore",
       "inviting": "Invito in corso…",
       "invite": "Invita",
-      "invalidWallet": "Inserisci un indirizzo del portafoglio 0x… valido (40 caratteri esadecimali).",
+      "invalidWallet": "Inserisci un @nomeutente o un indirizzo wallet 0x… valido.",
       "loadingMembers": "Caricamento dei membri…",
       "noMembers": "Ancora nessun membro.",
       "removeAria": "Rimuovi {{wallet}}",
@@ -1641,7 +1656,8 @@
       "memberInvitedDesc": "{{address}} ora può accedere a questo {{kind}}.",
       "inviteFailed": "Impossibile invitare il membro",
       "memberRemoved": "Membro rimosso",
-      "removeFailed": "Impossibile rimuovere il membro"
+      "removeFailed": "Impossibile rimuovere il membro",
+      "unknownUsername": "Nessuno corrisponde a questo nome utente. Controllalo o usa il suo indirizzo 0x…."
     },
     "insights": {
       "teamWorkload": "Carico di lavoro del team",

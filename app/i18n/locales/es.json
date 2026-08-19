@@ -191,11 +191,26 @@
       "feature": "Ventaja para tu negocio",
       "recommended": "Creado para negocios",
       "products": {
-        "perkos": { "name": "PerkOS", "tagline": "Equipo de IA listo para trabajar" },
-        "chatgpt": { "name": "ChatGPT Business", "tagline": "Espacio general de IA" },
-        "claudeCode": { "name": "Claude Code", "tagline": "Desarrollo de software" },
-        "openclaw": { "name": "OpenClaw", "tagline": "Asistente personal de IA" },
-        "hermes": { "name": "Hermes Agent", "tagline": "Agente que aprende" }
+        "perkos": {
+          "name": "PerkOS",
+          "tagline": "Equipo de IA listo para trabajar"
+        },
+        "chatgpt": {
+          "name": "ChatGPT Business",
+          "tagline": "Espacio general de IA"
+        },
+        "claudeCode": {
+          "name": "Claude Code",
+          "tagline": "Desarrollo de software"
+        },
+        "openclaw": {
+          "name": "OpenClaw",
+          "tagline": "Asistente personal de IA"
+        },
+        "hermes": {
+          "name": "Hermes Agent",
+          "tagline": "Agente que aprende"
+        }
       },
       "features": {
         "industryTemplates": "Plantillas para industrias y pequeños negocios",
@@ -1097,9 +1112,18 @@
       "title": "Invita a tu agente existente",
       "description": "Nada cambia en tu entorno de ejecución, memoria o herramientas: tu agente solo se conecta hacia afuera con PerkOS (perkos-a2a + perkos-chat) y obtiene acceso al chat y al tablero de tareas de tu organización.",
       "runtimeKinds": {
-        "hermes": { "label": "Hermes", "hint": "/v1/responses" },
-        "openclaw": { "label": "OpenClaw", "hint": "plugin integrado" },
-        "custom": { "label": "Personalizado", "hint": "tu propio entorno de ejecución HTTP" }
+        "hermes": {
+          "label": "Hermes",
+          "hint": "/v1/responses"
+        },
+        "openclaw": {
+          "label": "OpenClaw",
+          "hint": "plugin integrado"
+        },
+        "custom": {
+          "label": "Personalizado",
+          "hint": "tu propio entorno de ejecución HTTP"
+        }
       },
       "nameLabel": "Nombre del agente (identificador)",
       "nameHelp": "Así se le conoce en el relay y en el chat. Debe ser único.",
@@ -1649,15 +1673,15 @@
       "inProgressCount": "{{count}} en curso"
     },
     "members": {
-      "inviteLabel": "Invita una billetera a {{kind}}",
+      "inviteLabel": "Invita a alguien a {{kind}}",
       "kindOrg": "esta organización",
       "kindProject": "este proyecto",
-      "walletPlaceholder": "0x… dirección de billetera",
+      "walletPlaceholder": "@usuario o dirección 0x…",
       "roleEditor": "Editor",
       "roleViewer": "Espectador",
       "inviting": "Invitando…",
       "invite": "Invitar",
-      "invalidWallet": "Ingresa una dirección de billetera 0x… válida (40 caracteres hexadecimales).",
+      "invalidWallet": "Ingresa un @usuario o una dirección de billetera 0x… válida.",
       "loadingMembers": "Cargando miembros…",
       "noMembers": "Todavía no hay miembros.",
       "teamMember": "Miembro del equipo {{number}}",
@@ -1667,7 +1691,8 @@
       "memberInvitedDesc": "{{address}} ahora tiene acceso a {{kind}}.",
       "inviteFailed": "No se pudo invitar al miembro",
       "memberRemoved": "Miembro quitado",
-      "removeFailed": "No se pudo quitar al miembro"
+      "removeFailed": "No se pudo quitar al miembro",
+      "unknownUsername": "No encontramos a nadie con ese usuario. Revisa el nombre o usa su dirección 0x…."
     },
     "insights": {
       "teamWorkload": "Carga de trabajo del equipo",
