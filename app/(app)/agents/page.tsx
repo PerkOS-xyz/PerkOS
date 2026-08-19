@@ -436,6 +436,10 @@ function AgentCard({
               <Checkbox
                 checked={checked}
                 onCheckedChange={onToggle}
+                // Selection drives the bulk delete/hibernate bar, so an agent
+                // owned by someone else is not selectable: a member must not be
+                // able to destroy infrastructure another wallet pays for.
+                disabled={agent.shared === true}
                 aria-label={t("agents.card.selectAria", { name: agent.name })}
               />
             </span>
@@ -449,6 +453,14 @@ function AgentCard({
           </div>
           <div className="flex items-center gap-2">
             <AgentPowerToggle agent={agent} hibState={hibState} />
+            {agent.shared ? (
+              <span
+                className="rounded border border-[#1b1833] px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-[#7975a8]"
+                title={t("agents.card.sharedTitle", { org: agent.sharedVia ?? "" })}
+              >
+                {t("agents.card.shared")}
+              </span>
+            ) : null}
             {agent.external ? (
               <span
                 className="rounded border border-[#1b1833] px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-[#7975a8]"

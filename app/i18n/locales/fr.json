@@ -601,7 +601,9 @@
       "projects": "Projets : {{count}}",
       "active": "Actif {{time}}",
       "created": "Créé {{time}}",
-      "capabilitiesCount": "Compétences : {{count}}"
+      "capabilitiesCount": "Compétences : {{count}}",
+      "shared": "Partagé",
+      "sharedTitle": "Partagé avec vous via {{org}}. Son propriétaire le gère."
     },
     "power": {
       "waking": "Réveil de {{name}} en cours…",
