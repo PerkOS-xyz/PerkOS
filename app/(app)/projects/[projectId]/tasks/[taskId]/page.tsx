@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { use, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAppAccount } from "../../../../../lib/useAppAccount";
+import { useActiveOrg } from "../../../../../lib/useActiveOrg";
 import { toast } from "sonner";
 import {
   ArrowLeft,
@@ -49,14 +50,23 @@ export default function TaskDetailPage({ params }: PageProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { address } = useAppAccount();
+  const searchParams = useSearchParams();
+  const { activeOrg } = useActiveOrg();
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
+  // Projects live under their OWNER's wallet, which for an org project is not
+  // the caller. Reading the caller's subtree made every task a member opened
+  // report "Project not found". Same resolution order as the project page: the
+  // link's owner param, then the active org's owner, then your own wallet.
+  const ownerParam = searchParams.get("owner");
+  const ownerWallet = ownerParam || activeOrg?.ownerWallet || address;
+
   const { data, isLoading, error } = useQuery({
-    queryKey: ["wallet-project", address, projectId],
+    queryKey: ["wallet-project", ownerWallet, projectId],
     queryFn: () =>
-      getWalletProject({ walletAddress: address!, projectId }),
-    enabled: Boolean(address) && Boolean(projectId),
+      getWalletProject({ walletAddress: ownerWallet!, projectId }),
+    enabled: Boolean(ownerWallet) && Boolean(projectId),
   });
 
   const task = data?.tasks.find((t) => t.id === taskId);
@@ -64,12 +74,12 @@ export default function TaskDetailPage({ params }: PageProps) {
 
   const deleteMutation = useMutation({
     mutationFn: () => {
-      if (!address) throw new Error("Connect a wallet.");
-      return deleteTask({ walletAddress: address, projectId, taskId });
+      if (!ownerWallet) throw new Error("Connect a wallet.");
+      return deleteTask({ walletAddress: ownerWallet, projectId, taskId });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["wallet-project", address, projectId],
+        queryKey: ["wallet-project", ownerWallet, projectId],
       });
       toast.success("Task deleted");
       router.replace(`/projects/${projectId}`);
@@ -182,13 +192,15 @@ export default function TaskDetailPage({ params }: PageProps) {
 
       {task.result ? <ResultSection result={task.result} /> : null}
 
-      {address ? (
+      {ownerWallet ? (
         <EditTaskDialog
           open={editOpen}
           onOpenChange={setEditOpen}
           task={task}
           projectId={projectId}
-          walletAddress={address}
+          // The task lives under the project OWNER, so an editor in a shared
+          // org project has to patch there, not under their own wallet.
+          walletAddress={ownerWallet}
         />
       ) : null}
 

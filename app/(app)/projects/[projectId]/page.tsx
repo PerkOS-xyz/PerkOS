@@ -1207,7 +1207,10 @@ function TaskCard({
         </div>
       ) : null}
       <Link
-        href={`/projects/${encodeURIComponent(projectId)}/tasks/${encodeURIComponent(task.id)}`}
+        href={
+          `/projects/${encodeURIComponent(projectId)}/tasks/${encodeURIComponent(task.id)}` +
+          (ownerWallet ? `?owner=${encodeURIComponent(ownerWallet)}` : "")
+        }
         className={cn(cardClass, selectable && "pl-9")}
       >
         {inner}
