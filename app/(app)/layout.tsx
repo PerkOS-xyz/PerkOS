@@ -262,8 +262,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           <div
             id="main-content"
             className={cn(
-              "p-5 md:p-8 md:pb-8",
-              pathname?.startsWith("/projects/") ? "pb-24" : "pb-44",
+              "p-5 md:p-8",
+              pathname?.startsWith("/projects/") ? "pb-24 md:pb-24" : "pb-44 md:pb-36",
             )}
           >
             <PullToRefresh>{children}</PullToRefresh>
