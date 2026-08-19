@@ -973,7 +973,8 @@
       "recommended": "おすすめ",
       "runtimeHint": {
         "OpenClaw": "自律型・複数ステップの作業とツール利用",
-        "Hermes": "会話型・スピーディーでチャット主体"
+        "Hermes": "会話型・スピーディーでチャット主体",
+        "ZeroClaw": "自律型・Rust エンジン、シークレットを暗号化"
       },
       "agentName": "エージェント名",
       "hidePrompt": "システムプロンプトを非表示",

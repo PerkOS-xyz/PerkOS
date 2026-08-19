@@ -973,7 +973,8 @@
       "recommended": "recommandé",
       "runtimeHint": {
         "OpenClaw": "Autonome : travail en plusieurs étapes et outils",
-        "Hermes": "Conversationnel : rapide, piloté par le chat"
+        "Hermes": "Conversationnel : rapide, piloté par le chat",
+        "ZeroClaw": "Autonome : moteur Rust, secrets chiffrés"
       },
       "agentName": "Nom de l'agent",
       "hidePrompt": "Masquer le prompt système",
