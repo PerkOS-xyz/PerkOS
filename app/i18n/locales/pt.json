@@ -191,11 +191,26 @@
       "feature": "Vantagem para o negócio",
       "recommended": "Criado para negócios",
       "products": {
-        "perkos": { "name": "PerkOS", "tagline": "Equipe de IA pronta para trabalhar" },
-        "chatgpt": { "name": "ChatGPT Business", "tagline": "Workspace geral de IA" },
-        "claudeCode": { "name": "Claude Code", "tagline": "Desenvolvimento de software" },
-        "openclaw": { "name": "OpenClaw", "tagline": "Assistente pessoal de IA" },
-        "hermes": { "name": "Hermes Agent", "tagline": "Agente que aprende" }
+        "perkos": {
+          "name": "PerkOS",
+          "tagline": "Equipe de IA pronta para trabalhar"
+        },
+        "chatgpt": {
+          "name": "ChatGPT Business",
+          "tagline": "Workspace geral de IA"
+        },
+        "claudeCode": {
+          "name": "Claude Code",
+          "tagline": "Desenvolvimento de software"
+        },
+        "openclaw": {
+          "name": "OpenClaw",
+          "tagline": "Assistente pessoal de IA"
+        },
+        "hermes": {
+          "name": "Hermes Agent",
+          "tagline": "Agente que aprende"
+        }
       },
       "features": {
         "industryTemplates": "Modelos para setores e pequenas empresas",
@@ -1658,15 +1673,15 @@
       "inProgressCount": "{{count}} em andamento"
     },
     "members": {
-      "inviteLabel": "Convide uma carteira para este {{kind}}",
+      "inviteLabel": "Convide alguém para {{kind}}",
       "kindOrg": "organização",
       "kindProject": "projeto",
-      "walletPlaceholder": "0x… endereço da carteira",
+      "walletPlaceholder": "@usuário ou endereço 0x…",
       "roleEditor": "Editor",
       "roleViewer": "Visualizador",
       "inviting": "Convidativo…",
       "invite": "Convidar",
-      "invalidWallet": "Insira um endereço de carteira 0x… válido (40 caracteres hexadecimais).",
+      "invalidWallet": "Informe um @usuário ou um endereço de carteira 0x… válido.",
       "loadingMembers": "Carregando membros…",
       "noMembers": "Nenhum membro ainda.",
       "teamMember": "Membro da equipe {{number}}",
@@ -1676,7 +1691,8 @@
       "memberInvitedDesc": "{{address}} agora pode acessar este {{kind}}.",
       "inviteFailed": "Não foi possível convidar o membro",
       "memberRemoved": "Membro removido",
-      "removeFailed": "Não foi possível remover o membro"
+      "removeFailed": "Não foi possível remover o membro",
+      "unknownUsername": "Não encontramos ninguém com esse usuário. Confira o nome ou use o endereço 0x… dele."
     },
     "insights": {
       "teamWorkload": "Carga de trabalho da equipe",

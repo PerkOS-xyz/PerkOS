@@ -191,11 +191,26 @@
       "feature": "ビジネス上の利点",
       "recommended": "ビジネス向け",
       "products": {
-        "perkos": { "name": "PerkOS", "tagline": "すぐに働けるAIチーム" },
-        "chatgpt": { "name": "ChatGPT Business", "tagline": "汎用AIワークスペース" },
-        "claudeCode": { "name": "Claude Code", "tagline": "ソフトウェア開発" },
-        "openclaw": { "name": "OpenClaw", "tagline": "個人向けAIアシスタント" },
-        "hermes": { "name": "Hermes Agent", "tagline": "学習するエージェント" }
+        "perkos": {
+          "name": "PerkOS",
+          "tagline": "すぐに働けるAIチーム"
+        },
+        "chatgpt": {
+          "name": "ChatGPT Business",
+          "tagline": "汎用AIワークスペース"
+        },
+        "claudeCode": {
+          "name": "Claude Code",
+          "tagline": "ソフトウェア開発"
+        },
+        "openclaw": {
+          "name": "OpenClaw",
+          "tagline": "個人向けAIアシスタント"
+        },
+        "hermes": {
+          "name": "Hermes Agent",
+          "tagline": "学習するエージェント"
+        }
       },
       "features": {
         "industryTemplates": "中小企業の業種別テンプレート",
@@ -1634,15 +1649,15 @@
       "inProgressCount": "{{count}}件が進行中"
     },
     "members": {
-      "inviteLabel": "この{{kind}}にウォレットを招待",
+      "inviteLabel": "{{kind}}に招待する",
       "kindOrg": "組織",
       "kindProject": "プロジェクト",
-      "walletPlaceholder": "0x…のウォレットアドレス",
+      "walletPlaceholder": "@ユーザー名 または 0x… アドレス",
       "roleEditor": "編集者",
       "roleViewer": "閲覧者",
       "inviting": "招待中…",
       "invite": "招待",
-      "invalidWallet": "有効な0x…ウォレットアドレス（16進数40桁）を入力してください。",
+      "invalidWallet": "@ユーザー名 または有効な 0x… ウォレットアドレスを入力してください。",
       "loadingMembers": "メンバーを読み込み中…",
       "noMembers": "まだメンバーがいません。",
       "teamMember": "チームメンバー {{number}}",
@@ -1652,7 +1667,8 @@
       "memberInvitedDesc": "{{address}}はこの{{kind}}にアクセスできるようになりました。",
       "inviteFailed": "メンバーを招待できませんでした",
       "memberRemoved": "メンバーを削除しました",
-      "removeFailed": "メンバーを削除できませんでした"
+      "removeFailed": "メンバーを削除できませんでした",
+      "unknownUsername": "そのユーザー名は見つかりませんでした。名前を確認するか、0x… アドレスを使用してください。"
     },
     "insights": {
       "teamWorkload": "チームの作業量",

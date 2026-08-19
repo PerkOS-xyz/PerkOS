@@ -191,11 +191,26 @@
       "feature": "Business advantage",
       "recommended": "Built for business",
       "products": {
-        "perkos": { "name": "PerkOS", "tagline": "Ready-to-work AI team" },
-        "chatgpt": { "name": "ChatGPT Business", "tagline": "General AI workspace" },
-        "claudeCode": { "name": "Claude Code", "tagline": "Software development" },
-        "openclaw": { "name": "OpenClaw", "tagline": "Personal AI assistant" },
-        "hermes": { "name": "Hermes Agent", "tagline": "Self-improving agent" }
+        "perkos": {
+          "name": "PerkOS",
+          "tagline": "Ready-to-work AI team"
+        },
+        "chatgpt": {
+          "name": "ChatGPT Business",
+          "tagline": "General AI workspace"
+        },
+        "claudeCode": {
+          "name": "Claude Code",
+          "tagline": "Software development"
+        },
+        "openclaw": {
+          "name": "OpenClaw",
+          "tagline": "Personal AI assistant"
+        },
+        "hermes": {
+          "name": "Hermes Agent",
+          "tagline": "Self-improving agent"
+        }
       },
       "features": {
         "industryTemplates": "Templates for small-business industries",
@@ -1097,9 +1112,18 @@
       "title": "Invite your existing agent",
       "description": "Nothing about your runtime, memory, or tools changes. Your agent just connects OUT to PerkOS (perkos-a2a + perkos-chat) and gains your org's chat and job board.",
       "runtimeKinds": {
-        "hermes": { "label": "Hermes", "hint": "/v1/responses" },
-        "openclaw": { "label": "OpenClaw", "hint": "in-process plugin" },
-        "custom": { "label": "Custom", "hint": "your own HTTP runtime" }
+        "hermes": {
+          "label": "Hermes",
+          "hint": "/v1/responses"
+        },
+        "openclaw": {
+          "label": "OpenClaw",
+          "hint": "in-process plugin"
+        },
+        "custom": {
+          "label": "Custom",
+          "hint": "your own HTTP runtime"
+        }
       },
       "nameLabel": "Agent name (handle)",
       "nameHelp": "How it's known on the relay + in chat. Must be unique.",
@@ -1649,15 +1673,15 @@
       "inProgressCount": "{{count}} in progress"
     },
     "members": {
-      "inviteLabel": "Invite a wallet to this {{kind}}",
+      "inviteLabel": "Invite someone to {{kind}}",
       "kindOrg": "org",
       "kindProject": "project",
-      "walletPlaceholder": "0x… wallet address",
+      "walletPlaceholder": "@username or 0x… address",
       "roleEditor": "Editor",
       "roleViewer": "Viewer",
       "inviting": "Inviting…",
       "invite": "Invite",
-      "invalidWallet": "Enter a valid 0x… wallet address (40 hex chars).",
+      "invalidWallet": "Enter a @username or a valid 0x… wallet address.",
       "loadingMembers": "Loading members…",
       "noMembers": "No members yet.",
       "teamMember": "Team member {{number}}",
@@ -1667,7 +1691,8 @@
       "memberInvitedDesc": "{{address}} can now access this {{kind}}.",
       "inviteFailed": "Couldn't invite member",
       "memberRemoved": "Member removed",
-      "removeFailed": "Couldn't remove member"
+      "removeFailed": "Couldn't remove member",
+      "unknownUsername": "We couldn't find anyone with that username. Check the handle or use their 0x… address."
     },
     "insights": {
       "teamWorkload": "Team workload",

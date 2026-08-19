@@ -191,11 +191,26 @@
       "feature": "비즈니스 이점",
       "recommended": "비즈니스용으로 설계",
       "products": {
-        "perkos": { "name": "PerkOS", "tagline": "바로 일하는 AI 팀" },
-        "chatgpt": { "name": "ChatGPT Business", "tagline": "범용 AI 워크스페이스" },
-        "claudeCode": { "name": "Claude Code", "tagline": "소프트웨어 개발" },
-        "openclaw": { "name": "OpenClaw", "tagline": "개인 AI 어시스턴트" },
-        "hermes": { "name": "Hermes Agent", "tagline": "학습하는 에이전트" }
+        "perkos": {
+          "name": "PerkOS",
+          "tagline": "바로 일하는 AI 팀"
+        },
+        "chatgpt": {
+          "name": "ChatGPT Business",
+          "tagline": "범용 AI 워크스페이스"
+        },
+        "claudeCode": {
+          "name": "Claude Code",
+          "tagline": "소프트웨어 개발"
+        },
+        "openclaw": {
+          "name": "OpenClaw",
+          "tagline": "개인 AI 어시스턴트"
+        },
+        "hermes": {
+          "name": "Hermes Agent",
+          "tagline": "학습하는 에이전트"
+        }
       },
       "features": {
         "industryTemplates": "소규모 비즈니스 업종별 템플릿",
@@ -1092,9 +1107,18 @@
       "title": "기존 에이전트 초대",
       "description": "런타임, 메모리, 도구는 그대로 유지돼요. 에이전트가 PerkOS(perkos-a2a + perkos-chat)로 아웃바운드 연결만 하면, 조직의 채팅과 작업 보드를 사용할 수 있게 돼요.",
       "runtimeKinds": {
-        "hermes": { "label": "Hermes", "hint": "/v1/responses" },
-        "openclaw": { "label": "OpenClaw", "hint": "내장 플러그인" },
-        "custom": { "label": "커스텀", "hint": "직접 준비한 HTTP 런타임" }
+        "hermes": {
+          "label": "Hermes",
+          "hint": "/v1/responses"
+        },
+        "openclaw": {
+          "label": "OpenClaw",
+          "hint": "내장 플러그인"
+        },
+        "custom": {
+          "label": "커스텀",
+          "hint": "직접 준비한 HTTP 런타임"
+        }
       },
       "nameLabel": "에이전트 이름(핸들)",
       "nameHelp": "릴레이와 채팅에서 사용되는 이름이에요. 고유해야 해요.",
@@ -1625,15 +1649,15 @@
       "inProgressCount": "{{count}}개 진행 중"
     },
     "members": {
-      "inviteLabel": "이 {{kind}}에 지갑 초대하기",
+      "inviteLabel": "{{kind}}에 초대하기",
       "kindOrg": "조직",
       "kindProject": "프로젝트",
-      "walletPlaceholder": "0x… 지갑 주소",
+      "walletPlaceholder": "@사용자명 또는 0x… 주소",
       "roleEditor": "편집자",
       "roleViewer": "뷰어",
       "inviting": "초대하는 중…",
       "invite": "초대",
-      "invalidWallet": "올바른 0x… 지갑 주소를 입력하세요(16진수 40자).",
+      "invalidWallet": "@사용자명 또는 유효한 0x… 지갑 주소를 입력하세요.",
       "loadingMembers": "멤버를 불러오는 중…",
       "noMembers": "아직 멤버가 없어요.",
       "teamMember": "팀 멤버 {{number}}",
@@ -1643,7 +1667,8 @@
       "memberInvitedDesc": "{{address}}이(가) 이제 이 {{kind}}에 접근할 수 있어요.",
       "inviteFailed": "멤버를 초대하지 못했어요",
       "memberRemoved": "멤버를 삭제했어요",
-      "removeFailed": "멤버를 삭제하지 못했어요"
+      "removeFailed": "멤버를 삭제하지 못했어요",
+      "unknownUsername": "해당 사용자명을 찾을 수 없습니다. 이름을 확인하거나 0x… 주소를 사용하세요."
     },
     "insights": {
       "teamWorkload": "팀 작업량",

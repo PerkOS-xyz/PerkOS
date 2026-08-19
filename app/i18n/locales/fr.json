@@ -191,11 +191,26 @@
       "feature": "Avantage pour l'entreprise",
       "recommended": "Conçu pour l'entreprise",
       "products": {
-        "perkos": { "name": "PerkOS", "tagline": "Équipe IA prête à travailler" },
-        "chatgpt": { "name": "ChatGPT Business", "tagline": "Espace de travail IA généraliste" },
-        "claudeCode": { "name": "Claude Code", "tagline": "Développement logiciel" },
-        "openclaw": { "name": "OpenClaw", "tagline": "Assistant IA personnel" },
-        "hermes": { "name": "Hermes Agent", "tagline": "Agent qui apprend" }
+        "perkos": {
+          "name": "PerkOS",
+          "tagline": "Équipe IA prête à travailler"
+        },
+        "chatgpt": {
+          "name": "ChatGPT Business",
+          "tagline": "Espace de travail IA généraliste"
+        },
+        "claudeCode": {
+          "name": "Claude Code",
+          "tagline": "Développement logiciel"
+        },
+        "openclaw": {
+          "name": "OpenClaw",
+          "tagline": "Assistant IA personnel"
+        },
+        "hermes": {
+          "name": "Hermes Agent",
+          "tagline": "Agent qui apprend"
+        }
       },
       "features": {
         "industryTemplates": "Modèles pour les secteurs des petites entreprises",
@@ -1634,15 +1649,15 @@
       "inProgressCount": "{{count}} en cours"
     },
     "members": {
-      "inviteLabel": "Inviter un portefeuille pour {{kind}}",
+      "inviteLabel": "Invitez quelqu'un à {{kind}}",
       "kindOrg": "l'organisation",
       "kindProject": "le projet",
-      "walletPlaceholder": "0x… adresse du portefeuille",
+      "walletPlaceholder": "@pseudo ou adresse 0x…",
       "roleEditor": "Éditeur",
       "roleViewer": "Lecteur",
       "inviting": "Invitation…",
       "invite": "Inviter",
-      "invalidWallet": "Saisissez une adresse de portefeuille 0x… valide (40 caractères hexadécimaux).",
+      "invalidWallet": "Saisissez un @pseudo ou une adresse de portefeuille 0x… valide.",
       "loadingMembers": "Chargement des membres…",
       "noMembers": "Pas encore de membres.",
       "teamMember": "Membre de l'équipe {{number}}",
@@ -1652,7 +1667,8 @@
       "memberInvitedDesc": "{{address}} a maintenant accès : {{kind}}.",
       "inviteFailed": "Impossible d'inviter le membre",
       "memberRemoved": "Membre retiré",
-      "removeFailed": "Impossible de retirer le membre"
+      "removeFailed": "Impossible de retirer le membre",
+      "unknownUsername": "Personne ne correspond à ce pseudo. Vérifiez-le ou utilisez son adresse 0x…."
     },
     "insights": {
       "teamWorkload": "Charge de travail de l'équipe",
