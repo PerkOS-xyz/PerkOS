@@ -603,7 +603,8 @@
       "created": "Creato {{time}}",
       "capabilitiesCount": "Capacità: {{count}}",
       "shared": "Condiviso",
-      "sharedTitle": "Condiviso con te tramite {{org}}. Lo gestisce il proprietario."
+      "sharedTitle": "Condiviso con te tramite {{org}}. Lo gestisce il proprietario.",
+      "sharedVia": "Condiviso · {{org}}"
     },
     "power": {
       "waking": "Riattivazione di {{name}}…",

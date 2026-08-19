@@ -99,14 +99,74 @@ export function useWalletAgents(
             runtimeHealthCheckedAt: tsToIsoOrNull(data.runtimeHealthCheckedAt),
           };
         });
-        setState({ byName, loaded: true });
+        setState((prev) => ({
+          // Keep whatever shared agents were merged in below; the snapshot only
+          // ever describes the caller's own subtree.
+          byName: { ...prev.byName, ...byName },
+          loaded: true,
+        }));
       },
-      () => setState({ byName: {}, loaded: true })
+      () => setState((prev) => ({ ...prev, loaded: true }))
     );
+
+    // Agents shared in through an organization live under their owner's wallet,
+    // which this subscription cannot see — the Firestore rules keep it closed.
+    // Without them the dashboard reported "No agents registered yet" while the
+    // Agents page listed several: two answers to the same question. They have no
+    // realtime channel here, so they are fetched once per wallet and refreshed
+    // on the same cadence as the freshness tick.
+    let cancelled = false;
+    async function mergeSharedAgents() {
+      try {
+        const { authedFetch } = await import("./apiClient");
+        const res = await authedFetch("/api/agents");
+        if (!res.ok) return;
+        const body = (await res.json()) as {
+          agents?: Array<Record<string, unknown> & { shared?: boolean }>;
+        };
+        const shared = (body.agents ?? []).filter((a) => a.shared === true);
+        if (cancelled || shared.length === 0) return;
+        setState((prev) => {
+          const byName = { ...prev.byName };
+          for (const a of shared) {
+            const name = (a.name as string) ?? "";
+            if (!name || byName[name]) continue;
+            byName[name] = {
+              id: (a.id as string) ?? name,
+              name,
+              status: (a.status as string) ?? "unknown",
+              runtime: (a.runtime as string | undefined) ?? undefined,
+              hibernationState: undefined,
+              bridgeConnected: a.bridgeConnected === true,
+              lastBridgeSeenMs: toMs(a.lastBridgeSeenAt),
+              wakeStartedMs: 0,
+              presetId: undefined,
+              role: undefined,
+              external: a.external === true,
+              runtimeStatus:
+                a.runtimeStatus === "healthy" ||
+                a.runtimeStatus === "unreachable" ||
+                a.runtimeStatus === "unknown"
+                  ? (a.runtimeStatus as AgentLiveStatus["runtimeStatus"])
+                  : null,
+              runtimeHealthCheckedAt:
+                typeof a.runtimeHealthCheckedAt === "string"
+                  ? (a.runtimeHealthCheckedAt as string)
+                  : null,
+            };
+          }
+          return { byName, loaded: true };
+        });
+      } catch {
+        // A failure here leaves the caller's own agents intact.
+      }
+    }
+    void mergeSharedAgents();
     const freshnessTimer = window.setInterval(() => {
       setState((current) => ({ ...current, byName: { ...current.byName } }));
     }, 30_000);
     return () => {
+      cancelled = true;
       window.clearInterval(freshnessTimer);
       unsubscribe();
     };
