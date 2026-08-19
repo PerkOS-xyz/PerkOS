@@ -539,11 +539,17 @@
     "header": {
       "title": "Agent team",
       "subtitle": "Connect your agents, assign them to projects, and put them to work.",
+      "subtitleWithOrg": "{{org}} — connect your agents, assign them to projects, and put them to work.",
       "addAgent": "Add agent"
     },
     "search": {
       "placeholder": "Search agents by name, runtime, or capability…",
       "noResults": "No agents match \"{{query}}\"."
+    },
+    "filter": {
+      "orgAria": "Filter agents by organization",
+      "all": "All",
+      "shared": "Shared"
     },
     "bulk": {
       "selectAllAria": "Select all agents",

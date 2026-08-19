@@ -539,7 +539,8 @@
     "header": {
       "title": "Equipo de agentes",
       "subtitle": "Conecta tus agentes, asígnalos a proyectos y ponlos a trabajar.",
-      "addAgent": "Agregar agente"
+      "addAgent": "Agregar agente",
+      "subtitleWithOrg": "{{org}} — conecta tus agentes, asígnalos a proyectos y ponlos a trabajar."
     },
     "search": {
       "placeholder": "Busca agentes por nombre, entorno de ejecución o capacidad…",
@@ -637,7 +638,12 @@
       "description": "Agrega un agente: crea un agente Hermes u OpenClaw en PerkOS, ejecuta uno en tu propio VPS, o invita a un agente que ya tengas corriendo en otro lado a tu organización.",
       "action": "Agregar agente"
     },
-    "sharedLegend": "Los agentes marcados como Compartido pertenecen a otro miembro de la organización. Puedes ponerlos a trabajar en tus proyectos; su dueño los administra, pausa y elimina."
+    "sharedLegend": "Los agentes marcados como Compartido pertenecen a otro miembro de la organización. Puedes ponerlos a trabajar en tus proyectos; su dueño los administra, pausa y elimina.",
+    "filter": {
+      "orgAria": "Filtrar agentes por organización",
+      "all": "Todos",
+      "shared": "Compartidos"
+    }
   },
   "tasks": {
     "header": {

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-08-19 — Agents list shows the active org
+
+- `/agents` labels the roster with the active organization name.
+- Filter the list by this org or shared-from-another-org.
+
 ## 2026-08-19 — Attach images in agent chat
 
 - Agent 1:1 chat (`/chat/:convId`) can attach images. They show in the
