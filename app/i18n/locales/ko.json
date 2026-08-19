@@ -712,7 +712,8 @@
       "copied": "복사됨",
       "copyFull": "전체 복사",
       "noKeys": "저희는 개인 키나 시드 문구를 절대 요청하지 않아요.",
-      "disconnect": "로그아웃"
+      "disconnect": "로그아웃",
+      "copyFailed": "복사할 수 없습니다. 위의 주소를 선택해 직접 복사하세요."
     },
     "username": {
       "title": "사용자 이름",

@@ -712,7 +712,8 @@
       "copied": "Copié",
       "copyFull": "Copier en entier",
       "noKeys": "Nous ne demandons jamais vos clés privées ni vos phrases de récupération.",
-      "disconnect": "Se déconnecter"
+      "disconnect": "Se déconnecter",
+      "copyFailed": "Copie impossible. Sélectionnez l'adresse ci-dessus et copiez-la manuellement."
     },
     "username": {
       "title": "Nom d'utilisateur",

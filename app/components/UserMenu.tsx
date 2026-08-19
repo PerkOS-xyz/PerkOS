@@ -25,6 +25,8 @@ import { useUserProfile } from "../lib/useUserProfile";
 import { effectiveAvatarUrl } from "../lib/perkosApi";
 import { useAdvancedFeatures } from "../lib/advancedFeatures";
 import { UserAvatar } from "./UserAvatar";
+import { toast } from "sonner";
+import { copyText } from "../lib/copyText";
 
 export function UserMenu({ onLogout }: { onLogout?: () => void }) {
   const { t } = useTranslation();
@@ -46,14 +48,15 @@ export function UserMenu({ onLogout }: { onLogout?: () => void }) {
   const accountLabel =
     profile?.username || session.identityLabel || t("chrome.userMenu.account");
 
-  function copy() {
-    navigator.clipboard
-      .writeText(address ?? "")
-      .then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
-      })
-      .catch(() => {});
+  async function copy() {
+    // Same reason as settings: an empty catch made a blocked clipboard look
+    // like a dead button. See lib/copyText.
+    if (await copyText(address ?? "")) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } else {
+      toast.error(t("settings.account.copyFailed"));
+    }
   }
 
   async function handleDisconnect() {

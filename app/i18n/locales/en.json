@@ -712,7 +712,8 @@
       "copied": "Copied",
       "copyFull": "Copy full",
       "noKeys": "We never request private keys or seed phrases.",
-      "disconnect": "Sign out"
+      "disconnect": "Sign out",
+      "copyFailed": "Couldn't copy. Select the address above and copy it manually."
     },
     "username": {
       "title": "Username",

@@ -712,7 +712,8 @@
       "copied": "Copiado",
       "copyFull": "Cópia completa",
       "noKeys": "Nunca solicitamos chaves privadas ou frases iniciais.",
-      "disconnect": "Sair"
+      "disconnect": "Sair",
+      "copyFailed": "Não foi possível copiar. Selecione o endereço acima e copie manualmente."
     },
     "username": {
       "title": "Nome de usuário",
