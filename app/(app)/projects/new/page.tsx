@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAppAccount } from "../../../lib/useAppAccount";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ import { useOnboarding } from "../../../lib/onboardingState";
 import { useFormDraft } from "../../../lib/useFormDraft";
 import { fieldErrors, projectSchema } from "../../../lib/validators";
 import { trackEvent } from "../../../lib/analytics";
+import NewProjectWizard from "../../../components/NewProjectWizard";
 
 export default function CreateProjectPage() {
   const router = useRouter();
@@ -23,13 +24,8 @@ export default function CreateProjectPage() {
 
   const fromOnboarding = searchParams.get("from") === "onboarding";
 
-  // Project creation now goes through the unified wizard (template / custom
-  // team / empty) at /companies/new — every "Create project" entry point links
-  // here, so one redirect upgrades them all. The onboarding flow keeps this
-  // quick form: it marks its step and continues to /onboarding/agent.
-  useEffect(() => {
-    if (!fromOnboarding) router.replace("/companies/new");
-  }, [fromOnboarding, router]);
+  // One create-project route: /projects/new. The wizard is the default.
+  // Onboarding keeps this short name+goal form, then continues to /onboarding/agent.
 
   const [draft, setDraft, clearDraft] = useFormDraft("project.new.v1", {
     name: "",
@@ -86,8 +82,7 @@ export default function CreateProjectPage() {
     mutation.mutate();
   }
 
-  // Redirecting to the wizard (effect above) — don't flash the old form.
-  if (!fromOnboarding) return null;
+  if (!fromOnboarding) return <NewProjectWizard />;
 
   return (
     <div className="relative flex flex-col gap-6">

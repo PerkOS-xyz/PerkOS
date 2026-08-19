@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-08-19 — One create-project route
+
+- `/projects` "New project" and the empty-state CTA both go to `/projects/new`.
+- The template/team wizard now lives at `/projects/new`. `/companies/new` redirects there.
+- Onboarding still uses `/projects/new?from=onboarding` for the short name+goal form.
+
 ## 2026-08-13 — Privy browser authentication
 
 - Replace Dynamic with Privy for normal browser sign-in, including email and

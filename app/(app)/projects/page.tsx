@@ -260,7 +260,7 @@ function CreateProjectButton() {
   const { t } = useTranslation();
   return (
     <Link
-      href="/companies/new"
+      href="/projects/new"
       className="flex items-center justify-center gap-2 rounded-md bg-[#ec1b69] px-5 py-2.5 text-sm font-medium text-[#ececff] transition-opacity hover:opacity-90"
     >
       <PlusIcon />
@@ -398,7 +398,7 @@ function EmptyHint() {
       description={t("projects.empty.description")}
       actions={[
         {
-          label: t("projects.empty.action"),
+          label: t("projects.header.newProject"),
           href: "/projects/new",
           icon: Plus,
         },

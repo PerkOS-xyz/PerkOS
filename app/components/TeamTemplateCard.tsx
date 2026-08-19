@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Template gallery cards for the new-project wizard (/companies/new).
+ * Template gallery cards for the new-project wizard (/projects/new).
  *
  * A template is presented as a horizontal card: a portrait panel on the
  * left — industry-tinted backdrop with the recommended team rendered as a
