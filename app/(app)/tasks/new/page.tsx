@@ -9,11 +9,11 @@ import { toast } from "sonner";
 import {
   createProjectTasks,
   getWalletAgents,
-  getWalletProjects,
   type Project,
 } from "../../../lib/perkosApi";
 import { useFormDraft } from "../../../lib/useFormDraft";
 import { fieldErrors, taskSchema } from "../../../lib/validators";
+import { useVisibleProjects } from "../../../lib/useVisibleProjects";
 
 type Priority = "High" | "Medium" | "Low";
 
@@ -42,11 +42,10 @@ export default function CreateTaskPage() {
     setDraft((d) => ({ ...d, priority: v }));
   const setAgent = (v: string) => setDraft((d) => ({ ...d, agent: v }));
 
-  const projectsQuery = useQuery({
-    queryKey: ["wallet-projects", address],
-    queryFn: () => getWalletProjects(address!),
-    enabled: Boolean(address),
-  });
+  // Same source as /projects: a member's projects live under the org owner's
+  // wallet, so reading their own subtree returned nothing here while the
+  // project list showed several.
+  const projectsQuery = useVisibleProjects();
 
   const agentsQuery = useQuery({
     queryKey: ["wallet-agents", address],
@@ -54,7 +53,7 @@ export default function CreateTaskPage() {
     enabled: Boolean(address),
   });
 
-  const projects = projectsQuery.data?.projects ?? [];
+  const projects = projectsQuery.projects;
   const registeredAgents = agentsQuery.data ?? [];
 
   useEffect(() => {

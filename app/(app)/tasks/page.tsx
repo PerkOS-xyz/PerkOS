@@ -17,7 +17,6 @@ import { cn } from "@/lib/utils";
 import {
   deleteTask,
   getWalletProject,
-  getWalletProjects,
   updateTask,
   type Project,
   type Task,
@@ -30,6 +29,7 @@ import {
 } from "../../components/SearchInput";
 import { EmptyState } from "../../components/EmptyState";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
+import { useVisibleProjects } from "../../lib/useVisibleProjects";
 
 type EnrichedTask = {
   task: Task;
@@ -54,13 +54,12 @@ export default function TasksPage() {
   // next to the search bar; cleared by the project filter pill ×.
   const projectFilter = searchParams.get("project");
 
-  const projectsQuery = useQuery({
-    queryKey: ["wallet-projects", address],
-    queryFn: () => getWalletProjects(address!),
-    enabled: Boolean(address),
-  });
+  // Same source as /projects: a member's projects live under the org owner's
+  // wallet, so reading their own subtree returned nothing here while the
+  // project list showed several.
+  const projectsQuery = useVisibleProjects();
 
-  const projects = projectsQuery.data?.projects ?? [];
+  const projects = projectsQuery.projects;
   const projectIds = useMemo(
     () => projects.map((p) => p.id).filter((id): id is string => Boolean(id)),
     [projects]

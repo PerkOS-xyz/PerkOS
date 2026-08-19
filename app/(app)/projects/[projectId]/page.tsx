@@ -63,6 +63,7 @@ import { formatRelativeShort } from "../../../lib/format";
 import { logActivity } from "../../../lib/activityEvents";
 import { ProjectChatTab } from "../../../components/ProjectChatTab";
 import { SearchInput, matchesQuery } from "../../../components/SearchInput";
+import { useActiveOrg } from "../../../lib/useActiveOrg";
 
 const ProjectMeetingsTab = dynamic(() => import("../../../components/ProjectMeetingsTab"), {
   ssr: false,
@@ -86,9 +87,18 @@ export default function ProjectDetailPage({ params }: PageProps) {
   // For a SHARED project (owned by another wallet), the owner is passed as
   // ?owner=. All reads then target the owner's subtree (the membership rules
   // permit it). For own projects it's just the connected wallet.
+  //
+  // Falling back to the ACTIVE ORG's owner matters: a member who reaches this
+  // page without the parameter — a pasted link, a redirect that dropped the
+  // query, a hand-typed URL — used to get "Project not found" for a project
+  // they could see listed one screen earlier. The org they are viewing already
+  // tells us whose subtree to read.
   const ownerParam = searchParams.get("owner");
-  const ownerWallet = ownerParam || address;
-  const isShared = Boolean(ownerParam && ownerParam.toLowerCase() !== (address ?? "").toLowerCase());
+  const { activeOrg } = useActiveOrg();
+  const ownerWallet = ownerParam || activeOrg?.ownerWallet || address;
+  const isShared = Boolean(
+    ownerWallet && ownerWallet.toLowerCase() !== (address ?? "").toLowerCase(),
+  );
   const initialTab = (searchParams.get("tab") as Tab) || "tasks";
   const TABS: Tab[] = ["tasks", "docs", "conductor", "agents", "map", "chat", "meetings", "members"];
   const [tab, setTab] = useState<Tab>(
