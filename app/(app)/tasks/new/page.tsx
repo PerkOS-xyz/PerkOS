@@ -87,7 +87,10 @@ export default function CreateTaskPage() {
         throw new Error("Pick a project to create the task in.");
       }
       return createProjectTasks({
-        walletAddress: address,
+        // The project may live under an organization owner's wallet, not the
+        // caller's. Writing to the caller's path produced "No document to
+        // update" against a document that never existed there.
+        walletAddress: selectedProject?.ownerWallet ?? address,
         projectId,
         tasks: [
           {

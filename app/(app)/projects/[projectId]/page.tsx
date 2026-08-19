@@ -207,7 +207,9 @@ export default function ProjectDetailPage({ params }: PageProps) {
               ownerWallet={ownerWallet ?? undefined}
             />
           ) : null}
-          {tab === "agents" ? <AgentsTab detail={liveDetail} /> : null}
+          {tab === "agents" ? (
+            <AgentsTab detail={liveDetail} ownerWallet={ownerWallet!} />
+          ) : null}
           {tab === "map" ? (
             <MapTab detail={liveDetail} projectId={projectId} ownerWallet={ownerWallet ?? undefined} />
           ) : null}
@@ -1297,7 +1299,14 @@ function MapTab({
   );
 }
 
-function AgentsTab({ detail }: { detail: ProjectDetail }) {
+function AgentsTab({
+  detail,
+  ownerWallet,
+}: {
+  detail: ProjectDetail;
+  /** Wallet whose subtree holds the project — writes must target it. */
+  ownerWallet: string;
+}) {
   const { address } = useAppAccount();
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -1316,7 +1325,7 @@ function AgentsTab({ detail }: { detail: ProjectDetail }) {
 
   const setPmMut = useMutation({
     mutationFn: (name: string | null) =>
-      setProjectPm({ walletAddress: address!, projectId, pmAgent: name }),
+      setProjectPm({ walletAddress: ownerWallet!, projectId, pmAgent: name }),
     onSuccess: (_d, name) => {
       const queryKey = ["wallet-project", address, projectId] as const;
       qc.setQueryData<ProjectDetail>(queryKey, (current) =>
@@ -1427,6 +1436,7 @@ function AgentsTab({ detail }: { detail: ProjectDetail }) {
         open={addOpen}
         onOpenChange={setAddOpen}
         projectId={projectId}
+        ownerWallet={ownerWallet}
         existingNames={agentNames}
       />
     </div>
@@ -1478,11 +1488,14 @@ function AddAgentToProjectDialog({
   open,
   onOpenChange,
   projectId,
+  ownerWallet,
   existingNames,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
   projectId: string;
+  /** Wallet whose subtree holds the project — not necessarily the caller's. */
+  ownerWallet: string;
   existingNames: string[];
 }) {
   const { address } = useAppAccount();
@@ -1509,7 +1522,7 @@ function AddAgentToProjectDialog({
   const addMut = useMutation({
     mutationFn: () =>
       assignAgentsToProject({
-        walletAddress: address!,
+        walletAddress: ownerWallet,
         projectId,
         agentNames: [...selected],
       }),

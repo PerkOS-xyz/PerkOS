@@ -78,6 +78,13 @@ export type Project = {
   budget: string;
   /** The organization this project belongs to (wallets/{w}/organizations/{id}). */
   orgId?: string;
+  /**
+   * Wallet whose subtree holds this project. Differs from the signed-in wallet
+   * for a project reached through an organization, and every WRITE has to
+   * target it: reads resolved the owner while writes assumed the caller, so a
+   * member got "No document to update" against a path that never existed.
+   */
+  ownerWallet?: string;
   agentIds?: string[];
   /**
    * Optional swarm definition: declarative roster of agents + roles for
@@ -878,11 +885,11 @@ export async function getOrgProjects(input: {
     const snap = await getDocs(
       query(projectsCol(owner), where("orgId", "==", orgId))
     );
-    return snap.docs.map((d) => d.data());
+    return snap.docs.map((d) => ({ ...d.data(), ownerWallet: owner }));
   }
   const snap = await getDocs(projectsCol(owner));
   return snap.docs
-    .map((d) => d.data())
+    .map((d) => ({ ...d.data(), ownerWallet: owner }))
     .filter((p) => (p.orgId ?? input.defaultOrgId) === orgId);
 }
 
