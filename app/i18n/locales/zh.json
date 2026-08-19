@@ -1593,7 +1593,9 @@
         "added_other": "已将 {{count}} 个智能体添加到项目中",
         "alreadyOnProject": "这些智能体已经在项目中了",
         "addError": "无法添加智能体"
-      }
+      },
+      "searchPlaceholder": "按名称或运行时搜索代理…",
+      "noMatches": "没有与 \"{{query}}\" 匹配的代理。"
     },
     "chat": {
       "agentFallback": "智能体",

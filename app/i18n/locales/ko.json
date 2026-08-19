@@ -1603,7 +1603,9 @@
         "added_other": "프로젝트에 에이전트 {{count}}개를 추가했어요",
         "alreadyOnProject": "해당 에이전트는 이미 프로젝트에 있어요",
         "addError": "에이전트를 추가하지 못했어요"
-      }
+      },
+      "searchPlaceholder": "이름 또는 런타임으로 에이전트 검색…",
+      "noMatches": "\"{{query}}\"과(와) 일치하는 에이전트가 없습니다."
     },
     "chat": {
       "agentFallback": "에이전트",

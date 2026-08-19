@@ -1603,7 +1603,9 @@
         "added_other": "{{count}}件のエージェントをプロジェクトに追加しました",
         "alreadyOnProject": "それらのエージェントはすでにプロジェクトに含まれています",
         "addError": "エージェントを追加できませんでした"
-      }
+      },
+      "searchPlaceholder": "名前またはランタイムでエージェントを検索…",
+      "noMatches": "\"{{query}}\" に一致するエージェントはありません。"
     },
     "chat": {
       "agentFallback": "エージェント",

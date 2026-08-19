@@ -1627,7 +1627,9 @@
         "added_other": "Se agregaron {{count}} agentes al proyecto",
         "alreadyOnProject": "Esos agentes ya están en el proyecto",
         "addError": "No se pudieron agregar los agentes"
-      }
+      },
+      "searchPlaceholder": "Busca agentes por nombre o runtime…",
+      "noMatches": "Ningún agente coincide con \"{{query}}\"."
     },
     "chat": {
       "agentFallback": "Agente",

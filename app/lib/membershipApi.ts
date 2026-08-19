@@ -13,6 +13,12 @@ export type Member = {
   wallet: string;
   role: string;
   status: string;
+  /**
+   * Resolved server-side: the client may not read another member's profile
+   * (owner-only rule) and the /usernames registry denies `list`, so this is the
+   * only path from a wallet to the handle its owner chose.
+   */
+  username?: string | null;
 };
 
 async function jsonOrThrow(res: Response, fallback: string) {
