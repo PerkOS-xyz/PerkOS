@@ -54,6 +54,7 @@ export default function CreateTaskPage() {
   });
 
   const projects = projectsQuery.projects;
+  const selectedProject = projects.find((p) => p.id === projectId) ?? null;
   const registeredAgents = agentsQuery.data ?? [];
 
   useEffect(() => {
@@ -170,6 +171,20 @@ export default function CreateTaskPage() {
           placeholder="Pick a project"
           error={showErrors ? errors.projectId : undefined}
         />
+
+        {selectedProject && !selectedProject.pmAgent ? (
+          <div className="rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2.5">
+            <p className="text-sm font-medium text-amber-200">
+              No PM agent on this project, so nobody will pick this task up
+            </p>
+            <p className="mt-1 text-xs text-amber-200/70">
+              The task will be created and sit in Backlog. Work is dispatched
+              from a project's board, and a board only becomes active once a PM
+              agent plans on it. Assign a PM to "{selectedProject.name}" from the
+              project page, then create the task.
+            </p>
+          </div>
+        ) : null}
 
         <SelectField
           id="task-priority"
