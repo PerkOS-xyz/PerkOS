@@ -453,6 +453,15 @@ export function isSpeechVoice(value: unknown): value is SpeechVoice {
 }
 
 export type AgentRow = Agent & {
+  /**
+   * True when the agent belongs to another wallet and reached the caller
+   * through an organization. Its owner keeps every destructive control.
+   */
+  shared?: boolean;
+  /** Wallet that owns the agent (differs from the caller when `shared`). */
+  ownerWallet?: string;
+  /** Name of the organization the agent came in through, when shared. */
+  sharedVia?: string | null;
   /** User-facing label; `name` remains the immutable relay/runtime identity. */
   displayName?: string;
   /** Spoken TTS voice. Distinct from `soul.voice`, which is textual persona. */
@@ -1838,7 +1847,25 @@ export async function getWalletAgents(
   walletAddress: string
 ): Promise<AgentRow[]> {
   const snap = await getDocs(agentsCol(walletAddress));
-  return snap.docs.map((d) => d.data()).filter(isAllowedAgentRow);
+  const own = snap.docs.map((d) => d.data()).filter(isAllowedAgentRow) as AgentRow[];
+
+  // Agents shared in through an organization live under their OWNER's wallet,
+  // which the Firestore rules keep closed to everyone else — so they can only
+  // come from the API, which decides what the caller may see. Own agents keep
+  // coming from Firestore so the page loses none of the fields it renders.
+  // A failure here must not take the page down: the caller still has their own.
+  let shared: AgentRow[] = [];
+  try {
+    const { authedFetch } = await import("./apiClient");
+    const res = await authedFetch("/api/agents");
+    if (res.ok) {
+      const body = (await res.json()) as { agents?: (AgentRow & { shared?: boolean })[] };
+      shared = (body.agents ?? []).filter((a) => a.shared === true);
+    }
+  } catch {
+    shared = [];
+  }
+  return [...own, ...shared];
 }
 
 export async function updateAgent(input: {

@@ -601,7 +601,9 @@
       "projects": "プロジェクト：{{count}}",
       "active": "{{time}}に活動",
       "created": "{{time}}に作成",
-      "capabilitiesCount": "機能：{{count}}"
+      "capabilitiesCount": "機能：{{count}}",
+      "shared": "共有",
+      "sharedTitle": "{{org}} 経由で共有されています。管理は所有者が行います。"
     },
     "power": {
       "waking": "{{name}}を起動しています…",

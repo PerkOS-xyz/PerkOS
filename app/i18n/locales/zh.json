@@ -601,7 +601,9 @@
       "projects": "项目:{{count}}",
       "active": "活跃于 {{time}}",
       "created": "创建于 {{time}}",
-      "capabilitiesCount": "能力:{{count}}"
+      "capabilitiesCount": "能力:{{count}}",
+      "shared": "已共享",
+      "sharedTitle": "通过 {{org}} 与你共享。由其所有者管理。"
     },
     "power": {
       "waking": "正在唤醒 {{name}}…",
