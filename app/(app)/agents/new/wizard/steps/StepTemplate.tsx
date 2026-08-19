@@ -229,12 +229,12 @@ export function StepTemplate({
         ) : null}
 
         {/* Engine — every template is portable; it defaults to its origin's
-            engine (tagged "recommended") but the user can switch to either. */}
+            engine (tagged "recommended") but the user can switch to any the
+            catalogue offers. */}
         <div className="flex flex-col gap-2">
           <Label className="text-xs text-muted-foreground">{t("wizard.template.engine")}</Label>
           <div className="grid grid-cols-2 gap-2">
-            {(["OpenClaw", "Hermes"] as AgentRuntime[])
-              .filter((rt) => available.includes(rt))
+            {available
               .map((rt) => {
                 const recommended = defaultRuntimeFor(origin) === rt;
                 return (

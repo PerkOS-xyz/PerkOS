@@ -963,7 +963,8 @@
       "recommended": "推荐",
       "runtimeHint": {
         "OpenClaw": "自主型,可完成多步骤工作并使用工具",
-        "Hermes": "对话型,响应快,以聊天驱动"
+        "Hermes": "对话型,响应快,以聊天驱动",
+        "ZeroClaw": "自主型,Rust 引擎,密钥加密存储"
       },
       "agentName": "智能体名称",
       "hidePrompt": "隐藏系统提示词",
