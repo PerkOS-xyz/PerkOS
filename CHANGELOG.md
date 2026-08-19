@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-08-19 — Attach images in agent chat
+
+- Agent 1:1 chat (`/chat/:convId`) can attach images. They show in the
+  composer, render in the thread, and travel with the message as markdown
+  so the agent has them as context.
+- Image-only: the picker and uploader reject PDFs and other media.
+
 ## 2026-08-19 — Floating P no longer covers dashboard or Settings
 
 - Hide `ChatbotTrigger` on `/dashboard` and `/settings` so the fixed pink P

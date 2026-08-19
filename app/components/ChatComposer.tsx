@@ -31,7 +31,11 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import { useSpeechToText } from "../lib/useSpeechToText";
-import { attachmentMarkdown, type Attachment } from "../lib/uploadAttachment";
+import {
+  assertImageAttachment,
+  attachmentMarkdown,
+  type Attachment,
+} from "../lib/uploadAttachment";
 
 type Props = {
   value: string;
@@ -168,6 +172,7 @@ export function ChatComposer({
     setUploading(true);
     try {
       const chosen = Array.from(files);
+      for (const file of chosen) assertImageAttachment(file);
       const uploaded = await Promise.all(
         chosen.map((file, i) => uploadFile(file, i)),
       );
@@ -324,6 +329,7 @@ export function ChatComposer({
               <input
                 ref={fileInputRef}
                 type="file"
+                accept="image/*"
                 multiple
                 className="hidden"
                 onChange={(e) => onPickFiles(e.target.files)}

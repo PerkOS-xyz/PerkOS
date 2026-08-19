@@ -37,4 +37,10 @@ describe("Markdown", () => {
     // assert the literal text reaches the DOM.
     expect(screen.getByText(/npm run build/)).toBeInTheDocument();
   });
+
+  it("renders attached images in the thread", () => {
+    render(<Markdown>{"![shot.png](https://cdn.example/shot.png)"}</Markdown>);
+    const img = screen.getByRole("img", { name: "shot.png" });
+    expect(img).toHaveAttribute("src", "https://cdn.example/shot.png");
+  });
 });

@@ -27,6 +27,15 @@ const components: Components = {
       {children}
     </a>
   ),
+  img: ({ src, alt }) =>
+    src ? (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt={alt ?? ""}
+        className="my-2 max-h-64 max-w-full rounded-md border border-border object-contain"
+      />
+    ) : null,
   ul: ({ children }) => (
     <ul className="my-2 ml-4 list-disc space-y-1 [&:first-child]:mt-0 [&:last-child]:mb-0">
       {children}
