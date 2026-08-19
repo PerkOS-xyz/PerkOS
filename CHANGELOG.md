@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-08-19 — Header shows the org name, not the wallet
+
+- Dashboard greeting uses the active organization name instead of a
+  truncated wallet address.
+- Workspace card badge says Organization. Header org chip is wider so
+  the name stays readable.
+
 ## 2026-08-19 — Agents list shows the active org
 
 - `/agents` labels the roster with the active organization name.

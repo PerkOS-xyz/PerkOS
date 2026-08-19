@@ -410,7 +410,8 @@
     "workspace": {
       "badge": "워크스페이스",
       "memberCount": "멤버 1명",
-      "ownedBy": "소유자"
+      "ownedBy": "소유자",
+      "orgBadge": "조직"
     },
     "personalWorkspace": "개인 워크스페이스",
     "teamActivity": {

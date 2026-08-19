@@ -410,7 +410,8 @@
     "workspace": {
       "badge": "ワークスペース",
       "memberCount": "1名のメンバー",
-      "ownedBy": "オーナー"
+      "ownedBy": "オーナー",
+      "orgBadge": "組織"
     },
     "personalWorkspace": "個人ワークスペース",
     "teamActivity": {
