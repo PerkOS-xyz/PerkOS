@@ -207,8 +207,15 @@ export default function DashboardPage() {
     totalProjects === 0 &&
     totalTasks === 0;
 
+  // The active organization is the name the rest of the app shows (breadcrumb,
+  // switcher, shared-agent badges). The onboarding workspace name is a local
+  // nicety that predates organizations, so it must not outrank it: showing
+  // "Personal Workspace" under a "PerkOS" breadcrumb left the user unable to
+  // tell which context the numbers below belonged to.
   const displayWorkspace =
-    workspaceName.trim() || t("dashboard.personalWorkspace");
+    activeOrg?.name?.trim() ||
+    workspaceName.trim() ||
+    t("dashboard.personalWorkspace");
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">

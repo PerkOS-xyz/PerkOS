@@ -729,13 +729,17 @@ export type Overview = {
 export async function getWalletOverview(
   walletAddress: string
 ): Promise<Overview> {
-  const [projectsSnap, agentsSnap] = await Promise.all([
+  // Agents come from getWalletAgents, not a direct read, so the dashboard
+  // counts cannot disagree with the Agents page. Reading agentsCol here is what
+  // made the dashboard contradict ITSELF: the header's live strip already
+  // included organization agents while this said "No agents registered yet"
+  // and "0/0" on the same screen.
+  const [projectsSnap, agents] = await Promise.all([
     getDocs(projectsCol(walletAddress)),
-    getDocs(agentsCol(walletAddress)),
+    getWalletAgents(walletAddress),
   ]);
 
   const projects = projectsSnap.docs.map((d) => d.data());
-  const agents = agentsSnap.docs.map((d) => d.data()).filter(isAllowedAgentRow);
 
   // Pull recent tasks across all projects. Limited fan-out for now.
   const taskBundles = await Promise.all(

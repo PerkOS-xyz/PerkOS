@@ -636,7 +636,8 @@
       "title": "No agents yet",
       "description": "Add an agent: create a Hermes or OpenClaw agent on PerkOS, run one on your own VPS, or invite an agent you already run elsewhere into your org.",
       "action": "Add agent"
-    }
+    },
+    "sharedLegend": "Agents marked Shared belong to another member of the organization. You can put them to work on your projects; their owner manages, pauses and deletes them."
   },
   "tasks": {
     "header": {

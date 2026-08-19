@@ -205,6 +205,14 @@ export default function AgentsPage() {
         />
       ) : null}
 
+      {/* A badge nobody explained: users saw SHARED without being told what it
+          implies about who runs the agent or what they may do with it. */}
+      {agents.some((a) => a.shared) ? (
+        <p className="-mt-1 text-xs text-muted-foreground">
+          {t("agents.sharedLegend")}
+        </p>
+      ) : null}
+
       {isLoading ? <SkeletonGrid /> : null}
       {error ? <ErrorBanner message={(error as Error).message} /> : null}
 
