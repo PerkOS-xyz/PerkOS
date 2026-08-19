@@ -26,7 +26,6 @@ import {
   doc,
   getDoc,
   getDocs,
-  increment,
   orderBy,
   onSnapshot,
   query,
@@ -618,18 +617,6 @@ function tasksCol(walletAddress: string, projectId: string) {
     "projects",
     projectId,
     "tasks"
-  ).withConverter(taskConverter);
-}
-
-function taskDoc(walletAddress: string, projectId: string, taskId: string) {
-  return doc(
-    firebaseDb(),
-    "wallets",
-    normalize(walletAddress),
-    "projects",
-    projectId,
-    "tasks",
-    taskId
   ).withConverter(taskConverter);
 }
 
@@ -1278,42 +1265,36 @@ export async function startProject(input: {
 // Tasks
 // ---------------------------------------------------------------------------
 
+/**
+ * Create tasks on a project board via the server (`POST /projects/:pid/tasks`).
+ *
+ * This deliberately does NOT write the task docs from the client. The
+ * dispatcher only scans the `active_boards` collection, and only the API can
+ * upsert that marker — there is no Firestore rule for `active_boards`, so a
+ * browser write falls under the global deny. A board built client-side is a
+ * dead board: its tasks stay in Backlog and no agent is ever woken for them.
+ *
+ * `walletAddress` is the project OWNER, passed as `owner` so a member of a
+ * shared org project can create tasks too (the server authorizes by
+ * membership).
+ */
 export async function createProjectTasks(input: {
   walletAddress: string;
   projectId: string;
   tasks: { name: string; priority?: string; agent?: string; prompt?: string }[];
 }): Promise<{ tasks: Task[] }> {
-  const col = tasksCol(input.walletAddress, input.projectId);
-  const created: Task[] = [];
-  for (const t of input.tasks) {
-    const ref = doc(col);
-    const payload: Task = {
-      name: t.name,
-      status: "Backlog",
-      priority: (t.priority as Task["priority"]) ?? "Medium",
-      agent: t.agent ?? "App Agent",
-      prompt: t.prompt,
-    };
-    await setDoc(ref, {
-      ...payload,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
-    created.push({ ...payload, id: ref.id });
-  }
-  // Activity + graph trail (fire-and-forget): one feed event per task, plus
-  // an assigned_to edge when the task starts life with an agent.
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/projects/${input.projectId}/tasks?owner=${encodeURIComponent(input.walletAddress)}`,
+    { method: "POST", body: JSON.stringify({ tasks: input.tasks }) },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't create tasks"));
+  const created = ((payload as unknown as { tasks?: Task[] }).tasks ?? []) as Task[];
+
+  // Graph trail (fire-and-forget). The activity feed event is written server
+  // side; the assigned_to edge is still a client concern.
   for (const t of created) {
-    logActivity(input.walletAddress, {
-      actorType: "user",
-      actor: "You",
-      verb: "created_task",
-      object: t.name,
-      objectType: "task",
-      projectId: input.projectId,
-      taskId: t.id,
-      detail: t.agent && t.agent !== "App Agent" ? `for ${t.agent}` : undefined,
-    });
     if (t.id && t.agent && t.agent !== "App Agent") {
       writeEdge(input.walletAddress, {
         fromKey: entityKey.agent(t.agent),
@@ -1325,18 +1306,16 @@ export async function createProjectTasks(input: {
       });
     }
   }
-  // Keep the denormalized counter on the project doc in sync — the
-  // /projects list reads `project.tasks` directly (not the subcollection
-  // size), so without this the card always shows "0 tasks".
-  if (created.length > 0) {
-    await updateDoc(projectDoc(input.walletAddress, input.projectId), {
-      tasks: increment(created.length),
-      updatedAt: serverTimestamp(),
-    });
-  }
   return { tasks: created };
 }
 
+/**
+ * Patch one task through the server (`PATCH /projects/:pid/tasks/:taskId`).
+ *
+ * Server-side because reassigning or reopening a task has to re-upsert the
+ * `active_boards` marker: the dispatcher clears it once a board runs out of
+ * pending work, and the client cannot write it back.
+ */
 export async function updateTask(input: {
   walletAddress: string;
   projectId: string;
@@ -1349,33 +1328,38 @@ export async function updateTask(input: {
     status: TaskStatus;
   }>;
 }): Promise<{ task: Task }> {
-  const ref = taskDoc(input.walletAddress, input.projectId, input.taskId);
-  await updateDoc(ref, {
-    ...input.patch,
-    updatedAt: serverTimestamp(),
-  });
-  const fresh = await getDoc(ref);
-  if (!fresh.exists()) {
-    throw new Error("Task not found after update.");
-  }
-  return { task: fresh.data() };
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/projects/${input.projectId}/tasks/${encodeURIComponent(input.taskId)}` +
+      `?owner=${encodeURIComponent(input.walletAddress)}`,
+    { method: "PATCH", body: JSON.stringify(input.patch) },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't update task"));
+  return { task: (payload as unknown as { task: Task }).task };
 }
 
+/**
+ * Delete one task through the server (`DELETE /projects/:pid/tasks/:taskId`),
+ * which also keeps the denormalized `project.tasks` counter in sync. Task
+ * writes go through the API as a rule now, so the board and its dispatcher
+ * marker only ever have one writer.
+ */
 export async function deleteTask(input: {
   walletAddress: string;
   projectId: string;
   taskId: string;
 }): Promise<void> {
-  await deleteDoc(taskDoc(input.walletAddress, input.projectId, input.taskId));
-  // Mirror the increment in createProjectTasks so the project's task
-  // count stays in sync with the subcollection.
-  await updateDoc(projectDoc(input.walletAddress, input.projectId), {
-    tasks: increment(-1),
-    updatedAt: serverTimestamp(),
-  }).catch(() => {
-    // If the project doc disappeared (e.g. cascade delete in flight),
-    // swallow — there's nothing to keep in sync with.
-  });
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/projects/${input.projectId}/tasks/${encodeURIComponent(input.taskId)}` +
+      `?owner=${encodeURIComponent(input.walletAddress)}`,
+    { method: "DELETE" },
+  );
+  if (!response.ok) {
+    const payload = await parseJson(response);
+    throw new Error(apiError(payload, "Couldn't delete task"));
+  }
 }
 
 // ---------------------------------------------------------------------------

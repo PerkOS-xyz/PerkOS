@@ -59,6 +59,19 @@ function eventHref(e: ActivityEvent): string | null {
   return null;
 }
 
+/**
+ * Feed actors written server-side are raw wallet addresses (the API logs the
+ * authed caller, which is the only identity it has). Render the viewer's own
+ * wallet as "You" and anyone else's shortened, so a shared board still shows
+ * who did what without a 42-character hex string in the line.
+ */
+function actorLabel(event: ActivityEvent, viewer?: string | null): string {
+  const actor = event.actor ?? "";
+  if (event.actorType !== "user" || !/^0x[0-9a-fA-F]{40}$/.test(actor)) return actor;
+  if (viewer && actor.toLowerCase() === viewer.toLowerCase()) return "You";
+  return `${actor.slice(0, 6)}…${actor.slice(-4)}`;
+}
+
 export function ActivityFeedCard({
   walletAddress,
   max = 25,
@@ -107,7 +120,7 @@ export function ActivityFeedCard({
       ) : (
         <ul className="flex flex-col">
           {visible.map((e) => (
-            <FeedRow key={e.id} event={e} />
+            <FeedRow key={e.id} event={e} viewer={walletAddress} />
           ))}
         </ul>
       )}
@@ -115,7 +128,13 @@ export function ActivityFeedCard({
   );
 }
 
-function FeedRow({ event }: { event: ActivityEvent }) {
+function FeedRow({
+  event,
+  viewer,
+}: {
+  event: ActivityEvent;
+  viewer?: string | null;
+}) {
   const { t } = useTranslation();
   const meta = VERB_ICONS[event.verb] ?? {
     Icon: event.actorType === "user" ? User : Bot,
@@ -125,7 +144,9 @@ function FeedRow({ event }: { event: ActivityEvent }) {
 
   const line = (
     <div className="flex min-w-0 flex-1 items-baseline gap-1.5 text-xs leading-relaxed">
-      <span className="shrink-0 font-medium text-foreground">{event.actor}</span>
+      <span className="shrink-0 font-medium text-foreground">
+        {actorLabel(event, viewer)}
+      </span>
       <span className="shrink-0 text-muted-foreground">{verbPhrase(event.verb, t)}</span>
       {event.object ? (
         <span className="min-w-0 truncate text-foreground/90">{event.object}</span>
