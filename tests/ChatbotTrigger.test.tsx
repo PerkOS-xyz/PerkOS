@@ -21,6 +21,7 @@ describe("ChatbotTrigger route visibility", () => {
   });
 
   it("renders on regular app screens", () => {
+    pathname = "/tasks";
     render(<ChatbotTrigger />);
     expect(screen.getByRole("button", { name: "Open your PerkOS assistant" })).toBeVisible();
   });
@@ -29,6 +30,18 @@ describe("ChatbotTrigger route visibility", () => {
     pathname = "/agents";
     render(<ChatbotTrigger />);
     expect(screen.getByRole("button", { name: "Open your PerkOS assistant" })).toBeVisible();
+  });
+
+  it("does not cover dashboard Billing or stat tiles", () => {
+    pathname = "/dashboard";
+    render(<ChatbotTrigger />);
+    expect(screen.queryByRole("button", { name: "Open your PerkOS assistant" })).toBeNull();
+  });
+
+  it("does not cover the Settings Update control", () => {
+    pathname = "/settings";
+    render(<ChatbotTrigger />);
+    expect(screen.queryByRole("button", { name: "Open your PerkOS assistant" })).toBeNull();
   });
 
   it("does not cover the agent wizard actions", () => {

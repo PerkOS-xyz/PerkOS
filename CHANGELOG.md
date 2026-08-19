@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-08-19 — Floating P no longer covers dashboard or Settings
+
+- Hide `ChatbotTrigger` on `/dashboard` and `/settings` so the fixed pink P
+  cannot sit on Billing, the KPI/stat tiles, or the Settings Username Update
+  button at 375 / 768 / 1280.
+- Tuck the remaining FAB just above the mobile bottom nav and inset it from
+  the 280px desktop rail on other screens. Raise `md` content padding so
+  scrolled actions stay clear of the disc.
+
 ## 2026-08-19 — One create-project route
 
 - `/projects` "New project" and the empty-state CTA both go to `/projects/new`.

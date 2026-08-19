@@ -19,11 +19,18 @@ export function ChatbotTrigger() {
   // These screens already own the bottom-right composer/action area. Hiding
   // the floating assistant keeps wizard and chat Send controls directly
   // clickable instead of letting the fixed trigger intercept them.
+  //
+  // Dashboard and Settings are the other collision set: at 375 / 768 / 1280
+  // the fixed pink P sat on Billing, the KPI/stat tiles, and the Settings
+  // Username "Update" button. Hide it there rather than nudge coordinates —
+  // those controls must stay fully clickable.
   if (
     pathname?.startsWith("/agents/") ||
     pathname?.startsWith("/chat") ||
     pathname?.startsWith("/projects/") ||
-    pathname === "/wallet"
+    pathname === "/wallet" ||
+    pathname === "/dashboard" ||
+    pathname === "/settings"
   ) {
     return null;
   }
@@ -35,7 +42,10 @@ export function ChatbotTrigger() {
       aria-label={open ? "Close your PerkOS assistant" : "Open your PerkOS assistant"}
       title="Your PerkOS assistant"
       className={cn(
-        "fixed bottom-32 right-[30px] z-30 h-14 w-14 rounded-full transition-transform hover:scale-105 active:scale-95 md:bottom-[62px] md:right-[42px] md:h-16 md:w-16",
+        // Mobile: sit just above the 64px bottom nav so the disc cannot reach
+        // first-screen tiles. md+: stay in the content gutter, not the 280px
+        // right rail that holds Billing. lg+ further inset from that rail.
+        "fixed bottom-[72px] right-4 z-30 h-14 w-14 rounded-full transition-transform hover:scale-105 active:scale-95 md:bottom-6 md:right-6 md:h-16 md:w-16 lg:right-[322px]",
         open && "opacity-0 pointer-events-none"
       )}
     >
