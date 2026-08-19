@@ -1420,8 +1420,8 @@
       "members": "メンバー"
     },
     "header": {
-      "lead": "リーダー：{{name}}",
-      "noPrimaryAgent": "主担当エージェントが未割り当てです",
+      "lead": "リード: {{name}}",
+      "noPrimaryAgent": "リード未設定",
       "activeSuffix": "{{time}}に活動",
       "runPmTitleWithPm": "チームリーダーが目標を計画し、チームに仕事を割り振ります",
       "runPmTitleNoPm": "どのエージェントがチームを率いるか選択します",
@@ -1447,8 +1447,8 @@
         "agents": "エージェント"
       },
       "avatar": {
-        "noPrimaryAgent": "主担当エージェントが未割り当てです",
-        "primaryAgent": "主担当エージェント：{{name}}"
+        "noPrimaryAgent": "リード未設定",
+        "primaryAgent": "リード: {{name}}"
       },
       "firstRun": {
         "title": "チームの準備ができました。始め方はこちら",
@@ -1498,7 +1498,8 @@
         "wakingTeam_other": "{{count}}件のエージェントを起動しています…",
         "wakingTeamDesc": "起動から接続まで約2〜3分かかります。",
         "wakeTeamError": "チームを起動できませんでした"
-      }
+      },
+      "chooseLeadAria": "リードを選ぶ"
     },
     "tasksTab": {
       "createTask": "タスクを作成",

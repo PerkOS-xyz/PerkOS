@@ -1410,8 +1410,8 @@
       "members": "Membri"
     },
     "header": {
-      "lead": "Capo Team: {{name}}",
-      "noPrimaryAgent": "Nessun agente principale assegnato",
+      "lead": "Lead: {{name}}",
+      "noPrimaryAgent": "Nessun lead assegnato",
       "activeSuffix": "attivo {{time}}",
       "runPmTitleWithPm": "Il tuo Capo Team pianifica l'obiettivo e distribuisce il lavoro",
       "runPmTitleNoPm": "Sceglierai tu quale agente guida il team",
@@ -1437,8 +1437,8 @@
         "agents": "Agenti"
       },
       "avatar": {
-        "noPrimaryAgent": "Nessun agente principale assegnato",
-        "primaryAgent": "Agente principale: {{name}}"
+        "noPrimaryAgent": "Nessun lead assegnato",
+        "primaryAgent": "Lead: {{name}}"
       },
       "firstRun": {
         "title": "Il tuo team è pronto: ecco come iniziare",
@@ -1488,7 +1488,8 @@
         "wakingTeam_other": "Riattivazione di {{count}} agenti…",
         "wakingTeamDesc": "Impiegano circa 2-3 minuti per avviarsi e connettersi.",
         "wakeTeamError": "Impossibile riattivare il team"
-      }
+      },
+      "chooseLeadAria": "Scegli il lead"
     },
     "tasksTab": {
       "createTask": "Crea attività",

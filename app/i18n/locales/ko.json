@@ -1420,8 +1420,8 @@
       "members": "멤버"
     },
     "header": {
-      "lead": "팀장: {{name}}",
-      "noPrimaryAgent": "지정된 대표 에이전트가 없어요",
+      "lead": "리드: {{name}}",
+      "noPrimaryAgent": "리드 미지정",
       "activeSuffix": "{{time}} 활동 중",
       "runPmTitleWithPm": "팀장이 목표를 계획하고 작업을 나눠줘요",
       "runPmTitleNoPm": "어떤 에이전트가 팀을 이끌지 직접 선택하게 돼요",
@@ -1447,8 +1447,8 @@
         "agents": "에이전트"
       },
       "avatar": {
-        "noPrimaryAgent": "지정된 대표 에이전트가 없어요",
-        "primaryAgent": "대표 에이전트: {{name}}"
+        "noPrimaryAgent": "리드 미지정",
+        "primaryAgent": "리드: {{name}}"
       },
       "firstRun": {
         "title": "팀이 준비됐어요. 이렇게 시작해보세요",
@@ -1498,7 +1498,8 @@
         "wakingTeam_other": "에이전트 {{count}}개를 깨우는 중…",
         "wakingTeamDesc": "부팅과 연결까지 약 2~3분 걸려요.",
         "wakeTeamError": "팀을 깨우지 못했어요"
-      }
+      },
+      "chooseLeadAria": "리드 선택"
     },
     "tasksTab": {
       "createTask": "작업 만들기",

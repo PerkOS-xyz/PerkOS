@@ -1420,8 +1420,8 @@
       "members": "Membres"
     },
     "header": {
-      "lead": "Chef d'équipe : {{name}}",
-      "noPrimaryAgent": "Aucun agent principal assigné",
+      "lead": "Lead : {{name}}",
+      "noPrimaryAgent": "Aucun lead défini",
       "activeSuffix": "actif {{time}}",
       "runPmTitleWithPm": "Votre chef d'équipe planifie l'objectif et répartit le travail",
       "runPmTitleNoPm": "Vous choisirez quel agent dirige l'équipe",
@@ -1447,8 +1447,8 @@
         "agents": "Agents"
       },
       "avatar": {
-        "noPrimaryAgent": "Aucun agent principal assigné",
-        "primaryAgent": "Agent principal : {{name}}"
+        "noPrimaryAgent": "Aucun lead défini",
+        "primaryAgent": "Lead : {{name}}"
       },
       "firstRun": {
         "title": "Votre équipe est prête : voici comment démarrer",
@@ -1498,7 +1498,8 @@
         "wakingTeam_other": "Réveil de {{count}} agents…",
         "wakingTeamDesc": "Ils mettent environ 2 à 3 min à démarrer et se connecter.",
         "wakeTeamError": "Impossible de réveiller l'équipe"
-      }
+      },
+      "chooseLeadAria": "Choisir le lead"
     },
     "tasksTab": {
       "createTask": "Créer une tâche",

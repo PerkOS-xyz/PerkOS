@@ -1442,7 +1442,7 @@
     },
     "header": {
       "lead": "Lead: {{name}}",
-      "noPrimaryAgent": "No primary agent assigned",
+      "noPrimaryAgent": "No lead yet",
       "activeSuffix": "active {{time}}",
       "runPmTitleWithPm": "Your team lead plans the goal and hands out the work",
       "runPmTitleNoPm": "You'll pick which agent leads the team",
@@ -1469,8 +1469,8 @@
         "agents": "Agents"
       },
       "avatar": {
-        "noPrimaryAgent": "No primary agent assigned",
-        "primaryAgent": "Primary agent: {{name}}"
+        "noPrimaryAgent": "No lead yet",
+        "primaryAgent": "Lead: {{name}}"
       },
       "firstRun": {
         "title": "Your team is ready: here's how to start",
@@ -1522,7 +1522,8 @@
         "wakingTeam_other": "Waking {{count}} agents…",
         "wakingTeamDesc": "They take ~2–3 min to boot + connect.",
         "wakeTeamError": "Couldn't wake the team"
-      }
+      },
+      "chooseLeadAria": "Choose the lead"
     },
     "tasksTab": {
       "createTask": "Create task",
