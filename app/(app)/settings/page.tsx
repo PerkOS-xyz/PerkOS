@@ -37,7 +37,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
 import { useOnboarding } from "../../lib/onboardingState";
-import { formatAddress } from "../../lib/format";
+import { copyText } from "../../lib/copyText";
 import { perkosApiBaseUrl } from "../../lib/perkosApi";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { UsernameCard } from "../../components/UsernameCard";
@@ -63,15 +63,17 @@ export default function SettingsPage() {
   const dirty = draftName.trim() !== workspaceName.trim();
   const canSave = dirty && draftName.trim().length > 0;
 
-  function copyWallet() {
+  async function copyWallet() {
     if (!address) return;
-    navigator.clipboard
-      .writeText(address)
-      .then(() => {
-        setWalletCopied(true);
-        setTimeout(() => setWalletCopied(false), 1500);
-      })
-      .catch(() => {});
+    // Tell the user the truth: a blocked clipboard used to be indistinguishable
+    // from the button doing nothing. The address is also rendered in full below
+    // so it can always be selected by hand.
+    if (await copyText(address)) {
+      setWalletCopied(true);
+      setTimeout(() => setWalletCopied(false), 1500);
+    } else {
+      toast.error(t("settings.account.copyFailed"));
+    }
   }
 
   function onSaveWorkspace(e: FormEvent<HTMLFormElement>) {
@@ -133,13 +135,15 @@ export default function SettingsPage() {
               <div className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2">
                 <span
                   className={cn(
-                    "flex-1 truncate text-sm text-foreground",
-                    advancedFeatures.enabled && "font-mono",
+                    "flex-1 text-sm text-foreground",
+                    advancedFeatures.enabled
+                      ? "select-all break-all font-mono text-xs"
+                      : "truncate",
                   )}
                 >
                   {advancedFeatures.enabled
                     ? address
-                      ? formatAddress(address)
+                      ? address
                       : t("settings.account.notConnected")
                     : session.identityLabel || t("settings.account.secureAccount")}
                 </span>

@@ -712,7 +712,8 @@
       "copied": "Copiado",
       "copyFull": "Copiar completa",
       "noKeys": "Nunca te pedimos claves privadas ni frases semilla.",
-      "disconnect": "Cerrar sesión"
+      "disconnect": "Cerrar sesión",
+      "copyFailed": "No se pudo copiar. Selecciona la dirección de arriba y cópiala a mano."
     },
     "username": {
       "title": "Nombre de usuario",

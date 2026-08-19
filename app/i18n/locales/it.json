@@ -709,7 +709,8 @@
       "copied": "Copiato",
       "copyFull": "Copia per intero",
       "noKeys": "Non chiediamo mai chiavi private o seed phrase.",
-      "disconnect": "Disconnetti portafoglio"
+      "disconnect": "Disconnetti portafoglio",
+      "copyFailed": "Copia non riuscita. Seleziona l'indirizzo qui sopra e copialo a mano."
     },
     "username": {
       "title": "Nome utente",

@@ -709,7 +709,8 @@
       "copied": "已复制",
       "copyFull": "复制完整地址",
       "noKeys": "我们绝不会索要私钥或助记词。",
-      "disconnect": "断开钱包连接"
+      "disconnect": "断开钱包连接",
+      "copyFailed": "无法复制。请选中上方地址并手动复制。"
     },
     "username": {
       "title": "用户名",
