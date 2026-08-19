@@ -183,8 +183,12 @@ export function MembersPanel({
         ) : (
           members.map((m, index) => {
             const profile = profilesQuery.data?.[m.wallet.toLowerCase()];
-            const memberLabel = profile?.username
-              ? `@${profile.username}`
+            // Prefer the handle the API resolved: a teammate's own profile is
+            // unreadable from here, so `profile` is only ever populated for the
+            // caller themselves.
+            const handle = m.username ?? profile?.username;
+            const memberLabel = handle
+              ? `@${handle}`
               : advanced.enabled
                 ? formatAddress(m.wallet)
                 : t("components.members.teamMember", { number: index + 1 });
