@@ -18,6 +18,7 @@ import {
 } from "../../../components/ConversationMessages";
 import { ConversationComposer } from "../../../components/ConversationComposer";
 import { OfflineBanner } from "../../../components/OfflineBanner";
+import { uploadAttachment } from "../../../lib/uploadAttachment";
 
 export default function ConversationPage() {
   const params = useParams<{ convId: string }>();
@@ -163,6 +164,17 @@ export default function ConversationPage() {
         onSend={onSend}
         disabled={composerDisabled}
         disabledReason={composerReason}
+        uploadFile={
+          address && convId
+            ? (file, index) =>
+                uploadAttachment({
+                  file,
+                  walletAddress: address,
+                  conversationId: convId,
+                  index,
+                })
+            : undefined
+        }
       />
     </>
   );

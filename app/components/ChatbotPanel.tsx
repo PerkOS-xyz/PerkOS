@@ -358,6 +358,7 @@ export function ChatbotPanel() {
               <input
                 ref={fileInputRef}
                 type="file"
+                accept="image/*"
                 multiple
                 className="hidden"
                 onChange={(e) => onPickFiles(e.target.files)}

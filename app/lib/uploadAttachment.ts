@@ -42,6 +42,16 @@ export function attachmentMarkdown(a: Attachment): string {
   return a.isImage ? `![${a.name}](${a.url})` : `[📎 ${a.name}](${a.url})`;
 }
 
+export function isImageFile(file: Pick<File, "type">): boolean {
+  return file.type.startsWith("image/");
+}
+
+export function assertImageAttachment(file: Pick<File, "name" | "type">): void {
+  if (!isImageFile(file)) {
+    throw new Error(`"${file.name}" is not an image`);
+  }
+}
+
 export async function uploadAttachment(input: {
   file: File;
   walletAddress: string;
@@ -50,6 +60,10 @@ export async function uploadAttachment(input: {
   index?: number;
 }): Promise<Attachment> {
   const { file, walletAddress, conversationId, index = 0 } = input;
+
+  // Chat attachments are images only — the agent consumes them as markdown
+  // context. Extra media types stay out of the picker and the uploader.
+  assertImageAttachment(file);
 
   if (file.size > MAX_ATTACHMENT_BYTES) {
     throw new Error(
