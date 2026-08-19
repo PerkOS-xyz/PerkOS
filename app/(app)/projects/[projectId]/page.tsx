@@ -62,6 +62,7 @@ import { ActivityFeedCard } from "../../../components/ActivityFeedCard";
 import { formatRelativeShort } from "../../../lib/format";
 import { logActivity } from "../../../lib/activityEvents";
 import { ProjectChatTab } from "../../../components/ProjectChatTab";
+import { SearchInput, matchesQuery } from "../../../components/SearchInput";
 
 const ProjectMeetingsTab = dynamic(() => import("../../../components/ProjectMeetingsTab"), {
   ssr: false,
@@ -73,6 +74,9 @@ type Tab = "tasks" | "docs" | "conductor" | "agents" | "map" | "chat" | "meeting
 type PageProps = {
   params: Promise<{ projectId: string }>;
 };
+
+/** Below this many agents the list is short enough to scan without a search box. */
+const SEARCH_THRESHOLD = 5;
 
 export default function ProjectDetailPage({ params }: PageProps) {
   const { projectId } = use(params);
@@ -1482,10 +1486,15 @@ function AddAgentToProjectDialog({
     enabled: open && Boolean(address),
   });
 
+  const [query, setQuery] = useState("");
   const existing = new Set(existingNames.map((n) => n.toLowerCase()));
-  const available = (data ?? []).filter(
+  const candidates = (data ?? []).filter(
     (a) => a.name && !existing.has(a.name.toLowerCase())
   );
+  // Search over name and runtime: with organization agents now in this list too,
+  // picking one meant scrolling a roster that only grows. Matching the runtime
+  // as well lets "zeroclaw" or "hermes" narrow it to a kind of worker.
+  const available = candidates.filter((a) => matchesQuery(query, [a.name, a.runtime]));
 
   const addMut = useMutation({
     mutationFn: () =>
@@ -1528,6 +1537,15 @@ function AddAgentToProjectDialog({
           </DialogDescription>
         </DialogHeader>
 
+        {candidates.length > SEARCH_THRESHOLD ? (
+          <SearchInput
+            value={query}
+            onChange={setQuery}
+            placeholder={t("projectRoom.addAgentDialog.searchPlaceholder")}
+            ariaLabel={t("projectRoom.addAgentDialog.searchPlaceholder")}
+          />
+        ) : null}
+
         <div className="flex max-h-80 flex-col gap-2 overflow-auto py-1">
           {isLoading ? (
             <p className="flex items-center gap-2 text-sm text-[#7975a8]">
@@ -1535,9 +1553,11 @@ function AddAgentToProjectDialog({
             </p>
           ) : available.length === 0 ? (
             <p className="text-sm text-[#7975a8]">
-              {(data ?? []).length === 0
-                ? t("projectRoom.addAgentDialog.noAgentsYet")
-                : t("projectRoom.addAgentDialog.allOnProject")}
+              {query.trim()
+                ? t("projectRoom.addAgentDialog.noMatches", { query: query.trim() })
+                : (data ?? []).length === 0
+                  ? t("projectRoom.addAgentDialog.noAgentsYet")
+                  : t("projectRoom.addAgentDialog.allOnProject")}
             </p>
           ) : (
             available.map((a) => (

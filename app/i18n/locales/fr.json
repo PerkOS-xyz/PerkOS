@@ -1603,7 +1603,9 @@
         "added_other": "{{count}} agents ajoutés au projet",
         "alreadyOnProject": "Ces agents sont déjà sur le projet",
         "addError": "Impossible d'ajouter les agents"
-      }
+      },
+      "searchPlaceholder": "Rechercher des agents par nom ou runtime…",
+      "noMatches": "Aucun agent ne correspond à \"{{query}}\"."
     },
     "chat": {
       "agentFallback": "Agent",
