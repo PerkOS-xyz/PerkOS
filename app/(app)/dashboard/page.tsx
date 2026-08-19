@@ -38,6 +38,7 @@ import {
 } from "../../lib/perkosApi";
 import { useOnboarding } from "../../lib/onboardingState";
 import { useActiveOrg } from "../../lib/useActiveOrg";
+import { orgDisplayName } from "../../lib/orgDisplayName";
 import { formatAddress, formatRelativeShort } from "../../lib/format";
 import { useActivityFeed } from "../../lib/activityEvents";
 import {
@@ -212,15 +213,16 @@ export default function DashboardPage() {
   // nicety that predates organizations, so it must not outrank it: showing
   // "Personal Workspace" under a "PerkOS" breadcrumb left the user unable to
   // tell which context the numbers below belonged to.
-  const displayWorkspace =
-    activeOrg?.name?.trim() ||
-    workspaceName.trim() ||
-    t("dashboard.personalWorkspace");
+  const displayWorkspace = orgDisplayName({
+    orgName: activeOrg?.name,
+    workspaceName,
+    fallback: t("dashboard.personalWorkspace"),
+  });
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
       <div className="flex min-w-0 flex-col gap-6">
-        <GreetingBanner address={address} />
+        <GreetingBanner orgName={displayWorkspace} />
 
         <WorkspaceCard
           name={displayWorkspace}
@@ -431,7 +433,7 @@ function StarterCallout({ address }: { address: string }) {
   );
 }
 
-function GreetingBanner({ address }: { address?: string }) {
+function GreetingBanner({ orgName }: { orgName?: string }) {
   const { t } = useTranslation();
   return (
     <div className="relative overflow-hidden rounded-xl border border-primary/30 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent p-5">
@@ -443,9 +445,9 @@ function GreetingBanner({ address }: { address?: string }) {
         <div className="flex flex-col gap-1">
           <h1 className="text-xl font-medium text-foreground md:text-2xl">
             {t("dashboard.greeting.welcomeBack")}
-            {address ? (
-              <span className="ml-2 font-mono text-sm text-muted-foreground">
-                {formatAddress(address)}
+            {orgName ? (
+              <span className="ml-2 text-sm font-medium text-primary">
+                {orgName}
               </span>
             ) : null}
           </h1>
@@ -471,7 +473,7 @@ function WorkspaceCard({
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-foreground">{name}</span>
         <Badge variant="secondary" className="border-border">
-          {t("dashboard.workspace.badge")}
+          {t("dashboard.workspace.orgBadge")}
         </Badge>
       </div>
       <p className="text-xs text-muted-foreground">

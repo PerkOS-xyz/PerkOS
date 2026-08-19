@@ -410,7 +410,8 @@
     "workspace": {
       "badge": "Espaço de trabalho",
       "memberCount": "1 membro",
-      "ownedBy": "Propriedade de"
+      "ownedBy": "Propriedade de",
+      "orgBadge": "Organização"
     },
     "personalWorkspace": "Espaço de trabalho pessoal",
     "teamActivity": {

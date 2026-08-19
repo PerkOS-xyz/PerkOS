@@ -77,7 +77,7 @@ export function OrgSwitcher() {
             variant="ghost"
             size="sm"
             aria-label={t("chrome.orgSwitcher.switchOrganization")}
-            className="min-w-0 max-w-[140px] gap-2 px-2 hover:bg-muted/40 lg:max-w-[180px]"
+            className="min-w-0 max-w-[200px] gap-2 px-2 hover:bg-muted/40 lg:max-w-[280px]"
           />
         }
       >
