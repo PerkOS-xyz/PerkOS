@@ -705,6 +705,12 @@
       "deletedSuccess_one": "Deleted {{count}} task",
       "deletedSuccess_other": "Deleted {{count}} tasks",
       "bulkDeleteFailed": "Bulk delete failed"
+    },
+    "attachments": {
+      "label": "Attachments",
+      "hint": "Images give the agent visual context.",
+      "limit": "Up to {{max}} files per task.",
+      "connectFirst": "Connect a wallet before attaching files."
     }
   },
   "settings": {

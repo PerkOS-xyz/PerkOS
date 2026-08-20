@@ -705,6 +705,12 @@
       "deletedSuccess_one": "{{count}}件のタスクを削除しました",
       "deletedSuccess_other": "{{count}}件のタスクを削除しました",
       "bulkDeleteFailed": "一括削除に失敗しました"
+    },
+    "attachments": {
+      "label": "添付ファイル",
+      "hint": "画像はエージェントに視覚的な文脈を与えます。",
+      "limit": "タスクごとに最大 {{max}} ファイルです。",
+      "connectFirst": "ファイルを添付する前にウォレットを接続してください。"
     }
   },
   "settings": {

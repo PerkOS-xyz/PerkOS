@@ -119,8 +119,24 @@ export type Task = {
   prompt?: string;
   result?: string;
   logs?: string[];
+  /** Files attached when the task was created or edited (same shape as chat). */
+  attachments?: TaskAttachment[];
   createdAt?: string;
   updatedAt?: string;
+};
+
+/**
+ * A file attached to a task. Identical shape to a chat attachment, so the same
+ * `uploadAttachment` helper produces both and the same Markdown renderer shows
+ * them. The url is a Firebase Storage download URL: it carries its own
+ * capability token, which is how the assigned agent can fetch the image.
+ */
+export type TaskAttachment = {
+  name: string;
+  url: string;
+  contentType?: string;
+  isImage?: boolean;
+  size?: number;
 };
 
 export type ProjectMeetingStatus =
@@ -421,6 +437,9 @@ const taskConverter: FirestoreDataConverter<Task> = {
       prompt: (data.prompt as string | undefined) ?? undefined,
       result: (data.result as string | undefined) ?? undefined,
       logs: (data.logs as string[] | undefined) ?? undefined,
+      attachments: Array.isArray(data.attachments)
+        ? (data.attachments as TaskAttachment[])
+        : undefined,
       createdAt: tsToIso(data.createdAt),
       updatedAt: tsToIso(data.updatedAt),
     };
@@ -1281,7 +1300,13 @@ export async function startProject(input: {
 export async function createProjectTasks(input: {
   walletAddress: string;
   projectId: string;
-  tasks: { name: string; priority?: string; agent?: string; prompt?: string }[];
+  tasks: {
+    name: string;
+    priority?: string;
+    agent?: string;
+    prompt?: string;
+    attachments?: TaskAttachment[];
+  }[];
 }): Promise<{ tasks: Task[] }> {
   const { authedFetch } = await import("./apiClient");
   const response = await authedFetch(
@@ -1326,6 +1351,7 @@ export async function updateTask(input: {
     agent: string;
     prompt: string;
     status: TaskStatus;
+    attachments: TaskAttachment[];
   }>;
 }): Promise<{ task: Task }> {
   const { authedFetch } = await import("./apiClient");

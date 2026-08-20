@@ -705,6 +705,12 @@
       "deletedSuccess_one": "{{count}} tâche supprimée",
       "deletedSuccess_other": "{{count}} tâches supprimées",
       "bulkDeleteFailed": "Échec de la suppression groupée"
+    },
+    "attachments": {
+      "label": "Pièces jointes",
+      "hint": "Les images donnent un contexte visuel à l'agent.",
+      "limit": "Jusqu'à {{max}} fichiers par tâche.",
+      "connectFirst": "Connectez un portefeuille avant de joindre des fichiers."
     }
   },
   "settings": {

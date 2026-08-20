@@ -705,6 +705,12 @@
       "deletedSuccess_one": "작업 {{count}}개를 삭제했어요",
       "deletedSuccess_other": "작업 {{count}}개를 삭제했어요",
       "bulkDeleteFailed": "일괄 삭제에 실패했어요"
+    },
+    "attachments": {
+      "label": "첨부 파일",
+      "hint": "이미지는 에이전트에 시각적 맥락을 제공합니다.",
+      "limit": "작업당 최대 {{max}}개 파일입니다.",
+      "connectFirst": "파일을 첨부하기 전에 지갑을 연결하세요."
     }
   },
   "settings": {
