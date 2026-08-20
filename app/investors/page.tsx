@@ -7,7 +7,6 @@ import {
   Coins,
   CreditCard,
   Shield,
-  TrendingUp,
   Zap,
 } from "lucide-react";
 
@@ -34,23 +33,24 @@ const ROI_METRICS = [
   { value: "~$0.02", label: "Cost of an idle teammate / month" },
 ];
 
+// Planned utility is labelled as planned. None of the token mechanics below
+// are built yet: the credits contract has no operators wired and the claim
+// vault's rewardToken is still deferred. Describing intent as if it shipped is
+// how a utility token starts reading like a promise of return.
 const TOKEN_BENEFITS = [
-  { Icon: CreditCard, title: "15–25% off with $PERKOS", copy: "Pay for Growth and Custom plans with $PERKOS and save versus card — usage flows back to the token." },
-  { Icon: Shield, title: "Stake for perks", copy: "Stake $PERKOS for permanent discounts, priority support, and early access to new capabilities." },
-  { Icon: TrendingUp, title: "Aligned with growth", copy: "Stakers are positioned for revenue share in selected cases as the platform scales." },
-  { Icon: Zap, title: "Powers the platform", copy: "Teammates settle usage in instant micropayments on Base — the same rail that makes idle cost near-zero." },
+  { Icon: CreditCard, title: "Planned: pay with $PERKOS", copy: "We intend to let plans be paid in $PERKOS at a discount versus card. Not built yet." },
+  { Icon: Shield, title: "Planned: hold for perks", copy: "We intend to offer priority support and early access to capabilities for holders. Not built yet." },
+  { Icon: Zap, title: "Live: payments on Base", copy: "Teammates settle usage in USDC micropayments on Base, through the x402 facilitator we operate. This part is running today." },
 ];
 
+// Contract address for reference, linked to the explorer rather than to a DEX.
+// Pointing a Buy button at Uniswap from our own site is distribution, whoever
+// deployed the token. Anyone who wants to trade it can, without us routing them.
 const TOKEN_CONTRACTS = [
   {
     chain: "Base",
     ca: "0xF714E60f85497D70508F7E356b5DB80e64539BA3",
-    buy: "https://app.uniswap.org/explore/tokens/base/0xf714e60f85497d70508f7e356b5db80e64539ba3",
-  },
-  {
-    chain: "Celo",
-    ca: "0xb7Ba43fBD4F2E85FCE929f7d4DFE3905Ae846A46",
-    buy: "https://app.uniswap.org/explore/tokens/celo/0xb7ba43fbd4f2e85fce929f7d4dfe3905ae846a46",
+    explorer: "https://basescan.org/token/0xF714E60f85497D70508F7E356b5DB80e64539BA3",
   },
 ];
 
@@ -106,16 +106,24 @@ export default function InvestorsPage() {
               ))}
             </dl>
 
-            {/* Token utility */}
-            <div className="mb-6 flex flex-col items-center gap-2 text-center">
-              <h2 className="text-xl font-semibold text-foreground">$PERKOS — pay, stake, and grow with the platform</h2>
+            {/* Token utility. Leads with provenance: the community launched it, we
+                did not. Said first, it frames everything below as us acknowledging
+                our community's token rather than a company selling one. */}
+            <div className="mb-6 flex flex-col items-center gap-3 text-center">
+              <h2 className="text-xl font-semibold text-foreground">$PERKOS, a community token</h2>
               <p className="max-w-2xl text-sm text-muted-foreground">
-                The token aligns PerkOS with the businesses running on it: pay with
-                $PERKOS to save, stake to unlock perks, and share in the upside as
-                the platform scales.
+                <b className="text-foreground">$PERKOS was launched by the community on Base through Bankr.</b>{" "}
+                PerkOS did not issue it, has never sold it, and does not control the
+                contract. The platform itself runs on USDC: billing settles in USDC and
+                the claim vault pays providers in USDC.
+              </p>
+              <p className="max-w-2xl text-sm text-muted-foreground">
+                What follows is how we intend to make the token useful to the people who
+                already hold it. Nothing here is an offer, and none of it is required to
+                use PerkOS.
               </p>
             </div>
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-4">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3">
               {TOKEN_BENEFITS.map(({ Icon, title, copy }) => (
                 <div key={title} className="flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/5 p-6">
                   <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/15 text-primary">
@@ -128,26 +136,24 @@ export default function InvestorsPage() {
             </div>
 
             <p className="mt-8 text-center text-sm text-muted-foreground">
-              Get <b className="text-foreground">$PERKOS</b> on Uniswap — settles on{" "}
-              <b className="text-foreground">Base</b> and{" "}
-              <b className="text-foreground">Celo</b> via USDC, low-fee and instant.
+              Contract address, for reference.
             </p>
-            <div className="mx-auto mt-4 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-2">
-              {TOKEN_CONTRACTS.map(({ chain, ca, buy }) => (
+            <div className="mx-auto mt-4 grid max-w-xl grid-cols-1 gap-3">
+              {TOKEN_CONTRACTS.map(({ chain, ca, explorer }) => (
                 <div key={chain} className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4">
+                  <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <Coins className="h-4 w-4 text-primary" />
+                    $PERKOS on {chain}
+                  </span>
                   <a
-                    href={buy}
+                    href={explorer}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
+                    className="flex items-center gap-1.5 transition-opacity hover:opacity-80"
                   >
-                    <Coins className="h-4 w-4" />
-                    Buy $PERKOS on {chain} ↗
-                  </a>
-                  <span className="flex items-center gap-1.5">
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">CA</span>
                     <span className="break-all font-mono text-[11px] text-muted-foreground">{ca}</span>
-                  </span>
+                  </a>
                 </div>
               ))}
             </div>
@@ -162,7 +168,9 @@ export default function InvestorsPage() {
             </div>
             <p className="mt-4 text-center text-[11px] text-muted-foreground">
               ROI figures are early pilot results — your numbers vary by business
-              and volume. $PERKOS is a utility token; nothing here is financial
+              and volume. $PERKOS is a community-launched token that PerkOS did not
+              issue and does not control. Planned utility is not a commitment and may
+              change. Nothing here is an offer to sell, a solicitation, or financial
               advice.
             </p>
           </div>
