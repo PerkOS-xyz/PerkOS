@@ -164,7 +164,6 @@ export function EditTaskDialog({
           </div>
 
           <TaskAttachments
-            walletAddress={walletAddress}
             scope={projectId}
             value={attachments}
             onChange={setAttachments}

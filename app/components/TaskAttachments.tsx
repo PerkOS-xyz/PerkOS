@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { uploadAttachment, type Attachment } from "../lib/uploadAttachment";
+import { useAppAccount } from "../lib/useAppAccount";
 import type { TaskAttachment } from "../lib/perkosApi";
 
 /** Same ceiling the API schema and the Storage rule enforce. */
@@ -24,14 +25,11 @@ const MAX_ATTACHMENTS = 10;
  * and one attached later are the same thing.
  */
 export function TaskAttachments({
-  walletAddress,
   scope,
   value,
   onChange,
   disabled,
 }: {
-  /** Owner wallet — the Storage rule keys uploads to it. */
-  walletAddress?: string | null;
   /** Path segment that groups a task's files, e.g. the project id. */
   scope: string;
   value: TaskAttachment[];
@@ -39,6 +37,12 @@ export function TaskAttachments({
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
+  // Derived here, never passed in. The Storage rule is
+  // `request.auth.uid == wallet` on the PATH, so the only wallet that can ever
+  // work is the signed-in one. Passing the project OWNER instead — the right
+  // answer for the Firestore write, the wrong one here — is what produced
+  // storage/unauthorized for every org member who was not the owner.
+  const { address: walletAddress } = useAppAccount();
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
 

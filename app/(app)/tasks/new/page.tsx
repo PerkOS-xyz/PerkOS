@@ -194,7 +194,6 @@ export default function CreateTaskPage() {
         />
 
         <TaskAttachments
-          walletAddress={selectedProject?.ownerWallet ?? address}
           scope={projectId || "unassigned"}
           value={attachments}
           onChange={setAttachments}
