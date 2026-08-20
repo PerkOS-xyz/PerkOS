@@ -38,6 +38,14 @@ type ChatbotState = {
    *  ordered batches oldest-first within a chunk). */
   prependMessages: (msgs: ChatBubble[]) => void;
   resetConversation: () => void;
+  /**
+   * True while at least one empty state is on screen. The floating bubble
+   * rides on this: it appears only where there is no content to cover, and
+   * the header button carries the assistant everywhere else.
+   */
+  spotlight: boolean;
+  /** Called by an empty state on mount; returns its own unregister. */
+  registerSpotlight: () => () => void;
 };
 
 const Ctx = createContext<ChatbotState | null>(null);
@@ -49,6 +57,15 @@ export function ChatbotProvider({ children }: { children: ReactNode }) {
   const [convId, setConvId] = useState<string | null>(null);
   const [loadingConv, setLoadingConv] = useState(false);
   const [convError, setConvError] = useState<string | null>(null);
+  // Ref-counted rather than a boolean: a page can render more than one empty
+  // state (a board column plus a panel), and the first one to unmount must not
+  // switch the bubble off while another is still showing.
+  const [spotlightCount, setSpotlightCount] = useState(0);
+
+  const registerSpotlight = useCallback(() => {
+    setSpotlightCount((n) => n + 1);
+    return () => setSpotlightCount((n) => Math.max(0, n - 1));
+  }, []);
 
   const toggle = useCallback(() => setOpen((v) => !v), []);
 
@@ -123,11 +140,25 @@ export function ChatbotProvider({ children }: { children: ReactNode }) {
         appendMessage,
         prependMessages,
         resetConversation,
+        spotlight: spotlightCount > 0,
+        registerSpotlight,
       }}
     >
       {children}
     </Ctx.Provider>
   );
+}
+
+/**
+ * Context if a provider is mounted, null otherwise.
+ *
+ * `EmptyState` renders the spotlight registrar, and an empty state must be
+ * safe to render anywhere — a marketing page, a test, any tree without the
+ * provider. Throwing there would make a presentational component depend on
+ * app chrome.
+ */
+export function useChatbotOptional() {
+  return useContext(Ctx);
 }
 
 export function useChatbot() {

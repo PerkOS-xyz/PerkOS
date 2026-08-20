@@ -2064,7 +2064,8 @@
         "copy": "Cópia",
         "thumbsUp": "Afirmativo",
         "thumbsDown": "Não gostei"
-      }
+      },
+      "toggle": "Seu assistente PerkOS"
     }
   }
 }

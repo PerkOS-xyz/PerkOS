@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 
 import { ChatbotProvider } from "../components/ChatbotProvider";
 import { ChatbotTrigger } from "../components/ChatbotTrigger";
+import { AssistantButton } from "../components/AssistantButton";
 import { ChatbotPanel } from "../components/ChatbotPanel";
 import { CommandMenu } from "../components/CommandMenu";
 import { MobileBottomNav } from "../components/MobileBottomNav";
@@ -174,6 +175,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               <CommandHint />
               <RefreshButton />
               {advancedFeatures.enabled ? <NetworkPill /> : null}
+              <AssistantButton />
               <NotificationsBell />
               <LanguageSelector />
               <UserMenu onLogout={hideLogout ? undefined : logout} />
@@ -193,6 +195,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
             <div className="flex items-center gap-1">
               {advancedFeatures.enabled ? <NetworkPill /> : null}
+              <AssistantButton />
               <RefreshButton />
               <UserMenu onLogout={hideLogout ? undefined : logout} />
 

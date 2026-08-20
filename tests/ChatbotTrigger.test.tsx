@@ -1,85 +1,64 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-let pathname = "/dashboard";
 const toggle = vi.fn();
-
-vi.mock("next/navigation", () => ({
-  usePathname: () => pathname,
-}));
+let spotlight = false;
 
 vi.mock("../app/components/ChatbotProvider", () => ({
-  useChatbot: () => ({ open: false, toggle }),
+  useChatbot: () => ({ open: false, toggle, spotlight }),
 }));
 
 import { ChatbotTrigger } from "../app/components/ChatbotTrigger";
 
-describe("ChatbotTrigger route visibility", () => {
+const LABEL = "Open your PerkOS assistant";
+
+/**
+ * The trigger used to hide itself by route prefix. That list only ever grew —
+ * every time the fixed disc landed on a card another path was added, until it
+ * covered /agents, /chat, /projects, /tasks, /wallet, /dashboard and /settings,
+ * which is nearly the whole product. Visibility now follows what is on screen:
+ * the bubble appears only where an empty state says there is nothing to cover,
+ * and the header button carries the assistant everywhere else.
+ */
+describe("ChatbotTrigger visibility", () => {
   beforeEach(() => {
-    pathname = "/dashboard";
     toggle.mockReset();
+    spotlight = false;
   });
 
-  it("renders on regular app screens", () => {
-    pathname = "/organizations";
+  it("shows the bubble on an empty screen, which has nothing to cover", () => {
+    spotlight = true;
     render(<ChatbotTrigger />);
-    expect(screen.getByRole("button", { name: "Open your PerkOS assistant" })).toBeVisible();
+    expect(screen.getByRole("button", { name: LABEL })).toBeVisible();
   });
 
-  it.each(["/agents", "/projects", "/tasks"])(
-    "does not cover cards or rows on list page %s",
-    (route) => {
-      pathname = route;
-      render(<ChatbotTrigger />);
-      expect(screen.queryByRole("button", { name: "Open your PerkOS assistant" })).toBeNull();
-    },
-  );
-
-  it("does not cover dashboard Billing or stat tiles", () => {
-    pathname = "/dashboard";
+  it("stays out of the way once a screen has content", () => {
+    spotlight = false;
     render(<ChatbotTrigger />);
-    expect(screen.queryByRole("button", { name: "Open your PerkOS assistant" })).toBeNull();
+    expect(screen.queryByRole("button", { name: LABEL })).toBeNull();
   });
 
-  it("does not cover the Settings Update control", () => {
-    pathname = "/settings";
+  it("does not depend on the route to decide", () => {
+    // The same screen is allowed the bubble whatever its path is: an empty
+    // /agents and an empty /wallet behave identically, which is what the old
+    // prefix list could never express.
+    spotlight = true;
+    const { unmount } = render(<ChatbotTrigger />);
+    expect(screen.getByRole("button", { name: LABEL })).toBeVisible();
+    unmount();
+
+    spotlight = false;
     render(<ChatbotTrigger />);
-    expect(screen.queryByRole("button", { name: "Open your PerkOS assistant" })).toBeNull();
+    expect(screen.queryByRole("button", { name: LABEL })).toBeNull();
   });
 
-  it("does not cover the agent wizard actions", () => {
-    pathname = "/agents/new";
+  it("keeps one fixed position instead of dodging a per-page rail", () => {
+    spotlight = true;
     render(<ChatbotTrigger />);
-    expect(screen.queryByRole("button", { name: "Open your PerkOS assistant" })).toBeNull();
-  });
-
-  it("does not cover direct agent chat controls", () => {
-    pathname = "/agents/DWaY182NNUTg0FMWloXY";
-    render(<ChatbotTrigger />);
-    expect(screen.queryByRole("button", { name: "Open your PerkOS assistant" })).toBeNull();
-  });
-
-  it.each(["/chat", "/chat/agent/morpheus", "/chat/conversation-id"])(
-    "does not cover chat controls on %s",
-    (route) => {
-      pathname = route;
-      render(<ChatbotTrigger />);
-      expect(screen.queryByRole("button", { name: "Open your PerkOS assistant" })).toBeNull();
-    },
-  );
-
-  it.each(["/projects/new", "/projects/project-id", "/projects/project-id?tab=chat"])(
-    "does not cover project controls on %s",
-    (route) => {
-      pathname = route;
-      render(<ChatbotTrigger />);
-      expect(screen.queryByRole("button", { name: "Open your PerkOS assistant" })).toBeNull();
-    },
-  );
-
-  it("does not cover wallet balances or transfer controls", () => {
-    pathname = "/wallet";
-    render(<ChatbotTrigger />);
-    expect(screen.queryByRole("button", { name: "Open your PerkOS assistant" })).toBeNull();
+    const cls = screen.getByRole("button", { name: LABEL }).className;
+    // lg:right-[322px] inset the disc past a 280px rail that only some pages
+    // have, so on every other page it floated far from the edge.
+    expect(cls).not.toContain("right-[322px]");
+    expect(cls).toContain("right-4");
   });
 });

@@ -3,6 +3,7 @@ import type { ComponentType, ReactNode } from "react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { AssistantSpotlight } from "./AssistantSpotlight";
 
 type Variant = "default" | "outline" | "ghost" | "secondary";
 
@@ -36,6 +37,10 @@ export function EmptyState({
         className
       )}
     >
+      {/* An empty screen has nothing to cover, so this is where the floating
+          assistant is welcome. Everywhere else it lives in the header. */}
+      <AssistantSpotlight />
+
       {Icon ? (
         <div className="grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
           <Icon className="h-5 w-5" />
