@@ -20,14 +20,17 @@ export function ChatbotTrigger() {
   // the floating assistant keeps wizard and chat Send controls directly
   // clickable instead of letting the fixed trigger intercept them.
   //
-  // Dashboard and Settings are the other collision set: at 375 / 768 / 1280
-  // the fixed pink P sat on Billing, the KPI/stat tiles, and the Settings
-  // Username "Update" button. Hide it there rather than nudge coordinates —
-  // those controls must stay fully clickable.
+  // Dashboard, Settings, and the card/list pages are the other collision set:
+  // at 375 / 768 / 1280 the fixed pink P sat on Billing, KPI/stat tiles,
+  // Settings Username Update, and (after the dashboard-only hide) agent
+  // cards, project cards, and task rows. Hide it there rather than nudge
+  // coordinates or add padding — a fixed disc still intercepts scrolled
+  // cards under the bottom-right regardless of page padding.
   if (
-    pathname?.startsWith("/agents/") ||
+    pathname?.startsWith("/agents") ||
     pathname?.startsWith("/chat") ||
-    pathname?.startsWith("/projects/") ||
+    pathname?.startsWith("/projects") ||
+    pathname?.startsWith("/tasks") ||
     pathname === "/wallet" ||
     pathname === "/dashboard" ||
     pathname === "/settings"

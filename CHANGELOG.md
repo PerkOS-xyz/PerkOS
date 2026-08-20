@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-08-19 — Floating P no longer covers list-page cards
+
+- Hide `ChatbotTrigger` on `/agents`, `/projects`, and `/tasks` (and their
+  child routes). The dashboard-only hide left the 64×64 fixed P on top of
+  agent cards after scroll; page padding cannot stop a fixed hit-target.
+- The assistant button still appears on screens that do not own a card
+  grid or composer in the bottom-right, such as `/organizations`.
+
 ## 2026-08-19 — Header shows the org name, not the wallet
 
 - Dashboard greeting uses the active organization name instead of a

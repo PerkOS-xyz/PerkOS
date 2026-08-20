@@ -21,16 +21,19 @@ describe("ChatbotTrigger route visibility", () => {
   });
 
   it("renders on regular app screens", () => {
-    pathname = "/tasks";
+    pathname = "/organizations";
     render(<ChatbotTrigger />);
     expect(screen.getByRole("button", { name: "Open your PerkOS assistant" })).toBeVisible();
   });
 
-  it("renders on the agent roster", () => {
-    pathname = "/agents";
-    render(<ChatbotTrigger />);
-    expect(screen.getByRole("button", { name: "Open your PerkOS assistant" })).toBeVisible();
-  });
+  it.each(["/agents", "/projects", "/tasks"])(
+    "does not cover cards or rows on list page %s",
+    (route) => {
+      pathname = route;
+      render(<ChatbotTrigger />);
+      expect(screen.queryByRole("button", { name: "Open your PerkOS assistant" })).toBeNull();
+    },
+  );
 
   it("does not cover dashboard Billing or stat tiles", () => {
     pathname = "/dashboard";
