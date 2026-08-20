@@ -705,6 +705,12 @@
       "deletedSuccess_one": "Se eliminó {{count}} tarea",
       "deletedSuccess_other": "Se eliminaron {{count}} tareas",
       "bulkDeleteFailed": "Falló la eliminación masiva"
+    },
+    "attachments": {
+      "label": "Adjuntos",
+      "hint": "Las imágenes le dan contexto visual al agente.",
+      "limit": "Hasta {{max}} archivos por tarea.",
+      "connectFirst": "Conecta una billetera antes de adjuntar archivos."
     }
   },
   "settings": {

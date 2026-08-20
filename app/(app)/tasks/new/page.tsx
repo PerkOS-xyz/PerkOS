@@ -13,6 +13,9 @@ import {
   type Project,
 } from "../../../lib/perkosApi";
 import { useFormDraft } from "../../../lib/useFormDraft";
+import { TaskAttachments } from "../../../components/TaskAttachments";
+import { attachmentMarkdown } from "../../../lib/uploadAttachment";
+import type { TaskAttachment } from "../../../lib/perkosApi";
 import { fieldErrors, taskSchema } from "../../../lib/validators";
 import { useVisibleProjects } from "../../../lib/useVisibleProjects";
 import { Button } from "@/components/ui/button";
@@ -87,6 +90,7 @@ export default function CreateTaskPage() {
     }
   }, [projects, projectId]);
 
+  const [attachments, setAttachments] = useState<TaskAttachment[]>([]);
   const [attempted, setAttempted] = useState(false);
   const errors = useMemo(
     () =>
@@ -120,7 +124,13 @@ export default function CreateTaskPage() {
             name: name.trim(),
             priority,
             agent: agent.trim() || "App Agent",
-            prompt: description.trim(),
+            // The agent reads `prompt`, so the files have to be IN it or they
+            // are invisible to whoever does the work. Same markdown contract
+            // the chat composer uses, so the URLs survive as plain links.
+            prompt: [description.trim(), ...attachments.map(attachmentMarkdown)]
+              .filter(Boolean)
+              .join("\n\n"),
+            attachments,
           },
         ],
       });
@@ -181,6 +191,13 @@ export default function CreateTaskPage() {
           placeholder="What's the goal of this task?"
           multiline
           error={showErrors ? errors.description : undefined}
+        />
+
+        <TaskAttachments
+          walletAddress={selectedProject?.ownerWallet ?? address}
+          scope={projectId || "unassigned"}
+          value={attachments}
+          onChange={setAttachments}
         />
 
         <SelectField

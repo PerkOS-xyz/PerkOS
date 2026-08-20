@@ -705,6 +705,12 @@
       "deletedSuccess_one": "已删除 {{count}} 个任务",
       "deletedSuccess_other": "已删除 {{count}} 个任务",
       "bulkDeleteFailed": "批量删除失败"
+    },
+    "attachments": {
+      "label": "附件",
+      "hint": "图片可为智能体提供视觉上下文。",
+      "limit": "每个任务最多 {{max}} 个文件。",
+      "connectFirst": "请先连接钱包再添加附件。"
     }
   },
   "settings": {

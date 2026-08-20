@@ -37,8 +37,20 @@ function sanitizeName(name: string): string {
   return cleaned || "file";
 }
 
-/** Render an attachment as the markdown we append to the message body. */
-export function attachmentMarkdown(a: Attachment): string {
+/**
+ * Render an attachment as the markdown we append to a message or task prompt.
+ *
+ * Takes the minimum it needs rather than a full `Attachment`, so a task
+ * attachment (whose metadata fields are optional, matching the API schema)
+ * renders through the same function.
+ */
+export function attachmentMarkdown(a: {
+  name: string;
+  url: string;
+  isImage?: boolean;
+  // Callers pass the full attachment; only these three matter here.
+  [extra: string]: unknown;
+}): string {
   return a.isImage ? `![${a.name}](${a.url})` : `[📎 ${a.name}](${a.url})`;
 }
 

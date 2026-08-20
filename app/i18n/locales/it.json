@@ -705,6 +705,12 @@
       "deletedSuccess_one": "Eliminata {{count}} attività",
       "deletedSuccess_other": "Eliminate {{count}} attività",
       "bulkDeleteFailed": "Eliminazione in blocco non riuscita"
+    },
+    "attachments": {
+      "label": "Allegati",
+      "hint": "Le immagini danno contesto visivo all'agente.",
+      "limit": "Fino a {{max}} file per attività.",
+      "connectFirst": "Collega un portafoglio prima di allegare file."
     }
   },
   "settings": {

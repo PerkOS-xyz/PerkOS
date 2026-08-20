@@ -6,6 +6,9 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { TaskAttachments } from "./TaskAttachments";
+import type { TaskAttachment } from "../lib/perkosApi";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -51,6 +54,9 @@ export function EditTaskDialog({
     (task.priority as Priority) || "Medium"
   );
   const [agent, setAgent] = useState(task.agent ?? "");
+  const [attachments, setAttachments] = useState<TaskAttachment[]>(
+    task.attachments ?? [],
+  );
   const [attempted, setAttempted] = useState(false);
 
   useEffect(() => {
@@ -76,6 +82,7 @@ export function EditTaskDialog({
           name: name.trim(),
           priority,
           agent: agent.trim() || "App Agent",
+          attachments,
         },
       });
     },
@@ -155,6 +162,13 @@ export function EditTaskDialog({
               placeholder="App Agent"
             />
           </div>
+
+          <TaskAttachments
+            walletAddress={walletAddress}
+            scope={projectId}
+            value={attachments}
+            onChange={setAttachments}
+          />
 
           <DialogFooter>
             <Button

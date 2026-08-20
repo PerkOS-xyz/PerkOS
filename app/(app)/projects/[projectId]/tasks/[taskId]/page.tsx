@@ -31,6 +31,7 @@ import {
 import { ConfirmDialog } from "../../../../../components/ConfirmDialog";
 import { EditTaskDialog } from "../../../../../components/EditTaskDialog";
 import { Markdown } from "../../../../../components/Markdown";
+import { TaskAttachmentList } from "../../../../../components/TaskAttachments";
 
 type PageProps = {
   params: Promise<{ projectId: string; taskId: string }>;
@@ -189,6 +190,8 @@ export default function TaskDetailPage({ params }: PageProps) {
       {task.logs && task.logs.length > 0 ? (
         <LogsSection logs={task.logs} />
       ) : null}
+
+      <TaskAttachmentList attachments={task.attachments ?? []} />
 
       {task.result ? <ResultSection result={task.result} /> : null}
 

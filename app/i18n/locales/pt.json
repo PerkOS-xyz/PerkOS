@@ -705,6 +705,12 @@
       "deletedSuccess_one": "Tarefa {{count}} excluída",
       "deletedSuccess_other": "Tarefas {{count}} excluídas",
       "bulkDeleteFailed": "Falha na exclusão em massa"
+    },
+    "attachments": {
+      "label": "Anexos",
+      "hint": "Imagens dão contexto visual ao agente.",
+      "limit": "Até {{max}} arquivos por tarefa.",
+      "connectFirst": "Conecte uma carteira antes de anexar arquivos."
     }
   },
   "settings": {
