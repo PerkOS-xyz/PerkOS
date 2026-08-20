@@ -2038,7 +2038,8 @@
         "copy": "コピー",
         "thumbsUp": "高評価",
         "thumbsDown": "低評価"
-      }
+      },
+      "toggle": "PerkOS アシスタント"
     }
   }
 }

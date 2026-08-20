@@ -2038,7 +2038,8 @@
         "copy": "복사",
         "thumbsUp": "좋아요",
         "thumbsDown": "싫어요"
-      }
+      },
+      "toggle": "PerkOS 어시스턴트"
     }
   }
 }

@@ -2024,7 +2024,8 @@
         "copy": "Copia",
         "thumbsUp": "Pollice in su",
         "thumbsDown": "Pollice in giù"
-      }
+      },
+      "toggle": "Il tuo assistente PerkOS"
     }
   }
 }

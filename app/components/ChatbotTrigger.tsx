@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { usePathname } from "next/navigation";
 
 import { useChatbot } from "./ChatbotProvider";
 import { cn } from "@/lib/utils";
@@ -13,30 +12,15 @@ import { cn } from "@/lib/utils";
  * the live chat is there.
  */
 export function ChatbotTrigger() {
-  const pathname = usePathname();
-  const { open, toggle } = useChatbot();
+  const { open, toggle, spotlight } = useChatbot();
 
-  // These screens already own the bottom-right composer/action area. Hiding
-  // the floating assistant keeps wizard and chat Send controls directly
-  // clickable instead of letting the fixed trigger intercept them.
-  //
-  // Dashboard, Settings, and the card/list pages are the other collision set:
-  // at 375 / 768 / 1280 the fixed pink P sat on Billing, KPI/stat tiles,
-  // Settings Username Update, and (after the dashboard-only hide) agent
-  // cards, project cards, and task rows. Hide it there rather than nudge
-  // coordinates or add padding — a fixed disc still intercepts scrolled
-  // cards under the bottom-right regardless of page padding.
-  if (
-    pathname?.startsWith("/agents") ||
-    pathname?.startsWith("/chat") ||
-    pathname?.startsWith("/projects") ||
-    pathname?.startsWith("/tasks") ||
-    pathname === "/wallet" ||
-    pathname === "/dashboard" ||
-    pathname === "/settings"
-  ) {
-    return null;
-  }
+  // Only on empty screens. The assistant is always reachable from the header
+  // button; this bubble is the invitation shown where there is no content to
+  // sit on top of. Replaces a route blocklist that had grown to cover
+  // /agents, /chat, /projects, /tasks, /wallet, /dashboard and /settings —
+  // nearly the whole product — because a fixed disc intercepts whatever
+  // scrolls under it no matter how the page is padded.
+  if (!spotlight) return null;
 
   return (
     <button
@@ -48,7 +32,10 @@ export function ChatbotTrigger() {
         // Mobile: sit just above the 64px bottom nav so the disc cannot reach
         // first-screen tiles. md+: stay in the content gutter, not the 280px
         // right rail that holds Billing. lg+ further inset from that rail.
-        "fixed bottom-[72px] right-4 z-30 h-14 w-14 rounded-full transition-transform hover:scale-105 active:scale-95 md:bottom-6 md:right-6 md:h-16 md:w-16 lg:right-[322px]",
+        // One position everywhere. The old lg:right-[322px] dodged a 280px right
+        // rail that only some pages have, so on the rest the disc floated in the
+        // middle of nowhere. Bottom offset still clears the 64px mobile nav.
+        "fixed bottom-[72px] right-4 z-30 h-14 w-14 rounded-full transition-transform hover:scale-105 active:scale-95 md:bottom-6 md:right-6 md:h-16 md:w-16",
         open && "opacity-0 pointer-events-none"
       )}
     >

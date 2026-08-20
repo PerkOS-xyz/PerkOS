@@ -2038,7 +2038,8 @@
         "copy": "Copier",
         "thumbsUp": "Pouce levé",
         "thumbsDown": "Pouce baissé"
-      }
+      },
+      "toggle": "Votre assistant PerkOS"
     }
   }
 }

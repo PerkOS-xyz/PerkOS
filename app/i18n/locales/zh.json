@@ -2024,7 +2024,8 @@
         "copy": "复制",
         "thumbsUp": "赞",
         "thumbsDown": "踩"
-      }
+      },
+      "toggle": "你的 PerkOS 助手"
     }
   }
 }
