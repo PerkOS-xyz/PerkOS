@@ -117,7 +117,7 @@ function Frame({
       </div>
       {!hideChrome ? (
         <div className="absolute inset-x-[92px] bottom-[30px] z-10 flex items-center justify-between text-[13px] text-[#7d7391]">
-          <span>{copy.nav.investorOverview} · {DECK_VERSION}</span>
+          <span>{copy.nav.overview} · {DECK_VERSION}</span>
           <span>perkos.xyz</span>
         </div>
       ) : null}
@@ -197,7 +197,7 @@ function SlideHero() {
         <div className="mb-14 flex items-center gap-5">
           <Image src="/perkos-header.png" alt="PerkOS" width={205} height={66} />
           <span className="border-l border-white/20 pl-5 text-[16px] font-medium uppercase tracking-[0.18em] text-white/60">
-            {copy.nav.investorOverview}
+            {copy.nav.overview}
           </span>
         </div>
         <p className="mb-5 text-[17px] font-semibold uppercase tracking-[0.22em] text-[#ff8ab4]">
