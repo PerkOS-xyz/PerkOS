@@ -30,16 +30,23 @@ service cloud.firestore {
     // project subtree. Rules are ADDITIVE (Firestore grants if ANY match
     // allows), so the owner keeps full access via the workspace wildcard.
 
+    // Membership is only granted while status is missing (legacy) or "active".
+    // Removed/revoked members must not keep cross-wallet read access via a
+    // leftover sharedOrgs / sharedProjects pointer.
+    function isActiveMemberDoc(path) {
+      return exists(path)
+        && get(path).data.get('status', 'active') == 'active';
+    }
     function isOrgMember(w, orgId) {
       return isSignedIn()
-        && exists(/databases/$(database)/documents/wallets/$(w)/organizations/$(orgId)/members/$(request.auth.uid));
+        && isActiveMemberDoc(/databases/$(database)/documents/wallets/$(w)/organizations/$(orgId)/members/$(request.auth.uid));
     }
     function orgMemberRole(w, orgId) {
       return get(/databases/$(database)/documents/wallets/$(w)/organizations/$(orgId)/members/$(request.auth.uid)).data.role;
     }
     function isProjectMember(w, pid) {
       return isSignedIn()
-        && exists(/databases/$(database)/documents/wallets/$(w)/projects/$(pid)/members/$(request.auth.uid));
+        && isActiveMemberDoc(/databases/$(database)/documents/wallets/$(w)/projects/$(pid)/members/$(request.auth.uid));
     }
     function projectMemberRole(w, pid) {
       return get(/databases/$(database)/documents/wallets/$(w)/projects/$(pid)/members/$(request.auth.uid)).data.role;
