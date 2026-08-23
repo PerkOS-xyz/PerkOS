@@ -179,15 +179,23 @@ describe("AgentChatPanel hibernation policy", () => {
     expect(screen.getByTestId("desktop-chat-heading")).toHaveClass("hidden", "xl:grid");
   });
 
-  it("keeps the tablet composer fixed while only the history scrolls", () => {
+  it("keeps the composer fixed while only the history scrolls", () => {
     render(<AgentChatPanel agentId="alice" agentName="Alice" chatEnabled hibernationEnabled={false} />);
 
-    expect(screen.getByTestId("agent-chat-history")).toHaveClass(
-      "min-h-0",
-      "flex-1",
-      "overflow-y-auto",
-      "xl:min-h-[28rem]",
-    );
+    const history = screen.getByTestId("agent-chat-history");
+    expect(history).toHaveClass("min-h-0", "flex-1", "overflow-y-auto");
     expect(screen.getByTestId("agent-chat-composer")).toHaveClass("shrink-0");
+  });
+
+  it("does not cap the history on wide desktop", () => {
+    render(<AgentChatPanel agentId="alice" agentName="Alice" chatEnabled hibernationEnabled={false} />);
+
+    // xl:max-h-[42rem] + xl:flex-none turned the history into its own scroll
+    // box inside a page that also scrolled, which is the two-nested-scrollbars
+    // report. It now flexes to fill a viewport-bound conversation column, so
+    // there is a single scroll region at every width.
+    const cls = screen.getByTestId("agent-chat-history").className;
+    expect(cls).not.toContain("xl:max-h-[42rem]");
+    expect(cls).not.toContain("xl:flex-none");
   });
 });

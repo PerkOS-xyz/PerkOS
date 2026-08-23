@@ -80,9 +80,14 @@ type PageProps = {
 
 export const agentDetailResponsiveLayout = {
   tabs: "xl:hidden",
+  // xl was the broken case: both panels are visible there, but the parent was
+  // a single column, so Settings stacked UNDER the conversation. The message
+  // list kept its own capped scroll on top of the page scroll, which is the
+  // two-nested-scrollbars complaint. The conversation now owns the viewport
+  // height at every size, so exactly one thing scrolls: the message list.
   conversationBase: "min-h-0 flex-col gap-2 xl:flex xl:gap-6",
   conversationActive:
-    "flex h-[calc(100svh-18rem)] overflow-hidden md:h-[calc(100dvh-13rem)] xl:h-auto xl:overflow-visible",
+    "flex h-[calc(100svh-18rem)] overflow-hidden md:h-[calc(100dvh-13rem)] xl:h-[calc(100dvh-11rem)] xl:overflow-hidden",
   settingsBase: "flex-col gap-6 xl:flex",
 } as const;
 
@@ -248,7 +253,7 @@ export default function AgentDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="flex min-h-0 flex-col gap-4 xl:gap-6">
+    <div className="flex min-h-0 flex-col gap-4 xl:grid xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start xl:gap-6">
       <div className={cn("sticky top-0 z-30 grid grid-cols-2 gap-1 rounded-xl border border-border bg-background/95 p-1 shadow-sm backdrop-blur", agentDetailResponsiveLayout.tabs)} role="tablist" aria-label="Agent view">
         <button type="button" role="tab" aria-selected={mobileView === "conversation"} onClick={() => setMobileView("conversation")} className={cn("min-h-11 rounded-lg border px-3 text-sm font-semibold transition-colors", mobileView === "conversation" ? "border-primary/60 bg-primary text-primary-foreground shadow-sm" : "border-transparent text-muted-foreground hover:bg-muted")}>Conversation</button>
         <button type="button" role="tab" aria-selected={mobileView === "settings"} onClick={() => setMobileView("settings")} className={cn("min-h-11 rounded-lg border px-3 text-sm font-semibold transition-colors", mobileView === "settings" ? "border-primary/60 bg-primary text-primary-foreground shadow-sm" : "border-transparent text-muted-foreground hover:bg-muted")}>Settings</button>
