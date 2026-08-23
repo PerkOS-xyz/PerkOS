@@ -15,11 +15,22 @@ describe("agent detail responsive layout", () => {
     expect(agentDetailResponsiveLayout.settingsBase).not.toContain("md:flex");
   });
 
-  it("returns to document flow only on wide desktop", () => {
+  it("keeps the conversation viewport-bound on wide desktop too", () => {
+    // This used to assert xl:h-auto + xl:overflow-visible, i.e. the
+    // conversation rejoined document flow on wide screens. Both panels are
+    // visible at xl, so that put Settings UNDERNEATH the conversation and left
+    // the message list scrolling inside a page that also scrolled — the
+    // "two scrollbars, hard to handle" report. The conversation stays
+    // viewport-bound at every size so exactly one region scrolls.
     expect(agentDetailResponsiveLayout.conversationBase).toContain("xl:flex");
-    expect(agentDetailResponsiveLayout.conversationActive).toContain("xl:h-auto");
     expect(agentDetailResponsiveLayout.conversationActive).toContain(
-      "xl:overflow-visible",
+      "xl:h-[calc(100dvh-11rem)]",
+    );
+    expect(agentDetailResponsiveLayout.conversationActive).toContain(
+      "xl:overflow-hidden",
+    );
+    expect(agentDetailResponsiveLayout.conversationActive).not.toContain(
+      "xl:h-auto",
     );
   });
 });
