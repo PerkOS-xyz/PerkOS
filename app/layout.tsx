@@ -39,7 +39,18 @@ export const metadata: Metadata = {
   },
   description: OG_DESC,
   applicationName: "PerkOS AI",
-  alternates: { canonical: "/" },
+  alternates: {
+    canonical: "/",
+    // `<link rel="ai-catalog">` is one of the three ways an agent can find the
+    // capability manifest (the others are the Agentmap directive in robots.txt
+    // and the Link header). Next has no typed field for a custom rel, so it
+    // goes through `types`, which renders exactly that tag.
+    types: {
+      "application/json": [
+        { url: `${CANONICAL_URL}/.well-known/ai-catalog.json`, title: "ai-catalog" },
+      ],
+    },
+  },
   keywords: [
     "AI for small business",
     "AI team",
