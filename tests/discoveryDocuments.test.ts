@@ -21,11 +21,22 @@ describe("discovery documents", () => {
     expect(middlewareSource).not.toContain("request.nextUrl.origin");
   });
 
-  it("keeps the middleware to headers, with .well-known excluded", () => {
+  it("never changes routing, with .well-known excluded", () => {
     // Farcaster and Base App fetch /.well-known/farcaster.json to verify the
-    // Mini App; altering its routing would break embedding.
+    // Mini App; altering its routing would break embedding. Markdown
+    // negotiation answers inline for exactly this reason rather than
+    // rewriting to a mirror path.
     expect(middlewareSource).toContain(".well-known");
     expect(middlewareSource).not.toContain("NextResponse.redirect");
     expect(middlewareSource).not.toContain("NextResponse.rewrite");
+  });
+
+  it("serves markdown only when it is actually asked for", () => {
+    // A browser and a Farcaster client never send this Accept, so neither can
+    // be handed markdown by accident.
+    expect(middlewareSource).toContain("text/markdown");
+    expect(middlewareSource).toContain("accept");
+    // `Vary` so a cache cannot serve the markdown to an HTML request.
+    expect(middlewareSource).toContain("vary");
   });
 });
