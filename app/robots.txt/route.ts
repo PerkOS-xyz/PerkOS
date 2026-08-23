@@ -45,6 +45,9 @@ const BODY = [
   "Allow: /openapi.json",
   "Allow: /.well-known/",
   "",
+  // Points agents at the capability manifest, the same way Sitemap points
+  // crawlers at the page index.
+  `Agentmap: ${SITE}/.well-known/ai-catalog.json`,
   `Sitemap: ${SITE}/sitemap.xml`,
   `Host: ${SITE}`,
   "",

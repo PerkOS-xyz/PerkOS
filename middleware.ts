@@ -59,6 +59,7 @@ export function middleware(request: NextRequest) {
       `<${origin}/AGENTS.md>; rel="author"; type="text/markdown"`,
       `<${origin}/openapi.json>; rel="service-desc"; type="application/json"`,
       `<${origin}/.well-known/api-catalog>; rel="api-catalog"`,
+      `<${origin}/.well-known/ai-catalog.json>; rel="ai-catalog"; type="application/json"`,
     ].join(", "),
   );
 
