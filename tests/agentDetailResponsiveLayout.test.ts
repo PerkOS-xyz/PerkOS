@@ -15,22 +15,20 @@ describe("agent detail responsive layout", () => {
     expect(agentDetailResponsiveLayout.settingsBase).not.toContain("md:flex");
   });
 
-  it("keeps the conversation viewport-bound on wide desktop too", () => {
-    // This used to assert xl:h-auto + xl:overflow-visible, i.e. the
-    // conversation rejoined document flow on wide screens. Both panels are
-    // visible at xl, so that put Settings UNDERNEATH the conversation and left
-    // the message list scrolling inside a page that also scrolled — the
-    // "two scrollbars, hard to handle" report. The conversation stays
-    // viewport-bound at every size so exactly one region scrolls.
+  it("leaves the conversation in document flow on wide desktop", () => {
+    // Pinning it to `100dvh - <magic>` at xl put the composer out of reach:
+    // the app header, working-now strip, back link and title block all sit
+    // above the conversation, so the box started below that offset and its
+    // bottom fell past the viewport — and overflow-hidden meant you could not
+    // scroll to it. The page scroll is the reliable one, and with the
+    // history's own cap removed it is the only one.
     expect(agentDetailResponsiveLayout.conversationBase).toContain("xl:flex");
+    expect(agentDetailResponsiveLayout.conversationActive).toContain("xl:h-auto");
     expect(agentDetailResponsiveLayout.conversationActive).toContain(
-      "xl:h-[calc(100dvh-11rem)]",
-    );
-    expect(agentDetailResponsiveLayout.conversationActive).toContain(
-      "xl:overflow-hidden",
+      "xl:overflow-visible",
     );
     expect(agentDetailResponsiveLayout.conversationActive).not.toContain(
-      "xl:h-auto",
+      "xl:h-[calc(",
     );
   });
 });
