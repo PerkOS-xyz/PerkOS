@@ -17,6 +17,14 @@ import { NextResponse } from "next/server";
  */
 export const dynamic = "force-dynamic";
 
+/**
+ * The public origin. Behind Caddy the server binds 0.0.0.0:3000 and that is
+ * what the request URL reports, so pointing a caller at a URL derived from the
+ * request sends it to an address it cannot reach. The same mistake shipped
+ * once already in the Link headers.
+ */
+const SITE = process.env.NEXT_PUBLIC_CANONICAL_URL ?? "https://perkos.xyz";
+
 const PLATFORM_API =
   process.env.PERKOS_API_URL ??
   process.env.NEXT_PUBLIC_PERKOS_API_URL ??
@@ -88,7 +96,7 @@ export async function POST(request: Request): Promise<Response> {
     return rpcError(
       id,
       -32001,
-      `Unauthorized: send a bearer token. See ${new URL(request.url).origin}/auth.md`,
+      `Unauthorized: send a bearer token. See ${SITE}/auth.md`,
       401,
     );
   }
