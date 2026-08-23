@@ -1,4 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+
+import { LANDING_MARKDOWN } from "./app/lib/agentMarkdown";
 
 /**
  * Advertise the agent contract on every HTML response.
@@ -29,7 +31,24 @@ import { NextResponse } from "next/server";
  */
 const SITE = process.env.NEXT_PUBLIC_CANONICAL_URL ?? "https://perkos.xyz";
 
-export function middleware() {
+export function middleware(request: NextRequest) {
+  // Content negotiation: an agent that asks for markdown gets markdown from
+  // the SAME url, rather than having to know a separate path exists. Answered
+  // inline instead of rewriting, so this stays out of routing entirely — a
+  // browser or a Farcaster client never sends this Accept, so they never
+  // reach here.
+  if (
+    request.nextUrl.pathname === "/" &&
+    (request.headers.get("accept") ?? "").includes("text/markdown")
+  ) {
+    return new NextResponse(LANDING_MARKDOWN, {
+      headers: {
+        "content-type": "text/markdown; charset=utf-8",
+        vary: "accept",
+      },
+    });
+  }
+
   const response = NextResponse.next();
   const origin = SITE;
 
