@@ -80,14 +80,24 @@ type PageProps = {
 
 export const agentDetailResponsiveLayout = {
   tabs: "xl:hidden",
-  // xl was the broken case: both panels are visible there, but the parent was
-  // a single column, so Settings stacked UNDER the conversation. The message
-  // list kept its own capped scroll on top of the page scroll, which is the
-  // two-nested-scrollbars complaint. The conversation now owns the viewport
-  // height at every size, so exactly one thing scrolls: the message list.
+  // Two things were wrong at xl and they needed different answers.
+  //
+  // Settings stacked UNDER the conversation because the parent was a single
+  // column at every width; that is fixed by the grid on the parent.
+  //
+  // The nested scrollbars came from the history's own capped box
+  // (xl:max-h-[42rem] xl:flex-none), which is gone.
+  //
+  // The conversation itself stays in DOCUMENT FLOW at xl. Pinning it to
+  // `100dvh - <magic>` looks right until you count what sits above it on this
+  // page: app header, the working-now strip, the back link and the title block
+  // with its badges. The box then starts below that offset and its bottom
+  // falls past the viewport, so the composer is unreachable — with
+  // overflow-hidden you cannot even scroll to it. The page scroll is the
+  // reliable one here, and with the cap gone it is also the only one.
   conversationBase: "min-h-0 flex-col gap-2 xl:flex xl:gap-6",
   conversationActive:
-    "flex h-[calc(100svh-18rem)] overflow-hidden md:h-[calc(100dvh-13rem)] xl:h-[calc(100dvh-11rem)] xl:overflow-hidden",
+    "flex h-[calc(100svh-18rem)] overflow-hidden md:h-[calc(100dvh-13rem)] xl:h-auto xl:overflow-visible",
   settingsBase: "flex-col gap-6 xl:flex",
 } as const;
 
