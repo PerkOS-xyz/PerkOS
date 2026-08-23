@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 /**
  * Advertise the agent contract on every HTML response.
@@ -18,9 +18,20 @@ import { NextResponse, type NextRequest } from "next/server";
  * Mini App, browser) are told apart: that happens client-side in
  * `useIsInMiniApp`, after the page loads.
  */
-export function middleware(request: NextRequest) {
+/**
+ * The public origin, taken from config rather than from the incoming request.
+ *
+ * Behind Caddy the Next server binds 0.0.0.0:3000 and that is what the request
+ * URL reports, so deriving the origin from it emitted
+ * `<https://0.0.0.0:3000/llms.txt>` — a header pointing at an address no
+ * caller can reach. The other discovery documents already read this env var,
+ * so they were correct while the header was not.
+ */
+const SITE = process.env.NEXT_PUBLIC_CANONICAL_URL ?? "https://perkos.xyz";
+
+export function middleware() {
   const response = NextResponse.next();
-  const origin = request.nextUrl.origin;
+  const origin = SITE;
 
   response.headers.set(
     "link",

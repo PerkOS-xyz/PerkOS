@@ -12,7 +12,10 @@ export function GET(): Response {
   const body = {
     linkset: [
       {
-        anchor: `${SITE}/api/platform`,
+        // The origin identifies the API. `/api/platform` is only a prefix:
+        // its children answer, the path itself 404s, and a catalog whose
+        // anchor 404s reads as broken to a scanner following it.
+        anchor: SITE,
         "service-desc": [
           { href: `${SITE}/openapi.json`, type: "application/json" },
         ],
