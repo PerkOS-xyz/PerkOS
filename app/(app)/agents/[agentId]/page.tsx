@@ -262,8 +262,14 @@ export default function AgentDetailPage({ params }: PageProps) {
     );
   }
 
+  // Single column on purpose. A two-column grid on this element does NOT work:
+  // its children are not just the two panels — a `hidden … xl:flex` block sits
+  // before the conversation and is visible at xl, so it takes the wide track
+  // and pushes the conversation into the narrow one (it rendered 22rem wide
+  // and 17031px tall). Putting Settings beside the chat needs the two panels
+  // wrapped in their own grid parent, which is a JSX change, not a class one.
   return (
-    <div className="flex min-h-0 flex-col gap-4 xl:grid xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start xl:gap-6">
+    <div className="flex min-h-0 flex-col gap-4 xl:gap-6">
       <div className={cn("sticky top-0 z-30 grid grid-cols-2 gap-1 rounded-xl border border-border bg-background/95 p-1 shadow-sm backdrop-blur", agentDetailResponsiveLayout.tabs)} role="tablist" aria-label="Agent view">
         <button type="button" role="tab" aria-selected={mobileView === "conversation"} onClick={() => setMobileView("conversation")} className={cn("min-h-11 rounded-lg border px-3 text-sm font-semibold transition-colors", mobileView === "conversation" ? "border-primary/60 bg-primary text-primary-foreground shadow-sm" : "border-transparent text-muted-foreground hover:bg-muted")}>Conversation</button>
         <button type="button" role="tab" aria-selected={mobileView === "settings"} onClick={() => setMobileView("settings")} className={cn("min-h-11 rounded-lg border px-3 text-sm font-semibold transition-colors", mobileView === "settings" ? "border-primary/60 bg-primary text-primary-foreground shadow-sm" : "border-transparent text-muted-foreground hover:bg-muted")}>Settings</button>
