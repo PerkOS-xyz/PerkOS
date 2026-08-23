@@ -75,6 +75,21 @@ export function GET(): Response {
         ],
       },
       {
+        id: urn("agent", "perkos-assistant"),
+        displayName: "PerkOS assistant (A2A)",
+        description:
+          "The product assistant, reachable over A2A. Answers questions about " +
+          "using PerkOS App and Desktop, and helps work out why something is " +
+          "not behaving.",
+        type: "application/json",
+        url: `${SITE}/.well-known/agent-card.json`,
+        representativeQueries: [
+          "ask PerkOS how to create a project",
+          "why does my PerkOS agent show Runtime unverified",
+          "talk to the PerkOS assistant over A2A",
+        ],
+      },
+      {
         id: urn("docs", "llms-index"),
         displayName: "llms.txt index",
         description: "Short entry point listing the contract on this origin.",

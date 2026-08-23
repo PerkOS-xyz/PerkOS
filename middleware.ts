@@ -60,6 +60,7 @@ export function middleware(request: NextRequest) {
       `<${origin}/openapi.json>; rel="service-desc"; type="application/json"`,
       `<${origin}/.well-known/api-catalog>; rel="api-catalog"`,
       `<${origin}/.well-known/ai-catalog.json>; rel="ai-catalog"; type="application/json"`,
+      `<${origin}/.well-known/agent-card.json>; rel="agent-card"; type="application/json"`,
     ].join(", "),
   );
 

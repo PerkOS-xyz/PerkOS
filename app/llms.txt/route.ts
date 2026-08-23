@@ -27,6 +27,12 @@ not something a caller needs to know.
 - [OpenAPI](${SITE}/openapi.json): machine-readable description of the endpoints below.
 - [API catalog](${SITE}/.well-known/api-catalog): RFC 9727 linkset.
 
+## Talking to PerkOS itself
+
+PerkOS has an assistant you can ask about the product, reachable over A2A.
+
+- [Agent card](${SITE}/.well-known/agent-card.json): what it does and where to call it.
+
 ## Authenticating
 
 You need a wallet. An address alone proves nothing, so you sign a one-time
