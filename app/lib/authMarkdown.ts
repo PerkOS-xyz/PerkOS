@@ -7,7 +7,14 @@
  */
 const SITE = process.env.NEXT_PUBLIC_CANONICAL_URL ?? "https://perkos.xyz";
 
-export const AUTH_MARKDOWN = `# Authentication
+export const AUTH_MARKDOWN = `# Auth.md
+
+<!--
+  The H1 is the literal \`Auth.md\` the convention expects, not a prettier
+  "Authentication". A readiness scan that found this file still reported it
+  missing: "auth.md exists but is missing the expected Auth.md heading". The
+  heading is the machine-readable part; the prose below is for the reader.
+-->
 
 PerkOS authenticates callers by **wallet signature**. There is no API key to
 request and no OAuth flow: you prove you hold a private key, and you do it
