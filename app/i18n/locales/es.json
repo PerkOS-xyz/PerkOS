@@ -405,7 +405,7 @@
   "dashboard": {
     "greeting": {
       "welcomeBack": "Bienvenido de nuevo",
-      "intro": "Soy Ask PerkOS Agent. Te voy a ayudar a crear y poner en marcha los agentes y proyectos que necesites. Elige en qué quieres enfocarte hoy."
+      "intro": "Soy PerkOS. Te voy a ayudar a crear y poner en marcha los agentes y proyectos que necesites. Elige en qué quieres enfocarte hoy."
     },
     "workspace": {
       "badge": "Espacio de trabajo",
@@ -1867,7 +1867,7 @@
       "createTask": "Crear tarea",
       "registerAgent": "Registrar agente",
       "createOrganization": "Crear organización",
-      "openPerkosAgent": "Abrir Ask PerkOS Agent",
+      "openPerkosAgent": "Abrir PerkOS",
       "disconnectWallet": "Cerrar sesión"
     },
     "accessGate": {
@@ -2022,7 +2022,7 @@
           "description": "Inicia el asistente de lanzamiento de agentes en 7 pasos."
         },
         "perkos": {
-          "label": "Abrir Ask PerkOS Agent",
+          "label": "Abrir PerkOS",
           "description": "Obtén ayuda del asistente dentro de la app."
         },
         "clear": {
@@ -2056,7 +2056,7 @@
       },
       "empty": {
         "greeting": "Hola, ¿en qué puedo ayudarte hoy?",
-        "intro": "Soy Ask PerkOS Agent. Te ayudo a conocer la plataforma y a configurar los agentes de trabajo que vas a usar en tus proyectos.",
+        "intro": "Soy PerkOS. Te ayudo a conocer la plataforma y a configurar los agentes de trabajo que vas a usar en tus proyectos.",
         "quickActionsLabel": "Acciones rápidas",
         "footer": "O pregúntame lo que quieras sobre PerkOS: proyectos, agentes, entornos de ejecución, y te voy a guiar."
       },
