@@ -8,14 +8,27 @@ import { GET } from "../app/api/v1/[[...path]]/route";
  * settlement header the caller that did pay has no transaction to point at.
  */
 function captureFetch(status = 402, headers: Record<string, string> = {}) {
-  const spy = vi.fn(async () =>
-    new Response(JSON.stringify({ x402Version: 1 }), {
-      status,
-      headers: { "content-type": "application/json", ...headers },
-    }),
-  );
+  // Typed with the arguments it receives, so the assertions below read the
+  // call rather than casting away what the mock forgot to declare.
+  const spy = vi.fn((url: URL, init: RequestInit) => {
+    void url;
+    void init;
+    return Promise.resolve(
+      new Response(JSON.stringify({ x402Version: 1 }), {
+        status,
+        headers: { "content-type": "application/json", ...headers },
+      }),
+    );
+  });
   vi.stubGlobal("fetch", spy);
   return spy;
+}
+
+/** The URL and init of the nth fetch, which is what these tests assert on. */
+function callOf(spy: ReturnType<typeof captureFetch>, index = 0) {
+  const call = spy.mock.calls[index];
+  if (!call) throw new Error("fetch was not called");
+  return { url: String(call[0]), headers: call[1].headers as Headers };
 }
 
 const ctx = (path?: string[]) => ({ params: Promise.resolve({ path }) });
@@ -26,8 +39,7 @@ describe("the paid API proxy", () => {
   it("maps a bare /api/v1 to the paid resource, not an index", async () => {
     const spy = captureFetch();
     await GET(new Request("https://perkos.xyz/api/v1?q=hi"), ctx(undefined));
-    const url = String((spy.mock.calls[0]![0] as URL));
-    expect(url).toMatch(/\/v1\?q=hi$/);
+    expect(callOf(spy).url).toMatch(/\/v1\?q=hi$/);
   });
 
   it("forwards the payment header", async () => {
@@ -36,8 +48,7 @@ describe("the paid API proxy", () => {
       new Request("https://perkos.xyz/api/v1?q=hi", { headers: { "x-payment": "encoded" } }),
       ctx(undefined),
     );
-    const sent = (spy.mock.calls[0]![1] as RequestInit).headers as Headers;
-    expect(sent.get("x-payment")).toBe("encoded");
+    expect(callOf(spy).headers.get("x-payment")).toBe("encoded");
   });
 
   it("returns the settlement header to the caller", async () => {
@@ -66,13 +77,37 @@ describe("the paid API proxy", () => {
       }),
       ctx(undefined),
     );
-    const sent = (spy.mock.calls[0]![1] as RequestInit).headers as Headers;
-    expect(sent.get("authorization")).toBeNull();
+    expect(callOf(spy).headers.get("authorization")).toBeNull();
   });
 
   it("survives the API being down without pretending it paid", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("down"); }));
     const res = await GET(new Request("https://perkos.xyz/api/v1?q=hi"), ctx(undefined));
     expect(res.status).toBe(502);
+  });
+});
+
+describe("carries both protocol versions", () => {
+  it("forwards a V2 payment header", async () => {
+    // Forwarding only the V1 name makes a V2 client look upstream like one
+    // that never paid.
+    const spy = captureFetch(200);
+    await GET(
+      new Request("https://perkos.xyz/api/v1?q=hi", { headers: { "payment-signature": "encoded" } }),
+      ctx(undefined),
+    );
+    expect(callOf(spy).headers.get("payment-signature")).toBe("encoded");
+  });
+
+  it("returns the V2 requirements and settlement headers", async () => {
+    // Without these a V2 client gets a 402 it cannot read and a settlement it
+    // cannot see.
+    captureFetch(402, { "payment-required": "base64requirements" });
+    const res = await GET(new Request("https://perkos.xyz/api/v1"), ctx(undefined));
+    expect(res.headers.get("payment-required")).toBe("base64requirements");
+
+    captureFetch(200, { "payment-response": "base64settlement" });
+    const paidRes = await GET(new Request("https://perkos.xyz/api/v1?q=hi"), ctx(undefined));
+    expect(paidRes.headers.get("payment-response")).toBe("base64settlement");
   });
 });

@@ -33,6 +33,9 @@ const REQUEST_HEADERS = [
   // buying twice. Dropping either here would look upstream like a caller that
   // never paid.
   "x-payment",
+  // The V2 name for the same thing. Forwarding only the V1 header makes a
+  // V2 client look upstream like one that never paid.
+  "payment-signature",
   "x-idempotency-key",
 ] as const;
 
@@ -42,6 +45,10 @@ const RESPONSE_HEADERS = [
   // Carries the settlement back. Without it a caller that paid has no
   // transaction to point at.
   "x-payment-response",
+  // V2 equivalents. Without these a V2 client gets a 402 it cannot read and
+  // a settlement it cannot see.
+  "payment-response",
+  "payment-required",
 ] as const;
 
 function apiBase(): URL {
