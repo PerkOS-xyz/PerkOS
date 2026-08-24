@@ -13,6 +13,15 @@ describe("A2A agent card", () => {
     expect(card.name).toBe("PerkOS");
   });
 
+  it("declares the transport, not just a bare url", async () => {
+    const card = await GET().json();
+    // `url` alone leaves a caller guessing which protocol is spoken there, and
+    // the spec rejects a card without this.
+    expect(card.supportedInterfaces).toHaveLength(1);
+    expect(card.supportedInterfaces[0].transport).toBe("JSONRPC");
+    expect(card.supportedInterfaces[0].url).toBe(card.url);
+  });
+
   it("does not claim capabilities the endpoint lacks", async () => {
     const card = await GET().json();
     // The endpoint implements message/send only. Advertising streaming would

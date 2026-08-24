@@ -27,6 +27,9 @@ export function GET(): Response {
       "the agents on your team, chat, and settings.",
     url: `${SITE}/api/a2a`,
     preferredTransport: "JSONRPC",
+    // Required by the spec even with a single transport: `url` alone leaves a
+    // caller guessing which protocol is spoken there.
+    supportedInterfaces: [{ transport: "JSONRPC", url: `${SITE}/api/a2a` }],
     version: "1.0.0",
     provider: { organization: "PerkOS", url: SITE },
     documentationUrl: `${SITE}/AGENTS.md`,

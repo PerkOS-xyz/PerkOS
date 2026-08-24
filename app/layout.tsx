@@ -39,18 +39,7 @@ export const metadata: Metadata = {
   },
   description: OG_DESC,
   applicationName: "PerkOS AI",
-  alternates: {
-    canonical: "/",
-    // `<link rel="ai-catalog">` is one of the three ways an agent can find the
-    // capability manifest (the others are the Agentmap directive in robots.txt
-    // and the Link header). Next has no typed field for a custom rel, so it
-    // goes through `types`, which renders exactly that tag.
-    types: {
-      "application/json": [
-        { url: `${CANONICAL_URL}/.well-known/ai-catalog.json`, title: "ai-catalog" },
-      ],
-    },
-  },
+  alternates: { canonical: "/" },
   keywords: [
     "AI for small business",
     "AI team",
@@ -135,6 +124,15 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
+      {/* Raw <link rel="ai-catalog">, one of the three ways an agent finds the
+          capability manifest. Next's metadata `alternates.types` cannot emit a
+          custom rel — it renders rel="alternate", which no scanner looks for.
+          React hoists this into <head>. */}
+      <link
+        rel="ai-catalog"
+        type="application/json"
+        href={`${CANONICAL_URL}/.well-known/ai-catalog.json`}
+      />
         <GoogleAnalytics />
         <MiniAppReady />
         <Providers>
