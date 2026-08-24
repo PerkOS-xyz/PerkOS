@@ -152,6 +152,94 @@ export function GET(): Response {
           responses: { "201": { description: "Created." }, "401": ERROR_RESPONSE },
         },
       },
+      /**
+       * The one endpoint here that takes money, and the only one an
+       * unfunded caller can usefully reach.
+       *
+       * It is documented with x402's own 402-then-retry shape rather than an
+       * MPP `x-payment-info` block. That extension enumerates its methods as
+       * tempo, stripe, lightning and card; PerkOS settles EIP-3009 stablecoin
+       * transfers through its own facilitator, so declaring one of those would
+       * send an agent to pay over rails that do not exist here.
+       */
+      "/api/platform/billing/deposit/x402": {
+        post: {
+          summary: "Fund a wallet with USDC, no session required",
+          description:
+            "Two steps. Call it without an X-PAYMENT header to receive the " +
+            "payment requirements, then sign an EIP-3009 authorization, " +
+            "base64 it, and repeat the call with the header. Credit goes to " +
+            "the address that signed the payment, so no bearer token is " +
+            "needed and a wallet in the body is ignored. Funding a wallet is " +
+            "what lets an otherwise unknown address sign in.",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  required: ["network", "amount"],
+                  properties: {
+                    network: { type: "string", enum: ["base", "celo"] },
+                    amount: {
+                      type: "number",
+                      description: "Stablecoin amount. The minimum to sign in is returned by the sign-in 402.",
+                    },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            "200": {
+              description: "Settled and credited.",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      ok: { type: "boolean" },
+                      wallet: { type: "string", description: "The address that signed the payment." },
+                      creditsUsd: { type: "number" },
+                      transaction: { type: "string" },
+                    },
+                  },
+                },
+              },
+            },
+            "402": {
+              description:
+                "The x402 payment requirements. Not an error: this is the " +
+                "expected first response, and it carries what to pay.",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      x402Version: { type: "integer", enum: [1] },
+                      accepts: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            scheme: { type: "string", enum: ["exact"] },
+                            network: { type: "string" },
+                            maxAmountRequired: { type: "string", description: "Base units." },
+                            payTo: { type: "string" },
+                            asset: { type: "string", description: "Token contract." },
+                            resource: { type: "string" },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            "400": ERROR_RESPONSE,
+          },
+        },
+      },
       "/api/platform/agents": {
         get: {
           summary: "Agents the caller can see",
