@@ -18,6 +18,9 @@ const REQUEST_HEADERS = [
   "x-real-ip",
   "x-idempotency-key",
   "x-payment",
+  // The V2 name for the same thing. Forwarding only the V1 header makes a
+  // V2 client look upstream like one that never paid.
+  "payment-signature",
 ] as const;
 
 const RESPONSE_HEADERS = [
@@ -25,6 +28,10 @@ const RESPONSE_HEADERS = [
   "location",
   "retry-after",
   "x-payment-response",
+  // V2 equivalents. Without these a V2 client gets a 402 it cannot read and
+  // a settlement it cannot see.
+  "payment-response",
+  "payment-required",
 ] as const;
 
 function platformApiBase(): URL {
