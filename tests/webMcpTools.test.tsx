@@ -139,7 +139,11 @@ describe("registration works on either host API", () => {
     );
 
     view.unmount();
-    await waitFor(() => expect(unregisterTool).toHaveBeenCalled());
+    // The public tools survive the unmount on purpose: nothing about the
+    // component going away makes them untrue, and withdrawing them left a
+    // window where a visitor saw a site with no tools at all.
+    await waitFor(() => expect(registerTool).toHaveBeenCalled());
+    expect(unregisterTool.mock.calls.flat()).not.toContain("perkos_how_to_connect");
   });
 
   it("ignores a host object that implements neither", async () => {

@@ -88,20 +88,46 @@ function publish(context: ModelContext, tools: WebMcpTool[], previous: WebMcpToo
   tools.forEach((tool) => context.registerTool?.(tool));
 }
 
-/** Withdraw everything we published, in the matching style. */
-function withdraw(tools: WebMcpTool[]): void {
-  const context = modelContext();
-  if (!context) return;
-  if (typeof context.provideContext === "function") {
-    context.provideContext({ tools: [] });
-    return;
-  }
-  tools.forEach((tool) => context.unregisterTool?.(tool.name));
-}
-
 const text = (value: unknown) => ({
   content: [{ type: "text" as const, text: typeof value === "string" ? value : JSON.stringify(value) }],
 });
+
+async function fetchPublic(path: string) {
+  const response = await fetch(path, { headers: { accept: "*/*" } });
+  if (!response.ok) throw new Error(`${response.status} fetching ${path}`);
+  return response.text();
+}
+
+/**
+ * The tools any visitor gets. Built at module scope because they describe the
+ * site rather than this component: they are valid before it mounts, after it
+ * unmounts, and whether or not anyone is signed in.
+ */
+function buildPublicTools(): WebMcpTool[] {
+  return PUBLIC_TOOL_SPECS.map((spec) => ({
+    name: spec.name,
+    description: spec.description,
+    inputSchema: NO_ARGUMENTS,
+    async execute() {
+      return text(await fetchPublic(spec.path));
+    },
+  }));
+}
+
+/**
+ * Drop the session tools and keep the public ones.
+ *
+ * This used to publish an empty set. A real browser showed the component
+ * unmounting and remounting once during startup, so the observed sequence was
+ * tools, nothing, tools — and a visitor sampling in that gap saw a site with
+ * no tools at all. Nothing about an unmount makes the public tools untrue, so
+ * withdrawing them was never right; only the session tools have to go.
+ */
+function withdraw(published: WebMcpTool[]): void {
+  const context = modelContext();
+  if (!context) return;
+  publish(context, buildPublicTools(), published);
+}
 
 export function WebMcpTools() {
   const { address, isConnected } = useAppAccount();
@@ -131,26 +157,9 @@ export function WebMcpTools() {
     // about: the site works the same either way.
     if (!context) return;
 
-    async function fetchPublic(path: string) {
-      const response = await fetch(path, { headers: { accept: "*/*" } });
-      if (!response.ok) throw new Error(`${response.status} fetching ${path}`);
-      return response.text();
-    }
-
-    /**
-     * Available without signing in, because an agent that has just landed
-     * needs to learn the rules before it can follow them. The same specs are
-     * registered by the inline bootstrap before hydration, so these replace
-     * identical tools rather than adding new ones.
-     */
-    const publicTools: WebMcpTool[] = PUBLIC_TOOL_SPECS.map((spec) => ({
-      name: spec.name,
-      description: spec.description,
-      inputSchema: NO_ARGUMENTS,
-      async execute() {
-        return text(await fetchPublic(spec.path));
-      },
-    }));
+    // Same specs the inline bootstrap registered before hydration, so these
+    // replace identical tools rather than adding new ones.
+    const publicTools = buildPublicTools();
 
     if (!isConnected || !address) {
       // Anonymous visitor: publish the public tools and stop. Registering the
