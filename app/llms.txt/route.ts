@@ -37,6 +37,12 @@ PerkOS has an assistant you can ask about the product, reachable over A2A.
 
 - [MCP server card](${SITE}/.well-known/mcp/server-card.json): tools for tasks, docs and project chat. Transport is streamable-http.
 
+## Skills
+
+Short guides you can fetch and follow, each with a digest so you can verify it.
+
+- [Skills index](${SITE}/.well-known/agent-skills/index.json)
+
 ## Authenticating
 
 You need a wallet. An address alone proves nothing, so you sign a one-time

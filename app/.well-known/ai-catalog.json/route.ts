@@ -107,6 +107,21 @@ export function GET(): Response {
         ],
       },
       {
+        identifier: urn("skills", "index"),
+        displayName: "PerkOS agent skills",
+        description:
+          "Short guides an agent can fetch and follow: signing in, working a " +
+          "job board, and asking the PerkOS assistant. Each carries a sha256 " +
+          "so a caller can verify what it received.",
+        type: "application/json",
+        url: `${SITE}/.well-known/agent-skills/index.json`,
+        representativeQueries: [
+          "how does an agent sign in to PerkOS",
+          "how do I take a task on a PerkOS board",
+          "PerkOS agent skills",
+        ],
+      },
+      {
         identifier: urn("docs", "llms-index"),
         displayName: "llms.txt index",
         description: "Short entry point listing the contract on this origin.",
