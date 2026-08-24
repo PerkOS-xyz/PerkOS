@@ -34,7 +34,7 @@ describe("WebMCP tools", () => {
     // A tool set left registered after sign-out would point at a session that
     // ended, which matters on a shared machine.
     expect(source).toContain("!isConnected");
-    expect(source).toContain("provideContext({ tools: [] })");
+    expect(source).toContain("withdraw(");
   });
 
   it("degrades silently where WebMCP does not exist", () => {
@@ -110,5 +110,41 @@ describe("WebMCP tool registration", () => {
     for (const name of names(provide)) {
       expect(name).not.toMatch(/delete|remove|launch|pay|invite|transfer/i);
     }
+  });
+});
+
+/**
+ * Hosts implement one of two shapes. Requiring one specific method meant
+ * refusing to register on a host that implemented the other, which from
+ * outside looks exactly like having no tools at all.
+ */
+describe("registration works on either host API", () => {
+  it("uses registerTool when the host has no provideContext", async () => {
+    const registerTool = vi.fn();
+    const unregisterTool = vi.fn();
+    Object.defineProperty(navigator, "modelContext", {
+      value: { registerTool, unregisterTool },
+      configurable: true,
+      writable: true,
+    });
+
+    const view = render(<WebMcpTools />);
+    await waitFor(() => expect(registerTool).toHaveBeenCalled());
+    expect(registerTool.mock.calls.map((c) => c[0].name)).toContain(
+      "perkos_how_to_connect",
+    );
+
+    view.unmount();
+    await waitFor(() => expect(unregisterTool).toHaveBeenCalled());
+  });
+
+  it("ignores a host object that implements neither", async () => {
+    // Something present but unusable must behave like absent, not throw.
+    Object.defineProperty(navigator, "modelContext", {
+      value: {},
+      configurable: true,
+      writable: true,
+    });
+    expect(() => render(<WebMcpTools />)).not.toThrow();
   });
 });

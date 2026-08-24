@@ -41,17 +41,47 @@ type WebMcpTool = {
   }>;
 };
 
+/**
+ * Hosts expose one of two shapes: a bulk `provideContext`, or a per-tool
+ * `registerTool` with `unregisterTool`. We accept either. Requiring one
+ * specific method meant refusing to register on a host that implemented the
+ * other, which looks identical from outside to having no tools at all.
+ */
 type ModelContext = {
-  provideContext: (context: { tools: WebMcpTool[] }) => void;
+  provideContext?: (context: { tools: WebMcpTool[] }) => void;
+  registerTool?: (tool: WebMcpTool) => void;
+  unregisterTool?: (name: string) => void;
 };
 
 function modelContext(): ModelContext | null {
   if (typeof navigator === "undefined") return null;
   const candidate = (navigator as Navigator & { modelContext?: ModelContext })
     .modelContext;
-  return candidate && typeof candidate.provideContext === "function"
-    ? candidate
-    : null;
+  if (!candidate) return null;
+  const usable =
+    typeof candidate.provideContext === "function" ||
+    typeof candidate.registerTool === "function";
+  return usable ? candidate : null;
+}
+
+/** Publish a tool set through whichever API this host actually provides. */
+function publish(context: ModelContext, tools: WebMcpTool[]): void {
+  if (typeof context.provideContext === "function") {
+    context.provideContext({ tools });
+    return;
+  }
+  tools.forEach((tool) => context.registerTool?.(tool));
+}
+
+/** Withdraw everything we published, in the matching style. */
+function withdraw(tools: WebMcpTool[]): void {
+  const context = modelContext();
+  if (!context) return;
+  if (typeof context.provideContext === "function") {
+    context.provideContext({ tools: [] });
+    return;
+  }
+  tools.forEach((tool) => context.unregisterTool?.(tool.name));
 }
 
 const text = (value: unknown) => ({
@@ -106,10 +136,10 @@ export function WebMcpTools() {
     if (!isConnected || !address) {
       // Anonymous visitor: publish the public tools and stop. Registering the
       // session tools here would advertise calls that can only fail.
-      if (!cancelled) context.provideContext({ tools: publicTools });
+      if (!cancelled) publish(context, publicTools);
       return () => {
         cancelled = true;
-        modelContext()?.provideContext({ tools: [] });
+        withdraw(publicTools);
       };
     }
 
@@ -188,13 +218,14 @@ export function WebMcpTools() {
       },
     ];
 
-    if (!cancelled) context.provideContext({ tools: [...publicTools, ...sessionTools] });
+    const everything = [...publicTools, ...sessionTools];
+    if (!cancelled) publish(context, everything);
 
     return () => {
       cancelled = true;
       // Hand back an empty set on sign-out or unmount, so a shared machine
       // does not leave tools pointing at a session that has ended.
-      modelContext()?.provideContext({ tools: [] });
+      withdraw(everything);
     };
   }, [address, isConnected]);
 
