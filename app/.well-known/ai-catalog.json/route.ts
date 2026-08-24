@@ -16,6 +16,8 @@ export const dynamic = "force-static";
 
 const SITE = process.env.NEXT_PUBLIC_CANONICAL_URL ?? "https://perkos.xyz";
 const HOST = new URL(SITE).host;
+/** ARD calls this field `identifier`; `id` is silently ignored and the entry
+ * is then rejected as having none. */
 const urn = (ns: string, name: string) => `urn:air:${HOST}:${ns}:${name}`;
 
 export function GET(): Response {
@@ -31,7 +33,7 @@ export function GET(): Response {
     },
     entries: [
       {
-        id: urn("api", "platform"),
+        identifier: urn("api", "platform"),
         displayName: "PerkOS Platform API",
         description:
           "Projects, task boards and agents. Bearer token from wallet " +
@@ -47,7 +49,7 @@ export function GET(): Response {
         ],
       },
       {
-        id: urn("auth", "wallet-signature"),
+        identifier: urn("auth", "wallet-signature"),
         displayName: "PerkOS authentication",
         description:
           "How to authenticate: request a one-time nonce, sign it, exchange " +
@@ -62,7 +64,7 @@ export function GET(): Response {
         ],
       },
       {
-        id: urn("docs", "agent-guide"),
+        identifier: urn("docs", "agent-guide"),
         displayName: "Agent guide",
         description:
           "Walkthrough for a non-browser caller: sign in, call the platform, " +
@@ -75,7 +77,7 @@ export function GET(): Response {
         ],
       },
       {
-        id: urn("agent", "perkos-assistant"),
+        identifier: urn("agent", "perkos-assistant"),
         displayName: "PerkOS assistant (A2A)",
         description:
           "The product assistant, reachable over A2A. Answers questions about " +
@@ -90,7 +92,7 @@ export function GET(): Response {
         ],
       },
       {
-        id: urn("docs", "llms-index"),
+        identifier: urn("docs", "llms-index"),
         displayName: "llms.txt index",
         description: "Short entry point listing the contract on this origin.",
         type: "text/plain",
