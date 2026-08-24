@@ -1,8 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { useAppAccount } from "../lib/useAppAccount";
+import {
+  NO_ARGUMENTS,
+  PUBLIC_TOOL_SPECS,
+} from "../lib/webMcpPublicTools";
 
 /**
  * Exposes PerkOS actions to an agent running inside the user's own browser,
@@ -64,12 +68,23 @@ function modelContext(): ModelContext | null {
   return usable ? candidate : null;
 }
 
-/** Publish a tool set through whichever API this host actually provides. */
-function publish(context: ModelContext, tools: WebMcpTool[]): void {
+/**
+ * Publish a tool set through whichever API this host provides.
+ *
+ * `previous` matters only for per-tool hosts: `provideContext` replaces the
+ * whole set, but `registerTool` accumulates, so anything dropped from the set
+ * has to be unregistered explicitly or it outlives the session that created
+ * it.
+ */
+function publish(context: ModelContext, tools: WebMcpTool[], previous: WebMcpTool[] = []): void {
   if (typeof context.provideContext === "function") {
     context.provideContext({ tools });
     return;
   }
+  const current = new Set(tools.map((tool) => tool.name));
+  previous
+    .filter((tool) => !current.has(tool.name))
+    .forEach((tool) => context.unregisterTool?.(tool.name));
   tools.forEach((tool) => context.registerTool?.(tool));
 }
 
@@ -91,13 +106,30 @@ const text = (value: unknown) => ({
 export function WebMcpTools() {
   const { address, isConnected } = useAppAccount();
 
+  /**
+   * What is currently published, so teardown can withdraw exactly that.
+   *
+   * It also keeps the effect from tearing down on every dependency change.
+   * Cleanup used to withdraw and then re-publish, which left a window where a
+   * consumer looking at the wrong moment saw an empty tool set — observed in
+   * a real browser as tools, then nothing, then tools again.
+   */
+  const publishedRef = useRef<WebMcpTool[]>([]);
+
+  // Withdraw once, when the component actually goes away — not on every
+  // change of session.
+  useEffect(() => {
+    return () => {
+      withdraw(publishedRef.current);
+      publishedRef.current = [];
+    };
+  }, []);
+
   useEffect(() => {
     const context = modelContext();
     // Absent in browsers without WebMCP. Nothing to register, nothing to warn
     // about: the site works the same either way.
     if (!context) return;
-
-    let cancelled = false;
 
     async function fetchPublic(path: string) {
       const response = await fetch(path, { headers: { accept: "*/*" } });
@@ -107,40 +139,25 @@ export function WebMcpTools() {
 
     /**
      * Available without signing in, because an agent that has just landed
-     * needs to learn the rules before it can follow them. Both read documents
-     * already served to anonymous callers.
+     * needs to learn the rules before it can follow them. The same specs are
+     * registered by the inline bootstrap before hydration, so these replace
+     * identical tools rather than adding new ones.
      */
-    const publicTools: WebMcpTool[] = [
-      {
-        name: "perkos_how_to_connect",
-        description:
-          "Explain how an agent authenticates with PerkOS: the wallet-signature flow, " +
-          "what access requires, and which endpoints to call. Returns the auth.md guide.",
-        inputSchema: { type: "object", properties: {} },
-        async execute() {
-          return text(await fetchPublic("/auth.md"));
-        },
+    const publicTools: WebMcpTool[] = PUBLIC_TOOL_SPECS.map((spec) => ({
+      name: spec.name,
+      description: spec.description,
+      inputSchema: NO_ARGUMENTS,
+      async execute() {
+        return text(await fetchPublic(spec.path));
       },
-      {
-        name: "perkos_list_agent_skills",
-        description:
-          "List the PerkOS agent skills published on this site, with the URL of each " +
-          "SKILL.md describing what it does and how to invoke it.",
-        inputSchema: { type: "object", properties: {} },
-        async execute() {
-          return text(await fetchPublic("/.well-known/agent-skills/index.json"));
-        },
-      },
-    ];
+    }));
 
     if (!isConnected || !address) {
       // Anonymous visitor: publish the public tools and stop. Registering the
       // session tools here would advertise calls that can only fail.
-      if (!cancelled) publish(context, publicTools);
-      return () => {
-        cancelled = true;
-        withdraw(publicTools);
-      };
+      publish(context, publicTools, publishedRef.current);
+      publishedRef.current = publicTools;
+      return;
     }
 
     async function call(path: string, init?: RequestInit) {
@@ -219,14 +236,9 @@ export function WebMcpTools() {
     ];
 
     const everything = [...publicTools, ...sessionTools];
-    if (!cancelled) publish(context, everything);
+    publish(context, everything, publishedRef.current);
+    publishedRef.current = everything;
 
-    return () => {
-      cancelled = true;
-      // Hand back an empty set on sign-out or unmount, so a shared machine
-      // does not leave tools pointing at a session that has ended.
-      withdraw(everything);
-    };
   }, [address, isConnected]);
 
   return null;

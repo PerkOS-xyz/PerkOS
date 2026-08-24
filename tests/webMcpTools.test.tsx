@@ -5,6 +5,10 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, waitFor } from "@testing-library/react";
 
 import { WebMcpTools } from "../app/components/WebMcpTools";
+import {
+  PUBLIC_TOOL_SPECS,
+  publicToolsBootstrapScript,
+} from "../app/lib/webMcpPublicTools";
 
 const source = readFileSync(
   join(process.cwd(), "app/components/WebMcpTools.tsx"),
@@ -146,5 +150,83 @@ describe("registration works on either host API", () => {
       writable: true,
     });
     expect(() => render(<WebMcpTools />)).not.toThrow();
+  });
+});
+
+/**
+ * Two failures found by driving a real browser against production: nothing was
+ * registered at the load event, and the effect tore down and re-published on
+ * every session change, so a consumer looking in between saw an empty set.
+ */
+describe("tools stay available", () => {
+  it("does not publish an empty set while re-registering", async () => {
+    const calls: string[][] = [];
+    Object.defineProperty(navigator, "modelContext", {
+      value: { provideContext: (c: { tools: { name: string }[] }) => calls.push(c.tools.map((t) => t.name)) },
+      configurable: true,
+      writable: true,
+    });
+
+    const view = render(<WebMcpTools />);
+    await waitFor(() => expect(calls.length).toBeGreaterThan(0));
+
+    // Signing in mid-session must not blank the set on the way through.
+    account.address = "0xabc";
+    account.isConnected = true;
+    view.rerender(<WebMcpTools />);
+    await waitFor(() => expect(calls.length).toBeGreaterThan(1));
+
+    for (const published of calls) {
+      expect(published.length, "an empty set was published between registrations").toBeGreaterThan(0);
+    }
+  });
+
+  it("unregisters dropped tools on a per-tool host", async () => {
+    // registerTool accumulates, unlike provideContext, so a tool dropped from
+    // the set outlives the session that created it unless removed by name.
+    account.address = "0xabc";
+    account.isConnected = true;
+    const registerTool = vi.fn();
+    const unregisterTool = vi.fn();
+    Object.defineProperty(navigator, "modelContext", {
+      value: { registerTool, unregisterTool },
+      configurable: true,
+      writable: true,
+    });
+
+    const view = render(<WebMcpTools />);
+    await waitFor(() => expect(registerTool).toHaveBeenCalled());
+
+    account.address = undefined;
+    account.isConnected = false;
+    view.rerender(<WebMcpTools />);
+
+    await waitFor(() => expect(unregisterTool).toHaveBeenCalled());
+    expect(unregisterTool.mock.calls.flat()).toContain("perkos_create_task");
+  });
+});
+
+describe("the pre-hydration bootstrap", () => {
+  it("registers the same tool names the component does", () => {
+    // Two runtimes, one definition. Different names would leave a host with
+    // duplicate or orphaned tools depending on which ran last.
+    const script = publicToolsBootstrapScript();
+    for (const spec of PUBLIC_TOOL_SPECS) {
+      expect(script).toContain(spec.name);
+    }
+  });
+
+  it("does nothing where WebMCP is absent", () => {
+    const script = publicToolsBootstrapScript();
+    expect(script).toContain("if(!c)return");
+    // It runs inline on every page load, so it must not be able to throw.
+    expect(script).toContain("try{");
+  });
+
+  it("only reads paths that are public", () => {
+    for (const spec of PUBLIC_TOOL_SPECS) {
+      expect(spec.path.startsWith("/")).toBe(true);
+      expect(spec.path).not.toContain("/api/platform");
+    }
   });
 });

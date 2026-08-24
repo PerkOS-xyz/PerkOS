@@ -8,6 +8,7 @@ import { LocaleProvider } from "./components/LocaleProvider";
 import { cn } from "@/lib/utils";
 import { GoogleAnalytics } from "./components/GoogleAnalytics";
 import { WebMcpTools } from "./components/WebMcpTools";
+import { publicToolsBootstrapScript } from "./lib/webMcpPublicTools";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -144,6 +145,16 @@ export default function RootLayout({
             which meant the only visitors who could see it were the ones who
             had already signed in and no longer needed to be told how.
           */}
+          {/*
+            Registers the public tools before React hydrates. Without it the
+            tools do not exist at the load event, and a visitor that checks
+            then sees a site with no tools at all. WebMcpTools republishes the
+            same names once hydrated, adding the session tools if signed in.
+          */}
+          <script
+            id="webmcp-bootstrap"
+            dangerouslySetInnerHTML={{ __html: publicToolsBootstrapScript() }}
+          />
           <WebMcpTools />
           <LocaleProvider>{children}</LocaleProvider>
         </Providers>
