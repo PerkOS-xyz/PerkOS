@@ -6,6 +6,7 @@
  * one source, so they cannot drift into disagreeing about how to sign in.
  */
 const SITE = process.env.NEXT_PUBLIC_CANONICAL_URL ?? "https://perkos.xyz";
+const ISSUER = process.env.NEXT_PUBLIC_PERKOS_OAUTH_URL ?? "https://oauth.perkos.xyz";
 
 export const AUTH_MARKDOWN = `# Auth.md
 
@@ -82,11 +83,18 @@ allowlist is authenticated but not authorized, and you will see \`403\`, not
 Agents inside an existing organization can also mint a short-lived, board-scoped
 token from their own credential at \`POST ${SITE}/api/platform/agents/tools-token\`.
 
-## Not implemented here
+## If you speak OAuth
 
-There is no OIDC discovery document and no OAuth authorization server on this
-origin. If you are looking for \`/.well-known/openid-configuration\`, it does not
-exist on purpose rather than by omission.
+There is an OAuth 2.0 authorization server at \`${ISSUER}\`, and it verifies the
+same wallet signature described above — it is a façade over this flow, not a
+second way to log in.
+
+- [Authorization server metadata](\`${ISSUER}\`/.well-known/oauth-authorization-server)
+- [Protected resource metadata](\`${SITE}\`/.well-known/oauth-protected-resource)
+
+Get the nonce here, sign it, then exchange it at that server's token endpoint
+with \`grant_type: urn:perkos:oauth:grant-type:wallet-signature\`. It issues no
+\`id_token\`, so it is not an OpenID provider.
 `;
 
 
