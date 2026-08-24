@@ -68,3 +68,48 @@ describe("auth.md links are machine-followable", () => {
     }
   });
 });
+
+/**
+ * auth.md is the only document a self-registering agent reads before it acts.
+ * If a step in it does not work, the agent has no way to tell that from its
+ * own mistake — which is exactly what happened: the deposit step it was told
+ * to take required a token the platform refused to issue to that same wallet.
+ */
+describe("the registration flow auth.md documents is walkable", () => {
+  it("covers every step from nonce to bearer token", () => {
+    for (const step of [
+      "/api/auth/nonce",
+      "/agent/identity",
+      "/api/platform/billing/deposit/x402",
+      "X-PAYMENT",
+      "Bearer",
+    ]) {
+      expect(AUTH_MARKDOWN, `flow is missing ${step}`).toContain(step);
+    }
+  });
+
+  it("does not send an unfunded caller to a route that needs a token", () => {
+    // The old deposit route required a bearer token that /auth/wallet-signin
+    // refuses to issue to an unfunded wallet. Documenting it here would send
+    // an agent into that deadlock.
+    const deposits = [...AUTH_MARKDOWN.matchAll(/billing\/deposit\S*/g)].map((m) => m[0]);
+    expect(deposits.length).toBeGreaterThan(0);
+    for (const route of deposits) {
+      expect(route, "must be the session-free deposit route").toContain("deposit/x402");
+    }
+  });
+
+  it("explains that 402 is recoverable and 403 is not", () => {
+    // An agent that treats them the same either gives up when it could pay,
+    // or retries forever when it cannot.
+    expect(AUTH_MARKDOWN).toMatch(/402/);
+    expect(AUTH_MARKDOWN).toMatch(/403/);
+    expect(AUTH_MARKDOWN).toContain("depositing will");
+  });
+
+  it("does not promise that paying grants access to other workspaces", () => {
+    // Collapsing balance with membership would let anyone with a few dollars
+    // read every board on the platform.
+    expect(AUTH_MARKDOWN).toContain("compute, not company");
+  });
+});
