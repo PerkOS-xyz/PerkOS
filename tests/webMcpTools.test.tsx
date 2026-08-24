@@ -1,7 +1,10 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
+import { render, waitFor } from "@testing-library/react";
+
+import { WebMcpTools } from "../app/components/WebMcpTools";
 
 const source = readFileSync(
   join(process.cwd(), "app/components/WebMcpTools.tsx"),
@@ -26,7 +29,8 @@ describe("WebMCP tools", () => {
     }
   });
 
-  it("registers only while signed in", () => {
+  it("gates the session tools on being signed in, and tears them down", () => {
+    // Public tools are registered for everyone; the session tools are not.
     // A tool set left registered after sign-out would point at a session that
     // ended, which matters on a shared machine.
     expect(source).toContain("!isConnected");
@@ -44,5 +48,67 @@ describe("WebMCP tools", () => {
     // Nothing here may bypass the API's own authorization.
     expect(source).toContain("authedFetch");
     expect(source).not.toContain("firestore");
+  });
+});
+
+const account = vi.hoisted(() => ({ address: undefined as string | undefined, isConnected: false }));
+vi.mock("../app/lib/useAppAccount", () => ({ useAppAccount: () => account }));
+
+function captureTools() {
+  const provideContext = vi.fn();
+  Object.defineProperty(navigator, "modelContext", {
+    value: { provideContext },
+    configurable: true,
+    writable: true,
+  });
+  return provideContext;
+}
+
+const names = (provide: ReturnType<typeof captureTools>) =>
+  (provide.mock.calls.at(0)?.[0].tools ?? []).map((t: { name: string }) => t.name);
+
+beforeEach(() => {
+  account.address = undefined;
+  account.isConnected = false;
+});
+
+describe("WebMCP tool registration", () => {
+  it("gives an anonymous visitor the public tools", async () => {
+    const provide = captureTools();
+    render(<WebMcpTools />);
+    await waitFor(() => expect(provide).toHaveBeenCalled());
+    expect(names(provide)).toEqual(["perkos_how_to_connect", "perkos_list_agent_skills"]);
+  });
+
+  it("does not offer an anonymous visitor tools that can only fail", async () => {
+    const provide = captureTools();
+    render(<WebMcpTools />);
+    await waitFor(() => expect(provide).toHaveBeenCalled());
+    // Advertising a call that needs a session to a caller with no session
+    // wastes its attempt and teaches it nothing about why.
+    expect(names(provide).some((n: string) => n.startsWith("perkos_create"))).toBe(false);
+  });
+
+  it("adds the session tools once signed in, keeping the public ones", async () => {
+    account.address = "0xabc";
+    account.isConnected = true;
+    const provide = captureTools();
+    render(<WebMcpTools />);
+    await waitFor(() => expect(provide).toHaveBeenCalled());
+    const registered = names(provide);
+    expect(registered).toContain("perkos_how_to_connect");
+    expect(registered).toContain("perkos_list_projects");
+    expect(registered).toContain("perkos_create_task");
+  });
+
+  it("registers nothing destructive", async () => {
+    account.address = "0xabc";
+    account.isConnected = true;
+    const provide = captureTools();
+    render(<WebMcpTools />);
+    await waitFor(() => expect(provide).toHaveBeenCalled());
+    for (const name of names(provide)) {
+      expect(name).not.toMatch(/delete|remove|launch|pay|invite|transfer/i);
+    }
   });
 });

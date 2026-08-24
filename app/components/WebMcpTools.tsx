@@ -8,12 +8,17 @@ import { useAppAccount } from "../lib/useAppAccount";
  * Exposes PerkOS actions to an agent running inside the user's own browser,
  * via the WebMCP API.
  *
- * ## The security posture, which is the whole design
+ * ## Two tiers, and why
  *
- * These tools act as the SIGNED-IN USER. That is the point of WebMCP — the
+ * PUBLIC tools register for everyone, signed in or not. They read documents
+ * this site already serves to anonymous callers, so they hand an agent that
+ * just arrived a way to learn how PerkOS works without guessing at URLs. They
+ * expose nothing a visitor could not fetch directly.
+ *
+ * SESSION tools act as the SIGNED-IN USER. That is the point of WebMCP — the
  * agent is in the person's browser, working on their behalf — but it means
- * anything registered here is reachable by any agent in that tab. So the set
- * is deliberately narrow:
+ * anything registered there is reachable by any agent in that tab. So that
+ * set is deliberately narrow:
  *
  *  - reads, and one create
  *  - nothing destructive: no deletes, no launching agents, nothing that spends
@@ -60,9 +65,53 @@ export function WebMcpTools() {
     const context = modelContext();
     // Absent in browsers without WebMCP. Nothing to register, nothing to warn
     // about: the site works the same either way.
-    if (!context || !isConnected || !address) return;
+    if (!context) return;
 
     let cancelled = false;
+
+    async function fetchPublic(path: string) {
+      const response = await fetch(path, { headers: { accept: "*/*" } });
+      if (!response.ok) throw new Error(`${response.status} fetching ${path}`);
+      return response.text();
+    }
+
+    /**
+     * Available without signing in, because an agent that has just landed
+     * needs to learn the rules before it can follow them. Both read documents
+     * already served to anonymous callers.
+     */
+    const publicTools: WebMcpTool[] = [
+      {
+        name: "perkos_how_to_connect",
+        description:
+          "Explain how an agent authenticates with PerkOS: the wallet-signature flow, " +
+          "what access requires, and which endpoints to call. Returns the auth.md guide.",
+        inputSchema: { type: "object", properties: {} },
+        async execute() {
+          return text(await fetchPublic("/auth.md"));
+        },
+      },
+      {
+        name: "perkos_list_agent_skills",
+        description:
+          "List the PerkOS agent skills published on this site, with the URL of each " +
+          "SKILL.md describing what it does and how to invoke it.",
+        inputSchema: { type: "object", properties: {} },
+        async execute() {
+          return text(await fetchPublic("/.well-known/agent-skills/index.json"));
+        },
+      },
+    ];
+
+    if (!isConnected || !address) {
+      // Anonymous visitor: publish the public tools and stop. Registering the
+      // session tools here would advertise calls that can only fail.
+      if (!cancelled) context.provideContext({ tools: publicTools });
+      return () => {
+        cancelled = true;
+        modelContext()?.provideContext({ tools: [] });
+      };
+    }
 
     async function call(path: string, init?: RequestInit) {
       const { authedFetch } = await import("../lib/apiClient");
@@ -76,7 +125,7 @@ export function WebMcpTools() {
       return body;
     }
 
-    const tools: WebMcpTool[] = [
+    const sessionTools: WebMcpTool[] = [
       {
         name: "perkos_list_projects",
         description:
@@ -139,7 +188,7 @@ export function WebMcpTools() {
       },
     ];
 
-    if (!cancelled) context.provideContext({ tools });
+    if (!cancelled) context.provideContext({ tools: [...publicTools, ...sessionTools] });
 
     return () => {
       cancelled = true;

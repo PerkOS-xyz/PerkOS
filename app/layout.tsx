@@ -7,6 +7,7 @@ import { DevAuthIndicator } from "./components/DevAuthIndicator";
 import { LocaleProvider } from "./components/LocaleProvider";
 import { cn } from "@/lib/utils";
 import { GoogleAnalytics } from "./components/GoogleAnalytics";
+import { WebMcpTools } from "./components/WebMcpTools";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -137,6 +138,13 @@ export default function RootLayout({
         <MiniAppReady />
         <Providers>
           <DevAuthIndicator />
+          {/*
+            Mounted at the root, not in the app shell, so an agent landing on
+            a public page can discover the tools too. It was inside (app),
+            which meant the only visitors who could see it were the ones who
+            had already signed in and no longer needed to be told how.
+          */}
+          <WebMcpTools />
           <LocaleProvider>{children}</LocaleProvider>
         </Providers>
       </body>
