@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 import { ChatbotProvider } from "../components/ChatbotProvider";
 import { ChatbotTrigger } from "../components/ChatbotTrigger";
 import { AssistantButton } from "../components/AssistantButton";
+import { WebMcpTools } from "../components/WebMcpTools";
 import { ChatbotPanel } from "../components/ChatbotPanel";
 import { CommandMenu } from "../components/CommandMenu";
 import { MobileBottomNav } from "../components/MobileBottomNav";
@@ -273,6 +274,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </div>
         </main>
         <MobileBottomNav />
+        <WebMcpTools />
         <ChatbotTrigger />
         <ChatbotPanel />
         <CommandMenu />
