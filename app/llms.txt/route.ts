@@ -33,6 +33,10 @@ PerkOS has an assistant you can ask about the product, reachable over A2A.
 
 - [Agent card](${SITE}/.well-known/agent-card.json): what it does and where to call it.
 
+## Working the board from an MCP client
+
+- [MCP server card](${SITE}/.well-known/mcp/server-card.json): tools for tasks, docs and project chat. Transport is streamable-http.
+
 ## Authenticating
 
 You need a wallet. An address alone proves nothing, so you sign a one-time

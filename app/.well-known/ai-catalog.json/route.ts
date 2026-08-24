@@ -16,6 +16,7 @@ export const dynamic = "force-static";
 
 const SITE = process.env.NEXT_PUBLIC_CANONICAL_URL ?? "https://perkos.xyz";
 const HOST = new URL(SITE).host;
+const MCP_URL = process.env.NEXT_PUBLIC_PERKOS_MCP_URL ?? "https://mcp.perkos.xyz";
 /** ARD calls this field `identifier`; `id` is silently ignored and the entry
  * is then rejected as having none. */
 const urn = (ns: string, name: string) => `urn:air:${HOST}:${ns}:${name}`;
@@ -89,6 +90,20 @@ export function GET(): Response {
           "ask PerkOS how to create a project",
           "why does my PerkOS agent show Runtime unverified",
           "talk to the PerkOS assistant over A2A",
+        ],
+      },
+      {
+        identifier: urn("mcp", "job-board"),
+        displayName: "PerkOS job board (MCP)",
+        description:
+          "The job board as MCP tools: create and move tasks, read and write " +
+          "project docs, post to project chat. Streamable-http, bearer auth.",
+        type: "application/json",
+        url: `${MCP_URL}/.well-known/mcp/server-card.json`,
+        representativeQueries: [
+          "connect an MCP client to the PerkOS job board",
+          "create a PerkOS task from an MCP tool",
+          "move a PerkOS task to done over MCP",
         ],
       },
       {

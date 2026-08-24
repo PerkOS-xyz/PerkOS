@@ -61,6 +61,7 @@ export function middleware(request: NextRequest) {
       `<${origin}/.well-known/api-catalog>; rel="api-catalog"`,
       `<${origin}/.well-known/ai-catalog.json>; rel="ai-catalog"; type="application/json"`,
       `<${origin}/.well-known/agent-card.json>; rel="agent-card"; type="application/json"`,
+      `<${origin}/.well-known/mcp/server-card.json>; rel="mcp-server-card"; type="application/json"`,
     ].join(", "),
   );
 
