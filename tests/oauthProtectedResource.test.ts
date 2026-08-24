@@ -38,3 +38,33 @@ describe("auth.md keeps up with reality", () => {
     expect(AUTH_MARKDOWN).toContain("id_token");
   });
 });
+
+/**
+ * auth.md is followed by machines, so a link that a human would squint past and
+ * still click is simply broken here. This caught a real one: the issuer URLs
+ * were written as inline code inside the link target, which puts a literal
+ * backtick in the href.
+ */
+describe("auth.md links are machine-followable", () => {
+  const targets = [...AUTH_MARKDOWN.matchAll(/\]\(([^)]+)\)/g)].map((m) => m[1]);
+
+  it("links to somewhere", () => {
+    expect(targets.length).toBeGreaterThan(0);
+  });
+
+  it("no link target carries stray markup", () => {
+    // Checked before anything else on purpose. An earlier version of this test
+    // skipped non-http targets first, which skipped the exact malformed link it
+    // was written to catch: a backticked URL does not start with "http".
+    for (const target of targets) {
+      expect(target).not.toMatch(/[`\s]/);
+    }
+  });
+
+  it("every absolute link target parses as a URL", () => {
+    for (const target of targets) {
+      if (!target.startsWith("http")) continue;
+      expect(() => new URL(target)).not.toThrow();
+    }
+  });
+});

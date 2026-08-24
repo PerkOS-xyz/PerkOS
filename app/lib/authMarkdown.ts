@@ -89,8 +89,8 @@ There is an OAuth 2.0 authorization server at \`${ISSUER}\`, and it verifies the
 same wallet signature described above — it is a façade over this flow, not a
 second way to log in.
 
-- [Authorization server metadata](\`${ISSUER}\`/.well-known/oauth-authorization-server)
-- [Protected resource metadata](\`${SITE}\`/.well-known/oauth-protected-resource)
+- [Authorization server metadata](${ISSUER}/.well-known/oauth-authorization-server)
+- [Protected resource metadata](${SITE}/.well-known/oauth-protected-resource)
 
 Get the nonce here, sign it, then exchange it at that server's token endpoint
 with \`grant_type: urn:perkos:oauth:grant-type:wallet-signature\`. It issues no
