@@ -113,3 +113,23 @@ describe("the registration flow auth.md documents is walkable", () => {
     expect(AUTH_MARKDOWN).toContain("compute, not company");
   });
 });
+
+describe("auth.md documents the wallet-free path", () => {
+  it("tells an agent with no key that it can still register", () => {
+    // Otherwise the only documented way in requires something it does not
+    // have, and it has no reason to think there is another.
+    expect(AUTH_MARKDOWN).toContain('"type": "anonymous"');
+    expect(AUTH_MARKDOWN).toContain("urn:ietf:params:oauth:grant-type:jwt-bearer");
+  });
+
+  it("says registration is free and grants nothing", () => {
+    // An agent that assumes registering was enough will read its first
+    // refusal as a bug rather than as the rule.
+    expect(AUTH_MARKDOWN).toContain("free and buys nothing yet");
+    expect(AUTH_MARKDOWN).toContain("agent:self");
+  });
+
+  it("names who pays once an agent is adopted", () => {
+    expect(AUTH_MARKDOWN).toContain("billed to them");
+  });
+});
