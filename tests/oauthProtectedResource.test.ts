@@ -133,3 +133,47 @@ describe("auth.md documents the wallet-free path", () => {
     expect(AUTH_MARKDOWN).toContain("billed to them");
   });
 });
+
+describe("the OpenAPI document describes the endpoint that takes money", () => {
+  it("documents the paid deposit route", async () => {
+    const { GET } = await import("../app/openapi.json/route");
+    const doc = await GET().json();
+    const path = doc.paths["/api/platform/billing/deposit/x402"];
+    expect(path?.post).toBeTruthy();
+    // The 402 is the expected first response, not a failure, and it carries
+    // what to pay. A document that omitted it would leave an agent reading
+    // its own successful handshake as an error.
+    expect(path.post.responses["402"]).toBeTruthy();
+    expect(JSON.stringify(path.post.responses["402"])).toContain("accepts");
+  });
+
+  it("does not claim a payment method PerkOS cannot take", async () => {
+    // MPP's payment extension enumerates tempo, stripe, lightning and card.
+    // PerkOS settles EIP-3009 stablecoin transfers through its own
+    // facilitator, so declaring one of those would send an agent to pay over
+    // rails that do not exist here.
+    //
+    // Asserted against the published document rather than the source, because
+    // the source explains this decision in prose and a text search cannot tell
+    // an explanation from a declaration.
+    const { GET } = await import("../app/openapi.json/route");
+    const doc = await GET().json();
+    for (const [route, methods] of Object.entries(doc.paths as Record<string, object>)) {
+      expect(Object.keys(methods), `${route} declares a payment method`).not.toContain(
+        "x-payment-info",
+      );
+      for (const operation of Object.values(methods as Record<string, object>)) {
+        expect(Object.keys(operation ?? {})).not.toContain("x-payment-info");
+      }
+    }
+  });
+
+  it("says a wallet in the body is ignored", async () => {
+    // Credit follows the signature on the payment. An agent that thinks it
+    // can name the beneficiary would fund the wrong address on purpose.
+    const { GET } = await import("../app/openapi.json/route");
+    const doc = await GET().json();
+    const description = doc.paths["/api/platform/billing/deposit/x402"].post.description;
+    expect(description).toContain("ignored");
+  });
+});
