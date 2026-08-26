@@ -221,3 +221,38 @@ describe("the paid API declares how it can be paid", () => {
     expect([...methods].sort()).toEqual(["stripe", "x402"]);
   });
 });
+
+describe("the payment extension is readable by both kinds of client", () => {
+  it("carries the shorthand as well as the offer array", async () => {
+    // The draft says clients MUST accept either form, but readers exist that
+    // implement only the shorthand and report an array-only document as
+    // declaring no payment at all.
+    const { GET } = await import("../app/openapi.json/route");
+    const doc = await GET().json();
+    const info = doc.paths["/api/v1"].get["x-payment-info"];
+    expect(info.intent).toBe("charge");
+    expect(info.method).toBeTruthy();
+    expect(info.amount).toMatch(/^\d+$/);
+    expect(Array.isArray(info.offers)).toBe(true);
+  });
+
+  it("puts the card offer in the shorthand, since that is the one MPP can pay", async () => {
+    // An MPP client cannot settle an x402 offer, so naming one there would
+    // hand a shorthand-only reader terms it has no way to fulfil.
+    const { GET } = await import("../app/openapi.json/route");
+    const doc = await GET().json();
+    const info = doc.paths["/api/v1"].get["x-payment-info"];
+    expect(info.method).toBe("stripe");
+  });
+
+  it("keeps the two forms quoting the same price", async () => {
+    // Two descriptions of one charge is a way to show a payer one price and
+    // take another.
+    const { GET } = await import("../app/openapi.json/route");
+    const doc = await GET().json();
+    const info = doc.paths["/api/v1"].get["x-payment-info"];
+    const card = info.offers.find((o: { method: string }) => o.method === "stripe");
+    expect(card.amount).toBe(info.amount);
+    expect(card.currency).toBe(info.currency);
+  });
+});
