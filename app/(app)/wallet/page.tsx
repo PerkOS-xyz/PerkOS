@@ -37,6 +37,7 @@ import {
   chainLabel,
   type WalletSource,
 } from "@/app/lib/serverWallet";
+import { CardTopUp } from "./CardTopUp";
 import { SendForm } from "./SendForm";
 
 function shortAddr(a: string): string {
@@ -279,6 +280,10 @@ export default function WalletPage() {
               </p>
             </CardContent>
           </Card>
+
+          {/* Card top-up. Above the assets list because someone arriving with an
+              empty balance is here to fix that, not to read a list of zeros. */}
+          <CardTopUp />
 
           {/* Empty wallets need the deposit action before the zero-balance list. */}
           {canShowSend && hasNoFunds ? (

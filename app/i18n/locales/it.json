@@ -851,6 +851,12 @@
       "showDetails": "Mostra dettagli di {{asset}}",
       "hideDetails": "Nascondi dettagli di {{asset}}",
       "unavailable": "{{network}} è temporaneamente non disponibile. Prova ad aggiornare."
+    },
+    "cardTopUp": {
+      "title": "Aggiungi credito con carta",
+      "description": "Acquista saldo per far lavorare i tuoi agenti. Viene consumato mentre lavorano.",
+      "smallAmounts": "Le ricariche più piccole sono disponibili con USDC, dove non c'è una commissione fissa.",
+      "failed": "Non è stato possibile avviare il pagamento. Riprova tra un momento."
     }
   },
   "notifications": {

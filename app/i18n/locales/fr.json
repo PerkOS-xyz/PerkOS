@@ -861,6 +861,12 @@
       "showDetails": "Afficher les détails de {{asset}}",
       "hideDetails": "Masquer les détails de {{asset}}",
       "unavailable": "{{network}} est temporairement indisponible. Essayez d'actualiser."
+    },
+    "cardTopUp": {
+      "title": "Ajouter du crédit par carte",
+      "description": "Achetez du solde pour faire travailler vos agents. Il est consommé au fil de leur travail.",
+      "smallAmounts": "Les recharges plus petites sont disponibles en USDC, sans frais fixes de traitement.",
+      "failed": "Le paiement n'a pas pu être lancé. Réessayez dans un instant."
     }
   },
   "notifications": {

@@ -861,6 +861,12 @@
       "showDetails": "Mostrar detalhes de {{asset}}",
       "hideDetails": "Ocultar detalhes de {{asset}}",
       "unavailable": "{{network}} está temporariamente indisponível. Tente atualizar."
+    },
+    "cardTopUp": {
+      "title": "Adicionar crédito com cartão",
+      "description": "Compre saldo para os seus agentes trabalharem. É consumido enquanto trabalham.",
+      "smallAmounts": "Recargas menores estão disponíveis com USDC, onde não há taxa fixa de processamento.",
+      "failed": "Não foi possível iniciar o pagamento. Tente novamente em instantes."
     }
   },
   "notifications": {

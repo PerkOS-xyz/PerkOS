@@ -851,6 +851,12 @@
       "showDetails": "显示 {{asset}} 详情",
       "hideDetails": "隐藏 {{asset}} 详情",
       "unavailable": "{{network}} 暂时不可用，请尝试刷新。"
+    },
+    "cardTopUp": {
+      "title": "使用银行卡充值",
+      "description": "购买余额以运行你的智能体。余额会随其工作而消耗。",
+      "smallAmounts": "小额充值可使用 USDC，没有固定手续费。",
+      "failed": "无法启动支付，请稍后重试。"
     }
   },
   "notifications": {
