@@ -147,25 +147,15 @@ describe("the OpenAPI document describes the endpoint that takes money", () => {
     expect(JSON.stringify(path.post.responses["402"])).toContain("accepts");
   });
 
-  it("does not claim a payment method PerkOS cannot take", async () => {
-    // MPP's payment extension enumerates tempo, stripe, lightning and card.
-    // PerkOS settles EIP-3009 stablecoin transfers through its own
-    // facilitator, so declaring one of those would send an agent to pay over
-    // rails that do not exist here.
-    //
-    // Asserted against the published document rather than the source, because
-    // the source explains this decision in prose and a text search cannot tell
-    // an explanation from a declaration.
+  it("declares payment only on operations that take it per call", async () => {
+    // This asserted that NO operation declared a payment method, which was
+    // right while PerkOS could settle none of them. It is wrong now that the
+    // card rail exists, so it checks the real rule instead: the deposit is a
+    // top-up rather than a per-call purchase, so it carries no offer set.
     const { GET } = await import("../app/openapi.json/route");
     const doc = await GET().json();
-    for (const [route, methods] of Object.entries(doc.paths as Record<string, object>)) {
-      expect(Object.keys(methods), `${route} declares a payment method`).not.toContain(
-        "x-payment-info",
-      );
-      for (const operation of Object.values(methods as Record<string, object>)) {
-        expect(Object.keys(operation ?? {})).not.toContain("x-payment-info");
-      }
-    }
+    const deposit = doc.paths["/api/platform/billing/deposit/x402"].post;
+    expect(Object.keys(deposit)).not.toContain("x-payment-info");
   });
 
   it("says a wallet in the body is ignored", async () => {
@@ -175,5 +165,59 @@ describe("the OpenAPI document describes the endpoint that takes money", () => {
     const doc = await GET().json();
     const description = doc.paths["/api/platform/billing/deposit/x402"].post.description;
     expect(description).toContain("ignored");
+  });
+});
+
+/**
+ * Payment discovery. The draft requires x-payment-info on every payable
+ * operation plus a 402 in its responses, and the offers have to describe rails
+ * that really settle — an advertised method nothing accepts sends an agent
+ * through a payment flow that ends nowhere.
+ */
+describe("the paid API declares how it can be paid", () => {
+  it("puts an offer set on the payable operation", async () => {
+    const { GET } = await import("../app/openapi.json/route");
+    const doc = await GET().json();
+    const operation = doc.paths["/api/v1"].get;
+    expect(operation["x-payment-info"].offers.length).toBeGreaterThan(1);
+    // Required by the draft on every payable operation.
+    expect(operation.responses["402"]).toBeTruthy();
+  });
+
+  it("declares every field the draft makes required", async () => {
+    const { GET } = await import("../app/openapi.json/route");
+    const doc = await GET().json();
+    for (const offer of doc.paths["/api/v1"].get["x-payment-info"].offers) {
+      expect(offer.intent).toMatch(/^(charge|session)$/);
+      expect(offer.method).toBeTruthy();
+      // Amount is a string of digits in the smallest unit, never a number.
+      expect(offer.amount, `${offer.method} amount must be a digit string`).toMatch(/^\d+$/);
+    }
+  });
+
+  it("quotes each rail in its own smallest unit", async () => {
+    // A cent is "1" for USD and "10000" for USDC. Copying one number across
+    // both would price one rail a million times off.
+    const { GET } = await import("../app/openapi.json/route");
+    const doc = await GET().json();
+    const offers = doc.paths["/api/v1"].get["x-payment-info"].offers;
+    const card = offers.find((o: { method: string }) => o.method === "stripe");
+    const chain = offers.find((o: { method: string }) => o.method === "x402");
+    expect(card.amount).toBe("1");
+    expect(chain.amount).toBe("10000");
+    // Blockchain offers name the token contract, per the draft.
+    expect(chain.currency).toMatch(/^0x[a-fA-F0-9]{40}$/);
+    expect(card.currency).toBe("usd");
+  });
+
+  it("advertises no rail the endpoint cannot settle", async () => {
+    // Only these two are implemented. Adding a method here without building it
+    // is the same failure as an endpoint that 404s.
+    const { GET } = await import("../app/openapi.json/route");
+    const doc = await GET().json();
+    const methods = new Set(
+      doc.paths["/api/v1"].get["x-payment-info"].offers.map((o: { method: string }) => o.method),
+    );
+    expect([...methods].sort()).toEqual(["stripe", "x402"]);
   });
 });
