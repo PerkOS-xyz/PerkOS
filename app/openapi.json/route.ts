@@ -187,7 +187,28 @@ export function GET(): Response {
               description: "The question. Required, and checked before anything is charged.",
             },
           ],
+          /**
+           * Both forms of the extension, deliberately.
+           *
+           * The draft defines a single-offer shorthand and a multi-offer
+           * array, says servers SHOULD publish the array, and says clients
+           * MUST accept either. Readers exist that implement only the
+           * shorthand and report a document using the array as declaring no
+           * payment at all, so publishing both makes this readable by more of
+           * them than the array alone.
+           *
+           * Nothing is duplicated dishonestly: the shorthand describes the
+           * card offer, which is the one an MPP client can actually use — it
+           * cannot settle an x402 offer. A reader that understands both may
+           * see the card terms twice, which costs it nothing because they are
+           * the same terms.
+           */
           "x-payment-info": {
+            intent: "charge",
+            method: "stripe",
+            amount: "1",
+            currency: "usd",
+            description: "One answer, paid by card over MPP.",
             offers: [
               {
                 intent: "charge",
