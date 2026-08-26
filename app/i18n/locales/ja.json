@@ -861,6 +861,12 @@
       "showDetails": "{{asset}}の詳細を表示",
       "hideDetails": "{{asset}}の詳細を非表示",
       "unavailable": "{{network}}は一時的に利用できません。更新をお試しください。"
+    },
+    "cardTopUp": {
+      "title": "カードでクレジットを追加",
+      "description": "エージェントを動かすための残高を購入します。作業に応じて消費されます。",
+      "smallAmounts": "少額のチャージは USDC でご利用いただけます。固定手数料がかかりません。",
+      "failed": "決済を開始できませんでした。しばらくしてからもう一度お試しください。"
     }
   },
   "notifications": {

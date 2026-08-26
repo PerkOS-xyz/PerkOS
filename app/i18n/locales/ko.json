@@ -861,6 +861,12 @@
       "showDetails": "{{asset}} 상세 정보 보기",
       "hideDetails": "{{asset}} 상세 정보 숨기기",
       "unavailable": "{{network}}은(는) 일시적으로 사용할 수 없어요. 새로고침해 보세요."
+    },
+    "cardTopUp": {
+      "title": "카드로 크레딧 충전",
+      "description": "에이전트를 실행할 잔액을 구매합니다. 작업하는 동안 차감됩니다.",
+      "smallAmounts": "더 적은 금액은 USDC로 충전할 수 있습니다. 고정 수수료가 없습니다.",
+      "failed": "결제를 시작하지 못했습니다. 잠시 후 다시 시도해 주세요."
     }
   },
   "notifications": {

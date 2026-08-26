@@ -861,6 +861,12 @@
       "showDetails": "Show {{asset}} details",
       "hideDetails": "Hide {{asset}} details",
       "unavailable": "{{network}} is temporarily unavailable. Try refreshing."
+    },
+    "cardTopUp": {
+      "title": "Add credit with a card",
+      "description": "Buy balance for running your agents. It is spent as they work.",
+      "smallAmounts": "Smaller top-ups are available with USDC, where there is no fixed processing fee.",
+      "failed": "The checkout could not be started. Try again in a moment."
     }
   },
   "notifications": {

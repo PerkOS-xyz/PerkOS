@@ -861,6 +861,12 @@
       "showDetails": "Mostrar detalles de {{asset}}",
       "hideDetails": "Ocultar detalles de {{asset}}",
       "unavailable": "{{network}} no está disponible temporalmente. Intenta actualizar."
+    },
+    "cardTopUp": {
+      "title": "Agregar saldo con tarjeta",
+      "description": "Compra saldo para que trabajen tus agentes. Se consume a medida que trabajan.",
+      "smallAmounts": "Las recargas más pequeñas están disponibles con USDC, donde no hay comisión fija.",
+      "failed": "No se pudo iniciar el pago. Vuelve a intentarlo en un momento."
     }
   },
   "notifications": {
