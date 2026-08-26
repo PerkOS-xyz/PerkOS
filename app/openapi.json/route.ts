@@ -32,6 +32,15 @@ const ERROR_RESPONSE = {
 export function GET(): Response {
   const doc = {
     openapi: "3.1.0",
+    // Optional in the payment discovery draft, and the cheapest way for a
+    // registry to know what the paid endpoint is for.
+    "x-service-info": {
+      categories: ["ai", "productivity"],
+      docs: {
+        documentation: `${SITE}/AGENTS.md`,
+        authentication: `${SITE}/auth.md`,
+      },
+    },
     info: {
       title: "PerkOS",
       version: "1.0.0",
@@ -150,6 +159,88 @@ export function GET(): Response {
             { $ref: "#/components/parameters/idempotencyKey" },
           ],
           responses: { "201": { description: "Created." }, "401": ERROR_RESPONSE },
+        },
+      },
+      /**
+       * The paid API. Both offers are real: an agent holding stablecoins pays
+       * with x402, one holding cards pays with MPP, and each buys the same
+       * answer.
+       *
+       * The amounts are in the smallest unit of their currency, as the payment
+       * discovery draft requires — six decimals for USDC, cents for USD — so
+       * the same price appears as different integers.
+       */
+      "/api/v1": {
+        get: {
+          summary: "Ask PerkOS a question, paid per call",
+          description:
+            "Returns one answer from the PerkOS assistant. No account: the " +
+            "payment is the whole relationship. Call it without payment to " +
+            "receive the challenges, pay by either rail, and repeat the call. " +
+            "Questions outside PerkOS are refused before any payment is taken.",
+          parameters: [
+            {
+              name: "q",
+              in: "query",
+              required: true,
+              schema: { type: "string", maxLength: 2000 },
+              description: "The question. Required, and checked before anything is charged.",
+            },
+          ],
+          "x-payment-info": {
+            offers: [
+              {
+                intent: "charge",
+                method: "stripe",
+                amount: "1",
+                currency: "usd",
+                description: "One answer, paid by card over MPP.",
+              },
+              {
+                intent: "charge",
+                method: "x402",
+                amount: "10000",
+                currency: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                description: "One answer, paid in USDC on Base over x402.",
+              },
+              {
+                intent: "charge",
+                method: "x402",
+                amount: "10000",
+                currency: "0xcebA9300f2b948710d2653dD7B07f33A8B32118C",
+                description: "One answer, paid in USDC on Celo over x402.",
+              },
+            ],
+          },
+          responses: {
+            "200": {
+              description: "The answer.",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      data: {
+                        type: "object",
+                        properties: {
+                          reply: { type: "string" },
+                          agent: { type: "string" },
+                          paidWith: { type: "string" },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            "402": { description: "Payment Required" },
+            "422": {
+              description:
+                "Outside what the assistant answers. Nothing was charged: the " +
+                "body says so explicitly.",
+            },
+            "400": ERROR_RESPONSE,
+          },
         },
       },
       /**
