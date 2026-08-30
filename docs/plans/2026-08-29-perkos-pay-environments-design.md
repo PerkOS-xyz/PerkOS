@@ -190,14 +190,14 @@ require authorization, a reason, and an audit event.
 
 ## Source control and promotion
 
-`devnet` is an integration branch and deploys to `dev.perkos.xyz`. It must not
+`development` is an integration branch and deploys to `dev.perkos.xyz`. It must not
 become a permanently divergent product line.
 
 The promotion path is:
 
 ```text
 feature branch
-      -> devnet -> dev.perkos.xyz
+      -> development -> dev.perkos.xyz
       -> immutable release candidate -> qa.perkos.xyz
       -> the same tested commit/artifact -> main -> production
 ```

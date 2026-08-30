@@ -33,6 +33,7 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example
+!.env.dev.example
 
 # service-account credentials and other secrets — NEVER commit
 .secrets/
@@ -48,3 +49,4 @@ next-env.d.ts
 /ops/
 /docs/perkos-assistant/
 _perkos-internal-docs/
+firepit-log.txt
