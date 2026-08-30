@@ -30,9 +30,10 @@ import { authedFetch } from "../../lib/apiClient";
  *
  * ## Nothing here decides what was paid
  *
- * This starts a hosted Stripe checkout and sends the person to it. The balance
- * moves only when Stripe's signed webhook reports the money arrived, so a
- * person who closes the tab, or edits the return URL, changes nothing.
+ * This asks the API for a short-lived, wallet-bound payment capability and
+ * sends the person to PerkOS Pay. The portal, rather than this browser, redeems
+ * the capability and starts Stripe Checkout. The balance moves only when
+ * Stripe's signed webhook reports the money arrived.
  */
 const AMOUNTS = [5, 10, 25] as const;
 
@@ -45,7 +46,7 @@ export function CardTopUp() {
     setPending(amount);
     setError(null);
     try {
-      const response = await authedFetch("/api/billing/stripe/checkout", {
+      const response = await authedFetch("/api/billing/portal/session", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ amount }),

@@ -26,6 +26,11 @@ describe("card top-up", () => {
     expect(source).not.toMatch(/credit\(|setBalance|creditsUsd\s*=/);
   });
 
+  it("starts the hosted portal flow instead of Stripe directly", () => {
+    expect(source).toContain('authedFetch("/api/billing/portal/session"');
+    expect(source).not.toContain('authedFetch("/api/billing/stripe/checkout"');
+  });
+
   it("shows the server's own reason when checkout will not start", () => {
     // "Not configured" and "bad amount" call for different things from the
     // person reading it.
