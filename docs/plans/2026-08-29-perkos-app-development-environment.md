@@ -94,6 +94,23 @@ Development-specific Compose project and container names, fail-closed testnet
 payment configuration, and separate Firebase/AWS/Privy/service credentials. Workers
 that lack isolated downstream resources should not start in the first Dev release.
 
+### AWS Development baseline provisioned
+
+Provisioned in account `089332276762`, region `us-east-1`:
+
+- ECS cluster `perkos-dev-agents` with Fargate as the default capacity provider;
+- execution role `perkos-dev-ecs-execution`, limited to standard ECS execution
+  operations and `perkos-agents/dev/*` secrets;
+- task role `perkos-dev-ecs-task`, limited to Dev agent data and Dev secrets;
+- private, encrypted, versioned S3 bucket `perkos-dev-agent-data`;
+- egress-only security group `sg-0b731c819aa57aa7d` in the existing VPC.
+
+No Development service or task is running yet. A production audit also found
+sensitive runtime/bridge values stored as plaintext task-definition environment
+variables. They must not be copied. Production should migrate them gradually to
+Secrets Manager references and rotate each credential after the corresponding
+service revision is healthy.
+
 ## Deployment order
 
 1. Provision Firebase Dev services, Auth providers, rules, indexes, and secrets.
