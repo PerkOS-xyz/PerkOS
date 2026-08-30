@@ -48,13 +48,17 @@ Provisioning completed on 2026-08-29:
 - Firebase project `perkos-app-dev` (project number `859889415321`);
 - Web App `1:859889415321:web:26484d337a2c2de9d1b408`;
 - Firestore Native `(default)` in `nam7`;
-- the repository's Firestore rules and indexes deployed successfully.
+- the repository's Firestore rules and indexes deployed successfully;
+- Firebase Authentication initialized with `localhost`, `dev.perkos.xyz`,
+  `perkos-app-dev.firebaseapp.com`, and `perkos-app-dev.web.app` authorized.
 
 Cloud Storage is not yet provisioned. Firebase now requires new default Storage
 buckets to use the Blaze plan. Enabling billing is a separate financial action;
 after it is approved, create `perkos-app-dev.firebasestorage.app` and deploy
-`storage.rules`. Authentication providers and `dev.perkos.xyz` as an authorized
-domain also remain to be configured before sign-in testing.
+`storage.rules`. Provider-specific Auth settings remain to be configured before
+sign-in testing. No production users were copied. PerkOS wallet authentication
+uses Firebase custom tokens, so Development also needs the Development API's
+Admin SDK identity before end-to-end sign-in can work.
 
 ## API and payment boundary
 
@@ -68,6 +72,27 @@ API implements that contract.
 `test.pay.perkos.xyz` must accept only non-live Stripe objects and testnet payment
 capabilities. Its verified webhook or settlement event credits only the Development
 ledger at `dev.api.perkos.xyz`; it must never call the production ledger.
+
+### API readiness analysis
+
+The current PerkOS API deployment is production-specific and must not simply be
+cloned with its existing `.env`:
+
+- Docker Compose fixes production container names and shares the production proxy
+  network;
+- Firebase is selected by Admin credentials, so Dev needs its own service identity;
+- CORS must allow `https://dev.perkos.xyz` but not wildcard origins;
+- Stripe keys and webhook secrets are read directly from environment variables and
+  currently have no immutable environment assertion;
+- x402 defaults to `https://stack.perkos.xyz`, a production-facing default;
+- Celo defaults to mainnet and AWS defaults to the production `perkos` ECS cluster;
+- Chat, Transport, LLM, Privy, treasury wallets, KMS keys, and workers can all mutate
+  external state and therefore need explicit Dev resources or must remain disabled.
+
+Before deployment, PerkOS API needs an explicit `PERKOS_ENVIRONMENT` value, a
+Development-specific Compose project and container names, fail-closed testnet
+payment configuration, and separate Firebase/AWS/Privy/service credentials. Workers
+that lack isolated downstream resources should not start in the first Dev release.
 
 ## Deployment order
 
