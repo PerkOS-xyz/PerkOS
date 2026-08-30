@@ -110,6 +110,18 @@ Open <http://localhost:3000>.
 See [`.env.example`](./.env.example) for the full list. Minimum to boot:
 
 - `NEXT_PUBLIC_SITE_URL` — canonical origin (used in OG tags, sitemap, Farcaster manifest).
+- `NEXT_PUBLIC_PERKOS_PAY_URL` — payment portal for the selected environment
+  (`https://test.pay.perkos.xyz` in Development).
+- `PERKOS_ENVIRONMENT` — explicit application boundary; use `development` for
+  `dev.perkos.xyz` even though the optimized Next.js runtime uses
+  `NODE_ENV=production`.
+
+### Development VPS deployment
+
+`docker-compose.development.yml` is intentionally separate from Production. It
+creates only `perkos-app-dev`, connects it to the shared proxy network and
+requires Firebase Admin credentials for `perkos-app-dev`. Invoke Compose with
+`--env-file .env.development`; never reuse `/opt/perkos-miniapp/.env`.
 - `NEXT_PUBLIC_PRIVY_APP_ID` — Privy browser auth app; optional `NEXT_PUBLIC_PRIVY_CLIENT_ID` selects a client configuration.
 - `NEXT_PUBLIC_FIREBASE_*` — Firebase web SDK config (public).
 - `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` — Admin SDK (server only).
