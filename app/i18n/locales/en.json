@@ -1898,7 +1898,12 @@
     },
     "graph": {
       "expand": "Expand",
-      "close": "Close"
+      "close": "Close",
+      "rotateHint": "Drag to rotate · pinch or scroll to zoom",
+      "selected": "Selected node",
+      "neighbors_one": "{{count}} direct connection",
+      "neighbors_other": "{{count}} direct connections",
+      "openEntity": "Open details"
     },
     "knowledgeGraph": {
       "title": "Project knowledge",

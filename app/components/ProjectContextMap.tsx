@@ -1,15 +1,15 @@
 "use client";
 
-import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
-import { Bot, Compass, Database, Expand, Folder, GitBranch, ListTodo, Minimize2, Network, ShieldCheck } from "lucide-react";
+import { Expand, GitBranch, Loader2, Minimize2, Network } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Task } from "../lib/perkosApi";
 import type { Project } from "../lib/perkosApi";
-import { realtimeAgentStatus, type AgentLiveStatus } from "../lib/useWalletAgents";
+import type { AgentLiveStatus } from "../lib/useWalletAgents";
 import { agentColor } from "./charts";
 
 const W = 920;
@@ -18,7 +18,7 @@ const CX = W / 2;
 const CY = H / 2;
 const MAX_TASKS = 18;
 
-type GraphNode = {
+export type GraphNode = {
   key: string;
   kind: "project" | "agent" | "task" | "source" | "gate";
   label: string;
@@ -30,7 +30,19 @@ type GraphNode = {
   live?: AgentLiveStatus;
 };
 
-type GraphEdge = { from: string; to: string; color: string; dashed?: boolean; active?: boolean };
+export type GraphEdge = { from: string; to: string; color: string; dashed?: boolean; active?: boolean };
+
+const InteractiveGraph3D = dynamic(
+  () => import("./InteractiveGraph3D").then((module) => module.InteractiveGraph3D),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="grid h-[360px] place-items-center rounded-lg border border-border bg-[#07030d] sm:h-[460px]">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    ),
+  },
+);
 
 type CommonProps = {
   projectId: string;
@@ -303,44 +315,9 @@ function GraphSurface({ title, description, expanded, onExpandedChange, toolbar,
 }
 
 function GraphCanvas({ nodes, edges, ariaLabel, expanded }: { nodes: GraphNode[]; edges: GraphEdge[]; ariaLabel: string; expanded: boolean }) {
-  const byKey = new Map(nodes.map((node) => [node.key, node]));
   return (
-    <div className={cn("relative w-full overflow-auto rounded-lg border border-border bg-[#0b0512]", expanded ? "h-[calc(100dvh-10rem)]" : "h-[340px] sm:h-[430px]")} role="img" aria-label={ariaLabel}>
-      <div className="relative mx-auto" style={{ width: W, height: H }}>
-        <div aria-hidden className="absolute inset-0 opacity-80" style={{ backgroundImage: "radial-gradient(rgba(255,255,255,.07) 1px, transparent 1px)", backgroundSize: "18px 18px" }} />
-        <svg width={W} height={H} className="absolute inset-0" aria-hidden>
-          {edges.map((edge, index) => {
-            const from = byKey.get(edge.from);
-            const to = byKey.get(edge.to);
-            if (!from || !to) return null;
-            return <line key={`${edge.from}-${edge.to}-${index}`} x1={from.x} y1={from.y} x2={to.x} y2={to.y} stroke={edge.color} strokeWidth={edge.active ? 2.6 : 1.35} strokeDasharray={edge.dashed ? "4 5" : undefined} className={cn(edge.active && "motion-safe:animate-pulse")} />;
-          })}
-        </svg>
-        {nodes.map((node) => <GraphNodeCard key={node.key} node={node} />)}
-      </div>
-    </div>
+    <InteractiveGraph3D nodes={nodes} edges={edges} ariaLabel={ariaLabel} expanded={expanded} />
   );
-}
-
-function GraphNodeCard({ node }: { node: GraphNode }) {
-  const { t } = useTranslation();
-  const style = { left: node.x, top: node.y, transform: "translate(-50%, -50%)" } as const;
-  const status = node.kind === "agent" ? realtimeAgentStatus(node.live) : null;
-  const Icon = node.kind === "project" ? Folder : node.kind === "agent" ? node.isPM ? Compass : Bot : node.kind === "source" ? Database : node.kind === "gate" ? ShieldCheck : ListTodo;
-  const tone = node.kind === "project" ? "border-primary/60 bg-primary/10" : node.kind === "source" ? "border-sky-400/50 bg-sky-400/10" : node.kind === "gate" ? "border-violet-400/50 bg-violet-400/10" : node.status === "Done" ? "border-emerald-500/45 bg-emerald-500/10" : node.status === "In progress" || node.status === "Review" ? "border-amber-400/50 bg-amber-400/10" : "border-border bg-card/95";
-  const content = (
-    <div className={cn("group flex w-[132px] items-center gap-2 rounded-lg border px-2.5 py-2 shadow-lg transition hover:border-primary/70", tone)} title={`${node.label}${node.status ? ` — ${node.status}` : ""}`}>
-      <span className="relative grid h-7 w-7 shrink-0 place-items-center rounded-full bg-background/70">
-        <Icon className="h-3.5 w-3.5 text-primary" />
-        {status ? <span className={cn("absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-card", status.color)} /> : null}
-      </span>
-      <span className="min-w-0">
-        <span className="block truncate text-[10px] font-medium text-foreground">{node.label}</span>
-        <span className="block truncate text-[8px] uppercase tracking-wide text-muted-foreground">{node.isPM ? t("components.executionGraph.coordinator") : node.status || status?.label || node.kind}</span>
-      </span>
-    </div>
-  );
-  return <div className="absolute z-10" style={style}>{node.href ? <Link href={node.href}>{content}</Link> : content}</div>;
 }
 
 function GraphEmpty({ text, execution = false }: { text: string; execution?: boolean }) {
