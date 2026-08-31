@@ -21,6 +21,11 @@ import { EmptyState } from "../../components/EmptyState";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import {
+  CollectionViewToggle,
+  useCollectionViewMode,
+  type CollectionViewMode,
+} from "../../components/CollectionViewToggle";
 
 export default function ProjectsPage() {
   const { t } = useTranslation();
@@ -30,6 +35,7 @@ export default function ProjectsPage() {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [viewMode, setViewMode] = useCollectionViewMode("perkos:projects:view");
   const searchParams = useSearchParams();
   // Status filter via ?status=. Currently "active" is the only value the
   // dashboard sends; other values silently pass through.
@@ -150,11 +156,21 @@ export default function ProjectsPage() {
       </header>
 
       {hasProjects ? (
-        <SearchInput
-          value={query}
-          onChange={setQuery}
-          placeholder={t("projects.search.placeholder")}
-        />
+        <div className="flex items-center gap-2">
+          <div className="min-w-0 flex-1">
+            <SearchInput
+              value={query}
+              onChange={setQuery}
+              placeholder={t("projects.search.placeholder")}
+            />
+          </div>
+          <CollectionViewToggle
+            mode={viewMode}
+            onChange={setViewMode}
+            cardsLabel={t("common.cardsView")}
+            listLabel={t("common.listView")}
+          />
+        </div>
       ) : null}
 
       {statusFilter ? (
@@ -219,7 +235,7 @@ export default function ProjectsPage() {
             ) : null}
           </div>
 
-          <ul className="flex flex-col gap-3">
+          <ul className={viewMode === "cards" ? "grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" : "flex flex-col gap-3"}>
             {projects.map((p) => (
               <ProjectCard
                 key={p.id ?? p.name}
@@ -229,6 +245,7 @@ export default function ProjectsPage() {
                 ownerWallet={
                   activeOrg?.shared ? activeOrg.ownerWallet : undefined
                 }
+                viewMode={viewMode}
               />
             ))}
           </ul>
@@ -274,6 +291,7 @@ function ProjectCard({
   checked,
   onToggle,
   ownerWallet,
+  viewMode,
 }: {
   project: Project;
   checked: boolean;
@@ -281,6 +299,7 @@ function ProjectCard({
   /** Set when this project is in a SHARED org — links carry ?owner so the
    *  detail page reads from the owner's subtree. */
   ownerWallet?: string;
+  viewMode: CollectionViewMode;
 }) {
   const { t } = useTranslation();
   // Take the first letter of each significant word for the avatar
@@ -302,7 +321,9 @@ function ProjectCard({
 
   return (
     <li
-      className={`flex items-center gap-2 rounded-lg border bg-card/60 pl-3 transition-colors ${
+      className={`flex min-w-0 gap-2 rounded-lg border bg-card/60 pl-3 transition-colors ${
+        viewMode === "cards" ? "items-start" : "items-center"
+      } ${
         checked ? "border-primary/60" : "border-primary/25 hover:border-primary/50"
       }`}
     >
@@ -313,18 +334,23 @@ function ProjectCard({
       />
       <Link
         href={`/projects/${encodeURIComponent(project.id ?? "")}${ownerWallet ? `?owner=${ownerWallet}` : ""}`}
-        className="glow-card flex flex-1 items-center gap-3 rounded-lg px-2 py-3"
+        className={viewMode === "cards"
+          ? "glow-card flex min-w-0 flex-1 flex-col items-stretch gap-3 rounded-lg px-3 py-4"
+          : "glow-card flex min-w-0 flex-1 items-center gap-3 rounded-lg px-2 py-3"}
       >
-        {/* Project avatar: tinted circle with initials. Glow halo on hover. */}
-        <div
-          className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-primary/40 font-mono text-sm font-medium text-foreground transition-shadow"
-          style={{
-            background: `radial-gradient(circle at 30% 30%, hsla(${hue}, 70%, 60%, 0.35), hsla(${hue}, 70%, 35%, 0.15))`,
-            boxShadow: `0 0 14px -2px hsla(${hue}, 80%, 55%, 0.45)`,
-          }}
-          aria-hidden
-        >
-          {initials}
+        <div className={viewMode === "cards" ? "flex items-start justify-between gap-3" : "contents"}>
+          {/* Project avatar: tinted circle with initials. Glow halo on hover. */}
+          <div
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-primary/40 font-mono text-sm font-medium text-foreground transition-shadow"
+            style={{
+              background: `radial-gradient(circle at 30% 30%, hsla(${hue}, 70%, 60%, 0.35), hsla(${hue}, 70%, 35%, 0.15))`,
+              boxShadow: `0 0 14px -2px hsla(${hue}, 80%, 55%, 0.45)`,
+            }}
+            aria-hidden
+          >
+            {initials}
+          </div>
+          {viewMode === "cards" ? <StatusBadge status={project.status} /> : null}
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -333,6 +359,11 @@ function ProjectCard({
               {project.name}
             </span>
           </div>
+          {viewMode === "cards" && project.goal ? (
+            <p className="line-clamp-2 min-h-8 break-words text-xs leading-relaxed text-muted-foreground">
+              {project.goal}
+            </p>
+          ) : null}
           <p className="text-[11px] text-muted-foreground">
             {t("projects.card.agentCount", { count: project.agents })}
             <span className="px-1.5">·</span>
@@ -346,8 +377,8 @@ function ProjectCard({
           </p>
         </div>
 
-        <StatusBadge status={project.status} />
-        <ChevronRightIcon />
+        {viewMode === "list" ? <StatusBadge status={project.status} /> : null}
+        {viewMode === "list" ? <ChevronRightIcon /> : null}
       </Link>
     </li>
   );

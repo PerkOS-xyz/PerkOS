@@ -14,6 +14,10 @@ import { cn } from "@/lib/utils";
 import { formatAddress } from "../../lib/format";
 import { useActiveOrg } from "../../lib/useActiveOrg";
 import { getWalletProjects, updateOrgName } from "../../lib/perkosApi";
+import {
+  CollectionViewToggle,
+  useCollectionViewMode,
+} from "../../components/CollectionViewToggle";
 
 export default function OrganizationsPage() {
   const { t } = useTranslation();
@@ -29,6 +33,7 @@ export default function OrganizationsPage() {
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftName, setDraftName] = useState("");
+  const [viewMode, setViewMode] = useCollectionViewMode("perkos:organizations:view");
 
   // All projects once, grouped by org for the per-org count.
   const projectsQuery = useQuery({
@@ -62,19 +67,29 @@ export default function OrganizationsPage() {
             {t("organizations.header.subtitle")}
           </p>
         </div>
-        <Link
-          href="/organizations/new"
-          className={cn(buttonVariants({ size: "sm" }), "gap-1.5")}
-        >
-          <Plus className="h-3.5 w-3.5" />
-          {t("organizations.header.newOrg")}
-        </Link>
+        <div className="flex items-center gap-2">
+          {orgs.length > 0 ? (
+            <CollectionViewToggle
+              mode={viewMode}
+              onChange={setViewMode}
+              cardsLabel={t("common.cardsView")}
+              listLabel={t("common.listView")}
+            />
+          ) : null}
+          <Link
+            href="/organizations/new"
+            className={cn(buttonVariants({ size: "sm" }), "gap-1.5")}
+          >
+            <Plus className="h-3.5 w-3.5" />
+            {t("organizations.header.newOrg")}
+          </Link>
+        </div>
       </header>
 
       {loading && orgs.length === 0 ? (
         <div className="h-32 animate-pulse rounded-md border border-border bg-card" />
       ) : (
-        <ul className="flex flex-col gap-3">
+        <ul className={viewMode === "cards" ? "grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3" : "flex flex-col gap-3"}>
           {orgs.map((o) => {
             const isActive = o.id === activeOrgId;
             const editing = editingId === o.id;
@@ -82,11 +97,14 @@ export default function OrganizationsPage() {
               <li
                 key={o.id}
                 className={cn(
-                  "flex flex-wrap items-center justify-between gap-3 rounded-md border bg-card px-4 py-3",
+                  "min-w-0 gap-3 rounded-md border bg-card px-4 py-3",
+                  viewMode === "cards"
+                    ? "flex min-h-44 flex-col items-stretch justify-between"
+                    : "flex flex-wrap items-center justify-between",
                   isActive ? "border-primary/50" : "border-border"
                 )}
               >
-                <div className="flex min-w-0 items-center gap-3">
+                <div className={cn("flex min-w-0 gap-3", viewMode === "cards" ? "items-start" : "items-center")}>
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
                     <Building2 className="h-4 w-4" />
                   </span>
@@ -123,8 +141,8 @@ export default function OrganizationsPage() {
                     </form>
                   ) : (
                     <div className="flex min-w-0 flex-col">
-                      <span className="flex items-center gap-2 truncate text-sm font-medium text-foreground">
-                        {o.name}
+                      <span className="flex min-w-0 flex-wrap items-center gap-2 text-sm font-medium text-foreground">
+                        <span className="min-w-0 truncate">{o.name}</span>
                         {o.isDefault ? (
                           <span className="rounded border border-border px-1 text-[9px] uppercase text-muted-foreground">
                             {t("organizations.card.default")}
@@ -145,7 +163,7 @@ export default function OrganizationsPage() {
                 </div>
 
                 {!editing ? (
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className={cn("flex flex-wrap items-center gap-2", viewMode === "cards" && "border-t border-border/60 pt-3")}>
                     {!isActive ? (
                       <Button
                         size="xs"
