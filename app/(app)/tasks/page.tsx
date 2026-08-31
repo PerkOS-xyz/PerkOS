@@ -312,6 +312,7 @@ export default function TasksPage() {
 
           <KanbanBoard
             items={kanbanItems}
+            emptyMessage={t("components.kanban.emptyPhase")}
             onMove={(itemId, nextStatus) => {
               // eslint-disable-next-line no-console
               console.info("[Kanban Global] move", { itemId, nextStatus });

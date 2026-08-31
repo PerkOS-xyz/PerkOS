@@ -1695,7 +1695,8 @@
       "todo": "To do",
       "inProgress": "In progress",
       "done": "Done",
-      "moveTaskAria": "Move task. Use arrow left/right to change column, space to drag."
+      "moveTaskAria": "Move task. Use arrow left/right to change column, space to drag.",
+      "emptyPhase": "No tasks in this phase"
     },
     "conductor": {
       "emptyMessage": "No tasks yet. Add one to get started.",
