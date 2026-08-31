@@ -1,6 +1,6 @@
 # PerkOS App QA bootstrap
 
-**Status:** Configuration ready; infrastructure pending authentication  
+**Status:** Source, ECS cluster, and Firebase baseline provisioned
 **Release candidate:** `3106ec9ae2ffa986b5637b1031c279d6f26a9a29`
 
 ## Boundaries
@@ -28,11 +28,12 @@ conversations, and disallows deletion and force-push, including for admins.
 
 ## Provisioning checklist
 
-- [ ] Authenticate the PerkOS AWS account and record its account ID.
-- [ ] Provision isolated QA ECS cluster, task/execution roles, secrets, storage,
+- [x] Authenticate the PerkOS AWS account and record its account ID.
+- [ ] Provision isolated QA ECS task/execution roles, secrets, storage,
       networking, logs, alarms, and least-privilege policies.
-- [ ] Create Firebase project `perkos-app-qa`, Web App, Firestore, Auth providers,
-      authorized domains, rules, and indexes.
+- [x] Initialize Firebase Auth and configure authorized domains. PerkOS wallet
+      authentication continues to use server-issued Firebase custom tokens, so
+      no additional interactive provider was enabled.
 - [ ] Create `qa.api.perkos.xyz`, `qa.chat.perkos.xyz`, and `qa.perkos.xyz` DNS only
       after their actual targets exist.
 - [ ] Inject `.env.qa` through the QA secret/deployment system; never commit it.
@@ -52,3 +53,18 @@ and `Available now`. Track these as a QA localization defect before Production.
 Docker dependency installation also reports deprecated MetaMask, WalletConnect,
 UUID, QR, Safe SDK, and Prometheus packages. These warnings are non-blocking for
 the bootstrap but require a separately tested dependency-upgrade initiative.
+
+## Provisioned baseline
+
+- AWS account `089332276762`, region `us-east-1`.
+- ECS cluster `perkos-qa-agents`, ARN
+  `arn:aws:ecs:us-east-1:089332276762:cluster/perkos-qa-agents`, active with no
+  services, tasks, or EC2 instances. Fargate and Fargate Spot are available;
+  QA workloads must select Fargate explicitly.
+- Firebase project `perkos-app-qa` (`1079096067830`).
+- Firebase Web App `1:1079096067830:web:fcd9cd8c6484115c0e4ed7`.
+- Firestore Standard `(default)` in `nam7`, deletion protection enabled.
+- Repository Firestore rules and indexes compiled and deployed successfully.
+- Firebase Authentication initialized; `qa.perkos.xyz`, Firebase Hosting, and
+  `localhost` are authorized domains. No interactive provider was enabled.
+- No Admin SDK key, Production data, or Development users were copied.
