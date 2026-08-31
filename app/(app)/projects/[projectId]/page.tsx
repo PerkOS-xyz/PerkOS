@@ -57,7 +57,7 @@ import { useProject } from "../../../lib/useProject";
 import { useWalletAgents, realtimeAgentStatus, STATUS_AVAILABLE, STATUS_RESTING, STATUS_GETTING_READY, STATUS_GOING_TO_REST, type AgentLiveStatus } from "../../../lib/useWalletAgents";
 import { MembersPanel } from "../../../components/MembersPanel";
 import { ProjectInsights } from "../../../components/ProjectInsights";
-import { ProjectContextMap } from "../../../components/ProjectContextMap";
+import { ProjectExecutionGraph, ProjectKnowledgeGraph } from "../../../components/ProjectContextMap";
 import { ActivityFeedCard } from "../../../components/ActivityFeedCard";
 import { formatRelativeShort } from "../../../lib/format";
 import { logActivity } from "../../../lib/activityEvents";
@@ -272,6 +272,7 @@ function DetailHeader({
   const router = useRouter();
   const queryClient = useQueryClient();
   const { address } = useAppAccount();
+  const { byName: projectAgentsLive } = useWalletAgents(ownerWallet ?? address);
   const advancedFeatures = useAdvancedFeatures(address);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -601,6 +602,19 @@ function DetailHeader({
       {/* Who's doing the work + how it's going — only once there's a board. */}
       {!compact && tasks.length > 0 ? <ProjectInsights tasks={tasks} /> : null}
 
+      {/* Persistent knowledge belongs in the project overview. Runtime flow is
+          intentionally kept in the Execution tab below. */}
+      {!compact && project.id ? (
+        <ProjectKnowledgeGraph
+          projectId={project.id}
+          projectName={project.name}
+          pmAgent={project.pmAgent}
+          agentNames={uniqueAgents(tasks, project.agentIds ?? [])}
+          tasks={tasks}
+          liveAgents={projectAgentsLive}
+        />
+      ) : null}
+
       {/* First-run guidance: a fresh team with an empty board is confusing —
           tell the owner the next move instead of greeting them with 0s. */}
       {!compact && tasks.length === 0 && project.agents > 0 && !pmActive ? (
@@ -802,7 +816,7 @@ function Tabs({
     { id: "docs", label: t("projectRoom.tabs.docs") },
     { id: "conductor", label: t("projectRoom.tabs.conductor") },
     { id: "agents", label: t("projectRoom.tabs.agents") },
-    { id: "map", label: t("projectRoom.tabs.map") },
+    { id: "map", label: t("projectRoom.tabs.execution") },
     { id: "chat", label: t("projectRoom.tabs.chat") },
     { id: "meetings", label: "Meetings" },
     { id: "members", label: t("projectRoom.tabs.members") },
@@ -1281,9 +1295,8 @@ function PriorityBadge({ priority }: { priority: string }) {
 }
 
 /**
- * Map tab — the project's context map (one-hop: project → agents → tasks)
- * plus the project-scoped activity feed underneath. The same node identity
- * as everywhere else: clicking an agent or task navigates to it.
+ * Execution tab — runtime-oriented orchestration derived from the current
+ * workflow and task assignments, plus the project-scoped activity feed.
  */
 function MapTab({
   detail,
@@ -1297,14 +1310,13 @@ function MapTab({
   const { address } = useAppAccount();
   const { t } = useTranslation();
   const { byName } = useWalletAgents(ownerWallet ?? address);
-  const agentNames = uniqueAgents(detail.tasks, detail.project.agentIds ?? []);
   return (
     <div className="flex flex-col gap-4">
-      <ProjectContextMap
+      <ProjectExecutionGraph
         projectId={projectId}
         projectName={detail.project.name}
         pmAgent={detail.project.pmAgent}
-        agentNames={agentNames}
+        workflowPhase={detail.project.workflow?.phase}
         tasks={detail.tasks}
         liveAgents={byName}
       />

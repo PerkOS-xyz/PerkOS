@@ -1623,6 +1623,7 @@
       "conductor": "Director",
       "agents": "Agentes",
       "map": "Mapa",
+      "execution": "Ejecución",
       "chat": "Chat del proyecto",
       "members": "Miembros"
     },
@@ -1894,6 +1895,45 @@
       "taskLabel_other": "tareas",
       "donePerAgent": "Hecho por agente",
       "unassigned": "Sin asignar"
+    },
+    "graph": {
+      "expand": "Maximizar",
+      "close": "Cerrar"
+    },
+    "knowledgeGraph": {
+      "title": "Conocimiento del proyecto",
+      "description": "Cómo se relacionan las personas, agentes, trabajo y fuentes conectadas de este proyecto.",
+      "showCompleted": "Mostrar completadas",
+      "empty": "El conocimiento aparecerá aquí cuando agregues agentes, tareas y fuentes conectadas.",
+      "ariaLabel": "Grafo interactivo de conocimiento del proyecto",
+      "legend": "Proyecto · agentes · trabajo · fuentes conectadas",
+      "connectedSources_one": "{{count}} fuente conectada",
+      "connectedSources_other": "{{count}} fuentes conectadas",
+      "noSources": "Todavía no hay fuentes externas conectadas",
+      "hiddenTasks_one": " · {{count}} tarea adicional",
+      "hiddenTasks_other": " · {{count}} tareas adicionales"
+    },
+    "executionGraph": {
+      "title": "Grafo de ejecución de agentes",
+      "description": "Observa cómo el coordinador delega el trabajo y cómo avanza cada tarea.",
+      "phase": "Fase: {{phase}}",
+      "empty": "Todavía no existe una ejecución. Pon al equipo a trabajar para generar el primer flujo.",
+      "ariaLabel": "Grafo de ejecución y orquestación de agentes",
+      "telemetryNote": "Esta vista usa el flujo y las asignaciones actuales. Los traspasos, reintentos y controles de verificación aparecerán cuando exista telemetría del runtime.",
+      "unassignedLead": "Líder sin asignar",
+      "unassignedWorker": "Sin asignar",
+      "coordinator": "Coordinador"
+    },
+    "organizationGraph": {
+      "title": "Conocimiento de la organización",
+      "description": "Un mapa vivo de los proyectos, personas, agentes y fuentes conectados a esta organización.",
+      "projects_one": "{{count}} proyecto",
+      "projects_other": "{{count}} proyectos",
+      "empty": "El grafo de la organización crecerá cuando crees proyectos, agregues agentes y conectes fuentes.",
+      "ariaLabel": "Grafo interactivo de conocimiento de la organización",
+      "connectedSources_one": "{{count}} fuente de la organización conectada",
+      "connectedSources_other": "{{count}} fuentes de la organización conectadas",
+      "noSources": "Todavía no hay fuentes de la organización conectadas"
     },
     "contextMap": {
       "empty": "El mapa se va completando a medida que agregas agentes y tareas a este proyecto.",
