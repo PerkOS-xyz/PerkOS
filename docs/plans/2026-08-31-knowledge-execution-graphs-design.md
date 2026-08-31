@@ -59,3 +59,14 @@ tarea. La posición por carriles es estable para que el flujo siga siendo
 comprensible tras rotar la escena, mientras la profundidad evita solapamientos.
 Esta vista continúa derivándose de asignaciones y estados actuales: no representa
 handoffs o mensajes que el runtime todavía no haya publicado.
+
+## Composición del overview de proyecto
+
+En desktop, el encabezado y sus acciones conservan todo el ancho. Debajo se usa
+una composición 60/40: el Knowledge Graph ocupa la columna izquierda y la
+información del proyecto ocupa la derecha, con objetivo, métricas y carga del
+equipo. El grafo conserva su control de maximizar sin alterar los tabs.
+
+En pantallas menores se apilan las columnas: primero la información operativa y
+después el grafo, para evitar que WebGL retrase el acceso al estado esencial. La
+navegación por tabs permanece debajo del conjunto en todos los breakpoints.

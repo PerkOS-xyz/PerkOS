@@ -574,10 +574,6 @@ function DetailHeader({
           ) : null}
         </div>
       </div>
-      {!compact && project.goal ? (
-        <p className="max-w-2xl text-sm text-[#7975a8]">{project.goal}</p>
-      ) : null}
-
       {!compact && project.pmSession ? (
         pmRunRecent ? (
         <PmSessionBanner
@@ -590,29 +586,36 @@ function DetailHeader({
         ) : null
       ) : null}
 
-      {!compact ? (
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <StatTile label={t("projectRoom.header.stats.totalTasks")} value={tasks.length} />
-          <StatTile label={t("projectRoom.header.stats.inProgress")} value={inProgress} />
-          <StatTile label={t("projectRoom.header.stats.done")} value={done} />
-          <StatTile label={t("projectRoom.header.stats.agents")} value={project.agents} />
-        </div>
-      ) : null}
-
-      {/* Who's doing the work + how it's going — only once there's a board. */}
-      {!compact && tasks.length > 0 ? <ProjectInsights tasks={tasks} /> : null}
-
-      {/* Persistent knowledge belongs in the project overview. Runtime flow is
-          intentionally kept in the Execution tab below. */}
+      {/* One desktop composition: persistent knowledge at left and project
+          information at right. Mobile leads with information, then the graph.
+          Runtime flow remains in the Execution tab below. */}
       {!compact && project.id ? (
-        <ProjectKnowledgeGraph
-          projectId={project.id}
-          projectName={project.name}
-          pmAgent={project.pmAgent}
-          agentNames={uniqueAgents(tasks, project.agentIds ?? [])}
-          tasks={tasks}
-          liveAgents={projectAgentsLive}
-        />
+        <div className="grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(320px,2fr)]">
+          <div className="order-2 min-w-0 xl:order-1">
+            <ProjectKnowledgeGraph
+              projectId={project.id}
+              projectName={project.name}
+              pmAgent={project.pmAgent}
+              agentNames={uniqueAgents(tasks, project.agentIds ?? [])}
+              tasks={tasks}
+              liveAgents={projectAgentsLive}
+            />
+          </div>
+          <aside className="order-1 flex min-w-0 flex-col gap-3 xl:order-2" aria-label={project.name}>
+            {project.goal ? (
+              <div className="rounded-lg border border-primary/25 bg-card/60 p-4">
+                <p className="text-sm leading-relaxed text-[#7975a8]">{project.goal}</p>
+              </div>
+            ) : null}
+            <div className="grid grid-cols-2 gap-3">
+              <StatTile label={t("projectRoom.header.stats.totalTasks")} value={tasks.length} />
+              <StatTile label={t("projectRoom.header.stats.inProgress")} value={inProgress} />
+              <StatTile label={t("projectRoom.header.stats.done")} value={done} />
+              <StatTile label={t("projectRoom.header.stats.agents")} value={project.agents} />
+            </div>
+            {tasks.length > 0 ? <ProjectInsights tasks={tasks} /> : null}
+          </aside>
+        </div>
       ) : null}
 
       {/* First-run guidance: a fresh team with an empty board is confusing —
