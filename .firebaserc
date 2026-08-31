@@ -1,6 +1,7 @@
 {
   "projects": {
     "dev": "perkos-app-dev",
+    "qa": "perkos-app-qa",
     "prod": "perkos-app"
   }
 }
