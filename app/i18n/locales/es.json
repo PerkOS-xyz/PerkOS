@@ -1366,6 +1366,27 @@
       "codes": "Códigos", "checked": "comprobado", "capabilityUnavailable": "Capacidad pública: no disponible{{reason}}. La llamada permanece oculta hasta que el gateway informe que está lista.",
       "loading": "Cargando estado…", "greenPrefix": "El último reporte está correcto. Los propietarios aún pueden ejecutar", "greenSuffix": "en el host del gateway cuando quieran.", "recent": "Señales recientes"
     },
+    "upgrade": {
+      "title": "Actualización del agente",
+      "description": "Instala una versión más reciente del runtime del agente. PerkOS pausa el agente, inicia la nueva versión y restaura su estado cifrado. Interrupción estimada: 60–90 segundos.",
+      "installedVersion": "Versión instalada",
+      "latest": "Este agente utiliza la versión más reciente disponible.",
+      "available": "Versiones disponibles",
+      "pickTag": "Elige una versión",
+      "notes": "Notas de la versión",
+      "action": "Actualizar agente",
+      "refresh": "Buscar actualizaciones",
+      "checking": "Buscando…",
+      "retry": "Intentar de nuevo",
+      "complete": "Agente actualizado",
+      "completeDescription": "{{name}} ahora utiliza {{to}} (antes {{from}}). El estado se restauró en {{seconds}} s.",
+      "unknownVersion": "versión desconocida",
+      "failed": "La actualización falló",
+      "confirmTitle": "¿Actualizar a {{name}}?",
+      "confirmDescription": "PerkOS pausará el contenedor actual, instalará {{tag}} y restaurará el estado cifrado en un contenedor nuevo. El agente no estará disponible durante aproximadamente 60–90 segundos; se conservan la memoria y el historial de conversaciones.",
+      "pickFirst": "Primero elige una versión de destino.",
+      "confirmLabel": "Actualizar agente"
+    },
     "tasks": {
       "title": "Tareas asignadas a {{name}}",
       "description": "En todos tus proyectos. Haz clic en una tarea para ver su detalle.",
