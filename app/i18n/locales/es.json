@@ -1387,6 +1387,50 @@
       "pickFirst": "Primero elige una versión de destino.",
       "confirmLabel": "Actualizar agente"
     },
+    "voice": {
+      "liveWith": "En llamada con {{name}}", "callAgent": "Llamar a {{name}}", "endingCall": "Finalizando llamada…", "ending": "Finalizando…", "endCall": "Finalizar llamada",
+      "workingCall": "Llamada de trabajo", "privateCall": "Llamada privada", "working": "Trabajo", "private": "Privada", "voice": "Voz {{voice}}",
+      "unavailableDescription": "{{name}} no ha reportado un gateway de voz y proveedor de voz verificados. Tener chat disponible no habilita la voz.",
+      "duration": "Duración de la llamada {{duration}}", "unmute": "Activar micrófono", "mute": "Silenciar", "start": "Iniciar llamada de voz",
+      "connectingWorking": "Conectando llamada de trabajo", "retryWorking": "Reintentar llamada de trabajo", "workingWith": "Llamada de trabajo con {{name}}",
+      "preparingChatWorking": "Preparando el chat para la llamada de trabajo…", "workingNeedsChat": "La llamada de trabajo necesita una conversación de chat", "workingTitle": "Llamada de trabajo — guarda los turnos finales en el chat",
+      "preparingChat": "Preparando chat…", "savesTurns": "Guarda los turnos finales en el chat", "connectingPrivate": "Conectando llamada privada",
+      "retryPrivate": "Reintentar llamada privada", "privateWith": "Llamada privada con {{name}}", "privateTitle": "Llamada privada — no guarda nada en el chat", "privateSummary": "Sin guardar chat · sin conservar audio",
+      "pendingCapability": "Pendiente de capacidad del gateway y configuración del proveedor de voz.", "settings": "Configuración de llamada",
+      "workingDetails": "El texto final del usuario y del agente se escribe en el chat después de cada turno. El audio sin procesar nunca se guarda.",
+      "privateDetails": "No se conserva texto final, audio sin procesar ni voz provisional.", "audio": "Audio", "audioDetails": "Cancelación de eco, supresión de ruido y control automático de ganancia.",
+      "bargeIn": "Interrupción por voz", "bargeInDetails": "Hablar interrumpe la respuesta actual del agente.",
+      "state": { "checking": "Comprobando disponibilidad de voz…", "connecting": "Conectando…", "reconnecting": "Reconectando…", "in-call": "Llamada en curso", "ready": "Lista para voz", "unavailable": "Voz no disponible", "failed": "La llamada falló", "ended": "Llamada finalizada" }
+    },
+    "invitedCredential": {
+      "title": "Credencial de conexión", "description": "Este agente externo se conecta con un relayApiKey secreto. Vuelve a mostrar la invitación, rota la clave si se filtra o revócala para desconectar al agente.",
+      "connected": "Puente conectado", "revoked": "Revocada", "neverConnected": "Nunca se conectó", "waiting": "Esperando conexión",
+      "staleHelp": "Este agente fue invitado, pero nunca se conectó. Comprueba que su runtime ejecute el puente con esta credencial y revisa la invitación.",
+      "revokedHelp": "La credencial está revocada. El agente ya no puede acceder al relay ni al tablero de tareas. Rótala para emitir una nueva.",
+      "showPrompt": "Mostrar invitación", "hidePrompt": "Ocultar invitación", "rotate": "Rotar credencial", "revoke": "Revocar",
+      "rotated": "Credencial rotada; proporciona la nueva invitación a tu agente.", "rotateError": "No se pudo rotar la credencial",
+      "revokedToast": "Se revocó la credencial de {{name}}. Rótala para emitir una nueva.", "revokeError": "No se pudo revocar la credencial",
+      "rotateTitle": "¿Rotar la credencial de este agente?", "rotateDescription": "El relayApiKey actual dejará de funcionar inmediatamente. Recibirás una nueva invitación para que el agente pueda reconectarse.",
+      "revokeTitle": "¿Revocar la credencial de este agente?", "revokeDescription": "El agente perderá inmediatamente el acceso al chat y al tablero de tareas. Puedes revertirlo rotando la credencial más adelante.",
+      "loadingPrompt": "Cargando invitación…", "noPrompt": "No hay una invitación disponible; la credencial podría estar revocada.", "secretHint": "Contiene el relayApiKey secreto; trátalo como una contraseña."
+    },
+    "voiceCredential": {
+      "title": "Entrega de credencial del gateway de voz", "description": "Rotación exclusiva del propietario para {{name}}. La API cifra la nueva credencial con la clave pública efímera del gateway; este navegador solo recibe metadatos seguros de entrega.",
+      "warning": "Genera una clave pública de un solo uso en el gateway y pega aquí únicamente la clave pública. Nunca pegues una clave privada, API key, token o credencial existente. La rotación deshabilita inmediatamente la credencial de voz anterior.",
+      "publicKey": "Clave pública efímera del gateway", "placeholder": "Pega la clave pública generada por el gateway",
+      "acknowledge": "Generé esta clave pública en el gateway previsto y comprendo que esto rota la credencial de voz actual.",
+      "encrypting": "Cifrando la nueva credencial…", "rotate": "Rotar y cifrar", "rotationFailed": "Falló la rotación cifrada",
+      "pending": "Entrega pendiente para Bragi", "algorithm": "Algoritmo", "audience": "Audiencia", "fingerprint": "Huella de la clave pública", "expires": "Expira",
+      "safeMetadata": "La API y el receptor de Bragi conservan los identificadores de entrega y reclamo; el texto cifrado nunca se expone aquí."
+    },
+    "voiceController": {
+      "sessionStatus": "Sesión de voz: {{status}}.", "audioConnected": "Audio remoto conectado.", "audioPlaying": "Audio remoto reproduciéndose.",
+      "audioPermission": "La reproducción del audio remoto necesita permiso del navegador.", "networkChanged": "La red cambió. Reconectando la llamada…",
+      "waitingAudio": "Llamada reconectada. Esperando el audio remoto.", "connectionLost": "Se perdió la conexión. Restaurando la llamada…",
+      "restoreFailed": "No se pudo restaurar la conexión de red. La llamada finalizó de forma segura.", "callFailed": "La llamada de voz falló.",
+      "cancelTimeout": "Se envió la finalización, pero el servidor agotó el tiempo de espera.", "cancelFailed": "No se pudo cancelar la sesión de voz.",
+      "endFailed": "No se pudo finalizar la reunión.", "microphoneFailed": "No se pudo cambiar el estado del micrófono."
+    },
     "tasks": {
       "title": "Tareas asignadas a {{name}}",
       "description": "En todos tus proyectos. Haz clic en una tarea para ver su detalle.",

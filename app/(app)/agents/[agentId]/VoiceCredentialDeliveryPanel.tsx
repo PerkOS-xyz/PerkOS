@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Check, KeyRound, Loader2, ShieldCheck } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export function VoiceCredentialDeliveryPanel({ agentId, agentName, owner }: Props) {
+  const { t, i18n } = useTranslation();
   const [publicKey, setPublicKey] = useState("");
   const [acknowledged, setAcknowledged] = useState(false);
   const [delivery, setDelivery] = useState<EncryptedVoiceCredentialDelivery | null>(null);
@@ -38,7 +40,7 @@ export function VoiceCredentialDeliveryPanel({ agentId, agentName, owner }: Prop
       setState("ready");
     } catch (cause) {
       setState("failed");
-      setError(cause instanceof Error ? cause.message : "Encrypted rotation failed");
+      setError(cause instanceof Error ? cause.message : t("agentDetail.voiceCredential.rotationFailed"));
     }
   };
 
@@ -47,28 +49,24 @@ export function VoiceCredentialDeliveryPanel({ agentId, agentName, owner }: Prop
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <ShieldCheck className="h-4 w-4 text-muted-foreground" />
-          Voice gateway credential delivery
+          {t("agentDetail.voiceCredential.title")}
         </CardTitle>
         <CardDescription>
-          Owner-only rotation for {agentName}. The API encrypts the new credential to your
-          gateway&apos;s ephemeral public key. Bragi pulls the encrypted payload directly;
-          this browser receives safe delivery metadata only.
+          {t("agentDetail.voiceCredential.description", { name: agentName })}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <p className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
-          Generate a one-time public key on the gateway and paste only the public key here.
-          Never paste a private key, API key, token, or existing credential. Rotating disables
-          the previous voice credential immediately.
+          {t("agentDetail.voiceCredential.warning")}
         </p>
 
         <label className="flex flex-col gap-2 text-sm font-medium">
-          Ephemeral gateway public key
+          {t("agentDetail.voiceCredential.publicKey")}
           <textarea
-            aria-label="Ephemeral gateway public key"
+            aria-label={t("agentDetail.voiceCredential.publicKey")}
             className="min-h-28 rounded-md border border-input bg-background px-3 py-2 font-mono text-xs"
             disabled={state === "rotating"}
-            placeholder="Paste the gateway-generated public key"
+            placeholder={t("agentDetail.voiceCredential.placeholder")}
             spellCheck={false}
             autoComplete="off"
             value={publicKey}
@@ -89,7 +87,7 @@ export function VoiceCredentialDeliveryPanel({ agentId, agentName, owner }: Prop
             disabled={state === "rotating"}
             onChange={(event) => setAcknowledged(event.target.checked)}
           />
-          <span>I generated this public key on the intended gateway and understand this rotates the current voice credential.</span>
+          <span>{t("agentDetail.voiceCredential.acknowledge")}</span>
         </label>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -101,19 +99,19 @@ export function VoiceCredentialDeliveryPanel({ agentId, agentName, owner }: Prop
             onClick={() => void rotate()}
           >
             {state === "rotating" ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
-            {state === "rotating" ? "Encrypting new credential…" : "Rotate and encrypt"}
+            {state === "rotating" ? t("agentDetail.voiceCredential.encrypting") : t("agentDetail.voiceCredential.rotate")}
           </Button>
 
         </div>
 
         {delivery ? (
           <div role="status" className="space-y-1 rounded-md border px-3 py-2 text-xs text-emerald-700 dark:text-emerald-300">
-            <p className="flex items-center gap-2 font-medium"><Check className="h-4 w-4" /> Delivery pending for Bragi</p>
-            <p>Algorithm: {delivery.algorithm}</p>
-            <p>Audience: {delivery.audience}</p>
-            <p>Public-key fingerprint: <span className="font-mono">{delivery.publicKeyFingerprint}</span></p>
-            <p>Expires: {new Date(delivery.expiresAt).toLocaleString()}</p>
-            <p className="text-muted-foreground">Delivery and claim identifiers are retained by the API and Bragi receiver; ciphertext is never exposed here.</p>
+            <p className="flex items-center gap-2 font-medium"><Check className="h-4 w-4" /> {t("agentDetail.voiceCredential.pending")}</p>
+            <p>{t("agentDetail.voiceCredential.algorithm")}: {delivery.algorithm}</p>
+            <p>{t("agentDetail.voiceCredential.audience")}: {delivery.audience}</p>
+            <p>{t("agentDetail.voiceCredential.fingerprint")}: <span className="font-mono">{delivery.publicKeyFingerprint}</span></p>
+            <p>{t("agentDetail.voiceCredential.expires")}: {new Date(delivery.expiresAt).toLocaleString(i18n.language)}</p>
+            <p className="text-muted-foreground">{t("agentDetail.voiceCredential.safeMetadata")}</p>
           </div>
         ) : null}
         {error ? <p role="alert" className="text-xs text-destructive">{error}</p> : null}
