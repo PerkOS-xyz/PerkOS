@@ -1221,6 +1221,9 @@
     "backLink": "Back to Agent team",
     "notFound": "Agent not found in your team.",
     "whatHappensNext": "What happens next",
+    "common": { "dismiss": "Dismiss", "loading": "Loading…", "copy": "Copy", "copied": "Copied" },
+    "view": { "label": "Agent view", "conversation": "Conversation", "settings": "Settings" },
+    "voiceCall": { "title": "Voice call", "optional": "(optional)" },
     "header": {
       "stop": "Stop",
       "refresh": "Refresh",
@@ -1228,6 +1231,12 @@
       "alreadyStopped": "{{name}} was already stopped.",
       "stopping": "{{name}} stopping. It'll wake automatically on your next message.",
       "stopError": "Couldn't stop agent"
+      ,"refreshStatus": "Refresh status",
+      "manageAgent": "Manage agent",
+      "externalAgent": "External agent",
+      "perkosInfrastructure": "PerkOS infrastructure",
+      "externalDescription": "Declared availability: {{availability}}. Runtime, skills, and provider configuration remain owner-operated.",
+      "managedDescription": "Hosted and operated on PerkOS infrastructure. Authorized controls and declared capabilities appear below."
     },
     "status": {
       "syncing": "Syncing…",
@@ -1238,7 +1247,12 @@
       "offline": "Offline",
       "failed": "Failed",
       "provisioning": "Provisioning",
-      "unknown": "Unknown"
+      "unknown": "Unknown",
+      "runtimeUnavailable": "Runtime unavailable",
+      "runtimeUnverified": "Runtime unverified",
+      "available": "Available",
+      "unavailable": "Unavailable",
+      "unverified": "Unverified"
     },
     "activity": {
       "title": "Recent activity"
@@ -1258,7 +1272,8 @@
       "modelKey": "Model key",
       "byok": "User-provided (BYOK)",
       "runtimeOwned": "Runtime-owned (external)",
-      "perkosManaged": "PerkOS managed"
+      "perkosManaged": "PerkOS managed",
+      "runtimeHealth": "Runtime health"
     },
     "capabilities": {
       "title": "Capabilities",
@@ -1268,7 +1283,88 @@
     "channels": {
       "title": "Connected channels",
       "description": "Where users can reach this agent in addition to inside PerkOS.",
-      "none": "No channels configured. Telegram is available now; more runtime-specific channel adapters are coming."
+      "none": "No channels configured. Telegram is available now; more runtime-specific channel adapters are coming.",
+      "loading": "Loading channels…"
+    },
+    "wake": {
+      "wakingToast": "{{name}} is waking up",
+      "readyEstimate": "Container should be ready in ~30–60s.",
+      "error": "Couldn't wake the agent",
+      "hibernatedMessage": "{{name}} is hibernated. Want to send a message? Wake it first so it can receive it.",
+      "now": "Wake now",
+      "progress": "Waking {{name}}… ({{running}}/{{desired}} running)",
+      "hibernating": "{{name}} is hibernating…"
+    },
+    "chat": {
+      "title": "Chat",
+      "opensWhenReady": "Chat opens once the agent is provisioned and running.",
+      "connectWallet": "Connect a wallet to chat with this agent.",
+      "stillOpening": "Still opening the conversation; try again in a moment.",
+      "cleared": "Conversation cleared",
+      "agentConnected": "Agent connected",
+      "agentOffline": "Agent offline",
+      "serviceConnected": "Chat service connected",
+      "opening": "Opening…",
+      "connecting": "Connecting…",
+      "withAgent": "Chat with {{name}}",
+      "description": "Messages and completed saved voice turns share this conversation.",
+      "clear": "Clear",
+      "historyLabel": "Conversation history with {{name}}",
+      "empty": "No messages yet. Say hello.",
+      "savedVoiceTurn": "Saved voice turn",
+      "responding": "{{name}} is responding live…",
+      "runtimeUnavailableHelp": "The bridge is connected to PerkOS, but the external runtime did not answer its health probe. Start or repair the owner-operated runtime before sending messages.",
+      "placeholder": "Message {{name}}…",
+      "hibernatedHint": "Agent is hibernated — sending will wake it.",
+      "wakingHint": "Agent is waking up…",
+      "hibernatingHint": "Agent is hibernating; message will queue.",
+      "keyboardHint": "Enter to send · Shift+Enter for a new line",
+      "send": "Send",
+      "clearTitle": "Clear conversation?",
+      "clearDescription": "Removes the messages from this view. The agent and its server-side history are unaffected — reloading the page re-syncs them.",
+      "externalTimeout": "No response from {{name}} after 90s. The external{{runtime}} agent is connected but did not reply. Check the external runtime/plugin logs or model routing.",
+      "managedTimeout": "No response from {{name}} after 90s. If the agent was hibernated, give it another moment to wake; your message should arrive once the runtime is online."
+    },
+    "webhook": {
+      "title": "Inbound webhook", "active": "Active", "notSetUp": "Not set up",
+      "description": "Give an external service a URL to reach this agent. When an event arrives, PerkOS wakes the agent, hands it the payload, then lets it rest again. Anyone with the URL can trigger the agent, so keep it private.",
+      "empty": "No webhook URL yet. Generate one to start sending events to this agent.",
+      "ready": "Webhook URL ready — point your event source at it.", "generateError": "Couldn't generate webhook URL",
+      "disabledToast": "{{name}}'s webhook URL was disabled.", "disableError": "Couldn't disable webhook",
+      "rotateUrl": "Rotate URL", "generateUrl": "Generate URL", "disable": "Disable", "rotate": "Rotate",
+      "rotateTitle": "Rotate this webhook URL?", "rotateDescription": "The current URL stops working immediately. You'll get a fresh one to re-point your event source at.",
+      "disableTitle": "Disable this webhook URL?", "disableDescription": "The URL stops accepting events immediately. This is reversible — generate a new one later to re-enable inbound events.",
+      "secretHint": "Treat this URL like a password — anyone who has it can wake your agent."
+    },
+    "team": {
+      "title": "Team", "updated": "Team updated — the host is reprovisioning to serve it.", "updateError": "Couldn't update the team",
+      "coResidentDescription": "This agent runs as a co-resident inside {{host}}'s space, sharing one runtime with the rest of the team to keep costs down.",
+      "anotherAgent": "another agent", "leave": "Leave team (run on its own)", "leaveTitle": "Leave the team?",
+      "leaveDescription": "This agent moves back to its own runtime. The host reprovisions to drop it.", "leaveConfirm": "Leave",
+      "coResidents_one": "{{count}} co-resident", "coResidents_other": "{{count}} co-residents",
+      "description": "Run other agents inside this one's space — one runtime for the whole team, each with its own skills and memory. Fewer runtimes, lower cost.",
+      "remove": "Remove", "empty": "No co-residents yet. Add one of your agents to run it inside this one.",
+      "chooseAgent": "Choose an agent…", "add": "Add to team", "noneAvailable": "No standalone agents available to add. Create more agents first, then add them here."
+    },
+    "hibernation": {
+      "title": "Hibernation", "description": "Pause the agent's container to stop billing while you're not using it — sending a message wakes it back up. On the latest runtime its state is snapshotted (encrypted) and restored on wake; agents on older images restart fresh.",
+      "state": { "active": "Active", "hibernating": "Hibernating…", "hibernated": "Resting", "waking": "Waking up…" },
+      "desiredRunning": "Desired / Running", "snapshotSize": "Snapshot size", "hibernatedAt": "Hibernated at", "wakeStartedAt": "Wake started at",
+      "wakeAgent": "Wake agent", "hibernate": "Hibernate", "polling": "Polling status every 5s…", "backups": "State backups", "keepLast": "Keep last",
+      "noBackups": "No backups yet. Encrypted state snapshots are captured automatically every few minutes while the agent runs and restored when it wakes. Agents on older runtime images restart fresh.",
+      "restore": "Restore", "encrypted": "Encrypted client-side (AES-256) before upload — only your agent can decrypt them.",
+      "confirmTitle": "Hibernate {{name}}?", "confirmDescription": "Stops the running container and pauses billing. Sending a message wakes it (~30–60s to come back). On the latest runtime its encrypted state is restored on wake; agents on older images restart fresh.",
+      "confirmLabel": "Hibernate agent", "restoreTitle": "Restore {{name}} to this backup?", "restoreDescription": "The agent will restart with its state from {{backup}}. Anything changed since then is replaced (~30–60s to come back).",
+      "alreadyHibernated": "{{name}} was already hibernated.", "hibernatingToast": "{{name}} is hibernating — billing will stop once the task drains.", "hibernateError": "Couldn't hibernate agent",
+      "alreadyAwake": "{{name}} is already awake.", "startingToast": "{{name}} is starting back up — give it ~30s to be ready.", "wakeError": "Couldn't wake agent",
+      "retentionToast": "Keeping the last {{count}} backups — applies after the next restart.", "retentionError": "Couldn't update retention",
+      "restoringToast": "Restoring {{name}} — it will restart with that backup (~30–60s).", "restoreError": "Couldn't restore", "pending": " (+{{count}} pending)"
+    },
+    "voiceHealth": {
+      "title": "Voice health", "description": "Owner-only diagnostics for {{name}}. Fixed stage codes from the gateway doctor — no chat content, audio, or secrets. External agents self-heal on their host; PerkOS only shows what failed.",
+      "refresh": "Refresh health", "ready": "Doctor ready", "stale": "Stale report", "noReport": "No report yet", "attention": "Needs attention", "loadError": "Failed to load voice health",
+      "codes": "Codes", "checked": "checked", "capabilityUnavailable": "Public capability: unavailable{{reason}}. Call stays hidden until the gateway publishes ready.",
+      "loading": "Loading health…", "greenPrefix": "Last report is green. Owners can still run", "greenSuffix": "on the gateway host anytime.", "recent": "Recent signals"
     },
     "tasks": {
       "title": "Tasks assigned to {{name}}",

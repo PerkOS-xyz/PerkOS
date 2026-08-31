@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Sun, X } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 
@@ -37,6 +38,7 @@ const DISMISSED_KEY = (id: string) => `perkos:autowake-dismissed:${id}`;
  * goes back to "active".
  */
 export function AutoWakeBanner({ agentId, agentName, ecsDeployed }: Props) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   // Lazy initializer reads localStorage exactly once on first client
   // render. Project ESLint config rejects setState-in-effect; this
@@ -63,14 +65,14 @@ export function AutoWakeBanner({ agentId, agentName, ecsDeployed }: Props) {
       ensureAgentAwakeApi({ agentId, waitForRunning: false }),
     onSuccess: (result) => {
       if (result.triggeredWake) {
-        toast.success(`${agentName} is waking up`, {
-          description: "Container should be ready in ~30-60s.",
+        toast.success(t("agentDetail.wake.wakingToast", { name: agentName }), {
+          description: t("agentDetail.wake.readyEstimate"),
         });
       }
       queryClient.invalidateQueries({ queryKey: ["agent-hibernation", agentId] });
     },
     onError: (err: Error) => {
-      toast.error("Couldn't wake the agent", { description: err.message });
+      toast.error(t("agentDetail.wake.error"), { description: err.message });
     },
   });
 
@@ -93,8 +95,7 @@ export function AutoWakeBanner({ agentId, agentName, ecsDeployed }: Props) {
     return (
       <div className="flex items-center justify-between gap-3 rounded-md border border-slate-500/30 bg-slate-500/10 px-4 py-3 text-sm">
         <span className="text-slate-200">
-          <span className="font-medium">{agentName}</span> is hibernated.
-          Send it a message? Wake it first so it can receive.
+          {t("agentDetail.wake.hibernatedMessage", { name: agentName })}
         </span>
         <div className="flex items-center gap-2">
           <Button
@@ -108,13 +109,13 @@ export function AutoWakeBanner({ agentId, agentName, ecsDeployed }: Props) {
             ) : (
               <Sun className="h-3.5 w-3.5" />
             )}
-            Wake now
+            {t("agentDetail.wake.now")}
           </Button>
           <Button
             variant="ghost"
             size="icon"
             onClick={dismiss}
-            aria-label="Dismiss"
+            aria-label={t("agentDetail.common.dismiss")}
             className="h-7 w-7"
           >
             <X className="h-3.5 w-3.5" />
@@ -138,14 +139,14 @@ export function AutoWakeBanner({ agentId, agentName, ecsDeployed }: Props) {
       <span className="flex items-center gap-2">
         <Loader2 className="h-3.5 w-3.5 animate-spin" />
         {isWaking
-          ? `Waking ${agentName}… (${statusQuery.data.runningCount}/${statusQuery.data.desiredCount} running)`
-          : `${agentName} is hibernating…`}
+          ? t("agentDetail.wake.progress", { name: agentName, running: statusQuery.data.runningCount, desired: statusQuery.data.desiredCount })
+          : t("agentDetail.wake.hibernating", { name: agentName })}
       </span>
       <Button
         variant="ghost"
         size="icon"
         onClick={dismiss}
-        aria-label="Dismiss"
+        aria-label={t("agentDetail.common.dismiss")}
         className="h-7 w-7"
       >
         <X className="h-3.5 w-3.5" />

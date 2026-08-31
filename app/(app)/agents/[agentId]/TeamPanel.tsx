@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { Loader2, LogOut, Plus, Users, X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +27,7 @@ import { ConfirmDialog } from "../../../components/ConfirmDialog";
  * A team change reprovisions the host so one runtime serves the whole team.
  */
 export function TeamPanel({ agent }: { agent: AgentRow }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const agentsQuery = useQuery({
     queryKey: ["wallet-agents", agent.walletAddress],
@@ -61,11 +63,11 @@ export function TeamPanel({ agent }: { agent: AgentRow }) {
   const setHost = useMutation({
     mutationFn: (v: { id: string; host: string | null }) => setAgentHost(v.id, v.host),
     onSuccess: () => {
-      toast.success("Team updated — the host is reprovisioning to serve it.");
+      toast.success(t("agentDetail.team.updated"));
       setSelected("");
       invalidate();
     },
-    onError: (e: Error) => toast.error("Couldn't update the team", { description: e.message }),
+    onError: (e: Error) => toast.error(t("agentDetail.team.updateError"), { description: e.message }),
     onSettled: () => setLeaveOpen(false),
   });
 
@@ -77,11 +79,10 @@ export function TeamPanel({ agent }: { agent: AgentRow }) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Users className="h-4 w-4 text-muted-foreground" />
-            Team
+            {t("agentDetail.team.title")}
           </CardTitle>
           <CardDescription>
-            This agent runs as a co-resident inside {host ? `"${host.name}"` : "another agent"}
-            &apos;s space, sharing one runtime with the rest of the team to keep costs down.
+            {t("agentDetail.team.coResidentDescription", { host: host ? `“${host.name}”` : t("agentDetail.team.anotherAgent") })}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -92,15 +93,15 @@ export function TeamPanel({ agent }: { agent: AgentRow }) {
             onClick={() => setLeaveOpen(true)}
           >
             <LogOut className="h-4 w-4" />
-            Leave team (run on its own)
+            {t("agentDetail.team.leave")}
           </Button>
         </CardContent>
         <ConfirmDialog
           open={leaveOpen}
           onOpenChange={setLeaveOpen}
-          title="Leave the team?"
-          description="This agent moves back to its own runtime. The host reprovisions to drop it."
-          confirmLabel="Leave"
+          title={t("agentDetail.team.leaveTitle")}
+          description={t("agentDetail.team.leaveDescription")}
+          confirmLabel={t("agentDetail.team.leaveConfirm")}
           pending={setHost.isPending}
           onConfirm={() => setHost.mutate({ id: agent.id, host: null })}
         />
@@ -118,21 +119,20 @@ export function TeamPanel({ agent }: { agent: AgentRow }) {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="flex items-center gap-2 text-base">
             <Users className="h-4 w-4 text-muted-foreground" />
-            Team
+            {t("agentDetail.team.title")}
           </CardTitle>
           <Badge variant="secondary">
-            {coResidents.length} co-resident{coResidents.length === 1 ? "" : "s"}
+            {t("agentDetail.team.coResidents", { count: coResidents.length })}
           </Badge>
         </div>
         <CardDescription>
-          Run other agents inside this one&apos;s space — one runtime for the whole team, each
-          with its own skills and memory. Fewer runtimes, lower cost.
+          {t("agentDetail.team.description")}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {agentsQuery.isLoading ? (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+            <Loader2 className="h-4 w-4 animate-spin" /> {t("agentDetail.common.loading")}
           </div>
         ) : coResidents.length > 0 ? (
           <ul className="flex flex-col gap-1">
@@ -150,14 +150,14 @@ export function TeamPanel({ agent }: { agent: AgentRow }) {
                   onClick={() => setHost.mutate({ id: c.id, host: null })}
                 >
                   <X className="h-3.5 w-3.5" />
-                  Remove
+                  {t("agentDetail.team.remove")}
                 </Button>
               </li>
             ))}
           </ul>
         ) : (
           <p className="text-sm text-muted-foreground">
-            No co-residents yet. Add one of your agents to run it inside this one.
+            {t("agentDetail.team.empty")}
           </p>
         )}
 
@@ -168,7 +168,7 @@ export function TeamPanel({ agent }: { agent: AgentRow }) {
               value={selected}
               onChange={(e) => setSelected(e.target.value)}
             >
-              <option value="">Choose an agent…</option>
+              <option value="">{t("agentDetail.team.chooseAgent")}</option>
               {addable.map((a) => (
                 <option key={a.id} value={a.id}>
                   {a.name}
@@ -182,12 +182,12 @@ export function TeamPanel({ agent }: { agent: AgentRow }) {
               onClick={() => setHost.mutate({ id: selected, host: agent.id })}
             >
               <Plus className="h-4 w-4" />
-              Add to team
+              {t("agentDetail.team.add")}
             </Button>
           </div>
         ) : (
           <p className="text-xs text-muted-foreground">
-            No standalone agents available to add. Create more agents first, then add them here.
+            {t("agentDetail.team.noneAvailable")}
           </p>
         )}
       </CardContent>
