@@ -44,3 +44,18 @@ La evolución analítica seguirá los patrones validados en el research de Nodus
 Labs: comunidades reales, centralidad, nodos puente, gaps estructurales, filtros
 por umbral y evolución temporal. Estas métricas no se simulan en cliente: deben
 provenir del modelo de relaciones y de telemetría confiable.
+
+## Execution con bloques 3D
+
+El tab `Execution` prioriza legibilidad operativa sobre la estética de una nube
+de nodos. La meta del proyecto, el coordinador, los agentes y las tareas se
+distribuyen en carriles tridimensionales de izquierda a derecha. Agentes y
+tareas usan bloques con contorno e identificación persistente; los conectores
+tienen flecha, color de responsable y partículas cuando el trabajo está activo.
+
+Las tareas se agrupan alrededor del agente asignado. El usuario puede rotar,
+hacer zoom, seleccionar un bloque, aislar vecinos y abrir el detalle de la
+tarea. La posición por carriles es estable para que el flujo siga siendo
+comprensible tras rotar la escena, mientras la profundidad evita solapamientos.
+Esta vista continúa derivándose de asignaciones y estados actuales: no representa
+handoffs o mensajes que el runtime todavía no haya publicado.
