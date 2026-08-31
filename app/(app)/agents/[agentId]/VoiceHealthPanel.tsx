@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Activity, AlertTriangle, CheckCircle2, Loader2, Stethoscope } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +16,7 @@ type Props = {
 };
 
 export function VoiceHealthPanel({ agentId, agentName, owner }: Props) {
+  const { t, i18n } = useTranslation();
   const query = useQuery({
     queryKey: ["agent-voice-health", agentId],
     queryFn: () => getAgentVoiceHealthApi(agentId),
@@ -35,12 +37,10 @@ export function VoiceHealthPanel({ agentId, agentName, owner }: Props) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <Stethoscope className="h-4 w-4 text-muted-foreground" />
-          Voice health
+          {t("agentDetail.voiceHealth.title")}
         </CardTitle>
         <CardDescription>
-          Owner-only diagnostics for {agentName}. Fixed stage codes from the gateway doctor —
-          no chat content, audio, or secrets. External agents self-heal on their host; PerkOS
-          only shows what failed.
+          {t("agentDetail.voiceHealth.description", { name: agentName })}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
@@ -54,7 +54,7 @@ export function VoiceHealthPanel({ agentId, agentName, owner }: Props) {
             onClick={() => void query.refetch()}
           >
             {query.isFetching ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Activity className="h-3.5 w-3.5" />}
-            Refresh health
+            {t("agentDetail.voiceHealth.refresh")}
           </Button>
           {health ? (
             <span
@@ -66,39 +66,38 @@ export function VoiceHealthPanel({ agentId, agentName, owner }: Props) {
               data-testid="voice-health-status"
             >
               {ready ? <CheckCircle2 className="h-3.5 w-3.5" /> : <AlertTriangle className="h-3.5 w-3.5" />}
-              {ready ? "Doctor ready" : health.status === "stale" ? "Stale report" : health.status === "unknown" ? "No report yet" : "Needs attention"}
+              {ready ? t("agentDetail.voiceHealth.ready") : health.status === "stale" ? t("agentDetail.voiceHealth.stale") : health.status === "unknown" ? t("agentDetail.voiceHealth.noReport") : t("agentDetail.voiceHealth.attention")}
             </span>
           ) : null}
         </div>
 
         {query.isError ? (
           <p className="text-sm text-destructive" role="alert">
-            {query.error instanceof Error ? query.error.message : "Failed to load voice health"}
+            {query.error instanceof Error ? query.error.message : t("agentDetail.voiceHealth.loadError")}
           </p>
         ) : null}
 
         {health ? (
           <div className="space-y-2 text-sm">
             <p className="text-muted-foreground">
-              Codes: <span className="font-mono text-foreground">{summarizeVoiceHealthCodes(codes)}</span>
+              {t("agentDetail.voiceHealth.codes")}: <span className="font-mono text-foreground">{summarizeVoiceHealthCodes(codes)}</span>
               {health.checkedAt ? (
                 <>
                   {" "}
-                  · checked {new Date(health.checkedAt).toLocaleString()}
+                  · {t("agentDetail.voiceHealth.checked")} {new Date(health.checkedAt).toLocaleString(i18n.language)}
                   {health.source ? ` · ${health.source}` : ""}
                 </>
               ) : null}
             </p>
             {health.capabilityAvailable === false ? (
               <p className="text-xs text-muted-foreground">
-                Public capability: unavailable
-                {health.capabilityReason ? ` (${health.capabilityReason})` : ""}. Call stays hidden until the gateway publishes ready.
+                {t("agentDetail.voiceHealth.capabilityUnavailable", { reason: health.capabilityReason ? ` (${health.capabilityReason})` : "" })}
               </p>
             ) : null}
           </div>
         ) : query.isLoading ? (
           <p className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading health…
+            <Loader2 className="h-3.5 w-3.5 animate-spin" /> {t("agentDetail.voiceHealth.loading")}
           </p>
         ) : null}
 
@@ -118,13 +117,13 @@ export function VoiceHealthPanel({ agentId, agentName, owner }: Props) {
           </ul>
         ) : ready ? (
           <p className="text-sm text-muted-foreground">
-            Last report is green. Owners can still run <code className="text-xs">perkos-voice-doctor</code> on the gateway host anytime.
+            {t("agentDetail.voiceHealth.greenPrefix")} <code className="text-xs">perkos-voice-doctor</code> {t("agentDetail.voiceHealth.greenSuffix")}
           </p>
         ) : null}
 
         {recent.length > 0 ? (
           <div className="space-y-1">
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Recent signals</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("agentDetail.voiceHealth.recent")}</p>
             <ul className="max-h-36 space-y-1 overflow-y-auto text-xs text-muted-foreground" data-testid="voice-health-recent">
               {recent.slice(0, 8).map((event, index) => (
                 <li key={`${event.recordedAt ?? event.checkedAt ?? index}-${event.codes.join(",")}`} className="font-mono">

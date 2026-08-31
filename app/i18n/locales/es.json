@@ -1221,6 +1221,9 @@
     "backLink": "Volver a Equipo de agentes",
     "notFound": "No se encontró el agente en tu equipo.",
     "whatHappensNext": "Qué pasa después",
+    "common": { "dismiss": "Descartar", "loading": "Cargando…", "copy": "Copiar", "copied": "Copiado" },
+    "view": { "label": "Vista del agente", "conversation": "Conversación", "settings": "Configuración" },
+    "voiceCall": { "title": "Llamada de voz", "optional": "(opcional)" },
     "header": {
       "stop": "Detener",
       "refresh": "Actualizar",
@@ -1228,6 +1231,12 @@
       "alreadyStopped": "{{name}} ya estaba detenido.",
       "stopping": "Deteniendo a {{name}}: se despertará automáticamente con tu próximo mensaje.",
       "stopError": "No se pudo detener el agente"
+      ,"refreshStatus": "Actualizar estado",
+      "manageAgent": "Administrar agente",
+      "externalAgent": "Agente externo",
+      "perkosInfrastructure": "Infraestructura de PerkOS",
+      "externalDescription": "Disponibilidad declarada: {{availability}}. El propietario sigue operando el runtime, las habilidades y la configuración del proveedor.",
+      "managedDescription": "Alojado y operado en la infraestructura de PerkOS. Los controles autorizados y las capacidades declaradas aparecen abajo."
     },
     "status": {
       "syncing": "Sincronizando…",
@@ -1238,7 +1247,12 @@
       "offline": "Desconectado",
       "failed": "Falló",
       "provisioning": "Aprovisionando",
-      "unknown": "Desconocido"
+      "unknown": "Desconocido",
+      "runtimeUnavailable": "Runtime no disponible",
+      "runtimeUnverified": "Runtime sin verificar",
+      "available": "Disponible",
+      "unavailable": "No disponible",
+      "unverified": "Sin verificar"
     },
     "activity": {
       "title": "Actividad reciente"
@@ -1258,7 +1272,8 @@
       "modelKey": "Clave del modelo",
       "byok": "Provista por el usuario (BYOK)",
       "runtimeOwned": "Gestionada por el runtime externo",
-      "perkosManaged": "Administrada por PerkOS"
+      "perkosManaged": "Administrada por PerkOS",
+      "runtimeHealth": "Estado del runtime"
     },
     "capabilities": {
       "title": "Capacidades",
@@ -1268,7 +1283,88 @@
     "channels": {
       "title": "Canales conectados",
       "description": "Dónde más pueden contactar a este agente, además de dentro de PerkOS.",
-      "none": "No hay canales configurados. Telegram está disponible ahora; próximamente habrá más adaptadores específicos para cada runtime."
+      "none": "No hay canales configurados. Telegram está disponible ahora; próximamente habrá más adaptadores específicos para cada runtime.",
+      "loading": "Cargando canales…"
+    },
+    "wake": {
+      "wakingToast": "{{name}} se está despertando",
+      "readyEstimate": "El contenedor debería estar listo en ~30–60 s.",
+      "error": "No se pudo despertar al agente",
+      "hibernatedMessage": "{{name}} está hibernado. ¿Quieres enviarle un mensaje? Despiértalo primero para que pueda recibirlo.",
+      "now": "Despertar ahora",
+      "progress": "Despertando a {{name}}… ({{running}}/{{desired}} en ejecución)",
+      "hibernating": "{{name}} está hibernando…"
+    },
+    "chat": {
+      "title": "Chat",
+      "opensWhenReady": "El chat se habilitará cuando el agente esté aprovisionado y en ejecución.",
+      "connectWallet": "Conecta una billetera para chatear con este agente.",
+      "stillOpening": "La conversación todavía se está abriendo; inténtalo de nuevo en un momento.",
+      "cleared": "Conversación borrada",
+      "agentConnected": "Agente conectado",
+      "agentOffline": "Agente desconectado",
+      "serviceConnected": "Servicio de chat conectado",
+      "opening": "Abriendo…",
+      "connecting": "Conectando…",
+      "withAgent": "Chat con {{name}}",
+      "description": "Los mensajes y los turnos de voz guardados comparten esta conversación.",
+      "clear": "Borrar",
+      "historyLabel": "Historial de conversación con {{name}}",
+      "empty": "Todavía no hay mensajes. Di hola.",
+      "savedVoiceTurn": "Turno de voz guardado",
+      "responding": "{{name}} está respondiendo en vivo…",
+      "runtimeUnavailableHelp": "El puente está conectado a PerkOS, pero el runtime externo no respondió a la comprobación de estado. Inicia o repara el runtime operado por el propietario antes de enviar mensajes.",
+      "placeholder": "Mensaje para {{name}}…",
+      "hibernatedHint": "El agente está hibernado; enviar el mensaje lo despertará.",
+      "wakingHint": "El agente se está despertando…",
+      "hibernatingHint": "El agente está hibernando; el mensaje quedará en cola.",
+      "keyboardHint": "Enter para enviar · Mayús+Enter para una nueva línea",
+      "send": "Enviar",
+      "clearTitle": "¿Borrar la conversación?",
+      "clearDescription": "Quita los mensajes de esta vista. El agente y su historial del servidor no se modifican; al recargar la página se volverán a sincronizar.",
+      "externalTimeout": "{{name}} no respondió después de 90 s. El agente externo{{runtime}} está conectado, pero no devolvió una respuesta. Revisa los logs del runtime/plugin externo o el enrutamiento del modelo.",
+      "managedTimeout": "{{name}} no respondió después de 90 s. Si estaba hibernado, dale otro momento para despertar; tu mensaje debería llegar cuando el runtime esté en línea."
+    },
+    "webhook": {
+      "title": "Webhook entrante", "active": "Activo", "notSetUp": "Sin configurar",
+      "description": "Proporciona a un servicio externo una URL para contactar a este agente. Cuando llega un evento, PerkOS despierta al agente, le entrega los datos y luego lo deja descansar. Cualquiera que tenga la URL puede activarlo, así que mantenla privada.",
+      "empty": "Todavía no hay una URL de webhook. Genera una para comenzar a enviar eventos a este agente.",
+      "ready": "La URL del webhook está lista; configura tu fuente de eventos para usarla.", "generateError": "No se pudo generar la URL del webhook",
+      "disabledToast": "Se deshabilitó la URL del webhook de {{name}}.", "disableError": "No se pudo deshabilitar el webhook",
+      "rotateUrl": "Rotar URL", "generateUrl": "Generar URL", "disable": "Deshabilitar", "rotate": "Rotar",
+      "rotateTitle": "¿Rotar esta URL de webhook?", "rotateDescription": "La URL actual dejará de funcionar inmediatamente. Recibirás una nueva para reconfigurar tu fuente de eventos.",
+      "disableTitle": "¿Deshabilitar esta URL de webhook?", "disableDescription": "La URL dejará de aceptar eventos inmediatamente. Puedes revertirlo generando una nueva URL más adelante.",
+      "secretHint": "Trata esta URL como una contraseña: cualquiera que la tenga puede despertar a tu agente."
+    },
+    "team": {
+      "title": "Equipo", "updated": "Equipo actualizado; el host se está volviendo a aprovisionar.", "updateError": "No se pudo actualizar el equipo",
+      "coResidentDescription": "Este agente se ejecuta dentro del espacio de {{host}}, compartiendo un runtime con el resto del equipo para reducir costos.",
+      "anotherAgent": "otro agente", "leave": "Salir del equipo (ejecutarse por separado)", "leaveTitle": "¿Salir del equipo?",
+      "leaveDescription": "Este agente volverá a su propio runtime. El host se volverá a aprovisionar para quitarlo.", "leaveConfirm": "Salir",
+      "coResidents_one": "{{count}} co-residente", "coResidents_other": "{{count}} co-residentes",
+      "description": "Ejecuta otros agentes dentro del espacio de este agente: un runtime para todo el equipo, cada uno con sus propias habilidades y memoria. Menos runtimes, menor costo.",
+      "remove": "Quitar", "empty": "Todavía no hay co-residentes. Agrega uno de tus agentes para ejecutarlo dentro de este.",
+      "chooseAgent": "Elige un agente…", "add": "Agregar al equipo", "noneAvailable": "No hay agentes independientes disponibles. Crea más agentes y luego agrégalos aquí."
+    },
+    "hibernation": {
+      "title": "Hibernación", "description": "Pausa el contenedor del agente para detener la facturación mientras no lo usas; enviar un mensaje lo despierta. En el runtime más reciente, su estado se guarda cifrado y se restaura al despertar; las imágenes anteriores reinician desde cero.",
+      "state": { "active": "Activo", "hibernating": "Hibernando…", "hibernated": "En reposo", "waking": "Despertando…" },
+      "desiredRunning": "Deseados / En ejecución", "snapshotSize": "Tamaño del snapshot", "hibernatedAt": "Hibernado el", "wakeStartedAt": "Despertar iniciado el",
+      "wakeAgent": "Despertar agente", "hibernate": "Hibernar", "polling": "Actualizando el estado cada 5 s…", "backups": "Copias de estado", "keepLast": "Conservar las últimas",
+      "noBackups": "Todavía no hay copias. Los snapshots cifrados se capturan automáticamente cada pocos minutos mientras el agente se ejecuta y se restauran al despertar. Las imágenes anteriores reinician desde cero.",
+      "restore": "Restaurar", "encrypted": "Cifradas del lado del cliente (AES-256) antes de subirlas; solo tu agente puede descifrarlas.",
+      "confirmTitle": "¿Hibernar a {{name}}?", "confirmDescription": "Detiene el contenedor y pausa la facturación. Enviar un mensaje lo despierta (~30–60 s). En el runtime más reciente se restaura su estado cifrado; las imágenes anteriores reinician desde cero.",
+      "confirmLabel": "Hibernar agente", "restoreTitle": "¿Restaurar a {{name}} desde esta copia?", "restoreDescription": "El agente se reiniciará con el estado de {{backup}}. Todo cambio posterior será reemplazado (~30–60 s para volver).",
+      "alreadyHibernated": "{{name}} ya estaba hibernado.", "hibernatingToast": "{{name}} está hibernando; la facturación se detendrá cuando termine la tarea.", "hibernateError": "No se pudo hibernar al agente",
+      "alreadyAwake": "{{name}} ya está despierto.", "startingToast": "{{name}} está arrancando; estará listo en unos 30 s.", "wakeError": "No se pudo despertar al agente",
+      "retentionToast": "Se conservarán las últimas {{count}} copias después del próximo reinicio.", "retentionError": "No se pudo actualizar la retención",
+      "restoringToast": "Restaurando a {{name}}; se reiniciará con esa copia (~30–60 s).", "restoreError": "No se pudo restaurar", "pending": " (+{{count}} pendiente(s))"
+    },
+    "voiceHealth": {
+      "title": "Estado de voz", "description": "Diagnóstico exclusivo del propietario para {{name}}. Muestra códigos de etapa del gateway sin contenido del chat, audio ni secretos. Los agentes externos se recuperan en su host; PerkOS solo muestra qué falló.",
+      "refresh": "Actualizar estado", "ready": "Diagnóstico correcto", "stale": "Reporte desactualizado", "noReport": "Sin reporte todavía", "attention": "Requiere atención", "loadError": "No se pudo cargar el estado de voz",
+      "codes": "Códigos", "checked": "comprobado", "capabilityUnavailable": "Capacidad pública: no disponible{{reason}}. La llamada permanece oculta hasta que el gateway informe que está lista.",
+      "loading": "Cargando estado…", "greenPrefix": "El último reporte está correcto. Los propietarios aún pueden ejecutar", "greenSuffix": "en el host del gateway cuando quieran.", "recent": "Señales recientes"
     },
     "tasks": {
       "title": "Tareas asignadas a {{name}}",

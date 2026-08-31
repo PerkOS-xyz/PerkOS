@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { Check, Copy, Loader2, Plus, RotateCcw, Webhook, ShieldOff } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +31,7 @@ import { ConfirmDialog } from "../../../components/ConfirmDialog";
  * substrate. Owner-only; mirrors the connection-credential panel.
  */
 export function WebhookPanel({ agent }: { agent: AgentRow }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [rotateOpen, setRotateOpen] = useState(false);
   const [disableOpen, setDisableOpen] = useState(false);
@@ -44,10 +46,10 @@ export function WebhookPanel({ agent }: { agent: AgentRow }) {
     mutationFn: () => rotateWebhook(agent.id),
     onSuccess: (data) => {
       setFreshUrl(data.url);
-      toast.success("Webhook URL ready — point your event source at it.");
+      toast.success(t("agentDetail.webhook.ready"));
       queryClient.invalidateQueries({ queryKey: ["webhook", agent.id] });
     },
-    onError: (err: Error) => toast.error("Couldn't generate webhook URL", { description: err.message }),
+    onError: (err: Error) => toast.error(t("agentDetail.webhook.generateError"), { description: err.message }),
     onSettled: () => setRotateOpen(false),
   });
 
@@ -55,10 +57,10 @@ export function WebhookPanel({ agent }: { agent: AgentRow }) {
     mutationFn: () => disableWebhook(agent.id),
     onSuccess: () => {
       setFreshUrl(null);
-      toast.success(`${agent.name}'s webhook URL disabled.`);
+      toast.success(t("agentDetail.webhook.disabledToast", { name: agent.name }));
       queryClient.invalidateQueries({ queryKey: ["webhook", agent.id] });
     },
-    onError: (err: Error) => toast.error("Couldn't disable webhook", { description: err.message }),
+    onError: (err: Error) => toast.error(t("agentDetail.webhook.disableError"), { description: err.message }),
     onSettled: () => setDisableOpen(false),
   });
 
@@ -71,28 +73,26 @@ export function WebhookPanel({ agent }: { agent: AgentRow }) {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="flex items-center gap-2 text-base">
             <Webhook className="h-4 w-4 text-muted-foreground" />
-            Inbound webhook
+            {t("agentDetail.webhook.title")}
           </CardTitle>
           <Badge variant={hasToken ? "secondary" : "outline"}>
-            {hasToken ? "Active" : "Not set up"}
+            {hasToken ? t("agentDetail.webhook.active") : t("agentDetail.webhook.notSetUp")}
           </Badge>
         </div>
         <CardDescription>
-          Give an external service a URL to reach this agent. When an event arrives, PerkOS
-          wakes the agent (even if it&apos;s asleep), hands it the payload, then lets it rest
-          again. Anyone with the URL can trigger the agent, so keep it private.
+          {t("agentDetail.webhook.description")}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {infoQuery.isLoading ? (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+            <Loader2 className="h-4 w-4 animate-spin" /> {t("agentDetail.common.loading")}
           </div>
         ) : url ? (
           <UrlBlock url={url} />
         ) : (
           <p className="text-sm text-muted-foreground">
-            No webhook URL yet. Generate one to start sending events to this agent.
+            {t("agentDetail.webhook.empty")}
           </p>
         )}
 
@@ -105,7 +105,7 @@ export function WebhookPanel({ agent }: { agent: AgentRow }) {
             disabled={rotateMutation.isPending}
           >
             {hasToken ? <RotateCcw className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-            {hasToken ? "Rotate URL" : "Generate URL"}
+            {hasToken ? t("agentDetail.webhook.rotateUrl") : t("agentDetail.webhook.generateUrl")}
           </Button>
           {hasToken ? (
             <Button
@@ -115,7 +115,7 @@ export function WebhookPanel({ agent }: { agent: AgentRow }) {
               onClick={() => setDisableOpen(true)}
             >
               <ShieldOff className="h-4 w-4" />
-              Disable
+              {t("agentDetail.webhook.disable")}
             </Button>
           ) : null}
         </div>
@@ -124,18 +124,18 @@ export function WebhookPanel({ agent }: { agent: AgentRow }) {
       <ConfirmDialog
         open={rotateOpen}
         onOpenChange={setRotateOpen}
-        title="Rotate this webhook URL?"
-        description="The current URL stops working immediately. You'll get a fresh one to re-point your event source at."
-        confirmLabel="Rotate"
+        title={t("agentDetail.webhook.rotateTitle")}
+        description={t("agentDetail.webhook.rotateDescription")}
+        confirmLabel={t("agentDetail.webhook.rotate")}
         pending={rotateMutation.isPending}
         onConfirm={() => rotateMutation.mutate()}
       />
       <ConfirmDialog
         open={disableOpen}
         onOpenChange={setDisableOpen}
-        title="Disable this webhook URL?"
-        description="The URL stops accepting events immediately. This is reversible — generate a new one later to re-enable inbound events."
-        confirmLabel="Disable"
+        title={t("agentDetail.webhook.disableTitle")}
+        description={t("agentDetail.webhook.disableDescription")}
+        confirmLabel={t("agentDetail.webhook.disable")}
         destructive
         pending={disableMutation.isPending}
         onConfirm={() => disableMutation.mutate()}
@@ -145,12 +145,13 @@ export function WebhookPanel({ agent }: { agent: AgentRow }) {
 }
 
 function UrlBlock({ url }: { url: string }) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   return (
     <div className="rounded-md border border-border bg-muted/40 p-3">
       <div className="mb-2 flex items-center justify-between">
         <span className="text-xs font-medium text-muted-foreground">
-          Treat this URL like a password — anyone who has it can wake your agent.
+          {t("agentDetail.webhook.secretHint")}
         </span>
         <Button
           variant="ghost"
@@ -167,7 +168,7 @@ function UrlBlock({ url }: { url: string }) {
           }}
         >
           {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-          {copied ? "Copied" : "Copy"}
+          {copied ? t("agentDetail.common.copied") : t("agentDetail.common.copy")}
         </Button>
       </div>
       <pre className="overflow-auto whitespace-pre-wrap break-all text-[11px] leading-relaxed text-muted-foreground">
