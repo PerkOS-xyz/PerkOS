@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { ArrowUpCircle, Loader2, RefreshCw } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -38,10 +39,10 @@ type Props = {
   ecsDeployed: boolean;
 };
 
-function formatDate(value?: string): string | undefined {
+function formatDate(value?: string, locale?: string): string | undefined {
   if (!value) return undefined;
   try {
-    return new Date(value).toLocaleString(undefined, {
+    return new Date(value).toLocaleString(locale, {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -52,6 +53,7 @@ function formatDate(value?: string): string | undefined {
 }
 
 export function UpgradePanel({ agentId, agentName, ecsDeployed }: Props) {
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   // `null` = user hasn't picked yet; the derived `effectiveTarget` below
   // defaults to the newest available tag in that case. We deliberately
@@ -76,10 +78,13 @@ export function UpgradePanel({ agentId, agentName, ecsDeployed }: Props) {
   const upgradeMutation = useMutation({
     mutationFn: () => upgradeAgentApi({ agentId, imageTag: targetTag }),
     onSuccess: (result) => {
-      toast.success("Upgrade complete", {
-        description: `${agentName} is now on ${result.to}${
-          result.from ? ` (was ${result.from})` : ""
-        }. State restored in ${(result.drainedAfterMs / 1000).toFixed(1)}s.`,
+      toast.success(t("agentDetail.upgrade.complete"), {
+        description: t("agentDetail.upgrade.completeDescription", {
+          name: agentName,
+          to: result.to,
+          from: result.from ?? t("agentDetail.upgrade.unknownVersion"),
+          seconds: (result.drainedAfterMs / 1000).toFixed(1),
+        }),
       });
       queryClient.invalidateQueries({ queryKey: ["agent-upgrade-options", agentId] });
       queryClient.invalidateQueries({ queryKey: ["agent-hibernation", agentId] });
@@ -88,7 +93,7 @@ export function UpgradePanel({ agentId, agentName, ecsDeployed }: Props) {
       setUserSelectedTag(null);
     },
     onError: (err: Error) => {
-      toast.error("Upgrade failed", { description: err.message });
+      toast.error(t("agentDetail.upgrade.failed"), { description: err.message });
       setConfirmOpen(false);
     },
   });
@@ -101,7 +106,7 @@ export function UpgradePanel({ agentId, agentName, ecsDeployed }: Props) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <ArrowUpCircle className="h-4 w-4 text-muted-foreground" />
-            Runtime upgrade
+            {t("agentDetail.upgrade.title")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -117,13 +122,17 @@ export function UpgradePanel({ agentId, agentName, ecsDeployed }: Props) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <ArrowUpCircle className="h-4 w-4 text-muted-foreground" />
-            Runtime upgrade
+            {t("agentDetail.upgrade.title")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-destructive">
             {(optionsQuery.error as Error).message}
           </p>
+          <Button variant="outline" size="sm" className="mt-3 gap-1.5" onClick={() => optionsQuery.refetch()}>
+            <RefreshCw className="h-3.5 w-3.5" />
+            {t("agentDetail.upgrade.retry")}
+          </Button>
         </CardContent>
       </Card>
     );
@@ -139,48 +148,51 @@ export function UpgradePanel({ agentId, agentName, ecsDeployed }: Props) {
           <div>
             <CardTitle className="flex items-center gap-2 text-base">
               <ArrowUpCircle className="h-4 w-4 text-muted-foreground" />
-              Runtime upgrade
+              {t("agentDetail.upgrade.title")}
             </CardTitle>
             <CardDescription>
-              Upgrade to a newer runtime image. The agent hibernates, the new
-              container starts on the new image, and your conversation history
-              is restored from the snapshot. Downtime is typically 60-90s.
+              {t("agentDetail.upgrade.description")}
             </CardDescription>
           </div>
           {currentTag ? (
-            <Badge variant="secondary" className="border-0 bg-muted font-mono text-xs">
-              {currentTag}
-            </Badge>
+            <div className="flex flex-col items-end gap-1">
+              <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                {t("agentDetail.upgrade.installedVersion")}
+              </span>
+              <Badge variant="secondary" className="max-w-64 border-0 bg-muted font-mono text-xs">
+                <span className="truncate">{currentTag}</span>
+              </Badge>
+            </div>
           ) : null}
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {noUpdates ? (
           <p className="text-sm text-muted-foreground">
-            You&apos;re on the latest available image.
+            {t("agentDetail.upgrade.latest")}
           </p>
         ) : (
           <>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="upgrade-tag-select">Available upgrades</Label>
+              <Label htmlFor="upgrade-tag-select">{t("agentDetail.upgrade.available")}</Label>
               <Select
                 value={targetTag}
                 onValueChange={(v) => setUserSelectedTag(v)}
               >
                 <SelectTrigger id="upgrade-tag-select">
-                  <SelectValue placeholder="Pick a tag" />
+                  <SelectValue placeholder={t("agentDetail.upgrade.pickTag")} />
                 </SelectTrigger>
                 <SelectContent>
                   {available.map((opt) => (
                     <SelectItem key={opt.imageTag} value={opt.imageTag}>
-                      <UpgradeOptionLabel opt={opt} />
+                      <UpgradeOptionLabel opt={opt} locale={i18n.language} />
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
               {selectedOption?.notes ? (
                 <p className="text-xs text-muted-foreground">
-                  Notes: {selectedOption.notes}
+                  {t("agentDetail.upgrade.notes")}: {selectedOption.notes}
                 </p>
               ) : null}
             </div>
@@ -199,37 +211,33 @@ export function UpgradePanel({ agentId, agentName, ecsDeployed }: Props) {
                 ) : (
                   <ArrowUpCircle className="h-3.5 w-3.5" />
                 )}
-                Upgrade
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => optionsQuery.refetch()}
-                disabled={optionsQuery.isFetching}
-                className="gap-1.5"
-              >
-                <RefreshCw
-                  className={`h-3.5 w-3.5${
-                    optionsQuery.isFetching ? " animate-spin" : ""
-                  }`}
-                />
-                Refresh
+                {t("agentDetail.upgrade.action")}
               </Button>
             </div>
           </>
         )}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => optionsQuery.refetch()}
+          disabled={optionsQuery.isFetching}
+          className="w-fit gap-1.5"
+        >
+          <RefreshCw className={`h-3.5 w-3.5${optionsQuery.isFetching ? " animate-spin" : ""}`} />
+          {optionsQuery.isFetching ? t("agentDetail.upgrade.checking") : t("agentDetail.upgrade.refresh")}
+        </Button>
       </CardContent>
 
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title={`Upgrade ${agentName}?`}
+        title={t("agentDetail.upgrade.confirmTitle", { name: agentName })}
         description={
           targetTag
-            ? `Hibernates the current task, registers a new task definition pinned to ${targetTag}, and starts a fresh container that restores from the snapshot. The agent is unreachable for ~60-90 seconds. State (memory + history) is preserved.`
-            : "Pick a target tag first."
+            ? t("agentDetail.upgrade.confirmDescription", { tag: targetTag })
+            : t("agentDetail.upgrade.pickFirst")
         }
-        confirmLabel="Upgrade agent"
+        confirmLabel={t("agentDetail.upgrade.confirmLabel")}
         pending={upgradeMutation.isPending}
         onConfirm={() => upgradeMutation.mutate()}
       />
@@ -237,8 +245,8 @@ export function UpgradePanel({ agentId, agentName, ecsDeployed }: Props) {
   );
 }
 
-function UpgradeOptionLabel({ opt }: { opt: AvailableUpgrade }) {
-  const date = formatDate(opt.publishedAt);
+function UpgradeOptionLabel({ opt, locale }: { opt: AvailableUpgrade; locale: string }) {
+  const date = formatDate(opt.publishedAt, locale);
   return (
     <div className="flex items-center gap-2">
       <span className="font-mono text-xs">{opt.imageTag}</span>

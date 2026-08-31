@@ -1366,6 +1366,27 @@
       "codes": "Codes", "checked": "checked", "capabilityUnavailable": "Public capability: unavailable{{reason}}. Call stays hidden until the gateway publishes ready.",
       "loading": "Loading health…", "greenPrefix": "Last report is green. Owners can still run", "greenSuffix": "on the gateway host anytime.", "recent": "Recent signals"
     },
+    "upgrade": {
+      "title": "Agent runtime update",
+      "description": "Install a newer agent runtime. PerkOS pauses the agent, starts the new version, and restores its encrypted state. Expected interruption: 60–90 seconds.",
+      "installedVersion": "Installed version",
+      "latest": "This agent is running the latest available version.",
+      "available": "Available versions",
+      "pickTag": "Choose a version",
+      "notes": "Release notes",
+      "action": "Update agent",
+      "refresh": "Check for updates",
+      "checking": "Checking…",
+      "retry": "Try again",
+      "complete": "Agent updated",
+      "completeDescription": "{{name}} is now running {{to}} (previously {{from}}). State restored in {{seconds}}s.",
+      "unknownVersion": "unknown version",
+      "failed": "Update failed",
+      "confirmTitle": "Update {{name}}?",
+      "confirmDescription": "PerkOS will pause the current container, install {{tag}}, and restore the encrypted state in a new container. The agent will be unavailable for approximately 60–90 seconds; memory and conversation history are preserved.",
+      "pickFirst": "Choose a target version first.",
+      "confirmLabel": "Update agent"
+    },
     "tasks": {
       "title": "Tasks assigned to {{name}}",
       "description": "Across all your projects. Click a task to see its detail.",
