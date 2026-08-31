@@ -239,7 +239,11 @@ export function realtimeAgentStatus(a?: AgentLiveStatus): {
     return { color: "bg-[#7975a8]", label: "Offline" };
   }
 
-  // Connected: phoned home, and — if it was ever woken — since that wake.
+  // Connected: the relay currently owns the bridge session and — if it was
+  // ever woken — the session was established after that wake. Managed bridges
+  // do not emit periodic Firestore heartbeats; the relay writes an explicit
+  // disconnect instead. Applying the external-runtime 90 s freshness window
+  // here therefore turns healthy managed agents Offline shortly after boot.
   // "Available" REQUIRES a real bridge heartbeat — do NOT infer it from
   // status:"ready" alone. A registered-but-never-provisioned doc (no ECS
   // service, e.g. a launch that didn't enqueue a provision job) sits at
@@ -249,8 +253,7 @@ export function realtimeAgentStatus(a?: AgentLiveStatus): {
   if (
     a.bridgeConnected &&
     seen > 0 &&
-    seen >= woke &&
-    Date.now() - seen <= 90_000
+    seen >= woke
   )
     return { color: "bg-emerald-400", label: STATUS_AVAILABLE };
 

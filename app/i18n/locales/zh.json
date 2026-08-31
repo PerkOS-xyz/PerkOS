@@ -1235,6 +1235,7 @@
       "connectedNow": "· 当前已连接",
       "neverConnected": "从未连接",
       "endpoint": "端点",
+      "connectedViaRelay": "已通过 PerkOS relay 连接",
       "notProvisioned": "尚未配置",
       "runtimeVersion": "运行环境版本",
       "modelKey": "模型密钥",

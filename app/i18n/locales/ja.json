@@ -1245,6 +1245,7 @@
       "connectedNow": "・現在接続中",
       "neverConnected": "未接続",
       "endpoint": "エンドポイント",
+      "connectedViaRelay": "PerkOS relay 経由で接続中",
       "notProvisioned": "まだプロビジョニングされていません",
       "runtimeVersion": "ランタイムバージョン",
       "modelKey": "モデルキー",

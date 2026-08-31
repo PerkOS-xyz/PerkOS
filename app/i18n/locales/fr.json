@@ -1245,6 +1245,7 @@
       "connectedNow": "· connecté maintenant",
       "neverConnected": "Jamais connecté",
       "endpoint": "Point de terminaison",
+      "connectedViaRelay": "Connecté via le relais PerkOS",
       "notProvisioned": "Pas encore provisionné",
       "runtimeVersion": "Version de l'environnement d'exécution",
       "modelKey": "Clé du modèle",

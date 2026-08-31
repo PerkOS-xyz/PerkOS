@@ -674,6 +674,13 @@ function StatusBadge({
       </Badge>
     );
   }
+  if (status === "ready" && bridgeConnected !== true) {
+    return (
+      <Badge variant="secondary" className="border-0 bg-muted text-muted-foreground">
+        {t("agentDetail.status.offline")}
+      </Badge>
+    );
+  }
   const tone =
     status === "ready"
       ? "bg-emerald-500/20 text-emerald-300"
@@ -772,6 +779,8 @@ function MetadataCard({ agent }: { agent: AgentRow }) {
             <span className="break-all font-mono text-xs">
               {agent.endpoint}
             </span>
+          ) : agent.bridgeConnected ? (
+            <span className="text-emerald-300">{t("agentDetail.metadata.connectedViaRelay")}</span>
           ) : (
             <span className="text-muted-foreground">{t("agentDetail.metadata.notProvisioned")}</span>
           )}
