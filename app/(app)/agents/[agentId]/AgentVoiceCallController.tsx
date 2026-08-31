@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Room, RoomEvent, Track } from "livekit-client";
 import { AgentVoiceCallCard } from "./AgentVoiceCallCard";
 import type { AgentVoiceState } from "../../../lib/agentVoice";
@@ -13,6 +14,7 @@ import {
 } from "../../../lib/perkosApi";
 
 export function AgentVoiceCallController({ agentId, agentName, project, chatCommitScopeKind = "direct", chatConversationId, speechVoice }: { agentId: string; agentName: string; project?: ProjectDetail; chatCommitScopeKind?: "direct" | "project"; chatConversationId?: string; speechVoice?: string | null }) {
+  const { t } = useTranslation();
   const [callState, setCallState] = useState<AgentVoiceState | null>(null); const [error, setError] = useState<string | null>(null);
   const [activeSession, setActiveSession] = useState<VoiceSessionApi | null>(null);
   const [remoteAudioStatus, setRemoteAudioStatus] = useState<string | null>(null);
@@ -63,11 +65,11 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
         sessionRef.current = next;
         setActiveSession(next);
         if (next.status === "joined") { callStartToneRef.current?.stop(); callStartToneRef.current = null; setCallState("in-call"); setCallStartedAt((current) => current ?? Date.now()); }
-        if (["failed", "cancelled", "expired"].includes(next.status)) { callStartToneRef.current?.stop(); callStartToneRef.current = null; setError(`Voice session ${next.status}.`); setCallState("failed"); window.clearInterval(timer); }
+        if (["failed", "cancelled", "expired"].includes(next.status)) { callStartToneRef.current?.stop(); callStartToneRef.current = null; setError(t("agentDetail.voiceController.sessionStatus", { status: next.status })); setCallState("failed"); window.clearInterval(timer); }
       } catch { setCallState("reconnecting"); }
     }, 1_000);
     return () => window.clearInterval(timer);
-  }, [activeSession, agentId, projectId, state]);
+  }, [activeSession, agentId, projectId, state, t]);
   useEffect(() => {
     if (!callStartedAt || state !== "in-call") return;
     const tick = () => setDurationSeconds(Math.max(0, Math.floor((Date.now() - callStartedAt) / 1_000)));
@@ -91,7 +93,7 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
   const start = async (mode: "working" | "private") => {
     if (!project) return;
     if (mode === "working" && !chatMirrorAvailable) {
-      setError(chatMirrorPreparing ? "Preparing chat for Working call…" : "Working call needs a chat conversation.");
+      setError(chatMirrorPreparing ? t("agentDetail.voice.preparingChatWorking") : t("agentDetail.voice.workingNeedsChat"));
       return;
     }
     callStartToneRef.current?.stop(); callStartToneRef.current = startCallStartTone(); setError(null); setRemoteAudioStatus(null); setMuted(false); setCallStartedAt(null); setDurationSeconds(0); setActiveCallMode(mode); setCallState("connecting");
@@ -109,26 +111,26 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
         audio.autoplay = true; (audio as HTMLAudioElement & { playsInline: boolean }).playsInline = true; audio.controls = false; audio.muted = false;
         track.attach(audio); document.body.appendChild(audio);
         remoteAudioRef.current = audio; remoteAudioTrackRef.current = track;
-        setRemoteAudioStatus("Remote audio connected.");
+        setRemoteAudioStatus(t("agentDetail.voiceController.audioConnected"));
         void Promise.resolve(audio.play())
-          .then(() => setRemoteAudioStatus("Remote audio playing."))
-          .catch(() => setRemoteAudioStatus("Remote audio playback needs browser permission."));
+          .then(() => setRemoteAudioStatus(t("agentDetail.voiceController.audioPlaying")))
+          .catch(() => setRemoteAudioStatus(t("agentDetail.voiceController.audioPermission")));
       });
       room.on(RoomEvent.TrackUnsubscribed, (track) => { if (track === remoteAudioTrackRef.current) { cleanupRemoteAudio(); setRemoteAudioStatus(null); } });
       room.on(RoomEvent.Reconnecting, () => {
         if (!sessionRef.current) return;
         setCallState("reconnecting");
-        setRemoteAudioStatus("Network changed. Reconnecting call…");
+        setRemoteAudioStatus(t("agentDetail.voiceController.networkChanged"));
       });
       room.on(RoomEvent.Reconnected, () => {
         if (!sessionRef.current) return;
         setCallState("in-call");
-        setRemoteAudioStatus(remoteAudioRef.current ? "Remote audio connected." : "Call reconnected. Waiting for remote audio.");
+        setRemoteAudioStatus(remoteAudioRef.current ? t("agentDetail.voiceController.audioConnected") : t("agentDetail.voiceController.waitingAudio"));
       });
       room.on(RoomEvent.Disconnected, () => {
         if (!sessionRef.current || reconnectGenerationRef.current !== reconnectGeneration) return;
         setCallState("reconnecting");
-        setRemoteAudioStatus("Connection lost. Restoring the call…");
+        setRemoteAudioStatus(t("agentDetail.voiceController.connectionLost"));
         void (async () => {
           for (const delayMs of [0, 1_000, 2_000, 4_000, 8_000, 15_000]) {
             if (!sessionRef.current || reconnectGenerationRef.current !== reconnectGeneration) return;
@@ -145,12 +147,12 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
               });
               if (!sessionRef.current || reconnectGenerationRef.current !== reconnectGeneration) return;
               setCallState("in-call");
-              setRemoteAudioStatus("Call reconnected. Waiting for remote audio.");
+              setRemoteAudioStatus(t("agentDetail.voiceController.waitingAudio"));
               return;
             } catch { /* retry with a fresh short-lived grant */ }
           }
           if (!sessionRef.current || reconnectGenerationRef.current !== reconnectGeneration) return;
-          setError("The network connection could not be restored. The call was ended safely.");
+          setError(t("agentDetail.voiceController.restoreFailed"));
           setCallState("failed");
           const active = sessionRef.current;
           sessionRef.current = null;
@@ -183,7 +185,7 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
       setActiveSession(session);
     } catch (cause) {
       callStartToneRef.current?.stop(); callStartToneRef.current = null;
-      setError(cause instanceof Error ? cause.message : "Voice call failed."); setCallState("failed");
+      setError(cause instanceof Error ? cause.message : t("agentDetail.voiceController.callFailed")); setCallState("failed");
       const meeting = meetingRef.current; const session = sessionRef.current;
       sessionRef.current = null;
       setActiveSession(null);
@@ -235,17 +237,17 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
           cancelVoiceSessionApi({ projectId, meetingId: meeting.id, sessionId: session.id, agentId }),
           6_000,
         );
-        if (cancelled === "timeout") remoteError = "Hang-up sent; server cancel timed out.";
+        if (cancelled === "timeout") remoteError = t("agentDetail.voiceController.cancelTimeout");
       }
     } catch (cause) {
-      remoteError = cause instanceof Error ? cause.message : "Could not cancel voice session.";
+      remoteError = cause instanceof Error ? cause.message : t("agentDetail.voiceController.cancelFailed");
     }
     try {
       if (meeting) {
         await withTimeout(endProjectMeetingApi({ projectId, meetingId: meeting.id, notes: "", proposals: [] }), 6_000);
       }
     } catch (cause) {
-      if (!remoteError) remoteError = cause instanceof Error ? cause.message : "Could not end meeting.";
+      if (!remoteError) remoteError = cause instanceof Error ? cause.message : t("agentDetail.voiceController.endFailed");
     }
 
     setCallState("ended");
@@ -265,7 +267,7 @@ export function AgentVoiceCallController({ agentId, agentName, project, chatComm
       await room.localParticipant.setMicrophoneEnabled(!next);
       setMuted(next);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Could not change microphone state.");
+      setError(cause instanceof Error ? cause.message : t("agentDetail.voiceController.microphoneFailed"));
     }
   };
   return <AgentVoiceCallCard
