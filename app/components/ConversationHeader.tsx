@@ -19,13 +19,18 @@ import { cn } from "@/lib/utils";
 import { updateConversation, type Conversation } from "../lib/conversationsApi";
 import { useChatClientStatus } from "../lib/useChatClient";
 import { ReceiptDialog } from "./ReceiptDialog";
+import {
+  chatAgentStateLabel,
+  type ChatAgentOperationalState,
+} from "../lib/chatAgentStatus";
 
 type Props = {
   conversation: Conversation;
   walletAddress: string;
+  agentState?: ChatAgentOperationalState;
 };
 
-export function ConversationHeader({ conversation, walletAddress }: Props) {
+export function ConversationHeader({ conversation, walletAddress, agentState }: Props) {
   const [renameOpen, setRenameOpen] = useState(false);
   const [receiptOpen, setReceiptOpen] = useState(false);
   const KindIcon = conversation.kind === "channel" ? Hash : MessageSquare;
@@ -57,6 +62,7 @@ export function ConversationHeader({ conversation, walletAddress }: Props) {
       </div>
 
       <div className="flex items-center gap-2">
+        {agents.length > 0 && agentState ? <AgentStatusBadge state={agentState} /> : null}
         <ConnectionBadge status={status} />
         <Button
           type="button"
@@ -97,6 +103,26 @@ export function ConversationHeader({ conversation, walletAddress }: Props) {
   );
 }
 
+function AgentStatusBadge({ state }: { state: ChatAgentOperationalState }) {
+  const tone =
+    state === "online"
+      ? "text-emerald-400"
+      : state === "sleeping" || state === "checking"
+        ? "text-muted-foreground"
+        : state === "waking"
+          ? "text-amber-400"
+          : "text-destructive";
+  return (
+    <span
+      className={cn("inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-0.5 text-[10px]", tone)}
+      title={`Agent status: ${chatAgentStateLabel[state]}`}
+    >
+      <Circle className={cn("h-2 w-2 fill-current", state === "waking" && "animate-pulse")} />
+      {chatAgentStateLabel[state]}
+    </span>
+  );
+}
+
 function ConnectionBadge({ status }: { status: ReturnType<typeof useChatClientStatus>["status"] }) {
   const tone =
     status === "connected"
@@ -108,23 +134,23 @@ function ConnectionBadge({ status }: { status: ReturnType<typeof useChatClientSt
       : "text-muted-foreground";
   const label =
     status === "connected"
-      ? "Live"
+      ? "Chat connected"
       : status === "authing"
-      ? "Authing"
+      ? "Chat authenticating"
       : status === "connecting"
-      ? "Connecting"
+      ? "Chat reconnecting"
       : status === "auth-error"
-      ? "Auth error"
+      ? "Chat auth error"
       : status === "disconnected"
-      ? "Offline"
-      : "Idle";
+      ? "Chat disconnected"
+      : "Chat idle";
   return (
     <span
       className={cn(
         "inline-flex items-center gap-1 rounded-md border border-border bg-card px-2 py-0.5 text-[10px]",
         tone,
       )}
-      title={`Chat connection: ${label}`}
+      title={label}
     >
       <Circle className="h-2 w-2 fill-current" />
       {label}

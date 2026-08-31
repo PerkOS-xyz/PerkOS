@@ -2,6 +2,8 @@
 
 import { notFound, useParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { useAppAccount } from "../../../lib/useAppAccount";
 
 import { useConversation } from "../../../lib/useConversation";
@@ -19,6 +21,12 @@ import {
 import { ConversationComposer } from "../../../components/ConversationComposer";
 import { OfflineBanner } from "../../../components/OfflineBanner";
 import { uploadAttachment } from "../../../lib/uploadAttachment";
+import { useWalletAgents } from "../../../lib/useWalletAgents";
+import {
+  chatAgentOperationalState,
+  findConversationAgent,
+} from "../../../lib/chatAgentStatus";
+import { ensureAgentAwakeApi } from "../../../lib/perkosApi";
 
 export default function ConversationPage() {
   const params = useParams<{ convId: string }>();
@@ -31,6 +39,7 @@ export default function ConversationPage() {
   );
 
   const { status } = useChatClientStatus();
+  const { byName: liveAgents } = useWalletAgents(address);
   const client = useChatClient();
   const live = useConversationLiveMessages(convId);
   const {
@@ -47,6 +56,21 @@ export default function ConversationPage() {
   // Optimistic local messages — added immediately when the user hits send,
   // dropped when the server echoes them back (matching id).
   const [optimistic, setOptimistic] = useState<OptimisticMessage[]>([]);
+
+  const conversationAgent = useMemo(
+    () => conversation
+      ? findConversationAgent(liveAgents, conversation.historyHost, conversation.participants)
+      : undefined,
+    [conversation, liveAgents],
+  );
+  const agentState = chatAgentOperationalState(conversationAgent);
+  const wakeMutation = useMutation({
+    mutationFn: async () => {
+      if (!conversationAgent) throw new Error("Agent status is not available yet.");
+      return ensureAgentAwakeApi({ agentId: conversationAgent.id, waitForRunning: false });
+    },
+    onError: (error: Error) => toast.error("Couldn’t wake the agent", { description: error.message }),
+  });
 
   // Drop optimistic entries that have been confirmed via the live channel.
   const liveIds = useMemo(() => new Set(live.map((m) => m.id)), [live]);
@@ -142,11 +166,17 @@ export default function ConversationPage() {
       <ConversationHeader
         conversation={conversation}
         walletAddress={address}
+        agentState={agentState}
       />
-      {hostOffline ? (
+      {agentState !== "online" && (agentState !== "checking" || hostOffline) ? (
         <OfflineBanner
           historyHost={conversation.historyHost}
           fromCache={fromCache}
+          agentName={conversationAgent?.name}
+          agentState={wakeMutation.isPending ? "waking" : agentState}
+          managed={Boolean(conversationAgent && !conversationAgent.external)}
+          waking={wakeMutation.isPending}
+          onWake={conversationAgent && !conversationAgent.external ? () => wakeMutation.mutate() : undefined}
         />
       ) : null}
       <ConversationMessages
