@@ -14,7 +14,9 @@
     "loading": "Cargando…",
     "skipToContent": "Saltar al contenido principal",
     "openMenu": "Abrir menú",
-    "mainNavigation": "Navegación principal"
+    "mainNavigation": "Navegación principal",
+    "cardsView": "Vista de tarjetas",
+    "listView": "Vista de lista"
   },
   "signIn": {
     "signingIn": "Iniciando sesión…",

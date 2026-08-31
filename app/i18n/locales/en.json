@@ -14,7 +14,9 @@
     "loading": "Loading…",
     "skipToContent": "Skip to main content",
     "openMenu": "Open menu",
-    "mainNavigation": "Main navigation"
+    "mainNavigation": "Main navigation",
+    "cardsView": "Cards view",
+    "listView": "List view"
   },
   "signIn": {
     "signingIn": "Signing you in…",
