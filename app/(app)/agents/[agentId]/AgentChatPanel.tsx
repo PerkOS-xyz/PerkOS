@@ -374,7 +374,7 @@ export function AgentChatPanel({
           ref={scrollRef}
           data-testid="agent-chat-history"
           aria-label={`Conversation history with ${agentName}`}
-          className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain rounded-xl border border-border bg-background/50 p-3 sm:p-5 xl:min-h-[28rem] xl:max-h-[42rem] xl:flex-none"
+          className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain rounded-xl border border-border bg-background/50 p-3 sm:p-5"
         >
           {messages.length === 0 && !showTyping ? (
             <p className="my-auto text-center text-sm text-muted-foreground">

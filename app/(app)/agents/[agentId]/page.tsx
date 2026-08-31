@@ -80,6 +80,21 @@ type PageProps = {
 
 export const agentDetailResponsiveLayout = {
   tabs: "xl:hidden",
+  // Two things were wrong at xl and they needed different answers.
+  //
+  // Settings stacked UNDER the conversation because the parent was a single
+  // column at every width; that is fixed by the grid on the parent.
+  //
+  // The nested scrollbars came from the history's own capped box
+  // (xl:max-h-[42rem] xl:flex-none), which is gone.
+  //
+  // The conversation itself stays in DOCUMENT FLOW at xl. Pinning it to
+  // `100dvh - <magic>` looks right until you count what sits above it on this
+  // page: app header, the working-now strip, the back link and the title block
+  // with its badges. The box then starts below that offset and its bottom
+  // falls past the viewport, so the composer is unreachable — with
+  // overflow-hidden you cannot even scroll to it. The page scroll is the
+  // reliable one here, and with the cap gone it is also the only one.
   conversationBase: "min-h-0 flex-col gap-2 xl:flex xl:gap-6",
   conversationActive:
     "flex h-[calc(100svh-18rem)] overflow-hidden md:h-[calc(100dvh-13rem)] xl:h-auto xl:overflow-visible",
@@ -247,6 +262,12 @@ export default function AgentDetailPage({ params }: PageProps) {
     );
   }
 
+  // Single column on purpose. A two-column grid on this element does NOT work:
+  // its children are not just the two panels — a `hidden … xl:flex` block sits
+  // before the conversation and is visible at xl, so it takes the wide track
+  // and pushes the conversation into the narrow one (it rendered 22rem wide
+  // and 17031px tall). Putting Settings beside the chat needs the two panels
+  // wrapped in their own grid parent, which is a JSX change, not a class one.
   return (
     <div className="flex min-h-0 flex-col gap-4 xl:gap-6">
       <div className={cn("sticky top-0 z-30 grid grid-cols-2 gap-1 rounded-xl border border-border bg-background/95 p-1 shadow-sm backdrop-blur", agentDetailResponsiveLayout.tabs)} role="tablist" aria-label="Agent view">
@@ -283,8 +304,6 @@ export default function AgentDetailPage({ params }: PageProps) {
         />
       ) : null}
 
-      <AgentVoiceCallController agentId={agent.id} agentName={agent.name} project={voiceProject} chatCommitScopeKind="direct" speechVoice={agent.speechVoice} />
-
       <AgentChatPanel
         agentId={agent.id}
         agentName={agent.name}
@@ -296,6 +315,15 @@ export default function AgentDetailPage({ params }: PageProps) {
           ? externalRuntimeAvailability(agent)
           : undefined}
       />
+
+      <details className="group rounded-lg border border-border bg-card/40">
+        <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
+          Voice call <span className="ml-1 text-xs font-normal text-muted-foreground">(optional)</span>
+        </summary>
+        <div className="border-t border-border p-3 md:p-4">
+          <AgentVoiceCallController agentId={agent.id} agentName={agent.name} project={voiceProject} chatCommitScopeKind="direct" speechVoice={agent.speechVoice} />
+        </div>
+      </details>
 
       </section>
 
@@ -653,6 +681,13 @@ function StatusBadge({
       </Badge>
     );
   }
+  if (status === "ready" && bridgeConnected !== true) {
+    return (
+      <Badge variant="secondary" className="border-0 bg-muted text-muted-foreground">
+        {t("agentDetail.status.offline")}
+      </Badge>
+    );
+  }
   const tone =
     status === "ready"
       ? "bg-emerald-500/20 text-emerald-300"
@@ -751,6 +786,8 @@ function MetadataCard({ agent }: { agent: AgentRow }) {
             <span className="break-all font-mono text-xs">
               {agent.endpoint}
             </span>
+          ) : agent.bridgeConnected ? (
+            <span className="text-emerald-300">{t("agentDetail.metadata.connectedViaRelay")}</span>
           ) : (
             <span className="text-muted-foreground">{t("agentDetail.metadata.notProvisioned")}</span>
           )}

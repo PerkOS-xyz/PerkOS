@@ -39,16 +39,7 @@ export default function ChatLayout({ children }: { children: ReactNode }) {
 
   return (
     <>
-    {/*
-      Break out of (app)/layout.tsx's content padding so the conversation
-      sidebar can touch the viewport edges:
-        mobile: parent has p-5 pb-24 → cancel pt-5 (-mt-4) + px-5 (-mx-4).
-                Leave pb-24 alone — the fixed MobileBottomNav lives there.
-        desktop: parent has md:p-8 → cancel all four sides (md:-m-8) so
-                 the layout's own h-[calc(100dvh-4rem)] fits below the
-                 topbar without overflowing by ~64px (= pt-8 + pb-8).
-    */}
-    <div className="-mx-4 -mt-4 flex h-[calc(100dvh-4rem)] md:-m-8">
+    <div className="flex h-full min-h-0 overflow-hidden">
       {/* Desktop sidebar */}
       <div className="hidden md:flex md:w-64 md:shrink-0 md:flex-col">
         <ConversationSidebar walletAddress={address} onNew={onNew} />

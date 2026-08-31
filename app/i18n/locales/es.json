@@ -14,7 +14,9 @@
     "loading": "Cargando…",
     "skipToContent": "Saltar al contenido principal",
     "openMenu": "Abrir menú",
-    "mainNavigation": "Navegación principal"
+    "mainNavigation": "Navegación principal",
+    "cardsView": "Vista de tarjetas",
+    "listView": "Vista de lista"
   },
   "signIn": {
     "signingIn": "Iniciando sesión…",
@@ -405,7 +407,7 @@
   "dashboard": {
     "greeting": {
       "welcomeBack": "Bienvenido de nuevo",
-      "intro": "Soy Ask PerkOS Agent. Te voy a ayudar a crear y poner en marcha los agentes y proyectos que necesites. Elige en qué quieres enfocarte hoy."
+      "intro": "Soy PerkOS. Te voy a ayudar a crear y poner en marcha los agentes y proyectos que necesites. Elige en qué quieres enfocarte hoy."
     },
     "workspace": {
       "badge": "Espacio de trabajo",
@@ -861,6 +863,12 @@
       "showDetails": "Mostrar detalles de {{asset}}",
       "hideDetails": "Ocultar detalles de {{asset}}",
       "unavailable": "{{network}} no está disponible temporalmente. Intenta actualizar."
+    },
+    "cardTopUp": {
+      "title": "Agregar saldo con tarjeta",
+      "description": "Compra saldo para que trabajen tus agentes. Se consume a medida que trabajan.",
+      "smallAmounts": "Las recargas más pequeñas están disponibles con USDC, donde no hay comisión fija.",
+      "failed": "No se pudo iniciar el pago. Vuelve a intentarlo en un momento."
     }
   },
   "notifications": {
@@ -1244,6 +1252,7 @@
       "connectedNow": "· conectado ahora",
       "neverConnected": "Nunca se conectó",
       "endpoint": "Endpoint",
+      "connectedViaRelay": "Conectado mediante el relay de PerkOS",
       "notProvisioned": "Todavía no está aprovisionado",
       "runtimeVersion": "Versión del entorno de ejecución",
       "modelKey": "Clave del modelo",
@@ -1867,7 +1876,7 @@
       "createTask": "Crear tarea",
       "registerAgent": "Registrar agente",
       "createOrganization": "Crear organización",
-      "openPerkosAgent": "Abrir Ask PerkOS Agent",
+      "openPerkosAgent": "Abrir PerkOS",
       "disconnectWallet": "Cerrar sesión"
     },
     "accessGate": {
@@ -2022,7 +2031,7 @@
           "description": "Inicia el asistente de lanzamiento de agentes en 7 pasos."
         },
         "perkos": {
-          "label": "Abrir Ask PerkOS Agent",
+          "label": "Abrir PerkOS",
           "description": "Obtén ayuda del asistente dentro de la app."
         },
         "clear": {
@@ -2056,7 +2065,7 @@
       },
       "empty": {
         "greeting": "Hola, ¿en qué puedo ayudarte hoy?",
-        "intro": "Soy Ask PerkOS Agent. Te ayudo a conocer la plataforma y a configurar los agentes de trabajo que vas a usar en tus proyectos.",
+        "intro": "Soy PerkOS. Te ayudo a conocer la plataforma y a configurar los agentes de trabajo que vas a usar en tus proyectos.",
         "quickActionsLabel": "Acciones rápidas",
         "footer": "O pregúntame lo que quieras sobre PerkOS: proyectos, agentes, entornos de ejecución, y te voy a guiar."
       },

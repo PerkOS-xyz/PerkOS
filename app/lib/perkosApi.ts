@@ -844,35 +844,90 @@ export async function getWalletOrgs(
 }
 
 /**
- * Organizations SHARED with this wallet (owned by others). Reads the member's
- * own `sharedOrgs` discovery pointers, then loads each owner's live org doc
- * (allowed by the membership rules). Skips any the user can no longer access.
+ * Organizations SHARED with this wallet (owned by others).
+ *
+ * Reads the member's own `sharedOrgs` discovery pointers, then REQUIRES an
+ * active membership doc at:
+ *   wallets/{owner}/organizations/{orgId}/members/{me}
+ *
+ * A dangling/stale pointer (no member doc, removed status, missing org, or
+ * pointer to self) is skipped and best-effort deleted so the UI only lists
+ * orgs the wallet is actually part of.
  */
+export function isActiveMembershipStatus(status: unknown): boolean {
+  if (status == null || status === "") return true; // legacy docs default active
+  return String(status).toLowerCase() === "active";
+}
+
 export async function getSharedOrgs(
   walletAddress: string
 ): Promise<Organization[]> {
+  const me = normalize(walletAddress);
   const ptrs = await getDocs(
-    collection(firebaseDb(), "wallets", normalize(walletAddress), "sharedOrgs")
+    collection(firebaseDb(), "wallets", me, "sharedOrgs")
   );
   const out = await Promise.all(
     ptrs.docs.map(async (d) => {
-      const p = d.data() as { ownerWallet?: string; orgId?: string; role?: string; orgName?: string };
-      const owner = p.ownerWallet;
-      const orgId = p.orgId ?? d.id;
-      if (!owner) return null;
+      const p = d.data() as {
+        ownerWallet?: string;
+        orgId?: string;
+        role?: string;
+        orgName?: string;
+      };
+      const owner = p.ownerWallet ? normalize(p.ownerWallet) : "";
+      const orgId = ((p.orgId ?? d.id) || "").trim();
+      if (!owner || !orgId) {
+        await deleteDoc(d.ref).catch(() => {});
+        return null;
+      }
+      // Own orgs come from getWalletOrgs — never surface them as "shared".
+      if (owner === me) {
+        await deleteDoc(d.ref).catch(() => {});
+        return null;
+      }
       try {
+        const memberRef = doc(
+          firebaseDb(),
+          "wallets",
+          owner,
+          "organizations",
+          orgId,
+          "members",
+          me
+        );
+        const memberSnap = await getDoc(memberRef);
+        if (!memberSnap.exists()) {
+          await deleteDoc(d.ref).catch(() => {});
+          return null;
+        }
+        const member = memberSnap.data() as { status?: string; role?: string };
+        if (!isActiveMembershipStatus(member.status)) {
+          await deleteDoc(d.ref).catch(() => {});
+          return null;
+        }
+
         const snap = await getDoc(orgDoc(owner, orgId));
-        const name = snap.exists() ? snap.data().name : p.orgName ?? "Shared org";
+        if (!snap.exists()) {
+          await deleteDoc(d.ref).catch(() => {});
+          return null;
+        }
+        const name =
+          (snap.data().name && String(snap.data().name).trim()) ||
+          p.orgName ||
+          "Shared org";
+        const role = (member.role as OrgRole | undefined) ??
+          (p.role as OrgRole | undefined) ??
+          "viewer";
         return {
           id: orgId,
           name,
           ownerWallet: owner,
           isDefault: false,
           shared: true,
-          role: (p.role as OrgRole) ?? "viewer",
+          role,
         } as Organization;
       } catch {
-        return null; // access revoked — skip
+        return null; // access revoked / rules denied — skip
       }
     })
   );
@@ -910,18 +965,34 @@ export async function getOrgProjects(input: {
 export async function getSharedProjects(
   walletAddress: string
 ): Promise<Array<Project & { ownerWallet: string }>> {
+  const me = normalize(walletAddress);
   const ptrs = await getDocs(
-    collection(firebaseDb(), "wallets", normalize(walletAddress), "sharedProjects")
+    collection(firebaseDb(), "wallets", me, "sharedProjects")
   );
   const out = await Promise.all(
     ptrs.docs.map(async (d) => {
-      const p = d.data() as { ownerWallet?: string; projectId?: string };
-      const owner = p.ownerWallet;
-      const pid = p.projectId ?? d.id;
-      if (!owner) return null;
+      const p = d.data() as { ownerWallet?: string; projectId?: string; status?: string };
+      const owner = p.ownerWallet ? normalize(p.ownerWallet) : "";
+      const pid = ((p.projectId ?? d.id) || "").trim();
+      if (!owner || !pid || owner === me) {
+        await deleteDoc(d.ref).catch(() => {});
+        return null;
+      }
       try {
+        // Prefer explicit project membership; org-level access is handled via
+        // shared orgs, not stand-alone project pointers.
+        const memberSnap = await getDoc(
+          doc(firebaseDb(), "wallets", owner, "projects", pid, "members", me)
+        );
+        if (!memberSnap.exists() || !isActiveMembershipStatus(memberSnap.data()?.status)) {
+          await deleteDoc(d.ref).catch(() => {});
+          return null;
+        }
         const snap = await getDoc(projectDoc(owner, pid));
-        if (!snap.exists()) return null;
+        if (!snap.exists()) {
+          await deleteDoc(d.ref).catch(() => {});
+          return null;
+        }
         return { ...snap.data(), ownerWallet: owner };
       } catch {
         return null;

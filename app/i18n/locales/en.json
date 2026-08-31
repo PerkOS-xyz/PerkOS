@@ -14,7 +14,9 @@
     "loading": "Loading…",
     "skipToContent": "Skip to main content",
     "openMenu": "Open menu",
-    "mainNavigation": "Main navigation"
+    "mainNavigation": "Main navigation",
+    "cardsView": "Cards view",
+    "listView": "List view"
   },
   "signIn": {
     "signingIn": "Signing you in…",
@@ -405,7 +407,7 @@
   "dashboard": {
     "greeting": {
       "welcomeBack": "Welcome back",
-      "intro": "I'm Ask PerkOS Agent. I'll help you build and run the agents and projects you need. Pick where to focus today."
+      "intro": "I'm PerkOS. I'll help you build and run the agents and projects you need. Pick where to focus today."
     },
     "workspace": {
       "badge": "Workspace",
@@ -861,6 +863,12 @@
       "showDetails": "Show {{asset}} details",
       "hideDetails": "Hide {{asset}} details",
       "unavailable": "{{network}} is temporarily unavailable. Try refreshing."
+    },
+    "cardTopUp": {
+      "title": "Add credit with a card",
+      "description": "Buy balance for running your agents. It is spent as they work.",
+      "smallAmounts": "Smaller top-ups are available with USDC, where there is no fixed processing fee.",
+      "failed": "The checkout could not be started. Try again in a moment."
     }
   },
   "notifications": {
@@ -1244,6 +1252,7 @@
       "connectedNow": "· connected now",
       "neverConnected": "Never connected",
       "endpoint": "Endpoint",
+      "connectedViaRelay": "Connected via PerkOS relay",
       "notProvisioned": "Not provisioned yet",
       "runtimeVersion": "Runtime version",
       "modelKey": "Model key",
@@ -1867,7 +1876,7 @@
       "createTask": "Create task",
       "registerAgent": "Register agent",
       "createOrganization": "Create organization",
-      "openPerkosAgent": "Open Ask PerkOS Agent",
+      "openPerkosAgent": "Open PerkOS",
       "disconnectWallet": "Sign out"
     },
     "accessGate": {
@@ -2022,7 +2031,7 @@
           "description": "Start the 7-step agent launcher."
         },
         "perkos": {
-          "label": "Open Ask PerkOS Agent",
+          "label": "Open PerkOS",
           "description": "Get help from the in-app assistant."
         },
         "clear": {
@@ -2056,7 +2065,7 @@
       },
       "empty": {
         "greeting": "Hi, how can I help you today?",
-        "intro": "I'm Ask PerkOS Agent. I help you learn the platform and set up the work agents you'll use across your projects.",
+        "intro": "I'm PerkOS. I help you learn the platform and set up the work agents you'll use across your projects.",
         "quickActionsLabel": "Quick actions",
         "footer": "Or ask me anything about PerkOS (projects, agents, runtimes) and I'll guide you."
       },

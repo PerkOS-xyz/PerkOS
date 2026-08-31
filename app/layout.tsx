@@ -7,6 +7,8 @@ import { DevAuthIndicator } from "./components/DevAuthIndicator";
 import { LocaleProvider } from "./components/LocaleProvider";
 import { cn } from "@/lib/utils";
 import { GoogleAnalytics } from "./components/GoogleAnalytics";
+import { WebMcpTools } from "./components/WebMcpTools";
+import { publicToolsBootstrapScript } from "./lib/webMcpPublicTools";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -124,10 +126,36 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
+      {/* Raw <link rel="ai-catalog">, one of the three ways an agent finds the
+          capability manifest. Next's metadata `alternates.types` cannot emit a
+          custom rel — it renders rel="alternate", which no scanner looks for.
+          React hoists this into <head>. */}
+      <link
+        rel="ai-catalog"
+        type="application/json"
+        href={`${CANONICAL_URL}/.well-known/ai-catalog.json`}
+      />
         <GoogleAnalytics />
         <MiniAppReady />
         <Providers>
           <DevAuthIndicator />
+          {/*
+            Mounted at the root, not in the app shell, so an agent landing on
+            a public page can discover the tools too. It was inside (app),
+            which meant the only visitors who could see it were the ones who
+            had already signed in and no longer needed to be told how.
+          */}
+          {/*
+            Registers the public tools before React hydrates. Without it the
+            tools do not exist at the load event, and a visitor that checks
+            then sees a site with no tools at all. WebMcpTools republishes the
+            same names once hydrated, adding the session tools if signed in.
+          */}
+          <script
+            id="webmcp-bootstrap"
+            dangerouslySetInnerHTML={{ __html: publicToolsBootstrapScript() }}
+          />
+          <WebMcpTools />
           <LocaleProvider>{children}</LocaleProvider>
         </Providers>
       </body>

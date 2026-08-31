@@ -405,7 +405,7 @@
   "dashboard": {
     "greeting": {
       "welcomeBack": "おかえりなさい",
-      "intro": "私はAsk PerkOS Agentです。必要なエージェントやプロジェクトの構築と運用をお手伝いします。今日はどこから始めるか選んでください。"
+      "intro": "私はPerkOSです。必要なエージェントやプロジェクトの構築と運用をお手伝いします。今日はどこから始めるか選んでください。"
     },
     "workspace": {
       "badge": "ワークスペース",
@@ -861,6 +861,12 @@
       "showDetails": "{{asset}}の詳細を表示",
       "hideDetails": "{{asset}}の詳細を非表示",
       "unavailable": "{{network}}は一時的に利用できません。更新をお試しください。"
+    },
+    "cardTopUp": {
+      "title": "カードでクレジットを追加",
+      "description": "エージェントを動かすための残高を購入します。作業に応じて消費されます。",
+      "smallAmounts": "少額のチャージは USDC でご利用いただけます。固定手数料がかかりません。",
+      "failed": "決済を開始できませんでした。しばらくしてからもう一度お試しください。"
     }
   },
   "notifications": {
@@ -1239,6 +1245,7 @@
       "connectedNow": "・現在接続中",
       "neverConnected": "未接続",
       "endpoint": "エンドポイント",
+      "connectedViaRelay": "PerkOS relay 経由で接続中",
       "notProvisioned": "まだプロビジョニングされていません",
       "runtimeVersion": "ランタイムバージョン",
       "modelKey": "モデルキー",
@@ -1841,7 +1848,7 @@
       "createTask": "タスクを作成",
       "registerAgent": "エージェントを登録",
       "createOrganization": "組織を作成",
-      "openPerkosAgent": "Ask PerkOS Agentを開く",
+      "openPerkosAgent": "PerkOSを開く",
       "disconnectWallet": "ログアウト"
     },
     "accessGate": {
@@ -1996,7 +2003,7 @@
           "description": "7ステップのエージェント起動ウィザードを開始します。"
         },
         "perkos": {
-          "label": "Ask PerkOS Agentを開く",
+          "label": "PerkOSを開く",
           "description": "アプリ内アシスタントに相談します。"
         },
         "clear": {
@@ -2030,7 +2037,7 @@
       },
       "empty": {
         "greeting": "こんにちは、今日はどのようなご用件でしょうか？",
-        "intro": "私はAsk PerkOS Agentです。プラットフォームの使い方を学んだり、プロジェクトで使う作業エージェントを設定したりするお手伝いをします。",
+        "intro": "私はPerkOSです。プラットフォームの使い方を学んだり、プロジェクトで使う作業エージェントを設定したりするお手伝いをします。",
         "quickActionsLabel": "クイックアクション",
         "footer": "または、プロジェクト、エージェント、ランタイムなど、PerkOSについて何でも聞いてください。ご案内します。"
       },
