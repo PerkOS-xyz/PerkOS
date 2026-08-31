@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 import { agentDetailResponsiveLayout } from "../app/(app)/agents/[agentId]/page";
 
@@ -30,5 +32,15 @@ describe("agent detail responsive layout", () => {
     expect(agentDetailResponsiveLayout.conversationActive).not.toContain(
       "xl:h-[calc(",
     );
+  });
+
+  it("presents text chat before optional voice controls", () => {
+    const source = readFileSync(resolve(import.meta.dirname, "../app/(app)/agents/[agentId]/page.tsx"), "utf8");
+    const chat = source.indexOf("<AgentChatPanel");
+    const voice = source.indexOf("<AgentVoiceCallController", chat);
+    expect(chat).toBeGreaterThan(-1);
+    expect(voice).toBeGreaterThan(chat);
+    expect(source.slice(chat, voice)).toContain("<details");
+    expect(source.slice(chat, voice)).toContain("<summary");
   });
 });

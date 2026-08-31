@@ -93,6 +93,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     router.push("/");
   };
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isChatRoute = pathname === "/chat" || pathname?.startsWith("/chat/");
 
   useEffect(() => {
     if (session.status === "signed-out" && !loggingOut.current)
@@ -142,7 +143,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     <ChatClientProvider>
       <ChatbotProvider>
         <ActiveOrgProvider>
-      <div className="flex min-h-screen w-full overflow-x-clip bg-background text-foreground">
+      <div className={cn("flex w-full overflow-x-clip bg-background text-foreground", isChatRoute ? "h-dvh overflow-hidden" : "min-h-screen")}>
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:border focus:border-primary focus:bg-card focus:px-3 focus:py-2 focus:text-sm focus:text-foreground focus:shadow-lg"
@@ -161,7 +162,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           />
         </aside>
 
-        <main className="min-w-0 flex-1 overflow-x-hidden">
+        <main className={cn("min-w-0 flex-1 overflow-x-hidden", isChatRoute && "flex min-h-0 flex-col overflow-hidden")}>
           {/* Desktop/tablet topbar. Tablet (md→lg) runs compact: the search
               hint collapses to an icon and the balance pill drops $PERKOS —
               one row, nothing wraps or overlaps. Full layout returns at lg. */}
@@ -265,11 +266,11 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           <div
             id="main-content"
             className={cn(
-              "p-5 md:p-8",
-              pathname?.startsWith("/projects/") ? "pb-24 md:pb-24" : "pb-44 md:pb-36",
+              isChatRoute ? "flex min-h-0 flex-1 flex-col overflow-hidden pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0" : "p-5 md:p-8",
+              !isChatRoute && (pathname?.startsWith("/projects/") ? "pb-24 md:pb-24" : "pb-44 md:pb-36"),
             )}
           >
-            <PullToRefresh>{children}</PullToRefresh>
+            <PullToRefresh className={cn(isChatRoute && "flex min-h-0 flex-1 flex-col overflow-hidden")}>{children}</PullToRefresh>
           </div>
         </main>
         <MobileBottomNav />

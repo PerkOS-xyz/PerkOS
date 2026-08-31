@@ -125,7 +125,7 @@ export function ConversationComposer({
   return (
     <form
       onSubmit={(e) => { e.preventDefault(); submit(); }}
-      className="border-t border-border bg-background/60 px-3 py-3 backdrop-blur md:px-4"
+      className="shrink-0 border-t border-border bg-background/60 px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur md:px-4 md:pb-3"
       aria-disabled={disabled}
     >
       {attachments.length > 0 ? (

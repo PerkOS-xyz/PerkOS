@@ -304,8 +304,6 @@ export default function AgentDetailPage({ params }: PageProps) {
         />
       ) : null}
 
-      <AgentVoiceCallController agentId={agent.id} agentName={agent.name} project={voiceProject} chatCommitScopeKind="direct" speechVoice={agent.speechVoice} />
-
       <AgentChatPanel
         agentId={agent.id}
         agentName={agent.name}
@@ -317,6 +315,15 @@ export default function AgentDetailPage({ params }: PageProps) {
           ? externalRuntimeAvailability(agent)
           : undefined}
       />
+
+      <details className="group rounded-lg border border-border bg-card/40">
+        <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
+          Voice call <span className="ml-1 text-xs font-normal text-muted-foreground">(optional)</span>
+        </summary>
+        <div className="border-t border-border p-3 md:p-4">
+          <AgentVoiceCallController agentId={agent.id} agentName={agent.name} project={voiceProject} chatCommitScopeKind="direct" speechVoice={agent.speechVoice} />
+        </div>
+      </details>
 
       </section>
 
