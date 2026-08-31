@@ -1695,7 +1695,8 @@
       "todo": "Por hacer",
       "inProgress": "En curso",
       "done": "Hecho",
-      "moveTaskAria": "Mover tarea. Usa las flechas izquierda o derecha para cambiar de columna, espacio para arrastrar."
+      "moveTaskAria": "Mover tarea. Usa las flechas izquierda o derecha para cambiar de columna, espacio para arrastrar.",
+      "emptyPhase": "No hay tareas en esta fase"
     },
     "conductor": {
       "emptyMessage": "Todavía no hay tareas. Agrega una para empezar.",
