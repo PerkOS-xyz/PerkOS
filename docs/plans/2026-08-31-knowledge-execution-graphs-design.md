@@ -27,3 +27,20 @@ La siguiente etapa debe consumir relaciones tipadas y con procedencia: participa
 ## Límites de UX
 
 Se limita la densidad inicial para evitar un “hairball”. La exploración detallada debe incorporar filtros, clustering, zoom/pan y expansión progresiva antes de elevar el número de nodos visibles.
+
+## Follow-up 3D interactivo
+
+Las referencias visuales confirmaron que la experiencia objetivo es un grafo
+force-directed tridimensional, no un diagrama radial. El renderer usa
+Three.js/WebGL mediante `react-force-graph-3d` y ofrece rotación libre con
+mouse o touch, zoom con rueda o gesto pinch, drag de nodos y selección.
+
+La primera métrica de influencia es el grado de conectividad: los nodos con más
+relaciones son mayores. El color comunica el tipo o cluster y los enlaces activos
+usan partículas direccionales. Al seleccionar un nodo, el resto del grafo baja
+de intensidad, se resaltan sus vecinos directos y aparece un panel contextual.
+
+La evolución analítica seguirá los patrones validados en el research de Nodus
+Labs: comunidades reales, centralidad, nodos puente, gaps estructurales, filtros
+por umbral y evolución temporal. Estas métricas no se simulan en cliente: deben
+provenir del modelo de relaciones y de telemetría confiable.

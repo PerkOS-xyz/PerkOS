@@ -1708,7 +1708,7 @@
       "donePerAgent": "Terminées par agent",
       "unassigned": "Non assigné"
     },
-    "graph": { "expand": "Agrandir", "close": "Fermer" },
+    "graph": { "expand": "Agrandir", "close": "Fermer", "rotateHint": "Faites glisser pour tourner · pincez ou faites défiler pour zoomer", "selected": "Nœud sélectionné", "neighbors_one": "{{count}} connexion directe", "neighbors_other": "{{count}} connexions directes", "openEntity": "Ouvrir les détails" },
     "knowledgeGraph": {
       "title": "Connaissance du projet", "description": "Les relations entre les personnes, agents, tâches et sources connectées de ce projet.",
       "showCompleted": "Afficher les tâches terminées", "empty": "Les connaissances apparaîtront ici à mesure que vous ajouterez des agents, des tâches et des sources.",

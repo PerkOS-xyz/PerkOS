@@ -1708,7 +1708,7 @@
       "donePerAgent": "에이전트별 완료",
       "unassigned": "미배정"
     },
-    "graph": { "expand": "확대", "close": "닫기" },
+    "graph": { "expand": "확대", "close": "닫기", "rotateHint": "드래그하여 회전 · 핀치 또는 스크롤로 확대", "selected": "선택한 노드", "neighbors_one": "직접 연결 {{count}}개", "neighbors_other": "직접 연결 {{count}}개", "openEntity": "세부 정보 열기" },
     "knowledgeGraph": {
       "title": "프로젝트 지식", "description": "프로젝트의 사람, 에이전트, 작업 및 연결된 소스의 관계입니다.", "showCompleted": "완료 항목 표시", "empty": "에이전트, 작업 및 소스를 추가하면 여기에 지식이 표시됩니다.",
       "ariaLabel": "대화형 프로젝트 지식 그래프", "legend": "프로젝트 · 에이전트 · 작업 · 연결된 소스", "connectedSources_one": "연결된 소스 {{count}}개", "connectedSources_other": "연결된 소스 {{count}}개", "noSources": "연결된 외부 소스 없음", "hiddenTasks_one": " · 작업 {{count}}개 더", "hiddenTasks_other": " · 작업 {{count}}개 더"

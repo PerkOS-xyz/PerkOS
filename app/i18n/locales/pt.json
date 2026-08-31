@@ -1732,7 +1732,7 @@
       "donePerAgent": "Feito por agente",
       "unassigned": "Não atribuído"
     },
-    "graph": { "expand": "Expandir", "close": "Fechar" },
+    "graph": { "expand": "Expandir", "close": "Fechar", "rotateHint": "Arraste para girar · pince ou role para ampliar", "selected": "Nó selecionado", "neighbors_one": "{{count}} conexão direta", "neighbors_other": "{{count}} conexões diretas", "openEntity": "Abrir detalhes" },
     "knowledgeGraph": {
       "title": "Conhecimento do projeto",
       "description": "Como pessoas, agentes, trabalho e fontes conectadas deste projeto se relacionam.",

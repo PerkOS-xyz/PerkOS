@@ -1708,7 +1708,7 @@
       "donePerAgent": "エージェント別の完了数",
       "unassigned": "未割り当て"
     },
-    "graph": { "expand": "拡大", "close": "閉じる" },
+    "graph": { "expand": "拡大", "close": "閉じる", "rotateHint": "ドラッグで回転 · ピンチまたはスクロールでズーム", "selected": "選択中のノード", "neighbors_one": "直接接続 {{count}} 件", "neighbors_other": "直接接続 {{count}} 件", "openEntity": "詳細を開く" },
     "knowledgeGraph": {
       "title": "プロジェクト知識", "description": "このプロジェクトの人、エージェント、作業、接続済みソースの関係を表示します。", "showCompleted": "完了済みを表示",
       "empty": "エージェント、タスク、ソースを追加すると、ここに知識が表示されます。", "ariaLabel": "プロジェクト知識のインタラクティブグラフ", "legend": "プロジェクト · エージェント · 作業 · 接続済みソース",

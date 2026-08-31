@@ -1898,7 +1898,12 @@
     },
     "graph": {
       "expand": "Maximizar",
-      "close": "Cerrar"
+      "close": "Cerrar",
+      "rotateHint": "Arrastra para rotar · pellizca o desplaza para acercar",
+      "selected": "Nodo seleccionado",
+      "neighbors_one": "{{count}} conexión directa",
+      "neighbors_other": "{{count}} conexiones directas",
+      "openEntity": "Abrir detalles"
     },
     "knowledgeGraph": {
       "title": "Conocimiento del proyecto",

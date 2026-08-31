@@ -1697,7 +1697,7 @@
       "donePerAgent": "各智能体完成数量",
       "unassigned": "未分配"
     },
-    "graph": { "expand": "展开", "close": "关闭" },
+    "graph": { "expand": "展开", "close": "关闭", "rotateHint": "拖动旋转 · 双指或滚动缩放", "selected": "已选节点", "neighbors_one": "{{count}} 个直接连接", "neighbors_other": "{{count}} 个直接连接", "openEntity": "打开详情" },
     "knowledgeGraph": {
       "title": "项目知识", "description": "展示项目中的人员、智能体、工作和已连接数据源之间的关系。", "showCompleted": "显示已完成", "empty": "添加智能体、任务和数据源后，知识将在此显示。", "ariaLabel": "交互式项目知识图谱", "legend": "项目 · 智能体 · 工作 · 已连接数据源",
       "connectedSources_one": "已连接 {{count}} 个数据源", "connectedSources_other": "已连接 {{count}} 个数据源", "noSources": "尚未连接外部数据源", "hiddenTasks_one": " · 另有 {{count}} 个任务", "hiddenTasks_other": " · 另有 {{count}} 个任务"
