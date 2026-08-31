@@ -28,6 +28,10 @@ export type GraphNode = {
   status?: string;
   isPM?: boolean;
   live?: AgentLiveStatus;
+  shape?: "sphere" | "agent-block" | "task-block";
+  fx?: number;
+  fy?: number;
+  fz?: number;
 };
 
 export type GraphEdge = { from: string; to: string; color: string; dashed?: boolean; active?: boolean };
@@ -153,17 +157,19 @@ export function ProjectExecutionGraph({ projectId, projectName, pmAgent, workflo
   const [expanded, setExpanded] = useState(false);
   const relevantTasks = useMemo(() => tasks.filter((task) => task.id).slice(0, MAX_TASKS), [tasks]);
   const { nodes, edges } = useMemo(() => {
-    const nodes: GraphNode[] = [{ key: "goal", kind: "project", label: projectName, x: 90, y: CY }];
+    const nodes: GraphNode[] = [{ key: "goal", kind: "project", label: projectName, x: 90, y: CY, fx: -250, fy: 0, fz: 0 }];
     const edges: GraphEdge[] = [];
     const coordinatorKey = pmAgent ? `agent:${pmAgent}` : "gate:unassigned";
-    nodes.push({ key: coordinatorKey, kind: pmAgent ? "agent" : "gate", label: pmAgent || t("components.executionGraph.unassignedLead"), x: 290, y: CY, isPM: Boolean(pmAgent), live: pmAgent ? liveAgents[pmAgent] : undefined });
+    nodes.push({ key: coordinatorKey, kind: pmAgent ? "agent" : "gate", label: pmAgent || t("components.executionGraph.unassignedLead"), x: 290, y: CY, isPM: Boolean(pmAgent), live: pmAgent ? liveAgents[pmAgent] : undefined, shape: pmAgent ? "agent-block" : "sphere", fx: -85, fy: 0, fz: 0 });
     edges.push({ from: "goal", to: coordinatorKey, color: "rgba(236,27,105,.58)", active: workflowPhase === "planning" });
 
     const workerNames = [...new Set(relevantTasks.map((task) => task.agent?.trim() || "unassigned"))];
     workerNames.forEach((name, index) => {
+      if (name === pmAgent) return;
+      const centeredIndex = index - (workerNames.length - 1) / 2;
       const y = 65 + (index / Math.max(workerNames.length - 1, 1)) * (H - 130);
       const workerKey = `agent:${name}`;
-      nodes.push({ key: workerKey, kind: name === "unassigned" ? "gate" : "agent", label: name === "unassigned" ? t("components.executionGraph.unassignedWorker") : name, x: 485, y, live: name === "unassigned" ? undefined : liveAgents[name] });
+      nodes.push({ key: workerKey, kind: name === "unassigned" ? "gate" : "agent", label: name === "unassigned" ? t("components.executionGraph.unassignedWorker") : name, x: 485, y, live: name === "unassigned" ? undefined : liveAgents[name], shape: name === "unassigned" ? "sphere" : "agent-block", fx: 70, fy: centeredIndex * 78, fz: index % 2 === 0 ? -28 : 28 });
       edges.push({
         from: coordinatorKey,
         to: workerKey,
@@ -174,12 +180,15 @@ export function ProjectExecutionGraph({ projectId, projectName, pmAgent, workflo
 
     relevantTasks.forEach((task, index) => {
       if (!task.id) return;
+      const ownerTasks = relevantTasks.filter((candidate) => (candidate.agent?.trim() || "unassigned") === (task.agent?.trim() || "unassigned"));
+      const ownerIndex = ownerTasks.findIndex((candidate) => candidate.id === task.id);
+      const workerIndex = workerNames.indexOf(task.agent?.trim() || "unassigned");
       const y = 42 + (index / Math.max(relevantTasks.length - 1, 1)) * (H - 84);
       const workerKey = `agent:${task.agent?.trim() || "unassigned"}`;
       const taskKey = `task:${task.id}`;
-      nodes.push({ key: taskKey, kind: task.status === "Review" ? "gate" : "task", label: task.name, status: String(task.status), x: 780, y, href: `/projects/${encodeURIComponent(projectId)}/tasks/${encodeURIComponent(task.id)}` });
+      nodes.push({ key: taskKey, kind: task.status === "Review" ? "gate" : "task", label: task.name, status: String(task.status), x: 780, y, href: `/projects/${encodeURIComponent(projectId)}/tasks/${encodeURIComponent(task.id)}`, shape: "task-block", fx: 245 + ownerIndex * 28, fy: (workerIndex - (workerNames.length - 1) / 2) * 78 + (ownerIndex - (ownerTasks.length - 1) / 2) * 24, fz: ownerIndex % 2 === 0 ? -34 : 34 });
       const active = task.status === "In progress" || task.status === "Review";
-      edges.push({ from: workerKey, to: taskKey, color: agentColor(task.agent || task.name, 0.52), dashed: task.status === "Done", active });
+      edges.push({ from: workerKey, to: taskKey, color: agentColor(task.agent || task.name, 0.72), dashed: task.status === "Done", active });
     });
     return { nodes, edges };
   }, [liveAgents, pmAgent, projectId, projectName, relevantTasks, t, workflowPhase]);
