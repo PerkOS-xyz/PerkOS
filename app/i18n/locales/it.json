@@ -1429,6 +1429,7 @@
       "conductor": "Regia",
       "agents": "Agenti",
       "map": "Mappa",
+      "execution": "Esecuzione",
       "chat": "Chat di progetto",
       "members": "Membri"
     },
@@ -1695,6 +1696,20 @@
       "taskLabel_other": "attività",
       "donePerAgent": "Completate per agente",
       "unassigned": "Non assegnato"
+    },
+    "graph": { "expand": "Espandi", "close": "Chiudi", "rotateHint": "Trascina per ruotare · pizzica o scorri per ingrandire", "selected": "Nodo selezionato", "neighbors_one": "{{count}} connessione diretta", "neighbors_other": "{{count}} connessioni dirette", "openEntity": "Apri dettagli" },
+    "knowledgeGraph": {
+      "title": "Conoscenza del progetto", "description": "Le relazioni tra persone, agenti, lavoro e fonti collegate del progetto.", "showCompleted": "Mostra completate",
+      "empty": "La conoscenza apparirà qui aggiungendo agenti, attività e fonti.", "ariaLabel": "Grafo interattivo della conoscenza del progetto", "legend": "Progetto · agenti · lavoro · fonti collegate",
+      "connectedSources_one": "{{count}} fonte collegata", "connectedSources_other": "{{count}} fonti collegate", "noSources": "Nessuna fonte esterna collegata", "hiddenTasks_one": " · {{count}} attività in più", "hiddenTasks_other": " · {{count}} attività in più"
+    },
+    "executionGraph": {
+      "title": "Grafo di esecuzione degli agenti", "description": "Osserva come il coordinatore delega il lavoro e come procede ogni attività.", "phase": "Fase: {{phase}}", "empty": "Non ci sono ancora esecuzioni. Avvia il team per generare il primo flusso.",
+      "ariaLabel": "Grafo di esecuzione e orchestrazione degli agenti", "telemetryNote": "Questa vista usa workflow e assegnazioni correnti. Passaggi, tentativi e controlli appariranno con la telemetria del runtime.", "unassignedLead": "Responsabile non assegnato", "unassignedWorker": "Non assegnato", "coordinator": "Coordinatore"
+    },
+    "organizationGraph": {
+      "title": "Conoscenza dell’organizzazione", "description": "Una mappa viva di progetti, persone, agenti e fonti collegati a questa organizzazione.", "projects_one": "{{count}} progetto", "projects_other": "{{count}} progetti", "empty": "Il grafo cresce creando progetti, aggiungendo agenti e collegando fonti.",
+      "ariaLabel": "Grafo interattivo della conoscenza dell’organizzazione", "connectedSources_one": "{{count}} fonte dell’organizzazione collegata", "connectedSources_other": "{{count}} fonti dell’organizzazione collegate", "noSources": "Nessuna fonte dell’organizzazione collegata"
     },
     "contextMap": {
       "empty": "La mappa si popola man mano che aggiungi agenti e attività a questo progetto.",

@@ -1623,6 +1623,7 @@
       "conductor": "Conductor",
       "agents": "Agents",
       "map": "Map",
+      "execution": "Execution",
       "chat": "Project chat",
       "members": "Members"
     },
@@ -1894,6 +1895,50 @@
       "taskLabel_other": "tasks",
       "donePerAgent": "Done per agent",
       "unassigned": "Unassigned"
+    },
+    "graph": {
+      "expand": "Expand",
+      "close": "Close",
+      "rotateHint": "Drag to rotate · pinch or scroll to zoom",
+      "selected": "Selected node",
+      "neighbors_one": "{{count}} direct connection",
+      "neighbors_other": "{{count}} direct connections",
+      "openEntity": "Open details"
+    },
+    "knowledgeGraph": {
+      "title": "Project knowledge",
+      "description": "How this project's people, agents, work and connected sources relate.",
+      "showCompleted": "Show completed",
+      "empty": "Knowledge appears here as you add agents, tasks and connected sources.",
+      "ariaLabel": "Interactive project knowledge graph",
+      "legend": "Project · agents · work · connected sources",
+      "connectedSources_one": "{{count}} connected source",
+      "connectedSources_other": "{{count}} connected sources",
+      "noSources": "No external sources connected yet",
+      "hiddenTasks_one": " · {{count}} more task",
+      "hiddenTasks_other": " · {{count}} more tasks"
+    },
+    "executionGraph": {
+      "title": "Agent execution graph",
+      "description": "See how the coordinator delegates work to agents and how each task progresses.",
+      "phase": "Phase: {{phase}}",
+      "empty": "No execution exists yet. Put the team to work to generate the first flow.",
+      "ariaLabel": "Agent execution and orchestration graph",
+      "telemetryNote": "This view uses current workflow and assignment data. Detailed handoffs, retries and verification gates will appear as runtime telemetry becomes available.",
+      "unassignedLead": "Lead not assigned",
+      "unassignedWorker": "Unassigned",
+      "coordinator": "Coordinator"
+    },
+    "organizationGraph": {
+      "title": "Organization knowledge",
+      "description": "A living map of the projects, people, agents and sources connected to this organization.",
+      "projects_one": "{{count}} project",
+      "projects_other": "{{count}} projects",
+      "empty": "The organization graph grows as you create projects, add agents and connect sources.",
+      "ariaLabel": "Interactive organization knowledge graph",
+      "connectedSources_one": "{{count}} organization source connected",
+      "connectedSources_other": "{{count}} organization sources connected",
+      "noSources": "No organization sources connected yet"
     },
     "contextMap": {
       "empty": "The map fills in as you add agents and tasks to this project.",
