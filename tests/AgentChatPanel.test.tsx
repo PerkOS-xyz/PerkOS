@@ -187,13 +187,11 @@ describe("AgentChatPanel hibernation policy", () => {
     expect(screen.getByTestId("agent-chat-composer")).toHaveClass("shrink-0");
   });
 
-  it("does not cap the history on wide desktop", () => {
+  it("lets the bounded workspace own history scrolling on wide desktop", () => {
     render(<AgentChatPanel agentId="alice" agentName="Alice" chatEnabled hibernationEnabled={false} />);
 
-    // xl:max-h-[42rem] + xl:flex-none turned the history into its own scroll
-    // box inside a page that also scrolled, which is the two-nested-scrollbars
-    // report. It now flexes to fill a viewport-bound conversation column, so
-    // there is a single scroll region at every width.
+    // The parent conversation workspace owns the height. The history fills its
+    // remaining space and scrolls while the composer stays visible.
     const cls = screen.getByTestId("agent-chat-history").className;
     expect(cls).not.toContain("xl:max-h-[42rem]");
     expect(cls).not.toContain("xl:flex-none");

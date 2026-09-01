@@ -17,30 +17,25 @@ describe("agent detail responsive layout", () => {
     expect(agentDetailResponsiveLayout.settingsBase).not.toContain("md:flex");
   });
 
-  it("leaves the conversation in document flow on wide desktop", () => {
-    // Pinning it to `100dvh - <magic>` at xl put the composer out of reach:
-    // the app header, working-now strip, back link and title block all sit
-    // above the conversation, so the box started below that offset and its
-    // bottom fell past the viewport — and overflow-hidden meant you could not
-    // scroll to it. The page scroll is the reliable one, and with the
-    // history's own cap removed it is the only one.
+  it("bounds the conversation workspace on wide desktop", () => {
     expect(agentDetailResponsiveLayout.conversationBase).toContain("xl:flex");
-    expect(agentDetailResponsiveLayout.conversationActive).toContain("xl:h-auto");
     expect(agentDetailResponsiveLayout.conversationActive).toContain(
-      "xl:overflow-visible",
+      "xl:h-[min(48rem,calc(100dvh-18rem))]",
     );
-    expect(agentDetailResponsiveLayout.conversationActive).not.toContain(
-      "xl:h-[calc(",
+    expect(agentDetailResponsiveLayout.conversationActive).toContain("xl:min-h-[32rem]");
+    expect(agentDetailResponsiveLayout.conversationActive).toContain(
+      "xl:overflow-hidden",
     );
   });
 
-  it("presents text chat before optional voice controls", () => {
+  it("launches voice from the header and a responsive dialog", () => {
     const source = readFileSync(resolve(import.meta.dirname, "../app/(app)/agents/[agentId]/page.tsx"), "utf8");
     const chat = source.indexOf("<AgentChatPanel");
-    const voice = source.indexOf("<AgentVoiceCallController", chat);
     expect(chat).toBeGreaterThan(-1);
-    expect(voice).toBeGreaterThan(chat);
-    expect(source.slice(chat, voice)).toContain("<details");
-    expect(source.slice(chat, voice)).toContain("<summary");
+    expect(source).toContain('data-testid="agent-voice-dialog"');
+    expect(source).toContain('sm:top-1/2');
+    expect(source).toContain('bottom-0');
+    expect(source).toContain('onCall={() => setVoiceOpen(true)}');
+    expect(source).not.toContain('<details className="group rounded-lg border border-border bg-card/40">');
   });
 });

@@ -24,6 +24,7 @@ import {
   Boxes,
   Power,
   Loader2,
+  Phone,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +36,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import {
   externalRuntimeAvailability,
@@ -88,16 +96,12 @@ export const agentDetailResponsiveLayout = {
   // The nested scrollbars came from the history's own capped box
   // (xl:max-h-[42rem] xl:flex-none), which is gone.
   //
-  // The conversation itself stays in DOCUMENT FLOW at xl. Pinning it to
-  // `100dvh - <magic>` looks right until you count what sits above it on this
-  // page: app header, the working-now strip, the back link and the title block
-  // with its badges. The box then starts below that offset and its bottom
-  // falls past the viewport, so the composer is unreachable — with
-  // overflow-hidden you cannot even scroll to it. The page scroll is the
-  // reliable one here, and with the cap gone it is also the only one.
+  // The conversation is a bounded communication workspace at xl. The page can
+  // still scroll to Settings, while only the message history scrolls inside
+  // this panel and the composer remains reachable.
   conversationBase: "min-h-0 flex-col gap-2 xl:flex xl:gap-6",
   conversationActive:
-    "flex h-[calc(100svh-18rem)] overflow-hidden md:h-[calc(100dvh-13rem)] xl:h-auto xl:overflow-visible",
+    "flex h-[calc(100svh-18rem)] overflow-hidden md:h-[calc(100dvh-13rem)] xl:h-[min(48rem,calc(100dvh-18rem))] xl:min-h-[32rem] xl:overflow-hidden",
   settingsBase: "flex-col gap-6 xl:flex",
 } as const;
 
@@ -140,6 +144,7 @@ export default function AgentDetailPage({ params }: PageProps) {
   const queryClient = useQueryClient();
   const { address } = useAppAccount();
   const [mobileView, setMobileView] = useState<"conversation" | "settings">("conversation");
+  const [voiceOpen, setVoiceOpen] = useState(false);
 
   const agentsQuery = useQuery({
     queryKey: ["wallet-agents", address],
@@ -277,10 +282,21 @@ export default function AgentDetailPage({ params }: PageProps) {
 
       <div className="hidden flex-col gap-6 xl:flex">
         <BackLink />
-        <AgentHeader agent={agent} onRefresh={refresh} refreshing={agentsQuery.isFetching} walletAddress={address ?? ""} />
+        <AgentHeader agent={agent} onRefresh={refresh} refreshing={agentsQuery.isFetching} walletAddress={address ?? ""} onCall={() => setVoiceOpen(true)} />
       </div>
 
       <section role="tabpanel" aria-label={t("agentDetail.view.conversation")} className={cn(agentDetailResponsiveLayout.conversationBase, mobileView === "conversation" ? agentDetailResponsiveLayout.conversationActive : "hidden")}>
+
+      <div className="flex shrink-0 items-center justify-between rounded-lg border border-border bg-card/60 px-3 py-2 xl:hidden">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-foreground">{agent.displayName ?? agent.name}</p>
+          <p className="text-xs text-muted-foreground">{t("agentDetail.voiceCall.title")}</p>
+        </div>
+        <Button type="button" size="sm" className="shrink-0 gap-1.5" onClick={() => setVoiceOpen(true)}>
+          <Phone className="h-4 w-4" />
+          {t("agentDetail.voice.callAgent", { name: agent.displayName ?? agent.name })}
+        </Button>
+      </div>
 
       {agent.status === "provisioning" ||
       agent.status === "failed" ||
@@ -316,21 +332,12 @@ export default function AgentDetailPage({ params }: PageProps) {
           : undefined}
       />
 
-      <details className="group rounded-lg border border-border bg-card/40">
-        <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
-          {t("agentDetail.voiceCall.title")} <span className="ml-1 text-xs font-normal text-muted-foreground">{t("agentDetail.voiceCall.optional")}</span>
-        </summary>
-        <div className="border-t border-border p-3 md:p-4">
-          <AgentVoiceCallController agentId={agent.id} agentName={agent.name} project={voiceProject} chatCommitScopeKind="direct" speechVoice={agent.speechVoice} />
-        </div>
-      </details>
-
       </section>
 
       <section role="tabpanel" aria-label={t("agentDetail.view.settings")} className={cn(agentDetailResponsiveLayout.settingsBase, mobileView === "settings" ? "flex" : "hidden")}>
       <div className="flex flex-col gap-4 xl:hidden">
         <BackLink />
-        <AgentHeader agent={agent} onRefresh={refresh} refreshing={agentsQuery.isFetching} walletAddress={address ?? ""} />
+        <AgentHeader agent={agent} onRefresh={refresh} refreshing={agentsQuery.isFetching} walletAddress={address ?? ""} onCall={() => setVoiceOpen(true)} />
       </div>
 
       <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -396,6 +403,21 @@ export default function AgentDetailPage({ params }: PageProps) {
 
       <ActionsPanel agent={agent} />
       </section>
+
+      <Dialog open={voiceOpen} onOpenChange={setVoiceOpen}>
+        <DialogContent
+          data-testid="agent-voice-dialog"
+          className="inset-x-0 bottom-0 left-0 top-auto max-h-[88dvh] w-full max-w-none translate-x-0 translate-y-0 grid-cols-[minmax(0,1fr)] gap-0 overflow-hidden rounded-b-none rounded-t-2xl p-0 sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:max-w-2xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl"
+        >
+          <DialogHeader className="border-b border-border p-4 pr-12">
+            <DialogTitle>{t("agentDetail.voice.callAgent", { name: agent.displayName ?? agent.name })}</DialogTitle>
+            <DialogDescription>{t("agentDetail.voiceCall.title")}</DialogDescription>
+          </DialogHeader>
+          <div className="min-h-0 overflow-y-auto p-3 sm:p-4">
+            <AgentVoiceCallController agentId={agent.id} agentName={agent.name} project={voiceProject} chatCommitScopeKind="direct" speechVoice={agent.speechVoice} />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -439,11 +461,13 @@ function AgentHeader({
   onRefresh,
   refreshing,
   walletAddress,
+  onCall,
 }: {
   agent: AgentRow;
   onRefresh: () => void;
   refreshing: boolean;
   walletAddress: string;
+  onCall: () => void;
 }) {
   const { t } = useTranslation();
   const [editOpen, setEditOpen] = useState(false);
@@ -561,6 +585,10 @@ function AgentHeader({
       </div>
 
       <div className="flex items-center gap-2">
+        <Button type="button" size="sm" onClick={onCall} className="gap-1.5">
+          <Phone className="h-3.5 w-3.5" />
+          {t("agentDetail.voice.callAgent", { name: displayName })}
+        </Button>
         {isRunning ? (
           <Button
             variant="outline"
