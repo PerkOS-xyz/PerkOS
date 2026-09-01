@@ -140,7 +140,7 @@ describe("ActiveAgentsPanel", () => {
     expect(screen.getByText(/2h/)).toBeInTheDocument();
   });
 
-  it("treats a stale connected heartbeat as offline", () => {
+  it("keeps a managed bridge available until an explicit disconnect", () => {
     mockByName = {
       Apollo: live({
         name: "Apollo",
@@ -149,7 +149,9 @@ describe("ActiveAgentsPanel", () => {
       }),
     };
     render(<ActiveAgentsPanel agents={[agent({ id: "1", name: "Apollo" })]} />);
-    expect(screen.getByText("Offline")).toBeInTheDocument();
-    expect(screen.getByText(/0 of 1 available/)).toBeInTheDocument();
+    // Managed relay sessions do not publish periodic Firestore heartbeats.
+    // bridgeConnected is authoritative until the relay writes a disconnect.
+    expect(screen.getByText(STATUS_AVAILABLE)).toBeInTheDocument();
+    expect(screen.getByText(/1 of 1 available/)).toBeInTheDocument();
   });
 });
