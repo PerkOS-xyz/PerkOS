@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ authedFetch: vi.fn() }));
 vi.mock("../app/lib/apiClient", () => ({ authedFetch: mocks.authedFetch }));
 
-import { rotateVoiceGatewayCredential } from "../app/lib/perkosApi";
+import { prepareA2AVoiceEnrollment, requestVoiceSupportProbe, rotateVoiceGatewayCredential } from "../app/lib/perkosApi";
 
 describe("rotateVoiceGatewayCredential", () => {
   beforeEach(() => mocks.authedFetch.mockReset());
@@ -33,5 +33,30 @@ describe("rotateVoiceGatewayCredential", () => {
       headers: { "content-type": "application/json" },
     }));
     await expect(rotateVoiceGatewayCredential("athena")).rejects.toThrow("invalid enrollment data");
+  });
+});
+
+describe("A2A Voice enrollment API", () => {
+  beforeEach(() => mocks.authedFetch.mockReset());
+
+  it("prepares only a fixed non-secret prompt", async () => {
+    mocks.authedFetch.mockResolvedValue(new Response(JSON.stringify({
+      prompt: "PERKOS_VOICE_ENROLL",
+      capability: { state: "enrolling", updatedAt: "2026-09-01T12:00:00.000Z" },
+    }), { status: 200, headers: { "content-type": "application/json" } }));
+    await expect(prepareA2AVoiceEnrollment("athena")).resolves.toEqual({
+      prompt: "PERKOS_VOICE_ENROLL",
+      capability: { state: "enrolling", updatedAt: "2026-09-01T12:00:00.000Z" },
+    });
+    expect(mocks.authedFetch).toHaveBeenCalledWith("/api/agents/athena/voice-credential/prepare-a2a", { method: "POST" });
+  });
+
+  it("requests a support probe without minting credentials", async () => {
+    mocks.authedFetch.mockResolvedValue(new Response(JSON.stringify({
+      prompt: "PERKOS_VOICE_PROBE",
+      capability: { state: "unknown", updatedAt: "2026-09-01T12:00:00.000Z" },
+    }), { status: 200, headers: { "content-type": "application/json" } }));
+    await expect(requestVoiceSupportProbe("athena")).resolves.toMatchObject({ prompt: "PERKOS_VOICE_PROBE" });
+    expect(JSON.stringify(mocks.authedFetch.mock.calls)).not.toContain("credential\":");
   });
 });

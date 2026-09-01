@@ -9,7 +9,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  getVoiceEnrollmentCapability,
   getAgentVoiceHealthApi,
+  prepareA2AVoiceEnrollment,
+  requestVoiceSupportProbe,
   rotateVoiceGatewayCredential,
   type AgentRuntime,
   type VoiceGatewayCredential,
@@ -89,7 +92,15 @@ export function VoiceEnrollmentPanel({ agentId, agentName, runtime, owner }: Pro
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const [credential, setCredential] = useState<VoiceGatewayCredential | null>(null);
-  const [copied, setCopied] = useState<"instructions" | "secret" | null>(null);
+  const [prompt, setPrompt] = useState<string | null>(null);
+  const [copied, setCopied] = useState<"prompt" | "instructions" | "secret" | null>(null);
+  const capabilityQuery = useQuery({
+    queryKey: ["agent-voice-enrollment-capability", agentId],
+    queryFn: () => getVoiceEnrollmentCapability(agentId),
+    enabled: owner && Boolean(agentId),
+    refetchInterval: 15_000,
+    staleTime: 5_000,
+  });
   const healthQuery = useQuery({
     queryKey: ["agent-voice-health", agentId],
     queryFn: () => getAgentVoiceHealthApi(agentId),
@@ -98,6 +109,7 @@ export function VoiceEnrollmentPanel({ agentId, agentName, runtime, owner }: Pro
     staleTime: 5_000,
   });
   const ready = healthQuery.data?.health?.ready === true && healthQuery.data.health.capabilityAvailable === true;
+  const capabilityState = ready ? "ready" : capabilityQuery.data?.capability.state ?? "unknown";
   const bundle = useMemo(() => credential && typeof window !== "undefined"
     ? buildVoiceEnrollmentBundle({ agentId, agentName, runtime, credential: credential.credential, hostname: window.location.hostname })
     : null, [agentId, agentName, credential, runtime]);
@@ -110,10 +122,28 @@ export function VoiceEnrollmentPanel({ agentId, agentName, runtime, owner }: Pro
     },
     onError: (error: Error) => toast.error(t("agentDetail.voiceEnrollment.error"), { description: error.message }),
   });
+  const probe = useMutation({
+    mutationFn: () => requestVoiceSupportProbe(agentId),
+    onSuccess: (result) => {
+      setPrompt(result.prompt ?? "PERKOS_VOICE_PROBE");
+      queryClient.setQueryData(["agent-voice-enrollment-capability", agentId], result);
+      toast.success(t("agentDetail.voiceEnrollment.probeCreated"));
+    },
+    onError: (error: Error) => toast.error(t("agentDetail.voiceEnrollment.error"), { description: error.message }),
+  });
+  const prepare = useMutation({
+    mutationFn: () => prepareA2AVoiceEnrollment(agentId),
+    onSuccess: (result) => {
+      setPrompt(result.prompt ?? "PERKOS_VOICE_ENROLL");
+      queryClient.setQueryData(["agent-voice-enrollment-capability", agentId], result);
+      toast.success(t("agentDetail.voiceEnrollment.created"));
+    },
+    onError: (error: Error) => toast.error(t("agentDetail.voiceEnrollment.error"), { description: error.message }),
+  });
 
   if (!owner) return null;
 
-  const copy = async (kind: "instructions" | "secret", value: string) => {
+  const copy = async (kind: "prompt" | "instructions" | "secret", value: string) => {
     await navigator.clipboard.writeText(value);
     setCopied(kind);
     setTimeout(() => setCopied(null), 1500);
@@ -145,17 +175,49 @@ export function VoiceEnrollmentPanel({ agentId, agentName, runtime, owner }: Pro
           ))}
         </ol>
 
-        {ready ? (
+        {capabilityState === "ready" ? (
           <p className="text-sm text-muted-foreground">{t("agentDetail.voiceEnrollment.readyHelp")}</p>
+        ) : capabilityState === "unsupported" ? (
+          <p className="text-sm text-muted-foreground">
+            {t("agentDetail.voiceEnrollment.unsupported")}
+            {capabilityQuery.data?.capability.reasonCode ? ` (${capabilityQuery.data.capability.reasonCode})` : ""}
+          </p>
+        ) : capabilityState === "available" ? (
+          <Button type="button" className="w-fit gap-2" disabled={prepare.isPending} onClick={() => prepare.mutate()}>
+            {prepare.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <PhoneCall className="h-4 w-4" />}
+            {t("agentDetail.voiceEnrollment.enable")}
+          </Button>
+        ) : capabilityState === "enrolling" ? (
+          <p className="text-sm text-muted-foreground">{t("agentDetail.voiceEnrollment.enrolling")}</p>
         ) : (
-          <Button type="button" className="w-fit gap-2" disabled={rotate.isPending} onClick={() => rotate.mutate()}>
-            {rotate.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : credential ? <RotateCcw className="h-4 w-4" /> : <PhoneCall className="h-4 w-4" />}
-            {credential ? t("agentDetail.voiceEnrollment.rotate") : t("agentDetail.voiceEnrollment.enable")}
+          <Button type="button" variant="outline" className="w-fit gap-2" disabled={probe.isPending} onClick={() => probe.mutate()}>
+            {probe.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+            {t("agentDetail.voiceEnrollment.checkSupport")}
           </Button>
         )}
 
-        {bundle && credential ? (
-          <div className="space-y-3 rounded-md border border-amber-500/30 bg-amber-500/5 p-3">
+        {(prompt || capabilityState === "enrolling") ? (
+          <div className="space-y-3 rounded-md border border-primary/25 bg-primary/5 p-3">
+            <p className="text-sm text-muted-foreground">{t("agentDetail.voiceEnrollment.promptHelp")}</p>
+            <code className="block rounded bg-background px-3 py-2 text-sm">{prompt ?? "PERKOS_VOICE_ENROLL"}</code>
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => void copy("prompt", prompt ?? "PERKOS_VOICE_ENROLL")}>
+              {copied === "prompt" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              {copied === "prompt" ? t("agentDetail.common.copied") : t("agentDetail.voiceEnrollment.copyPrompt")}
+            </Button>
+          </div>
+        ) : null}
+
+        <details className="rounded-md border border-border/80 p-3">
+          <summary className="cursor-pointer text-sm text-muted-foreground">{t("agentDetail.voiceEnrollment.advanced")}</summary>
+          <div className="mt-3 space-y-3">
+            {!bundle ? (
+              <Button type="button" variant="outline" size="sm" className="gap-2" disabled={rotate.isPending} onClick={() => rotate.mutate()}>
+                {rotate.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+                {t("agentDetail.voiceEnrollment.directHost")}
+              </Button>
+            ) : null}
+          {bundle && credential ? (
+            <div className="space-y-3 rounded-md border border-amber-500/30 bg-amber-500/5 p-3">
             <p className="flex items-center gap-2 text-xs text-amber-700 dark:text-amber-300">
               <ShieldCheck className="h-4 w-4 shrink-0" /> {t("agentDetail.voiceEnrollment.secretWarning")}
             </p>
@@ -172,8 +234,10 @@ export function VoiceEnrollmentPanel({ agentId, agentName, runtime, owner }: Pro
             <p className="text-xs text-muted-foreground">
               {t("agentDetail.voiceEnrollment.expires", { date: new Date(credential.expiresAt).toLocaleString(i18n.language) })}
             </p>
+            </div>
+          ) : null}
           </div>
-        ) : null}
+        </details>
       </CardContent>
     </Card>
   );

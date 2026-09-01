@@ -3276,6 +3276,47 @@ export type VoiceGatewayCredential = {
   expiresAt: string;
 };
 
+export type VoiceEnrollmentCapabilityState = "unknown" | "available" | "unsupported" | "enrolling" | "ready" | "degraded";
+
+export type VoiceEnrollmentCapability = {
+  state: VoiceEnrollmentCapabilityState;
+  runtime?: string;
+  reasonCode?: string;
+  probeRequestedAt?: string;
+  reportedAt?: string;
+  enrollmentRequestedAt?: string;
+  claimedAt?: string;
+  updatedAt: string;
+};
+
+async function voiceEnrollmentAction(agentId: string, path: "capability" | "probe" | "prepare-a2a", method: "GET" | "POST") {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/agents/${encodeURIComponent(agentId)}/voice-credential/${path}`,
+    { method },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't update Voice enrollment"));
+  const source = payload as { capability?: unknown; prompt?: unknown } | null;
+  const capability = source?.capability as VoiceEnrollmentCapability | undefined;
+  if (!capability || !["unknown", "available", "unsupported", "enrolling", "ready", "degraded"].includes(capability.state)) {
+    throw new Error("Voice capability API returned invalid data.");
+  }
+  return { capability, ...(typeof source?.prompt === "string" ? { prompt: source.prompt } : {}) };
+}
+
+export async function getVoiceEnrollmentCapability(agentId: string) {
+  return voiceEnrollmentAction(agentId, "capability", "GET");
+}
+
+export async function requestVoiceSupportProbe(agentId: string) {
+  return voiceEnrollmentAction(agentId, "probe", "POST");
+}
+
+export async function prepareA2AVoiceEnrollment(agentId: string) {
+  return voiceEnrollmentAction(agentId, "prepare-a2a", "POST");
+}
+
 /**
  * Rotate the agent-scoped Voice gateway credential.
  *

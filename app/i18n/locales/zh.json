@@ -446,7 +446,7 @@
       "emptyCta": "创建你的第一个项目"
     },
     "voiceEnrollment": {
-      "title": "启用通话", "description": "为 {{name}}（{{runtime}}）添加 PerkOS Voice 原生插件。代理保持私有并自行配置语音服务商。", "ready": "通话已启用", "readyHelp": "网关诊断和公开能力已就绪，现在可以使用通话按钮。", "enable": "启用通话", "rotate": "更换注册", "created": "已创建语音注册", "error": "无法创建语音注册", "secretWarning": "密钥仅在本次注册中显示。请私下发送给代理，不要粘贴到聊天、日志、命令参数或源代码中。", "copyInstructions": "复制插件说明", "copySecret": "复制密钥 JSON", "expires": "注册凭据将于 {{date}} 到期。", "steps": { "credential": "创建私有凭据", "plugin": "安装原生插件", "doctor": "验证诊断状态" }
+      "title": "启用通话", "description": "为 {{name}}（{{runtime}}）添加 PerkOS Voice 原生插件。代理保持私有并自行配置语音服务商。", "ready": "通话已启用", "readyHelp": "网关诊断和公开能力已就绪，现在可以使用通话按钮。", "enable": "启用通话", "rotate": "更换注册", "created": "已创建语音注册", "error": "无法创建语音注册", "secretWarning": "密钥仅在本次注册中显示。请私下发送给代理，不要粘贴到聊天、日志、命令参数或源代码中。", "copyInstructions": "复制插件说明", "copySecret": "复制密钥 JSON", "expires": "注册凭据将于 {{date}} 到期。", "checkSupport": "检查 Voice 支持", "probeCreated": "已准备 Voice 支持检查", "unsupported": "此代理不支持 Voice", "enrolling": "正在等待代理配置 Voice。", "copyPrompt": "复制注册提示", "promptHelp": "仅向代理发送此标记。插件使用现有 A2A 身份，密钥不会进入聊天。", "advanced": "高级主机直连设置", "directHost": "创建主机凭证", "steps": { "credential": "创建私有凭据", "plugin": "安装原生插件", "doctor": "验证诊断状态" }
     },
     "tasks": {
       "empty": "暂时还没有任务。",

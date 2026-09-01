@@ -2,11 +2,14 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ rotate: vi.fn(), health: vi.fn() }));
+const mocks = vi.hoisted(() => ({ rotate: vi.fn(), health: vi.fn(), capability: vi.fn(), probe: vi.fn(), prepare: vi.fn() }));
 vi.mock("../app/lib/perkosApi", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../app/lib/perkosApi")>()),
   rotateVoiceGatewayCredential: mocks.rotate,
   getAgentVoiceHealthApi: mocks.health,
+  getVoiceEnrollmentCapability: mocks.capability,
+  requestVoiceSupportProbe: mocks.probe,
+  prepareA2AVoiceEnrollment: mocks.prepare,
 }));
 
 import {
@@ -28,7 +31,11 @@ describe("VoiceEnrollmentPanel", () => {
   beforeEach(() => {
     mocks.rotate.mockReset();
     mocks.health.mockReset();
+    mocks.capability.mockReset();
+    mocks.probe.mockReset();
+    mocks.prepare.mockReset();
     mocks.health.mockResolvedValue({ health: { ready: false, capabilityAvailable: false }, recent: [] });
+    mocks.capability.mockResolvedValue({ capability: { state: "available", updatedAt: "2026-09-01T12:00:00.000Z" } });
   });
 
   it("does not render or mint credentials for a non-owner", () => {
@@ -36,19 +43,27 @@ describe("VoiceEnrollmentPanel", () => {
     expect(mocks.rotate).not.toHaveBeenCalled();
   });
 
-  it("mints only after Enable calls and keeps the secret separate from instructions", async () => {
-    mocks.rotate.mockResolvedValue({
-      credential: "vgc_test_abcdefghijklmnopqrstuvwxyz",
-      audience: "perkos-voice-gateway-grant:v1",
-      expiresAt: "2026-09-02T12:00:00.000Z",
+  it("prepares A2A enrollment without returning a secret", async () => {
+    mocks.prepare.mockResolvedValue({
+      prompt: "PERKOS_VOICE_ENROLL",
+      capability: { state: "enrolling", enrollmentRequestedAt: "2026-09-01T12:00:00.000Z", updatedAt: "2026-09-01T12:00:00.000Z" },
     });
     renderPanel();
     expect(mocks.rotate).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Enable calls" }));
-    await waitFor(() => expect(mocks.rotate).toHaveBeenCalledWith("athena-id"));
-    expect(await screen.findByRole("button", { name: "Copy plugin instructions" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Copy secret JSON" })).toBeInTheDocument();
-    expect(screen.queryByText("vgc_test_abcdefghijklmnopqrstuvwxyz")).not.toBeInTheDocument();
+    fireEvent.click(await screen.findByRole("button", { name: "Enable calls" }));
+    await waitFor(() => expect(mocks.prepare).toHaveBeenCalledWith("athena-id"));
+    expect(await screen.findByText("PERKOS_VOICE_ENROLL")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Copy enrollment prompt" })).toBeInTheDocument();
+    expect(mocks.rotate).not.toHaveBeenCalled();
+  });
+
+  it("offers a non-destructive support check for unknown agents", async () => {
+    mocks.capability.mockResolvedValue({ capability: { state: "unknown", updatedAt: "2026-09-01T12:00:00.000Z" } });
+    mocks.probe.mockResolvedValue({ prompt: "PERKOS_VOICE_PROBE", capability: { state: "unknown", updatedAt: "2026-09-01T12:00:00.000Z" } });
+    renderPanel();
+    fireEvent.click(await screen.findByRole("button", { name: "Check Voice support" }));
+    await waitFor(() => expect(mocks.probe).toHaveBeenCalledWith("athena-id"));
+    expect(await screen.findByText("PERKOS_VOICE_PROBE")).toBeInTheDocument();
   });
 });
 
