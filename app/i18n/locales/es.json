@@ -1416,6 +1416,14 @@
       "revokeTitle": "¿Revocar la credencial de este agente?", "revokeDescription": "El agente perderá inmediatamente el acceso al chat y al tablero de tareas. Puedes revertirlo rotando la credencial más adelante.",
       "loadingPrompt": "Cargando invitación…", "noPrompt": "No hay una invitación disponible; la credencial podría estar revocada.", "secretHint": "Contiene el relayApiKey secreto; trátalo como una contraseña.", "copyInstructions": "Copiar instrucciones", "copyCommand": "Copiar comando para agente"
     },
+    "voiceEnrollment": {
+      "title": "Habilitar llamadas", "description": "Añade el plugin nativo PerkOS Voice a {{name}} ({{runtime}}). El agente permanece privado y configura su propio proveedor de voz.",
+      "ready": "Llamadas habilitadas", "readyHelp": "El diagnóstico del gateway y la capacidad pública están listos. El botón Llamar ya está disponible.",
+      "enable": "Habilitar llamadas", "rotate": "Reemplazar enrolamiento", "created": "Enrolamiento de voz creado", "error": "No se pudo crear el enrolamiento de voz",
+      "secretWarning": "El secreto se muestra solo para este enrolamiento. Envíalo al agente de forma privada; no lo pegues en chats, logs, argumentos de comandos ni código fuente.",
+      "copyInstructions": "Copiar instrucciones del plugin", "copySecret": "Copiar JSON secreto", "expires": "La credencial de enrolamiento vence el {{date}}.",
+      "steps": { "credential": "Crear credencial privada", "plugin": "Instalar plugin nativo", "doctor": "Verificar diagnóstico" }
+    },
     "voiceCredential": {
       "title": "Entrega de credencial del gateway de voz", "description": "Rotación exclusiva del propietario para {{name}}. La API cifra la nueva credencial con la clave pública efímera del gateway; este navegador solo recibe metadatos seguros de entrega.",
       "warning": "Genera una clave pública de un solo uso en el gateway y pega aquí únicamente la clave pública. Nunca pegues una clave privada, API key, token o credencial existente. La rotación deshabilita inmediatamente la credencial de voz anterior.",

@@ -445,6 +445,9 @@
       "empty": "まだプロジェクトがありません。",
       "emptyCta": "最初のプロジェクトを作成"
     },
+    "voiceEnrollment": {
+      "title": "通話を有効化", "description": "{{name}}（{{runtime}}）に PerkOS Voice ネイティブプラグインを追加します。エージェントは非公開のまま、音声プロバイダーを自身で設定します。", "ready": "通話が有効です", "readyHelp": "ゲートウェイ診断と公開機能の準備が完了し、通話ボタンを利用できます。", "enable": "通話を有効化", "rotate": "登録を更新", "created": "音声登録を作成しました", "error": "音声登録を作成できませんでした", "secretWarning": "シークレットは今回の登録時にのみ表示されます。非公開でエージェントに送り、チャット、ログ、コマンド引数、ソースコードには貼り付けないでください。", "copyInstructions": "手順をコピー", "copySecret": "シークレット JSON をコピー", "expires": "登録資格情報の有効期限: {{date}}", "steps": { "credential": "非公開資格情報を作成", "plugin": "ネイティブプラグインを導入", "doctor": "診断を確認" }
+    },
     "tasks": {
       "empty": "まだタスクがありません。",
       "emptyCta": "タスクを作成"
