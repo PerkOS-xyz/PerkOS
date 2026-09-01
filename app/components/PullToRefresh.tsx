@@ -21,7 +21,7 @@ const RESISTANCE = 0.5; // drag feels heavier than the finger travel
  * browser's own rubber-band overscroll. Desktop is unaffected: the indicator
  * is `md:hidden` and a mouse never fires these touch events.
  */
-export function PullToRefresh({ children }: { children: ReactNode }) {
+export function PullToRefresh({ children, className }: { children: ReactNode; className?: string }) {
   const queryClient = useQueryClient();
   const containerRef = useRef<HTMLDivElement>(null);
   const [pull, setPull] = useState(0);
@@ -101,7 +101,7 @@ export function PullToRefresh({ children }: { children: ReactNode }) {
   const indicatorHeight = refreshing ? THRESHOLD : pull;
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className={className}>
       <div
         aria-hidden
         className="pointer-events-none flex items-center justify-center overflow-hidden text-primary md:hidden"

@@ -14,7 +14,9 @@
     "loading": "Cargando…",
     "skipToContent": "Saltar al contenido principal",
     "openMenu": "Abrir menú",
-    "mainNavigation": "Navegación principal"
+    "mainNavigation": "Navegación principal",
+    "cardsView": "Vista de tarjetas",
+    "listView": "Vista de lista"
   },
   "signIn": {
     "signingIn": "Iniciando sesión…",
@@ -1219,6 +1221,9 @@
     "backLink": "Volver a Equipo de agentes",
     "notFound": "No se encontró el agente en tu equipo.",
     "whatHappensNext": "Qué pasa después",
+    "common": { "dismiss": "Descartar", "loading": "Cargando…", "copy": "Copiar", "copied": "Copiado" },
+    "view": { "label": "Vista del agente", "conversation": "Conversación", "settings": "Configuración" },
+    "voiceCall": { "title": "Llamada de voz", "optional": "(opcional)" },
     "header": {
       "stop": "Detener",
       "refresh": "Actualizar",
@@ -1226,6 +1231,12 @@
       "alreadyStopped": "{{name}} ya estaba detenido.",
       "stopping": "Deteniendo a {{name}}: se despertará automáticamente con tu próximo mensaje.",
       "stopError": "No se pudo detener el agente"
+      ,"refreshStatus": "Actualizar estado",
+      "manageAgent": "Administrar agente",
+      "externalAgent": "Agente externo",
+      "perkosInfrastructure": "Infraestructura de PerkOS",
+      "externalDescription": "Disponibilidad declarada: {{availability}}. El propietario sigue operando el runtime, las habilidades y la configuración del proveedor.",
+      "managedDescription": "Alojado y operado en la infraestructura de PerkOS. Los controles autorizados y las capacidades declaradas aparecen abajo."
     },
     "status": {
       "syncing": "Sincronizando…",
@@ -1236,7 +1247,12 @@
       "offline": "Desconectado",
       "failed": "Falló",
       "provisioning": "Aprovisionando",
-      "unknown": "Desconocido"
+      "unknown": "Desconocido",
+      "runtimeUnavailable": "Runtime no disponible",
+      "runtimeUnverified": "Runtime sin verificar",
+      "available": "Disponible",
+      "unavailable": "No disponible",
+      "unverified": "Sin verificar"
     },
     "activity": {
       "title": "Actividad reciente"
@@ -1250,12 +1266,14 @@
       "connectedNow": "· conectado ahora",
       "neverConnected": "Nunca se conectó",
       "endpoint": "Endpoint",
+      "connectedViaRelay": "Conectado mediante el relay de PerkOS",
       "notProvisioned": "Todavía no está aprovisionado",
       "runtimeVersion": "Versión del entorno de ejecución",
       "modelKey": "Clave del modelo",
       "byok": "Provista por el usuario (BYOK)",
       "runtimeOwned": "Gestionada por el runtime externo",
-      "perkosManaged": "Administrada por PerkOS"
+      "perkosManaged": "Administrada por PerkOS",
+      "runtimeHealth": "Estado del runtime"
     },
     "capabilities": {
       "title": "Capacidades",
@@ -1265,7 +1283,153 @@
     "channels": {
       "title": "Canales conectados",
       "description": "Dónde más pueden contactar a este agente, además de dentro de PerkOS.",
-      "none": "No hay canales configurados. Telegram está disponible ahora; próximamente habrá más adaptadores específicos para cada runtime."
+      "none": "No hay canales configurados. Telegram está disponible ahora; próximamente habrá más adaptadores específicos para cada runtime.",
+      "loading": "Cargando canales…"
+    },
+    "wake": {
+      "wakingToast": "{{name}} se está despertando",
+      "readyEstimate": "El contenedor debería estar listo en ~30–60 s.",
+      "error": "No se pudo despertar al agente",
+      "hibernatedMessage": "{{name}} está hibernado. ¿Quieres enviarle un mensaje? Despiértalo primero para que pueda recibirlo.",
+      "now": "Despertar ahora",
+      "progress": "Despertando a {{name}}… ({{running}}/{{desired}} en ejecución)",
+      "hibernating": "{{name}} está hibernando…"
+    },
+    "chat": {
+      "title": "Chat",
+      "opensWhenReady": "El chat se habilitará cuando el agente esté aprovisionado y en ejecución.",
+      "connectWallet": "Conecta una billetera para chatear con este agente.",
+      "stillOpening": "La conversación todavía se está abriendo; inténtalo de nuevo en un momento.",
+      "cleared": "Conversación borrada",
+      "agentConnected": "Agente conectado",
+      "agentOffline": "Agente desconectado",
+      "serviceConnected": "Servicio de chat conectado",
+      "opening": "Abriendo…",
+      "connecting": "Conectando…",
+      "withAgent": "Chat con {{name}}",
+      "description": "Los mensajes y los turnos de voz guardados comparten esta conversación.",
+      "clear": "Borrar",
+      "historyLabel": "Historial de conversación con {{name}}",
+      "empty": "Todavía no hay mensajes. Di hola.",
+      "savedVoiceTurn": "Turno de voz guardado",
+      "responding": "{{name}} está respondiendo en vivo…",
+      "runtimeUnavailableHelp": "El puente está conectado a PerkOS, pero el runtime externo no respondió a la comprobación de estado. Inicia o repara el runtime operado por el propietario antes de enviar mensajes.",
+      "placeholder": "Mensaje para {{name}}…",
+      "hibernatedHint": "El agente está hibernado; enviar el mensaje lo despertará.",
+      "wakingHint": "El agente se está despertando…",
+      "hibernatingHint": "El agente está hibernando; el mensaje quedará en cola.",
+      "keyboardHint": "Enter para enviar · Mayús+Enter para una nueva línea",
+      "send": "Enviar",
+      "clearTitle": "¿Borrar la conversación?",
+      "clearDescription": "Quita los mensajes de esta vista. El agente y su historial del servidor no se modifican; al recargar la página se volverán a sincronizar.",
+      "externalTimeout": "{{name}} no respondió después de 90 s. El agente externo{{runtime}} está conectado, pero no devolvió una respuesta. Revisa los logs del runtime/plugin externo o el enrutamiento del modelo.",
+      "managedTimeout": "{{name}} no respondió después de 90 s. Si estaba hibernado, dale otro momento para despertar; tu mensaje debería llegar cuando el runtime esté en línea."
+    },
+    "webhook": {
+      "title": "Webhook entrante", "active": "Activo", "notSetUp": "Sin configurar",
+      "description": "Proporciona a un servicio externo una URL para contactar a este agente. Cuando llega un evento, PerkOS despierta al agente, le entrega los datos y luego lo deja descansar. Cualquiera que tenga la URL puede activarlo, así que mantenla privada.",
+      "empty": "Todavía no hay una URL de webhook. Genera una para comenzar a enviar eventos a este agente.",
+      "ready": "La URL del webhook está lista; configura tu fuente de eventos para usarla.", "generateError": "No se pudo generar la URL del webhook",
+      "disabledToast": "Se deshabilitó la URL del webhook de {{name}}.", "disableError": "No se pudo deshabilitar el webhook",
+      "rotateUrl": "Rotar URL", "generateUrl": "Generar URL", "disable": "Deshabilitar", "rotate": "Rotar",
+      "rotateTitle": "¿Rotar esta URL de webhook?", "rotateDescription": "La URL actual dejará de funcionar inmediatamente. Recibirás una nueva para reconfigurar tu fuente de eventos.",
+      "disableTitle": "¿Deshabilitar esta URL de webhook?", "disableDescription": "La URL dejará de aceptar eventos inmediatamente. Puedes revertirlo generando una nueva URL más adelante.",
+      "secretHint": "Trata esta URL como una contraseña: cualquiera que la tenga puede despertar a tu agente."
+    },
+    "team": {
+      "title": "Equipo", "updated": "Equipo actualizado; el host se está volviendo a aprovisionar.", "updateError": "No se pudo actualizar el equipo",
+      "coResidentDescription": "Este agente se ejecuta dentro del espacio de {{host}}, compartiendo un runtime con el resto del equipo para reducir costos.",
+      "anotherAgent": "otro agente", "leave": "Salir del equipo (ejecutarse por separado)", "leaveTitle": "¿Salir del equipo?",
+      "leaveDescription": "Este agente volverá a su propio runtime. El host se volverá a aprovisionar para quitarlo.", "leaveConfirm": "Salir",
+      "coResidents_one": "{{count}} co-residente", "coResidents_other": "{{count}} co-residentes",
+      "description": "Ejecuta otros agentes dentro del espacio de este agente: un runtime para todo el equipo, cada uno con sus propias habilidades y memoria. Menos runtimes, menor costo.",
+      "remove": "Quitar", "empty": "Todavía no hay co-residentes. Agrega uno de tus agentes para ejecutarlo dentro de este.",
+      "chooseAgent": "Elige un agente…", "add": "Agregar al equipo", "noneAvailable": "No hay agentes independientes disponibles. Crea más agentes y luego agrégalos aquí."
+    },
+    "hibernation": {
+      "title": "Hibernación", "description": "Pausa el contenedor del agente para detener la facturación mientras no lo usas; enviar un mensaje lo despierta. En el runtime más reciente, su estado se guarda cifrado y se restaura al despertar; las imágenes anteriores reinician desde cero.",
+      "state": { "active": "Activo", "hibernating": "Hibernando…", "hibernated": "En reposo", "waking": "Despertando…" },
+      "desiredRunning": "Deseados / En ejecución", "snapshotSize": "Tamaño del snapshot", "hibernatedAt": "Hibernado el", "wakeStartedAt": "Despertar iniciado el",
+      "wakeAgent": "Despertar agente", "hibernate": "Hibernar", "polling": "Actualizando el estado cada 5 s…", "backups": "Copias de estado", "keepLast": "Conservar las últimas",
+      "noBackups": "Todavía no hay copias. Los snapshots cifrados se capturan automáticamente cada pocos minutos mientras el agente se ejecuta y se restauran al despertar. Las imágenes anteriores reinician desde cero.",
+      "restore": "Restaurar", "encrypted": "Cifradas del lado del cliente (AES-256) antes de subirlas; solo tu agente puede descifrarlas.",
+      "confirmTitle": "¿Hibernar a {{name}}?", "confirmDescription": "Detiene el contenedor y pausa la facturación. Enviar un mensaje lo despierta (~30–60 s). En el runtime más reciente se restaura su estado cifrado; las imágenes anteriores reinician desde cero.",
+      "confirmLabel": "Hibernar agente", "restoreTitle": "¿Restaurar a {{name}} desde esta copia?", "restoreDescription": "El agente se reiniciará con el estado de {{backup}}. Todo cambio posterior será reemplazado (~30–60 s para volver).",
+      "alreadyHibernated": "{{name}} ya estaba hibernado.", "hibernatingToast": "{{name}} está hibernando; la facturación se detendrá cuando termine la tarea.", "hibernateError": "No se pudo hibernar al agente",
+      "alreadyAwake": "{{name}} ya está despierto.", "startingToast": "{{name}} está arrancando; estará listo en unos 30 s.", "wakeError": "No se pudo despertar al agente",
+      "retentionToast": "Se conservarán las últimas {{count}} copias después del próximo reinicio.", "retentionError": "No se pudo actualizar la retención",
+      "restoringToast": "Restaurando a {{name}}; se reiniciará con esa copia (~30–60 s).", "restoreError": "No se pudo restaurar", "pending": " (+{{count}} pendiente(s))"
+    },
+    "voiceHealth": {
+      "title": "Estado de voz", "description": "Diagnóstico exclusivo del propietario para {{name}}. Muestra códigos de etapa del gateway sin contenido del chat, audio ni secretos. Los agentes externos se recuperan en su host; PerkOS solo muestra qué falló.",
+      "refresh": "Actualizar estado", "ready": "Diagnóstico correcto", "stale": "Reporte desactualizado", "noReport": "Sin reporte todavía", "attention": "Requiere atención", "loadError": "No se pudo cargar el estado de voz",
+      "codes": "Códigos", "checked": "comprobado", "capabilityUnavailable": "Capacidad pública: no disponible{{reason}}. La llamada permanece oculta hasta que el gateway informe que está lista.",
+      "loading": "Cargando estado…", "greenPrefix": "El último reporte está correcto. Los propietarios aún pueden ejecutar", "greenSuffix": "en el host del gateway cuando quieran.", "recent": "Señales recientes"
+    },
+    "upgrade": {
+      "title": "Actualización del agente",
+      "description": "Instala una versión más reciente del runtime del agente. PerkOS pausa el agente, inicia la nueva versión y restaura su estado cifrado. Interrupción estimada: 60–90 segundos.",
+      "installedVersion": "Versión instalada",
+      "latest": "Este agente utiliza la versión más reciente disponible.",
+      "available": "Versiones disponibles",
+      "pickTag": "Elige una versión",
+      "notes": "Notas de la versión",
+      "action": "Actualizar agente",
+      "refresh": "Buscar actualizaciones",
+      "checking": "Buscando…",
+      "retry": "Intentar de nuevo",
+      "complete": "Agente actualizado",
+      "completeDescription": "{{name}} ahora utiliza {{to}} (antes {{from}}). El estado se restauró en {{seconds}} s.",
+      "unknownVersion": "versión desconocida",
+      "failed": "La actualización falló",
+      "confirmTitle": "¿Actualizar a {{name}}?",
+      "confirmDescription": "PerkOS pausará el contenedor actual, instalará {{tag}} y restaurará el estado cifrado en un contenedor nuevo. El agente no estará disponible durante aproximadamente 60–90 segundos; se conservan la memoria y el historial de conversaciones.",
+      "pickFirst": "Primero elige una versión de destino.",
+      "confirmLabel": "Actualizar agente"
+    },
+    "voice": {
+      "liveWith": "En llamada con {{name}}", "callAgent": "Llamar a {{name}}", "endingCall": "Finalizando llamada…", "ending": "Finalizando…", "endCall": "Finalizar llamada",
+      "workingCall": "Llamada de trabajo", "privateCall": "Llamada privada", "working": "Trabajo", "private": "Privada", "voice": "Voz {{voice}}",
+      "unavailableDescription": "{{name}} no ha reportado un gateway de voz y proveedor de voz verificados. Tener chat disponible no habilita la voz.",
+      "duration": "Duración de la llamada {{duration}}", "unmute": "Activar micrófono", "mute": "Silenciar", "start": "Iniciar llamada de voz",
+      "connectingWorking": "Conectando llamada de trabajo", "retryWorking": "Reintentar llamada de trabajo", "workingWith": "Llamada de trabajo con {{name}}",
+      "preparingChatWorking": "Preparando el chat para la llamada de trabajo…", "workingNeedsChat": "La llamada de trabajo necesita una conversación de chat", "workingTitle": "Llamada de trabajo — guarda los turnos finales en el chat",
+      "preparingChat": "Preparando chat…", "savesTurns": "Guarda los turnos finales en el chat", "connectingPrivate": "Conectando llamada privada",
+      "retryPrivate": "Reintentar llamada privada", "privateWith": "Llamada privada con {{name}}", "privateTitle": "Llamada privada — no guarda nada en el chat", "privateSummary": "Sin guardar chat · sin conservar audio",
+      "pendingCapability": "Pendiente de capacidad del gateway y configuración del proveedor de voz.", "settings": "Configuración de llamada",
+      "workingDetails": "El texto final del usuario y del agente se escribe en el chat después de cada turno. El audio sin procesar nunca se guarda.",
+      "privateDetails": "No se conserva texto final, audio sin procesar ni voz provisional.", "audio": "Audio", "audioDetails": "Cancelación de eco, supresión de ruido y control automático de ganancia.",
+      "bargeIn": "Interrupción por voz", "bargeInDetails": "Hablar interrumpe la respuesta actual del agente.",
+      "state": { "checking": "Comprobando disponibilidad de voz…", "connecting": "Conectando…", "reconnecting": "Reconectando…", "in-call": "Llamada en curso", "ready": "Lista para voz", "unavailable": "Voz no disponible", "failed": "La llamada falló", "ended": "Llamada finalizada" }
+    },
+    "invitedCredential": {
+      "title": "Credencial de conexión", "description": "Este agente externo se conecta con un relayApiKey secreto. Vuelve a mostrar la invitación, rota la clave si se filtra o revócala para desconectar al agente.",
+      "connected": "Puente conectado", "revoked": "Revocada", "neverConnected": "Nunca se conectó", "waiting": "Esperando conexión",
+      "staleHelp": "Este agente fue invitado, pero nunca se conectó. Comprueba que su runtime ejecute el puente con esta credencial y revisa la invitación.",
+      "revokedHelp": "La credencial está revocada. El agente ya no puede acceder al relay ni al tablero de tareas. Rótala para emitir una nueva.",
+      "showPrompt": "Mostrar invitación", "hidePrompt": "Ocultar invitación", "rotate": "Rotar credencial", "revoke": "Revocar",
+      "rotated": "Credencial rotada; proporciona la nueva invitación a tu agente.", "rotateError": "No se pudo rotar la credencial",
+      "revokedToast": "Se revocó la credencial de {{name}}. Rótala para emitir una nueva.", "revokeError": "No se pudo revocar la credencial",
+      "rotateTitle": "¿Rotar la credencial de este agente?", "rotateDescription": "El relayApiKey actual dejará de funcionar inmediatamente. Recibirás una nueva invitación para que el agente pueda reconectarse.",
+      "revokeTitle": "¿Revocar la credencial de este agente?", "revokeDescription": "El agente perderá inmediatamente el acceso al chat y al tablero de tareas. Puedes revertirlo rotando la credencial más adelante.",
+      "loadingPrompt": "Cargando invitación…", "noPrompt": "No hay una invitación disponible; la credencial podría estar revocada.", "secretHint": "Contiene el relayApiKey secreto; trátalo como una contraseña."
+    },
+    "voiceCredential": {
+      "title": "Entrega de credencial del gateway de voz", "description": "Rotación exclusiva del propietario para {{name}}. La API cifra la nueva credencial con la clave pública efímera del gateway; este navegador solo recibe metadatos seguros de entrega.",
+      "warning": "Genera una clave pública de un solo uso en el gateway y pega aquí únicamente la clave pública. Nunca pegues una clave privada, API key, token o credencial existente. La rotación deshabilita inmediatamente la credencial de voz anterior.",
+      "publicKey": "Clave pública efímera del gateway", "placeholder": "Pega la clave pública generada por el gateway",
+      "acknowledge": "Generé esta clave pública en el gateway previsto y comprendo que esto rota la credencial de voz actual.",
+      "encrypting": "Cifrando la nueva credencial…", "rotate": "Rotar y cifrar", "rotationFailed": "Falló la rotación cifrada",
+      "pending": "Entrega pendiente para Bragi", "algorithm": "Algoritmo", "audience": "Audiencia", "fingerprint": "Huella de la clave pública", "expires": "Expira",
+      "safeMetadata": "La API y el receptor de Bragi conservan los identificadores de entrega y reclamo; el texto cifrado nunca se expone aquí."
+    },
+    "voiceController": {
+      "sessionStatus": "Sesión de voz: {{status}}.", "audioConnected": "Audio remoto conectado.", "audioPlaying": "Audio remoto reproduciéndose.",
+      "audioPermission": "La reproducción del audio remoto necesita permiso del navegador.", "networkChanged": "La red cambió. Reconectando la llamada…",
+      "waitingAudio": "Llamada reconectada. Esperando el audio remoto.", "connectionLost": "Se perdió la conexión. Restaurando la llamada…",
+      "restoreFailed": "No se pudo restaurar la conexión de red. La llamada finalizó de forma segura.", "callFailed": "La llamada de voz falló.",
+      "cancelTimeout": "Se envió la finalización, pero el servidor agotó el tiempo de espera.", "cancelFailed": "No se pudo cancelar la sesión de voz.",
+      "endFailed": "No se pudo finalizar la reunión.", "microphoneFailed": "No se pudo cambiar el estado del micrófono."
     },
     "tasks": {
       "title": "Tareas asignadas a {{name}}",
@@ -1459,6 +1623,7 @@
       "conductor": "Director",
       "agents": "Agentes",
       "map": "Mapa",
+      "execution": "Ejecución",
       "chat": "Chat del proyecto",
       "members": "Miembros"
     },
@@ -1692,7 +1857,8 @@
       "todo": "Por hacer",
       "inProgress": "En curso",
       "done": "Hecho",
-      "moveTaskAria": "Mover tarea. Usa las flechas izquierda o derecha para cambiar de columna, espacio para arrastrar."
+      "moveTaskAria": "Mover tarea. Usa las flechas izquierda o derecha para cambiar de columna, espacio para arrastrar.",
+      "emptyPhase": "No hay tareas en esta fase"
     },
     "conductor": {
       "emptyMessage": "Todavía no hay tareas. Agrega una para empezar.",
@@ -1729,6 +1895,50 @@
       "taskLabel_other": "tareas",
       "donePerAgent": "Hecho por agente",
       "unassigned": "Sin asignar"
+    },
+    "graph": {
+      "expand": "Maximizar",
+      "close": "Cerrar",
+      "rotateHint": "Arrastra para rotar · pellizca o desplaza para acercar",
+      "selected": "Nodo seleccionado",
+      "neighbors_one": "{{count}} conexión directa",
+      "neighbors_other": "{{count}} conexiones directas",
+      "openEntity": "Abrir detalles"
+    },
+    "knowledgeGraph": {
+      "title": "Conocimiento del proyecto",
+      "description": "Cómo se relacionan las personas, agentes, trabajo y fuentes conectadas de este proyecto.",
+      "showCompleted": "Mostrar completadas",
+      "empty": "El conocimiento aparecerá aquí cuando agregues agentes, tareas y fuentes conectadas.",
+      "ariaLabel": "Grafo interactivo de conocimiento del proyecto",
+      "legend": "Proyecto · agentes · trabajo · fuentes conectadas",
+      "connectedSources_one": "{{count}} fuente conectada",
+      "connectedSources_other": "{{count}} fuentes conectadas",
+      "noSources": "Todavía no hay fuentes externas conectadas",
+      "hiddenTasks_one": " · {{count}} tarea adicional",
+      "hiddenTasks_other": " · {{count}} tareas adicionales"
+    },
+    "executionGraph": {
+      "title": "Grafo de ejecución de agentes",
+      "description": "Observa cómo el coordinador delega el trabajo y cómo avanza cada tarea.",
+      "phase": "Fase: {{phase}}",
+      "empty": "Todavía no existe una ejecución. Pon al equipo a trabajar para generar el primer flujo.",
+      "ariaLabel": "Grafo de ejecución y orquestación de agentes",
+      "telemetryNote": "Esta vista usa el flujo y las asignaciones actuales. Los traspasos, reintentos y controles de verificación aparecerán cuando exista telemetría del runtime.",
+      "unassignedLead": "Líder sin asignar",
+      "unassignedWorker": "Sin asignar",
+      "coordinator": "Coordinador"
+    },
+    "organizationGraph": {
+      "title": "Conocimiento de la organización",
+      "description": "Un mapa vivo de los proyectos, personas, agentes y fuentes conectados a esta organización.",
+      "projects_one": "{{count}} proyecto",
+      "projects_other": "{{count}} proyectos",
+      "empty": "El grafo de la organización crecerá cuando crees proyectos, agregues agentes y conectes fuentes.",
+      "ariaLabel": "Grafo interactivo de conocimiento de la organización",
+      "connectedSources_one": "{{count}} fuente de la organización conectada",
+      "connectedSources_other": "{{count}} fuentes de la organización conectadas",
+      "noSources": "Todavía no hay fuentes de la organización conectadas"
     },
     "contextMap": {
       "empty": "El mapa se va completando a medida que agregas agentes y tareas a este proyecto.",

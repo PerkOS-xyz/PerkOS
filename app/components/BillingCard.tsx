@@ -70,7 +70,7 @@ export function BillingCard({
         <p className="text-xs text-muted-foreground">Loading usage…</p>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2">
             <Metric
               icon={<Clock className="h-3.5 w-3.5 text-primary" />}
               label="Team hours"
@@ -200,12 +200,12 @@ function Metric({
   value: string;
 }) {
   return (
-    <div className="flex flex-col gap-1 rounded-md border border-border/60 bg-background/40 px-2.5 py-2">
-      <span className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+    <div className="flex min-w-0 flex-col gap-1 rounded-md border border-border/60 bg-background/40 px-2.5 py-2">
+      <span className="flex min-w-0 items-start gap-1 text-[10px] uppercase leading-tight tracking-wide text-muted-foreground">
         {icon}
-        {label}
+        <span className="min-w-0 break-words">{label}</span>
       </span>
-      <span className="font-mono text-base text-foreground tabular-nums">{value}</span>
+      <span className="min-w-0 break-words font-mono text-base leading-tight text-foreground tabular-nums">{value}</span>
     </div>
   );
 }

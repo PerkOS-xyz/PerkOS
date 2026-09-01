@@ -14,7 +14,9 @@
     "loading": "Loading…",
     "skipToContent": "Skip to main content",
     "openMenu": "Open menu",
-    "mainNavigation": "Main navigation"
+    "mainNavigation": "Main navigation",
+    "cardsView": "Cards view",
+    "listView": "List view"
   },
   "signIn": {
     "signingIn": "Signing you in…",
@@ -1219,6 +1221,9 @@
     "backLink": "Back to Agent team",
     "notFound": "Agent not found in your team.",
     "whatHappensNext": "What happens next",
+    "common": { "dismiss": "Dismiss", "loading": "Loading…", "copy": "Copy", "copied": "Copied" },
+    "view": { "label": "Agent view", "conversation": "Conversation", "settings": "Settings" },
+    "voiceCall": { "title": "Voice call", "optional": "(optional)" },
     "header": {
       "stop": "Stop",
       "refresh": "Refresh",
@@ -1226,6 +1231,12 @@
       "alreadyStopped": "{{name}} was already stopped.",
       "stopping": "{{name}} stopping. It'll wake automatically on your next message.",
       "stopError": "Couldn't stop agent"
+      ,"refreshStatus": "Refresh status",
+      "manageAgent": "Manage agent",
+      "externalAgent": "External agent",
+      "perkosInfrastructure": "PerkOS infrastructure",
+      "externalDescription": "Declared availability: {{availability}}. Runtime, skills, and provider configuration remain owner-operated.",
+      "managedDescription": "Hosted and operated on PerkOS infrastructure. Authorized controls and declared capabilities appear below."
     },
     "status": {
       "syncing": "Syncing…",
@@ -1236,7 +1247,12 @@
       "offline": "Offline",
       "failed": "Failed",
       "provisioning": "Provisioning",
-      "unknown": "Unknown"
+      "unknown": "Unknown",
+      "runtimeUnavailable": "Runtime unavailable",
+      "runtimeUnverified": "Runtime unverified",
+      "available": "Available",
+      "unavailable": "Unavailable",
+      "unverified": "Unverified"
     },
     "activity": {
       "title": "Recent activity"
@@ -1250,12 +1266,14 @@
       "connectedNow": "· connected now",
       "neverConnected": "Never connected",
       "endpoint": "Endpoint",
+      "connectedViaRelay": "Connected via PerkOS relay",
       "notProvisioned": "Not provisioned yet",
       "runtimeVersion": "Runtime version",
       "modelKey": "Model key",
       "byok": "User-provided (BYOK)",
       "runtimeOwned": "Runtime-owned (external)",
-      "perkosManaged": "PerkOS managed"
+      "perkosManaged": "PerkOS managed",
+      "runtimeHealth": "Runtime health"
     },
     "capabilities": {
       "title": "Capabilities",
@@ -1265,7 +1283,153 @@
     "channels": {
       "title": "Connected channels",
       "description": "Where users can reach this agent in addition to inside PerkOS.",
-      "none": "No channels configured. Telegram is available now; more runtime-specific channel adapters are coming."
+      "none": "No channels configured. Telegram is available now; more runtime-specific channel adapters are coming.",
+      "loading": "Loading channels…"
+    },
+    "wake": {
+      "wakingToast": "{{name}} is waking up",
+      "readyEstimate": "Container should be ready in ~30–60s.",
+      "error": "Couldn't wake the agent",
+      "hibernatedMessage": "{{name}} is hibernated. Want to send a message? Wake it first so it can receive it.",
+      "now": "Wake now",
+      "progress": "Waking {{name}}… ({{running}}/{{desired}} running)",
+      "hibernating": "{{name}} is hibernating…"
+    },
+    "chat": {
+      "title": "Chat",
+      "opensWhenReady": "Chat opens once the agent is provisioned and running.",
+      "connectWallet": "Connect a wallet to chat with this agent.",
+      "stillOpening": "Still opening the conversation; try again in a moment.",
+      "cleared": "Conversation cleared",
+      "agentConnected": "Agent connected",
+      "agentOffline": "Agent offline",
+      "serviceConnected": "Chat service connected",
+      "opening": "Opening…",
+      "connecting": "Connecting…",
+      "withAgent": "Chat with {{name}}",
+      "description": "Messages and completed saved voice turns share this conversation.",
+      "clear": "Clear",
+      "historyLabel": "Conversation history with {{name}}",
+      "empty": "No messages yet. Say hello.",
+      "savedVoiceTurn": "Saved voice turn",
+      "responding": "{{name}} is responding live…",
+      "runtimeUnavailableHelp": "The bridge is connected to PerkOS, but the external runtime did not answer its health probe. Start or repair the owner-operated runtime before sending messages.",
+      "placeholder": "Message {{name}}…",
+      "hibernatedHint": "Agent is hibernated — sending will wake it.",
+      "wakingHint": "Agent is waking up…",
+      "hibernatingHint": "Agent is hibernating; message will queue.",
+      "keyboardHint": "Enter to send · Shift+Enter for a new line",
+      "send": "Send",
+      "clearTitle": "Clear conversation?",
+      "clearDescription": "Removes the messages from this view. The agent and its server-side history are unaffected — reloading the page re-syncs them.",
+      "externalTimeout": "No response from {{name}} after 90s. The external{{runtime}} agent is connected but did not reply. Check the external runtime/plugin logs or model routing.",
+      "managedTimeout": "No response from {{name}} after 90s. If the agent was hibernated, give it another moment to wake; your message should arrive once the runtime is online."
+    },
+    "webhook": {
+      "title": "Inbound webhook", "active": "Active", "notSetUp": "Not set up",
+      "description": "Give an external service a URL to reach this agent. When an event arrives, PerkOS wakes the agent, hands it the payload, then lets it rest again. Anyone with the URL can trigger the agent, so keep it private.",
+      "empty": "No webhook URL yet. Generate one to start sending events to this agent.",
+      "ready": "Webhook URL ready — point your event source at it.", "generateError": "Couldn't generate webhook URL",
+      "disabledToast": "{{name}}'s webhook URL was disabled.", "disableError": "Couldn't disable webhook",
+      "rotateUrl": "Rotate URL", "generateUrl": "Generate URL", "disable": "Disable", "rotate": "Rotate",
+      "rotateTitle": "Rotate this webhook URL?", "rotateDescription": "The current URL stops working immediately. You'll get a fresh one to re-point your event source at.",
+      "disableTitle": "Disable this webhook URL?", "disableDescription": "The URL stops accepting events immediately. This is reversible — generate a new one later to re-enable inbound events.",
+      "secretHint": "Treat this URL like a password — anyone who has it can wake your agent."
+    },
+    "team": {
+      "title": "Team", "updated": "Team updated — the host is reprovisioning to serve it.", "updateError": "Couldn't update the team",
+      "coResidentDescription": "This agent runs as a co-resident inside {{host}}'s space, sharing one runtime with the rest of the team to keep costs down.",
+      "anotherAgent": "another agent", "leave": "Leave team (run on its own)", "leaveTitle": "Leave the team?",
+      "leaveDescription": "This agent moves back to its own runtime. The host reprovisions to drop it.", "leaveConfirm": "Leave",
+      "coResidents_one": "{{count}} co-resident", "coResidents_other": "{{count}} co-residents",
+      "description": "Run other agents inside this one's space — one runtime for the whole team, each with its own skills and memory. Fewer runtimes, lower cost.",
+      "remove": "Remove", "empty": "No co-residents yet. Add one of your agents to run it inside this one.",
+      "chooseAgent": "Choose an agent…", "add": "Add to team", "noneAvailable": "No standalone agents available to add. Create more agents first, then add them here."
+    },
+    "hibernation": {
+      "title": "Hibernation", "description": "Pause the agent's container to stop billing while you're not using it — sending a message wakes it back up. On the latest runtime its state is snapshotted (encrypted) and restored on wake; agents on older images restart fresh.",
+      "state": { "active": "Active", "hibernating": "Hibernating…", "hibernated": "Resting", "waking": "Waking up…" },
+      "desiredRunning": "Desired / Running", "snapshotSize": "Snapshot size", "hibernatedAt": "Hibernated at", "wakeStartedAt": "Wake started at",
+      "wakeAgent": "Wake agent", "hibernate": "Hibernate", "polling": "Polling status every 5s…", "backups": "State backups", "keepLast": "Keep last",
+      "noBackups": "No backups yet. Encrypted state snapshots are captured automatically every few minutes while the agent runs and restored when it wakes. Agents on older runtime images restart fresh.",
+      "restore": "Restore", "encrypted": "Encrypted client-side (AES-256) before upload — only your agent can decrypt them.",
+      "confirmTitle": "Hibernate {{name}}?", "confirmDescription": "Stops the running container and pauses billing. Sending a message wakes it (~30–60s to come back). On the latest runtime its encrypted state is restored on wake; agents on older images restart fresh.",
+      "confirmLabel": "Hibernate agent", "restoreTitle": "Restore {{name}} to this backup?", "restoreDescription": "The agent will restart with its state from {{backup}}. Anything changed since then is replaced (~30–60s to come back).",
+      "alreadyHibernated": "{{name}} was already hibernated.", "hibernatingToast": "{{name}} is hibernating — billing will stop once the task drains.", "hibernateError": "Couldn't hibernate agent",
+      "alreadyAwake": "{{name}} is already awake.", "startingToast": "{{name}} is starting back up — give it ~30s to be ready.", "wakeError": "Couldn't wake agent",
+      "retentionToast": "Keeping the last {{count}} backups — applies after the next restart.", "retentionError": "Couldn't update retention",
+      "restoringToast": "Restoring {{name}} — it will restart with that backup (~30–60s).", "restoreError": "Couldn't restore", "pending": " (+{{count}} pending)"
+    },
+    "voiceHealth": {
+      "title": "Voice health", "description": "Owner-only diagnostics for {{name}}. Fixed stage codes from the gateway doctor — no chat content, audio, or secrets. External agents self-heal on their host; PerkOS only shows what failed.",
+      "refresh": "Refresh health", "ready": "Doctor ready", "stale": "Stale report", "noReport": "No report yet", "attention": "Needs attention", "loadError": "Failed to load voice health",
+      "codes": "Codes", "checked": "checked", "capabilityUnavailable": "Public capability: unavailable{{reason}}. Call stays hidden until the gateway publishes ready.",
+      "loading": "Loading health…", "greenPrefix": "Last report is green. Owners can still run", "greenSuffix": "on the gateway host anytime.", "recent": "Recent signals"
+    },
+    "upgrade": {
+      "title": "Agent runtime update",
+      "description": "Install a newer agent runtime. PerkOS pauses the agent, starts the new version, and restores its encrypted state. Expected interruption: 60–90 seconds.",
+      "installedVersion": "Installed version",
+      "latest": "This agent is running the latest available version.",
+      "available": "Available versions",
+      "pickTag": "Choose a version",
+      "notes": "Release notes",
+      "action": "Update agent",
+      "refresh": "Check for updates",
+      "checking": "Checking…",
+      "retry": "Try again",
+      "complete": "Agent updated",
+      "completeDescription": "{{name}} is now running {{to}} (previously {{from}}). State restored in {{seconds}}s.",
+      "unknownVersion": "unknown version",
+      "failed": "Update failed",
+      "confirmTitle": "Update {{name}}?",
+      "confirmDescription": "PerkOS will pause the current container, install {{tag}}, and restore the encrypted state in a new container. The agent will be unavailable for approximately 60–90 seconds; memory and conversation history are preserved.",
+      "pickFirst": "Choose a target version first.",
+      "confirmLabel": "Update agent"
+    },
+    "voice": {
+      "liveWith": "Live with {{name}}", "callAgent": "Call {{name}}", "endingCall": "Ending call…", "ending": "Ending…", "endCall": "End call",
+      "workingCall": "Working Call", "privateCall": "Private Call", "working": "Working", "private": "Private", "voice": "Voice {{voice}}",
+      "unavailableDescription": "{{name}} has not reported a verified voice gateway and speech provider. Chat availability does not enable voice.",
+      "duration": "Call duration {{duration}}", "unmute": "Unmute", "mute": "Mute", "start": "Start voice call",
+      "connectingWorking": "Connecting working call", "retryWorking": "Retry working call", "workingWith": "Working call {{name}}",
+      "preparingChatWorking": "Preparing chat for Working call…", "workingNeedsChat": "Working call needs a chat conversation", "workingTitle": "Working call — save final turns to chat",
+      "preparingChat": "Preparing chat…", "savesTurns": "Saves final turns to chat", "connectingPrivate": "Connecting private call",
+      "retryPrivate": "Retry private call", "privateWith": "Private call {{name}}", "privateTitle": "Private call — nothing saved to chat", "privateSummary": "No chat save · no audio kept",
+      "pendingCapability": "Pending gateway capability and speech-provider configuration.", "settings": "Call settings",
+      "workingDetails": "Final user and agent text is written to chat after each turn. Raw audio is never saved.",
+      "privateDetails": "No final text, raw audio, or interim speech is persisted.", "audio": "Audio", "audioDetails": "Echo cancellation, noise suppression, and automatic gain control.",
+      "bargeIn": "Barge-in", "bargeInDetails": "Speaking interrupts the current agent reply.",
+      "state": { "checking": "Checking voice availability", "connecting": "Connecting voice call", "reconnecting": "Reconnecting voice call", "in-call": "Voice call in progress", "ready": "Ready for voice", "unavailable": "Voice unavailable", "failed": "Voice call failed", "ended": "Voice call ended" }
+    },
+    "invitedCredential": {
+      "title": "Connection credential", "description": "This external agent connects with a secret relayApiKey. Show the onboarding prompt again, rotate the key if it leaks, or revoke it to disconnect the agent.",
+      "connected": "Bridge connected", "revoked": "Revoked", "neverConnected": "Never connected", "waiting": "Waiting to connect",
+      "staleHelp": "This agent was invited but has never connected. Make sure its runtime is running the bridge with this credential and review the invitation prompt.",
+      "revokedHelp": "The credential is revoked. The agent can no longer reach the relay or job board. Rotate it to issue a fresh credential.",
+      "showPrompt": "Show invitation prompt", "hidePrompt": "Hide prompt", "rotate": "Rotate credential", "revoke": "Revoke",
+      "rotated": "Credential rotated — provide the new prompt to your agent.", "rotateError": "Couldn't rotate credential",
+      "revokedToast": "{{name}}'s credential was revoked. Rotate it to issue a new one.", "revokeError": "Couldn't revoke credential",
+      "rotateTitle": "Rotate this agent's credential?", "rotateDescription": "The current relayApiKey stops working immediately. You'll receive a fresh onboarding prompt so the agent can reconnect.",
+      "revokeTitle": "Revoke this agent's credential?", "revokeDescription": "The agent immediately loses access to chat and the job board. This is reversible by rotating the credential later.",
+      "loadingPrompt": "Loading prompt…", "noPrompt": "No prompt is available; the credential may be revoked.", "secretHint": "Contains the secret relayApiKey — treat it like a password."
+    },
+    "voiceCredential": {
+      "title": "Voice gateway credential delivery", "description": "Owner-only rotation for {{name}}. The API encrypts the new credential to the gateway's ephemeral public key; this browser receives safe delivery metadata only.",
+      "warning": "Generate a one-time public key on the gateway and paste only the public key here. Never paste a private key, API key, token, or existing credential. Rotation disables the previous voice credential immediately.",
+      "publicKey": "Ephemeral gateway public key", "placeholder": "Paste the public key generated by the gateway",
+      "acknowledge": "I generated this public key on the intended gateway and understand that this rotates the current voice credential.",
+      "encrypting": "Encrypting new credential…", "rotate": "Rotate and encrypt", "rotationFailed": "Encrypted rotation failed",
+      "pending": "Delivery pending for Bragi", "algorithm": "Algorithm", "audience": "Audience", "fingerprint": "Public-key fingerprint", "expires": "Expires",
+      "safeMetadata": "Delivery and claim identifiers are retained by the API and Bragi receiver; ciphertext is never exposed here."
+    },
+    "voiceController": {
+      "sessionStatus": "Voice session {{status}}.", "audioConnected": "Remote audio connected.", "audioPlaying": "Remote audio playing.",
+      "audioPermission": "Remote audio playback needs browser permission.", "networkChanged": "Network changed. Reconnecting call…",
+      "waitingAudio": "Call reconnected. Waiting for remote audio.", "connectionLost": "Connection lost. Restoring the call…",
+      "restoreFailed": "The network connection could not be restored. The call was ended safely.", "callFailed": "Voice call failed.",
+      "cancelTimeout": "Hang-up sent; server cancel timed out.", "cancelFailed": "Could not cancel voice session.",
+      "endFailed": "Could not end meeting.", "microphoneFailed": "Could not change microphone state."
     },
     "tasks": {
       "title": "Tasks assigned to {{name}}",
@@ -1459,6 +1623,7 @@
       "conductor": "Conductor",
       "agents": "Agents",
       "map": "Map",
+      "execution": "Execution",
       "chat": "Project chat",
       "members": "Members"
     },
@@ -1692,7 +1857,8 @@
       "todo": "To do",
       "inProgress": "In progress",
       "done": "Done",
-      "moveTaskAria": "Move task. Use arrow left/right to change column, space to drag."
+      "moveTaskAria": "Move task. Use arrow left/right to change column, space to drag.",
+      "emptyPhase": "No tasks in this phase"
     },
     "conductor": {
       "emptyMessage": "No tasks yet. Add one to get started.",
@@ -1729,6 +1895,50 @@
       "taskLabel_other": "tasks",
       "donePerAgent": "Done per agent",
       "unassigned": "Unassigned"
+    },
+    "graph": {
+      "expand": "Expand",
+      "close": "Close",
+      "rotateHint": "Drag to rotate · pinch or scroll to zoom",
+      "selected": "Selected node",
+      "neighbors_one": "{{count}} direct connection",
+      "neighbors_other": "{{count}} direct connections",
+      "openEntity": "Open details"
+    },
+    "knowledgeGraph": {
+      "title": "Project knowledge",
+      "description": "How this project's people, agents, work and connected sources relate.",
+      "showCompleted": "Show completed",
+      "empty": "Knowledge appears here as you add agents, tasks and connected sources.",
+      "ariaLabel": "Interactive project knowledge graph",
+      "legend": "Project · agents · work · connected sources",
+      "connectedSources_one": "{{count}} connected source",
+      "connectedSources_other": "{{count}} connected sources",
+      "noSources": "No external sources connected yet",
+      "hiddenTasks_one": " · {{count}} more task",
+      "hiddenTasks_other": " · {{count}} more tasks"
+    },
+    "executionGraph": {
+      "title": "Agent execution graph",
+      "description": "See how the coordinator delegates work to agents and how each task progresses.",
+      "phase": "Phase: {{phase}}",
+      "empty": "No execution exists yet. Put the team to work to generate the first flow.",
+      "ariaLabel": "Agent execution and orchestration graph",
+      "telemetryNote": "This view uses current workflow and assignment data. Detailed handoffs, retries and verification gates will appear as runtime telemetry becomes available.",
+      "unassignedLead": "Lead not assigned",
+      "unassignedWorker": "Unassigned",
+      "coordinator": "Coordinator"
+    },
+    "organizationGraph": {
+      "title": "Organization knowledge",
+      "description": "A living map of the projects, people, agents and sources connected to this organization.",
+      "projects_one": "{{count}} project",
+      "projects_other": "{{count}} projects",
+      "empty": "The organization graph grows as you create projects, add agents and connect sources.",
+      "ariaLabel": "Interactive organization knowledge graph",
+      "connectedSources_one": "{{count}} organization source connected",
+      "connectedSources_other": "{{count}} organization sources connected",
+      "noSources": "No organization sources connected yet"
     },
     "contextMap": {
       "empty": "The map fills in as you add agents and tasks to this project.",

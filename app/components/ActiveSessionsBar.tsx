@@ -12,7 +12,7 @@ import {
 import { AgentOrb } from "./AgentOrb";
 
 /**
- * ActiveSessionsBar — a live strip of the teammates working right now.
+ * ActiveSessionsBar — a live strip of the teammates available right now.
  *
  * One chip per teammate that's Available (or Getting ready), role-colored via
  * AgentOrb, click-through to that teammate. Makes "my team is working" legible
@@ -24,7 +24,7 @@ import { AgentOrb } from "./AgentOrb";
  * hibernation lifecycle) via useWalletAgents — no extra fetch. Scoped to the
  * connected wallet (all of its teammates, across projects).
  *
- * Customer-facing copy uses TEAM language ("Working now", "Available"), per the
+ * Customer-facing copy uses TEAM language ("Available now", "Available"), per the
  * fear-reduction redesign — never "sessions" / "agents" / "online".
  */
 export function ActiveSessionsBar() {
@@ -53,7 +53,7 @@ export function ActiveSessionsBar() {
   return (
     <div className="flex items-center gap-2 border-b border-border bg-background/60 px-4 py-1.5 md:px-8">
       <span className="shrink-0 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-        Working now
+        Available now
       </span>
       <div className="flex min-w-0 items-center gap-1 overflow-x-auto">
         {active.map(({ a, st }) => (

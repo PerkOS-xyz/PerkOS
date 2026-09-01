@@ -270,9 +270,9 @@ export default function AgentDetailPage({ params }: PageProps) {
   // wrapped in their own grid parent, which is a JSX change, not a class one.
   return (
     <div className="flex min-h-0 flex-col gap-4 xl:gap-6">
-      <div className={cn("sticky top-0 z-30 grid grid-cols-2 gap-1 rounded-xl border border-border bg-background/95 p-1 shadow-sm backdrop-blur", agentDetailResponsiveLayout.tabs)} role="tablist" aria-label="Agent view">
-        <button type="button" role="tab" aria-selected={mobileView === "conversation"} onClick={() => setMobileView("conversation")} className={cn("min-h-11 rounded-lg border px-3 text-sm font-semibold transition-colors", mobileView === "conversation" ? "border-primary/60 bg-primary text-primary-foreground shadow-sm" : "border-transparent text-muted-foreground hover:bg-muted")}>Conversation</button>
-        <button type="button" role="tab" aria-selected={mobileView === "settings"} onClick={() => setMobileView("settings")} className={cn("min-h-11 rounded-lg border px-3 text-sm font-semibold transition-colors", mobileView === "settings" ? "border-primary/60 bg-primary text-primary-foreground shadow-sm" : "border-transparent text-muted-foreground hover:bg-muted")}>Settings</button>
+      <div className={cn("sticky top-0 z-30 grid grid-cols-2 gap-1 rounded-xl border border-border bg-background/95 p-1 shadow-sm backdrop-blur", agentDetailResponsiveLayout.tabs)} role="tablist" aria-label={t("agentDetail.view.label")}>
+        <button type="button" role="tab" aria-selected={mobileView === "conversation"} onClick={() => setMobileView("conversation")} className={cn("min-h-11 rounded-lg border px-3 text-sm font-semibold transition-colors", mobileView === "conversation" ? "border-primary/60 bg-primary text-primary-foreground shadow-sm" : "border-transparent text-muted-foreground hover:bg-muted")}>{t("agentDetail.view.conversation")}</button>
+        <button type="button" role="tab" aria-selected={mobileView === "settings"} onClick={() => setMobileView("settings")} className={cn("min-h-11 rounded-lg border px-3 text-sm font-semibold transition-colors", mobileView === "settings" ? "border-primary/60 bg-primary text-primary-foreground shadow-sm" : "border-transparent text-muted-foreground hover:bg-muted")}>{t("agentDetail.view.settings")}</button>
       </div>
 
       <div className="hidden flex-col gap-6 xl:flex">
@@ -280,7 +280,7 @@ export default function AgentDetailPage({ params }: PageProps) {
         <AgentHeader agent={agent} onRefresh={refresh} refreshing={agentsQuery.isFetching} walletAddress={address ?? ""} />
       </div>
 
-      <section role="tabpanel" aria-label="Conversation" className={cn(agentDetailResponsiveLayout.conversationBase, mobileView === "conversation" ? agentDetailResponsiveLayout.conversationActive : "hidden")}>
+      <section role="tabpanel" aria-label={t("agentDetail.view.conversation")} className={cn(agentDetailResponsiveLayout.conversationBase, mobileView === "conversation" ? agentDetailResponsiveLayout.conversationActive : "hidden")}>
 
       {agent.status === "provisioning" ||
       agent.status === "failed" ||
@@ -304,8 +304,6 @@ export default function AgentDetailPage({ params }: PageProps) {
         />
       ) : null}
 
-      <AgentVoiceCallController agentId={agent.id} agentName={agent.name} project={voiceProject} chatCommitScopeKind="direct" speechVoice={agent.speechVoice} />
-
       <AgentChatPanel
         agentId={agent.id}
         agentName={agent.name}
@@ -318,9 +316,18 @@ export default function AgentDetailPage({ params }: PageProps) {
           : undefined}
       />
 
+      <details className="group rounded-lg border border-border bg-card/40">
+        <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
+          {t("agentDetail.voiceCall.title")} <span className="ml-1 text-xs font-normal text-muted-foreground">{t("agentDetail.voiceCall.optional")}</span>
+        </summary>
+        <div className="border-t border-border p-3 md:p-4">
+          <AgentVoiceCallController agentId={agent.id} agentName={agent.name} project={voiceProject} chatCommitScopeKind="direct" speechVoice={agent.speechVoice} />
+        </div>
+      </details>
+
       </section>
 
-      <section role="tabpanel" aria-label="Settings" className={cn(agentDetailResponsiveLayout.settingsBase, mobileView === "settings" ? "flex" : "hidden")}>
+      <section role="tabpanel" aria-label={t("agentDetail.view.settings")} className={cn(agentDetailResponsiveLayout.settingsBase, mobileView === "settings" ? "flex" : "hidden")}>
       <div className="flex flex-col gap-4 xl:hidden">
         <BackLink />
         <AgentHeader agent={agent} onRefresh={refresh} refreshing={agentsQuery.isFetching} walletAddress={address ?? ""} />
@@ -525,7 +532,7 @@ function AgentHeader({
           </h1>
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="outline" className={isExternal ? "border-sky-400/40 text-sky-200" : "border-violet-400/40 text-violet-200"}>
-              {isExternal ? "External agent" : "PerkOS infrastructure"}
+              {isExternal ? t("agentDetail.header.externalAgent") : t("agentDetail.header.perkosInfrastructure")}
             </Badge>
             <Badge variant="secondary" className="border-0 bg-muted">
               {agent.runtime}
@@ -543,11 +550,11 @@ function AgentHeader({
           </div>
           {isExternal && externalAvailability && externalAvailability !== "unverified" ? (
             <p className="max-w-xl text-xs text-muted-foreground">
-              Declared availability: {externalAvailability}. Runtime, skills, and provider configuration remain owner-operated.
+              {t("agentDetail.header.externalDescription", { availability: externalAvailability })}
             </p>
           ) : !isExternal ? (
             <p className="max-w-xl text-xs text-muted-foreground">
-              Hosted and operated on PerkOS infrastructure. Authorized controls and declared capabilities appear below.
+              {t("agentDetail.header.managedDescription")}
             </p>
           ) : null}
         </div>
@@ -580,7 +587,7 @@ function AgentHeader({
           <RefreshCw
             className={cn("h-3.5 w-3.5", refreshing && "animate-spin")}
           />
-          {actionPolicy.refreshLabel}
+          {t("agentDetail.header.refreshStatus")}
         </Button>
         {actionPolicy.showManage ? <Button
           variant="outline"
@@ -590,7 +597,7 @@ function AgentHeader({
           className="gap-1.5"
         >
           <Pencil className="h-3.5 w-3.5" />
-          {actionPolicy.manageLabel}
+          {t("agentDetail.header.manageAgent")}
         </Button> : null}
       </div>
 
@@ -636,9 +643,9 @@ function StatusBadge({
     const state = availability === "online"
       ? { tone: "bg-emerald-500/20 text-emerald-300", label: t("agentDetail.status.online") }
       : availability === "unavailable"
-        ? { tone: "bg-red-500/20 text-red-300", label: "Runtime unavailable" }
+        ? { tone: "bg-red-500/20 text-red-300", label: t("agentDetail.status.runtimeUnavailable") }
         : availability === "unverified"
-          ? { tone: "bg-amber-500/20 text-amber-300", label: "Runtime unverified" }
+          ? { tone: "bg-amber-500/20 text-amber-300", label: t("agentDetail.status.runtimeUnverified") }
           : { tone: "bg-muted text-muted-foreground", label: t("agentDetail.status.offline") };
     return (
       <Badge variant="secondary" className={cn("border-0", state.tone)}>
@@ -671,6 +678,13 @@ function StatusBadge({
     return (
       <Badge variant="secondary" className={cn("border-0", sleep.tone)}>
         {sleep.label}
+      </Badge>
+    );
+  }
+  if (status === "ready" && bridgeConnected !== true) {
+    return (
+      <Badge variant="secondary" className="border-0 bg-muted text-muted-foreground">
+        {t("agentDetail.status.offline")}
       </Badge>
     );
   }
@@ -772,6 +786,8 @@ function MetadataCard({ agent }: { agent: AgentRow }) {
             <span className="break-all font-mono text-xs">
               {agent.endpoint}
             </span>
+          ) : agent.bridgeConnected ? (
+            <span className="text-emerald-300">{t("agentDetail.metadata.connectedViaRelay")}</span>
           ) : (
             <span className="text-muted-foreground">{t("agentDetail.metadata.notProvisioned")}</span>
           )}
@@ -786,7 +802,7 @@ function MetadataCard({ agent }: { agent: AgentRow }) {
           )}
         </MetaRow>
         {isExternalAgent(agent) ? (
-          <MetaRow Icon={Server} label="Runtime health">
+          <MetaRow Icon={Server} label={t("agentDetail.metadata.runtimeHealth")}>
             <span className={cn(
               "text-xs",
               agent.runtimeStatus === "healthy"
@@ -796,10 +812,10 @@ function MetadataCard({ agent }: { agent: AgentRow }) {
                   : "text-amber-300",
             )}>
               {agent.runtimeStatus === "healthy"
-                ? "Available"
+                ? t("agentDetail.status.available")
                 : agent.runtimeStatus === "unreachable"
-                  ? "Unavailable"
-                  : "Unverified"}
+                  ? t("agentDetail.status.unavailable")
+                  : t("agentDetail.status.unverified")}
             </span>
           </MetaRow>
         ) : null}
@@ -895,7 +911,7 @@ function ChannelsSection({
       </CardHeader>
       <CardContent>
         {loading ? (
-          <p className="text-sm text-muted-foreground">Loading channels…</p>
+          <p className="text-sm text-muted-foreground">{t("agentDetail.channels.loading")}</p>
         ) : error ? (
           <p className="text-sm text-destructive">{error}</p>
         ) : channels.length === 0 ? (

@@ -6,6 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAppAccount } from "../../../lib/useAppAccount";
 import { Loader2, MessageSquare, Mic2, Send, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -98,6 +99,7 @@ export function AgentChatPanel({
   runtimeKind,
   runtimeAvailability,
 }: Props) {
+  const { t } = useTranslation();
   const { address, isConnected } = useAppAccount();
   const queryClient = useQueryClient();
   const [messages, setMessages] = useState<Bubble[]>([]);
@@ -218,17 +220,21 @@ export function AgentChatPanel({
     if (!awaitingReply) return;
     const timer = setTimeout(() => {
       setAwaitingReply(false);
-      setError(agentResponseTimeoutMessage({ agentName, externalAgent, runtimeKind }));
+      setError(
+        externalAgent
+          ? t("agentDetail.chat.externalTimeout", { name: agentName, runtime: runtimeKind ? ` ${runtimeKind}` : "" })
+          : t("agentDetail.chat.managedTimeout", { name: agentName }),
+      );
     }, 90_000);
     return () => clearTimeout(timer);
-  }, [awaitingReply, agentName, externalAgent, runtimeKind]);
+  }, [awaitingReply, agentName, externalAgent, runtimeKind, t]);
 
   async function send(text: string) {
     const trimmed = text.trim();
     if (!trimmed) return;
     setError(null);
     if (!isConnected || !address) {
-      setError("Connect a wallet to chat with this agent.");
+      setError(t("agentDetail.chat.connectWallet"));
       return;
     }
     if (runtimeBlocked) {
@@ -240,7 +246,7 @@ export function AgentChatPanel({
       return;
     }
     if (!convId) {
-      setError("Still opening the conversation, try again in a moment.");
+      setError(t("agentDetail.chat.stillOpening"));
       return;
     }
 
@@ -300,7 +306,7 @@ export function AgentChatPanel({
     setAwaitingReply(false);
     setError(null);
     setConfirmClearOpen(false);
-    toast.success("Conversation cleared");
+    toast.success(t("agentDetail.chat.cleared"));
   }
 
   if (!chatEnabled) {
@@ -309,10 +315,10 @@ export function AgentChatPanel({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
-            Chat
+            {t("agentDetail.chat.title")}
           </CardTitle>
           <CardDescription>
-            Chat opens once the agent is provisioned and running.
+            {t("agentDetail.chat.opensWhenReady")}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -322,23 +328,23 @@ export function AgentChatPanel({
   const connError = chat.error ?? error;
   const wsBadge = chat.authed && externalAgent ? (
     runtimeAvailability === "online" ? (
-      <span className="text-xs text-emerald-300">Agent connected</span>
+      <span className="text-xs text-emerald-300">{t("agentDetail.chat.agentConnected")}</span>
     ) : runtimeAvailability === "unavailable" ? (
-      <span className="text-xs text-red-300">Runtime unavailable</span>
+      <span className="text-xs text-red-300">{t("agentDetail.status.runtimeUnavailable")}</span>
     ) : runtimeAvailability === "offline" ? (
-      <span className="text-xs text-muted-foreground">Agent offline</span>
+      <span className="text-xs text-muted-foreground">{t("agentDetail.chat.agentOffline")}</span>
     ) : (
-      <span className="text-xs text-amber-300">Runtime unverified</span>
+      <span className="text-xs text-amber-300">{t("agentDetail.status.runtimeUnverified")}</span>
     )
   ) : chat.authed ? (
-    <span className="text-xs text-emerald-300">Chat service connected</span>
+    <span className="text-xs text-emerald-300">{t("agentDetail.chat.serviceConnected")}</span>
   ) : convQuery.isFetching || !convId ? (
     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
       <Loader2 className="h-3 w-3 animate-spin" />
-      Opening…
+      {t("agentDetail.chat.opening")}
     </span>
   ) : (
-    <span className="text-xs text-amber-300">Connecting…</span>
+    <span className="text-xs text-amber-300">{t("agentDetail.chat.connecting")}</span>
   );
 
   return (
@@ -348,9 +354,9 @@ export function AgentChatPanel({
           <div>
             <CardTitle className="flex items-center gap-2 text-lg">
               <MessageSquare className="h-4 w-4 text-primary" />
-              Chat with {agentName}
+              {t("agentDetail.chat.withAgent", { name: agentName })}
             </CardTitle>
-            <CardDescription>Messages and completed saved voice turns share this conversation.</CardDescription>
+            <CardDescription>{t("agentDetail.chat.description")}</CardDescription>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {messages.length > 0 ? (
@@ -362,7 +368,7 @@ export function AgentChatPanel({
                 className="h-7 gap-1 px-2 text-xs text-muted-foreground hover:text-foreground"
               >
                 <Trash2 className="h-3.5 w-3.5" />
-                Clear
+                {t("agentDetail.chat.clear")}
               </Button>
             ) : null}
             {wsBadge}
@@ -373,12 +379,12 @@ export function AgentChatPanel({
         <div
           ref={scrollRef}
           data-testid="agent-chat-history"
-          aria-label={`Conversation history with ${agentName}`}
+          aria-label={t("agentDetail.chat.historyLabel", { name: agentName })}
           className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain rounded-xl border border-border bg-background/50 p-3 sm:p-5"
         >
           {messages.length === 0 && !showTyping ? (
             <p className="my-auto text-center text-sm text-muted-foreground">
-              No messages yet. Say hello.
+              {t("agentDetail.chat.empty")}
             </p>
           ) : (
             messages.map((m) => (
@@ -399,7 +405,7 @@ export function AgentChatPanel({
                 >
                   {m.voice ? (
                     <span className="mb-2 inline-flex items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-primary">
-                      <Mic2 className="h-3 w-3" aria-hidden="true" /> Saved voice turn
+                      <Mic2 className="h-3 w-3" aria-hidden="true" /> {t("agentDetail.chat.savedVoiceTurn")}
                     </span>
                   ) : null}
                   <pre className="whitespace-pre-wrap break-words font-sans">
@@ -423,7 +429,7 @@ export function AgentChatPanel({
             <div className="flex justify-start">
               <div className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm text-muted-foreground">
                 <Loader2 className="h-3 w-3 animate-spin" />
-                {agentName} is responding live…
+                {t("agentDetail.chat.responding", { name: agentName })}
               </div>
             </div>
           ) : null}
@@ -435,9 +441,7 @@ export function AgentChatPanel({
 
         {externalAgent && runtimeAvailability === "unavailable" ? (
           <p className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
-            The bridge is connected to PerkOS, but the external runtime did not
-            answer its health probe. Start or repair the owner-operated runtime
-            before sending messages.
+            {t("agentDetail.chat.runtimeUnavailableHelp")}
           </p>
         ) : null}
 
@@ -446,7 +450,7 @@ export function AgentChatPanel({
             <Textarea
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder={`Message ${agentName}…`}
+              placeholder={t("agentDetail.chat.placeholder", { name: agentName })}
               rows={2}
               onKeyDown={onKey}
               disabled={runtimeBlocked || (!chat.authed && (convQuery.isFetching || !convId))}
@@ -454,13 +458,13 @@ export function AgentChatPanel({
             <div className="flex items-center justify-between gap-2">
               <p className="text-xs text-muted-foreground">
                 {hibernationEnabled && hibernation?.state === "hibernated" ? (
-                  <>Agent is hibernated — sending will wake it.</>
+                  <>{t("agentDetail.chat.hibernatedHint")}</>
                 ) : hibernationEnabled && hibernation?.state === "waking" ? (
-                  <>Agent is waking up…</>
+                  <>{t("agentDetail.chat.wakingHint")}</>
                 ) : hibernationEnabled && hibernation?.state === "hibernating" ? (
-                  <>Agent is hibernating; message will queue.</>
+                  <>{t("agentDetail.chat.hibernatingHint")}</>
                 ) : (
-                  <>Enter to send · Shift+Enter for a new line</>
+                  <>{t("agentDetail.chat.keyboardHint")}</>
                 )}
               </p>
               <Button
@@ -470,7 +474,7 @@ export function AgentChatPanel({
                 className="gap-1.5"
               >
                 <Send className="h-3.5 w-3.5" />
-                Send
+                {t("agentDetail.chat.send")}
               </Button>
             </div>
           </div>
@@ -480,9 +484,9 @@ export function AgentChatPanel({
       <ConfirmDialog
         open={confirmClearOpen}
         onOpenChange={setConfirmClearOpen}
-        title="Clear conversation?"
-        description="Removes the messages from this view. The agent and its server-side history are unaffected — reloading the page re-syncs them."
-        confirmLabel="Clear"
+        title={t("agentDetail.chat.clearTitle")}
+        description={t("agentDetail.chat.clearDescription")}
+        confirmLabel={t("agentDetail.chat.clear")}
         onConfirm={clearChat}
       />
     </Card>

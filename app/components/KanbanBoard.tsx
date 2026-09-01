@@ -153,7 +153,7 @@ export function KanbanBoard<T extends KanbanItem>({
             extras={columnExtras?.[col.id]}
           >
             {grouped[col.id].length === 0 && emptyMessage ? (
-              <li className="rounded-md border border-dashed border-border px-4 py-6 text-center text-xs text-muted-foreground">
+              <li className="rounded-md border border-dashed border-border px-3 py-3 text-center text-xs text-muted-foreground md:px-4 md:py-6">
                 {emptyMessage}
               </li>
             ) : null}
@@ -215,7 +215,8 @@ function KanbanColumn({
       <ul
         ref={setNodeRef}
         className={cn(
-          "flex min-h-[120px] flex-col gap-2 rounded-md p-1 transition-colors",
+          "flex flex-col gap-2 rounded-md p-1 transition-colors",
+          count === 0 ? "min-h-14 md:min-h-[120px]" : "min-h-[120px]",
           isOver && "bg-primary/5 ring-1 ring-primary/40"
         )}
       >

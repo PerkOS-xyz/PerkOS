@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { Check, Copy, KeyRound, Loader2, RotateCcw, ShieldOff } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -44,6 +45,7 @@ function connState(agent: AgentRow): ConnState {
 }
 
 export function InvitedCredentialPanel({ agent }: { agent: AgentRow }) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [promptOpen, setPromptOpen] = useState(false);
   const [rotateOpen, setRotateOpen] = useState(false);
@@ -65,11 +67,11 @@ export function InvitedCredentialPanel({ agent }: { agent: AgentRow }) {
     onSuccess: (data) => {
       setShownPrompt(data.invitePrompt);
       setPromptOpen(true);
-      toast.success("Credential rotated — re-hand the new prompt to your agent.");
+      toast.success(t("agentDetail.invitedCredential.rotated"));
       queryClient.invalidateQueries({ queryKey: ["relay-key", agent.id] });
       queryClient.invalidateQueries({ queryKey: ["wallet-agents", agent.walletAddress] });
     },
-    onError: (err: Error) => toast.error("Couldn't rotate credential", { description: err.message }),
+    onError: (err: Error) => toast.error(t("agentDetail.invitedCredential.rotateError"), { description: err.message }),
     onSettled: () => setRotateOpen(false),
   });
 
@@ -78,11 +80,11 @@ export function InvitedCredentialPanel({ agent }: { agent: AgentRow }) {
     onSuccess: () => {
       setShownPrompt(null);
       setPromptOpen(false);
-      toast.success(`${agent.name}'s credential revoked. Rotate to re-issue one.`);
+      toast.success(t("agentDetail.invitedCredential.revokedToast", { name: agent.name }));
       queryClient.invalidateQueries({ queryKey: ["relay-key", agent.id] });
       queryClient.invalidateQueries({ queryKey: ["wallet-agents", agent.walletAddress] });
     },
-    onError: (err: Error) => toast.error("Couldn't revoke credential", { description: err.message }),
+    onError: (err: Error) => toast.error(t("agentDetail.invitedCredential.revokeError"), { description: err.message }),
     onSettled: () => setRevokeOpen(false),
   });
 
@@ -95,27 +97,23 @@ export function InvitedCredentialPanel({ agent }: { agent: AgentRow }) {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="flex items-center gap-2 text-base">
             <KeyRound className="h-4 w-4 text-muted-foreground" />
-            Connection credential
+            {t("agentDetail.invitedCredential.title")}
           </CardTitle>
           <StatusBadge state={state} />
         </div>
         <CardDescription>
-          This external agent connects with a secret <code>relayApiKey</code>. Re-show the
-          onboarding prompt, rotate the key if it leaks, or revoke it to cut the agent off.
+          {t("agentDetail.invitedCredential.description")}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {state.kind === "stale" ? (
           <p className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-300">
-            This agent was invited but has never connected. Make sure your runtime is
-            running the bridge with this credential — re-show the prompt below to double-check
-            the <code>docker run</code> command.
+            {t("agentDetail.invitedCredential.staleHelp")}
           </p>
         ) : null}
         {revoked ? (
           <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
-            The credential is revoked — the agent can no longer reach the relay or the job
-            board. Rotate to issue a fresh one and reconnect it.
+            {t("agentDetail.invitedCredential.revokedHelp")}
           </p>
         ) : null}
 
@@ -128,7 +126,7 @@ export function InvitedCredentialPanel({ agent }: { agent: AgentRow }) {
             onClick={() => setPromptOpen((v) => !v)}
           >
             <KeyRound className="h-4 w-4" />
-            {promptOpen ? "Hide prompt" : "Show invitation prompt"}
+            {promptOpen ? t("agentDetail.invitedCredential.hidePrompt") : t("agentDetail.invitedCredential.showPrompt")}
           </Button>
           <Button
             variant="outline"
@@ -137,7 +135,7 @@ export function InvitedCredentialPanel({ agent }: { agent: AgentRow }) {
             onClick={() => setRotateOpen(true)}
           >
             <RotateCcw className="h-4 w-4" />
-            Rotate credential
+            {t("agentDetail.invitedCredential.rotate")}
           </Button>
           <Button
             variant="outline"
@@ -147,7 +145,7 @@ export function InvitedCredentialPanel({ agent }: { agent: AgentRow }) {
             onClick={() => setRevokeOpen(true)}
           >
             <ShieldOff className="h-4 w-4" />
-            Revoke
+            {t("agentDetail.invitedCredential.revoke")}
           </Button>
         </div>
 
@@ -159,18 +157,18 @@ export function InvitedCredentialPanel({ agent }: { agent: AgentRow }) {
       <ConfirmDialog
         open={rotateOpen}
         onOpenChange={setRotateOpen}
-        title="Rotate this agent's credential?"
-        description="The current relayApiKey stops working immediately. You'll get a fresh onboarding prompt to re-hand to your agent so it can reconnect."
-        confirmLabel="Rotate"
+        title={t("agentDetail.invitedCredential.rotateTitle")}
+        description={t("agentDetail.invitedCredential.rotateDescription")}
+        confirmLabel={t("agentDetail.invitedCredential.rotate")}
         pending={rotateMutation.isPending}
         onConfirm={() => rotateMutation.mutate()}
       />
       <ConfirmDialog
         open={revokeOpen}
         onOpenChange={setRevokeOpen}
-        title="Revoke this agent's credential?"
-        description="The agent will immediately lose access to chat and the job board. This is reversible — rotating later issues a new key."
-        confirmLabel="Revoke"
+        title={t("agentDetail.invitedCredential.revokeTitle")}
+        description={t("agentDetail.invitedCredential.revokeDescription")}
+        confirmLabel={t("agentDetail.invitedCredential.revoke")}
         destructive
         pending={revokeMutation.isPending}
         onConfirm={() => revokeMutation.mutate()}
@@ -180,37 +178,39 @@ export function InvitedCredentialPanel({ agent }: { agent: AgentRow }) {
 }
 
 function StatusBadge({ state }: { state: ConnState }) {
+  const { t } = useTranslation();
   switch (state.kind) {
     case "connected":
-      return <Badge className="bg-sky-500/15 text-sky-600 dark:text-sky-300">Bridge connected</Badge>;
+      return <Badge className="bg-sky-500/15 text-sky-600 dark:text-sky-300">{t("agentDetail.invitedCredential.connected")}</Badge>;
     case "revoked":
-      return <Badge variant="destructive">Revoked</Badge>;
+      return <Badge variant="destructive">{t("agentDetail.invitedCredential.revoked")}</Badge>;
     case "stale":
-      return <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-300">Never connected</Badge>;
+      return <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-300">{t("agentDetail.invitedCredential.neverConnected")}</Badge>;
     default:
-      return <Badge variant="secondary">Waiting to connect</Badge>;
+      return <Badge variant="secondary">{t("agentDetail.invitedCredential.waiting")}</Badge>;
   }
 }
 
 function PromptBlock({ loading, prompt }: { loading: boolean; prompt: string | null }) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   if (loading) {
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="h-4 w-4 animate-spin" /> Loading prompt…
+        <Loader2 className="h-4 w-4 animate-spin" /> {t("agentDetail.invitedCredential.loadingPrompt")}
       </div>
     );
   }
   if (!prompt) {
     return (
-      <p className="text-sm text-muted-foreground">No prompt available — the credential may be revoked.</p>
+      <p className="text-sm text-muted-foreground">{t("agentDetail.invitedCredential.noPrompt")}</p>
     );
   }
   return (
     <div className="rounded-md border border-border bg-muted/40 p-3">
       <div className="mb-2 flex items-center justify-between">
         <span className="text-xs font-medium text-muted-foreground">
-          Contains the secret relayApiKey — treat it like a password.
+          {t("agentDetail.invitedCredential.secretHint")}
         </span>
         <Button
           variant="ghost"
@@ -227,7 +227,7 @@ function PromptBlock({ loading, prompt }: { loading: boolean; prompt: string | n
           }}
         >
           {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-          {copied ? "Copied" : "Copy"}
+          {copied ? t("agentDetail.common.copied") : t("agentDetail.common.copy")}
         </Button>
       </div>
       <pre className="max-h-96 overflow-auto whitespace-pre-wrap break-words text-[11px] leading-relaxed text-muted-foreground">

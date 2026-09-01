@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import {
   Moon,
   Sun,
@@ -51,28 +52,23 @@ type Props = {
 
 function stateTone(state: HibernationApiState): {
   badgeClass: string;
-  label: string;
 } {
   switch (state) {
     case "active":
       return {
         badgeClass: "bg-emerald-500/20 text-emerald-300",
-        label: "Active",
       };
     case "hibernating":
       return {
         badgeClass: "bg-amber-500/20 text-amber-300",
-        label: "Hibernating…",
       };
     case "hibernated":
       return {
         badgeClass: "bg-slate-500/20 text-slate-300",
-        label: "Resting",
       };
     case "waking":
       return {
         badgeClass: "bg-sky-500/20 text-sky-300",
-        label: "Waking up…",
       };
   }
 }
@@ -84,10 +80,10 @@ function formatBytes(n: number | undefined): string {
   return `${(n / 1024 / 1024).toFixed(1)} MB`;
 }
 
-function formatDate(value?: string): string | undefined {
+function formatDate(value?: string, locale?: string): string | undefined {
   if (!value) return undefined;
   try {
-    return new Date(value).toLocaleString(undefined, {
+    return new Date(value).toLocaleString(locale, {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -101,13 +97,14 @@ function formatDate(value?: string): string | undefined {
 
 // Human label for one backup — its S3 timestamp, falling back to the snapshot
 // id (state-<ts>) when LastModified is unavailable.
-function backupLabel(b: AgentBackup): string {
-  return formatDate(b.createdAt ?? undefined) ?? b.ts;
+function backupLabel(b: AgentBackup, locale?: string): string {
+  return formatDate(b.createdAt ?? undefined, locale) ?? b.ts;
 }
 
 const RETENTION_PRESETS = [1, 3, 5, 10, 20, 30];
 
 export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [restoreTarget, setRestoreTarget] = useState<AgentBackup | null>(null);
@@ -128,14 +125,14 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
     onSuccess: (result) => {
       toast.success(
         result.previousDesiredCount === 0
-          ? `${agentName} was already hibernated.`
-          : `${agentName} is hibernating — billing will stop once the task drains.`,
+          ? t("agentDetail.hibernation.alreadyHibernated", { name: agentName })
+          : t("agentDetail.hibernation.hibernatingToast", { name: agentName }),
       );
       queryClient.invalidateQueries({ queryKey: ["agent-hibernation", agentId] });
       setConfirmOpen(false);
     },
     onError: (err: Error) => {
-      toast.error("Couldn't hibernate agent", { description: err.message });
+      toast.error(t("agentDetail.hibernation.hibernateError"), { description: err.message });
       setConfirmOpen(false);
     },
   });
@@ -145,13 +142,13 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
     onSuccess: (result) => {
       toast.success(
         result.previousDesiredCount >= 1
-          ? `${agentName} is already awake.`
-          : `${agentName} is starting back up — give it ~30s to be ready.`,
+          ? t("agentDetail.hibernation.alreadyAwake", { name: agentName })
+          : t("agentDetail.hibernation.startingToast", { name: agentName }),
       );
       queryClient.invalidateQueries({ queryKey: ["agent-hibernation", agentId] });
     },
     onError: (err: Error) => {
-      toast.error("Couldn't wake agent", { description: err.message });
+      toast.error(t("agentDetail.hibernation.wakeError"), { description: err.message });
     },
   });
 
@@ -166,12 +163,12 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
     mutationFn: (n: number) => setBackupRetentionApi({ agentId, retention: n }),
     onSuccess: (r) => {
       toast.success(
-        `Keeping the last ${r.retention} backups — applies after the next restart.`,
+        t("agentDetail.hibernation.retentionToast", { count: r.retention }),
       );
       queryClient.invalidateQueries({ queryKey: ["agent-backups", agentId] });
     },
     onError: (err: Error) => {
-      toast.error("Couldn't update retention", { description: err.message });
+      toast.error(t("agentDetail.hibernation.retentionError"), { description: err.message });
     },
   });
 
@@ -179,13 +176,13 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
     mutationFn: (ts: string) => restoreAgentBackupApi({ agentId, ts }),
     onSuccess: () => {
       toast.success(
-        `Restoring ${agentName} — it will restart and come back with that backup (~30-60s).`,
+        t("agentDetail.hibernation.restoringToast", { name: agentName }),
       );
       setRestoreTarget(null);
       queryClient.invalidateQueries({ queryKey: ["agent-hibernation", agentId] });
     },
     onError: (err: Error) => {
-      toast.error("Couldn't restore", { description: err.message });
+      toast.error(t("agentDetail.hibernation.restoreError"), { description: err.message });
       setRestoreTarget(null);
     },
   });
@@ -200,7 +197,7 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Archive className="h-4 w-4 text-muted-foreground" />
-            Hibernation
+            {t("agentDetail.hibernation.title")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -216,7 +213,7 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Archive className="h-4 w-4 text-muted-foreground" />
-            Hibernation
+            {t("agentDetail.hibernation.title")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -232,11 +229,12 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
   if (!status) return null;
 
   const tone = stateTone(status.state);
+  const stateLabel = t(`agentDetail.hibernation.state.${status.state}`);
   const isHibernated = status.state === "hibernated";
   const isTransient = status.state === "hibernating" || status.state === "waking";
 
-  const hibernatedAt = formatDate(status.hibernatedAt);
-  const wakeStartedAt = formatDate(status.wakeStartedAt);
+  const hibernatedAt = formatDate(status.hibernatedAt, i18n.language);
+  const wakeStartedAt = formatDate(status.wakeStartedAt, i18n.language);
 
   const backups = backupsQuery.data?.backups ?? [];
   const retention = backupsQuery.data?.retention ?? 5;
@@ -248,32 +246,29 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
           <div>
             <CardTitle className="flex items-center gap-2 text-base">
               <Archive className="h-4 w-4 text-muted-foreground" />
-              Hibernation
+              {t("agentDetail.hibernation.title")}
             </CardTitle>
             <CardDescription>
-              Pause the agent&apos;s container to stop billing while you&apos;re not
-              using it — sending a message wakes it back up. On the latest
-              runtime its state is snapshotted (encrypted) and restored on
-              wake; agents on older images restart fresh.
+              {t("agentDetail.hibernation.description")}
             </CardDescription>
           </div>
           <Badge variant="secondary" className={cn("border-0", tone.badgeClass)}>
-            {tone.label}
+            {stateLabel}
           </Badge>
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
           <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-            Desired / Running
+            {t("agentDetail.hibernation.desiredRunning")}
           </dt>
           <dd className="text-right font-mono text-foreground">
             {status.desiredCount} / {status.runningCount}
-            {status.pendingCount > 0 ? ` (+${status.pendingCount} pending)` : ""}
+            {status.pendingCount > 0 ? t("agentDetail.hibernation.pending", { count: status.pendingCount }) : ""}
           </dd>
 
           <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-            Snapshot size
+            {t("agentDetail.hibernation.snapshotSize")}
           </dt>
           <dd className="text-right text-foreground">
             {formatBytes(status.snapshot.sizeBytes)}
@@ -282,7 +277,7 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
           {hibernatedAt ? (
             <>
               <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-                Hibernated at
+                {t("agentDetail.hibernation.hibernatedAt")}
               </dt>
               <dd className="text-right text-foreground">{hibernatedAt}</dd>
             </>
@@ -291,7 +286,7 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
           {wakeStartedAt ? (
             <>
               <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-                Wake started at
+                {t("agentDetail.hibernation.wakeStartedAt")}
               </dt>
               <dd className="text-right text-foreground">{wakeStartedAt}</dd>
             </>
@@ -311,7 +306,7 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
               ) : (
                 <Sun className="h-3.5 w-3.5" />
               )}
-              Wake agent
+              {t("agentDetail.hibernation.wakeAgent")}
             </Button>
           ) : (
             <Button
@@ -326,12 +321,12 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
               ) : (
                 <Moon className="h-3.5 w-3.5" />
               )}
-              Hibernate
+              {t("agentDetail.hibernation.hibernate")}
             </Button>
           )}
           {isTransient ? (
             <span className="text-xs text-muted-foreground">
-              Polling status every 5s…
+              {t("agentDetail.hibernation.polling")}
             </span>
           ) : null}
         </div>
@@ -341,7 +336,7 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2 text-sm font-medium text-foreground">
               <History className="h-4 w-4 text-muted-foreground" />
-              State backups
+              {t("agentDetail.hibernation.backups")}
               {backups.length > 0 ? (
                 <Badge variant="secondary" className="border-0">
                   {backups.length}
@@ -349,7 +344,7 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
               ) : null}
             </div>
             <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              Keep last
+              {t("agentDetail.hibernation.keepLast")}
               <select
                 className="rounded border border-border bg-background px-1.5 py-0.5 text-foreground disabled:opacity-50"
                 value={retention}
@@ -381,10 +376,7 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
             </p>
           ) : backups.length === 0 ? (
             <p className="mt-2 text-xs text-muted-foreground">
-              No backups yet. Encrypted state snapshots are captured
-              automatically every few minutes while the agent runs, and restored
-              when it wakes. (Agents on older runtime images restart fresh —
-              relaunch to pick up the latest.)
+              {t("agentDetail.hibernation.noBackups")}
             </p>
           ) : (
             <ul className="mt-2 flex flex-col divide-y divide-border/40">
@@ -393,7 +385,7 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
                   key={b.ts}
                   className="flex items-center justify-between gap-2 py-1.5 text-xs"
                 >
-                  <span className="text-foreground">{backupLabel(b)}</span>
+                  <span className="text-foreground">{backupLabel(b, i18n.language)}</span>
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-muted-foreground">
                       {formatBytes(b.bytes)}
@@ -406,7 +398,7 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
                       onClick={() => setRestoreTarget(b)}
                     >
                       <RotateCcw className="h-3 w-3" />
-                      Restore
+                      {t("agentDetail.hibernation.restore")}
                     </Button>
                   </div>
                 </li>
@@ -416,8 +408,7 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
 
           <p className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground">
             <Lock className="h-3 w-3" />
-            Encrypted client-side (AES-256) before upload — only your agent can
-            decrypt them.
+            {t("agentDetail.hibernation.encrypted")}
           </p>
         </div>
       </CardContent>
@@ -425,9 +416,9 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
-        title={`Hibernate ${agentName}?`}
-        description="Stops the running container and pauses billing. Sending a message wakes it (~30-60s to come back). On the latest runtime its encrypted state is restored on wake; agents on older images restart fresh, so any in-progress context is lost."
-        confirmLabel="Hibernate agent"
+        title={t("agentDetail.hibernation.confirmTitle", { name: agentName })}
+        description={t("agentDetail.hibernation.confirmDescription")}
+        confirmLabel={t("agentDetail.hibernation.confirmLabel")}
         pending={hibernateMutation.isPending}
         onConfirm={() => hibernateMutation.mutate()}
       />
@@ -437,15 +428,13 @@ export function HibernationPanel({ agentId, agentName, ecsDeployed }: Props) {
         onOpenChange={(o) => {
           if (!o) setRestoreTarget(null);
         }}
-        title={`Restore ${agentName} to this backup?`}
+        title={t("agentDetail.hibernation.restoreTitle", { name: agentName })}
         description={
           restoreTarget
-            ? `The agent will restart and come back with its state from ${backupLabel(
-                restoreTarget,
-              )}. Anything it changed since then is replaced (~30-60s to come back).`
+            ? t("agentDetail.hibernation.restoreDescription", { backup: backupLabel(restoreTarget, i18n.language) })
             : ""
         }
-        confirmLabel="Restore"
+        confirmLabel={t("agentDetail.hibernation.restore")}
         pending={restoreMutation.isPending}
         onConfirm={() => {
           if (restoreTarget) restoreMutation.mutate(restoreTarget.ts);

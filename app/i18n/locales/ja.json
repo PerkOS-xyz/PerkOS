@@ -1245,6 +1245,7 @@
       "connectedNow": "・現在接続中",
       "neverConnected": "未接続",
       "endpoint": "エンドポイント",
+      "connectedViaRelay": "PerkOS relay 経由で接続中",
       "notProvisioned": "まだプロビジョニングされていません",
       "runtimeVersion": "ランタイムバージョン",
       "modelKey": "モデルキー",
@@ -1438,6 +1439,7 @@
       "conductor": "コンダクター",
       "agents": "エージェント",
       "map": "マップ",
+      "execution": "実行",
       "chat": "プロジェクトチャット",
       "members": "メンバー"
     },
@@ -1705,6 +1707,20 @@
       "taskLabel_other": "タスク",
       "donePerAgent": "エージェント別の完了数",
       "unassigned": "未割り当て"
+    },
+    "graph": { "expand": "拡大", "close": "閉じる", "rotateHint": "ドラッグで回転 · ピンチまたはスクロールでズーム", "selected": "選択中のノード", "neighbors_one": "直接接続 {{count}} 件", "neighbors_other": "直接接続 {{count}} 件", "openEntity": "詳細を開く" },
+    "knowledgeGraph": {
+      "title": "プロジェクト知識", "description": "このプロジェクトの人、エージェント、作業、接続済みソースの関係を表示します。", "showCompleted": "完了済みを表示",
+      "empty": "エージェント、タスク、ソースを追加すると、ここに知識が表示されます。", "ariaLabel": "プロジェクト知識のインタラクティブグラフ", "legend": "プロジェクト · エージェント · 作業 · 接続済みソース",
+      "connectedSources_one": "接続済みソース {{count}} 件", "connectedSources_other": "接続済みソース {{count}} 件", "noSources": "外部ソースはまだ接続されていません", "hiddenTasks_one": " · 他 {{count}} タスク", "hiddenTasks_other": " · 他 {{count}} タスク"
+    },
+    "executionGraph": {
+      "title": "エージェント実行グラフ", "description": "コーディネーターによる作業の委任と各タスクの進捗を表示します。", "phase": "フェーズ: {{phase}}", "empty": "実行はまだありません。チームを開始すると最初のフローが生成されます。",
+      "ariaLabel": "エージェント実行とオーケストレーションのグラフ", "telemetryNote": "現在のワークフローと割り当てを表示しています。引き継ぎ、再試行、検証ゲートはランタイムテレメトリの追加後に表示されます。", "unassignedLead": "リーダー未割り当て", "unassignedWorker": "未割り当て", "coordinator": "コーディネーター"
+    },
+    "organizationGraph": {
+      "title": "組織の知識", "description": "組織に接続されたプロジェクト、人、エージェント、ソースの生きたマップです。", "projects_one": "{{count}} プロジェクト", "projects_other": "{{count}} プロジェクト", "empty": "プロジェクト、エージェント、ソースの追加に合わせてグラフが成長します。",
+      "ariaLabel": "組織知識のインタラクティブグラフ", "connectedSources_one": "組織ソース {{count}} 件接続済み", "connectedSources_other": "組織ソース {{count}} 件接続済み", "noSources": "組織ソースはまだ接続されていません"
     },
     "contextMap": {
       "empty": "エージェントとタスクをこのプロジェクトに追加すると、マップが埋まっていきます。",

@@ -1245,6 +1245,7 @@
       "connectedNow": "· connecté maintenant",
       "neverConnected": "Jamais connecté",
       "endpoint": "Point de terminaison",
+      "connectedViaRelay": "Connecté via le relais PerkOS",
       "notProvisioned": "Pas encore provisionné",
       "runtimeVersion": "Version de l'environnement d'exécution",
       "modelKey": "Clé du modèle",
@@ -1438,6 +1439,7 @@
       "conductor": "Chef d'orchestre",
       "agents": "Agents",
       "map": "Carte",
+      "execution": "Exécution",
       "chat": "Chat du projet",
       "members": "Membres"
     },
@@ -1705,6 +1707,23 @@
       "taskLabel_other": "tâches",
       "donePerAgent": "Terminées par agent",
       "unassigned": "Non assigné"
+    },
+    "graph": { "expand": "Agrandir", "close": "Fermer", "rotateHint": "Faites glisser pour tourner · pincez ou faites défiler pour zoomer", "selected": "Nœud sélectionné", "neighbors_one": "{{count}} connexion directe", "neighbors_other": "{{count}} connexions directes", "openEntity": "Ouvrir les détails" },
+    "knowledgeGraph": {
+      "title": "Connaissance du projet", "description": "Les relations entre les personnes, agents, tâches et sources connectées de ce projet.",
+      "showCompleted": "Afficher les tâches terminées", "empty": "Les connaissances apparaîtront ici à mesure que vous ajouterez des agents, des tâches et des sources.",
+      "ariaLabel": "Graphe interactif des connaissances du projet", "legend": "Projet · agents · travail · sources connectées",
+      "connectedSources_one": "{{count}} source connectée", "connectedSources_other": "{{count}} sources connectées", "noSources": "Aucune source externe connectée", "hiddenTasks_one": " · {{count}} tâche de plus", "hiddenTasks_other": " · {{count}} tâches de plus"
+    },
+    "executionGraph": {
+      "title": "Graphe d’exécution des agents", "description": "Visualisez comment le coordinateur délègue le travail et comment chaque tâche progresse.", "phase": "Phase : {{phase}}",
+      "empty": "Aucune exécution pour le moment. Lancez l’équipe pour générer le premier flux.", "ariaLabel": "Graphe d’exécution et d’orchestration des agents",
+      "telemetryNote": "Cette vue utilise le workflow et les affectations actuels. Les transferts, nouvelles tentatives et contrôles apparaîtront avec la télémétrie du runtime.", "unassignedLead": "Responsable non attribué", "unassignedWorker": "Non attribué", "coordinator": "Coordinateur"
+    },
+    "organizationGraph": {
+      "title": "Connaissance de l’organisation", "description": "Une carte vivante des projets, personnes, agents et sources connectés à cette organisation.",
+      "projects_one": "{{count}} projet", "projects_other": "{{count}} projets", "empty": "Le graphe grandit avec les projets, agents et sources connectées.",
+      "ariaLabel": "Graphe interactif des connaissances de l’organisation", "connectedSources_one": "{{count}} source d’organisation connectée", "connectedSources_other": "{{count}} sources d’organisation connectées", "noSources": "Aucune source d’organisation connectée"
     },
     "contextMap": {
       "empty": "La carte se remplit au fur et à mesure que vous ajoutez des agents et des tâches à ce projet.",

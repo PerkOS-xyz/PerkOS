@@ -57,7 +57,7 @@ import { useProject } from "../../../lib/useProject";
 import { useWalletAgents, realtimeAgentStatus, STATUS_AVAILABLE, STATUS_RESTING, STATUS_GETTING_READY, STATUS_GOING_TO_REST, type AgentLiveStatus } from "../../../lib/useWalletAgents";
 import { MembersPanel } from "../../../components/MembersPanel";
 import { ProjectInsights } from "../../../components/ProjectInsights";
-import { ProjectContextMap } from "../../../components/ProjectContextMap";
+import { ProjectExecutionGraph, ProjectKnowledgeGraph } from "../../../components/ProjectContextMap";
 import { ActivityFeedCard } from "../../../components/ActivityFeedCard";
 import { formatRelativeShort } from "../../../lib/format";
 import { logActivity } from "../../../lib/activityEvents";
@@ -272,6 +272,7 @@ function DetailHeader({
   const router = useRouter();
   const queryClient = useQueryClient();
   const { address } = useAppAccount();
+  const { byName: projectAgentsLive } = useWalletAgents(ownerWallet ?? address);
   const advancedFeatures = useAdvancedFeatures(address);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -573,10 +574,6 @@ function DetailHeader({
           ) : null}
         </div>
       </div>
-      {!compact && project.goal ? (
-        <p className="max-w-2xl text-sm text-[#7975a8]">{project.goal}</p>
-      ) : null}
-
       {!compact && project.pmSession ? (
         pmRunRecent ? (
         <PmSessionBanner
@@ -589,17 +586,37 @@ function DetailHeader({
         ) : null
       ) : null}
 
-      {!compact ? (
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <StatTile label={t("projectRoom.header.stats.totalTasks")} value={tasks.length} />
-          <StatTile label={t("projectRoom.header.stats.inProgress")} value={inProgress} />
-          <StatTile label={t("projectRoom.header.stats.done")} value={done} />
-          <StatTile label={t("projectRoom.header.stats.agents")} value={project.agents} />
+      {/* One desktop composition: persistent knowledge at left and project
+          information at right. Mobile leads with information, then the graph.
+          Runtime flow remains in the Execution tab below. */}
+      {!compact && project.id ? (
+        <div className="grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(320px,2fr)]">
+          <div className="order-2 min-w-0 xl:order-1">
+            <ProjectKnowledgeGraph
+              projectId={project.id}
+              projectName={project.name}
+              pmAgent={project.pmAgent}
+              agentNames={uniqueAgents(tasks, project.agentIds ?? [])}
+              tasks={tasks}
+              liveAgents={projectAgentsLive}
+            />
+          </div>
+          <aside className="order-1 flex min-w-0 flex-col gap-3 xl:order-2" aria-label={project.name}>
+            {project.goal ? (
+              <div className="rounded-lg border border-primary/25 bg-card/60 p-4">
+                <p className="text-sm leading-relaxed text-[#7975a8]">{project.goal}</p>
+              </div>
+            ) : null}
+            <div className="grid grid-cols-2 gap-3">
+              <StatTile label={t("projectRoom.header.stats.totalTasks")} value={tasks.length} />
+              <StatTile label={t("projectRoom.header.stats.inProgress")} value={inProgress} />
+              <StatTile label={t("projectRoom.header.stats.done")} value={done} />
+              <StatTile label={t("projectRoom.header.stats.agents")} value={project.agents} />
+            </div>
+            {tasks.length > 0 ? <ProjectInsights tasks={tasks} /> : null}
+          </aside>
         </div>
       ) : null}
-
-      {/* Who's doing the work + how it's going — only once there's a board. */}
-      {!compact && tasks.length > 0 ? <ProjectInsights tasks={tasks} /> : null}
 
       {/* First-run guidance: a fresh team with an empty board is confusing —
           tell the owner the next move instead of greeting them with 0s. */}
@@ -802,7 +819,7 @@ function Tabs({
     { id: "docs", label: t("projectRoom.tabs.docs") },
     { id: "conductor", label: t("projectRoom.tabs.conductor") },
     { id: "agents", label: t("projectRoom.tabs.agents") },
-    { id: "map", label: t("projectRoom.tabs.map") },
+    { id: "map", label: t("projectRoom.tabs.execution") },
     { id: "chat", label: t("projectRoom.tabs.chat") },
     { id: "meetings", label: "Meetings" },
     { id: "members", label: t("projectRoom.tabs.members") },
@@ -1281,9 +1298,8 @@ function PriorityBadge({ priority }: { priority: string }) {
 }
 
 /**
- * Map tab — the project's context map (one-hop: project → agents → tasks)
- * plus the project-scoped activity feed underneath. The same node identity
- * as everywhere else: clicking an agent or task navigates to it.
+ * Execution tab — runtime-oriented orchestration derived from the current
+ * workflow and task assignments, plus the project-scoped activity feed.
  */
 function MapTab({
   detail,
@@ -1297,14 +1313,13 @@ function MapTab({
   const { address } = useAppAccount();
   const { t } = useTranslation();
   const { byName } = useWalletAgents(ownerWallet ?? address);
-  const agentNames = uniqueAgents(detail.tasks, detail.project.agentIds ?? []);
   return (
     <div className="flex flex-col gap-4">
-      <ProjectContextMap
+      <ProjectExecutionGraph
         projectId={projectId}
         projectName={detail.project.name}
         pmAgent={detail.project.pmAgent}
-        agentNames={agentNames}
+        workflowPhase={detail.project.workflow?.phase}
         tasks={detail.tasks}
         liveAgents={byName}
       />

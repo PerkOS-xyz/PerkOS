@@ -1235,6 +1235,7 @@
       "connectedNow": "· 当前已连接",
       "neverConnected": "从未连接",
       "endpoint": "端点",
+      "connectedViaRelay": "已通过 PerkOS relay 连接",
       "notProvisioned": "尚未配置",
       "runtimeVersion": "运行环境版本",
       "modelKey": "模型密钥",
@@ -1428,6 +1429,7 @@
       "conductor": "指挥台",
       "agents": "智能体",
       "map": "地图",
+      "execution": "执行",
       "chat": "项目聊天",
       "members": "成员"
     },
@@ -1694,6 +1696,17 @@
       "taskLabel_other": "个任务",
       "donePerAgent": "各智能体完成数量",
       "unassigned": "未分配"
+    },
+    "graph": { "expand": "展开", "close": "关闭", "rotateHint": "拖动旋转 · 双指或滚动缩放", "selected": "已选节点", "neighbors_one": "{{count}} 个直接连接", "neighbors_other": "{{count}} 个直接连接", "openEntity": "打开详情" },
+    "knowledgeGraph": {
+      "title": "项目知识", "description": "展示项目中的人员、智能体、工作和已连接数据源之间的关系。", "showCompleted": "显示已完成", "empty": "添加智能体、任务和数据源后，知识将在此显示。", "ariaLabel": "交互式项目知识图谱", "legend": "项目 · 智能体 · 工作 · 已连接数据源",
+      "connectedSources_one": "已连接 {{count}} 个数据源", "connectedSources_other": "已连接 {{count}} 个数据源", "noSources": "尚未连接外部数据源", "hiddenTasks_one": " · 另有 {{count}} 个任务", "hiddenTasks_other": " · 另有 {{count}} 个任务"
+    },
+    "executionGraph": {
+      "title": "智能体执行图", "description": "查看协调者如何委派工作以及每项任务的进度。", "phase": "阶段：{{phase}}", "empty": "尚无执行。启动团队以生成第一个流程。", "ariaLabel": "智能体执行与编排图", "telemetryNote": "此视图使用当前工作流和分配数据。运行时遥测可用后，将显示交接、重试和验证关卡。", "unassignedLead": "未分配负责人", "unassignedWorker": "未分配", "coordinator": "协调者"
+    },
+    "organizationGraph": {
+      "title": "组织知识", "description": "组织中项目、人员、智能体和数据源的动态地图。", "projects_one": "{{count}} 个项目", "projects_other": "{{count}} 个项目", "empty": "创建项目、添加智能体和连接数据源后，组织图谱将不断增长。", "ariaLabel": "交互式组织知识图谱", "connectedSources_one": "已连接 {{count}} 个组织数据源", "connectedSources_other": "已连接 {{count}} 个组织数据源", "noSources": "尚未连接组织数据源"
     },
     "contextMap": {
       "empty": "随着你为这个项目添加智能体和任务,地图会逐渐填满。",

@@ -31,7 +31,7 @@ const CANONICAL_URL =
 
 const OG_TITLE = "PerkOS AI: AI Teams for Small Businesses";
 const OG_DESC =
-  "PerkOS AI gives small businesses a ready-to-work AI team for marketing, research, customer support and operations. Start free—no technical skills required.";
+  "PerkOS AI gives small businesses a ready-to-work AI team for growth, research, customer support and operations. Start free, no technical skills required.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(CANONICAL_URL),
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     description: OG_DESC,
     url: CANONICAL_URL,
     images: [
-      { url: "/banner.png", width: 2371, height: 1421, alt: "PerkOS AI — AI teams for small businesses" },
+      { url: "/banner.png", width: 2371, height: 1421, alt: "PerkOS AI: AI teams for small businesses" },
     ],
   },
   twitter: {

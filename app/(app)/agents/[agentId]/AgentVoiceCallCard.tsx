@@ -2,6 +2,7 @@
 
 import { Briefcase, ChevronDown, Headphones, Loader2, Mic, MicOff, Phone, PhoneOff, Shield } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +13,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  AGENT_VOICE_STATE_LABELS,
   canStartAgentVoiceCall,
   resolveAgentVoiceState,
   type AgentVoiceCapability,
@@ -82,6 +82,7 @@ export function AgentVoiceCallCard({
   /** True while hang-up is in flight (disables re-taps; shows Ending…). */
   ending?: boolean;
 }) {
+  const { t } = useTranslation();
   const state = callState ?? resolveAgentVoiceState(capability);
   const busy = BUSY_STATES.includes(state);
   const canStart = canStartAgentVoiceCall(state) && Boolean(onStart);
@@ -126,12 +127,12 @@ export function AgentVoiceCallCard({
                 <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-400" />
               </span>
               {state === "unavailable" ? <MicOff className="h-5 w-5" /> : <Headphones className="h-5 w-5" />}
-              {active ? `Live with ${agentName}` : `Call ${agentName}`}
+              {active ? t("agentDetail.voice.liveWith", { name: agentName }) : t("agentDetail.voice.callAgent", { name: agentName })}
             </CardTitle>
             <CardDescription className="mt-1 text-sm" aria-live="polite">
-              {endBusy ? "Ending call…" : AGENT_VOICE_STATE_LABELS[state]}
-              {active && activeCallMode ? ` · ${activeCallMode === "working" ? "Working call" : "Private call"}` : ""}
-              {voiceChip ? ` · Voice ${voiceChip}` : ""}
+              {endBusy ? t("agentDetail.voice.endingCall") : t(`agentDetail.voice.state.${state}`)}
+              {active && activeCallMode ? ` · ${activeCallMode === "working" ? t("agentDetail.voice.workingCall") : t("agentDetail.voice.privateCall")}` : ""}
+              {voiceChip ? ` · ${t("agentDetail.voice.voice", { voice: voiceChip })}` : ""}
             </CardDescription>
           </div>
           {active ? <VoiceActivityBars active={audioLive || (active && !endBusy)} muted={muted || endBusy} /> : null}
@@ -140,8 +141,7 @@ export function AgentVoiceCallCard({
       <CardContent className="space-y-2 p-2 xl:space-y-4 xl:p-6 xl:pt-0">
         {state === "unavailable" ? (
           <p className="hidden text-sm text-muted-foreground xl:block">
-            {agentName} has not reported a verified voice gateway and speech provider. Chat availability does not enable
-            voice.
+            {t("agentDetail.voice.unavailableDescription", { name: agentName })}
           </p>
         ) : null}
 
@@ -154,13 +154,13 @@ export function AgentVoiceCallCard({
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold">{agentName}</p>
                 <p className="text-xs text-muted-foreground" aria-live="polite">
-                  {endBusy ? "Ending call…" : AGENT_VOICE_STATE_LABELS[state]}
-                  {activeCallMode ? ` · ${activeCallMode === "working" ? "Working" : "Private"}` : ""}
+                  {endBusy ? t("agentDetail.voice.endingCall") : t(`agentDetail.voice.state.${state}`)}
+                  {activeCallMode ? ` · ${activeCallMode === "working" ? t("agentDetail.voice.working") : t("agentDetail.voice.private")}` : ""}
                   {voiceChip ? ` · ${voiceChip}` : ""}
                 </p>
               </div>
               <VoiceActivityBars active={audioLive || (active && !endBusy)} muted={muted || endBusy} />
-              <span className="font-mono text-sm font-semibold tabular-nums" aria-label={`Call duration ${duration}`}>
+              <span className="font-mono text-sm font-semibold tabular-nums" aria-label={t("agentDetail.voice.duration", { duration })}>
                 {duration}
               </span>
               <Button
@@ -171,8 +171,8 @@ export function AgentVoiceCallCard({
                 onClick={onToggleMute}
                 disabled={endBusy}
                 aria-pressed={muted}
-                aria-label={muted ? "Unmute" : "Mute"}
-                title={muted ? "Unmute" : "Mute"}
+                aria-label={muted ? t("agentDetail.voice.unmute") : t("agentDetail.voice.mute")}
+                title={muted ? t("agentDetail.voice.unmute") : t("agentDetail.voice.mute")}
               >
                 {muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
               </Button>
@@ -186,15 +186,15 @@ export function AgentVoiceCallCard({
               onClick={handleEnd}
               disabled={endBusy || !onEnd}
               aria-busy={endBusy}
-              aria-label={endBusy ? "Ending call" : "End call"}
-              title={endBusy ? "Ending call…" : "End call"}
+              aria-label={endBusy ? t("agentDetail.voice.endingCall") : t("agentDetail.voice.endCall")}
+              title={endBusy ? t("agentDetail.voice.endingCall") : t("agentDetail.voice.endCall")}
             >
               {endBusy ? (
                 <Loader2 className="h-6 w-6 shrink-0 animate-spin xl:h-7 xl:w-7" />
               ) : (
                 <PhoneOff className="h-6 w-6 shrink-0 xl:h-7 xl:w-7" />
               )}
-              {endBusy ? "Ending…" : "End call"}
+              {endBusy ? t("agentDetail.voice.ending") : t("agentDetail.voice.endCall")}
             </Button>
           </div>
         ) : (
@@ -214,7 +214,7 @@ export function AgentVoiceCallCard({
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold">{agentName}</p>
                 <p className="text-xs text-muted-foreground" aria-live="polite" data-testid="voice-speech-chip">
-                  {AGENT_VOICE_STATE_LABELS[state]}
+                  {t(`agentDetail.voice.state.${state}`)}
                   {voiceChip ? ` · ${voiceChip}` : ""}
                 </p>
               </div>
@@ -223,7 +223,7 @@ export function AgentVoiceCallCard({
             <div
               data-testid="voice-call-mode-actions"
               className="grid grid-cols-1 gap-2 sm:grid-cols-2"
-              aria-label="Start voice call"
+              aria-label={t("agentDetail.voice.start")}
             >
               <Button
                 type="button"
@@ -232,25 +232,25 @@ export function AgentVoiceCallCard({
                 aria-disabled={!canStart || busy || !chatMirrorAvailable}
                 aria-label={
                   busy
-                    ? `Connecting working call`
+                    ? t("agentDetail.voice.connectingWorking")
                     : state === "failed" || state === "ended"
-                      ? "Retry working call"
-                      : `Working call ${agentName}`
+                      ? t("agentDetail.voice.retryWorking")
+                      : t("agentDetail.voice.workingWith", { name: agentName })
                 }
                 title={
                   !chatMirrorAvailable
                     ? chatMirrorPreparing
-                      ? "Preparing chat for Working call…"
-                      : "Working call needs a chat conversation"
-                    : "Working call — save final turns to chat"
+                      ? t("agentDetail.voice.preparingChatWorking")
+                      : t("agentDetail.voice.workingNeedsChat")
+                    : t("agentDetail.voice.workingTitle")
                 }
                 onClick={() => onStart?.("working")}
               >
                 <Briefcase className="h-4 w-4 shrink-0" />
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold leading-tight">Working Call</span>
+                  <span className="block text-sm font-semibold leading-tight">{t("agentDetail.voice.workingCall")}</span>
                   <span className="block text-[11px] font-normal leading-tight opacity-90">
-                    {chatMirrorPreparing && !chatMirrorAvailable ? "Preparing chat…" : "Saves final turns to chat"}
+                    {chatMirrorPreparing && !chatMirrorAvailable ? t("agentDetail.voice.preparingChat") : t("agentDetail.voice.savesTurns")}
                   </span>
                 </span>
               </Button>
@@ -262,19 +262,19 @@ export function AgentVoiceCallCard({
                 aria-disabled={!canStart || busy}
                 aria-label={
                   busy
-                    ? `Connecting private call`
+                    ? t("agentDetail.voice.connectingPrivate")
                     : state === "failed" || state === "ended"
-                      ? "Retry private call"
-                      : `Private call ${agentName}`
+                      ? t("agentDetail.voice.retryPrivate")
+                      : t("agentDetail.voice.privateWith", { name: agentName })
                 }
-                title="Private call — nothing saved to chat"
+                title={t("agentDetail.voice.privateTitle")}
                 onClick={() => onStart?.("private")}
               >
                 <Shield className="h-4 w-4 shrink-0" />
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold leading-tight">Private Call</span>
+                  <span className="block text-sm font-semibold leading-tight">{t("agentDetail.voice.privateCall")}</span>
                   <span className="block text-[11px] font-normal leading-tight text-muted-foreground">
-                    No chat save · no audio kept
+                    {t("agentDetail.voice.privateSummary")}
                   </span>
                 </span>
               </Button>
@@ -294,28 +294,25 @@ export function AgentVoiceCallCard({
         ) : null}
         {state === "unavailable" ? (
           <p className="hidden text-xs text-amber-300 xl:block">
-            Pending gateway capability and speech-provider configuration.
+            {t("agentDetail.voice.pendingCapability")}
           </p>
         ) : null}
         <details className="group hidden rounded-lg border border-border/60 bg-background/30 px-3 py-2 md:block">
           <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium">
-            Call settings <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
+            {t("agentDetail.voice.settings")} <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
           </summary>
           <div className="mt-3 grid gap-2 border-t border-border/60 pt-3 text-xs text-muted-foreground sm:grid-cols-2">
             <p>
-              <strong className="text-foreground">Working Call:</strong> final user and agent text is written to chat after
-              each turn. Raw audio is never saved.
+              <strong className="text-foreground">{t("agentDetail.voice.workingCall")}:</strong> {t("agentDetail.voice.workingDetails")}
             </p>
             <p>
-              <strong className="text-foreground">Private Call:</strong> no final text, raw audio, or interim speech is
-              persisted.
+              <strong className="text-foreground">{t("agentDetail.voice.privateCall")}:</strong> {t("agentDetail.voice.privateDetails")}
             </p>
             <p>
-              <strong className="text-foreground">Audio:</strong> echo cancellation, noise suppression, and automatic gain
-              control.
+              <strong className="text-foreground">{t("agentDetail.voice.audio")}:</strong> {t("agentDetail.voice.audioDetails")}
             </p>
             <p>
-              <strong className="text-foreground">Barge-in:</strong> speaking interrupts the current agent reply.
+              <strong className="text-foreground">{t("agentDetail.voice.bargeIn")}:</strong> {t("agentDetail.voice.bargeInDetails")}
             </p>
           </div>
         </details>

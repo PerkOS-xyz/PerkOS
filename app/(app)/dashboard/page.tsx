@@ -53,6 +53,7 @@ import { ActivityHeatmap } from "../../components/charts";
 import { KpiStrip } from "../../components/KpiStrip";
 import { ModelUsagePanel } from "../../components/ModelUsagePanel";
 import { BillingCard } from "../../components/BillingCard";
+import { OrganizationKnowledgeGraph } from "../../components/ProjectContextMap";
 import {
   WaitingOnYouCard,
   type WaitingItem,
@@ -227,6 +228,13 @@ export default function DashboardPage() {
         <WorkspaceCard
           name={displayWorkspace}
           ownerAddress={address}
+        />
+
+        <OrganizationKnowledgeGraph
+          organizationName={displayWorkspace}
+          ownerWallet={activeOrg?.ownerWallet ?? address}
+          projects={orgProjects}
+          agents={data?.agents ?? []}
         />
 
         {error ? (
