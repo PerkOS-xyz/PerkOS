@@ -1439,6 +1439,7 @@
       "conductor": "운영",
       "agents": "에이전트",
       "map": "지도",
+      "execution": "실행",
       "chat": "프로젝트 채팅",
       "members": "멤버"
     },
@@ -1706,6 +1707,19 @@
       "taskLabel_other": "작업",
       "donePerAgent": "에이전트별 완료",
       "unassigned": "미배정"
+    },
+    "graph": { "expand": "확대", "close": "닫기", "rotateHint": "드래그하여 회전 · 핀치 또는 스크롤로 확대", "selected": "선택한 노드", "neighbors_one": "직접 연결 {{count}}개", "neighbors_other": "직접 연결 {{count}}개", "openEntity": "세부 정보 열기" },
+    "knowledgeGraph": {
+      "title": "프로젝트 지식", "description": "프로젝트의 사람, 에이전트, 작업 및 연결된 소스의 관계입니다.", "showCompleted": "완료 항목 표시", "empty": "에이전트, 작업 및 소스를 추가하면 여기에 지식이 표시됩니다.",
+      "ariaLabel": "대화형 프로젝트 지식 그래프", "legend": "프로젝트 · 에이전트 · 작업 · 연결된 소스", "connectedSources_one": "연결된 소스 {{count}}개", "connectedSources_other": "연결된 소스 {{count}}개", "noSources": "연결된 외부 소스 없음", "hiddenTasks_one": " · 작업 {{count}}개 더", "hiddenTasks_other": " · 작업 {{count}}개 더"
+    },
+    "executionGraph": {
+      "title": "에이전트 실행 그래프", "description": "코디네이터가 작업을 위임하고 각 작업이 진행되는 방식을 확인하세요.", "phase": "단계: {{phase}}", "empty": "아직 실행이 없습니다. 팀을 시작해 첫 흐름을 만드세요.", "ariaLabel": "에이전트 실행 및 오케스트레이션 그래프",
+      "telemetryNote": "현재 워크플로와 할당 데이터를 사용합니다. 런타임 텔레메트리가 제공되면 전달, 재시도 및 검증 게이트가 표시됩니다.", "unassignedLead": "리더 미지정", "unassignedWorker": "미지정", "coordinator": "코디네이터"
+    },
+    "organizationGraph": {
+      "title": "조직 지식", "description": "조직에 연결된 프로젝트, 사람, 에이전트 및 소스의 실시간 지도입니다.", "projects_one": "프로젝트 {{count}}개", "projects_other": "프로젝트 {{count}}개", "empty": "프로젝트, 에이전트 및 소스를 추가하면 조직 그래프가 성장합니다.", "ariaLabel": "대화형 조직 지식 그래프",
+      "connectedSources_one": "조직 소스 {{count}}개 연결됨", "connectedSources_other": "조직 소스 {{count}}개 연결됨", "noSources": "연결된 조직 소스 없음"
     },
     "contextMap": {
       "empty": "에이전트와 작업을 추가하면 지도가 채워져요.",

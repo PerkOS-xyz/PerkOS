@@ -1460,6 +1460,7 @@
       "conductor": "Condutor",
       "agents": "Agentes",
       "map": "Mapa",
+      "execution": "Execução",
       "chat": "Bate-papo do projeto",
       "members": "Membros"
     },
@@ -1730,6 +1731,42 @@
       "taskLabel_other": "tarefas",
       "donePerAgent": "Feito por agente",
       "unassigned": "Não atribuído"
+    },
+    "graph": { "expand": "Expandir", "close": "Fechar", "rotateHint": "Arraste para girar · pince ou role para ampliar", "selected": "Nó selecionado", "neighbors_one": "{{count}} conexão direta", "neighbors_other": "{{count}} conexões diretas", "openEntity": "Abrir detalhes" },
+    "knowledgeGraph": {
+      "title": "Conhecimento do projeto",
+      "description": "Como pessoas, agentes, trabalho e fontes conectadas deste projeto se relacionam.",
+      "showCompleted": "Mostrar concluídas",
+      "empty": "O conhecimento aparecerá aqui conforme você adicionar agentes, tarefas e fontes conectadas.",
+      "ariaLabel": "Grafo interativo de conhecimento do projeto",
+      "legend": "Projeto · agentes · trabalho · fontes conectadas",
+      "connectedSources_one": "{{count}} fonte conectada",
+      "connectedSources_other": "{{count}} fontes conectadas",
+      "noSources": "Nenhuma fonte externa conectada ainda",
+      "hiddenTasks_one": " · mais {{count}} tarefa",
+      "hiddenTasks_other": " · mais {{count}} tarefas"
+    },
+    "executionGraph": {
+      "title": "Grafo de execução de agentes",
+      "description": "Veja como o coordenador delega o trabalho e como cada tarefa avança.",
+      "phase": "Fase: {{phase}}",
+      "empty": "Ainda não há execução. Coloque a equipe para trabalhar para gerar o primeiro fluxo.",
+      "ariaLabel": "Grafo de execução e orquestração de agentes",
+      "telemetryNote": "Esta visão usa o fluxo e as atribuições atuais. Transferências, novas tentativas e verificações aparecerão quando a telemetria do runtime estiver disponível.",
+      "unassignedLead": "Líder não atribuído",
+      "unassignedWorker": "Não atribuído",
+      "coordinator": "Coordenador"
+    },
+    "organizationGraph": {
+      "title": "Conhecimento da organização",
+      "description": "Um mapa vivo dos projetos, pessoas, agentes e fontes conectados a esta organização.",
+      "projects_one": "{{count}} projeto",
+      "projects_other": "{{count}} projetos",
+      "empty": "O grafo da organização cresce conforme você cria projetos, adiciona agentes e conecta fontes.",
+      "ariaLabel": "Grafo interativo de conhecimento da organização",
+      "connectedSources_one": "{{count}} fonte da organização conectada",
+      "connectedSources_other": "{{count}} fontes da organização conectadas",
+      "noSources": "Nenhuma fonte da organização conectada ainda"
     },
     "contextMap": {
       "empty": "O mapa é preenchido conforme você adiciona agentes e tarefas a este projeto.",
