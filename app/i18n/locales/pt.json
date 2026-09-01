@@ -1553,6 +1553,7 @@
       "enable": "Ativar chamadas", "rotate": "Substituir cadastro", "created": "Cadastro de voz criado", "error": "Não foi possível criar o cadastro de voz",
       "secretWarning": "O segredo aparece apenas neste cadastro. Envie-o ao agente em privado; não o cole em chats, logs, argumentos de comando ou código-fonte.",
       "copyInstructions": "Copiar instruções", "copySecret": "Copiar JSON secreto", "expires": "A credencial de cadastro expira em {{date}}.",
+      "checkSupport": "Verificar suporte a Voice", "probeCreated": "Verificação de Voice preparada", "unsupported": "Voice não é compatível com este agente", "enrolling": "Aguardando o agente configurar Voice.", "copyPrompt": "Copiar prompt de inscrição", "promptHelp": "Envie apenas este marcador. O plugin usa a identidade A2A existente; nenhum segredo passa pelo chat.", "advanced": "Configuração avançada no host", "directHost": "Criar credencial para o host",
       "steps": { "credential": "Criar credencial privada", "plugin": "Instalar plugin nativo", "doctor": "Verificar diagnóstico" }
     },
     "voiceCredential": {

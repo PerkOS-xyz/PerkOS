@@ -446,7 +446,7 @@
       "emptyCta": "첫 프로젝트 만들기"
     },
     "voiceEnrollment": {
-      "title": "통화 활성화", "description": "{{name}}({{runtime}})에 PerkOS Voice 네이티브 플러그인을 추가합니다. 에이전트는 비공개 상태로 자체 음성 공급자를 설정합니다.", "ready": "통화 활성화됨", "readyHelp": "게이트웨이 진단과 공개 기능이 준비되어 통화 버튼을 사용할 수 있습니다.", "enable": "통화 활성화", "rotate": "등록 교체", "created": "음성 등록을 만들었습니다", "error": "음성 등록을 만들 수 없습니다", "secretWarning": "비밀 값은 이 등록에서만 표시됩니다. 에이전트에게 비공개로 보내고 채팅, 로그, 명령 인수 또는 소스 코드에 붙여넣지 마세요.", "copyInstructions": "지침 복사", "copySecret": "비밀 JSON 복사", "expires": "등록 자격 증명 만료: {{date}}", "steps": { "credential": "비공개 자격 증명 생성", "plugin": "네이티브 플러그인 설치", "doctor": "진단 준비 확인" }
+      "title": "통화 활성화", "description": "{{name}}({{runtime}})에 PerkOS Voice 네이티브 플러그인을 추가합니다. 에이전트는 비공개 상태로 자체 음성 공급자를 설정합니다.", "ready": "통화 활성화됨", "readyHelp": "게이트웨이 진단과 공개 기능이 준비되어 통화 버튼을 사용할 수 있습니다.", "enable": "통화 활성화", "rotate": "등록 교체", "created": "음성 등록을 만들었습니다", "error": "음성 등록을 만들 수 없습니다", "secretWarning": "비밀 값은 이 등록에서만 표시됩니다. 에이전트에게 비공개로 보내고 채팅, 로그, 명령 인수 또는 소스 코드에 붙여넣지 마세요.", "copyInstructions": "지침 복사", "copySecret": "비밀 JSON 복사", "expires": "등록 자격 증명 만료: {{date}}", "checkSupport": "Voice 지원 확인", "probeCreated": "Voice 지원 확인 준비됨", "unsupported": "이 에이전트는 Voice를 지원하지 않습니다", "enrolling": "에이전트의 Voice 설정을 기다리는 중입니다.", "copyPrompt": "등록 프롬프트 복사", "promptHelp": "이 마커만 에이전트에 전송합니다. 플러그인은 기존 A2A ID를 사용하며 비밀은 채팅을 통과하지 않습니다.", "advanced": "고급 호스트 직접 설정", "directHost": "호스트 자격 증명 생성", "steps": { "credential": "비공개 자격 증명 생성", "plugin": "네이티브 플러그인 설치", "doctor": "진단 준비 확인" }
     },
     "tasks": {
       "empty": "아직 작업이 없어요.",

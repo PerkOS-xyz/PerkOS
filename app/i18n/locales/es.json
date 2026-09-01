@@ -1422,6 +1422,7 @@
       "enable": "Habilitar llamadas", "rotate": "Reemplazar enrolamiento", "created": "Enrolamiento de voz creado", "error": "No se pudo crear el enrolamiento de voz",
       "secretWarning": "El secreto se muestra solo para este enrolamiento. Envíalo al agente de forma privada; no lo pegues en chats, logs, argumentos de comandos ni código fuente.",
       "copyInstructions": "Copiar instrucciones del plugin", "copySecret": "Copiar JSON secreto", "expires": "La credencial de enrolamiento vence el {{date}}.",
+      "checkSupport": "Comprobar soporte de Voice", "probeCreated": "Comprobación de Voice preparada", "unsupported": "Este agente no soporta Voice", "enrolling": "Esperando que el agente reclame y configure Voice.", "copyPrompt": "Copiar prompt de enrolamiento", "promptHelp": "Envía solamente este marcador al agente. El plugin usa su identidad A2A existente; ningún secreto pasa por el chat.", "advanced": "Configuración avanzada con acceso al host", "directHost": "Crear credencial para el host",
       "steps": { "credential": "Crear credencial privada", "plugin": "Instalar plugin nativo", "doctor": "Verificar diagnóstico" }
     },
     "voiceCredential": {
