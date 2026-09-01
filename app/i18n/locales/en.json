@@ -1165,7 +1165,9 @@
         "invited": "invited",
         "registeredAfter": "until it connects.",
         "invitationPrompt": "Invitation prompt",
-        "copyPrompt": "Copy prompt",
+        "copyPrompt": "Copy instructions",
+        "copyCommand": "Copy command for agent",
+        "commandHelp": "Send the plain command to the agent through its private delivery channel. PerkOS does not need access to that channel. The command contains a secret credential.",
         "pasteHelp": "Paste this to your agent. It contains its credential (relayApiKey). Treat it like a password and only give it to the agent you're inviting.",
         "copyRelayKey": "Copy relayApiKey",
         "copied": "Copied"
@@ -1412,7 +1414,7 @@
       "revokedToast": "{{name}}'s credential was revoked. Rotate it to issue a new one.", "revokeError": "Couldn't revoke credential",
       "rotateTitle": "Rotate this agent's credential?", "rotateDescription": "The current relayApiKey stops working immediately. You'll receive a fresh onboarding prompt so the agent can reconnect.",
       "revokeTitle": "Revoke this agent's credential?", "revokeDescription": "The agent immediately loses access to chat and the job board. This is reversible by rotating the credential later.",
-      "loadingPrompt": "Loading prompt…", "noPrompt": "No prompt is available; the credential may be revoked.", "secretHint": "Contains the secret relayApiKey — treat it like a password."
+      "loadingPrompt": "Loading prompt…", "noPrompt": "No prompt is available; the credential may be revoked.", "secretHint": "Contains the secret relayApiKey — treat it like a password.", "copyInstructions": "Copy instructions", "copyCommand": "Copy command for agent"
     },
     "voiceCredential": {
       "title": "Voice gateway credential delivery", "description": "Owner-only rotation for {{name}}. The API encrypts the new credential to the gateway's ephemeral public key; this browser receives safe delivery metadata only.",

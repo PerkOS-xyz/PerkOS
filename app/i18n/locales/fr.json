@@ -1158,7 +1158,9 @@
         "invited": "invité",
         "registeredAfter": "jusqu'à ce qu'il se connecte.",
         "invitationPrompt": "Prompt d'invitation",
-        "copyPrompt": "Copier le prompt",
+        "copyPrompt": "Copier les instructions",
+        "copyCommand": "Copier la commande pour l’agent",
+        "commandHelp": "Envoyez la commande en texte brut à l’agent via son canal privé. PerkOS n’a pas besoin d’accéder à ce canal. La commande contient un identifiant secret.",
         "pasteHelp": "Collez ceci dans votre agent. Il contient ses identifiants (relayApiKey) : traitez-les comme un mot de passe et ne les donnez qu'à l'agent que vous invitez.",
         "copyRelayKey": "Copier relayApiKey",
         "copied": "Copié"

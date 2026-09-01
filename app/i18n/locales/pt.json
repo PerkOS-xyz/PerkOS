@@ -1165,7 +1165,9 @@
         "invited": "convidado",
         "registeredAfter": "até que ele se conecte.",
         "invitationPrompt": "Solicitação de convite",
-        "copyPrompt": "Solicitação de cópia",
+        "copyPrompt": "Copiar instruções",
+        "copyCommand": "Copiar comando para o agente",
+        "commandHelp": "Envie o comando em texto simples ao agente pelo canal privado de entrega. O PerkOS não precisa acessar esse canal. O comando contém uma credencial secreta.",
         "pasteHelp": "Cole isso no seu agente. Ele contém sua credencial (relayApiKey). Trate-a como uma senha e forneça-a apenas ao agente que você está convidando.",
         "copyRelayKey": "Copiar relayApiKey",
         "copied": "Copiado"
@@ -1541,7 +1543,9 @@
       "revokeDescription": "O agente perde imediatamente o acesso ao chat e ao quadro de tarefas. Isso pode ser revertido trocando a credencial mais tarde.",
       "loadingPrompt": "Carregando prompt…",
       "noPrompt": "Nenhum prompt está disponível; a credencial pode ter sido revogada.",
-      "secretHint": "Contém a relayApiKey secreta — trate-a como uma senha."
+      "secretHint": "Contém a relayApiKey secreta — trate-a como uma senha.",
+      "copyInstructions": "Copiar instruções",
+      "copyCommand": "Copiar comando para o agente"
     },
     "voiceCredential": {
       "title": "Entrega da credencial do gateway de voz",

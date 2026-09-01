@@ -1148,7 +1148,9 @@
         "invited": "已邀请",
         "registeredAfter": "。",
         "invitationPrompt": "邀请提示词",
-        "copyPrompt": "复制提示词",
+        "copyPrompt": "复制说明",
+        "copyCommand": "复制代理命令",
+        "commandHelp": "通过代理的私有交付渠道发送纯文本命令。PerkOS 无需访问该渠道。命令包含秘密凭据。",
         "pasteHelp": "把这段内容粘贴给你的智能体。其中包含它的凭证(relayApiKey),请像对待密码一样谨慎处理,只把它交给你正在邀请的智能体。",
         "copyRelayKey": "复制 relayApiKey",
         "copied": "已复制"

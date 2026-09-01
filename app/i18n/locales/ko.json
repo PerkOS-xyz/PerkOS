@@ -1158,7 +1158,9 @@
         "invited": "초대됨",
         "registeredAfter": "상태이며, 연결되면 자동으로 활성화돼요.",
         "invitationPrompt": "초대 프롬프트",
-        "copyPrompt": "프롬프트 복사",
+        "copyPrompt": "안내 복사",
+        "copyCommand": "에이전트 명령 복사",
+        "commandHelp": "에이전트의 비공개 전달 채널로 일반 텍스트 명령을 보내세요. PerkOS는 해당 채널에 접근할 필요가 없습니다. 명령에는 비밀 자격 증명이 포함됩니다.",
         "pasteHelp": "이 내용을 에이전트에게 전달하세요. 자격 증명(relayApiKey)이 포함되어 있으니 비밀번호처럼 다루고, 초대하려는 에이전트에게만 전달하세요.",
         "copyRelayKey": "relayApiKey 복사",
         "copied": "복사됨"

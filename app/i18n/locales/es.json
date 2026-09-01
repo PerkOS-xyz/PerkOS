@@ -1165,7 +1165,9 @@
         "invited": "invitado",
         "registeredAfter": "hasta que se conecte.",
         "invitationPrompt": "Prompt de invitación",
-        "copyPrompt": "Copiar prompt",
+        "copyPrompt": "Copiar instrucciones",
+        "copyCommand": "Copiar comando para agente",
+        "commandHelp": "Envía el comando plano al agente por su canal privado de entrega. PerkOS no necesita acceso a ese canal. El comando contiene una credencial secreta.",
         "pasteHelp": "Pégale esto a tu agente. Contiene su credencial (relayApiKey); trátala como una contraseña y entrégasela solo al agente que estás invitando.",
         "copyRelayKey": "Copiar relayApiKey",
         "copied": "Copiado"
@@ -1412,7 +1414,7 @@
       "revokedToast": "Se revocó la credencial de {{name}}. Rótala para emitir una nueva.", "revokeError": "No se pudo revocar la credencial",
       "rotateTitle": "¿Rotar la credencial de este agente?", "rotateDescription": "El relayApiKey actual dejará de funcionar inmediatamente. Recibirás una nueva invitación para que el agente pueda reconectarse.",
       "revokeTitle": "¿Revocar la credencial de este agente?", "revokeDescription": "El agente perderá inmediatamente el acceso al chat y al tablero de tareas. Puedes revertirlo rotando la credencial más adelante.",
-      "loadingPrompt": "Cargando invitación…", "noPrompt": "No hay una invitación disponible; la credencial podría estar revocada.", "secretHint": "Contiene el relayApiKey secreto; trátalo como una contraseña."
+      "loadingPrompt": "Cargando invitación…", "noPrompt": "No hay una invitación disponible; la credencial podría estar revocada.", "secretHint": "Contiene el relayApiKey secreto; trátalo como una contraseña.", "copyInstructions": "Copiar instrucciones", "copyCommand": "Copiar comando para agente"
     },
     "voiceCredential": {
       "title": "Entrega de credencial del gateway de voz", "description": "Rotación exclusiva del propietario para {{name}}. La API cifra la nueva credencial con la clave pública efímera del gateway; este navegador solo recibe metadatos seguros de entrega.",
