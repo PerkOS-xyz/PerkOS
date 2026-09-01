@@ -1148,7 +1148,9 @@
         "invited": "invitato",
         "registeredAfter": "finché non si connette.",
         "invitationPrompt": "Prompt di invito",
-        "copyPrompt": "Copia prompt",
+        "copyPrompt": "Copia istruzioni",
+        "copyCommand": "Copia comando per l’agente",
+        "commandHelp": "Invia il comando in testo semplice all’agente tramite il suo canale privato. PerkOS non deve accedere a quel canale. Il comando contiene una credenziale segreta.",
         "pasteHelp": "Incolla questo nel tuo agente. Contiene la sua credenziale (relayApiKey): trattala come una password e consegnala solo all'agente che stai invitando.",
         "copyRelayKey": "Copia relayApiKey",
         "copied": "Copiato"

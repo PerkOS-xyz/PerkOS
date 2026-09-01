@@ -51,6 +51,7 @@ export function InvitedCredentialPanel({ agent }: { agent: AgentRow }) {
   const [rotateOpen, setRotateOpen] = useState(false);
   const [revokeOpen, setRevokeOpen] = useState(false);
   const [shownPrompt, setShownPrompt] = useState<string | null>(null);
+  const [shownCommand, setShownCommand] = useState<string | null>(null);
 
   const state = useMemo(() => connState(agent), [agent]);
 
@@ -66,6 +67,7 @@ export function InvitedCredentialPanel({ agent }: { agent: AgentRow }) {
     mutationFn: () => rotateRelayKey(agent.id),
     onSuccess: (data) => {
       setShownPrompt(data.invitePrompt);
+      setShownCommand(data.inviteCommand);
       setPromptOpen(true);
       toast.success(t("agentDetail.invitedCredential.rotated"));
       queryClient.invalidateQueries({ queryKey: ["relay-key", agent.id] });
@@ -79,6 +81,7 @@ export function InvitedCredentialPanel({ agent }: { agent: AgentRow }) {
     mutationFn: () => revokeRelayKey(agent.id),
     onSuccess: () => {
       setShownPrompt(null);
+      setShownCommand(null);
       setPromptOpen(false);
       toast.success(t("agentDetail.invitedCredential.revokedToast", { name: agent.name }));
       queryClient.invalidateQueries({ queryKey: ["relay-key", agent.id] });
@@ -90,6 +93,7 @@ export function InvitedCredentialPanel({ agent }: { agent: AgentRow }) {
 
   const revoked = state.kind === "revoked";
   const promptText = shownPrompt ?? promptQuery.data?.invitePrompt ?? null;
+  const commandText = shownCommand ?? promptQuery.data?.inviteCommand ?? null;
 
   return (
     <Card>
@@ -150,7 +154,7 @@ export function InvitedCredentialPanel({ agent }: { agent: AgentRow }) {
         </div>
 
         {promptOpen ? (
-          <PromptBlock loading={promptQuery.isLoading} prompt={promptText} />
+          <PromptBlock loading={promptQuery.isLoading} prompt={promptText} command={commandText} />
         ) : null}
       </CardContent>
 
@@ -191,9 +195,9 @@ function StatusBadge({ state }: { state: ConnState }) {
   }
 }
 
-function PromptBlock({ loading, prompt }: { loading: boolean; prompt: string | null }) {
+function PromptBlock({ loading, prompt, command }: { loading: boolean; prompt: string | null; command: string | null }) {
   const { t } = useTranslation();
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<"prompt" | "command" | null>(null);
   if (loading) {
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -212,6 +216,7 @@ function PromptBlock({ loading, prompt }: { loading: boolean; prompt: string | n
         <span className="text-xs font-medium text-muted-foreground">
           {t("agentDetail.invitedCredential.secretHint")}
         </span>
+        <div className="flex flex-wrap gap-1">
         <Button
           variant="ghost"
           size="sm"
@@ -219,16 +224,36 @@ function PromptBlock({ loading, prompt }: { loading: boolean; prompt: string | n
           onClick={async () => {
             try {
               await navigator.clipboard.writeText(prompt);
-              setCopied(true);
-              setTimeout(() => setCopied(false), 1500);
+              setCopied("prompt");
+              setTimeout(() => setCopied(null), 1500);
             } catch {
               /* clipboard blocked — ignore */
             }
           }}
         >
-          {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-          {copied ? t("agentDetail.common.copied") : t("agentDetail.common.copy")}
+          {copied === "prompt" ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+          {copied === "prompt" ? t("agentDetail.common.copied") : t("agentDetail.invitedCredential.copyInstructions")}
         </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-7 gap-1.5"
+          disabled={!command}
+          onClick={async () => {
+            if (!command) return;
+            try {
+              await navigator.clipboard.writeText(command);
+              setCopied("command");
+              setTimeout(() => setCopied(null), 1500);
+            } catch {
+              /* clipboard blocked — ignore */
+            }
+          }}
+        >
+          {copied === "command" ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+          {copied === "command" ? t("agentDetail.common.copied") : t("agentDetail.invitedCredential.copyCommand")}
+        </Button>
+        </div>
       </div>
       <pre className="max-h-96 overflow-auto whitespace-pre-wrap break-words text-[11px] leading-relaxed text-muted-foreground">
         {prompt}

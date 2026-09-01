@@ -3088,6 +3088,8 @@ export type InviteAgentResult = {
   agentName: string;
   relayApiKey: string;
   invitePrompt: string;
+  /** Plain shell command for machine-to-machine delivery; no Markdown fences. */
+  inviteCommand: string;
 };
 
 /**
@@ -3122,6 +3124,8 @@ export type RelayKeyInfo = {
   hasKey: boolean;
   /** Re-rendered onboarding prompt, or null when the key is revoked. */
   invitePrompt: string | null;
+  /** Plain shell command, or null when the key is revoked. */
+  inviteCommand: string | null;
 };
 
 /**
@@ -3142,12 +3146,12 @@ export async function getRelayKeyInfo(agentId: string): Promise<RelayKeyInfo> {
  */
 export async function rotateRelayKey(
   agentId: string,
-): Promise<{ ok: boolean; relayApiKey: string; invitePrompt: string }> {
+): Promise<{ ok: boolean; relayApiKey: string; invitePrompt: string; inviteCommand: string }> {
   const { authedFetch } = await import("./apiClient");
   const response = await authedFetch(`/api/agents/${agentId}/relay-key/rotate`, { method: "POST" });
   const payload = await parseJson(response);
   if (!response.ok) throw new Error(apiError(payload, "Couldn't rotate credential"));
-  return payload as unknown as { ok: boolean; relayApiKey: string; invitePrompt: string };
+  return payload as unknown as { ok: boolean; relayApiKey: string; invitePrompt: string; inviteCommand: string };
 }
 
 /**

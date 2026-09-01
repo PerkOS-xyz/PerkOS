@@ -1158,7 +1158,9 @@
         "invited": "招待済み",
         "registeredAfter": "と表示され、接続が完了するまでそのままです。",
         "invitationPrompt": "招待プロンプト",
-        "copyPrompt": "プロンプトをコピー",
+        "copyPrompt": "手順をコピー",
+        "copyCommand": "エージェント用コマンドをコピー",
+        "commandHelp": "プレーンテキストのコマンドをエージェントの非公開配信チャネルで送信します。PerkOSがそのチャネルへアクセスする必要はありません。コマンドには秘密の認証情報が含まれます。",
         "pasteHelp": "これをエージェントに貼り付けてください。認証情報（relayApiKey）が含まれているため、パスワードと同様に扱い、招待するエージェント本人にのみ渡してください。",
         "copyRelayKey": "relayApiKeyをコピー",
         "copied": "コピーしました"

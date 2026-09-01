@@ -129,10 +129,13 @@ function InviteResult({ result }: { result: InviteAgentResult }) {
       <div className="rounded-md border border-border bg-card p-4">
         <div className="mb-2 flex items-center justify-between">
           <h2 className="text-sm font-medium text-foreground">{t("wizard.external.result.invitationPrompt")}</h2>
-          <CopyButton text={result.invitePrompt} label={t("wizard.external.result.copyPrompt")} />
+          <div className="flex flex-wrap gap-2">
+            <CopyButton text={result.inviteCommand} label={t("wizard.external.result.copyCommand")} />
+            <CopyButton text={result.invitePrompt} label={t("wizard.external.result.copyPrompt")} subtle />
+          </div>
         </div>
         <p className="mb-3 text-xs text-muted-foreground">
-          {t("wizard.external.result.pasteHelp")}
+          {t("wizard.external.result.commandHelp")}
         </p>
         <pre className="max-h-96 overflow-auto whitespace-pre-wrap break-words rounded-md border border-border bg-muted/50 p-3 text-[11px] leading-relaxed text-foreground">
           {result.invitePrompt}
