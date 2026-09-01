@@ -1547,6 +1547,14 @@
       "copyInstructions": "Copiar instruções",
       "copyCommand": "Copiar comando para o agente"
     },
+    "voiceEnrollment": {
+      "title": "Ativar chamadas", "description": "Adicione o plugin nativo PerkOS Voice a {{name}} ({{runtime}}). O agente permanece privado e configura seu próprio provedor de voz.",
+      "ready": "Chamadas ativadas", "readyHelp": "O diagnóstico do gateway e a capacidade pública estão prontos. O botão Ligar está disponível.",
+      "enable": "Ativar chamadas", "rotate": "Substituir cadastro", "created": "Cadastro de voz criado", "error": "Não foi possível criar o cadastro de voz",
+      "secretWarning": "O segredo aparece apenas neste cadastro. Envie-o ao agente em privado; não o cole em chats, logs, argumentos de comando ou código-fonte.",
+      "copyInstructions": "Copiar instruções", "copySecret": "Copiar JSON secreto", "expires": "A credencial de cadastro expira em {{date}}.",
+      "steps": { "credential": "Criar credencial privada", "plugin": "Instalar plugin nativo", "doctor": "Verificar diagnóstico" }
+    },
     "voiceCredential": {
       "title": "Entrega da credencial do gateway de voz",
       "description": "Rotação exclusiva do proprietário para {{name}}. A API criptografa a nova credencial com a chave pública efêmera do gateway; este navegador recebe apenas metadados seguros da entrega.",

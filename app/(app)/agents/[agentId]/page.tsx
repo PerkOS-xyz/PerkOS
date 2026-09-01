@@ -81,6 +81,7 @@ import { AgentChatPanel } from "./AgentChatPanel";
 import { AgentVoiceCallController } from "./AgentVoiceCallController";
 import { VoiceCredentialDeliveryPanel } from "./VoiceCredentialDeliveryPanel";
 import { VoiceHealthPanel } from "./VoiceHealthPanel";
+import { VoiceEnrollmentPanel } from "./VoiceEnrollmentPanel";
 
 type PageProps = {
   params: Promise<{ agentId: string }>;
@@ -353,6 +354,15 @@ export default function AgentDetailPage({ params }: PageProps) {
       />
 
       {agent.invited ? <InvitedCredentialPanel agent={agent} /> : null}
+
+      {agent.invited && agent.name !== "Bragi" ? (
+        <VoiceEnrollmentPanel
+          agentId={agent.id}
+          agentName={agent.name}
+          runtime={agent.runtime}
+          owner={Boolean(address) && address!.toLowerCase() === agent.walletAddress.toLowerCase()}
+        />
+      ) : null}
 
       {agent.invited ? (
         <VoiceCredentialDeliveryPanel

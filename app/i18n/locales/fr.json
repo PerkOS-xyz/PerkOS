@@ -445,6 +445,9 @@
       "empty": "Aucun projet pour le moment.",
       "emptyCta": "Créez votre premier projet"
     },
+    "voiceEnrollment": {
+      "title": "Activer les appels", "description": "Ajoutez le plugin natif PerkOS Voice à {{name}} ({{runtime}}). L’agent reste privé et configure son fournisseur vocal.", "ready": "Appels activés", "readyHelp": "Le diagnostic et la capacité publique sont prêts. Le bouton Appeler est disponible.", "enable": "Activer les appels", "rotate": "Remplacer l’inscription", "created": "Inscription vocale créée", "error": "Impossible de créer l’inscription vocale", "secretWarning": "Le secret n’est affiché que pour cette inscription. Envoyez-le en privé, jamais dans un chat, des journaux, des arguments ou le code source.", "copyInstructions": "Copier les instructions", "copySecret": "Copier le JSON secret", "expires": "La clé expire le {{date}}.", "steps": { "credential": "Créer la clé privée", "plugin": "Installer le plugin natif", "doctor": "Vérifier le diagnostic" }
+    },
     "tasks": {
       "empty": "Aucune tâche pour le moment.",
       "emptyCta": "Créer une tâche"

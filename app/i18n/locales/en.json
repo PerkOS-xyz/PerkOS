@@ -1416,6 +1416,14 @@
       "revokeTitle": "Revoke this agent's credential?", "revokeDescription": "The agent immediately loses access to chat and the job board. This is reversible by rotating the credential later.",
       "loadingPrompt": "Loading prompt…", "noPrompt": "No prompt is available; the credential may be revoked.", "secretHint": "Contains the secret relayApiKey — treat it like a password.", "copyInstructions": "Copy instructions", "copyCommand": "Copy command for agent"
     },
+    "voiceEnrollment": {
+      "title": "Enable calls", "description": "Add the native PerkOS Voice plugin to {{name}} ({{runtime}}). The agent stays private and configures its own speech provider.",
+      "ready": "Calls enabled", "readyHelp": "The gateway doctor and public capability are ready. The Call button is now available.",
+      "enable": "Enable calls", "rotate": "Replace enrollment", "created": "Voice enrollment created", "error": "Couldn't create Voice enrollment",
+      "secretWarning": "The secret is shown only for this enrollment. Send it privately to the agent and do not paste it into chat, logs, command arguments, or source control.",
+      "copyInstructions": "Copy plugin instructions", "copySecret": "Copy secret JSON", "expires": "Enrollment credential expires {{date}}.",
+      "steps": { "credential": "Create private credential", "plugin": "Install native plugin", "doctor": "Verify doctor readiness" }
+    },
     "voiceCredential": {
       "title": "Voice gateway credential delivery", "description": "Owner-only rotation for {{name}}. The API encrypts the new credential to the gateway's ephemeral public key; this browser receives safe delivery metadata only.",
       "warning": "Generate a one-time public key on the gateway and paste only the public key here. Never paste a private key, API key, token, or existing credential. Rotation disables the previous voice credential immediately.",

@@ -3270,6 +3270,49 @@ export type EncryptedVoiceCredentialDelivery = {
   expiresAt: string;
 };
 
+export type VoiceGatewayCredential = {
+  credential: string;
+  audience: "perkos-voice-gateway-grant:v1";
+  expiresAt: string;
+};
+
+/**
+ * Rotate the agent-scoped Voice gateway credential.
+ *
+ * This is intentionally an explicit owner action: the plaintext secret is
+ * returned once so it can be handed directly to the external agent's native
+ * plugin. Callers must not persist it in browser storage or query caches.
+ */
+export async function rotateVoiceGatewayCredential(
+  agentId: string,
+): Promise<VoiceGatewayCredential> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/agents/${encodeURIComponent(agentId)}/voice-credential/rotate`,
+    { method: "POST" },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) {
+    throw new Error(apiError(payload, "Couldn't create the Voice enrollment credential"));
+  }
+  const candidate = payload as Record<string, unknown> | null;
+  if (
+    !candidate ||
+    typeof candidate.credential !== "string" ||
+    candidate.credential.length < 20 ||
+    candidate.audience !== "perkos-voice-gateway-grant:v1" ||
+    typeof candidate.expiresAt !== "string" ||
+    !Number.isFinite(Date.parse(candidate.expiresAt))
+  ) {
+    throw new Error("Voice credential API returned invalid enrollment data.");
+  }
+  return {
+    credential: candidate.credential,
+    audience: "perkos-voice-gateway-grant:v1",
+    expiresAt: candidate.expiresAt,
+  };
+}
+
 /** Create the Bragi-only encrypted pull delivery without returning ciphertext to Web. */
 export async function rotateEncryptedVoiceCredentialDelivery(
   agentId: string,

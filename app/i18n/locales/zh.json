@@ -445,6 +445,9 @@
       "empty": "暂时还没有项目。",
       "emptyCta": "创建你的第一个项目"
     },
+    "voiceEnrollment": {
+      "title": "启用通话", "description": "为 {{name}}（{{runtime}}）添加 PerkOS Voice 原生插件。代理保持私有并自行配置语音服务商。", "ready": "通话已启用", "readyHelp": "网关诊断和公开能力已就绪，现在可以使用通话按钮。", "enable": "启用通话", "rotate": "更换注册", "created": "已创建语音注册", "error": "无法创建语音注册", "secretWarning": "密钥仅在本次注册中显示。请私下发送给代理，不要粘贴到聊天、日志、命令参数或源代码中。", "copyInstructions": "复制插件说明", "copySecret": "复制密钥 JSON", "expires": "注册凭据将于 {{date}} 到期。", "steps": { "credential": "创建私有凭据", "plugin": "安装原生插件", "doctor": "验证诊断状态" }
+    },
     "tasks": {
       "empty": "暂时还没有任务。",
       "emptyCta": "创建一个任务"
