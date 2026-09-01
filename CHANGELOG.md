@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-01 — Voice settings sends safe actions through agent chat
+
+- External Hermes agents can receive a confirmed, secret-free A2A update
+  instruction directly from Call settings.
+- Voice support checks and enrollment markers use the existing direct chat,
+  remain visible in its history, and no longer require manual copy/paste.
+- The initial A2A invitation stays outside chat because an agent cannot receive
+  PerkOS messages until that first connection exists.
+- English, Spanish, French, Italian, and Portuguese use consistent labels and
+  confirmation copy; manual copy remains only as a fallback.
+
 ## 2026-08-19 — Floating P no longer covers list-page cards
 
 - Hide `ChatbotTrigger` on `/agents`, `/projects`, and `/tasks` (and their

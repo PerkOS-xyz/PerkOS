@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { use, useMemo, useState } from "react";
+import { use, useMemo, useRef, useState } from "react";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAppAccount } from "../../../lib/useAppAccount";
 import { toast } from "sonner";
@@ -77,7 +77,7 @@ import { WebhookPanel } from "./WebhookPanel";
 import { TeamPanel } from "./TeamPanel";
 import { UpgradePanel } from "./UpgradePanel";
 import { AutoWakeBanner } from "./AutoWakeBanner";
-import { AgentChatPanel } from "./AgentChatPanel";
+import { AgentChatPanel, type AgentChatPanelHandle } from "./AgentChatPanel";
 import { AgentVoiceCallController } from "./AgentVoiceCallController";
 import { VoiceCredentialDeliveryPanel } from "./VoiceCredentialDeliveryPanel";
 import { VoiceHealthPanel } from "./VoiceHealthPanel";
@@ -146,6 +146,7 @@ export default function AgentDetailPage({ params }: PageProps) {
   const { address } = useAppAccount();
   const [mobileView, setMobileView] = useState<"conversation" | "settings">("conversation");
   const [voiceOpen, setVoiceOpen] = useState(false);
+  const chatPanelRef = useRef<AgentChatPanelHandle>(null);
 
   const agentsQuery = useQuery({
     queryKey: ["wallet-agents", address],
@@ -322,6 +323,7 @@ export default function AgentDetailPage({ params }: PageProps) {
       ) : null}
 
       <AgentChatPanel
+        ref={chatPanelRef}
         agentId={agent.id}
         agentName={agent.name}
         chatEnabled={agent.status === "ready"}
@@ -361,6 +363,9 @@ export default function AgentDetailPage({ params }: PageProps) {
           agentName={agent.name}
           runtime={agent.runtime}
           owner={Boolean(address) && address!.toLowerCase() === agent.walletAddress.toLowerCase()}
+          canSendToAgent={() => chatPanelRef.current?.canSendMessage() === true}
+          onSendToAgent={(message) => chatPanelRef.current?.sendMessage(message) ?? Promise.resolve(false)}
+          onMessageSent={() => setMobileView("conversation")}
         />
       ) : null}
 

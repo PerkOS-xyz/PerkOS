@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createRef } from "react";
 
 const mocks = vi.hoisted(() => ({
   ensureAgentAwakeApi: vi.fn(),
@@ -51,6 +52,7 @@ vi.mock("../app/lib/useChatPerkosClient", () => ({
 
 import {
   AgentChatPanel,
+  type AgentChatPanelHandle,
   agentResponseTimeoutMessage,
 } from "../app/(app)/agents/[agentId]/AgentChatPanel";
 
@@ -82,6 +84,29 @@ describe("AgentChatPanel hibernation policy", () => {
     await waitFor(() => expect(mocks.chatSend).toHaveBeenCalledWith("hello external agent"));
     expect(mocks.ensureAgentAwakeApi).not.toHaveBeenCalled();
     expect(screen.getByText("Enter to send · Shift+Enter for a new line")).toBeVisible();
+  });
+
+  it("exposes one canonical sender for confirmed settings actions", async () => {
+    const ref = createRef<AgentChatPanelHandle>();
+    render(
+      <AgentChatPanel
+        ref={ref}
+        agentId="athena"
+        agentName="Athena"
+        chatEnabled
+        hibernationEnabled={false}
+        externalAgent
+        runtimeKind="Hermes"
+        runtimeAvailability="online"
+      />,
+    );
+
+    expect(ref.current?.canSendMessage()).toBe(true);
+    await act(async () => {
+      expect(await ref.current!.sendMessage("PERKOS_VOICE_PROBE")).toBe(true);
+    });
+    expect(mocks.chatSend).toHaveBeenCalledWith("PERKOS_VOICE_PROBE");
+    expect(screen.getByText("PERKOS_VOICE_PROBE")).toBeVisible();
   });
 
   it("still wakes a managed agent before sending", async () => {
