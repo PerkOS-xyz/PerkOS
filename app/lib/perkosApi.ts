@@ -3373,7 +3373,8 @@ export async function createA2AMaintenanceUpdate(agentId: string): Promise<{ mar
   const payload = await parseJson(response);
   if (!response.ok) throw new Error(apiError(payload, "Couldn't create the A2A maintenance request"));
   const marker = payload && typeof payload === "object" ? (payload as Record<string, unknown>).marker : undefined;
-  if (typeof marker !== "string" || !/^PERKOS_A2A_UPDATE:[0-9a-f-]{36}$/i.test(marker)) {
+  const uuid = "[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}";
+  if (typeof marker !== "string" || !new RegExp(`^PERKOS_A2A_UPDATE:${uuid}:${uuid}$`, "i").test(marker)) {
     throw new Error("A2A maintenance API returned an invalid marker.");
   }
   return { marker, request: parseA2AMaintenanceRequest(payload) };
