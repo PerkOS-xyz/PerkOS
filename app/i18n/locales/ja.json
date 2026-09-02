@@ -1253,6 +1253,7 @@
       "connectedViaRelay": "PerkOS relay 経由で接続中",
       "notProvisioned": "まだプロビジョニングされていません",
       "runtimeVersion": "ランタイムバージョン",
+      "integrationVersion": "A2A 統合",
       "modelKey": "モデルキー",
       "byok": "ユーザー提供（BYOK）",
       "runtimeOwned": "外部ランタイムで管理",

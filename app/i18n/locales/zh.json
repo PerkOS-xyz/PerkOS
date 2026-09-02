@@ -1243,6 +1243,7 @@
       "connectedViaRelay": "已通过 PerkOS relay 连接",
       "notProvisioned": "尚未配置",
       "runtimeVersion": "运行环境版本",
+      "integrationVersion": "A2A 集成",
       "modelKey": "模型密钥",
       "byok": "用户自带(BYOK)",
       "runtimeOwned": "由外部运行时管理",

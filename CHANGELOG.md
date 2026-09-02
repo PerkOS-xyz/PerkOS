@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-02 — Fail-closed A2A update readiness
+
+- “Update integration” now requires a fresh protocol-v1 capability from the
+  same bridge process that owns authenticated Chat, not only a compatible
+  package version.
+- Stale, missing, legacy, or duplicate bridge evidence falls back to the
+  explicit one-time bootstrap command for `@perkos/perkos-a2a@0.12.64`.
+- Agent metadata now distinguishes the upstream runtime version from the
+  installed PerkOS A2A integration version in every supported locale.
+
 ## 2026-09-02 — Managed A2A updates bypass the model
 
 - Compatible Hermes bridges now receive an opaque one-time update marker
