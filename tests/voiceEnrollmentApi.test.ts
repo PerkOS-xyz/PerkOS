@@ -67,17 +67,27 @@ describe("managed A2A maintenance API", () => {
   const request = {
     requestId: "1e1719e8-7e50-4dad-a7cf-754a86699d7d",
     state: "pending",
-    targetVersion: "0.12.63",
+    targetVersion: "0.12.64",
     createdAt: "2026-09-02T12:00:00.000Z",
     expiresAt: "2026-09-02T12:10:00.000Z",
   };
+  const bridgeInstanceId = "16df04b5-706e-4dad-b303-3c78f67b989f";
 
-  it("creates an opaque marker without a command or credential", async () => {
-    const marker = `PERKOS_A2A_UPDATE:${request.requestId}`;
+  it("creates an instance-bound opaque marker without a command or credential", async () => {
+    const marker = `PERKOS_A2A_UPDATE:${request.requestId}:${bridgeInstanceId}`;
     mocks.authedFetch.mockResolvedValue(new Response(JSON.stringify({ ok: true, marker, request }), { status: 201 }));
     await expect(createA2AMaintenanceUpdate("agent / athena")).resolves.toEqual({ marker, request });
     expect(mocks.authedFetch).toHaveBeenCalledWith("/api/agents/agent%20%2F%20athena/maintenance/a2a-update", { method: "POST" });
     expect(marker).not.toMatch(/npx|relayApiKey|rk_/i);
+  });
+
+  it.each([
+    `PERKOS_A2A_UPDATE:${request.requestId}`,
+    `PERKOS_A2A_UPDATE:${request.requestId}:not-an-instance`,
+    `PERKOS_A2A_UPDATE:${request.requestId}:${bridgeInstanceId}:extra`,
+  ])("fails closed for a marker outside the instance-bound contract: %s", async (marker) => {
+    mocks.authedFetch.mockResolvedValue(new Response(JSON.stringify({ ok: true, marker, request }), { status: 201 }));
+    await expect(createA2AMaintenanceUpdate("athena")).rejects.toThrow("invalid marker");
   });
 
   it("loads the durable request state", async () => {
