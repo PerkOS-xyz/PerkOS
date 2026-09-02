@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { FormEvent, KeyboardEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAppAccount } from "../../../lib/useAppAccount";
@@ -43,6 +43,13 @@ type Props = {
   runtimeKind?: string;
   /** Execution readiness, independent from this browser's chat websocket. */
   runtimeAvailability?: ExternalRuntimeAvailability;
+};
+
+export type AgentChatPanelHandle = {
+  /** Send through the canonical direct conversation and persist in its history. */
+  sendMessage: (text: string) => Promise<boolean>;
+  /** Strong readiness gate used before a settings action mutates server state. */
+  canSendMessage: () => boolean;
 };
 
 type Bubble = {
@@ -90,7 +97,7 @@ export function agentResponseTimeoutMessage(input: {
   );
 }
 
-export function AgentChatPanel({
+export const AgentChatPanel = forwardRef<AgentChatPanelHandle, Props>(function AgentChatPanel({
   agentId,
   agentName,
   chatEnabled,
@@ -98,7 +105,7 @@ export function AgentChatPanel({
   externalAgent = false,
   runtimeKind,
   runtimeAvailability,
-}: Props) {
+}: Props, ref) {
   const { t } = useTranslation();
   const { address, isConnected } = useAppAccount();
   const queryClient = useQueryClient();
@@ -229,13 +236,13 @@ export function AgentChatPanel({
     return () => clearTimeout(timer);
   }, [awaitingReply, agentName, externalAgent, runtimeKind, t]);
 
-  async function send(text: string) {
+  async function send(text: string): Promise<boolean> {
     const trimmed = text.trim();
-    if (!trimmed) return;
+    if (!trimmed) return false;
     setError(null);
     if (!isConnected || !address) {
       setError(t("agentDetail.chat.connectWallet"));
-      return;
+      return false;
     }
     if (runtimeBlocked) {
       setError(
@@ -243,11 +250,11 @@ export function AgentChatPanel({
           ? `${agentName}'s bridge is connected, but its external runtime is unavailable.`
           : `${agentName}'s external runtime is offline.`,
       );
-      return;
+      return false;
     }
     if (!convId) {
       setError(t("agentDetail.chat.stillOpening"));
-      return;
+      return false;
     }
 
     // If the agent is hibernated, wake it before we send so the
@@ -266,7 +273,7 @@ export function AgentChatPanel({
         setError(
           `Couldn't wake the agent: ${err instanceof Error ? err.message : String(err)}`,
         );
-        return;
+        return false;
       }
     }
 
@@ -282,7 +289,13 @@ export function AgentChatPanel({
     // Stamp real user activity so the curator's idle timer resets on use.
     // Fire-and-forget — a missed ping never breaks the send.
     void recordAgentActivityApi({ agentId }).catch(() => {});
+    return true;
   }
+
+  useImperativeHandle(ref, () => ({
+    sendMessage: send,
+    canSendMessage: () => Boolean(chat.authed && isConnected && address && convId && !runtimeBlocked),
+  }));
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -491,4 +504,4 @@ export function AgentChatPanel({
       />
     </Card>
   );
-}
+});

@@ -2,12 +2,13 @@
 
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, CheckCircle2, Copy, Loader2, PhoneCall, RotateCcw, ShieldCheck } from "lucide-react";
+import { Check, CheckCircle2, Copy, Loader2, PhoneCall, RotateCcw, ShieldCheck, Wrench } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ConfirmDialog } from "@/app/components/ConfirmDialog";
 import {
   getVoiceEnrollmentCapability,
   getAgentVoiceHealthApi,
@@ -23,7 +24,28 @@ type Props = {
   agentName: string;
   runtime: AgentRuntime;
   owner: boolean;
+  canSendToAgent?: () => boolean;
+  onSendToAgent?: (message: string) => Promise<boolean>;
+  onMessageSent?: () => void;
 };
+
+type SafeChatAction = "update" | "probe" | "enroll";
+
+export const PERKOS_A2A_CHAT_UPDATE_VERSION = "0.12.62";
+
+function shellQuote(value: string): string {
+  return `'${value.replaceAll("'", `'"'"'`)}'`;
+}
+
+export function buildHermesA2AUpdatePrompt(agentId: string): string {
+  return [
+    "Update only your managed PerkOS A2A connection and return only the final JSON result.",
+    "",
+    `Run: npx --yes @perkos/perkos-a2a@${PERKOS_A2A_CHAT_UPDATE_VERSION} update-hermes --agent-id ${shellQuote(agentId)} --json`,
+    "",
+    "Do not show, copy, or regenerate credentials. Do not change the model, memory, tools, or environment endpoints.",
+  ].join("\n");
+}
 
 type EnrollmentBundle = {
   instructions: string;
@@ -88,12 +110,23 @@ export function buildVoiceEnrollmentBundle(input: {
   };
 }
 
-export function VoiceEnrollmentPanel({ agentId, agentName, runtime, owner }: Props) {
+export function VoiceEnrollmentPanel({
+  agentId,
+  agentName,
+  runtime,
+  owner,
+  canSendToAgent,
+  onSendToAgent,
+  onMessageSent,
+}: Props) {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const [credential, setCredential] = useState<VoiceGatewayCredential | null>(null);
   const [prompt, setPrompt] = useState<string | null>(null);
+  const [promptSent, setPromptSent] = useState(false);
   const [copied, setCopied] = useState<"prompt" | "instructions" | "secret" | null>(null);
+  const [chatAction, setChatAction] = useState<SafeChatAction | null>(null);
+  const [sendingToChat, setSendingToChat] = useState(false);
   const capabilityQuery = useQuery({
     queryKey: ["agent-voice-enrollment-capability", agentId],
     queryFn: () => getVoiceEnrollmentCapability(agentId),
@@ -125,20 +158,14 @@ export function VoiceEnrollmentPanel({ agentId, agentName, runtime, owner }: Pro
   const probe = useMutation({
     mutationFn: () => requestVoiceSupportProbe(agentId),
     onSuccess: (result) => {
-      setPrompt(result.prompt ?? "PERKOS_VOICE_PROBE");
       queryClient.setQueryData(["agent-voice-enrollment-capability", agentId], result);
-      toast.success(t("agentDetail.voiceEnrollment.probeCreated"));
     },
-    onError: (error: Error) => toast.error(t("agentDetail.voiceEnrollment.error"), { description: error.message }),
   });
   const prepare = useMutation({
     mutationFn: () => prepareA2AVoiceEnrollment(agentId),
     onSuccess: (result) => {
-      setPrompt(result.prompt ?? "PERKOS_VOICE_ENROLL");
       queryClient.setQueryData(["agent-voice-enrollment-capability", agentId], result);
-      toast.success(t("agentDetail.voiceEnrollment.created"));
     },
-    onError: (error: Error) => toast.error(t("agentDetail.voiceEnrollment.error"), { description: error.message }),
   });
 
   if (!owner) return null;
@@ -147,6 +174,40 @@ export function VoiceEnrollmentPanel({ agentId, agentName, runtime, owner }: Pro
     await navigator.clipboard.writeText(value);
     setCopied(kind);
     setTimeout(() => setCopied(null), 1500);
+  };
+
+  const sendConfirmedAction = async () => {
+    if (!chatAction || !onSendToAgent || !canSendToAgent?.()) {
+      toast.error(t("agentDetail.voiceEnrollment.chatUnavailable"));
+      return;
+    }
+    setSendingToChat(true);
+    try {
+      let message: string;
+      if (chatAction === "update") {
+        message = buildHermesA2AUpdatePrompt(agentId);
+      } else if (chatAction === "probe") {
+        const result = await probe.mutateAsync();
+        message = result.prompt ?? "PERKOS_VOICE_PROBE";
+      } else {
+        const result = await prepare.mutateAsync();
+        message = result.prompt ?? "PERKOS_VOICE_ENROLL";
+      }
+      if (!await onSendToAgent(message)) {
+        throw new Error(t("agentDetail.voiceEnrollment.chatUnavailable"));
+      }
+      setPrompt(message);
+      setPromptSent(true);
+      setChatAction(null);
+      toast.success(t("agentDetail.voiceEnrollment.sentToChat", { name: agentName }));
+      onMessageSent?.();
+    } catch (error) {
+      toast.error(t("agentDetail.voiceEnrollment.sendFailed"), {
+        description: error instanceof Error ? error.message : String(error),
+      });
+    } finally {
+      setSendingToChat(false);
+    }
   };
 
   return (
@@ -175,6 +236,25 @@ export function VoiceEnrollmentPanel({ agentId, agentName, runtime, owner }: Pro
           ))}
         </ol>
 
+        {runtime === "Hermes" && capabilityState !== "ready" ? (
+          <div className="rounded-md border border-border/80 bg-muted/20 p-3">
+            <p className="mb-2 text-sm text-muted-foreground">
+              {t("agentDetail.voiceEnrollment.updateHelp")}
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              disabled={sendingToChat}
+              onClick={() => setChatAction("update")}
+            >
+              <Wrench className="h-4 w-4" />
+              {t("agentDetail.voiceEnrollment.updateIntegration")}
+            </Button>
+          </div>
+        ) : null}
+
         {capabilityState === "ready" ? (
           <p className="text-sm text-muted-foreground">{t("agentDetail.voiceEnrollment.readyHelp")}</p>
         ) : capabilityState === "unsupported" ? (
@@ -183,14 +263,14 @@ export function VoiceEnrollmentPanel({ agentId, agentName, runtime, owner }: Pro
             {capabilityQuery.data?.capability.reasonCode ? ` (${capabilityQuery.data.capability.reasonCode})` : ""}
           </p>
         ) : capabilityState === "available" ? (
-          <Button type="button" className="w-fit gap-2" disabled={prepare.isPending} onClick={() => prepare.mutate()}>
+          <Button type="button" className="w-fit gap-2" disabled={sendingToChat} onClick={() => setChatAction("enroll")}>
             {prepare.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <PhoneCall className="h-4 w-4" />}
             {t("agentDetail.voiceEnrollment.enable")}
           </Button>
         ) : capabilityState === "enrolling" ? (
           <p className="text-sm text-muted-foreground">{t("agentDetail.voiceEnrollment.enrolling")}</p>
         ) : (
-          <Button type="button" variant="outline" className="w-fit gap-2" disabled={probe.isPending} onClick={() => probe.mutate()}>
+          <Button type="button" variant="outline" className="w-fit gap-2" disabled={sendingToChat} onClick={() => setChatAction("probe")}>
             {probe.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
             {t("agentDetail.voiceEnrollment.checkSupport")}
           </Button>
@@ -198,7 +278,9 @@ export function VoiceEnrollmentPanel({ agentId, agentName, runtime, owner }: Pro
 
         {(prompt || capabilityState === "enrolling") ? (
           <div className="space-y-3 rounded-md border border-primary/25 bg-primary/5 p-3">
-            <p className="text-sm text-muted-foreground">{t("agentDetail.voiceEnrollment.promptHelp")}</p>
+            <p className="text-sm text-muted-foreground">
+              {t(promptSent ? "agentDetail.voiceEnrollment.sentPromptHelp" : "agentDetail.voiceEnrollment.promptHelp")}
+            </p>
             <code className="block rounded bg-background px-3 py-2 text-sm">{prompt ?? "PERKOS_VOICE_ENROLL"}</code>
             <Button variant="outline" size="sm" className="gap-2" onClick={() => void copy("prompt", prompt ?? "PERKOS_VOICE_ENROLL")}>
               {copied === "prompt" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -239,6 +321,15 @@ export function VoiceEnrollmentPanel({ agentId, agentName, runtime, owner }: Pro
           </div>
         </details>
       </CardContent>
+      <ConfirmDialog
+        open={chatAction !== null}
+        onOpenChange={(open) => { if (!open && !sendingToChat) setChatAction(null); }}
+        title={t(`agentDetail.voiceEnrollment.confirm.${chatAction ?? "probe"}.title`)}
+        description={t(`agentDetail.voiceEnrollment.confirm.${chatAction ?? "probe"}.description`, { name: agentName })}
+        confirmLabel={t("agentDetail.voiceEnrollment.sendToChat")}
+        pending={sendingToChat}
+        onConfirm={() => void sendConfirmedAction()}
+      />
     </Card>
   );
 }
