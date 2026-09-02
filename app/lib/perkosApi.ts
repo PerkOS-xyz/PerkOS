@@ -522,6 +522,15 @@ export type AgentRow = Agent & {
   runtimeHealthy?: boolean;
   runtimeHealthCheckedAt?: string | null;
   lastRuntimeSeenAt?: string | null;
+  /** Fresh, Chat-bound proof that this bridge can consume maintenance markers. */
+  maintenanceCapability?: A2AMaintenanceCapability | null;
+};
+
+export type A2AMaintenanceCapability = {
+  protocolVersion: number;
+  bridgeInstanceId: string;
+  seenAt: string;
+  expiresAt: string;
 };
 
 const agentConverter: FirestoreDataConverter<AgentRow> = {
@@ -586,6 +595,16 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
       runtimeHealthCheckedAt: tsToIso(data.runtimeHealthCheckedAt),
       lastRuntimeSeenAt: tsToIso(data.lastRuntimeSeenAt),
       runtimeVersion: typeof data.runtimeVersion === "string" ? data.runtimeVersion : undefined,
+      maintenanceCapability: (() => {
+        const value = data.maintenanceCapability as Record<string, unknown> | null | undefined;
+        return value
+          && typeof value.protocolVersion === "number"
+          && typeof value.bridgeInstanceId === "string"
+          && typeof value.seenAt === "string"
+          && typeof value.expiresAt === "string"
+          ? value as A2AMaintenanceCapability
+          : null;
+      })(),
       note: typeof data.note === "string" ? data.note : null,
       hostAgent: typeof data.hostAgent === "string" ? data.hostAgent : null,
     };
@@ -3247,6 +3266,7 @@ export async function fetchAgent(agentId: string): Promise<{
   bridgeConnected?: boolean;
   lastBridgeSeenAt?: string | null;
   runtimeVersion?: string | null;
+  maintenanceCapability?: A2AMaintenanceCapability | null;
   runtimeStatus?: "healthy" | "unreachable" | "unknown" | null;
   runtimeHealthy?: boolean;
   runtimeHealthCheckedAt?: string | null;

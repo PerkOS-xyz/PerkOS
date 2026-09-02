@@ -1271,6 +1271,7 @@
       "connectedViaRelay": "Conectado mediante el relay de PerkOS",
       "notProvisioned": "Todavía no está aprovisionado",
       "runtimeVersion": "Versión del entorno de ejecución",
+      "integrationVersion": "Integración A2A",
       "modelKey": "Clave del modelo",
       "byok": "Provista por el usuario (BYOK)",
       "runtimeOwned": "Gestionada por el runtime externo",

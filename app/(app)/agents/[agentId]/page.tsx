@@ -25,6 +25,7 @@ import {
   Power,
   Loader2,
   Phone,
+  Wrench,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -363,6 +364,7 @@ export default function AgentDetailPage({ params }: PageProps) {
           agentName={agent.name}
           runtime={agent.runtime}
           runtimeVersion={agent.runtimeVersion}
+          maintenanceCapability={agent.maintenanceCapability}
           owner={Boolean(address) && address!.toLowerCase() === agent.walletAddress.toLowerCase()}
           canSendToAgent={() => chatPanelRef.current?.canSendMessage() === true}
           onSendToAgent={(message) => chatPanelRef.current?.sendMessage(message) ?? Promise.resolve(false)}
@@ -845,6 +847,11 @@ function MetadataCard({ agent }: { agent: AgentRow }) {
             <span className="text-muted-foreground">—</span>
           )}
         </MetaRow>
+        {agent.runtimeVersion ? (
+          <MetaRow Icon={Wrench} label={t("agentDetail.metadata.integrationVersion")}>
+            <span className="font-mono text-xs">perkos-a2a {agent.runtimeVersion}</span>
+          </MetaRow>
+        ) : null}
         {isExternalAgent(agent) ? (
           <MetaRow Icon={Server} label={t("agentDetail.metadata.runtimeHealth")}>
             <span className={cn(

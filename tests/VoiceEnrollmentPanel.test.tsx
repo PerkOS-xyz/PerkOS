@@ -18,10 +18,23 @@ import {
   buildHermesA2ABootstrapInstructions,
   buildVoiceEnrollmentBundle,
   VoiceEnrollmentPanel,
+  supportsManagedA2AUpdate,
   voiceApiBaseForHost,
 } from "../app/(app)/agents/[agentId]/VoiceEnrollmentPanel";
 
-function renderPanel(owner = true, canSend = true, runtimeVersion: string | null = "0.12.63") {
+const activeMaintenanceCapability = {
+  protocolVersion: 1,
+  bridgeInstanceId: "16df04b5-706e-4dad-b303-3c78f67b989f",
+  seenAt: "2099-09-02T12:00:00.000Z",
+  expiresAt: "2099-09-02T12:02:05.000Z",
+};
+
+function renderPanel(
+  owner = true,
+  canSend = true,
+  runtimeVersion: string | null = "0.12.64",
+  maintenanceCapability = activeMaintenanceCapability,
+) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
@@ -30,6 +43,7 @@ function renderPanel(owner = true, canSend = true, runtimeVersion: string | null
         agentName="Athena"
         runtime="Hermes"
         runtimeVersion={runtimeVersion}
+        maintenanceCapability={maintenanceCapability}
         owner={owner}
         canSendToAgent={() => canSend}
         onSendToAgent={mocks.send}
@@ -52,7 +66,7 @@ describe("VoiceEnrollmentPanel", () => {
     mocks.health.mockResolvedValue({ health: { ready: false, capabilityAvailable: false }, recent: [] });
     mocks.capability.mockResolvedValue({ capability: { state: "available", updatedAt: "2026-09-01T12:00:00.000Z" } });
     mocks.createUpdate.mockResolvedValue({
-      marker: "PERKOS_A2A_UPDATE:1e1719e8-7e50-4dad-a7cf-754a86699d7d",
+      marker: "PERKOS_A2A_UPDATE:1e1719e8-7e50-4dad-a7cf-754a86699d7d:16df04b5-706e-4dad-b303-3c78f67b989f",
       request: { requestId: "1e1719e8-7e50-4dad-a7cf-754a86699d7d", state: "pending", targetVersion: "0.12.63", createdAt: "2026-09-02T12:00:00.000Z", expiresAt: "2026-09-02T12:10:00.000Z" },
     });
     mocks.getUpdate.mockResolvedValue({ requestId: "1e1719e8-7e50-4dad-a7cf-754a86699d7d", state: "completed", targetVersion: "0.12.63", installedVersion: "0.12.63", createdAt: "2026-09-02T12:00:00.000Z", expiresAt: "2026-09-02T12:10:00.000Z" });
@@ -100,7 +114,7 @@ describe("VoiceEnrollmentPanel", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Send to agent" }));
     await waitFor(() => expect(mocks.send).toHaveBeenCalledTimes(1));
     const message = mocks.send.mock.calls[0]![0] as string;
-    expect(message).toBe("PERKOS_A2A_UPDATE:1e1719e8-7e50-4dad-a7cf-754a86699d7d");
+    expect(message).toBe("PERKOS_A2A_UPDATE:1e1719e8-7e50-4dad-a7cf-754a86699d7d:16df04b5-706e-4dad-b303-3c78f67b989f");
     expect(message).not.toContain("npx");
     expect(message).not.toMatch(/relayApiKey|credential-from|rk_/i);
     expect(mocks.createUpdate).toHaveBeenCalledWith("athena-id");
@@ -113,8 +127,21 @@ describe("VoiceEnrollmentPanel", () => {
     expect(await screen.findByText(/Bootstrap required/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Update integration" })).not.toBeInTheDocument();
     const instructions = buildHermesA2ABootstrapInstructions("athena'$(touch /tmp/nope)");
-    expect(instructions).toContain("@perkos/perkos-a2a@0.12.63 update-hermes");
+    expect(instructions).toContain("@perkos/perkos-a2a@0.12.64 update-hermes");
     expect(instructions).toContain("--agent-id 'athena'\"'\"'$(touch /tmp/nope)' --json");
+  });
+
+  it("fails closed when semver is compatible but Chat-bound capability is absent or stale", () => {
+    const now = new Date("2026-09-02T12:03:00.000Z");
+    expect(supportsManagedA2AUpdate("0.12.64", null, now)).toBe(false);
+    expect(supportsManagedA2AUpdate("0.12.64", {
+      ...activeMaintenanceCapability,
+      expiresAt: "2026-09-02T12:02:05.000Z",
+    }, now)).toBe(false);
+    expect(supportsManagedA2AUpdate("0.12.64", {
+      ...activeMaintenanceCapability,
+      expiresAt: "2026-09-02T12:05:05.000Z",
+    }, now)).toBe(true);
   });
 
   it("does not prepare server state when the agent chat is unavailable", async () => {

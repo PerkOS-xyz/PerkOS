@@ -18,6 +18,7 @@ import {
   requestVoiceSupportProbe,
   rotateVoiceGatewayCredential,
   type AgentRuntime,
+  type A2AMaintenanceCapability,
   type VoiceGatewayCredential,
 } from "@/app/lib/perkosApi";
 
@@ -26,6 +27,7 @@ type Props = {
   agentName: string;
   runtime: AgentRuntime;
   runtimeVersion?: string | null;
+  maintenanceCapability?: A2AMaintenanceCapability | null;
   owner: boolean;
   canSendToAgent?: () => boolean;
   onSendToAgent?: (message: string) => Promise<boolean>;
@@ -34,7 +36,7 @@ type Props = {
 
 type SafeChatAction = "update" | "probe" | "enroll";
 
-export const PERKOS_A2A_MANAGED_UPDATE_VERSION = "0.12.63";
+export const PERKOS_A2A_MANAGED_UPDATE_VERSION = "0.12.64";
 
 function shellQuote(value: string): string {
   return `'${value.replaceAll("'", `'"'"'`)}'`;
@@ -44,7 +46,11 @@ export function buildHermesA2ABootstrapCommand(agentId: string): string {
   return `npx --yes @perkos/perkos-a2a@${PERKOS_A2A_MANAGED_UPDATE_VERSION} update-hermes --agent-id ${shellQuote(agentId)} --json`;
 }
 
-export function supportsManagedA2AUpdate(runtimeVersion?: string | null): boolean {
+export function supportsManagedA2AUpdate(
+  runtimeVersion?: string | null,
+  capability?: A2AMaintenanceCapability | null,
+  now = new Date(),
+): boolean {
   const actual = /^(\d+)\.(\d+)\.(\d+)/.exec(runtimeVersion?.trim() ?? "");
   const minimum = PERKOS_A2A_MANAGED_UPDATE_VERSION.split(".").map(Number);
   if (!actual) return false;
@@ -53,7 +59,9 @@ export function supportsManagedA2AUpdate(runtimeVersion?: string | null): boolea
     if (parts[index]! > minimum[index]!) return true;
     if (parts[index]! < minimum[index]!) return false;
   }
-  return true;
+  return capability?.protocolVersion === 1
+    && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(capability.bridgeInstanceId)
+    && Date.parse(capability.expiresAt) > now.getTime();
 }
 
 export function buildHermesA2ABootstrapInstructions(agentId: string): string {
@@ -134,6 +142,7 @@ export function VoiceEnrollmentPanel({
   agentName,
   runtime,
   runtimeVersion,
+  maintenanceCapability,
   owner,
   canSendToAgent,
   onSendToAgent,
@@ -148,7 +157,8 @@ export function VoiceEnrollmentPanel({
   const [chatAction, setChatAction] = useState<SafeChatAction | null>(null);
   const [sendingToChat, setSendingToChat] = useState(false);
   const [maintenanceRequestId, setMaintenanceRequestId] = useState<string | null>(null);
-  const managedUpdateSupported = runtime === "Hermes" && supportsManagedA2AUpdate(runtimeVersion);
+  const managedUpdateSupported = runtime === "Hermes"
+    && supportsManagedA2AUpdate(runtimeVersion, maintenanceCapability);
   const capabilityQuery = useQuery({
     queryKey: ["agent-voice-enrollment-capability", agentId],
     queryFn: () => getVoiceEnrollmentCapability(agentId),
