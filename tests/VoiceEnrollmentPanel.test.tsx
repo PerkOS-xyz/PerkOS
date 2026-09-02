@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ rotate: vi.fn(), health: vi.fn(), capability: vi.fn(), probe: vi.fn(), prepare: vi.fn(), send: vi.fn() }));
+const mocks = vi.hoisted(() => ({ rotate: vi.fn(), health: vi.fn(), capability: vi.fn(), probe: vi.fn(), prepare: vi.fn(), createUpdate: vi.fn(), getUpdate: vi.fn(), send: vi.fn() }));
 vi.mock("../app/lib/perkosApi", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../app/lib/perkosApi")>()),
   rotateVoiceGatewayCredential: mocks.rotate,
@@ -10,16 +10,18 @@ vi.mock("../app/lib/perkosApi", async (importOriginal) => ({
   getVoiceEnrollmentCapability: mocks.capability,
   requestVoiceSupportProbe: mocks.probe,
   prepareA2AVoiceEnrollment: mocks.prepare,
+  createA2AMaintenanceUpdate: mocks.createUpdate,
+  getA2AMaintenanceUpdate: mocks.getUpdate,
 }));
 
 import {
-  buildHermesA2AUpdatePrompt,
+  buildHermesA2ABootstrapInstructions,
   buildVoiceEnrollmentBundle,
   VoiceEnrollmentPanel,
   voiceApiBaseForHost,
 } from "../app/(app)/agents/[agentId]/VoiceEnrollmentPanel";
 
-function renderPanel(owner = true, canSend = true) {
+function renderPanel(owner = true, canSend = true, runtimeVersion: string | null = "0.12.63") {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
@@ -27,6 +29,7 @@ function renderPanel(owner = true, canSend = true) {
         agentId="athena-id"
         agentName="Athena"
         runtime="Hermes"
+        runtimeVersion={runtimeVersion}
         owner={owner}
         canSendToAgent={() => canSend}
         onSendToAgent={mocks.send}
@@ -42,10 +45,17 @@ describe("VoiceEnrollmentPanel", () => {
     mocks.capability.mockReset();
     mocks.probe.mockReset();
     mocks.prepare.mockReset();
+    mocks.createUpdate.mockReset();
+    mocks.getUpdate.mockReset();
     mocks.send.mockReset();
     mocks.send.mockResolvedValue(true);
     mocks.health.mockResolvedValue({ health: { ready: false, capabilityAvailable: false }, recent: [] });
     mocks.capability.mockResolvedValue({ capability: { state: "available", updatedAt: "2026-09-01T12:00:00.000Z" } });
+    mocks.createUpdate.mockResolvedValue({
+      marker: "PERKOS_A2A_UPDATE:1e1719e8-7e50-4dad-a7cf-754a86699d7d",
+      request: { requestId: "1e1719e8-7e50-4dad-a7cf-754a86699d7d", state: "pending", targetVersion: "0.12.63", createdAt: "2026-09-02T12:00:00.000Z", expiresAt: "2026-09-02T12:10:00.000Z" },
+    });
+    mocks.getUpdate.mockResolvedValue({ requestId: "1e1719e8-7e50-4dad-a7cf-754a86699d7d", state: "completed", targetVersion: "0.12.63", installedVersion: "0.12.63", createdAt: "2026-09-02T12:00:00.000Z", expiresAt: "2026-09-02T12:10:00.000Z" });
   });
 
   it("does not render or mint credentials for a non-owner", () => {
@@ -90,17 +100,21 @@ describe("VoiceEnrollmentPanel", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Send to agent" }));
     await waitFor(() => expect(mocks.send).toHaveBeenCalledTimes(1));
     const message = mocks.send.mock.calls[0]![0] as string;
-    expect(message).toBe(buildHermesA2AUpdatePrompt("athena-id"));
-    expect(message).toContain("@perkos/perkos-a2a@0.12.62 update-hermes --agent-id 'athena-id'");
+    expect(message).toBe("PERKOS_A2A_UPDATE:1e1719e8-7e50-4dad-a7cf-754a86699d7d");
+    expect(message).not.toContain("npx");
     expect(message).not.toMatch(/relayApiKey|credential-from|rk_/i);
+    expect(mocks.createUpdate).toHaveBeenCalledWith("athena-id");
     expect(mocks.probe).not.toHaveBeenCalled();
     expect(mocks.prepare).not.toHaveBeenCalled();
   });
 
-  it("shell-quotes the server-provided agent id in the maintenance prompt", () => {
-    const prompt = buildHermesA2AUpdatePrompt("athena'$(touch /tmp/nope)");
-    expect(prompt).toContain("--agent-id 'athena'\"'\"'$(touch /tmp/nope)' --json");
-    expect(prompt).not.toContain("--agent-id athena'");
+  it("shows an honest bootstrap fallback for an older bridge", async () => {
+    renderPanel(true, true, "0.12.62");
+    expect(await screen.findByText(/Bootstrap required/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Update integration" })).not.toBeInTheDocument();
+    const instructions = buildHermesA2ABootstrapInstructions("athena'$(touch /tmp/nope)");
+    expect(instructions).toContain("@perkos/perkos-a2a@0.12.63 update-hermes");
+    expect(instructions).toContain("--agent-id 'athena'\"'\"'$(touch /tmp/nope)' --json");
   });
 
   it("does not prepare server state when the agent chat is unavailable", async () => {

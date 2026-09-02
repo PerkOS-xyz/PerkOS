@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ authedFetch: vi.fn() }));
 vi.mock("../app/lib/apiClient", () => ({ authedFetch: mocks.authedFetch }));
 
-import { prepareA2AVoiceEnrollment, requestVoiceSupportProbe, rotateVoiceGatewayCredential } from "../app/lib/perkosApi";
+import { createA2AMaintenanceUpdate, getA2AMaintenanceUpdate, prepareA2AVoiceEnrollment, requestVoiceSupportProbe, rotateVoiceGatewayCredential } from "../app/lib/perkosApi";
 
 describe("rotateVoiceGatewayCredential", () => {
   beforeEach(() => mocks.authedFetch.mockReset());
@@ -58,5 +58,31 @@ describe("A2A Voice enrollment API", () => {
     }), { status: 200, headers: { "content-type": "application/json" } }));
     await expect(requestVoiceSupportProbe("athena")).resolves.toMatchObject({ prompt: "PERKOS_VOICE_PROBE" });
     expect(JSON.stringify(mocks.authedFetch.mock.calls)).not.toContain("credential\":");
+  });
+});
+
+describe("managed A2A maintenance API", () => {
+  beforeEach(() => mocks.authedFetch.mockReset());
+
+  const request = {
+    requestId: "1e1719e8-7e50-4dad-a7cf-754a86699d7d",
+    state: "pending",
+    targetVersion: "0.12.63",
+    createdAt: "2026-09-02T12:00:00.000Z",
+    expiresAt: "2026-09-02T12:10:00.000Z",
+  };
+
+  it("creates an opaque marker without a command or credential", async () => {
+    const marker = `PERKOS_A2A_UPDATE:${request.requestId}`;
+    mocks.authedFetch.mockResolvedValue(new Response(JSON.stringify({ ok: true, marker, request }), { status: 201 }));
+    await expect(createA2AMaintenanceUpdate("agent / athena")).resolves.toEqual({ marker, request });
+    expect(mocks.authedFetch).toHaveBeenCalledWith("/api/agents/agent%20%2F%20athena/maintenance/a2a-update", { method: "POST" });
+    expect(marker).not.toMatch(/npx|relayApiKey|rk_/i);
+  });
+
+  it("loads the durable request state", async () => {
+    mocks.authedFetch.mockResolvedValue(new Response(JSON.stringify({ ok: true, request: { ...request, state: "completed", installedVersion: "0.12.63" } }), { status: 200 }));
+    await expect(getA2AMaintenanceUpdate("athena", request.requestId)).resolves.toMatchObject({ state: "completed", installedVersion: "0.12.63" });
+    expect(mocks.authedFetch).toHaveBeenCalledWith(`/api/agents/athena/maintenance/a2a-update/${request.requestId}`, { method: "GET" });
   });
 });

@@ -362,6 +362,7 @@ export default function AgentDetailPage({ params }: PageProps) {
           agentId={agent.id}
           agentName={agent.name}
           runtime={agent.runtime}
+          runtimeVersion={agent.runtimeVersion}
           owner={Boolean(address) && address!.toLowerCase() === agent.walletAddress.toLowerCase()}
           canSendToAgent={() => chatPanelRef.current?.canSendMessage() === true}
           onSendToAgent={(message) => chatPanelRef.current?.sendMessage(message) ?? Promise.resolve(false)}
