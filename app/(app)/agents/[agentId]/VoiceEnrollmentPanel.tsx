@@ -36,7 +36,8 @@ type Props = {
 
 type SafeChatAction = "update" | "probe" | "enroll";
 
-export const PERKOS_A2A_MANAGED_UPDATE_VERSION = "0.12.64";
+export const PERKOS_A2A_MANAGED_UPDATE_MIN_VERSION = "0.12.64";
+export const PERKOS_A2A_MANAGED_UPDATE_VERSION = "0.12.65";
 
 function shellQuote(value: string): string {
   return `'${value.replaceAll("'", `'"'"'`)}'`;
@@ -52,7 +53,7 @@ export function supportsManagedA2AUpdate(
   now = new Date(),
 ): boolean {
   const actual = /^(\d+)\.(\d+)\.(\d+)/.exec(runtimeVersion?.trim() ?? "");
-  const minimum = PERKOS_A2A_MANAGED_UPDATE_VERSION.split(".").map(Number);
+  const minimum = PERKOS_A2A_MANAGED_UPDATE_MIN_VERSION.split(".").map(Number);
   if (!actual) return false;
   const parts = actual.slice(1).map(Number);
   for (let index = 0; index < minimum.length; index++) {

@@ -127,7 +127,7 @@ describe("VoiceEnrollmentPanel", () => {
     expect(await screen.findByText(/Bootstrap required/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Update integration" })).not.toBeInTheDocument();
     const instructions = buildHermesA2ABootstrapInstructions("athena'$(touch /tmp/nope)");
-    expect(instructions).toContain("@perkos/perkos-a2a@0.12.64 update-hermes");
+    expect(instructions).toContain("@perkos/perkos-a2a@0.12.65 update-hermes");
     expect(instructions).toContain("--agent-id 'athena'\"'\"'$(touch /tmp/nope)' --json");
   });
 
