@@ -12,6 +12,8 @@ import { ConfirmDialog } from "@/app/components/ConfirmDialog";
 import {
   getVoiceEnrollmentCapability,
   getAgentVoiceHealthApi,
+  createA2AMaintenanceUpdate,
+  getA2AMaintenanceUpdate,
   prepareA2AVoiceEnrollment,
   requestVoiceSupportProbe,
   rotateVoiceGatewayCredential,
@@ -23,6 +25,7 @@ type Props = {
   agentId: string;
   agentName: string;
   runtime: AgentRuntime;
+  runtimeVersion?: string | null;
   owner: boolean;
   canSendToAgent?: () => boolean;
   onSendToAgent?: (message: string) => Promise<boolean>;
@@ -31,19 +34,35 @@ type Props = {
 
 type SafeChatAction = "update" | "probe" | "enroll";
 
-export const PERKOS_A2A_CHAT_UPDATE_VERSION = "0.12.62";
+export const PERKOS_A2A_MANAGED_UPDATE_VERSION = "0.12.63";
 
 function shellQuote(value: string): string {
   return `'${value.replaceAll("'", `'"'"'`)}'`;
 }
 
-export function buildHermesA2AUpdatePrompt(agentId: string): string {
+export function buildHermesA2ABootstrapCommand(agentId: string): string {
+  return `npx --yes @perkos/perkos-a2a@${PERKOS_A2A_MANAGED_UPDATE_VERSION} update-hermes --agent-id ${shellQuote(agentId)} --json`;
+}
+
+export function supportsManagedA2AUpdate(runtimeVersion?: string | null): boolean {
+  const actual = /^(\d+)\.(\d+)\.(\d+)/.exec(runtimeVersion?.trim() ?? "");
+  const minimum = PERKOS_A2A_MANAGED_UPDATE_VERSION.split(".").map(Number);
+  if (!actual) return false;
+  const parts = actual.slice(1).map(Number);
+  for (let index = 0; index < minimum.length; index++) {
+    if (parts[index]! > minimum[index]!) return true;
+    if (parts[index]! < minimum[index]!) return false;
+  }
+  return true;
+}
+
+export function buildHermesA2ABootstrapInstructions(agentId: string): string {
   return [
-    "Update only your managed PerkOS A2A connection and return only the final JSON result.",
+    "Run this once on the private Hermes host to enable managed updates:",
     "",
-    `Run: npx --yes @perkos/perkos-a2a@${PERKOS_A2A_CHAT_UPDATE_VERSION} update-hermes --agent-id ${shellQuote(agentId)} --json`,
+    buildHermesA2ABootstrapCommand(agentId),
     "",
-    "Do not show, copy, or regenerate credentials. Do not change the model, memory, tools, or environment endpoints.",
+    "This reuses the existing managed identity. Do not paste credentials or command output into chat.",
   ].join("\n");
 }
 
@@ -114,6 +133,7 @@ export function VoiceEnrollmentPanel({
   agentId,
   agentName,
   runtime,
+  runtimeVersion,
   owner,
   canSendToAgent,
   onSendToAgent,
@@ -127,6 +147,8 @@ export function VoiceEnrollmentPanel({
   const [copied, setCopied] = useState<"prompt" | "instructions" | "secret" | null>(null);
   const [chatAction, setChatAction] = useState<SafeChatAction | null>(null);
   const [sendingToChat, setSendingToChat] = useState(false);
+  const [maintenanceRequestId, setMaintenanceRequestId] = useState<string | null>(null);
+  const managedUpdateSupported = runtime === "Hermes" && supportsManagedA2AUpdate(runtimeVersion);
   const capabilityQuery = useQuery({
     queryKey: ["agent-voice-enrollment-capability", agentId],
     queryFn: () => getVoiceEnrollmentCapability(agentId),
@@ -140,6 +162,16 @@ export function VoiceEnrollmentPanel({
     enabled: owner && Boolean(agentId),
     refetchInterval: 15_000,
     staleTime: 5_000,
+  });
+  const maintenanceQuery = useQuery({
+    queryKey: ["agent-a2a-maintenance", agentId, maintenanceRequestId],
+    queryFn: () => getA2AMaintenanceUpdate(agentId, maintenanceRequestId!),
+    enabled: owner && Boolean(maintenanceRequestId),
+    refetchInterval: (query) => {
+      const state = query.state.data?.state;
+      return state === "completed" || state === "failed" || state === "expired" ? false : 3_000;
+    },
+    staleTime: 1_000,
   });
   const ready = healthQuery.data?.health?.ready === true && healthQuery.data.health.capabilityAvailable === true;
   const capabilityState = ready ? "ready" : capabilityQuery.data?.capability.state ?? "unknown";
@@ -185,7 +217,10 @@ export function VoiceEnrollmentPanel({
     try {
       let message: string;
       if (chatAction === "update") {
-        message = buildHermesA2AUpdatePrompt(agentId);
+        const result = await createA2AMaintenanceUpdate(agentId);
+        message = result.marker;
+        setMaintenanceRequestId(result.request.requestId);
+        queryClient.setQueryData(["agent-a2a-maintenance", agentId, result.request.requestId], result.request);
       } else if (chatAction === "probe") {
         const result = await probe.mutateAsync();
         message = result.prompt ?? "PERKOS_VOICE_PROBE";
@@ -239,19 +274,41 @@ export function VoiceEnrollmentPanel({
         {runtime === "Hermes" && capabilityState !== "ready" ? (
           <div className="rounded-md border border-border/80 bg-muted/20 p-3">
             <p className="mb-2 text-sm text-muted-foreground">
-              {t("agentDetail.voiceEnrollment.updateHelp")}
+              {t(managedUpdateSupported
+                ? "agentDetail.voiceEnrollment.updateHelp"
+                : "agentDetail.voiceEnrollment.bootstrapHelp", { version: runtimeVersion ?? t("agentDetail.voiceEnrollment.unknownVersion") })}
             </p>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              disabled={sendingToChat}
-              onClick={() => setChatAction("update")}
-            >
-              <Wrench className="h-4 w-4" />
-              {t("agentDetail.voiceEnrollment.updateIntegration")}
-            </Button>
+            {managedUpdateSupported ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                disabled={sendingToChat}
+                onClick={() => setChatAction("update")}
+              >
+                <Wrench className="h-4 w-4" />
+                {t("agentDetail.voiceEnrollment.updateIntegration")}
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => void copy("prompt", buildHermesA2ABootstrapInstructions(agentId))}
+              >
+                {copied === "prompt" ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                {copied === "prompt" ? t("agentDetail.common.copied") : t("agentDetail.voiceEnrollment.copyBootstrap")}
+              </Button>
+            )}
+            {maintenanceRequestId ? (
+              <p className="mt-2 text-xs text-muted-foreground" role="status">
+                {t(`agentDetail.voiceEnrollment.maintenance.${maintenanceQuery.data?.state ?? "pending"}`, {
+                  version: maintenanceQuery.data?.installedVersion ?? maintenanceQuery.data?.targetVersion ?? PERKOS_A2A_MANAGED_UPDATE_VERSION,
+                })}
+              </p>
+            ) : null}
           </div>
         ) : null}
 

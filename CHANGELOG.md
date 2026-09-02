@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-02 — Managed A2A updates bypass the model
+
+- Compatible Hermes bridges now receive an opaque one-time update marker
+  instead of a natural-language npm command.
+- Call settings polls the durable API request and shows pending, claimed,
+  running, completed, failed, and expired states.
+- Older or unknown bridges show an honest bootstrap-required fallback instead
+  of claiming an automatic update was started.
+- English, Spanish, and Portuguese include the complete maintenance UI copy.
+
 ## 2026-09-01 — Voice settings sends safe actions through agent chat
 
 - External Hermes agents can receive a confirmed, secret-free A2A update

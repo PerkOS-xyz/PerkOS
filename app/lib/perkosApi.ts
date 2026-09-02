@@ -585,6 +585,7 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
       runtimeHealthy: data.runtimeHealthy === true,
       runtimeHealthCheckedAt: tsToIso(data.runtimeHealthCheckedAt),
       lastRuntimeSeenAt: tsToIso(data.lastRuntimeSeenAt),
+      runtimeVersion: typeof data.runtimeVersion === "string" ? data.runtimeVersion : undefined,
       note: typeof data.note === "string" ? data.note : null,
       hostAgent: typeof data.hostAgent === "string" ? data.hostAgent : null,
     };
@@ -3315,6 +3316,58 @@ export async function requestVoiceSupportProbe(agentId: string) {
 
 export async function prepareA2AVoiceEnrollment(agentId: string) {
   return voiceEnrollmentAction(agentId, "prepare-a2a", "POST");
+}
+
+export type A2AMaintenanceState = "pending" | "claimed" | "running" | "completed" | "failed" | "expired";
+
+export type A2AMaintenanceRequest = {
+  requestId: string;
+  state: A2AMaintenanceState;
+  targetVersion: string;
+  createdAt: string;
+  expiresAt: string;
+  claimedAt?: string;
+  startedAt?: string;
+  completedAt?: string;
+  installedVersion?: string;
+  errorCode?: string;
+};
+
+function parseA2AMaintenanceRequest(payload: unknown): A2AMaintenanceRequest {
+  const source = payload && typeof payload === "object" ? payload as Record<string, unknown> : {};
+  const request = source.request && typeof source.request === "object" ? source.request as Record<string, unknown> : {};
+  const states: A2AMaintenanceState[] = ["pending", "claimed", "running", "completed", "failed", "expired"];
+  if (
+    typeof request.requestId !== "string" ||
+    typeof request.targetVersion !== "string" ||
+    typeof request.createdAt !== "string" ||
+    typeof request.expiresAt !== "string" ||
+    !states.includes(request.state as A2AMaintenanceState)
+  ) throw new Error("A2A maintenance API returned invalid data.");
+  return request as A2AMaintenanceRequest;
+}
+
+export async function createA2AMaintenanceUpdate(agentId: string): Promise<{ marker: string; request: A2AMaintenanceRequest }> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(`/api/agents/${encodeURIComponent(agentId)}/maintenance/a2a-update`, { method: "POST" });
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't create the A2A maintenance request"));
+  const marker = payload && typeof payload === "object" ? (payload as Record<string, unknown>).marker : undefined;
+  if (typeof marker !== "string" || !/^PERKOS_A2A_UPDATE:[0-9a-f-]{36}$/i.test(marker)) {
+    throw new Error("A2A maintenance API returned an invalid marker.");
+  }
+  return { marker, request: parseA2AMaintenanceRequest(payload) };
+}
+
+export async function getA2AMaintenanceUpdate(agentId: string, requestId: string): Promise<A2AMaintenanceRequest> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/agents/${encodeURIComponent(agentId)}/maintenance/a2a-update/${encodeURIComponent(requestId)}`,
+    { method: "GET" },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't load the A2A maintenance request"));
+  return parseA2AMaintenanceRequest(payload);
 }
 
 /**
