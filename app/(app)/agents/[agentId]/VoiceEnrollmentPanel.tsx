@@ -36,8 +36,8 @@ type Props = {
 
 type SafeChatAction = "update" | "probe" | "enroll";
 
-export const PERKOS_A2A_MANAGED_UPDATE_MIN_VERSION = "0.12.64";
-export const PERKOS_A2A_MANAGED_UPDATE_VERSION = "0.12.65";
+export const PERKOS_A2A_MANAGED_UPDATE_MIN_VERSION = "0.12.65";
+export const PERKOS_A2A_MANAGED_UPDATE_VERSION = "0.12.66";
 
 function shellQuote(value: string): string {
   return `'${value.replaceAll("'", `'"'"'`)}'`;
