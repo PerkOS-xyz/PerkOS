@@ -756,7 +756,7 @@ self-hosted and imported deploy modes. Test wallet
 ## 2026-05-30 — BYO end-to-end validated on LLM VPS
 
 End-to-end smoke against a fresh `self-hosted` launch on the LLM VPS
-(the LLM VPS). Agent: `PerkOS-Tester-v3` (id `vgXgI79rBap1F2ELkfhP`).
+. Agent: `PerkOS-Tester-v3` (id `vgXgI79rBap1F2ELkfhP`).
 No App code changes — this entry just records what the wizard now
 produces in production.
 
