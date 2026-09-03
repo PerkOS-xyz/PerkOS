@@ -695,7 +695,7 @@ OpenClaw fleet can join PerkOS without modifying their runtime.
 
 Full user-visible loop validated against `app.perkos.xyz` for BOTH
 self-hosted and imported deploy modes. Test wallet
-`0xc2564e41…8228f` on the LLM VPS (`46.225.62.30`).
+`0xc2564e41…8228f` on the LLM VPS.
 
 ### Mode 2 — self-hosted (full stack)
 
@@ -756,7 +756,7 @@ self-hosted and imported deploy modes. Test wallet
 ## 2026-05-30 — BYO end-to-end validated on LLM VPS
 
 End-to-end smoke against a fresh `self-hosted` launch on the LLM VPS
-(`46.225.62.30`). Agent: `PerkOS-Tester-v3` (id `vgXgI79rBap1F2ELkfhP`).
+. Agent: `PerkOS-Tester-v3` (id `vgXgI79rBap1F2ELkfhP`).
 No App code changes — this entry just records what the wizard now
 produces in production.
 
