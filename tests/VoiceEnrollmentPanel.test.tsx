@@ -32,7 +32,7 @@ const activeMaintenanceCapability = {
 function renderPanel(
   owner = true,
   canSend = true,
-  runtimeVersion: string | null = "0.12.64",
+  runtimeVersion: string | null = "0.12.65",
   maintenanceCapability = activeMaintenanceCapability,
 ) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
@@ -67,9 +67,9 @@ describe("VoiceEnrollmentPanel", () => {
     mocks.capability.mockResolvedValue({ capability: { state: "available", updatedAt: "2026-09-01T12:00:00.000Z" } });
     mocks.createUpdate.mockResolvedValue({
       marker: "PERKOS_A2A_UPDATE:1e1719e8-7e50-4dad-a7cf-754a86699d7d:16df04b5-706e-4dad-b303-3c78f67b989f",
-      request: { requestId: "1e1719e8-7e50-4dad-a7cf-754a86699d7d", state: "pending", targetVersion: "0.12.63", createdAt: "2026-09-02T12:00:00.000Z", expiresAt: "2026-09-02T12:10:00.000Z" },
+      request: { requestId: "1e1719e8-7e50-4dad-a7cf-754a86699d7d", state: "pending", targetVersion: "0.12.66", createdAt: "2026-09-02T12:00:00.000Z", expiresAt: "2026-09-02T12:10:00.000Z" },
     });
-    mocks.getUpdate.mockResolvedValue({ requestId: "1e1719e8-7e50-4dad-a7cf-754a86699d7d", state: "completed", targetVersion: "0.12.63", installedVersion: "0.12.63", createdAt: "2026-09-02T12:00:00.000Z", expiresAt: "2026-09-02T12:10:00.000Z" });
+    mocks.getUpdate.mockResolvedValue({ requestId: "1e1719e8-7e50-4dad-a7cf-754a86699d7d", state: "completed", targetVersion: "0.12.66", installedVersion: "0.12.66", createdAt: "2026-09-02T12:00:00.000Z", expiresAt: "2026-09-02T12:10:00.000Z" });
   });
 
   it("does not render or mint credentials for a non-owner", () => {
@@ -127,18 +127,19 @@ describe("VoiceEnrollmentPanel", () => {
     expect(await screen.findByText(/Bootstrap required/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Update integration" })).not.toBeInTheDocument();
     const instructions = buildHermesA2ABootstrapInstructions("athena'$(touch /tmp/nope)");
-    expect(instructions).toContain("@perkos/perkos-a2a@0.12.65 update-hermes");
+    expect(instructions).toContain("@perkos/perkos-a2a@0.12.66 update-hermes");
     expect(instructions).toContain("--agent-id 'athena'\"'\"'$(touch /tmp/nope)' --json");
   });
 
   it("fails closed when semver is compatible but Chat-bound capability is absent or stale", () => {
     const now = new Date("2026-09-02T12:03:00.000Z");
-    expect(supportsManagedA2AUpdate("0.12.64", null, now)).toBe(false);
-    expect(supportsManagedA2AUpdate("0.12.64", {
+    expect(supportsManagedA2AUpdate("0.12.64", activeMaintenanceCapability, now)).toBe(false);
+    expect(supportsManagedA2AUpdate("0.12.65", null, now)).toBe(false);
+    expect(supportsManagedA2AUpdate("0.12.65", {
       ...activeMaintenanceCapability,
       expiresAt: "2026-09-02T12:02:05.000Z",
     }, now)).toBe(false);
-    expect(supportsManagedA2AUpdate("0.12.64", {
+    expect(supportsManagedA2AUpdate("0.12.65", {
       ...activeMaintenanceCapability,
       expiresAt: "2026-09-02T12:05:05.000Z",
     }, now)).toBe(true);
