@@ -1391,7 +1391,7 @@
       "confirmLabel": "Actualizar agente"
     },
     "voice": {
-      "liveWith": "En llamada con {{name}}", "callAgent": "Llamar a {{name}}", "endingCall": "Finalizando llamada…", "ending": "Finalizando…", "endCall": "Finalizar llamada",
+      "liveWith": "En llamada con {{name}}", "callAgent": "Llamar a {{name}}", "setupCalls": "Configurar llamadas", "checkingCalls": "Comprobando llamadas…", "endingCall": "Finalizando llamada…", "ending": "Finalizando…", "endCall": "Finalizar llamada",
       "workingCall": "Llamada de trabajo", "privateCall": "Llamada privada", "working": "Trabajo", "private": "Privada", "voice": "Voz {{voice}}",
       "unavailableDescription": "{{name}} no ha reportado un gateway de voz y proveedor de voz verificados. Tener chat disponible no habilita la voz.",
       "duration": "Duración de la llamada {{duration}}", "unmute": "Activar micrófono", "mute": "Silenciar", "start": "Iniciar llamada de voz",
