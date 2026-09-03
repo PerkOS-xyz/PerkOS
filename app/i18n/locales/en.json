@@ -1391,7 +1391,7 @@
       "confirmLabel": "Update agent"
     },
     "voice": {
-      "liveWith": "Live with {{name}}", "callAgent": "Call {{name}}", "endingCall": "Ending call…", "ending": "Ending…", "endCall": "End call",
+      "liveWith": "Live with {{name}}", "callAgent": "Call {{name}}", "setupCalls": "Set up calls", "checkingCalls": "Checking calls…", "endingCall": "Ending call…", "ending": "Ending…", "endCall": "End call",
       "workingCall": "Working Call", "privateCall": "Private Call", "working": "Working", "private": "Private", "voice": "Voice {{voice}}",
       "unavailableDescription": "{{name}} has not reported a verified voice gateway and speech provider. Chat availability does not enable voice.",
       "duration": "Call duration {{duration}}", "unmute": "Unmute", "mute": "Mute", "start": "Start voice call",

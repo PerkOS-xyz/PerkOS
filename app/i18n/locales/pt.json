@@ -1476,6 +1476,8 @@
     "voice": {
       "liveWith": "Ao vivo com {{name}}",
       "callAgent": "Ligar para {{name}}",
+      "setupCalls": "Configurar chamadas",
+      "checkingCalls": "Verificando chamadas…",
       "endingCall": "Encerrando chamada…",
       "ending": "Encerrando…",
       "endCall": "Encerrar chamada",

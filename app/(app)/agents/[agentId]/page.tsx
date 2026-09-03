@@ -53,6 +53,7 @@ import {
 import {
   deleteAgent,
   getAgentGateways,
+  getAgentVoiceCapabilityApi,
   getHibernationStatusApi,
   getWalletAgents,
   getWalletProject,
@@ -106,6 +107,17 @@ export const agentDetailResponsiveLayout = {
     "flex h-[calc(100svh-18rem)] overflow-hidden md:h-[calc(100dvh-13rem)] xl:h-[min(48rem,calc(100dvh-18rem))] xl:min-h-[32rem] xl:overflow-hidden",
   settingsBase: "flex-col gap-6 xl:flex",
 } as const;
+
+export function voiceHeaderActionPolicy(input: {
+  projectReady: boolean;
+  loading: boolean;
+  available?: boolean;
+  status?: string;
+}): "call" | "checking" | "setup" {
+  if (input.projectReady && input.available && input.status === "ready") return "call";
+  if (input.projectReady && input.loading) return "checking";
+  return "setup";
+}
 
 function initials(name: string): string {
   return name
@@ -217,6 +229,24 @@ export default function AgentDetailPage({ params }: PageProps) {
   }, [agent, projectDetails]);
 
   const voiceProject = useMemo(() => agent ? projectDetails.map((query) => query.data).find((detail) => detail?.project.agentIds?.includes(agent.name)) : undefined, [agent, projectDetails]);
+  const voiceProjectId = voiceProject?.project.id ?? "";
+  const voiceCapabilityQuery = useQuery({
+    queryKey: ["agent-voice-capability", voiceProjectId, agentId],
+    queryFn: () => getAgentVoiceCapabilityApi({ projectId: voiceProjectId, agentId }),
+    enabled: Boolean(voiceProjectId),
+    refetchInterval: 15_000,
+  });
+  const voiceAction = voiceHeaderActionPolicy({
+    projectReady: Boolean(voiceProjectId),
+    loading: voiceCapabilityQuery.isLoading || voiceCapabilityQuery.isFetching,
+    available: voiceCapabilityQuery.data?.available,
+    status: voiceCapabilityQuery.data?.status,
+  });
+  const voiceActionLabel = voiceAction === "call"
+    ? t("agentDetail.voice.callAgent", { name: agent?.displayName ?? agent?.name ?? "" })
+    : voiceAction === "checking"
+      ? t("agentDetail.voice.checkingCalls")
+      : t("agentDetail.voice.setupCalls");
 
   const channels = useMemo(
     () => (gatewaysQuery.data?.gateways ?? []).filter((gateway) => gateway.enabled),
@@ -285,7 +315,7 @@ export default function AgentDetailPage({ params }: PageProps) {
 
       <div className="hidden flex-col gap-6 xl:flex">
         <BackLink />
-        <AgentHeader agent={agent} onRefresh={refresh} refreshing={agentsQuery.isFetching} walletAddress={address ?? ""} onCall={() => setVoiceOpen(true)} />
+        <AgentHeader agent={agent} onRefresh={refresh} refreshing={agentsQuery.isFetching} walletAddress={address ?? ""} onCall={() => setVoiceOpen(true)} voiceAction={voiceAction} voiceActionLabel={voiceActionLabel} />
       </div>
 
       <section role="tabpanel" aria-label={t("agentDetail.view.conversation")} className={cn(agentDetailResponsiveLayout.conversationBase, mobileView === "conversation" ? agentDetailResponsiveLayout.conversationActive : "hidden")}>
@@ -296,8 +326,8 @@ export default function AgentDetailPage({ params }: PageProps) {
           <p className="text-xs text-muted-foreground">{t("agentDetail.voiceCall.title")}</p>
         </div>
         <Button type="button" size="sm" className="shrink-0 gap-1.5" onClick={() => setVoiceOpen(true)}>
-          <Phone className="h-4 w-4" />
-          {t("agentDetail.voice.callAgent", { name: agent.displayName ?? agent.name })}
+          {voiceAction === "call" ? <Phone className="h-4 w-4" /> : <Wrench className="h-4 w-4" />}
+          {voiceActionLabel}
         </Button>
       </div>
 
@@ -341,7 +371,7 @@ export default function AgentDetailPage({ params }: PageProps) {
       <section role="tabpanel" aria-label={t("agentDetail.view.settings")} className={cn(agentDetailResponsiveLayout.settingsBase, mobileView === "settings" ? "flex" : "hidden")}>
       <div className="flex flex-col gap-4 xl:hidden">
         <BackLink />
-        <AgentHeader agent={agent} onRefresh={refresh} refreshing={agentsQuery.isFetching} walletAddress={address ?? ""} onCall={() => setVoiceOpen(true)} />
+        <AgentHeader agent={agent} onRefresh={refresh} refreshing={agentsQuery.isFetching} walletAddress={address ?? ""} onCall={() => setVoiceOpen(true)} voiceAction={voiceAction} voiceActionLabel={voiceActionLabel} />
       </div>
 
       <section className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -428,7 +458,7 @@ export default function AgentDetailPage({ params }: PageProps) {
           className="inset-x-0 bottom-0 left-0 top-auto max-h-[88dvh] w-full max-w-none translate-x-0 translate-y-0 grid-cols-[minmax(0,1fr)] gap-0 overflow-hidden rounded-b-none rounded-t-2xl p-0 sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:max-w-2xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl"
         >
           <DialogHeader className="border-b border-border p-4 pr-12">
-            <DialogTitle>{t("agentDetail.voice.callAgent", { name: agent.displayName ?? agent.name })}</DialogTitle>
+            <DialogTitle>{voiceAction === "call" ? t("agentDetail.voice.callAgent", { name: agent.displayName ?? agent.name }) : t("agentDetail.voice.setupCalls")}</DialogTitle>
             <DialogDescription>{t("agentDetail.voiceCall.title")}</DialogDescription>
           </DialogHeader>
           <div className="min-h-0 overflow-y-auto p-3 sm:p-4">
@@ -480,12 +510,16 @@ function AgentHeader({
   refreshing,
   walletAddress,
   onCall,
+  voiceAction,
+  voiceActionLabel,
 }: {
   agent: AgentRow;
   onRefresh: () => void;
   refreshing: boolean;
   walletAddress: string;
   onCall: () => void;
+  voiceAction: "call" | "checking" | "setup";
+  voiceActionLabel: string;
 }) {
   const { t } = useTranslation();
   const [editOpen, setEditOpen] = useState(false);
@@ -604,8 +638,8 @@ function AgentHeader({
 
       <div className="flex items-center gap-2">
         <Button type="button" size="sm" onClick={onCall} className="gap-1.5">
-          <Phone className="h-3.5 w-3.5" />
-          {t("agentDetail.voice.callAgent", { name: displayName })}
+          {voiceAction === "call" ? <Phone className="h-3.5 w-3.5" /> : <Wrench className="h-3.5 w-3.5" />}
+          {voiceActionLabel}
         </Button>
         {isRunning ? (
           <Button
