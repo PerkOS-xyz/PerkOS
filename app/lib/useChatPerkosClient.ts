@@ -22,6 +22,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { firebaseAuth } from "./firebase";
+import type { AgentChatProgress } from "./agentChatTurns";
 
 const DEFAULT_CHAT_URL =
   process.env.NEXT_PUBLIC_PERKOS_CHAT_URL ?? "wss://chat.perkos.xyz/chat";
@@ -93,6 +94,7 @@ type Options = {
   /** Optional. Called when a `history_chunk` arrives in response to a
    *  prior `requestHistory()` call (or any in-flight history pull). */
   onHistory?: (chunk: ChatPerkosHistoryChunk) => void;
+  onProgress?: (progress: AgentChatProgress) => void;
 };
 
 function newId(): string {
@@ -109,7 +111,7 @@ export function frameBelongsToConversation(
 }
 
 export function useChatPerkosClient(opts: Options): ChatPerkosState {
-  const { convId, enabled, onMessage, onHistory } = opts;
+  const { convId, enabled, onMessage, onHistory, onProgress } = opts;
   const [authed, setAuthed] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -119,8 +121,10 @@ export function useChatPerkosClient(opts: Options): ChatPerkosState {
   const wsRef = useRef<WebSocket | null>(null);
   const onMessageRef = useRef(onMessage);
   const onHistoryRef = useRef(onHistory);
+  const onProgressRef = useRef(onProgress);
   useEffect(() => { onMessageRef.current = onMessage; }, [onMessage]);
   useEffect(() => { onHistoryRef.current = onHistory; }, [onHistory]);
+  useEffect(() => { onProgressRef.current = onProgress; }, [onProgress]);
 
   const reconnectAttemptsRef = useRef(0);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -293,15 +297,22 @@ export function useChatPerkosClient(opts: Options): ChatPerkosState {
             // Nothing to do until the chunk arrives.
             return;
 
+          case "typing": {
+            if (!frameBelongsToConversation(frame, activeConvId) || typeof frame.from !== "string") return;
+            const phase = ["accepted", "running", "recovering", "completed", "uncertain"].includes(String(frame.phase))
+              ? frame.phase as AgentChatProgress["phase"] : undefined;
+            onProgressRef.current?.({ from: frame.from, replyTo: typeof frame.replyTo === "string" ? frame.replyTo : null,
+              state: frame.state === "stop" ? "stop" : "start", phase });
+            return;
+          }
           case "ack":
-          case "typing":
           case "presence":
             // Not used by v1 of this panel.
             return;
 
           default:
             // Unknown frame type — log for debugging, ignore otherwise.
-            console.debug("[chat-perkos] unknown frame", frame);
+            // Unknown frames may contain private payloads; do not log them.
         }
       });
 
@@ -340,6 +351,7 @@ export function useChatPerkosClient(opts: Options): ChatPerkosState {
         wsRef.current.close(1000, "unmount");
         wsRef.current = null;
       }
+      pendingRef.current = [];
       setAuthed(false);
     };
   }, [enabled, convId, flushPending]);

@@ -1,12 +1,16 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createRef } from "react";
+import type { AgentChatProgress } from "../app/lib/agentChatTurns";
+import type { ChatPerkosMessage, ChatPerkosHistoryChunk } from "../app/lib/useChatPerkosClient";
 
 const mocks = vi.hoisted(() => ({
   ensureAgentAwakeApi: vi.fn(),
   recordAgentActivityApi: vi.fn(),
   chatSend: vi.fn(() => "message-1"),
-  chatOptions: null as null | { onMessage: (message: { id: string; from: string; text: string; timestamp: string; event?: { domain?: string } }) => void },
+  authed: true,
+  requestHistory: vi.fn(() => "history-fixture"),
+  chatOptions: null as null | { onMessage: (message: ChatPerkosMessage) => void; onHistory?: (chunk: ChatPerkosHistoryChunk) => void; onProgress?: (progress: AgentChatProgress) => void },
 }));
 
 vi.mock("wagmi", async () => {
@@ -42,9 +46,9 @@ vi.mock("../app/lib/useChatPerkosClient", () => ({
   useChatPerkosClient: (options: typeof mocks.chatOptions) => {
     mocks.chatOptions = options;
     return ({
-    authed: true,
+    authed: mocks.authed,
     error: null,
-    requestHistory: vi.fn(() => false),
+    requestHistory: mocks.requestHistory,
     send: mocks.chatSend,
     });
   },
@@ -64,6 +68,39 @@ describe("AgentChatPanel hibernation policy", () => {
     mocks.recordAgentActivityApi.mockResolvedValue(undefined);
     mocks.chatSend.mockClear();
     mocks.chatOptions = null;
+    mocks.authed = true;
+    mocks.requestHistory.mockClear();
+  });
+  afterEach(() => { vi.useRealTimers(); });
+
+  it("keeps a 90-second wait nonterminal and clears it on a deduplicated late final", async () => {
+    vi.useFakeTimers();
+    render(<AgentChatPanel agentId="fixture" agentName="Fixture" chatEnabled hibernationEnabled={false} />);
+    fireEvent.change(screen.getByPlaceholderText("Message Fixture…"), { target: { value: "Long task" } });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+    await act(async () => { await vi.advanceTimersByTimeAsync(90_001); });
+    expect(screen.getByRole("status")).toHaveTextContent("this wait does not cancel the work");
+    expect(screen.queryByText(/connected but did not/i)).not.toBeInTheDocument();
+    act(() => {
+      const message = { id: "final-fixture", from: "agent:fixture", text: "Final answer", replyTo: "message-1", timestamp: new Date().toISOString() };
+      mocks.chatOptions?.onMessage(message);
+      mocks.chatOptions?.onMessage(message);
+      mocks.chatOptions?.onHistory?.({ requestId: "history-fixture", hasMore: false, messages: [message] });
+    });
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Final answer")).toHaveLength(1);
+  });
+
+  it("requests fresh history after a socket reconnect", () => {
+    const props = { agentId: "fixture", agentName: "Fixture", chatEnabled: true, hibernationEnabled: false };
+    const view = render(<AgentChatPanel {...props} />);
+    expect(mocks.requestHistory).toHaveBeenCalledTimes(1);
+    act(() => mocks.chatOptions?.onHistory?.({ requestId: "history-fixture", hasMore: false, messages: [] }));
+    mocks.authed = false;
+    view.rerender(<AgentChatPanel {...props} />);
+    mocks.authed = true;
+    view.rerender(<AgentChatPanel {...props} />);
+    expect(mocks.requestHistory).toHaveBeenCalledTimes(2);
   });
 
   it("sends directly to an invited agent without trying to wake it", async () => {
@@ -169,21 +206,21 @@ describe("AgentChatPanel hibernation policy", () => {
     expect(screen.getByPlaceholderText("Message Alice…")).toBeEnabled();
   });
 
-  it("directs external OpenClaw timeouts to plugin and model routing logs", () => {
+  it("does not misdiagnose a long external turn as a runtime failure", () => {
     const message = agentResponseTimeoutMessage({
       agentName: "Alice",
       externalAgent: true,
       runtimeKind: "OpenClaw",
     });
     expect(message).toBe(
-      "No response from Alice after 90s. The external OpenClaw agent is connected but did not return a reply. Check the external runtime/plugin logs or model routing.",
+      "Still waiting for Alice's final reply. Longer tasks can take several minutes; this wait does not cancel the work.",
     );
     expect(message).not.toMatch(/hibernat|container|wake/i);
   });
 
-  it("keeps the managed-agent hibernation guidance", () => {
+  it("uses nonterminal waiting guidance for managed agents too", () => {
     expect(agentResponseTimeoutMessage({ agentName: "Managed", externalAgent: false }))
-      .toContain("If the agent was hibernated");
+      .toContain("this wait does not cancel the work");
   });
 
   it("distinguishes persisted final voice messages from live response status", () => {
