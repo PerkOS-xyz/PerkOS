@@ -26,6 +26,7 @@ import {
   type HibernationStatus,
 } from "../../../lib/perkosApi";
 import { useChatPerkosClient } from "../../../lib/useChatPerkosClient";
+import { applyChatProgress, completeChatTurn, emptyChatTurns, mergeAgentChatBubbles } from "../../../lib/agentChatTurns";
 import { getHibernationStatusApi } from "../../../lib/perkosApi";
 import { ConfirmDialog } from "../../../components/ConfirmDialog";
 import type { ExternalRuntimeAvailability } from "../../../lib/agentHostingPolicy";
@@ -82,19 +83,7 @@ export function agentResponseTimeoutMessage(input: {
   externalAgent: boolean;
   runtimeKind?: string;
 }): string {
-  if (input.externalAgent) {
-    const runtime = input.runtimeKind?.trim();
-    return (
-      `No response from ${input.agentName} after 90s. ` +
-      `The external${runtime ? ` ${runtime}` : ""} agent is connected but did not return a reply. ` +
-      "Check the external runtime/plugin logs or model routing."
-    );
-  }
-  return (
-    `No response from ${input.agentName} after 90s. ` +
-    "If the agent was hibernated, give it another moment to wake — " +
-    "your message should land once the runtime is online."
-  );
+  return `Still waiting for ${input.agentName}'s final reply. Longer tasks can take several minutes; this wait does not cancel the work.`;
 }
 
 export const AgentChatPanel = forwardRef<AgentChatPanelHandle, Props>(function AgentChatPanel({
@@ -103,7 +92,6 @@ export const AgentChatPanel = forwardRef<AgentChatPanelHandle, Props>(function A
   chatEnabled,
   hibernationEnabled,
   externalAgent = false,
-  runtimeKind,
   runtimeAvailability,
 }: Props, ref) {
   const { t } = useTranslation();
@@ -112,7 +100,10 @@ export const AgentChatPanel = forwardRef<AgentChatPanelHandle, Props>(function A
   const [messages, setMessages] = useState<Bubble[]>([]);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [awaitingReply, setAwaitingReply] = useState(false);
+  const [turns, setTurns] = useState(emptyChatTurns);
+  const awaitingReply = turns.pending.some((turn) => turn.phase !== "uncertain");
+  const slowReply = turns.pending.some((turn) => turn.slow && turn.phase !== "uncertain");
+  const uncertainReply = turns.pending.some((turn) => turn.phase === "uncertain");
   const [confirmClearOpen, setConfirmClearOpen] = useState(false);
 
   // Track ids we just sent so the WS echo (chat_message broadcast back
@@ -156,8 +147,7 @@ export const AgentChatPanel = forwardRef<AgentChatPanelHandle, Props>(function A
         return;
       }
       const isFromAgent = msg.from.startsWith("agent:");
-      setMessages((prev) => [
-        ...prev,
+      setMessages((prev) => mergeAgentChatBubbles(prev, [
         {
           id: msg.id,
           role: isFromAgent ? "agent" : "user",
@@ -165,10 +155,13 @@ export const AgentChatPanel = forwardRef<AgentChatPanelHandle, Props>(function A
           ts: msg.timestamp ? new Date(msg.timestamp).getTime() : Date.now(),
           voice: isPersistedVoiceMessage(msg.event),
         },
-      ]);
-      if (isFromAgent) setAwaitingReply(false);
+      ]));
+      if (isFromAgent) setTurns((prev) => completeChatTurn(prev, msg));
     },
+    onProgress: (progress) => setTurns((prev) => applyChatProgress(prev, progress, Date.now())),
     onHistory: (chunk) => {
+      historyPulledRef.current = true;
+      setTurns((prev) => chunk.messages.reduce(completeChatTurn, prev));
       // history_chunk is oldest-first within the chunk. Dedup by id +
       // prepend so re-pulls don't double-render. The Set check below
       // is simple and correct for the < ~50 msg pages we pull.
@@ -183,7 +176,7 @@ export const AgentChatPanel = forwardRef<AgentChatPanelHandle, Props>(function A
             ts: m.timestamp ? new Date(m.timestamp).getTime() : Date.now(),
             voice: isPersistedVoiceMessage(m.event),
           }));
-        return [...incoming, ...prev];
+        return mergeAgentChatBubbles(prev, incoming);
       });
     },
   });
@@ -193,16 +186,29 @@ export const AgentChatPanel = forwardRef<AgentChatPanelHandle, Props>(function A
   // effect on every chat-state change.
   const { authed: chatAuthed, requestHistory } = chat;
   useEffect(() => {
-    if (!chatAuthed || historyPulledRef.current || !convId) return;
-    if (requestHistory({ limit: 50 })) {
-      historyPulledRef.current = true;
-    }
+    historyPulledRef.current = false;
+    if (!chatAuthed || !convId) return;
+    requestHistory({ limit: 50 });
+    let attempts = 0;
+    const retry = setInterval(() => {
+      if (!historyPulledRef.current && attempts++ < 3) requestHistory({ limit: 50 });
+    }, 15_000);
+    const refresh = () => {
+      if (document.visibilityState === "visible") requestHistory({ limit: 50 });
+    };
+    document.addEventListener("visibilitychange", refresh);
+    return () => { clearInterval(retry); document.removeEventListener("visibilitychange", refresh); };
   }, [chatAuthed, requestHistory, convId]);
 
   // Reset history-pulled flag when convId changes (different agent or
   // different wallet) so the next active conv pulls fresh.
   useEffect(() => {
     historyPulledRef.current = false;
+    sentIdsRef.current.clear();
+    // A different conversation must not retain another conversation's messages or pending turns.
+    setMessages([]);
+    setTurns(emptyChatTurns);
+    setError(null);
   }, [convId]);
 
   // Derive "show typing indicator" rather than syncing state — avoids
@@ -219,22 +225,15 @@ export const AgentChatPanel = forwardRef<AgentChatPanelHandle, Props>(function A
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages.length, showTyping]);
 
-  // Timeout fallback for the "thinking…" indicator. Managed runtimes may be
-  // waking from hibernation; external runtimes instead need their own plugin
-  // and model-routing diagnostics. Never suggest PerkOS container lifecycle
-  // actions for infrastructure the owner operates.
+  // The browser deadline describes the wait, never the runtime's terminal state.
   useEffect(() => {
-    if (!awaitingReply) return;
+    const next = turns.pending.filter((turn) => !turn.slow).sort((a, b) => a.sentAt - b.sentAt)[0];
+    if (!next) return;
     const timer = setTimeout(() => {
-      setAwaitingReply(false);
-      setError(
-        externalAgent
-          ? t("agentDetail.chat.externalTimeout", { name: agentName, runtime: runtimeKind ? ` ${runtimeKind}` : "" })
-          : t("agentDetail.chat.managedTimeout", { name: agentName }),
-      );
-    }, 90_000);
+      setTurns((prev) => ({ ...prev, pending: prev.pending.map((turn) => ({ ...turn, slow: turn.slow || Date.now() - turn.sentAt >= 90_000 })) }));
+    }, Math.max(0, next.sentAt + 90_000 - Date.now()));
     return () => clearTimeout(timer);
-  }, [awaitingReply, agentName, externalAgent, runtimeKind, t]);
+  }, [turns.pending]);
 
   async function send(text: string): Promise<boolean> {
     const trimmed = text.trim();
@@ -284,7 +283,7 @@ export const AgentChatPanel = forwardRef<AgentChatPanelHandle, Props>(function A
       { id, role: "user", text: trimmed, ts: Date.now() },
     ]);
     setDraft("");
-    setAwaitingReply(true);
+    setTurns((prev) => ({ ...prev, pending: [...prev.pending, { id, sentAt: Date.now(), updatedAt: Date.now(), phase: "accepted" }] }));
 
     // Stamp real user activity so the curator's idle timer resets on use.
     // Fire-and-forget — a missed ping never breaks the send.
@@ -316,7 +315,7 @@ export const AgentChatPanel = forwardRef<AgentChatPanelHandle, Props>(function A
     setMessages([]);
     sentIdsRef.current.clear();
     historyPulledRef.current = true;
-    setAwaitingReply(false);
+    setTurns(emptyChatTurns);
     setError(null);
     setConfirmClearOpen(false);
     toast.success(t("agentDetail.chat.cleared"));
@@ -442,7 +441,7 @@ export const AgentChatPanel = forwardRef<AgentChatPanelHandle, Props>(function A
             <div className="flex justify-start">
               <div className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm text-muted-foreground">
                 <Loader2 className="h-3 w-3 animate-spin" />
-                {t("agentDetail.chat.responding", { name: agentName })}
+                {t("agentDetail.chat.waitingForReply", { name: agentName })}
               </div>
             </div>
           ) : null}
@@ -450,6 +449,12 @@ export const AgentChatPanel = forwardRef<AgentChatPanelHandle, Props>(function A
 
         {connError ? (
           <p className="text-xs text-destructive">{connError}</p>
+        ) : null}
+        {slowReply ? (
+          <p role="status" className="text-xs text-amber-300">{t("agentDetail.chat.slowReply", { name: agentName })}</p>
+        ) : null}
+        {uncertainReply ? (
+          <p role="status" className="text-xs text-amber-300">{t("agentDetail.chat.uncertainReply")}</p>
         ) : null}
 
         {externalAgent && runtimeAvailability === "unavailable" ? (
