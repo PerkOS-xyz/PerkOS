@@ -70,6 +70,7 @@ export async function proxyPlatformRequest(
     });
 
     const responseHeaders = new Headers();
+    responseHeaders.set("cache-control", "private, no-store");
     for (const name of RESPONSE_HEADERS) {
       const value = upstream.headers.get(name);
       if (value) responseHeaders.set(name, value);
