@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { authedFetch } from "../lib/apiClient";
 import { useAppAccount } from "../lib/useAppAccount";
+import { ArtizenCreatorWorkflow } from "./ArtizenCreatorWorkflow";
 import {
   type ProjectTemplate,
   templateText,
@@ -59,8 +60,8 @@ export function ProjectTemplateConfiguration({
       </h2>
       <p className="my-3 text-sm text-muted-foreground">
         {es
-          ? "Configuración guardada. Hermes y las tareas recurrentes aún no están activados."
-          : "Configuration saved. Hermes and recurring tasks are not activated yet."}
+          ? "Configuración guardada. Las tareas recurrentes no están activadas."
+          : "Configuration saved. Recurring tasks are not enabled."}
       </p>
       <details>
         <summary>
@@ -81,6 +82,7 @@ export function ProjectTemplateConfiguration({
             ))}
         </dl>
       </details>
+      {result.template.id === "artizen-creator-update" && <ArtizenCreatorWorkflow key={key} projectId={projectId} />}
     </section>
   );
 }
