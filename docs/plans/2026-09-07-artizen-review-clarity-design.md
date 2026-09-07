@@ -18,4 +18,11 @@ Sustituir sugerencias libres del modelo por comprobaciones neutrales EN/ES escri
 
 ## Verificación
 
-Tests del componente real para EN/ES, reposo/salida incierta, memoria guardada tras remontaje, origen correcto, edición no guardada y supresión de sugerencias históricas. Mantener confirmaciones web, presupuesto e idempotencia, sin nuevo polling. Comprobar diseño a 390 px y escritorio con fixtures locales identificadas, sin inferencia real. API con regresiones de prompt y normalización/recovery. Publicar PRs a development; desplegar tras merge.
+Tests del componente real para EN/ES, reposo/salida incierta, memoria guardada tras remontaje, origen correcto, edición no guardada y supresión de sugerencias históricas. Mantener confirmaciones web, presupuesto e idempotencia, sin nuevo polling. Comprobar diseño a 390 px y escritorio con fixtures locales identificadas, sin inferencia real. API con regresiones de prompt y normalización pública, sin alterar recovery. Publicar PRs a development; desplegar tras merge.
+
+## Evidencia local
+
+- 573 pruebas PASS (103 archivos), 14 del componente; typecheck y ESLint focalizado PASS. Primer intento de suite completa bloqueado por sockets EPERM; repetición autorizada PASS.
+- Build Next.js PASS con configuración pública Firebase ficticia para compilar, no configuración desplegada ni prueba de conexión.
+- Componente real con fixture aislada en Chrome: 390×844 ES y 1440×1000 EN, sin desbordamiento horizontal. Modal web móvil comprobado y cancelado; ejemplo guardado abierto. Tailwind real con fuentes del repo; tipografía de preview usa Arial, no certifica Poppins de producción. Preview cerrada y viewport restaurado.
+- Ninguna inferencia cloud, migración o despliegue en esta corrección. Etiqueta accesible Close del diálogo compartido sigue siendo un pendiente previo de localización, fuera del cambio focalizado.
