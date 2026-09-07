@@ -478,6 +478,9 @@ export function isSpeechVoice(value: unknown): value is SpeechVoice {
 }
 
 export type AgentRow = Agent & {
+  presenceSource?:"redis";
+  presenceUnavailable?:boolean;
+  presenceExpiresAt?:number;
   /**
    * True when the agent belongs to another wallet and reached the caller
    * through an organization. Its owner keeps every destructive control.
@@ -584,6 +587,8 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
           : null,
       runtimeHealthy: data.runtimeHealthy === true,
       runtimeHealthCheckedAt: tsToIso(data.runtimeHealthCheckedAt),
+      presenceSource:data.presenceSource==="redis"?"redis":undefined,
+      presenceExpiresAt:typeof data.presenceExpiresAt==="number"?data.presenceExpiresAt:undefined,
       lastRuntimeSeenAt: tsToIso(data.lastRuntimeSeenAt),
       note: typeof data.note === "string" ? data.note : null,
       hostAgent: typeof data.hostAgent === "string" ? data.hostAgent : null,
@@ -1947,17 +1952,24 @@ export async function getWalletAgents(
   // coming from Firestore so the page loses none of the fields it renders.
   // A failure here must not take the page down: the caller still has their own.
   let shared: AgentRow[] = [];
+  let liveOwn:Record<string,Partial<AgentRow>>={};
   try {
     const { authedFetch } = await import("./apiClient");
     const res = await authedFetch("/api/agents");
     if (res.ok) {
       const body = (await res.json()) as { agents?: (AgentRow & { shared?: boolean })[] };
       shared = (body.agents ?? []).filter((a) => a.shared === true);
+      liveOwn=Object.fromEntries((body.agents??[]).filter(a=>!a.shared&&a.presenceSource==="redis").map(a=>[a.id,{
+        presenceSource:a.presenceSource,presenceExpiresAt:a.presenceExpiresAt,bridgeConnected:a.bridgeConnected,
+        presenceUnavailable:a.presenceUnavailable,
+        status:a.status,
+        lastBridgeSeenAt:a.lastBridgeSeenAt,runtimeStatus:a.runtimeStatus,runtimeHealthCheckedAt:a.runtimeHealthCheckedAt,
+      }]));
     }
   } catch {
     shared = [];
   }
-  return [...own, ...shared];
+  return [...own.map(a=>({...a,...liveOwn[a.id]})), ...shared];
 }
 
 export async function updateAgent(input: {

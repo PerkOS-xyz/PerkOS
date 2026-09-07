@@ -1,4 +1,5 @@
 "use client";
+import {useAgentPresence} from "../../../lib/useAgentPresence";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -152,12 +153,14 @@ export default function AgentDetailPage({ params }: PageProps) {
     refetchInterval: (query) => {
       const agents = query.state.data as AgentRow[] | undefined;
       return agents?.some((candidate) => candidate.id === agentId && candidate.invited)
-        ? 5_000
+        ? (agents.some(a=>a.presenceSource==="redis")?60_000:5_000)
         : false;
     },
   });
 
-  const agent = agentsQuery.data?.find((a) => a.id === agentId);
+  const storedAgent = agentsQuery.data?.find((a) => a.id === agentId);
+  const presence=useAgentPresence(address,storedAgent&&!storedAgent.shared?[agentId]:[]);
+  const agent=storedAgent?{...storedAgent,...presence[agentId]}:undefined;
 
   const gatewaysQuery = useQuery({
     queryKey: ["agent-gateways", agentId],
@@ -545,6 +548,8 @@ function AgentHeader({
               lastBridgeSeenAt={agent.lastBridgeSeenAt}
               runtimeStatus={agent.runtimeStatus}
               runtimeHealthCheckedAt={agent.runtimeHealthCheckedAt}
+              presenceExpiresAt={agent.presenceExpiresAt}
+              presenceUnavailable={agent.presenceUnavailable}
               hibernationState={hibState}
               syncing={hibSyncing}
             />
@@ -615,6 +620,8 @@ function AgentHeader({
 }
 
 function StatusBadge({
+  presenceExpiresAt,
+  presenceUnavailable,
   status,
   external,
   bridgeConnected,
@@ -625,6 +632,8 @@ function StatusBadge({
   syncing,
 }: {
   status: Agent["status"];
+  presenceExpiresAt?:number;
+  presenceUnavailable?:boolean;
   external?: boolean;
   bridgeConnected?: boolean;
   lastBridgeSeenAt?: string | null;
@@ -636,6 +645,8 @@ function StatusBadge({
   const { t } = useTranslation();
   if (external && status === "ready") {
     const availability = externalRuntimeAvailability({
+      presenceExpiresAt,
+      presenceUnavailable,
       bridgeConnected,
       lastBridgeSeenAt,
       runtimeStatus,

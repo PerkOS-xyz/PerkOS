@@ -11,6 +11,14 @@ import {
 } from "@/app/(app)/agents/new/wizard/types";
 
 describe("agent hosting policy", () => {
+  it("uses a bounded presence lease instead of the legacy 90-second Firestore clock",()=>{
+    const now=Date.now();
+    const agent={bridgeConnected:true,lastBridgeSeenAt:new Date(now-120_000).toISOString(),
+      runtimeHealthCheckedAt:new Date(now-120_000).toISOString(),runtimeStatus:"healthy" as const,presenceExpiresAt:now+60_000};
+    expect(externalRuntimeAvailability(agent,now)).toBe("online");
+    expect(externalRuntimeAvailability(agent,now+60_001)).toBe("offline");
+    expect(externalRuntimeAvailability({...agent,runtimeStatus:"unknown"},now)).toBe("unverified");
+  });
   it("supports PerkOS ECS, a user VPS, and invited agents", () => {
     expect(isAllowedAgentHosting({ managed: true })).toBe(true);
     expect(isAllowedAgentHosting({ selfHosted: true })).toBe(true);

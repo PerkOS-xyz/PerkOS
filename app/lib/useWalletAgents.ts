@@ -5,8 +5,12 @@ import { useEffect, useState } from "react";
 
 import { firebaseDb } from "./firebase";
 import { externalRuntimeAvailability } from "./agentHostingPolicy";
+import {useAgentPresence} from "./useAgentPresence";
 
 export type AgentLiveStatus = {
+  shared?:boolean;
+  presenceExpiresAt?:number;
+  presenceUnavailable?:boolean;
   id: string; // the agent doc id (for wake/hibernate calls)
   name: string;
   status: string; // top-level provision/heartbeat status (ready | provisioning | …)
@@ -54,6 +58,7 @@ export function useWalletAgents(
   walletAddress: string | null | undefined
 ): State {
   const [state, setState] = useState<State>({ byName: {}, loaded: false });
+  const presence=useAgentPresence(walletAddress,Object.values(state.byName).filter(a=>!a.shared).map(a=>a.id));
 
   useEffect(() => {
     if (!walletAddress) {
@@ -97,6 +102,7 @@ export function useWalletAgents(
                 ? data.runtimeStatus
                 : null,
             runtimeHealthCheckedAt: tsToIsoOrNull(data.runtimeHealthCheckedAt),
+            presenceExpiresAt:typeof data.presenceExpiresAt==="number"?data.presenceExpiresAt:undefined,
           };
         });
         setState((prev) => ({
@@ -116,6 +122,7 @@ export function useWalletAgents(
     // realtime channel here, so they are fetched once per wallet and refreshed
     // on the same cadence as the freshness tick.
     let cancelled = false;
+    let hasShared=false;
     async function mergeSharedAgents() {
       try {
         const { authedFetch } = await import("./apiClient");
@@ -125,14 +132,18 @@ export function useWalletAgents(
           agents?: Array<Record<string, unknown> & { shared?: boolean }>;
         };
         const shared = (body.agents ?? []).filter((a) => a.shared === true);
-        if (cancelled || shared.length === 0) return;
+        hasShared=shared.length>0;
+        if (cancelled) return;
         setState((prev) => {
-          const byName = { ...prev.byName };
+          const byName = Object.fromEntries(Object.entries(prev.byName).filter(([,a])=>!a.shared));
           for (const a of shared) {
             const name = (a.name as string) ?? "";
-            if (!name || byName[name]) continue;
+            if (!name || (byName[name]&&!byName[name].shared)) continue;
             byName[name] = {
               id: (a.id as string) ?? name,
+              shared:true,
+              presenceExpiresAt:typeof a.presenceExpiresAt==="number"?a.presenceExpiresAt:undefined,
+              presenceUnavailable:a.presenceUnavailable===true,
               name,
               status: (a.status as string) ?? "unknown",
               runtime: (a.runtime as string | undefined) ?? undefined,
@@ -162,17 +173,22 @@ export function useWalletAgents(
       }
     }
     void mergeSharedAgents();
+    const sharedTimer=window.setInterval(()=>{if(hasShared&&!document.hidden)void mergeSharedAgents();},60_000);
     const freshnessTimer = window.setInterval(() => {
       setState((current) => ({ ...current, byName: { ...current.byName } }));
     }, 30_000);
     return () => {
       cancelled = true;
       window.clearInterval(freshnessTimer);
+      window.clearInterval(sharedTimer);
       unsubscribe();
     };
   }, [walletAddress]);
 
-  return state;
+  return {...state,byName:Object.fromEntries(Object.entries(state.byName).map(([name,a])=>{
+    const live=presence[a.id];
+    return [name,live?{...a,...live,lastBridgeSeenMs:toMs(live.lastBridgeSeenAt)}:a];
+  }))};
 }
 
 /**
@@ -222,6 +238,7 @@ export function realtimeAgentStatus(a?: AgentLiveStatus): {
     return { color: "bg-amber-400 animate-pulse", label: STATUS_GETTING_READY };
   if ((a.status ?? "").toLowerCase() === "provisioning")
     return { color: "bg-amber-400 animate-pulse", label: STATUS_GETTING_READY };
+  if(a.presenceUnavailable)return {color:"bg-[#7975a8]",label:"Unknown",known:false};
 
   if (a.external) {
     const availability = externalRuntimeAvailability({
@@ -229,6 +246,7 @@ export function realtimeAgentStatus(a?: AgentLiveStatus): {
       lastBridgeSeenAt: a.lastBridgeSeenMs ? new Date(a.lastBridgeSeenMs).toISOString() : null,
       runtimeStatus: a.runtimeStatus,
       runtimeHealthCheckedAt: a.runtimeHealthCheckedAt,
+      presenceExpiresAt:a.presenceExpiresAt,
     });
     if (availability === "online")
       return { color: "bg-emerald-400", label: STATUS_AVAILABLE };
@@ -252,6 +270,7 @@ export function realtimeAgentStatus(a?: AgentLiveStatus): {
   // correctly read "Offline" until a bridge actually connects.
   if (
     a.bridgeConnected &&
+    (a.presenceExpiresAt===undefined || a.presenceExpiresAt>Date.now()) &&
     seen > 0 &&
     seen >= woke
   )
