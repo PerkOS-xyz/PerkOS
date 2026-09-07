@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+vi.mock("../app/lib/voiceFeature", () => ({ isVoiceEnabled: () => true }));
 
 const mocks = vi.hoisted(() => ({ rotate: vi.fn(), health: vi.fn(), capability: vi.fn(), probe: vi.fn(), prepare: vi.fn(), createUpdate: vi.fn(), getUpdate: vi.fn(), send: vi.fn() }));
 vi.mock("../app/lib/perkosApi", async (importOriginal) => ({

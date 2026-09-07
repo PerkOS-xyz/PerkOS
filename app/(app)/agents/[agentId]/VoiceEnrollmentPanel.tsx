@@ -1,4 +1,5 @@
 "use client";
+import { isVoiceEnabled } from "@/app/lib/voiceFeature";
 
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -163,14 +164,14 @@ export function VoiceEnrollmentPanel({
   const capabilityQuery = useQuery({
     queryKey: ["agent-voice-enrollment-capability", agentId],
     queryFn: () => getVoiceEnrollmentCapability(agentId),
-    enabled: owner && Boolean(agentId),
+    enabled: isVoiceEnabled() && owner && Boolean(agentId),
     refetchInterval: 15_000,
     staleTime: 5_000,
   });
   const healthQuery = useQuery({
     queryKey: ["agent-voice-health", agentId],
     queryFn: () => getAgentVoiceHealthApi(agentId),
-    enabled: owner && Boolean(agentId),
+    enabled: isVoiceEnabled() && owner && Boolean(agentId),
     refetchInterval: 15_000,
     staleTime: 5_000,
   });
@@ -261,8 +262,8 @@ export function VoiceEnrollmentPanel({
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="flex items-center gap-2 text-base">
-            <PhoneCall className="h-4 w-4 text-muted-foreground" />
-            {t("agentDetail.voiceEnrollment.title")}
+            <Wrench className="h-4 w-4 text-muted-foreground" />
+            {t(isVoiceEnabled() ? "agentDetail.voiceEnrollment.title" : "agentDetail.voiceEnrollment.updateIntegration")}
           </CardTitle>
           {ready ? (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
@@ -270,25 +271,25 @@ export function VoiceEnrollmentPanel({
             </span>
           ) : null}
         </div>
-        <CardDescription>{t("agentDetail.voiceEnrollment.description", { name: agentName, runtime })}</CardDescription>
+        {isVoiceEnabled() ? <CardDescription>{t("agentDetail.voiceEnrollment.description", { name: agentName, runtime })}</CardDescription> : null}
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <ol className="grid gap-2 text-sm sm:grid-cols-3">
+        {isVoiceEnabled() ? <ol className="grid gap-2 text-sm sm:grid-cols-3">
           {["credential", "plugin", "doctor"].map((step, index) => (
             <li key={step} className="rounded-md border border-border/80 bg-muted/30 px-3 py-2">
               <span className="mr-2 font-mono text-xs text-primary">{index + 1}</span>
               {t(`agentDetail.voiceEnrollment.steps.${step}`)}
             </li>
           ))}
-        </ol>
+        </ol> : null}
 
         {runtime === "Hermes" && capabilityState !== "ready" ? (
           <div className="rounded-md border border-border/80 bg-muted/20 p-3">
-            <p className="mb-2 text-sm text-muted-foreground">
+            {isVoiceEnabled() ? <p className="mb-2 text-sm text-muted-foreground">
               {t(managedUpdateSupported
                 ? "agentDetail.voiceEnrollment.updateHelp"
                 : "agentDetail.voiceEnrollment.bootstrapHelp", { version: runtimeVersion ?? t("agentDetail.voiceEnrollment.unknownVersion") })}
-            </p>
+            </p> : null}
             {managedUpdateSupported ? (
               <Button
                 type="button"
@@ -323,6 +324,7 @@ export function VoiceEnrollmentPanel({
           </div>
         ) : null}
 
+        {isVoiceEnabled() ? <>
         {capabilityState === "ready" ? (
           <p className="text-sm text-muted-foreground">{t("agentDetail.voiceEnrollment.readyHelp")}</p>
         ) : capabilityState === "unsupported" ? (
@@ -388,6 +390,7 @@ export function VoiceEnrollmentPanel({
           ) : null}
           </div>
         </details>
+        </> : null}
       </CardContent>
       <ConfirmDialog
         open={chatAction !== null}

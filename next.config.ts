@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 import path from "node:path";
 
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_PERKOS_VOICE_ENABLED:
+      process.env.PERKOS_ENVIRONMENT === "development" && process.env.PERKOS_VOICE_ENABLED === "true"
+        ? "true" : "false",
+  },
   turbopack: {
     root: path.resolve(__dirname),
   },

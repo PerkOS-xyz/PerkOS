@@ -84,6 +84,7 @@ import { AgentVoiceCallController } from "./AgentVoiceCallController";
 import { VoiceCredentialDeliveryPanel } from "./VoiceCredentialDeliveryPanel";
 import { VoiceHealthPanel } from "./VoiceHealthPanel";
 import { VoiceEnrollmentPanel } from "./VoiceEnrollmentPanel";
+import { isVoiceEnabled } from "@/app/lib/voiceFeature";
 
 type PageProps = {
   params: Promise<{ agentId: string }>;
@@ -233,7 +234,7 @@ export default function AgentDetailPage({ params }: PageProps) {
   const voiceCapabilityQuery = useQuery({
     queryKey: ["agent-voice-capability", voiceProjectId, agentId],
     queryFn: () => getAgentVoiceCapabilityApi({ projectId: voiceProjectId, agentId }),
-    enabled: Boolean(voiceProjectId),
+    enabled: isVoiceEnabled() && Boolean(voiceProjectId),
     refetchInterval: 15_000,
   });
   const voiceAction = voiceHeaderActionPolicy({
@@ -323,12 +324,12 @@ export default function AgentDetailPage({ params }: PageProps) {
       <div className="flex shrink-0 items-center justify-between rounded-lg border border-border bg-card/60 px-3 py-2 xl:hidden">
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-foreground">{agent.displayName ?? agent.name}</p>
-          <p className="text-xs text-muted-foreground">{t("agentDetail.voiceCall.title")}</p>
+          {isVoiceEnabled() ? <p className="text-xs text-muted-foreground">{t("agentDetail.voiceCall.title")}</p> : null}
         </div>
-        <Button type="button" size="sm" className="shrink-0 gap-1.5" onClick={() => setVoiceOpen(true)}>
+        {isVoiceEnabled() ? <Button type="button" size="sm" className="shrink-0 gap-1.5" onClick={() => setVoiceOpen(true)}>
           {voiceAction === "call" ? <Phone className="h-4 w-4" /> : <Wrench className="h-4 w-4" />}
           {voiceActionLabel}
-        </Button>
+        </Button> : null}
       </div>
 
       {agent.status === "provisioning" ||
@@ -402,7 +403,7 @@ export default function AgentDetailPage({ params }: PageProps) {
         />
       ) : null}
 
-      {agent.invited ? (
+      {isVoiceEnabled() && agent.invited ? (
         <VoiceCredentialDeliveryPanel
           agentId={agent.id}
           agentName={agent.name}
@@ -410,11 +411,11 @@ export default function AgentDetailPage({ params }: PageProps) {
         />
       ) : null}
 
-      <VoiceHealthPanel
+      {isVoiceEnabled() ? <VoiceHealthPanel
         agentId={agent.id}
         agentName={agent.name}
         owner={Boolean(address) && address!.toLowerCase() === agent.walletAddress.toLowerCase()}
-      />
+      /> : null}
 
       <WebhookPanel agent={agent} />
 
@@ -452,7 +453,7 @@ export default function AgentDetailPage({ params }: PageProps) {
       <ActionsPanel agent={agent} />
       </section>
 
-      <Dialog open={voiceOpen} onOpenChange={setVoiceOpen}>
+      {isVoiceEnabled() ? <Dialog open={voiceOpen} onOpenChange={setVoiceOpen}>
         <DialogContent
           data-testid="agent-voice-dialog"
           className="inset-x-0 bottom-0 left-0 top-auto max-h-[88dvh] w-full max-w-none translate-x-0 translate-y-0 grid-cols-[minmax(0,1fr)] gap-0 overflow-hidden rounded-b-none rounded-t-2xl p-0 sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:max-w-2xl sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl"
@@ -465,7 +466,7 @@ export default function AgentDetailPage({ params }: PageProps) {
             <AgentVoiceCallController agentId={agent.id} agentName={agent.name} project={voiceProject} chatCommitScopeKind="direct" speechVoice={agent.speechVoice} />
           </div>
         </DialogContent>
-      </Dialog>
+      </Dialog> : null}
     </div>
   );
 }
@@ -637,10 +638,10 @@ function AgentHeader({
       </div>
 
       <div className="flex items-center gap-2">
-        <Button type="button" size="sm" onClick={onCall} className="gap-1.5">
+        {isVoiceEnabled() ? <Button type="button" size="sm" onClick={onCall} className="gap-1.5">
           {voiceAction === "call" ? <Phone className="h-3.5 w-3.5" /> : <Wrench className="h-3.5 w-3.5" />}
           {voiceActionLabel}
-        </Button>
+        </Button> : null}
         {isRunning ? (
           <Button
             variant="outline"
