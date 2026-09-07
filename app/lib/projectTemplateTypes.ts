@@ -36,3 +36,16 @@ export type PublishedTemplate = {
 export function templateText(text: LocalizedText, language: string) {
   return text[language.split("-")[0]] ?? text.en;
 }
+
+/** Display an answer without changing its canonical stored value. */
+export function templateAnswerText(
+  question: TemplateQuestion,
+  value: string | undefined,
+  language: string,
+) {
+  if (!value) return "—";
+  const option = question.type === "select"
+    ? question.options.find((entry) => entry.value === value)
+    : undefined;
+  return option ? templateText(option.label, language) : value;
+}
