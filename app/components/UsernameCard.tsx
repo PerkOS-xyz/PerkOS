@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { AtSign, Check, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { usernameCopy } from "../lib/usernameCopy";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +34,8 @@ export function UsernameCard({
   address?: string;
   onSaved?: (username: string) => void;
 }) {
+  const { i18n } = useTranslation();
+  const copy = usernameCopy(i18n.language);
   const [current, setCurrent] = useState<string | null>(null);
   const [value, setValue] = useState("");
   const [avail, setAvail] = useState<Avail>("idle");
@@ -87,10 +91,10 @@ export function UsernameCard({
       await setUsername({ walletAddress: address, username: uname });
       setCurrent(uname);
       setAvail("idle");
-      toast.success(`You're now @${uname}`);
+      toast.success(`${copy.saved}: @${uname}`);
       onSaved?.(uname);
-    } catch (e) {
-      toast.error("Couldn't set username", { description: (e as Error).message });
+    } catch {
+      toast.error(copy.error);
     } finally {
       setSaving(false);
     }
@@ -105,7 +109,8 @@ export function UsernameCard({
         <Input
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          placeholder="username"
+          placeholder={copy.label}
+          aria-label={copy.label}
           className="border-0 bg-transparent focus-visible:ring-0"
           maxLength={20}
         />
@@ -120,17 +125,17 @@ export function UsernameCard({
       <div className="flex items-center justify-between gap-2">
         <span className="text-xs text-[#7975a8]">
           {avail === "taken"
-            ? "That handle is taken."
+            ? copy.taken
             : avail === "invalid"
-              ? "3–20 chars: letters, numbers, _ or -."
+              ? copy.invalid
               : current
-                ? `Current: @${current}`
+                ? `${copy.current}: @${current}`
                 : address
-                  ? `No username — others see ${formatAddress(address)}.`
-                  : "Connect a wallet."}
+                  ? `${copy.unnamed} ${formatAddress(address)}.`
+                  : copy.connect}
         </span>
-        <Button size="sm" onClick={save} disabled={!canSave || saving}>
-          {saving ? "Saving…" : current ? "Update" : "Claim"}
+        <Button type="button" size="sm" onClick={save} disabled={!canSave || saving}>
+          {saving ? copy.saving : current ? copy.update : copy.claim}
         </Button>
       </div>
     </div>
