@@ -1,4 +1,5 @@
 "use client";
+import { isVoiceEnabled } from "../lib/voiceFeature";
 
 import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -67,7 +68,7 @@ export function EditAgentDialog({
       updateAgent({
         walletAddress,
         agentId: agent.id,
-        patch: { displayName: displayName.trim(), plugins, speechVoice },
+        patch: { displayName: displayName.trim(), plugins, ...(isVoiceEnabled() ? { speechVoice } : {}) },
       }),
     onSuccess: (result) => {
       queryClient.invalidateQueries({
@@ -139,7 +140,7 @@ export function EditAgentDialog({
             ) : null}
           </div>
 
-          <div className="flex flex-col gap-2">
+          {isVoiceEnabled() ? <div className="flex flex-col gap-2">
             <Label htmlFor="edit-agent-speech-voice">Spoken audio voice</Label>
             <select
               id="edit-agent-speech-voice"
@@ -155,7 +156,7 @@ export function EditAgentDialog({
               Used for synthesized speech on the next voice call. Labels are presentation-only
               (provider voices are not strictly gendered). Does not change the agent&apos;s written personality.
             </p>
-          </div>
+          </div> : null}
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="edit-agent-plugin">Capabilities</Label>

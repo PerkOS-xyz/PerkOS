@@ -1,4 +1,5 @@
 "use client";
+import { isVoiceEnabled } from "@/app/lib/voiceFeature";
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -221,7 +222,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
               onDesignatePm={() => setTab("agents")}
             />
           ) : null}
-          {tab === "meetings" ? (
+          {isVoiceEnabled() && tab === "meetings" ? (
             <ProjectMeetingsTab
               projectId={projectId}
               projectName={liveDetail.project.name}
@@ -821,7 +822,7 @@ function Tabs({
     { id: "agents", label: t("projectRoom.tabs.agents") },
     { id: "map", label: t("projectRoom.tabs.execution") },
     { id: "chat", label: t("projectRoom.tabs.chat") },
-    { id: "meetings", label: "Meetings" },
+    ...(isVoiceEnabled() ? [{ id: "meetings" as const, label: "Meetings" }] : []),
     { id: "members", label: t("projectRoom.tabs.members") },
   ];
 
