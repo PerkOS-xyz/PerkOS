@@ -11,6 +11,7 @@ import {
   type PublishedTemplate,
   type LocalizedText,
   templateText,
+  templateAnswerText,
 } from "../lib/projectTemplateTypes";
 
 const text = (es: boolean) =>
@@ -309,7 +310,7 @@ function Wizard({ templateId }: { templateId: string }) {
                             {templateText(q.label, locale)}
                           </dt>
                           <dd className="whitespace-pre-wrap break-words">
-                            {answers[q.id] || "—"}
+                            {templateAnswerText(q, answers[q.id], locale)}
                           </dd>
                         </div>
                       ))}
