@@ -10,10 +10,11 @@ export function isAllowedAgentHosting(agent: AgentHostingFlags): boolean {
 }
 
 export function hasFreshAgentHeartbeat(
-  agent: { bridgeConnected?: boolean; lastBridgeSeenAt?: string | null },
+  agent: { bridgeConnected?: boolean; lastBridgeSeenAt?: string | null; presenceExpiresAt?:number },
   now = Date.now(),
 ): boolean {
   if (agent.bridgeConnected !== true || !agent.lastBridgeSeenAt) return false;
+  if(typeof agent.presenceExpiresAt==="number")return agent.presenceExpiresAt>now;
   const seen = Date.parse(agent.lastBridgeSeenAt);
   return !Number.isNaN(seen) && now - seen <= 90_000;
 }
@@ -35,14 +36,17 @@ export function externalRuntimeAvailability(
     lastBridgeSeenAt?: string | null;
     runtimeStatus?: "healthy" | "unreachable" | "unknown" | null;
     runtimeHealthCheckedAt?: string | null;
+    presenceExpiresAt?:number;
+    presenceUnavailable?:boolean;
   },
   now = Date.now(),
 ): ExternalRuntimeAvailability {
+  if(agent.presenceUnavailable)return "unverified";
   if (!hasFreshAgentHeartbeat(agent, now)) return "offline";
   const checked = agent.runtimeHealthCheckedAt
     ? Date.parse(agent.runtimeHealthCheckedAt)
     : NaN;
-  if (Number.isNaN(checked) || now - checked > 90_000) return "unverified";
+  if (Number.isNaN(checked) || (typeof agent.presenceExpiresAt!=="number" && now - checked > 90_000)) return "unverified";
   if (agent.runtimeStatus === "healthy") return "online";
   if (agent.runtimeStatus === "unreachable") return "unavailable";
   return "unverified";

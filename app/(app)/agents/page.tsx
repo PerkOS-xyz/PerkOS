@@ -1,4 +1,5 @@
 "use client";
+import {useAgentPresence} from "../../lib/useAgentPresence";
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -79,7 +80,8 @@ export default function AgentsPage() {
     return counts;
   }, [projectsQuery.data]);
 
-  const allAgents = useMemo(() => data ?? [], [data]);
+  const presence=useAgentPresence(address,(data??[]).filter(a=>!a.shared).map(a=>a.id));
+  const allAgents = (data??[]).map(a=>({...a,...presence[a.id]}));
   const orgName = activeOrg?.name?.trim() || undefined;
   const agents = allAgents.filter(
     (a) =>
@@ -528,6 +530,8 @@ function AgentCard({
               lastBridgeSeenAt={agent.lastBridgeSeenAt}
               runtimeStatus={agent.runtimeStatus}
               runtimeHealthCheckedAt={agent.runtimeHealthCheckedAt}
+              presenceExpiresAt={agent.presenceExpiresAt}
+              presenceUnavailable={agent.presenceUnavailable}
               hibernationState={hibState}
               syncing={syncing}
               invited={agent.invited}
@@ -633,6 +637,8 @@ function AgentPowerToggle({
 }
 
 function StatusBadge({
+  presenceExpiresAt,
+  presenceUnavailable,
   status,
   external,
   bridgeConnected,
@@ -646,6 +652,8 @@ function StatusBadge({
   invitedStale,
 }: {
   status: AgentRow["status"];
+  presenceExpiresAt?:number;
+  presenceUnavailable?:boolean;
   external?: boolean;
   bridgeConnected?: boolean;
   lastBridgeSeenAt?: string | null;
@@ -682,6 +690,8 @@ function StatusBadge({
   }
   if (external && status === "ready") {
     const availability = externalRuntimeAvailability({
+      presenceExpiresAt,
+      presenceUnavailable,
       bridgeConnected,
       lastBridgeSeenAt,
       runtimeStatus,
