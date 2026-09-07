@@ -139,7 +139,13 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
     {notice && <p role="status" className="text-sm text-emerald-500">{notice}</p>}
     {!state && !error && <p role="status">{es ? "Cargando…" : "Loading…"}</p>}
     {state && <>
-      <p role="status" aria-live="polite" className="text-sm">{status}</p>
+      <div className="min-w-0 space-y-2 rounded-lg border border-border bg-muted/20 p-3">
+        <h4 className="text-sm font-medium">{es ? "Hermes bajo demanda" : "On-demand Hermes"}</h4>
+        <p role="status" aria-live="polite" className="text-sm">{status}</p>
+        <p className="text-xs text-muted-foreground">{es
+          ? "Cada ejecución usa un trabajador temporal. No se cuenta como agente permanente ni como tarea del tablero del proyecto."
+          : "Each run uses a temporary worker. It is not counted as a permanent agent or a task on the project board."}</p>
+      </div>
       {current?.phase === "settled" && !current.result && <p role="alert" className="text-sm text-destructive">{es ? "El trabajo terminó sin un borrador válido. No se volverá a generar automáticamente." : "The run ended without a valid draft. It will not regenerate automatically."}</p>}
       {state.budget && <p className="text-xs text-muted-foreground">
         {es ? "Asignado" : "Allocated"}: {money(state.budget.allocatedMicros)} · {es ? "Reservado" : "Reserved"}: {money(state.budget.reservedMicros)} · {es ? "Límite" : "Limit"}: {money(state.budget.limitMicros)}.
@@ -152,7 +158,7 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
       <Button disabled={pending || !!state.activeRunId || !state.configured || !notes.trim()} onClick={() => setConfirmation({ action: "prepare-update" })}>
         {es ? "Preparar borrador" : "Prepare draft"}
       </Button>
-      {current?.result && <DraftReview key={current.requestId} run={current} es={es} pending={pending}
+      {current?.result && <DraftReview key={current.requestId} run={current} memory={state.memory} es={es} pending={pending}
         canRevise={!state.activeRunId && state.configured && !!notes.trim()}
         revise={draft => setConfirmation({ action: "revise-update", sourceDraft: draft })} save={saveMemory} />}
       <MemoryEditor key={state.memory.revision} memory={state.memory} es={es} pending={pending} save={saveMemory} />
@@ -170,14 +176,33 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
   </section>;
 }
 
-function DraftReview({ run, es, pending, canRevise, revise, save }: { run: Run; es: boolean; pending: boolean; canRevise: boolean;
+function DraftReview({ run, memory, es, pending, canRevise, revise, save }: { run: Run; memory: Memory; es: boolean; pending: boolean; canRevise: boolean;
   revise: (draft: string) => void; save: (text: string, sourceRunId?: string) => Promise<boolean> }) {
   const [draft, setDraft] = useState(run.result!.draft);
   const [confirm, setConfirm] = useState(false);
-  return <section className="space-y-3 rounded-lg border border-primary/30 p-4">
+  const savedFromRun = !!memory.text && memory.sourceRunId === run.requestId;
+  return <section className="min-w-0 space-y-3 rounded-lg border border-primary/30 p-4" aria-label={es ? "Revisión del borrador" : "Draft review"}>
+    <h4 className="font-semibold">{es ? "Borrador generado · revisión humana" : "Generated draft · human review"}</h4>
+    <p className="text-xs text-muted-foreground">{es
+      ? "Al recargar se muestra el borrador original. Las ediciones sólo se conservan como ejemplo al aprobar y guardar; el original no se reemplaza."
+      : "Reloading shows the original draft. Edits are saved as an example only when you approve and save; the original is not replaced."}</p>
+    {savedFromRun && <p className="text-sm text-emerald-500">{es
+      ? "Ya guardaste un ejemplo de esta ejecución. Consulta la versión guardada en «Ejemplo de escritura aprobado»."
+      : "You saved an example from this run. See the saved version in “Approved writing example”."}</p>}
     <label htmlFor="artizen-draft" className="block font-medium">{es ? "Revisa y edita tu borrador" : "Review and edit your draft"}</label>
     <textarea id="artizen-draft" className={`${field} min-h-48`} value={draft} maxLength={8000} onChange={e => setDraft(e.target.value)} />
-    {!!run.result!.reviewNotes.length && <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">{run.result!.reviewNotes.map((note, index) => <li key={index}>{note}</li>)}</ul>}
+    {draft !== run.result!.draft && (!savedFromRun || draft !== memory.text) && <p className="text-xs text-muted-foreground">{es
+      ? "Ediciones locales sin guardar como ejemplo. Se perderán al salir o recargar."
+      : "Local edits have not been saved as an example. They will be lost when leaving or reloading."}</p>}
+    <div className="space-y-2">
+      <h5 className="text-sm font-medium">{es ? "Comprobaciones antes de aprobar" : "Checks before approval"}</h5>
+      <p className="text-xs text-muted-foreground">{es ? "Guía de revisión, no verificación automática de hechos." : "Review guidance, not automated fact verification."}</p>
+      <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+        <li>{es ? "Confirma cada afirmación con los hechos que aportaste; elimina lo que no puedas respaldar." : "Check each claim against the facts you supplied; remove anything you cannot support."}</li>
+        <li>{es ? "Distingue avances confirmados de planes. No presupongas adopción, métricas ni comentarios de creadores." : "Distinguish confirmed progress from plans. Do not assume adoption, metrics or creator feedback."}</li>
+        <li>{es ? "Usa el ejemplo aprobado como estilo, no como evidencia de avances actuales." : "Use the approved example for style, not as evidence of current progress."}</li>
+      </ul>
+    </div>
     <div className="flex flex-wrap gap-2">
       <Button disabled={pending || run.phase !== "settled" || !draft.trim()} onClick={() => setConfirm(true)}>{es ? "Aprobar y guardar ejemplo" : "Approve and save example"}</Button>
       <Button variant="outline" disabled={pending || !canRevise || !draft.trim()} onClick={() => revise(draft)}>{es ? "Revisar con mis notas" : "Revise with my notes"}</Button>
@@ -193,10 +218,15 @@ function DraftReview({ run, es, pending, canRevise, revise, save }: { run: Run; 
 function MemoryEditor({ memory, es, pending, save }: { memory: Memory; es: boolean; pending: boolean; save: (text: string) => Promise<boolean> }) {
   const [text, setText] = useState(memory.text);
   const [confirm, setConfirm] = useState(false);
-  return <details className="rounded-lg border border-border p-3"><summary>{es ? "Ejemplo de escritura aprobado" : "Approved writing example"}</summary>
+  const [expanded, setExpanded] = useState(!!memory.text);
+  return <details className="min-w-0 rounded-lg border border-border p-3" open={expanded} onToggle={event => setExpanded(event.currentTarget.open)}><summary>{es ? "Ejemplo de escritura aprobado" : "Approved writing example"}</summary>
     <div className="mt-3 space-y-3">
+      <p className="text-sm text-muted-foreground">{memory.text
+        ? (es ? `Versión guardada · revisión ${memory.revision}. Referencia de estilo, no hechos actuales ni contenido publicado.` : `Saved version · revision ${memory.revision}. A style reference, not current facts or published content.`)
+        : (es ? "Aún no hay un ejemplo guardado para futuros borradores." : "No example has been saved for future drafts yet.")}</p>
       <label htmlFor="artizen-memory" className="block text-sm">{es ? "Contexto editable para futuros borradores" : "Editable context for future drafts"}</label>
       <textarea id="artizen-memory" className={`${field} min-h-28`} value={text} maxLength={8000} onChange={e => setText(e.target.value)} />
+      {text !== memory.text && <p className="text-xs text-muted-foreground">{es ? "Cambios sin guardar. La referencia anterior sigue vigente hasta confirmar el guardado." : "Unsaved changes. The previous reference remains in use until you confirm saving."}</p>}
       <p className="text-xs text-muted-foreground">{es ? "Vacía este campo y guarda para dejar de usar el ejemplo. Los borradores anteriores permanecen hasta eliminar el proyecto." : "Clear this field and save to stop using the example. Previous drafts remain until the project is deleted."}</p>
       <Button variant="outline" disabled={pending || text === memory.text} onClick={() => setConfirm(true)}>{es ? "Guardar contexto" : "Save context"}</Button>
     </div>

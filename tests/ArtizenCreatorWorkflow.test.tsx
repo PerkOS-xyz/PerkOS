@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { ArtizenCreatorWorkflow } from "../app/components/ArtizenCreatorWorkflow";
 
 const mock = vi.hoisted(() => ({ fetch: vi.fn(), language: "es" }));
@@ -85,4 +85,78 @@ it("missing budget does not offer an enabled wake action", async () => {
   render(<ArtizenCreatorWorkflow projectId="template-example" />);
   expect(await screen.findByText("Este proyecto aún no tiene un presupuesto habilitado.")).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Preparar borrador" })).toBeDisabled();
+});
+
+it.each(["es", "en"])("separates temporary work and neutral review guidance in %s", async language => {
+  mock.language = language;
+  const run = completed();
+  run.result.reviewNotes = ["Add testimonials from your many happy creators."];
+  mock.fetch.mockImplementation(async () => json({ ...initial(), runs: [run] }));
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  expect(await screen.findByText(language === "es" ? "Hermes bajo demanda" : "On-demand Hermes")).toBeInTheDocument();
+  expect(screen.getByText(language === "es" ? /No se cuenta como agente permanente/ : /not counted as a permanent agent/)).toBeInTheDocument();
+  expect(screen.getByText(language === "es" ? "Comprobaciones antes de aprobar" : "Checks before approval")).toBeInTheDocument();
+  expect(screen.queryByText(run.result.reviewNotes[0])).not.toBeInTheDocument();
+  expect(screen.getByText(language === "es" ? /no verificación automática/ : /not automated fact verification/)).toBeInTheDocument();
+  expect(mock.fetch).toHaveBeenCalledTimes(1);
+});
+
+it("reload distinguishes original draft from the approved edited example and opens saved memory", async () => {
+  const memory = { revision: 1, text: "Ejemplo revisado por la persona.", sourceRunId: completed().requestId, updatedAtMs: Date.now() };
+  mock.fetch.mockImplementation(async () => json({ ...initial(), runs: [completed()], memory }));
+  const view = render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  await screen.findByText(/Ya guardaste un ejemplo de esta ejecución/);
+  expect(screen.getByLabelText("Revisa y edita tu borrador")).toHaveValue(completed().result.draft);
+  const example = screen.getByLabelText("Contexto editable para futuros borradores");
+  expect(example).toHaveValue(memory.text);
+  expect(example.closest("details")).toHaveAttribute("open");
+  expect(screen.getByText(/Versión guardada · revisión 1/)).toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText("Revisa y edita tu borrador"), { target: { value: "Cambio local" } });
+  expect(screen.getByText(/Ediciones locales sin guardar/)).toBeInTheDocument();
+  view.unmount();
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  expect(await screen.findByLabelText("Revisa y edita tu borrador")).toHaveValue(completed().result.draft);
+  expect(screen.getByLabelText("Contexto editable para futuros borradores")).toHaveValue(memory.text);
+  expect(mock.fetch.mock.calls.some(c => c[1]?.method)).toBe(false);
+});
+
+it("does not label an unrelated run as the source of approved memory", async () => {
+  mock.fetch.mockImplementation(async () => json({ ...initial(), runs: [completed()], memory: {
+    revision: 2, text: completed().result.draft, sourceRunId: "00000000-0000-4000-8000-000000000002", updatedAtMs: 1,
+  } }));
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  await screen.findByText(/Versión guardada · revisión 2/);
+  expect(screen.queryByText(/Ya guardaste un ejemplo de esta ejecución/)).not.toBeInTheDocument();
+});
+
+it("approval reveals the persisted edited example without replacing the original or calling the model", async () => {
+  const persisted = { ...initial(), runs: [completed()] };
+  mock.fetch.mockImplementation(async (_path, init) => {
+    if (init?.method === "PUT") {
+      const input = JSON.parse(init.body);
+      persisted.memory = { revision: 1, text: input.text, sourceRunId: input.sourceRunId, updatedAtMs: 1 };
+      return json(persisted.memory);
+    }
+    return json(persisted);
+  });
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  fireEvent.change(await screen.findByLabelText("Revisa y edita tu borrador"), { target: { value: "Hechos revisados." } });
+  fireEvent.click(screen.getByRole("button", { name: "Aprobar y guardar ejemplo" }));
+  fireEvent.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Guardar ejemplo" }));
+  await screen.findByText(/Ya guardaste un ejemplo de esta ejecución/);
+  expect(screen.getByLabelText("Contexto editable para futuros borradores")).toHaveValue("Hechos revisados.");
+  expect(screen.queryByText(/Ediciones locales sin guardar/)).not.toBeInTheDocument();
+  expect(persisted.runs[0].result.draft).toBe(completed().result.draft);
+  expect(mock.fetch.mock.calls.filter(c => c[1]?.method === "PUT")).toHaveLength(1);
+  expect(mock.fetch.mock.calls.some(c => c[1]?.method === "POST")).toBe(false);
+});
+
+it("memory edits stay local until the web confirmation is accepted", async () => {
+  mock.fetch.mockImplementation(async () => json({ ...initial(), memory: { revision: 1, text: "Ejemplo guardado", sourceRunId: null, updatedAtMs: 1 } }));
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  fireEvent.change(await screen.findByLabelText("Contexto editable para futuros borradores"), { target: { value: "Nuevo estilo" } });
+  expect(screen.getByText(/La referencia anterior sigue vigente/)).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Guardar contexto" }));
+  fireEvent.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Cancelar" }));
+  expect(mock.fetch.mock.calls.some(c => c[1]?.method)).toBe(false);
 });
