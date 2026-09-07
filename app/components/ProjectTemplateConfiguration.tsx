@@ -6,6 +6,7 @@ import { useAppAccount } from "../lib/useAppAccount";
 import {
   type ProjectTemplate,
   templateText,
+  templateAnswerText,
 } from "../lib/projectTemplateTypes";
 
 export function ProjectTemplateConfiguration({
@@ -74,7 +75,7 @@ export function ProjectTemplateConfiguration({
                   {templateText(q.label, i18n.language)}
                 </dt>
                 <dd className="whitespace-pre-wrap break-words">
-                  {result.answers[q.id] || "—"}
+                  {templateAnswerText(q, result.answers[q.id], i18n.language)}
                 </dd>
               </div>
             ))}
