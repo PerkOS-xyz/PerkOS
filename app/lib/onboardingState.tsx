@@ -1,94 +1,99 @@
 "use client";
-
 import {
   createContext,
   useContext,
-  useEffect,
-  useState,
+  useCallback,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
-
-type OnboardingState = {
+import { useAppAccount } from "./useAppAccount";
+type WorkspaceState = {
   workspaceName: string;
-  setWorkspaceName: (value: string) => void;
   hasProject: boolean;
-  markProjectCreated: () => void;
   hasAgent: boolean;
+};
+type OnboardingState = WorkspaceState & {
+  setWorkspaceName: (value: string) => void;
+  markProjectCreated: () => void;
   markAgentRegistered: () => void;
   reset: () => void;
 };
-
 const OnboardingContext = createContext<OnboardingState | null>(null);
-
-const STORAGE_KEY = "swarm.onboarding.v1";
-
-type Persisted = {
-  workspaceName: string;
-  hasProject: boolean;
-  hasAgent: boolean;
+const PREFIX = "perkos.workspace.v2";
+const EVENT = "perkos-workspace-change";
+const empty: WorkspaceState = {
+  workspaceName: "",
+  hasProject: false,
+  hasAgent: false,
 };
-
-function loadPersisted(): Persisted {
-  if (typeof window === "undefined") {
-    return { workspaceName: "", hasProject: false, hasAgent: false };
-  }
+function read(wallet: string): string {
+  if (!wallet || typeof window === "undefined") return "";
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { workspaceName: "", hasProject: false, hasAgent: false };
-    const parsed = JSON.parse(raw) as Partial<Persisted>;
-    return {
-      workspaceName: parsed.workspaceName ?? "",
-      hasProject: Boolean(parsed.hasProject),
-      hasAgent: Boolean(parsed.hasAgent),
-    };
+    return window.localStorage.getItem(`${PREFIX}:${wallet}`) ?? "";
   } catch {
-    return { workspaceName: "", hasProject: false, hasAgent: false };
+    return "";
   }
 }
-
-export function OnboardingProvider({ children }: { children: ReactNode }) {
-  const [workspaceName, setWorkspaceNameState] = useState("");
-  const [hasProject, setHasProject] = useState(false);
-  const [hasAgent, setHasAgent] = useState(false);
-
-  useEffect(() => {
-    const persisted = loadPersisted();
-    setWorkspaceNameState(persisted.workspaceName);
-    setHasProject(persisted.hasProject);
-    setHasAgent(persisted.hasAgent);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ workspaceName, hasProject, hasAgent })
-    );
-  }, [workspaceName, hasProject, hasAgent]);
-
-  const value: OnboardingState = {
-    workspaceName,
-    setWorkspaceName: setWorkspaceNameState,
-    hasProject,
-    markProjectCreated: () => setHasProject(true),
-    hasAgent,
-    markAgentRegistered: () => setHasAgent(true),
-    reset: () => {
-      setWorkspaceNameState("");
-      setHasProject(false);
-      setHasAgent(false);
-    },
+function parse(raw: string): WorkspaceState {
+  try {
+    const d = JSON.parse(raw);
+    return {
+      workspaceName: typeof d.workspaceName === "string" ? d.workspaceName : "",
+      hasProject: d.hasProject === true,
+      hasAgent: d.hasAgent === true,
+    };
+  } catch {
+    return empty;
+  }
+}
+function subscribe(callback: () => void) {
+  window.addEventListener(EVENT, callback);
+  window.addEventListener("storage", callback);
+  return () => {
+    window.removeEventListener(EVENT, callback);
+    window.removeEventListener("storage", callback);
   };
-
+}
+/** Legacy workspace hints only. Account onboarding is persisted by the API, not this cache.
+ * Never migrate the old unscoped browser key: its owner cannot be established. */
+export function OnboardingProvider({ children }: { children: ReactNode }) {
+  const { address } = useAppAccount();
+  const wallet = address?.toLowerCase() ?? "";
+  const snapshot = useSyncExternalStore(
+    subscribe,
+    useCallback(() => read(wallet), [wallet]),
+    () => "",
+  );
+  const data = parse(snapshot);
+  function update(patch: Partial<WorkspaceState>) {
+    if (!wallet) return;
+    try {
+      window.localStorage.setItem(
+        `${PREFIX}:${wallet}`,
+        JSON.stringify({ ...parse(read(wallet)), ...patch }),
+      );
+      window.dispatchEvent(new Event(EVENT));
+    } catch {
+      /* Cache is optional. */
+    }
+  }
   return (
-    <OnboardingContext.Provider value={value}>
+    <OnboardingContext.Provider
+      value={{
+        ...data,
+        setWorkspaceName: (workspaceName) => update({ workspaceName }),
+        markProjectCreated: () => update({ hasProject: true }),
+        markAgentRegistered: () => update({ hasAgent: true }),
+        reset: () => update(empty),
+      }}
+    >
       {children}
     </OnboardingContext.Provider>
   );
 }
-
 export function useOnboarding() {
   const ctx = useContext(OnboardingContext);
-  if (!ctx) throw new Error("useOnboarding must be used inside OnboardingProvider");
+  if (!ctx)
+    throw new Error("useOnboarding must be used inside OnboardingProvider");
   return ctx;
 }

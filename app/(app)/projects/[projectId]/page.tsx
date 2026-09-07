@@ -63,6 +63,7 @@ import { ActivityFeedCard } from "../../../components/ActivityFeedCard";
 import { formatRelativeShort } from "../../../lib/format";
 import { logActivity } from "../../../lib/activityEvents";
 import { ProjectChatTab } from "../../../components/ProjectChatTab";
+import { ProjectTemplateConfiguration } from "../../../components/ProjectTemplateConfiguration";
 import { SearchInput, matchesQuery } from "../../../components/SearchInput";
 import { useActiveOrg } from "../../../lib/useActiveOrg";
 
@@ -151,7 +152,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
   const { byName: myAgents } = useWalletAgents(address);
   const warmedForProject = useRef<string | null>(null);
   useEffect(() => {
-    if (isShared || !projectId) return;
+    if (isShared || !projectId || projectId.startsWith("template-")) return;
     const pm = data?.project?.pmAgent;
     if (!pm) return;
     const a = myAgents?.[pm];
@@ -177,6 +178,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
       {error ? <ErrorBanner message={(error as Error).message} /> : null}
       {liveDetail ? (
         <>
+          {!isShared && <ProjectTemplateConfiguration projectId={projectId} />}
           <DetailHeader
             detail={liveDetail}
             ownerWallet={ownerWallet ?? undefined}
