@@ -10,7 +10,7 @@ type DraftResult = { draft: string; reviewNotes: string[]; sourcesUsed: string[]
 type Run = { requestId: string; action: "prepare-update" | "revise-update";
   phase: "queued" | "executing" | "awaiting_stop" | "settled" | "cancelled";
   result: DraftResult | null; allocatedMicros: number | null; reservedMicros: number;
-  createdAtMs: number; needsAttention?: boolean };
+  createdAtMs: number; needsAttention?: boolean; revisionUnchanged?: boolean };
 type Memory = { revision: number; text: string; sourceRunId: string | null; updatedAtMs: number };
 type State = { configured: boolean; budget: { limitMicros: number; reservedMicros: number; allocatedMicros: number } | null;
   activeRunId: string | null; runReservationMicros: number; runs: Run[]; memory: Memory };
@@ -183,6 +183,9 @@ function DraftReview({ run, memory, es, pending, canRevise, revise, save }: { ru
   const savedFromRun = !!memory.text && memory.sourceRunId === run.requestId;
   return <section className="min-w-0 space-y-3 rounded-lg border border-primary/30 p-4" aria-label={es ? "Revisión del borrador" : "Draft review"}>
     <h4 className="font-semibold">{es ? "Borrador generado · revisión humana" : "Generated draft · human review"}</h4>
+    {run.action === "revise-update" && run.revisionUnchanged === true && <p role="alert" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-600 dark:text-amber-300">{es
+      ? "La revisión devolvió el mismo texto, salvo posibles espacios o saltos de línea. Tus notas podrían no haberse aplicado. Compara el borrador con tus indicaciones y edítalo antes de aprobar si hace falta. No se volverá a generar automáticamente."
+      : "The revision returned the same text, apart from possible whitespace changes. Your notes may not have been applied. Compare the draft with your feedback and edit before approving if needed. It will not regenerate automatically."}</p>}
     <p className="text-xs text-muted-foreground">{es
       ? "Al recargar se muestra el borrador original. Las ediciones sólo se conservan como ejemplo al aprobar y guardar; el original no se reemplaza."
       : "Reloading shows the original draft. Edits are saved as an example only when you approve and save; the original is not replaced."}</p>
