@@ -31,6 +31,7 @@ import { ProvisionPipeline } from "../../components/ProvisionPipeline";
 import { formatRelativeShort } from "../../lib/format";
 import { agentMatchesOrgFilter, type AgentOrgFilter } from "../../lib/agentOrgFilter";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ArtizenAgentStatus } from "@/app/components/ArtizenProjectBoard";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -80,7 +81,7 @@ export default function AgentsPage() {
     return counts;
   }, [projectsQuery.data]);
 
-  const presence=useAgentPresence(address,(data??[]).filter(a=>!a.shared).map(a=>a.id));
+  const presence=useAgentPresence(address,(data??[]).filter(a=>!a.shared && a.executionMode !== "artizen-on-demand").map(a=>a.id));
   const allAgents = (data??[]).map(a=>({...a,...presence[a.id]}));
   const orgName = activeOrg?.name?.trim() || undefined;
   const agents = allAgents.filter(
@@ -91,7 +92,7 @@ export default function AgentsPage() {
   const hasAgents = allAgents.length > 0;
   const noResults = hasAgents && agents.length === 0;
 
-  const visibleIds = agents.map((a) => a.id);
+  const visibleIds = agents.filter(a => !a.shared && a.executionMode !== "artizen-on-demand").map((a) => a.id);
   const selectedIds = visibleIds.filter((id) => selected.has(id));
   const allChecked = visibleIds.length > 0 && selectedIds.length === visibleIds.length;
   const someChecked = selectedIds.length > 0 && !allChecked;
@@ -459,7 +460,7 @@ function AgentCard({
   const hibQuery = useQuery({
     queryKey: ["agent-hibernation", agent.id],
     queryFn: () => getHibernationStatusApi({ agentId: agent.id }),
-    enabled: agent.status === "ready" && !agent.external,
+    enabled: agent.status === "ready" && !agent.external && agent.executionMode !== "artizen-on-demand",
     // While a wake/hibernate is mid-flight, poll so the badge + power button
     // converge to the settled state without a manual refresh.
     refetchInterval: (q) => {
@@ -467,8 +468,8 @@ function AgentCard({
       return s === "waking" || s === "hibernating" ? 5000 : false;
     },
   });
-  const hibState = hibQuery.data?.state;
-  const syncing = agent.status === "ready" && hibQuery.isLoading;
+  const hibState = agent.executionMode === "artizen-on-demand" ? (agent.executionState === "resting" ? "hibernated" : agent.executionState === "awaiting_stop" ? "hibernating" : "waking") : hibQuery.data?.state;
+  const syncing = agent.executionMode !== "artizen-on-demand" && agent.status === "ready" && hibQuery.isLoading;
   return (
     <li>
       <Link
@@ -489,7 +490,7 @@ function AgentCard({
                 // Selection drives the bulk delete/hibernate bar, so an agent
                 // owned by someone else is not selectable: a member must not be
                 // able to destroy infrastructure another wallet pays for.
-                disabled={agent.shared === true}
+                disabled={agent.shared === true || agent.executionMode === "artizen-on-demand"}
                 aria-label={t("agents.card.selectAria", { name: agent.name })}
               />
             </span>
@@ -497,12 +498,12 @@ function AgentCard({
               {initials(agent.name)}
             </span>
             <div className="flex flex-col">
-              <span className="text-sm text-[#ececff]">{agent.name}</span>
+              <span className="text-sm text-[#ececff]">{agent.displayName ?? agent.name}</span>
               <span className="text-xs text-[#7975a8]">{agent.runtime}</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <AgentPowerToggle agent={agent} hibState={hibState} />
+            {agent.executionMode !== "artizen-on-demand" && <AgentPowerToggle agent={agent} hibState={hibState} />}
             {agent.shared ? (
               <span
                 className="max-w-[12rem] truncate rounded border border-[#1b1833] px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-[#7975a8]"
@@ -523,7 +524,7 @@ function AgentCard({
                 {t("agents.card.external")}
               </span>
             ) : null}
-            <StatusBadge
+            {agent.executionMode === "artizen-on-demand" ? <ArtizenAgentStatus state={agent.executionState} /> : <StatusBadge
               status={agent.status}
               external={agent.external}
               bridgeConnected={agent.bridgeConnected}
@@ -537,7 +538,7 @@ function AgentCard({
               invited={agent.invited}
               revoked={agent.revoked}
               invitedStale={isInvitedStale(agent)}
-            />
+            />}
           </div>
         </div>
 
