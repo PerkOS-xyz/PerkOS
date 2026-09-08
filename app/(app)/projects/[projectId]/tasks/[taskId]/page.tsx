@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ArtizenWorkLink } from "@/app/components/ArtizenProjectBoard";
+import { ArtizenFailureLabel, ArtizenRunFailure, isArtizenUnsuccessful } from "@/app/components/ArtizenRunFailure";
 import { TaskAgentCard, taskAgentName } from "@/app/components/TaskAgentCard";
 import { useRouter, useSearchParams } from "next/navigation";
 import { use, useState } from "react";
@@ -117,7 +118,7 @@ export default function TaskDetailPage({ params }: PageProps) {
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <TaskStatusBadge status={task.status} />
+            {task.executionMode === "artizen-on-demand" && isArtizenUnsuccessful({ ...task, phase: task.executionPhase }) ? <ArtizenFailureLabel /> : <TaskStatusBadge status={task.status} />}
             <PriorityBadge priority={task.priority} />
           </div>
           <h1 className="text-3xl font-medium leading-tight text-foreground">
@@ -186,7 +187,7 @@ export default function TaskDetailPage({ params }: PageProps) {
 
       <TaskAttachmentList attachments={task.attachments ?? []} />
 
-      {task.result ? <ResultSection result={task.result} /> : null}
+      {task.result ? <ResultSection result={task.result} /> : task.executionMode === "artizen-on-demand" ? <ArtizenRunFailure run={{ ...task, phase: task.executionPhase }} /> : null}
 
       {ownerWallet ? (
         <EditTaskDialog

@@ -8,10 +8,12 @@ import { ConfirmDialog } from "./ConfirmDialog";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArtizenFormatReview, type FormatReview } from "./ArtizenFormatReview";
+import { ArtizenRunFailure, isArtizenUnsuccessful } from "./ArtizenRunFailure";
 
 type DraftResult = { draft: string; reviewNotes: string[]; sourcesUsed: string[]; formatReview?: FormatReview };
 type Run = { requestId: string; action: "prepare-update" | "revise-update";
   phase: "queued" | "executing" | "awaiting_stop" | "settled" | "cancelled";
+  stopReason?: string | null; failureCode?: string;
   result: DraftResult | null; allocatedMicros: number | null; reservedMicros: number;
   createdAtMs: number; needsAttention?: boolean; revisionUnchanged?: boolean; draftEchoesNotes?: boolean };
 type Memory = { revision: number; text: string; sourceRunId: string | null; updatedAtMs: number };
@@ -148,7 +150,7 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
     queued: es ? "Preparando Hermes" : "Preparing Hermes",
     executing: es ? "Hermes está trabajando" : "Hermes is working",
     awaiting_stop: es ? "Confirmando reposo y costo" : "Confirming stop and cost",
-    settled: es ? "Hermes en reposo" : "Hermes is resting",
+    settled: isArtizenUnsuccessful(current) ? (es ? "Intento sin resultado · Hermes en reposo" : "Unsuccessful attempt · Hermes is resting") : (es ? "Hermes en reposo" : "Hermes is resting"),
     cancelled: es ? "Cancelado sin iniciar" : "Cancelled before start",
   })[current.phase] : state?.agentName ? (es ? "Hermes en reposo" : "Hermes is resting") : (es ? "Falta asociar Hermes" : "Link Hermes to continue");
   return <section id="artizen-workflow" className="mt-5 min-w-0 scroll-mt-20 space-y-4 break-words border-t border-border pt-5" aria-label={es ? "Borradores Artizen" : "Artizen drafts"}>
@@ -170,7 +172,7 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
         {state.agentName ? <Link className="inline-block text-sm text-primary underline" href={`/agents/${encodeURIComponent(state.agentName)}`}>{es ? "Ver agente Hermes" : "View Hermes agent"}</Link>
           : <Button variant="outline" disabled={pending || !!state.activeRunId} onClick={() => setSetupOpen(true)}>{es ? "Asociar Hermes al proyecto" : "Link Hermes to project"}</Button>}
       </div>
-      {current?.phase === "settled" && !current.result && <p role="alert" className="text-sm text-destructive">{es ? "El trabajo terminó sin un borrador válido. No se volverá a generar automáticamente." : "The run ended without a valid draft. It will not regenerate automatically."}</p>}
+      {current && <ArtizenRunFailure run={current} />}
       {state.budget && <p className="text-xs text-muted-foreground">
         {es ? "Asignado" : "Allocated"}: {money(state.budget.allocatedMicros)} · {es ? "Reservado" : "Reserved"}: {money(state.budget.reservedMicros)} · {es ? "Límite" : "Limit"}: {money(state.budget.limitMicros)}.
         {" "}{es ? "Asignación de infraestructura, no factura cloud definitiva." : "Infrastructure allocation, not a final cloud invoice."}
