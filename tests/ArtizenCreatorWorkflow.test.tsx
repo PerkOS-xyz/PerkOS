@@ -14,6 +14,22 @@ const completed = () => ({ requestId: "00000000-0000-4000-8000-000000000001", ac
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json" } });
 beforeEach(() => { mock.language = "es"; mock.fetch.mockReset().mockImplementation(async () => json(initial())); });
 afterEach(() => { cleanup(); vi.useRealTimers(); });
+
+it.each([["en", "prepare-update"], ["es", "prepare-update"], ["en", "revise-update"], ["es", "revise-update"]])("warns of copied notes in %s/%s without changing the draft or generating again", async (language, action) => {
+  mock.language = language;
+  mock.fetch.mockImplementation(async () => json({ ...initial(), runs: [{ ...completed(), action, draftEchoesNotes: true }] }));
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  expect(await screen.findByRole("alert")).toHaveTextContent(language === "es" ? "El borrador repite tus notas" : "The draft repeats your notes");
+  expect(screen.getByRole("alert")).toHaveTextContent(language === "es" ? "No se volverá a generar automáticamente" : "It will not regenerate automatically");
+  expect(screen.getByLabelText(language === "es" ? "Revisa y edita tu borrador" : "Review and edit your draft")).toHaveValue(completed().result.draft);
+  expect(mock.fetch.mock.calls.filter(c=>c[1]?.method)).toHaveLength(0);
+});
+it.each([false, undefined])("does not invent a note-echo warning for absent/false API flags: %s", async draftEchoesNotes => {
+  mock.fetch.mockImplementation(async () => json({ ...initial(), runs: [{ ...completed(), draftEchoesNotes }] }));
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  await screen.findByLabelText("Revisa y edita tu borrador");
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+});
 async function fill() {
   const notes = await screen.findByLabelText("¿Qué avances puedes confirmar?");
   fireEvent.change(notes, { target: { value: "Lanzamos una demo." } });

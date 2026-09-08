@@ -291,6 +291,16 @@ export type ProjectDetail = {
   project: Project;
   tasks: Task[];
   messages: ChatMessage[];
+  /** Minimal last-read agent metadata from the existing roster read; no presence polling. */
+  taskAgents?: TaskAgentView[];
+};
+
+export type TaskAgentView = {
+  name: string;
+  displayName?: string;
+  runtime?: string;
+  executionMode?: "artizen-on-demand";
+  executionState?: string;
 };
 
 // Agent, AgentRuntime, LaunchAgentCredentials are the canonical platform
@@ -1149,7 +1159,8 @@ export async function getWalletProject(input: {
     ),
   ]);
 
-  // The wallet's /agents collection powers ONLY the roster self-heal below.
+  // The wallet's /agents collection powers roster self-heal and last-read
+  // task-agent display metadata below; it is not a live presence subscription.
   // A member viewing a SHARED project (walletAddress = the owner) can't read
   // the owner's /agents (by design — members are scoped to the org/project,
   // not the owner's agents), so read it tolerantly: a denial must not break
@@ -1208,10 +1219,23 @@ export async function getWalletProject(input: {
     }
   }
 
+  const taskRows = tasksSnap.docs.map((d) => d.data());
+  const assignedNames = new Set(taskRows.map((task) => task.agent));
   return {
     project,
-    tasks: tasksSnap.docs.map((d) => d.data()),
+    tasks: taskRows,
     messages: messagesSnap.docs.map((d) => d.data()),
+    taskAgents: agentsSnap?.docs
+      .map((d) => d.data())
+      .filter(isAllowedAgentRow)
+      .filter((agent) => assignedNames.has(agent.name))
+      .map((agent) => ({
+        name: agent.name,
+        displayName: agent.displayName,
+        runtime: agent.runtime,
+        executionMode: agent.executionMode,
+        executionState: agent.executionState,
+      })),
   };
 }
 
