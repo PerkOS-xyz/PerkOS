@@ -31,6 +31,7 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [notes, setNotes] = useState("");
+  const [editorialNotes, setEditorialNotes] = useState("");
   const [pending, setPending] = useState(false);
   const [confirmation, setConfirmation] = useState<{ action: Run["action"]; sourceDraft?: string } | null>(null);
   const retry = useRef<{ fingerprint: string; requestId: string } | null>(null);
@@ -95,7 +96,8 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
   }
   async function start() {
     if (!confirmation || pending || !notes.trim()) return;
-    const payload = { ...confirmation, notes: notes.trim(), confirmed: true };
+    const payload = { ...confirmation, notes: notes.trim(),
+      ...(editorialNotes.trim() ? { editorialNotes: editorialNotes.trim() } : {}), confirmed: true };
     const fingerprint = JSON.stringify(payload);
     if (!retry.current) retry.current = { fingerprint, requestId: crypto.randomUUID() };
     if (retry.current.fingerprint !== fingerprint) { setError("IDEMPOTENCY_CONFLICT"); setConfirmation(null); return; }
@@ -153,8 +155,18 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
       </p>}
       {!state.configured && <p className="text-sm text-muted-foreground">{errorText("PILOT_NOT_CONFIGURED")}</p>}
       <label className="block text-sm font-medium" htmlFor="artizen-current-notes">{es ? "¿Qué avances puedes confirmar?" : "What progress can you confirm?"}</label>
-      <textarea id="artizen-current-notes" className={`${field} min-h-28`} maxLength={4000} value={notes} onChange={e => setNotes(e.target.value)}
-        placeholder={es ? "Comparte hechos de este proyecto, no instrucciones técnicas." : "Share facts about this project, not technical instructions."} />
+      <p id="artizen-facts-help" className="text-xs text-muted-foreground">{es
+        ? "Sólo hechos verificados, límites y trabajo pendiente. Usa el campo de abajo para indicar cómo redactarlos."
+        : "Only verified facts, limitations and ongoing work. Use the field below to say how to write them."}</p>
+      <textarea id="artizen-current-notes" aria-describedby="artizen-facts-help" className={`${field} min-h-28`} maxLength={4000} value={notes} onChange={e => setNotes(e.target.value)}
+        placeholder={es ? "Ejemplo: la demo funciona; las pruebas con creadores siguen pendientes." : "Example: the demo works; creator testing is still pending."} />
+      <label className="block text-sm font-medium" htmlFor="artizen-editorial-notes">{es ? "Preferencias de redacción (opcional)" : "Writing preferences (optional)"}</label>
+      <p id="artizen-editorial-help" className="text-xs text-muted-foreground">{es
+        ? "Tono, extensión o formato. Estas preferencias no son hechos ni deben aparecer como instrucciones en el borrador."
+        : "Tone, length or format. These preferences are not facts and should not appear as instructions in the draft."}</p>
+      <textarea id="artizen-editorial-notes" aria-describedby="artizen-editorial-help" className={`${field} min-h-20`} maxLength={1000}
+        value={editorialNotes} onChange={e => setEditorialNotes(e.target.value)}
+        placeholder={es ? "Ejemplo: tono cercano, menos de 100 palabras, dos párrafos." : "Example: a warm tone, under 100 words, two paragraphs."} />
       <Button disabled={pending || !!state.activeRunId || !state.configured || !notes.trim()} onClick={() => setConfirmation({ action: "prepare-update" })}>
         {es ? "Preparar borrador" : "Prepare draft"}
       </Button>
@@ -204,6 +216,7 @@ function DraftReview({ run, memory, es, pending, canRevise, revise, save }: { ru
         <li>{es ? "Confirma cada afirmación con los hechos que aportaste; elimina lo que no puedas respaldar." : "Check each claim against the facts you supplied; remove anything you cannot support."}</li>
         <li>{es ? "Distingue avances confirmados de planes. No presupongas adopción, métricas ni comentarios de creadores." : "Distinguish confirmed progress from plans. Do not assume adoption, metrics or creator feedback."}</li>
         <li>{es ? "Usa el ejemplo aprobado como estilo, no como evidencia de avances actuales." : "Use the approved example for style, not as evidence of current progress."}</li>
+        <li>{es ? "Comprueba que el texto hable a tu comunidad y no copie instrucciones de redacción." : "Check that the text speaks to your community and does not copy writing instructions."}</li>
       </ul>
     </div>
     <div className="flex flex-wrap gap-2">
