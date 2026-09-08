@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ArtizenWorkLink } from "@/app/components/ArtizenProjectBoard";
 import { useRouter, useSearchParams } from "next/navigation";
 import { use, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -131,7 +132,7 @@ export default function TaskDetailPage({ params }: PageProps) {
             {task.name}
           </h1>
         </div>
-        <div className="flex items-center gap-2">
+        {task.executionMode === "artizen-on-demand" ? <ArtizenWorkLink projectId={projectId} /> : <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -150,7 +151,7 @@ export default function TaskDetailPage({ params }: PageProps) {
             <Trash2 className="h-3.5 w-3.5" />
             Delete
           </Button>
-        </div>
+        </div>}
       </header>
 
       <Card>

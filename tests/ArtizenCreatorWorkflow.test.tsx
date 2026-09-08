@@ -4,8 +4,9 @@ import { ArtizenCreatorWorkflow } from "../app/components/ArtizenCreatorWorkflow
 
 const mock = vi.hoisted(() => ({ fetch: vi.fn(), language: "es" }));
 vi.mock("../app/lib/apiClient", () => ({ authedFetch: mock.fetch }));
+vi.mock("@tanstack/react-query", () => ({ useQueryClient: () => ({ invalidateQueries: vi.fn() }) }));
 vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: mock.language } }) }));
-const initial = () => ({ configured: true, budget: { limitMicros: 1000000, reservedMicros: 0, allocatedMicros: 0 },
+const initial = () => ({ configured: true, agentName: "Artizen-fixture", budget: { limitMicros: 1000000, reservedMicros: 0, allocatedMicros: 0 },
   activeRunId: null, runReservationMicros: 50000, runs: [], memory: { revision: 0, text: "", sourceRunId: null, updatedAtMs: 0 } });
 const completed = () => ({ requestId: "00000000-0000-4000-8000-000000000001", action: "prepare-update", phase: "settled",
   result: { draft: "Lanzamos una demo.", reviewNotes: ["Verifica los detalles antes de compartir."], sourcesUsed: ["current notes"] },
@@ -19,6 +20,23 @@ async function fill() {
   fireEvent.click(screen.getByRole("button", { name: "Preparar borrador" }));
   await screen.findByRole("dialog");
 }
+it.each(["es", "en"])("links a legacy project explicitly without starting inference in %s", async language => {
+  mock.language = language; let linked = false;
+  mock.fetch.mockImplementation(async (_path, init) => {
+    if (init?.method === "POST") { linked = true; return json({ agentName: "Artizen-fixture" }); }
+    return json({ ...initial(), agentName: linked ? "Artizen-fixture" : null });
+  });
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  const setup = await screen.findByRole("button", { name: language === "es" ? "Asociar Hermes al proyecto" : "Link Hermes to project" });
+  expect(mock.fetch).toHaveBeenCalledTimes(1);
+  fireEvent.click(setup);
+  expect(screen.getByRole("dialog")).toHaveTextContent(language === "es" ? "No se iniciará cómputo" : "No compute starts");
+  fireEvent.click(screen.getByRole("button", { name: language === "es" ? "Asociar sin iniciar" : "Link without starting" }));
+  await screen.findByRole("link", { name: language === "es" ? "Ver agente Hermes" : "View Hermes agent" });
+  const writes = mock.fetch.mock.calls.filter(c => c[1]?.method === "POST");
+  expect(writes).toHaveLength(1); expect(writes[0][0]).toBe("/artizen-projects/template-example/agent");
+  expect(JSON.parse(writes[0][1].body)).toEqual({ confirmed: true });
+});
 it("blank notes never wake Hermes; confirmation is a web dialog", async () => {
   render(<ArtizenCreatorWorkflow projectId="template-example" />);
   expect(await screen.findByRole("button", { name: "Preparar borrador" })).toBeDisabled();
@@ -123,8 +141,8 @@ it("keeps UI copy in English when English is selected", async () => {
   mock.language = "en";
   render(<ArtizenCreatorWorkflow projectId="template-example" />);
   expect(await screen.findByLabelText("What progress can you confirm?")).toBeInTheDocument();
-  expect(screen.getByText("No runs yet")).toBeInTheDocument();
-  expect(screen.queryByText("Sin ejecuciones")).not.toBeInTheDocument();
+  expect(screen.getByText("Hermes is resting")).toBeInTheDocument();
+  expect(screen.queryByText("Hermes en reposo")).not.toBeInTheDocument();
 });
 it("missing budget does not offer an enabled wake action", async () => {
   mock.fetch.mockImplementation(async () => json({ ...initial(), configured: false, budget: null }));
@@ -140,7 +158,7 @@ it.each(["es", "en"])("separates temporary work and neutral review guidance in %
   mock.fetch.mockImplementation(async () => json({ ...initial(), runs: [run] }));
   render(<ArtizenCreatorWorkflow projectId="template-example" />);
   expect(await screen.findByText(language === "es" ? "Hermes bajo demanda" : "On-demand Hermes")).toBeInTheDocument();
-  expect(screen.getByText(language === "es" ? /No se cuenta como agente permanente/ : /not counted as a permanent agent/)).toBeInTheDocument();
+  expect(screen.getByText(language === "es" ? /Cada trabajo crea una tarea/ : /Each run creates a task/)).toBeInTheDocument();
   expect(screen.getByText(language === "es" ? "Comprobaciones antes de aprobar" : "Checks before approval")).toBeInTheDocument();
   expect(screen.queryByText(run.result.reviewNotes[0])).not.toBeInTheDocument();
   expect(screen.getByText(language === "es" ? /no verificación automática/ : /not automated fact verification/)).toBeInTheDocument();
