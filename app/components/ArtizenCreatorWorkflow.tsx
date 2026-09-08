@@ -7,15 +7,17 @@ import { authedFetch } from "../lib/apiClient";
 import { ConfirmDialog } from "./ConfirmDialog";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
+import { ArtizenFormatReview, type FormatReview } from "./ArtizenFormatReview";
 
-type DraftResult = { draft: string; reviewNotes: string[]; sourcesUsed: string[] };
+type DraftResult = { draft: string; reviewNotes: string[]; sourcesUsed: string[]; formatReview?: FormatReview };
 type Run = { requestId: string; action: "prepare-update" | "revise-update";
   phase: "queued" | "executing" | "awaiting_stop" | "settled" | "cancelled";
   result: DraftResult | null; allocatedMicros: number | null; reservedMicros: number;
   createdAtMs: number; needsAttention?: boolean; revisionUnchanged?: boolean; draftEchoesNotes?: boolean };
 type Memory = { revision: number; text: string; sourceRunId: string | null; updatedAtMs: number };
 type State = { configured: boolean; agentName: string | null; budget: { limitMicros: number; reservedMicros: number; allocatedMicros: number } | null;
-  activeRunId: string | null; runReservationMicros: number; runs: Run[]; memory: Memory };
+  activeRunId: string | null; runReservationMicros: number; runs: Run[]; memory: Memory;
+  draftFormat?: { contract: string; paragraphs: number; minWords: number; maxWords: number } };
 
 const active = (run?: Run) => !!run && !run.needsAttention && ["queued", "executing", "awaiting_stop"].includes(run.phase);
 const field = "w-full min-w-0 rounded-lg border border-border bg-background p-3 text-sm";
@@ -91,6 +93,7 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
       PILOT_DISABLED: ["La ejecución del piloto aún no está habilitada.", "Pilot execution is not enabled yet."],
       PILOT_NOT_CONFIGURED: ["Este proyecto aún no tiene un presupuesto habilitado.", "This project does not have an enabled budget yet."],
       WORKSPACE_NOT_READY: ["Asocia primero Hermes al proyecto. No se inició ningún trabajo.", "Link Hermes to the project first. No work was started."],
+      OUTPUT_CONTRACT_UNAVAILABLE: ["El proveedor aún no tiene activo el formato estructurado. No se inició consumo; requiere configuración del operador.", "The provider has not enabled structured output yet. No compute started; operator configuration is required."],
       WORKSPACE_CONFLICT: ["La asociación del agente requiere revisión. No se sobrescribieron registros existentes.", "The agent association needs review. Existing records were not overwritten."],
       BUSY: ["Ya hay un trabajo activo. Actualiza su estado antes de reintentar.", "A run is already active. Refresh its status before retrying."],
       BUDGET_EXHAUSTED: ["El presupuesto disponible no alcanza para otra ejecución.", "The available budget cannot cover another run."],
@@ -180,12 +183,15 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
       <textarea id="artizen-current-notes" aria-describedby="artizen-facts-help" className={`${field} min-h-28`} maxLength={4000} value={notes} onChange={e => setNotes(e.target.value)}
         placeholder={es ? "Ejemplo: la demo funciona; las pruebas con creadores siguen pendientes." : "Example: the demo works; creator testing is still pending."} />
       <label className="block text-sm font-medium" htmlFor="artizen-editorial-notes">{es ? "Preferencias de redacción (opcional)" : "Writing preferences (optional)"}</label>
+      {state.draftFormat?.contract === "artizen-update-v1" && <p className="text-sm">{es
+        ? "Formato de esta plantilla: dos párrafos, 90–120 palabras en total; avances primero, límites y trabajo pendiente después. Las preferencias no cambian este formato."
+        : "Template format: two paragraphs, 90–120 words total; progress first, limitations and ongoing work second. Preferences do not change this format."}</p>}
       <p id="artizen-editorial-help" className="text-xs text-muted-foreground">{es
-        ? "Tono, extensión o formato. Estas preferencias no son hechos ni deben aparecer como instrucciones en el borrador."
-        : "Tone, length or format. These preferences are not facts and should not appear as instructions in the draft."}</p>
+        ? (state.draftFormat ? "Tono y estilo dentro del formato de la plantilla. Estas preferencias no son hechos." : "Tono, extensión o formato. Estas preferencias no son hechos ni deben aparecer como instrucciones en el borrador.")
+        : (state.draftFormat ? "Tone and style within the template format. These preferences are not facts." : "Tone, length or format. These preferences are not facts and should not appear as instructions in the draft.")}</p>
       <textarea id="artizen-editorial-notes" aria-describedby="artizen-editorial-help" className={`${field} min-h-20`} maxLength={1000}
         value={editorialNotes} onChange={e => setEditorialNotes(e.target.value)}
-        placeholder={es ? "Ejemplo: tono cercano, menos de 100 palabras, dos párrafos." : "Example: a warm tone, under 100 words, two paragraphs."} />
+        placeholder={es ? "Ejemplo: tono cercano, lenguaje sencillo, sin exageraciones." : "Example: a warm tone, plain language, no hype."} />
       <Button disabled={pending || !!state.activeRunId || !state.configured || !state.agentName || !notes.trim()} onClick={() => setConfirmation({ action: "prepare-update" })}>
         {es ? "Preparar borrador" : "Prepare draft"}
       </Button>
@@ -196,6 +202,7 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
       {state.runs.length > 1 && <details className="rounded-lg border border-border p-3"><summary>{es ? "Borradores anteriores" : "Previous drafts"}</summary>
         <div className="mt-3 space-y-4">{state.runs.slice(1).filter(r => r.result).map(run => <article key={run.requestId} className="whitespace-pre-wrap break-words text-sm">
           <time className="mb-2 block text-xs text-muted-foreground">{new Date(run.createdAtMs).toLocaleString(i18n.language)}</time>{run.result?.draft}
+          <ArtizenFormatReview review={run.result?.formatReview} es={es} />
         </article>)}</div>
       </details>}
     </>}
@@ -218,6 +225,7 @@ function DraftReview({ run, memory, es, pending, canRevise, revise, save }: { ru
   const savedFromRun = !!memory.text && memory.sourceRunId === run.requestId;
   return <section className="min-w-0 space-y-3 rounded-lg border border-primary/30 p-4" aria-label={es ? "Revisión del borrador" : "Draft review"}>
     <h4 className="font-semibold">{es ? "Borrador generado · revisión humana" : "Generated draft · human review"}</h4>
+    <ArtizenFormatReview review={run.result?.formatReview} es={es} edited={draft !== run.result!.draft} />
     {run.draftEchoesNotes === true && <p role="alert" className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-600 dark:text-amber-300">{es
       ? "El borrador repite tus notas, salvo posibles espacios o saltos de línea. Puede no haber aplicado la redacción o el formato solicitados. Revisa y edita el texto antes de aprobarlo si hace falta. No se volverá a generar automáticamente."
       : "The draft repeats your notes, apart from possible whitespace changes. It may not have applied the requested wording or format. Review and edit before approving if needed. It will not regenerate automatically."}</p>}

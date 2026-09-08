@@ -15,6 +15,20 @@ const json = (data: unknown, status = 200) => new Response(JSON.stringify(data),
 beforeEach(() => { mock.language = "es"; mock.fetch.mockReset().mockImplementation(async () => json(initial())); });
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 
+it.each(["en", "es"])("shows structured format, failed historical assessment and local editing without POST in %s", async language => {
+  mock.language = language;
+  const run = { ...completed(), result: { ...completed().result, formatReview: {
+    contract: "artizen-update-v1", status: "needs-review", wordCount: 4, paragraphCount: 1, issues: ["word_count", "paragraph_count"] } } };
+  mock.fetch.mockResolvedValue(json({ ...initial(), draftFormat: { contract: "artizen-update-v1", paragraphs: 2, minWords: 90, maxWords: 120 }, runs: [run] }));
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  const textarea = await screen.findByRole("textbox", { name: language === "es" ? "Revisa y edita tu borrador" : "Review and edit your draft" });
+  expect(screen.getByText(language === "es" ? /Formato de esta plantilla:/ : /Template format:/)).toHaveTextContent("90–120");
+  fireEvent.change(textarea, { target: { value: "Edited first paragraph.\n\nEdited second paragraph." } });
+  expect(screen.getByText(language === "es" ? /Estos resultados corresponden/ : /These results describe/)).toBeVisible();
+  expect(mock.fetch).toHaveBeenCalledTimes(1);
+  expect(screen.getByRole("button", { name: language === "es" ? "Aprobar y guardar ejemplo" : "Approve and save example" })).toBeEnabled();
+});
+
 it.each([["en", "prepare-update"], ["es", "prepare-update"], ["en", "revise-update"], ["es", "revise-update"]])("warns of copied notes in %s/%s without changing the draft or generating again", async (language, action) => {
   mock.language = language;
   mock.fetch.mockImplementation(async () => json({ ...initial(), runs: [{ ...completed(), action, draftEchoesNotes: true }] }));
