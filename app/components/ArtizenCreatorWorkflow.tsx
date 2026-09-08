@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { authedFetch } from "../lib/apiClient";
 import { ConfirmDialog } from "./ConfirmDialog";
+import Link from "next/link";
+import { useQueryClient } from "@tanstack/react-query";
 
 type DraftResult = { draft: string; reviewNotes: string[]; sourcesUsed: string[] };
 type Run = { requestId: string; action: "prepare-update" | "revise-update";
@@ -12,7 +14,7 @@ type Run = { requestId: string; action: "prepare-update" | "revise-update";
   result: DraftResult | null; allocatedMicros: number | null; reservedMicros: number;
   createdAtMs: number; needsAttention?: boolean; revisionUnchanged?: boolean };
 type Memory = { revision: number; text: string; sourceRunId: string | null; updatedAtMs: number };
-type State = { configured: boolean; budget: { limitMicros: number; reservedMicros: number; allocatedMicros: number } | null;
+type State = { configured: boolean; agentName: string | null; budget: { limitMicros: number; reservedMicros: number; allocatedMicros: number } | null;
   activeRunId: string | null; runReservationMicros: number; runs: Run[]; memory: Memory };
 
 const active = (run?: Run) => !!run && !run.needsAttention && ["queued", "executing", "awaiting_stop"].includes(run.phase);
@@ -25,6 +27,7 @@ async function readResponse<T>(response: Response): Promise<T> {
 
 /** Parent keys this workspace by account and project; no cross-wallet UI state. */
 export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
+  const queryClient = useQueryClient();
   const { i18n } = useTranslation();
   const es = i18n.language.startsWith("es");
   const [state, setState] = useState<State | null>(null);
@@ -33,6 +36,7 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
   const [notes, setNotes] = useState("");
   const [editorialNotes, setEditorialNotes] = useState("");
   const [pending, setPending] = useState(false);
+  const [setupOpen, setSetupOpen] = useState(false);
   const [confirmation, setConfirmation] = useState<{ action: Run["action"]; sourceDraft?: string } | null>(null);
   const retry = useRef<{ fingerprint: string; requestId: string } | null>(null);
   const base = `/artizen-projects/${encodeURIComponent(projectId)}`;
@@ -86,6 +90,8 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
     const messages: Record<string, [string, string]> = {
       PILOT_DISABLED: ["La ejecución del piloto aún no está habilitada.", "Pilot execution is not enabled yet."],
       PILOT_NOT_CONFIGURED: ["Este proyecto aún no tiene un presupuesto habilitado.", "This project does not have an enabled budget yet."],
+      WORKSPACE_NOT_READY: ["Asocia primero Hermes al proyecto. No se inició ningún trabajo.", "Link Hermes to the project first. No work was started."],
+      WORKSPACE_CONFLICT: ["La asociación del agente requiere revisión. No se sobrescribieron registros existentes.", "The agent association needs review. Existing records were not overwritten."],
       BUSY: ["Ya hay un trabajo activo. Actualiza su estado antes de reintentar.", "A run is already active. Refresh its status before retrying."],
       BUDGET_EXHAUSTED: ["El presupuesto disponible no alcanza para otra ejecución.", "The available budget cannot cover another run."],
       CONTEXT_TOO_LARGE: ["El contexto excede el límite. Reduce las notas o el ejemplo aprobado.", "Context exceeds the limit. Shorten the notes or approved example."],
@@ -95,7 +101,7 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
     return messages[code]?.[es ? 0 : 1] ?? (es ? "No se pudo completar la solicitud. Actualiza el estado antes de reintentar." : "The request could not complete. Refresh status before retrying.");
   }
   async function start() {
-    if (!confirmation || pending || !notes.trim()) return;
+    if (!confirmation || pending || !notes.trim() || !state?.agentName) return;
     const payload = { ...confirmation, notes: notes.trim(),
       ...(editorialNotes.trim() ? { editorialNotes: editorialNotes.trim() } : {}), confirmed: true };
     const fingerprint = JSON.stringify(payload);
@@ -124,14 +130,25 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
     } catch (e) { setError(e instanceof Error ? e.message : "ARTIZEN_UNAVAILABLE"); return false; }
     finally { setPending(false); }
   }
+  async function setupAgent() {
+    setPending(true); setError("");
+    try {
+      await readResponse(await authedFetch(`${base}/agent`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ confirmed: true }) }));
+      setSetupOpen(false); await load();
+      await queryClient.invalidateQueries({ queryKey: ["wallet-agents"] });
+      await queryClient.invalidateQueries({ queryKey: ["wallet-project"] });
+      setNotice(es ? "Hermes asociado. Las ejecuciones anteriores ya están en Tareas. No se inició consumo." : "Hermes linked. Previous runs are now in Tasks. No compute was started.");
+    } catch (e) { setError(e instanceof Error ? e.message : "ARTIZEN_UNAVAILABLE"); }
+    finally { setPending(false); }
+  }
   const status = current?.needsAttention ? (es ? "Requiere revisión operativa" : "Needs operational review") : current ? ({
     queued: es ? "Preparando Hermes" : "Preparing Hermes",
     executing: es ? "Hermes está trabajando" : "Hermes is working",
     awaiting_stop: es ? "Confirmando reposo y costo" : "Confirming stop and cost",
     settled: es ? "Hermes en reposo" : "Hermes is resting",
     cancelled: es ? "Cancelado sin iniciar" : "Cancelled before start",
-  })[current.phase] : es ? "Sin ejecuciones" : "No runs yet";
-  return <section className="mt-5 min-w-0 space-y-4 break-words border-t border-border pt-5" aria-label={es ? "Borradores Artizen" : "Artizen drafts"}>
+  })[current.phase] : state?.agentName ? (es ? "Hermes en reposo" : "Hermes is resting") : (es ? "Falta asociar Hermes" : "Link Hermes to continue");
+  return <section id="artizen-workflow" className="mt-5 min-w-0 scroll-mt-20 space-y-4 break-words border-t border-border pt-5" aria-label={es ? "Borradores Artizen" : "Artizen drafts"}>
     <div className="flex flex-wrap items-center justify-between gap-3">
       <h3 className="font-semibold">{es ? "Tu actualización para la comunidad" : "Your supporter update"}</h3>
       <Button variant="outline" size="sm" onClick={() => { void load(); }} disabled={pending}>{es ? "Actualizar estado" : "Refresh status"}</Button>
@@ -145,8 +162,10 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
         <h4 className="text-sm font-medium">{es ? "Hermes bajo demanda" : "On-demand Hermes"}</h4>
         <p role="status" aria-live="polite" className="text-sm">{status}</p>
         <p className="text-xs text-muted-foreground">{es
-          ? "Cada ejecución usa un trabajador temporal. No se cuenta como agente permanente ni como tarea del tablero del proyecto."
-          : "Each run uses a temporary worker. It is not counted as a permanent agent or a task on the project board."}</p>
+          ? "Tu agente conserva su identidad en el proyecto. Cada trabajo crea una tarea y usa un runtime temporal, sin cómputo ni heartbeats en reposo. El resultado queda en revisión hasta que apruebes el ejemplo."
+          : "Your agent keeps its project identity. Each run creates a task and uses a temporary runtime, with no idle compute or heartbeats. Results stay in review until you approve the example."}</p>
+        {state.agentName ? <Link className="inline-block text-sm text-primary underline" href={`/agents/${encodeURIComponent(state.agentName)}`}>{es ? "Ver agente Hermes" : "View Hermes agent"}</Link>
+          : <Button variant="outline" disabled={pending || !!state.activeRunId} onClick={() => setSetupOpen(true)}>{es ? "Asociar Hermes al proyecto" : "Link Hermes to project"}</Button>}
       </div>
       {current?.phase === "settled" && !current.result && <p role="alert" className="text-sm text-destructive">{es ? "El trabajo terminó sin un borrador válido. No se volverá a generar automáticamente." : "The run ended without a valid draft. It will not regenerate automatically."}</p>}
       {state.budget && <p className="text-xs text-muted-foreground">
@@ -167,11 +186,11 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
       <textarea id="artizen-editorial-notes" aria-describedby="artizen-editorial-help" className={`${field} min-h-20`} maxLength={1000}
         value={editorialNotes} onChange={e => setEditorialNotes(e.target.value)}
         placeholder={es ? "Ejemplo: tono cercano, menos de 100 palabras, dos párrafos." : "Example: a warm tone, under 100 words, two paragraphs."} />
-      <Button disabled={pending || !!state.activeRunId || !state.configured || !notes.trim()} onClick={() => setConfirmation({ action: "prepare-update" })}>
+      <Button disabled={pending || !!state.activeRunId || !state.configured || !state.agentName || !notes.trim()} onClick={() => setConfirmation({ action: "prepare-update" })}>
         {es ? "Preparar borrador" : "Prepare draft"}
       </Button>
       {current?.result && <DraftReview key={current.requestId} run={current} memory={state.memory} es={es} pending={pending}
-        canRevise={!state.activeRunId && state.configured && !!notes.trim()}
+        canRevise={!state.activeRunId && state.configured && !!state.agentName && !!notes.trim()}
         revise={draft => setConfirmation({ action: "revise-update", sourceDraft: draft })} save={saveMemory} />}
       <MemoryEditor key={state.memory.revision} memory={state.memory} es={es} pending={pending} save={saveMemory} />
       {state.runs.length > 1 && <details className="rounded-lg border border-border p-3"><summary>{es ? "Borradores anteriores" : "Previous drafts"}</summary>
@@ -180,6 +199,10 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
         </article>)}</div>
       </details>}
     </>}
+    <ConfirmDialog open={setupOpen} onOpenChange={setSetupOpen} pending={pending}
+      title={es ? "¿Asociar Hermes al proyecto?" : "Link Hermes to this project?"}
+      description={es ? "Se registrará un agente y se vincularán los trabajos anteriores. No se iniciará cómputo ni se reservará presupuesto." : "Registers one agent and links previous runs. No compute starts and no budget is reserved."}
+      confirmLabel={es ? "Asociar sin iniciar" : "Link without starting"} cancelLabel={es ? "Cancelar" : "Cancel"} onConfirm={() => { void setupAgent(); }} />
     <ConfirmDialog open={!!confirmation} onOpenChange={open => { if (!open && !pending) setConfirmation(null); }} pending={pending}
       title={es ? "¿Iniciar un trabajo de Hermes?" : "Start a Hermes run?"}
       description={es ? `Se reservará hasta ${money(state?.runReservationMicros ?? 0)} del presupuesto. Hermes preparará un borrador y volverá a reposo. No publicará contenido.`

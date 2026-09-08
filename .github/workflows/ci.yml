@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, development, qa]
   pull_request:
-    branches: [main]
+    branches: [main, development, qa]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -36,5 +36,11 @@ jobs:
         run: npm run typecheck
       - name: Tests
         run: npm test
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Artizen Firestore rules (local demo only)
+        run: npx --yes --package=firebase-tools@13.35.1 firebase emulators:exec --only firestore --project demo-artizen-workspace --config firebase.rules-test.json 'npx vitest run tests/artizenFirestoreRules.test.ts'
       - name: Build (production)
         run: npm run build

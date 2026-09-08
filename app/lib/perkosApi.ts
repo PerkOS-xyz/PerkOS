@@ -68,6 +68,7 @@ export type PmSession = {
 };
 
 export type Project = {
+  executionMode?: "artizen-on-demand";
   id?: string;
   name: string;
   goal?: string;
@@ -110,6 +111,11 @@ export type Project = {
 export type TaskStatus = "Backlog" | "In progress" | "Review" | "Done";
 
 export type Task = {
+  executionMode?: "artizen-on-demand";
+  artizenRunId?: string;
+  executionPhase?: string;
+  humanApproved?: boolean;
+  approvedExample?: string;
   id?: string;
   name: string;
   status: TaskStatus | string;
@@ -406,6 +412,7 @@ const projectConverter: FirestoreDataConverter<Project> = {
       goal: (data.goal as string) ?? "",
       status: (data.status as string) ?? "Active",
       agents: (data.agents as number) ?? 0,
+      executionMode: data.executionMode === "artizen-on-demand" ? "artizen-on-demand" : undefined,
       tasks: (data.tasks as number) ?? 0,
       budget: (data.budget as string) ?? "0 USDC",
       orgId: (data.orgId as string | undefined) ?? undefined,
@@ -432,6 +439,11 @@ const taskConverter: FirestoreDataConverter<Task> = {
       name: (data.name as string) ?? "",
       status: (data.status as Task["status"]) ?? "Backlog",
       priority: (data.priority as Task["priority"]) ?? "Medium",
+      executionMode: data.executionMode === "artizen-on-demand" ? "artizen-on-demand" : undefined,
+      artizenRunId: typeof data.artizenRunId === "string" ? data.artizenRunId : undefined,
+      executionPhase: typeof data.executionPhase === "string" ? data.executionPhase : undefined,
+      humanApproved: data.humanApproved === true,
+      approvedExample: typeof data.approvedExample === "string" ? data.approvedExample : undefined,
       agent: (data.agent as string) ?? "",
       agentId: (data.agentId as string | undefined) ?? undefined,
       prompt: (data.prompt as string | undefined) ?? undefined,
@@ -478,6 +490,9 @@ export function isSpeechVoice(value: unknown): value is SpeechVoice {
 }
 
 export type AgentRow = Agent & {
+  executionMode?: "artizen-on-demand";
+  executionProjectId?: string;
+  executionState?: string;
   presenceSource?:"redis";
   presenceUnavailable?:boolean;
   presenceExpiresAt?:number;
@@ -547,6 +562,9 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
       id: snap.id,
       name: (data.name as string) ?? "",
       displayName: (data.displayName as string | undefined) ?? undefined,
+      executionMode: data.executionMode === "artizen-on-demand" ? "artizen-on-demand" : undefined,
+      executionProjectId: typeof data.executionProjectId === "string" ? data.executionProjectId : undefined,
+      executionState: typeof data.executionState === "string" ? data.executionState : undefined,
       speechVoice: isSpeechVoice(data.speechVoice) ? data.speechVoice : "alloy",
       runtime: (data.runtime as AgentRuntime) ?? "Hermes",
       status,
