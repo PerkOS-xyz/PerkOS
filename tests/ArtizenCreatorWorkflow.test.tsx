@@ -47,6 +47,52 @@ it("an uncertain response reuses the same idempotency key", async () => {
   const calls = mock.fetch.mock.calls.filter(c => c[1]?.method === "POST");
   expect(JSON.parse(calls[0][1].body).requestId).toBe(JSON.parse(calls[1][1].body).requestId);
 });
+
+it.each(["es", "en"])("separates accessible facts and optional editorial fields in %s", async language => {
+  mock.language = language;
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  const facts = await screen.findByLabelText(language === "es" ? "¿Qué avances puedes confirmar?" : "What progress can you confirm?");
+  const editorial = screen.getByLabelText(language === "es" ? "Preferencias de redacción (opcional)" : "Writing preferences (optional)");
+  expect(facts).toHaveAttribute("maxlength", "4000");
+  expect(editorial).toHaveAttribute("maxlength", "1000");
+  expect(facts).toHaveAccessibleDescription(language === "es"
+    ? "Sólo hechos verificados, límites y trabajo pendiente. Usa el campo de abajo para indicar cómo redactarlos."
+    : "Only verified facts, limitations and ongoing work. Use the field below to say how to write them.");
+  expect(editorial).toHaveAccessibleDescription(language === "es"
+    ? "Tono, extensión o formato. Estas preferencias no son hechos ni deben aparecer como instrucciones en el borrador."
+    : "Tone, length or format. These preferences are not facts and should not appear as instructions in the draft.");
+  fireEvent.change(editorial, { target: { value: "Under 100 words." } });
+  expect(screen.getByRole("button", { name: language === "es" ? "Preparar borrador" : "Prepare draft" })).toBeDisabled();
+  expect(mock.fetch).toHaveBeenCalledTimes(1);
+});
+
+it.each(["prepare-update", "revise-update"])("sends editorial preferences separately for %s", async action => {
+  mock.fetch.mockImplementation(async () => json({ ...initial(), runs: action === "revise-update" ? [completed()] : [] }));
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  fireEvent.change(await screen.findByLabelText("¿Qué avances puedes confirmar?"), { target: { value: "La prueba sigue en curso." } });
+  fireEvent.change(screen.getByLabelText("Preferencias de redacción (opcional)"), { target: { value: "  Menos de 100 palabras. No afirmes que terminó.  " } });
+  fireEvent.click(screen.getByRole("button", { name: action === "revise-update" ? "Revisar con mis notas" : "Preparar borrador" }));
+  fireEvent.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Iniciar trabajo" }));
+  await waitFor(() => expect(mock.fetch.mock.calls.some(c => c[1]?.method === "POST")).toBe(true));
+  const call = mock.fetch.mock.calls.find(c => c[1]?.method === "POST")!;
+  expect(JSON.parse(call[1].body)).toMatchObject({ action, notes: "La prueba sigue en curso.", editorialNotes: "Menos de 100 palabras. No afirmes que terminó." });
+  if (action === "revise-update") expect(JSON.parse(call[1].body).sourceDraft).toBe(completed().result.draft);
+});
+
+it("blocks changed editorial preferences after an uncertain admission instead of starting a second run", async () => {
+  mock.fetch.mockImplementation(async (_path, init) => { if (init?.method === "POST") throw Error("network"); return json(initial()); });
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  fireEvent.change(await screen.findByLabelText("¿Qué avances puedes confirmar?"), { target: { value: "La demo está lista." } });
+  fireEvent.change(screen.getByLabelText("Preferencias de redacción (opcional)"), { target: { value: "Tono cálido." } });
+  fireEvent.click(screen.getByRole("button", { name: "Preparar borrador" }));
+  fireEvent.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Iniciar trabajo" }));
+  await screen.findByRole("alert");
+  fireEvent.change(screen.getByLabelText("Preferencias de redacción (opcional)"), { target: { value: "Usa viñetas." } });
+  fireEvent.click(screen.getByRole("button", { name: "Preparar borrador" }));
+  fireEvent.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Iniciar trabajo" }));
+  await screen.findByText("El intento anterior tiene otros datos. Actualiza para revisar su resultado.");
+  expect(mock.fetch.mock.calls.filter(c => c[1]?.method === "POST")).toHaveLength(1);
+});
 it("reload shows persisted draft; approval saves edited text and never starts a model", async () => {
   mock.fetch.mockImplementation(async () => json({ ...initial(), runs: [completed()] }));
   render(<ArtizenCreatorWorkflow projectId="template-example" />);
@@ -98,6 +144,7 @@ it.each(["es", "en"])("separates temporary work and neutral review guidance in %
   expect(screen.getByText(language === "es" ? "Comprobaciones antes de aprobar" : "Checks before approval")).toBeInTheDocument();
   expect(screen.queryByText(run.result.reviewNotes[0])).not.toBeInTheDocument();
   expect(screen.getByText(language === "es" ? /no verificación automática/ : /not automated fact verification/)).toBeInTheDocument();
+  expect(screen.getByText(language === "es" ? /no copie instrucciones de redacción/ : /does not copy writing instructions/)).toBeInTheDocument();
   expect(mock.fetch).toHaveBeenCalledTimes(1);
 });
 
