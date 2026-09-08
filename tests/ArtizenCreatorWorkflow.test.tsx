@@ -160,3 +160,67 @@ it("memory edits stay local until the web confirmation is accepted", async () =>
   fireEvent.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Cancelar" }));
   expect(mock.fetch.mock.calls.some(c => c[1]?.method)).toBe(false);
 });
+
+it.each(["es", "en"])("shows a durable unchanged-revision warning in %s without retrying", async language => {
+  mock.language = language;
+  const run = { ...completed(), action: "revise-update", revisionUnchanged: true };
+  mock.fetch.mockImplementation(async () => json({ ...initial(), runs: [run] }));
+  const view = render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  const warning = await screen.findByRole("alert");
+  expect(warning).toHaveTextContent(language === "es" ? "La revisión devolvió el mismo texto" : "The revision returned the same text");
+  expect(warning).toHaveTextContent(language === "es" ? "No se volverá a generar automáticamente" : "It will not regenerate automatically");
+  view.unmount();
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  expect(await screen.findByRole("alert")).toHaveTextContent(language === "es" ? "Tus notas podrían no haberse aplicado" : "Your notes may not have been applied");
+  vi.useFakeTimers(); await act(async () => { await vi.advanceTimersByTimeAsync(60000); });
+  expect(mock.fetch).toHaveBeenCalledTimes(2);
+  expect(mock.fetch.mock.calls.some(c => c[1]?.method)).toBe(false);
+});
+
+it.each([
+  { action: "revise-update", revisionUnchanged: false },
+  { action: "revise-update", revisionUnchanged: undefined },
+  { action: "prepare-update", revisionUnchanged: true },
+])("does not infer an unchanged revision from missing or irrelevant evidence: %j", async evidence => {
+  mock.fetch.mockImplementation(async () => json({ ...initial(), runs: [{ ...completed(), ...evidence }] }));
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  await screen.findByLabelText("Revisa y edita tu borrador");
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+});
+
+it("lets a human fix and approve an unchanged response without a new inference", async () => {
+  const persisted = { ...initial(), runs: [{ ...completed(), action: "revise-update", revisionUnchanged: true }] };
+  mock.fetch.mockImplementation(async (_path, init) => {
+    if (init?.method === "PUT") {
+      const input = JSON.parse(init.body);
+      persisted.memory = { revision: 1, text: input.text, sourceRunId: input.sourceRunId, updatedAtMs: 1 };
+      return json(persisted.memory);
+    }
+    return json(persisted);
+  });
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  await screen.findByRole("alert");
+  fireEvent.change(screen.getByLabelText("Revisa y edita tu borrador"), { target: { value: "La demo ya fue retirada; seguimos probando la revisión." } });
+  fireEvent.click(screen.getByRole("button", { name: "Aprobar y guardar ejemplo" }));
+  expect(mock.fetch.mock.calls.some(c => c[1]?.method)).toBe(false);
+  fireEvent.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Guardar ejemplo" }));
+  await screen.findByText(/Ya guardaste un ejemplo de esta ejecución/);
+  expect(persisted.memory.text).toBe("La demo ya fue retirada; seguimos probando la revisión.");
+  expect(persisted.runs[0].result.draft).toBe(completed().result.draft);
+  expect(mock.fetch.mock.calls.filter(c => c[1]?.method === "PUT")).toHaveLength(1);
+  expect(mock.fetch.mock.calls.some(c => c[1]?.method === "POST")).toBe(false);
+});
+
+it("sends the edited source and current creator notes for revision only after confirmation", async () => {
+  mock.fetch.mockImplementation(async () => json({ ...initial(), runs: [completed()] }));
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  fireEvent.change(await screen.findByLabelText("¿Qué avances puedes confirmar?"), { target: { value: "La demo ya fue retirada." } });
+  fireEvent.change(screen.getByLabelText("Revisa y edita tu borrador"), { target: { value: "Nuestro borrador anterior." } });
+  fireEvent.click(screen.getByRole("button", { name: "Revisar con mis notas" }));
+  expect(await screen.findByRole("dialog")).toHaveTextContent("No publicará contenido");
+  expect(mock.fetch.mock.calls.some(c => c[1]?.method === "POST")).toBe(false);
+  fireEvent.click(screen.getByRole("button", { name: "Iniciar trabajo" }));
+  await waitFor(() => expect(mock.fetch.mock.calls.filter(c => c[1]?.method === "POST")).toHaveLength(1));
+  const payload = JSON.parse(mock.fetch.mock.calls.find(c => c[1]?.method === "POST")![1].body);
+  expect(payload).toEqual({ requestId: expect.any(String), action: "revise-update", sourceDraft: "Nuestro borrador anterior.", notes: "La demo ya fue retirada.", confirmed: true });
+});
