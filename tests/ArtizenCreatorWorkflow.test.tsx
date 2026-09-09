@@ -16,6 +16,45 @@ beforeEach(() => { mock.language = "es"; mock.fetch.mockReset().mockImplementati
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 const scheduling = { enabled: true, minDelayMs: 60_000, maxDelayMs: 86_400_000 };
 const localDate = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}T${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+it("hides webhook controls when the API does not advertise the capability", async () => {
+  render(<ArtizenCreatorWorkflow projectId="template-example" />); await screen.findByLabelText("¿Qué avances puedes confirmar?");
+  expect(screen.queryByRole("region", { name: "Webhook de una ejecución" })).not.toBeInTheDocument();
+});
+it.each(["en", "es"])("creates a one-shot webhook without starting a run and exposes the secret once in %s", async language => {
+  mock.language = language; let armed = false;
+  mock.fetch.mockImplementation(async (path, init) => {
+    if (path.endsWith("/webhook/rotate") && init?.method === "POST") { armed = true; return json({ enabled: true, status: "armed",
+      url: "https://dev.api.example/artizen-hooks/opaque", secret: "a".repeat(64), signatureVersion: "v1" }); }
+    return json({ ...initial(), webhook: { enabled: armed, status: armed ? "armed" : "disabled", url: null } });
+  });
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  fireEvent.click(await screen.findByRole("button", { name: language === "es" ? "Crear webhook" : "Create webhook" }));
+  expect(screen.getByRole("dialog")).toHaveTextContent(language === "es" ? "No iniciará Hermes ahora" : "Hermes will not start now");
+  fireEvent.click(screen.getByRole("button", { name: language === "es" ? "Crear sin ejecutar" : "Create without running" }));
+  expect(await screen.findByLabelText(language === "es" ? "Secreto HMAC" : "HMAC secret")).toHaveValue("a".repeat(64));
+  expect(screen.getByRole("dialog")).toHaveTextContent(language === "es" ? "se muestra una sola vez" : "shown once");
+  const writes = mock.fetch.mock.calls.filter(c => c[1]?.method === "POST");
+  expect(writes).toHaveLength(1); expect(writes[0][0]).toMatch(/\/webhook\/rotate$/);
+  expect(JSON.parse(writes[0][1].body)).toEqual({ confirmed: true });
+  expect(writes[0][0]).not.toMatch(/\/runs$/);
+  fireEvent.click(screen.getByRole("button", { name: language === "es" ? "Ya la guardé" : "I saved it" }));
+  expect(screen.queryByLabelText(language === "es" ? "Secreto HMAC" : "HMAC secret")).not.toBeInTheDocument();
+  expect(screen.getByText(language === "es" ? "Preparado · esperando un evento" : "Armed · waiting for one event")).toBeVisible();
+});
+it("disables an armed webhook only after a web confirmation", async () => {
+  let enabled = true;
+  mock.fetch.mockImplementation(async (path, init) => {
+    if (path.endsWith("/webhook/disable") && init?.method === "POST") { enabled = false; return json({ enabled: false, status: "disabled", url: null }); }
+    return json({ ...initial(), webhook: { enabled, status: enabled ? "armed" : "disabled", url: null } });
+  });
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  fireEvent.click(await screen.findByRole("button", { name: "Deshabilitar" }));
+  expect(mock.fetch.mock.calls.filter(c => c[1]?.method)).toHaveLength(0);
+  fireEvent.click(screen.getByRole("button", { name: "Deshabilitar" }));
+  await screen.findByText("Webhook deshabilitado. La URL anterior ya no acepta eventos.");
+  const writes = mock.fetch.mock.calls.filter(c => c[1]?.method === "POST");
+  expect(writes).toHaveLength(1); expect(writes[0][0]).toMatch(/\/webhook\/disable$/);
+});
 it.each(["en", "es"])("confirms a one-shot local date and holds a slot without auto-approving in %s", async language => {
   mock.language = language;
   const due = new Date(Date.now() + 300_000); due.setSeconds(0, 0);
