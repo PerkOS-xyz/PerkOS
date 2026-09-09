@@ -40,6 +40,7 @@ import {
 import { isAllowedAgentHosting } from "@/app/lib/agentHostingPolicy";
 
 import { firebaseDb } from "./firebase";
+import { taskConverter } from "./projectTaskConverter";
 import { formatAddress } from "./format";
 import { logActivity } from "./activityEvents";
 import { entityKey, writeEdge } from "./edges";
@@ -433,39 +434,6 @@ const projectConverter: FirestoreDataConverter<Project> = {
       pmAgent: (data.pmAgent as string | null | undefined) ?? null,
       pmSession,
       workflow,
-      createdAt: tsToIso(data.createdAt),
-      updatedAt: tsToIso(data.updatedAt),
-    };
-  },
-};
-
-const taskConverter: FirestoreDataConverter<Task> = {
-  toFirestore(task) {
-    const { id: _id, createdAt: _c, updatedAt: _u, ...rest } = task;
-    return rest;
-  },
-  fromFirestore(snap) {
-    const data = snap.data();
-    return {
-      id: snap.id,
-      name: (data.name as string) ?? "",
-      status: (data.status as Task["status"]) ?? "Backlog",
-      priority: (data.priority as Task["priority"]) ?? "Medium",
-      executionMode: data.executionMode === "artizen-on-demand" ? "artizen-on-demand" : undefined,
-      artizenRunId: typeof data.artizenRunId === "string" ? data.artizenRunId : undefined,
-      executionPhase: typeof data.executionPhase === "string" ? data.executionPhase : undefined,
-      stopReason: typeof data.stopReason === "string" ? data.stopReason : undefined,
-      failureCode: data.failureCode === "runtime-start-failed" ? data.failureCode : undefined,
-      humanApproved: data.humanApproved === true,
-      approvedExample: typeof data.approvedExample === "string" ? data.approvedExample : undefined,
-      agent: (data.agent as string) ?? "",
-      agentId: (data.agentId as string | undefined) ?? undefined,
-      prompt: (data.prompt as string | undefined) ?? undefined,
-      result: (data.result as string | undefined) ?? undefined,
-      logs: (data.logs as string[] | undefined) ?? undefined,
-      attachments: Array.isArray(data.attachments)
-        ? (data.attachments as TaskAttachment[])
-        : undefined,
       createdAt: tsToIso(data.createdAt),
       updatedAt: tsToIso(data.updatedAt),
     };
