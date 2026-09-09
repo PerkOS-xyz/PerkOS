@@ -114,6 +114,8 @@ export type Task = {
   executionMode?: "artizen-on-demand";
   artizenRunId?: string;
   executionPhase?: string;
+  stopReason?: string;
+  failureCode?: "runtime-start-failed";
   humanApproved?: boolean;
   approvedExample?: string;
   id?: string;
@@ -452,6 +454,8 @@ const taskConverter: FirestoreDataConverter<Task> = {
       executionMode: data.executionMode === "artizen-on-demand" ? "artizen-on-demand" : undefined,
       artizenRunId: typeof data.artizenRunId === "string" ? data.artizenRunId : undefined,
       executionPhase: typeof data.executionPhase === "string" ? data.executionPhase : undefined,
+      stopReason: typeof data.stopReason === "string" ? data.stopReason : undefined,
+      failureCode: data.failureCode === "runtime-start-failed" ? data.failureCode : undefined,
       humanApproved: data.humanApproved === true,
       approvedExample: typeof data.approvedExample === "string" ? data.approvedExample : undefined,
       agent: (data.agent as string) ?? "",

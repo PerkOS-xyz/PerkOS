@@ -15,6 +15,16 @@ const json = (data: unknown, status = 200) => new Response(JSON.stringify(data),
 beforeEach(() => { mock.language = "es"; mock.fetch.mockReset().mockImplementation(async () => json(initial())); });
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 
+it.each(["en", "es"])("shows recovered startup failure after reload without generating in %s", async language => {
+  mock.language = language;
+  mock.fetch.mockImplementation(async () => json({ ...initial(), runs: [{ ...completed(), result: null, stopReason: "failed", failureCode: "runtime-start-failed" }] }));
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  expect(await screen.findByRole("alert")).toHaveTextContent(language === "es" ? "No se llamó al modelo" : "The model was not called");
+  expect(screen.getByRole("alert")).toHaveTextContent(language === "es" ? "se ha conciliado" : "has been reconciled");
+  expect(mock.fetch).toHaveBeenCalledTimes(1);
+  expect(screen.queryByRole("button", { name: /Approve and save|Aprobar y guardar/ })).not.toBeInTheDocument();
+});
+
 it.each(["en", "es"])("shows structured format, failed historical assessment and local editing without POST in %s", async language => {
   mock.language = language;
   const run = { ...completed(), result: { ...completed().result, formatReview: {
