@@ -14,6 +14,68 @@ const completed = () => ({ requestId: "00000000-0000-4000-8000-000000000001", ac
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json" } });
 beforeEach(() => { mock.language = "es"; mock.fetch.mockReset().mockImplementation(async () => json(initial())); });
 afterEach(() => { cleanup(); vi.useRealTimers(); });
+const scheduling = { enabled: true, minDelayMs: 60_000, maxDelayMs: 86_400_000 };
+const localDate = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}T${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+it.each(["en", "es"])("confirms a one-shot local date and holds a slot without auto-approving in %s", async language => {
+  mock.language = language;
+  const due = new Date(Date.now() + 300_000); due.setSeconds(0, 0);
+  let scheduled = false;
+  mock.fetch.mockImplementation(async (_path, init) => {
+    if (init?.method === "POST") { scheduled = true; return json({}); }
+    return json({ ...initial(), scheduling, ...(scheduled ? { activeRunId: completed().requestId, runs: [{ ...completed(), phase: "queued", result: null, scheduledForMs: due.getTime() }] } : {}) });
+  });
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  fireEvent.change(await screen.findByLabelText(language === "es" ? "¿Qué avances puedes confirmar?" : "What progress can you confirm?"), { target: { value: "Verified demo." } });
+  fireEvent.change(screen.getByLabelText(language === "es" ? "Programar una vez (opcional)" : "Schedule once (optional)"), { target: { value: localDate(due) } });
+  fireEvent.click(screen.getByRole("button", { name: language === "es" ? "Programar borrador" : "Schedule draft" }));
+  expect(mock.fetch).toHaveBeenCalledTimes(1);
+  expect(screen.getByRole("dialog")).toHaveTextContent(language === "es" ? "Se reservará ahora" : "reserved now");
+  fireEvent.click(screen.getByRole("button", { name: language === "es" ? "Confirmar programación" : "Confirm schedule" }));
+  await screen.findByText(language === "es" ? "Programado · Hermes en reposo" : "Scheduled · Hermes is resting");
+  const writes = mock.fetch.mock.calls.filter(c => c[1]?.method);
+  expect(writes).toHaveLength(1);
+  expect(JSON.parse(writes[0][1].body)).toMatchObject({ scheduledForMs: due.getTime(), confirmed: true, action: "prepare-update", notes: "Verified demo." });
+});
+it("keeps scheduling hidden when the API does not advertise it", async () => {
+  render(<ArtizenCreatorWorkflow projectId="template-example" />); await screen.findByLabelText("¿Qué avances puedes confirmar?");
+  expect(screen.queryByLabelText("Programar una vez (opcional)")).not.toBeInTheDocument();
+});
+it("rejects a past schedule locally without any mutation", async () => {
+  mock.fetch.mockImplementation(async () => json({ ...initial(), scheduling }));
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  fireEvent.change(await screen.findByLabelText("¿Qué avances puedes confirmar?"), { target: { value: "Verified demo." } });
+  fireEvent.change(screen.getByLabelText("Programar una vez (opcional)"), { target: { value: "2020-01-01T12:00" } });
+  fireEvent.click(screen.getByRole("button", { name: "Programar borrador" }));
+  expect(screen.getByRole("alert")).toHaveTextContent("24 horas"); expect(mock.fetch).toHaveBeenCalledTimes(1);
+});
+it("does not poll while a recovered schedule waits; starts reading at due time", async () => {
+  mock.language = "en"; const due = Date.now() + 3_600_000;
+  const run = { ...completed(), phase: "queued", result: null, scheduledForMs: due };
+  mock.fetch.mockImplementation(async path => json(path.includes("/runs/") ? run : { ...initial(), scheduling, activeRunId: run.requestId, runs: [run] }));
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  await screen.findByText("Scheduled · Hermes is resting");
+  vi.useFakeTimers();
+  await act(async () => { document.dispatchEvent(new Event("visibilitychange")); });
+  await act(async () => { await vi.advanceTimersByTimeAsync(3_500_000); });
+  expect(mock.fetch).toHaveBeenCalledTimes(1);
+  await act(async () => { await vi.advanceTimersByTimeAsync(105_000); });
+  expect(mock.fetch.mock.calls.some(c => c[0].includes("/runs/"))).toBe(true);
+});
+it("cancels only after a web confirmation and refreshes the released reservation", async () => {
+  mock.language = "en"; let cancelled = false;
+  const run = { ...completed(), phase: "queued", result: null, scheduledForMs: Date.now() + 3_600_000 };
+  mock.fetch.mockImplementation(async (_path, init) => {
+    if (init?.method === "POST") { cancelled = true; return json({ phase: "cancelled" }); }
+    return json({ ...initial(), scheduling, activeRunId: cancelled ? null : run.requestId, runs: [{ ...run, phase: cancelled ? "cancelled" : "queued" }] });
+  });
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  fireEvent.click(await screen.findByRole("button", { name: "Cancel scheduled run" }));
+  expect(mock.fetch).toHaveBeenCalledTimes(1);
+  fireEvent.click(screen.getByRole("button", { name: "Cancel run" }));
+  await screen.findByText("Cancelled before start");
+  const writes = mock.fetch.mock.calls.filter(c => c[1]?.method);
+  expect(writes).toHaveLength(1); expect(writes[0][0]).toMatch(/\/cancel$/); expect(JSON.parse(writes[0][1].body)).toEqual({ confirmed: true });
+});
 
 it.each(["en", "es"])("shows recovered startup failure after reload without generating in %s", async language => {
   mock.language = language;

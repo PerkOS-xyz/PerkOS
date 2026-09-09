@@ -15,10 +15,11 @@ type Run = { requestId: string; action: "prepare-update" | "revise-update";
   phase: "queued" | "executing" | "awaiting_stop" | "settled" | "cancelled";
   stopReason?: string | null; failureCode?: string;
   result: DraftResult | null; allocatedMicros: number | null; reservedMicros: number;
-  createdAtMs: number; needsAttention?: boolean; revisionUnchanged?: boolean; draftEchoesNotes?: boolean };
+  createdAtMs: number; scheduledForMs?: number; needsAttention?: boolean; revisionUnchanged?: boolean; draftEchoesNotes?: boolean };
 type Memory = { revision: number; text: string; sourceRunId: string | null; updatedAtMs: number };
 type State = { configured: boolean; agentName: string | null; budget: { limitMicros: number; reservedMicros: number; allocatedMicros: number } | null;
   activeRunId: string | null; runReservationMicros: number; runs: Run[]; memory: Memory;
+  scheduling?: { enabled: boolean; minDelayMs: number; maxDelayMs: number };
   draftFormat?: { contract: string; paragraphs: number; minWords: number; maxWords: number } };
 
 const active = (run?: Run) => !!run && !run.needsAttention && ["queued", "executing", "awaiting_stop"].includes(run.phase);
@@ -41,7 +42,9 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
   const [editorialNotes, setEditorialNotes] = useState("");
   const [pending, setPending] = useState(false);
   const [setupOpen, setSetupOpen] = useState(false);
-  const [confirmation, setConfirmation] = useState<{ action: Run["action"]; sourceDraft?: string } | null>(null);
+  const [confirmation, setConfirmation] = useState<{ action: Run["action"]; sourceDraft?: string; scheduledForMs?: number } | null>(null);
+  const [scheduleDate, setScheduleDate] = useState("");
+  const [cancelId, setCancelId] = useState<string | null>(null);
   const retry = useRef<{ fingerprint: string; requestId: string } | null>(null);
   const base = `/artizen-projects/${encodeURIComponent(projectId)}`;
   const money = (micros: number) => new Intl.NumberFormat(i18n.language, { style: "currency", currency: "USD", maximumFractionDigits: 4 }).format(micros / 1_000_000);
@@ -64,6 +67,7 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
   const current = state?.runs[0];
   const activeId = state?.activeRunId;
   const needsPoll = !!activeId && (!current || active(current));
+  const notBefore = current?.phase === "queued" ? current.scheduledForMs ?? 0 : 0;
   useEffect(() => {
     if (!activeId || !needsPoll) return;
     const controller = new AbortController();
@@ -71,6 +75,7 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
     let inFlight = false;
     const poll = async () => {
       if (controller.signal.aborted || document.visibilityState === "hidden" || inFlight) return;
+      if (notBefore > Date.now()) { timer = setTimeout(() => { void poll(); }, Math.min(notBefore - Date.now(), 86_400_000)); return; }
       inFlight = true;
       try {
         const run = await readResponse<Run>(await authedFetch(`${base}/runs/${activeId}`, { signal: controller.signal }));
@@ -90,13 +95,15 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
       if (timer) clearTimeout(timer);
       if (document.visibilityState !== "hidden") void poll();
     };
-    timer = setTimeout(() => { void poll(); }, 5000);
+    timer = setTimeout(() => { void poll(); }, Math.min(Math.max(5000, notBefore - Date.now()), 86_400_000));
     document.addEventListener("visibilitychange", visibility);
     return () => { controller.abort(); if (timer) clearTimeout(timer); document.removeEventListener("visibilitychange", visibility); };
-  }, [activeId, needsPoll, base, load]);
+  }, [activeId, needsPoll, notBefore, base, load]);
 
   function errorText(code: string) {
     const messages: Record<string, [string, string]> = {
+      INVALID_SCHEDULE: ["Elige una fecha entre un minuto y 24 horas desde ahora. No se programó un nuevo trabajo.", "Choose a time between one minute and 24 hours from now. No new run was scheduled."],
+      STOP_UNCONFIRMED: ["El trabajo ya comenzó; no se canceló. Actualiza su estado.", "The run has already started; it was not cancelled. Refresh its status."],
       PILOT_DISABLED: ["La ejecución del piloto aún no está habilitada.", "Pilot execution is not enabled yet."],
       PILOT_NOT_CONFIGURED: ["Este proyecto aún no tiene un presupuesto habilitado.", "This project does not have an enabled budget yet."],
       WORKSPACE_NOT_READY: ["Asocia primero Hermes al proyecto. No se inició ningún trabajo.", "Link Hermes to the project first. No work was started."],
@@ -121,12 +128,32 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
     try {
       await readResponse(await authedFetch(`${base}/runs`, { method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({ ...payload, requestId: retry.current.requestId }) }));
-      retry.current = null; setConfirmation(null); await load();
+      retry.current = null; setConfirmation(null); setScheduleDate(""); await load();
     } catch (e) {
       const code = e instanceof Error ? e.message : "ARTIZEN_UNAVAILABLE";
-      if (["INVALID_INPUT", "PILOT_DISABLED", "PILOT_NOT_CONFIGURED", "BUDGET_EXHAUSTED", "BUSY", "COST_PLAN_EXPIRED"].includes(code)) retry.current = null;
+      if (["INVALID_SCHEDULE", "INVALID_INPUT", "PILOT_DISABLED", "PILOT_NOT_CONFIGURED", "BUDGET_EXHAUSTED", "BUSY", "COST_PLAN_EXPIRED"].includes(code)) retry.current = null;
       setError(code); setConfirmation(null);
     }
+    finally { setPending(false); }
+  }
+  function confirmSchedule() {
+    const date = new Date(scheduleDate);
+    const scheduledForMs = date.getTime();
+    const local = Number.isFinite(scheduledForMs) ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}T${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}` : "";
+    // Reject normalized invalid dates / nonexistent local DST times.
+    const now = Date.now();
+    if (!Number.isFinite(scheduledForMs) || !state?.scheduling?.enabled || local !== scheduleDate || scheduledForMs < now + state.scheduling.minDelayMs || scheduledForMs > now + state.scheduling.maxDelayMs) {
+      setError("INVALID_SCHEDULE"); return;
+    }
+    setError(""); setConfirmation({ action: "prepare-update", scheduledForMs });
+  }
+  async function cancelScheduled() {
+    if (!cancelId || pending) return;
+    setPending(true); setError("");
+    try {
+      await readResponse(await authedFetch(`${base}/runs/${cancelId}/cancel`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ confirmed: true }) }));
+      setCancelId(null); await load();
+    } catch (e) { setError(e instanceof Error ? e.message : "ARTIZEN_UNAVAILABLE"); setCancelId(null); }
     finally { setPending(false); }
   }
   async function saveMemory(text: string, sourceRunId?: string) {
@@ -152,7 +179,7 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
     finally { setPending(false); }
   }
   const status = current?.needsAttention ? (es ? "Requiere revisión operativa" : "Needs operational review") : current ? ({
-    queued: es ? "Preparando Hermes" : "Preparing Hermes",
+    queued: current.scheduledForMs !== undefined ? (es ? "Programado · Hermes en reposo" : "Scheduled · Hermes is resting") : (es ? "Preparando Hermes" : "Preparing Hermes"),
     executing: es ? "Hermes está trabajando" : "Hermes is working",
     awaiting_stop: es ? "Confirmando reposo y costo" : "Confirming stop and cost",
     settled: isArtizenUnsuccessful(current) ? (es ? "Intento sin resultado · Hermes en reposo" : "Unsuccessful attempt · Hermes is resting") : (es ? "Hermes en reposo" : "Hermes is resting"),
@@ -163,7 +190,7 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
       <h3 className="font-semibold">{es ? "Tu actualización para la comunidad" : "Your supporter update"}</h3>
       <Button variant="outline" size="sm" onClick={() => { void load(); }} disabled={pending}>{es ? "Actualizar estado" : "Refresh status"}</Button>
     </div>
-    <p className="text-sm text-muted-foreground">{es ? "Un Hermes trabaja sólo cuando lo solicitas. Los resultados son borradores: no se publica nada ni se activan horarios." : "One Hermes works only when requested. Results are drafts: nothing is published and no schedules are enabled."}</p>
+    <p className="text-sm text-muted-foreground">{es ? "Un Hermes trabaja sólo con tu autorización, ahora o a una hora confirmada. Los resultados son borradores: no se publica nada ni se activan horarios recurrentes." : "One Hermes works only with your authorization, now or at a confirmed time. Results are drafts: nothing is published and no recurring schedules are enabled."}</p>
     {error && <p role="alert" className="text-sm text-destructive">{errorText(error)}</p>}
     {notice && <p role="status" className="text-sm text-emerald-500">{notice}</p>}
     {!state && !error && <p role="status">{es ? "Cargando…" : "Loading…"}</p>}
@@ -171,6 +198,11 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
       <div className="min-w-0 space-y-2 rounded-lg border border-border bg-muted/20 p-3">
         <h4 className="text-sm font-medium">{es ? "Hermes bajo demanda" : "On-demand Hermes"}</h4>
         <p role="status" aria-live="polite" className="text-sm">{status}</p>
+        {current?.phase === "queued" && current.scheduledForMs !== undefined && <div className="space-y-2">
+          <p className="text-sm">{es ? "Ejecución única: " : "One-time run: "}<time dateTime={new Date(current.scheduledForMs).toISOString()}>{new Date(current.scheduledForMs).toLocaleString(i18n.language, { dateStyle: "medium", timeStyle: "long" })}</time></p>
+          <p className="text-xs text-muted-foreground">{es ? "La reserva y el cupo permanecen retenidos hasta ejecutar o cancelar. Hermes no consume cómputo mientras espera. Si la API no se recupera dentro de la ventana de ejecución, cancelará el trabajo sin iniciarlo." : "The budget reservation and run slot are held until execution or cancellation. Hermes uses no compute while waiting. If the API does not recover within the execution window, it cancels without starting."}</p>
+          <Button variant="outline" disabled={pending} onClick={() => setCancelId(current.requestId)}>{es ? "Cancelar programación" : "Cancel scheduled run"}</Button>
+        </div>}
         <p className="text-xs text-muted-foreground">{es
           ? "Tu agente conserva su identidad en el proyecto. Cada trabajo crea una tarea y usa un runtime temporal, sin cómputo ni heartbeats en reposo. El resultado queda en revisión hasta que apruebes el ejemplo."
           : "Your agent keeps its project identity. Each run creates a task and uses a temporary runtime, with no idle compute or heartbeats. Results stay in review until you approve the example."}</p>
@@ -202,6 +234,12 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
       <Button disabled={pending || !!state.activeRunId || !state.configured || !state.agentName || !notes.trim()} onClick={() => setConfirmation({ action: "prepare-update" })}>
         {es ? "Preparar borrador" : "Prepare draft"}
       </Button>
+      {state.scheduling?.enabled && <div className="space-y-2 rounded-lg border border-border p-3">
+        <label htmlFor="artizen-schedule" className="block text-sm font-medium">{es ? "Programar una vez (opcional)" : "Schedule once (optional)"}</label>
+        <p id="artizen-schedule-help" className="text-xs text-muted-foreground">{es ? "Dentro de las próximas 24 horas, con al menos un minuto de anticipación. Hora local de tu navegador; las notas actuales se guardan al confirmar. No hay recurrencia." : "Within the next 24 hours, at least one minute ahead. Your browser’s local time; current notes are saved when confirmed. No recurrence."}</p>
+        <input id="artizen-schedule" type="datetime-local" aria-describedby="artizen-schedule-help" className={field} value={scheduleDate} onChange={e => setScheduleDate(e.target.value)} disabled={pending || !!state.activeRunId} />
+        <Button variant="outline" disabled={pending || !!state.activeRunId || !state.configured || !state.agentName || !notes.trim() || !scheduleDate} onClick={confirmSchedule}>{es ? "Programar borrador" : "Schedule draft"}</Button>
+      </div>}
       {current?.result && <DraftReview key={current.requestId} run={current} memory={state.memory} es={es} pending={pending}
         canRevise={!state.activeRunId && state.configured && !!state.agentName && !!notes.trim()}
         revise={draft => setConfirmation({ action: "revise-update", sourceDraft: draft })} save={saveMemory} />}
@@ -218,10 +256,13 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
       description={es ? "Se registrará un agente y se vincularán los trabajos anteriores. No se iniciará cómputo ni se reservará presupuesto." : "Registers one agent and links previous runs. No compute starts and no budget is reserved."}
       confirmLabel={es ? "Asociar sin iniciar" : "Link without starting"} cancelLabel={es ? "Cancelar" : "Cancel"} onConfirm={() => { void setupAgent(); }} />
     <ConfirmDialog open={!!confirmation} onOpenChange={open => { if (!open && !pending) setConfirmation(null); }} pending={pending}
-      title={es ? "¿Iniciar un trabajo de Hermes?" : "Start a Hermes run?"}
-      description={es ? `Se reservará hasta ${money(state?.runReservationMicros ?? 0)} del presupuesto. Hermes preparará un borrador y volverá a reposo. No publicará contenido.`
-        : `Up to ${money(state?.runReservationMicros ?? 0)} will be reserved. Hermes will prepare a draft and return to rest. It will not publish content.`}
-      confirmLabel={es ? "Iniciar trabajo" : "Start run"} cancelLabel={es ? "Cancelar" : "Cancel"} onConfirm={() => { void start(); }} />
+      title={confirmation?.scheduledForMs !== undefined ? (es ? "¿Programar un único trabajo?" : "Schedule one run?") : (es ? "¿Iniciar un trabajo de Hermes?" : "Start a Hermes run?")}
+      description={(confirmation?.scheduledForMs !== undefined ? `${new Date(confirmation.scheduledForMs).toLocaleString(i18n.language, { dateStyle: "full", timeStyle: "long" })}. ` : "") + (es ? `Se reservará ahora hasta ${money(state?.runReservationMicros ?? 0)} del presupuesto y el cupo del proyecto. Hermes preparará un borrador y volverá a reposo. No publicará contenido.`
+        : `Up to ${money(state?.runReservationMicros ?? 0)} and the project run slot will be reserved now. Hermes will prepare a draft and return to rest. It will not publish content.`)}
+      confirmLabel={confirmation?.scheduledForMs !== undefined ? (es ? "Confirmar programación" : "Confirm schedule") : (es ? "Iniciar trabajo" : "Start run")} cancelLabel={es ? "Cancelar" : "Cancel"} onConfirm={() => { void start(); }} />
+    <ConfirmDialog open={!!cancelId} onOpenChange={open => { if (!open && !pending) setCancelId(null); }} pending={pending} title={es ? "¿Cancelar el trabajo programado?" : "Cancel the scheduled run?"}
+      description={es ? "Si aún no ha comenzado, se liberará la reserva sin iniciar Hermes. No se eliminarán borradores anteriores." : "If it has not started, the reservation will be released without starting Hermes. Previous drafts will not be deleted."}
+      confirmLabel={es ? "Cancelar trabajo" : "Cancel run"} cancelLabel={es ? "Volver" : "Go back"} onConfirm={() => { void cancelScheduled(); }} />
   </section>;
 }
 
