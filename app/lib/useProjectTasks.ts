@@ -4,27 +4,18 @@ import {
   collection,
   onSnapshot,
   query,
-  type Timestamp,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
 import { firebaseDb } from "./firebase";
 import type { Task } from "./perkosApi";
+import { taskConverter } from "./projectTaskConverter";
 
 type State = {
   tasks: Task[];
   loaded: boolean;
   error: Error | null;
 };
-
-function tsToIso(value: unknown): string | undefined {
-  if (!value) return undefined;
-  if (typeof value === "string") return value;
-  if (typeof (value as Timestamp).toDate === "function") {
-    return (value as Timestamp).toDate().toISOString();
-  }
-  return undefined;
-}
 
 /**
  * Realtime subscription to a project's tasks subcollection. Returns an
@@ -60,27 +51,13 @@ export function useProjectTasks(
         "projects",
         projectId,
         "tasks"
-      )
+      ).withConverter(taskConverter)
     );
 
     return onSnapshot(
       ref,
       (snap) => {
-        const tasks: Task[] = snap.docs.map((d) => {
-          const data = d.data();
-          return {
-            id: d.id,
-            name: (data.name as string) ?? "",
-            status: (data.status as Task["status"]) ?? "Backlog",
-            priority: (data.priority as Task["priority"]) ?? "Medium",
-            agent: (data.agent as string) ?? "",
-            agentId: (data.agentId as string | undefined) ?? undefined,
-            prompt: (data.prompt as string | undefined) ?? undefined,
-            result: (data.result as string | undefined) ?? undefined,
-            createdAt: tsToIso(data.createdAt),
-            updatedAt: tsToIso(data.updatedAt),
-          };
-        });
+        const tasks = snap.docs.map((d) => d.data());
         setState({ tasks, loaded: true, error: null });
       },
       (error) => {

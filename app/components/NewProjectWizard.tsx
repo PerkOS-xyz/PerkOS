@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useAppAccount } from "../lib/useAppAccount";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { ProjectTemplateGallery } from "./ProjectTemplateWizard";
 import {
   ArrowLeft,
   Bot,
@@ -949,6 +950,8 @@ export default function NewProjectWizard() {
           {t("companyNew.gallery.introAfter")}
         </p>
       </header>
+
+      <ProjectTemplateGallery />
 
       {/* Build-your-own starting points */}
       <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2">

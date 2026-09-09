@@ -8,6 +8,9 @@ import { externalRuntimeAvailability } from "./agentHostingPolicy";
 import {useAgentPresence} from "./useAgentPresence";
 
 export type AgentLiveStatus = {
+  executionMode?: "artizen-on-demand";
+  executionState?: string;
+  displayName?: string;
   shared?:boolean;
   presenceExpiresAt?:number;
   presenceUnavailable?:boolean;
@@ -58,7 +61,7 @@ export function useWalletAgents(
   walletAddress: string | null | undefined
 ): State {
   const [state, setState] = useState<State>({ byName: {}, loaded: false });
-  const presence=useAgentPresence(walletAddress,Object.values(state.byName).filter(a=>!a.shared).map(a=>a.id));
+  const presence=useAgentPresence(walletAddress,Object.values(state.byName).filter(a=>!a.shared && a.executionMode !== "artizen-on-demand").map(a=>a.id));
 
   useEffect(() => {
     if (!walletAddress) {
@@ -82,6 +85,9 @@ export function useWalletAgents(
           byName[name] = {
             id: d.id,
             name,
+            displayName: typeof data.displayName === "string" ? data.displayName : undefined,
+            executionMode: data.executionMode === "artizen-on-demand" ? "artizen-on-demand" : undefined,
+            executionState: typeof data.executionState === "string" ? data.executionState : undefined,
             status: (data.status as string) ?? "unknown",
             runtime: (data.runtime as string | undefined) ?? undefined,
             hibernationState:
@@ -225,6 +231,12 @@ export function realtimeAgentStatus(a?: AgentLiveStatus): {
   // lets each caller choose: keep the word where a label is required, drop the
   // segment where it is just noise.
   if (!a) return { color: "bg-[#7975a8]", label: "Unknown", known: false };
+  if (a.executionMode === "artizen-on-demand") {
+    if (a.executionState === "executing") return { color: "bg-amber-400", label: "Working" };
+    if (a.executionState === "queued") return { color: "bg-amber-400", label: STATUS_GETTING_READY };
+    if (a.executionState === "awaiting_stop") return { color: "bg-amber-400", label: STATUS_GOING_TO_REST };
+    return { color: "bg-[#7975a8]", label: STATUS_RESTING };
+  }
   const hs = (a.hibernationState ?? "").toLowerCase();
   if (hs === "hibernated")
     return { color: "bg-[#7975a8]", label: STATUS_RESTING };

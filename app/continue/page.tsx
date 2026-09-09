@@ -10,7 +10,7 @@
  * reads the resolved wallet session and dispatches to the right
  * destination:
  *
- *   - signed-in       → /dashboard
+ *   - signed-in       → saved account setup or /dashboard
  *   - not-allowlisted → <AccessGate /> (request-access form)
  *   - loading|syncing → "Checking access…" splash
  *   - signed-out      → fall back to /sign-in so the user can still
@@ -27,6 +27,8 @@ import { useEffect, useState } from "react";
 
 import { AccessGate } from "../components/AccessGate";
 import { useWalletSession } from "../lib/useWalletSession";
+import { readAccountProfile } from "../lib/accountOnboarding";
+import i18n, { isSupportedLanguage, persistLanguagePreference } from "../lib/i18n";
 
 const LOADING_TIMEOUT_MS = 10_000;
 
@@ -36,9 +38,19 @@ export default function ContinuePage() {
   const [timedOut, setTimedOut] = useState(false);
 
   useEffect(() => {
+    const controller = new AbortController();
     if (session.status === "signed-in") {
-      router.replace("/dashboard");
-      return;
+      readAccountProfile(controller.signal).then(({ account }) => {
+        if (controller.signal.aborted) return;
+        if (account && isSupportedLanguage(account.language)) {
+          void i18n.changeLanguage(account.language);
+          persistLanguagePreference(account.language);
+        }
+        router.replace(account?.completed ? "/dashboard" : "/onboarding/welcome");
+      }).catch(() => {
+        // Setup is not an access gate: a profile outage must not lock out the account.
+        if (!controller.signal.aborted) router.replace("/dashboard");
+      });
     }
     if (session.status === "signed-out") {
       // No wallet at all — fall back to the manual sign-in screen. This
@@ -46,7 +58,8 @@ export default function ContinuePage() {
       // from a shared link) rather than via a landing-page CTA.
       router.replace("/sign-in");
     }
-  }, [session.status, router]);
+    return () => controller.abort();
+  }, [session.status, session.address, router]);
 
   // Escape hatch: if the session never resolves (Coinbase Wallet RN
   // can leave wagmi pinned in "reconnecting" indefinitely when the

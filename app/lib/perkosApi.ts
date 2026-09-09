@@ -40,6 +40,7 @@ import {
 import { isAllowedAgentHosting } from "@/app/lib/agentHostingPolicy";
 
 import { firebaseDb } from "./firebase";
+import { taskConverter } from "./projectTaskConverter";
 import { formatAddress } from "./format";
 import { logActivity } from "./activityEvents";
 import { entityKey, writeEdge } from "./edges";
@@ -68,6 +69,7 @@ export type PmSession = {
 };
 
 export type Project = {
+  executionMode?: "artizen-on-demand";
   id?: string;
   name: string;
   goal?: string;
@@ -110,6 +112,13 @@ export type Project = {
 export type TaskStatus = "Backlog" | "In progress" | "Review" | "Done";
 
 export type Task = {
+  executionMode?: "artizen-on-demand";
+  artizenRunId?: string;
+  executionPhase?: string;
+  stopReason?: string;
+  failureCode?: "runtime-start-failed";
+  humanApproved?: boolean;
+  approvedExample?: string;
   id?: string;
   name: string;
   status: TaskStatus | string;
@@ -285,6 +294,16 @@ export type ProjectDetail = {
   project: Project;
   tasks: Task[];
   messages: ChatMessage[];
+  /** Minimal last-read agent metadata from the existing roster read; no presence polling. */
+  taskAgents?: TaskAgentView[];
+};
+
+export type TaskAgentView = {
+  name: string;
+  displayName?: string;
+  runtime?: string;
+  executionMode?: "artizen-on-demand";
+  executionState?: string;
 };
 
 // Agent, AgentRuntime, LaunchAgentCredentials are the canonical platform
@@ -406,6 +425,7 @@ const projectConverter: FirestoreDataConverter<Project> = {
       goal: (data.goal as string) ?? "",
       status: (data.status as string) ?? "Active",
       agents: (data.agents as number) ?? 0,
+      executionMode: data.executionMode === "artizen-on-demand" ? "artizen-on-demand" : undefined,
       tasks: (data.tasks as number) ?? 0,
       budget: (data.budget as string) ?? "0 USDC",
       orgId: (data.orgId as string | undefined) ?? undefined,
@@ -414,32 +434,6 @@ const projectConverter: FirestoreDataConverter<Project> = {
       pmAgent: (data.pmAgent as string | null | undefined) ?? null,
       pmSession,
       workflow,
-      createdAt: tsToIso(data.createdAt),
-      updatedAt: tsToIso(data.updatedAt),
-    };
-  },
-};
-
-const taskConverter: FirestoreDataConverter<Task> = {
-  toFirestore(task) {
-    const { id: _id, createdAt: _c, updatedAt: _u, ...rest } = task;
-    return rest;
-  },
-  fromFirestore(snap) {
-    const data = snap.data();
-    return {
-      id: snap.id,
-      name: (data.name as string) ?? "",
-      status: (data.status as Task["status"]) ?? "Backlog",
-      priority: (data.priority as Task["priority"]) ?? "Medium",
-      agent: (data.agent as string) ?? "",
-      agentId: (data.agentId as string | undefined) ?? undefined,
-      prompt: (data.prompt as string | undefined) ?? undefined,
-      result: (data.result as string | undefined) ?? undefined,
-      logs: (data.logs as string[] | undefined) ?? undefined,
-      attachments: Array.isArray(data.attachments)
-        ? (data.attachments as TaskAttachment[])
-        : undefined,
       createdAt: tsToIso(data.createdAt),
       updatedAt: tsToIso(data.updatedAt),
     };
@@ -478,6 +472,9 @@ export function isSpeechVoice(value: unknown): value is SpeechVoice {
 }
 
 export type AgentRow = Agent & {
+  executionMode?: "artizen-on-demand";
+  executionProjectId?: string;
+  executionState?: string;
   presenceSource?:"redis";
   presenceUnavailable?:boolean;
   presenceExpiresAt?:number;
@@ -547,6 +544,9 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
       id: snap.id,
       name: (data.name as string) ?? "",
       displayName: (data.displayName as string | undefined) ?? undefined,
+      executionMode: data.executionMode === "artizen-on-demand" ? "artizen-on-demand" : undefined,
+      executionProjectId: typeof data.executionProjectId === "string" ? data.executionProjectId : undefined,
+      executionState: typeof data.executionState === "string" ? data.executionState : undefined,
       speechVoice: isSpeechVoice(data.speechVoice) ? data.speechVoice : "alloy",
       runtime: (data.runtime as AgentRuntime) ?? "Hermes",
       status,
@@ -1111,7 +1111,8 @@ export async function getWalletProject(input: {
     ),
   ]);
 
-  // The wallet's /agents collection powers ONLY the roster self-heal below.
+  // The wallet's /agents collection powers roster self-heal and last-read
+  // task-agent display metadata below; it is not a live presence subscription.
   // A member viewing a SHARED project (walletAddress = the owner) can't read
   // the owner's /agents (by design — members are scoped to the org/project,
   // not the owner's agents), so read it tolerantly: a denial must not break
@@ -1170,10 +1171,23 @@ export async function getWalletProject(input: {
     }
   }
 
+  const taskRows = tasksSnap.docs.map((d) => d.data());
+  const assignedNames = new Set(taskRows.map((task) => task.agent));
   return {
     project,
-    tasks: tasksSnap.docs.map((d) => d.data()),
+    tasks: taskRows,
     messages: messagesSnap.docs.map((d) => d.data()),
+    taskAgents: agentsSnap?.docs
+      .map((d) => d.data())
+      .filter(isAllowedAgentRow)
+      .filter((agent) => assignedNames.has(agent.name))
+      .map((agent) => ({
+        name: agent.name,
+        displayName: agent.displayName,
+        runtime: agent.runtime,
+        executionMode: agent.executionMode,
+        executionState: agent.executionState,
+      })),
   };
 }
 

@@ -63,6 +63,8 @@ import { ActivityFeedCard } from "../../../components/ActivityFeedCard";
 import { formatRelativeShort } from "../../../lib/format";
 import { logActivity } from "../../../lib/activityEvents";
 import { ProjectChatTab } from "../../../components/ProjectChatTab";
+import { ProjectTemplateConfiguration } from "../../../components/ProjectTemplateConfiguration";
+import { ArtizenProjectBoard, ArtizenWorkLink } from "../../../components/ArtizenProjectBoard";
 import { SearchInput, matchesQuery } from "../../../components/SearchInput";
 import { useActiveOrg } from "../../../lib/useActiveOrg";
 
@@ -151,7 +153,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
   const { byName: myAgents } = useWalletAgents(address);
   const warmedForProject = useRef<string | null>(null);
   useEffect(() => {
-    if (isShared || !projectId) return;
+    if (isShared || !projectId || projectId.startsWith("template-")) return;
     const pm = data?.project?.pmAgent;
     if (!pm) return;
     const a = myAgents?.[pm];
@@ -177,6 +179,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
       {error ? <ErrorBanner message={(error as Error).message} /> : null}
       {liveDetail ? (
         <>
+          {!isShared && <ProjectTemplateConfiguration projectId={projectId} />}
           <DetailHeader
             detail={liveDetail}
             ownerWallet={ownerWallet ?? undefined}
@@ -184,8 +187,9 @@ export default function ProjectDetailPage({ params }: PageProps) {
             compact={tab === "chat"}
             onShowMembers={() => setTab("members")}
           />
-          <Tabs current={tab} onChange={setTab} />
-          {tab === "tasks" ? (
+          <Tabs current={tab} onChange={setTab} onDemand={liveDetail.project.executionMode === "artizen-on-demand"} />
+          {liveDetail.project.executionMode === "artizen-on-demand" && ["chat", "conductor", "meetings"].includes(tab) && <ArtizenWorkLink projectId={projectId} />}
+          {tab === "tasks" && liveDetail.project.executionMode === "artizen-on-demand" ? <ArtizenProjectBoard tasks={liveDetail.tasks} projectId={projectId} /> : tab === "tasks" ? (
             <TasksTab
               tasks={liveDetail.tasks}
               projectId={projectId}
@@ -199,7 +203,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
               ownerWallet={ownerWallet ?? undefined}
             />
           ) : null}
-          {tab === "conductor" ? (
+          {tab === "conductor" && liveDetail.project.executionMode !== "artizen-on-demand" ? (
             <ConductorTab
               tasks={liveDetail.tasks}
               swarm={liveDetail.project.swarm}
@@ -214,7 +218,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
           {tab === "map" ? (
             <MapTab detail={liveDetail} projectId={projectId} ownerWallet={ownerWallet ?? undefined} />
           ) : null}
-          {tab === "chat" ? (
+          {tab === "chat" && liveDetail.project.executionMode !== "artizen-on-demand" ? (
             <ProjectChatTab
               detail={liveDetail}
               projectId={projectId}
@@ -222,7 +226,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
               onDesignatePm={() => setTab("agents")}
             />
           ) : null}
-          {isVoiceEnabled() && tab === "meetings" ? (
+          {isVoiceEnabled() && tab === "meetings" && liveDetail.project.executionMode !== "artizen-on-demand" ? (
             <ProjectMeetingsTab
               projectId={projectId}
               projectName={liveDetail.project.name}
@@ -460,13 +464,13 @@ function DetailHeader({
                   setChoosePmPick(project.pmAgent ?? project.agentIds?.[0] ?? "");
                   setChoosePmOpen(true);
                 }}
-                disabled={!project.agentIds?.length}
+                disabled={!project.agentIds?.length || project.executionMode === "artizen-on-demand"}
                 aria-label={t("projectRoom.header.chooseLeadAria")}
                 title={t("projectRoom.header.chooseLeadAria")}
                 className="underline decoration-dotted underline-offset-2 hover:text-foreground disabled:no-underline disabled:hover:text-muted-foreground"
               >
                 {primaryAgent
-                  ? t("projectRoom.header.lead", { name: primaryAgent })
+                  ? t("projectRoom.header.lead", { name: project.executionMode === "artizen-on-demand" ? "Hermes" : primaryAgent })
                   : t("projectRoom.header.noPrimaryAgent")}
               </button>
               {project.updatedAt ? (
@@ -482,7 +486,7 @@ function DetailHeader({
               "w-full flex-nowrap overflow-x-auto overscroll-x-contain pb-1 sm:w-auto sm:flex-wrap sm:overflow-visible sm:pb-0",
           )}
         >
-          <Button
+          {project.executionMode === "artizen-on-demand" ? <ArtizenWorkLink projectId={project.id!} /> : <Button
             size="sm"
             className="gap-1.5"
             disabled={
@@ -505,7 +509,7 @@ function DetailHeader({
               : pmActive
                 ? t("projectRoom.header.teamWorking")
                 : t("projectRoom.header.putTeamToWork")}
-          </Button>
+          </Button>}
           {project.workflow?.phase === "planning" ? (
             <Button
               variant="outline"
@@ -522,7 +526,7 @@ function DetailHeader({
               {t("projectRoom.header.cancelPlanning")}
             </Button>
           ) : null}
-          <Button
+          {project.executionMode !== "artizen-on-demand" && <Button
             variant="outline"
             size="sm"
             className="gap-1.5"
@@ -532,7 +536,7 @@ function DetailHeader({
           >
             <Zap className="h-4 w-4" />
             {wakeTeamMutation.isPending ? t("projectRoom.header.waking") : t("projectRoom.header.wakeTeam")}
-          </Button>
+          </Button>}
           {advancedFeatures.enabled ? (
             <span className="mr-1 text-xs text-[#7975a8]">
               {project.budget || "0 USDC"}
@@ -555,6 +559,7 @@ function DetailHeader({
                 variant="outline"
                 size="sm"
                 onClick={() => setEditOpen(true)}
+                disabled={project.executionMode === "artizen-on-demand"}
                 aria-label={t("projectRoom.header.editAria")}
                 title={t("projectRoom.header.editTitle")}
               >
@@ -810,9 +815,11 @@ function StatTile({ label, value }: { label: string; value: number }) {
 function Tabs({
   current,
   onChange,
+  onDemand = false,
 }: {
   current: Tab;
   onChange: (t: Tab) => void;
+  onDemand?: boolean;
 }) {
   const { t } = useTranslation();
   const items: { id: Tab; label: string }[] = [
@@ -831,7 +838,7 @@ function Tabs({
       role="tablist"
       className="flex overflow-x-auto overscroll-x-contain border-b border-[#1b1833] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
-      {items.map((item) => {
+      {items.filter(item => !onDemand || !["chat", "conductor", "meetings"].includes(item.id)).map((item) => {
         const active = current === item.id;
         return (
           <button
@@ -1354,7 +1361,7 @@ function AgentsTab({
   const { byName: agentStatus } = useWalletAgents(address);
   const workingAgents = new Set(
     detail.tasks
-      .filter((task) => task.status === "In progress" || task.status === "Review")
+      .filter((task) => task.status === "In progress" || (task.status === "Review" && detail.project.executionMode !== "artizen-on-demand"))
       .map((task) => task.agent),
   );
 
@@ -1386,14 +1393,14 @@ function AgentsTab({
         <h2 className="text-sm font-medium text-[#ececff]">
           {t("projectRoom.agentsTab.countOnProject", { count: agentNames.length })}
         </h2>
-        <Button size="sm" className="gap-1.5" onClick={() => setAddOpen(true)}>
+        <Button size="sm" className="gap-1.5" disabled={detail.project.executionMode === "artizen-on-demand"} onClick={() => setAddOpen(true)}>
           <Plus className="h-3.5 w-3.5" /> {t("projectRoom.agentsTab.addAgent")}
         </Button>
       </div>
 
-      <p className="-mt-1 text-xs text-[#7975a8]">
+      {detail.project.executionMode === "artizen-on-demand" ? <ArtizenWorkLink projectId={projectId} /> : <p className="-mt-1 text-xs text-[#7975a8]">
         {t("projectRoom.agentsTab.pickLeadBefore")}<span className="text-primary">{t("projectRoom.agentsTab.pickLeadEmphasis")}</span>{t("projectRoom.agentsTab.pickLeadAfter")}
-      </p>
+      </p>}
 
       {agentNames.length === 0 ? (
         <EmptyState
@@ -1422,7 +1429,7 @@ function AgentsTab({
                   />
                 </span>
                 <div className="flex min-w-0 flex-col">
-                  <span className="truncate text-sm text-[#ececff]">{name}</span>
+                  <Link href={`/agents/${encodeURIComponent(agentStatus[name]?.id ?? name)}`} className="truncate text-sm text-[#ececff] underline">{agentStatus[name]?.displayName ?? name}</Link>
                   <span className="text-xs text-[#7975a8]">
                     {agentStatus[name]?.runtime
                       ? `${agentStatus[name]?.runtime} · `
@@ -1451,7 +1458,7 @@ function AgentsTab({
                 </div>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                <ProjectAgentPower live={agentStatus[name]} />
+                {detail.project.executionMode !== "artizen-on-demand" && <ProjectAgentPower live={agentStatus[name]} />}
                 {name === pmAgent ? (
                   <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                     <Compass className="h-3 w-3" /> {t("projectRoom.agentsTab.leadBadge")}
