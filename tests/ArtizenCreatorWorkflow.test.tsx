@@ -177,6 +177,125 @@ it("idle UI does not poll the database", async () => {
   vi.useFakeTimers(); await act(async () => { await vi.advanceTimersByTimeAsync(60000); });
   expect(mock.fetch).toHaveBeenCalledTimes(1);
 });
+
+function runningState() {
+  return { ...initial(), activeRunId: completed().requestId,
+    budget: { limitMicros: 1000000, reservedMicros: 50000, allocatedMicros: 0 },
+    runs: [{ ...completed(), phase: "executing", result: null }] };
+}
+function settledState() {
+  return { ...initial(), budget: { limitMicros: 1000000, reservedMicros: 0, allocatedMicros: 1000 },
+    runs: [completed()], memory: { revision: 1, text: "Approved original", sourceRunId: "older-run", updatedAtMs: 1 } };
+}
+async function resumePolling() {
+  vi.useFakeTimers();
+  // Resume a mounted workspace as a real tab would; clear its original timer.
+  await act(async () => { document.dispatchEvent(new Event("visibilitychange")); });
+}
+
+it.each(["en", "es"])("keeps the final workspace read alive and synchronizes budget/actions once in %s", async language => {
+  mock.language = language;
+  let finish!: (response: Response) => void;
+  let finalSignal: AbortSignal | undefined;
+  mock.fetch.mockResolvedValueOnce(json(runningState()))
+    .mockResolvedValueOnce(json(completed()))
+    .mockImplementationOnce((_path, init) => {
+      finalSignal = init.signal;
+      return new Promise<Response>(resolve => { finish = resolve; });
+    });
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  fireEvent.change(await screen.findByLabelText(language === "es" ? "¿Qué avances puedes confirmar?" : "What progress can you confirm?"), { target: { value: "Verified progress" } });
+  await resumePolling();
+  expect(mock.fetch).toHaveBeenCalledTimes(3);
+  expect(finalSignal?.aborted).toBe(false);
+  expect(screen.getByText(language === "es" ? "Hermes está trabajando" : "Hermes is working")).toBeVisible();
+  await act(async () => { finish(json(settledState())); });
+  expect(screen.getByText(language === "es" ? "Hermes en reposo" : "Hermes is resting")).toBeVisible();
+  const formatted = new Intl.NumberFormat(language, { style: "currency", currency: "USD", maximumFractionDigits: 4 });
+  const budget = screen.getByText(language === "es" ? /^Asignado:/ : /^Allocated:/);
+  expect(budget).toHaveTextContent(formatted.format(0.001).replace(/\s/g, " "));
+  expect(budget).toHaveTextContent(`${language === "es" ? "Reservado" : "Reserved"}: ${formatted.format(0).replace(/\s/g, " ")}`);
+  expect(screen.getByRole("button", { name: language === "es" ? "Revisar con mis notas" : "Revise with my notes" })).toBeEnabled();
+  expect(screen.getByLabelText(language === "es" ? "Revisa y edita tu borrador" : "Review and edit your draft")).toHaveValue(completed().result.draft);
+  expect(screen.getByLabelText(language === "es" ? "Contexto editable para futuros borradores" : "Editable context for future drafts")).toHaveValue("Approved original");
+  await act(async () => { await vi.advanceTimersByTimeAsync(60000); });
+  expect(mock.fetch).toHaveBeenCalledTimes(3);
+  expect(mock.fetch.mock.calls.some(c => c[1]?.method)).toBe(false);
+});
+
+it("keeps accounting conservative after a failed final read and recovers with manual refresh", async () => {
+  mock.fetch.mockResolvedValueOnce(json(runningState())).mockResolvedValueOnce(json(completed()))
+    .mockRejectedValueOnce(new Error("ARTIZEN_UNAVAILABLE"));
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  await screen.findByLabelText("¿Qué avances puedes confirmar?");
+  await resumePolling();
+  expect(screen.getByRole("alert")).toHaveTextContent("Actualiza el estado");
+  expect(screen.getByRole("button", { name: "Preparar borrador" })).toBeDisabled();
+  expect(screen.getByText("Hermes está trabajando")).toBeVisible();
+  await act(async () => { await vi.advanceTimersByTimeAsync(60000); });
+  expect(mock.fetch).toHaveBeenCalledTimes(3);
+  mock.fetch.mockResolvedValueOnce(json(settledState()));
+  await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Actualizar estado" })); });
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(screen.getByText("Hermes en reposo")).toBeVisible();
+  expect(mock.fetch).toHaveBeenCalledTimes(4);
+});
+
+it("still aborts a pending final read when the workspace unmounts", async () => {
+  let finalSignal: AbortSignal | undefined;
+  let finish!: (response: Response) => void;
+  mock.fetch.mockResolvedValueOnce(json(runningState())).mockResolvedValueOnce(json(completed()))
+    .mockImplementationOnce((_path, init) => {
+      finalSignal = init.signal;
+      return new Promise<Response>(resolve => { finish = resolve; });
+    });
+  const view = render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  await screen.findByLabelText("¿Qué avances puedes confirmar?");
+  await resumePolling();
+  expect(finalSignal?.aborted).toBe(false);
+  view.unmount();
+  expect(finalSignal?.aborted).toBe(true);
+  await act(async () => { finish(json(settledState())); await vi.advanceTimersByTimeAsync(60000); });
+  expect(mock.fetch).toHaveBeenCalledTimes(3);
+});
+
+it("stops polling on operational attention without fetching or inventing a released budget", async () => {
+  mock.fetch.mockResolvedValueOnce(json(runningState())).mockResolvedValueOnce(json({ ...completed(), phase: "awaiting_stop", needsAttention: true, result: null }));
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  await screen.findByLabelText("¿Qué avances puedes confirmar?");
+  await resumePolling();
+  await act(async () => { await vi.advanceTimersByTimeAsync(65000); });
+  expect(screen.getByText("Requiere revisión operativa")).toBeVisible();
+  expect(mock.fetch).toHaveBeenCalledTimes(2);
+});
+
+it("continues active polling through awaiting_stop and then loads the workspace once", async () => {
+  mock.fetch.mockResolvedValueOnce(json(runningState()))
+    .mockResolvedValueOnce(json({ ...completed(), phase: "awaiting_stop" }))
+    .mockResolvedValueOnce(json(completed())).mockResolvedValueOnce(json(settledState()));
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  await screen.findByLabelText("¿Qué avances puedes confirmar?");
+  await resumePolling();
+  expect(screen.getByText("Confirmando reposo y costo")).toBeVisible();
+  expect(mock.fetch).toHaveBeenCalledTimes(2);
+  await act(async () => { await vi.advanceTimersByTimeAsync(5000); });
+  expect(screen.getByText("Hermes en reposo")).toBeVisible();
+  await act(async () => { await vi.advanceTimersByTimeAsync(60000); });
+  expect(mock.fetch).toHaveBeenCalledTimes(4);
+});
+
+it("also synchronizes a cancelled run without inventing a draft", async () => {
+  const cancelled = { ...completed(), phase: "cancelled", result: null };
+  mock.fetch.mockResolvedValueOnce(json(runningState())).mockResolvedValueOnce(json(cancelled))
+    .mockResolvedValueOnce(json({ ...initial(), runs: [cancelled] }));
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  await screen.findByLabelText("¿Qué avances puedes confirmar?");
+  await resumePolling();
+  expect(screen.getByText("Cancelado sin iniciar")).toBeVisible();
+  expect(screen.queryByLabelText("Revisa y edita tu borrador")).not.toBeInTheDocument();
+  await act(async () => { await vi.advanceTimersByTimeAsync(60000); });
+  expect(mock.fetch).toHaveBeenCalledTimes(3);
+});
 it("keeps UI copy in English when English is selected", async () => {
   mock.language = "en";
   render(<ArtizenCreatorWorkflow projectId="template-example" />);
