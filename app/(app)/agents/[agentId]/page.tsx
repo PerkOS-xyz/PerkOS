@@ -75,6 +75,7 @@ import { AgentVoiceCallController } from "./AgentVoiceCallController";
 import { VoiceCredentialDeliveryPanel } from "./VoiceCredentialDeliveryPanel";
 import { VoiceHealthPanel } from "./VoiceHealthPanel";
 import { isVoiceEnabled } from "@/app/lib/voiceFeature";
+import { ArtizenAgentDetail } from "@/app/components/ArtizenProjectBoard";
 
 type PageProps = {
   params: Promise<{ agentId: string }>;
@@ -159,13 +160,13 @@ export default function AgentDetailPage({ params }: PageProps) {
   });
 
   const storedAgent = agentsQuery.data?.find((a) => a.id === agentId);
-  const presence=useAgentPresence(address,storedAgent&&!storedAgent.shared?[agentId]:[]);
+  const presence=useAgentPresence(address,storedAgent&&!storedAgent.shared&&storedAgent.executionMode!=="artizen-on-demand"?[agentId]:[]);
   const agent=storedAgent?{...storedAgent,...presence[agentId]}:undefined;
 
   const gatewaysQuery = useQuery({
     queryKey: ["agent-gateways", agentId],
     queryFn: () => getAgentGateways(agentId),
-    enabled: Boolean(address) && Boolean(agent),
+    enabled: Boolean(address) && Boolean(agent) && agent?.executionMode !== "artizen-on-demand",
   });
 
   const projectsQuery = useQuery({
@@ -174,12 +175,14 @@ export default function AgentDetailPage({ params }: PageProps) {
     enabled: Boolean(address),
   });
 
+  const executionProjectId = agent?.executionProjectId;
   const projectIds = useMemo(
     () =>
       (projectsQuery.data?.projects ?? [])
+        .filter(p => !executionProjectId || p.id === executionProjectId)
         .map((p) => p.id)
         .filter((id): id is string => Boolean(id)),
-    [projectsQuery.data]
+    [projectsQuery.data, executionProjectId]
   );
 
   const projectDetails = useQueries({
@@ -265,6 +268,8 @@ export default function AgentDetailPage({ params }: PageProps) {
       </div>
     );
   }
+
+  if (agent.executionMode === "artizen-on-demand") return <ArtizenAgentDetail key={`${address}:${agent.id}`} agent={agent} />;
 
   // Single column on purpose. A two-column grid on this element does NOT work:
   // its children are not just the two panels — a `hidden … xl:flex` block sits
