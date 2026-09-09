@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArtizenFormatReview, type FormatReview } from "./ArtizenFormatReview";
 import { ArtizenRunFailure, isArtizenUnsuccessful } from "./ArtizenRunFailure";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type DraftResult = { draft: string; reviewNotes: string[]; sourcesUsed: string[]; formatReview?: FormatReview };
 type Run = { requestId: string; action: "prepare-update" | "revise-update";
@@ -17,9 +18,12 @@ type Run = { requestId: string; action: "prepare-update" | "revise-update";
   result: DraftResult | null; allocatedMicros: number | null; reservedMicros: number;
   createdAtMs: number; scheduledForMs?: number; needsAttention?: boolean; revisionUnchanged?: boolean; draftEchoesNotes?: boolean };
 type Memory = { revision: number; text: string; sourceRunId: string | null; updatedAtMs: number };
+type WebhookState = { enabled: boolean; status: "disabled" | "armed" | "consumed"; url: null };
+type WebhookCredential = { enabled: true; status: "armed"; url: string; secret: string; signatureVersion: "v1" };
 type State = { configured: boolean; agentName: string | null; budget: { limitMicros: number; reservedMicros: number; allocatedMicros: number } | null;
   activeRunId: string | null; runReservationMicros: number; runs: Run[]; memory: Memory;
   scheduling?: { enabled: boolean; minDelayMs: number; maxDelayMs: number };
+  webhook?: WebhookState;
   draftFormat?: { contract: string; paragraphs: number; minWords: number; maxWords: number } };
 
 const active = (run?: Run) => !!run && !run.needsAttention && ["queued", "executing", "awaiting_stop"].includes(run.phase);
@@ -45,6 +49,8 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
   const [confirmation, setConfirmation] = useState<{ action: Run["action"]; sourceDraft?: string; scheduledForMs?: number } | null>(null);
   const [scheduleDate, setScheduleDate] = useState("");
   const [cancelId, setCancelId] = useState<string | null>(null);
+  const [webhookAction, setWebhookAction] = useState<"rotate" | "disable" | null>(null);
+  const [webhookCredential, setWebhookCredential] = useState<WebhookCredential | null>(null);
   const retry = useRef<{ fingerprint: string; requestId: string } | null>(null);
   const base = `/artizen-projects/${encodeURIComponent(projectId)}`;
   const money = (micros: number) => new Intl.NumberFormat(i18n.language, { style: "currency", currency: "USD", maximumFractionDigits: 4 }).format(micros / 1_000_000);
@@ -178,6 +184,27 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
     } catch (e) { setError(e instanceof Error ? e.message : "ARTIZEN_UNAVAILABLE"); }
     finally { setPending(false); }
   }
+  async function rotateWebhook() {
+    if (pending) return;
+    setPending(true); setError(""); setNotice("");
+    try {
+      const created = await readResponse<WebhookCredential>(await authedFetch(`${base}/webhook/rotate`, { method: "POST",
+        headers: { "content-type": "application/json" }, body: JSON.stringify({ confirmed: true }) }));
+      setWebhookAction(null); setWebhookCredential(created); await load();
+    } catch (e) { setError(e instanceof Error ? e.message : "ARTIZEN_UNAVAILABLE"); setWebhookAction(null); }
+    finally { setPending(false); }
+  }
+  async function disableWebhook() {
+    if (pending) return;
+    setPending(true); setError("");
+    try {
+      await readResponse(await authedFetch(`${base}/webhook/disable`, { method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ confirmed: true }) }));
+      setWebhookAction(null); setWebhookCredential(null); await load();
+      setNotice(es ? "Webhook deshabilitado. La URL anterior ya no acepta eventos." : "Webhook disabled. The previous URL no longer accepts events.");
+    } catch (e) { setError(e instanceof Error ? e.message : "ARTIZEN_UNAVAILABLE"); setWebhookAction(null); }
+    finally { setPending(false); }
+  }
   const status = current?.needsAttention ? (es ? "Requiere revisión operativa" : "Needs operational review") : current ? ({
     queued: current.scheduledForMs !== undefined ? (es ? "Programado · Hermes en reposo" : "Scheduled · Hermes is resting") : (es ? "Preparando Hermes" : "Preparing Hermes"),
     executing: es ? "Hermes está trabajando" : "Hermes is working",
@@ -240,6 +267,22 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
         <input id="artizen-schedule" type="datetime-local" aria-describedby="artizen-schedule-help" className={field} value={scheduleDate} onChange={e => setScheduleDate(e.target.value)} disabled={pending || !!state.activeRunId} />
         <Button variant="outline" disabled={pending || !!state.activeRunId || !state.configured || !state.agentName || !notes.trim() || !scheduleDate} onClick={confirmSchedule}>{es ? "Programar borrador" : "Schedule draft"}</Button>
       </div>}
+      {state.webhook && <div className="space-y-2 rounded-lg border border-border p-3" aria-label={es ? "Webhook de una ejecución" : "One-time webhook"}>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h4 className="text-sm font-medium">{es ? "Webhook de una ejecución" : "One-time webhook"}</h4>
+          <span className="text-xs text-muted-foreground">{state.webhook.status === "armed"
+            ? (es ? "Preparado · esperando un evento" : "Armed · waiting for one event")
+            : state.webhook.status === "consumed" ? (es ? "Consumido" : "Consumed") : (es ? "Deshabilitado" : "Disabled")}</span>
+        </div>
+        <p className="text-xs text-muted-foreground">{es
+          ? "Una fuente que conozca la URL y el secreto puede enviar un evento firmado. El primer evento válido crea como máximo un trabajo; duplicados exactos conservan el mismo resultado y otro ID se rechaza. Nada se publica automáticamente."
+          : "A source with the URL and secret can send one signed event. The first valid event creates at most one run; exact duplicates keep the same result and another ID is rejected. Nothing is published automatically."}</p>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" disabled={pending || !!state.activeRunId || !state.configured || !state.agentName}
+            onClick={() => setWebhookAction("rotate")}>{state.webhook.status === "disabled" ? (es ? "Crear webhook" : "Create webhook") : (es ? "Crear uno nuevo" : "Create a new one")}</Button>
+          {state.webhook.enabled && <Button variant="outline" disabled={pending} onClick={() => setWebhookAction("disable")}>{es ? "Deshabilitar" : "Disable"}</Button>}
+        </div>
+      </div>}
       {current?.result && <DraftReview key={current.requestId} run={current} memory={state.memory} es={es} pending={pending}
         canRevise={!state.activeRunId && state.configured && !!state.agentName && !!notes.trim()}
         revise={draft => setConfirmation({ action: "revise-update", sourceDraft: draft })} save={saveMemory} />}
@@ -263,7 +306,43 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
     <ConfirmDialog open={!!cancelId} onOpenChange={open => { if (!open && !pending) setCancelId(null); }} pending={pending} title={es ? "¿Cancelar el trabajo programado?" : "Cancel the scheduled run?"}
       description={es ? "Si aún no ha comenzado, se liberará la reserva sin iniciar Hermes. No se eliminarán borradores anteriores." : "If it has not started, the reservation will be released without starting Hermes. Previous drafts will not be deleted."}
       confirmLabel={es ? "Cancelar trabajo" : "Cancel run"} cancelLabel={es ? "Volver" : "Go back"} onConfirm={() => { void cancelScheduled(); }} />
+    <ConfirmDialog open={webhookAction === "rotate"} onOpenChange={open => { if (!open && !pending) setWebhookAction(null); }} pending={pending}
+      title={es ? "¿Crear un webhook de una ejecución?" : "Create a one-time webhook?"}
+      description={es ? `No iniciará Hermes ahora. El primer evento firmado válido podrá reservar hasta ${money(state?.runReservationMicros ?? 0)}, crear un borrador y consumir la credencial. Una URL anterior quedará invalidada.`
+        : `Hermes will not start now. The first valid signed event may reserve up to ${money(state?.runReservationMicros ?? 0)}, create one draft and consume the credential. Any previous URL will be invalidated.`}
+      confirmLabel={es ? "Crear sin ejecutar" : "Create without running"} cancelLabel={es ? "Cancelar" : "Cancel"} onConfirm={() => { void rotateWebhook(); }} />
+    <ConfirmDialog open={webhookAction === "disable"} onOpenChange={open => { if (!open && !pending) setWebhookAction(null); }} pending={pending}
+      title={es ? "¿Deshabilitar este webhook?" : "Disable this webhook?"}
+      description={es ? "La URL actual dejará de aceptar eventos. Una ejecución ya admitida no se cancela." : "The current URL will stop accepting events. A run already admitted is not cancelled."}
+      confirmLabel={es ? "Deshabilitar" : "Disable"} cancelLabel={es ? "Volver" : "Go back"} onConfirm={() => { void disableWebhook(); }} />
+    <WebhookCredentialDialog credential={webhookCredential} es={es} close={() => setWebhookCredential(null)} />
   </section>;
+}
+
+function WebhookCredentialDialog({ credential, es, close }: { credential: WebhookCredential | null; es: boolean; close: () => void }) {
+  const copy = async (value: string) => { await navigator.clipboard.writeText(value); };
+  return <Dialog open={!!credential} onOpenChange={open => { if (!open) close(); }}>
+    <DialogContent className="max-w-xl">
+      <DialogHeader>
+        <DialogTitle>{es ? "Guarda la credencial ahora" : "Save the credential now"}</DialogTitle>
+        <DialogDescription>{es
+          ? "El secreto se muestra una sola vez. PerkOS no lo volverá a exponer después de cerrar este diálogo. Configura la fuente antes de cerrarlo."
+          : "The secret is shown once. PerkOS will not expose it again after this dialog closes. Configure the source before closing it."}</DialogDescription>
+      </DialogHeader>
+      {credential && <div className="min-w-0 space-y-3">
+        <div><label className="text-sm font-medium" htmlFor="artizen-webhook-url">URL</label>
+          <textarea id="artizen-webhook-url" readOnly className={`${field} mt-1 min-h-20 font-mono text-xs`} value={credential.url} />
+          <Button className="mt-2" variant="outline" size="sm" onClick={() => { void copy(credential.url); }}>{es ? "Copiar URL" : "Copy URL"}</Button></div>
+        <div><label className="text-sm font-medium" htmlFor="artizen-webhook-secret">{es ? "Secreto HMAC" : "HMAC secret"}</label>
+          <textarea id="artizen-webhook-secret" readOnly className={`${field} mt-1 min-h-20 font-mono text-xs`} value={credential.secret} />
+          <Button className="mt-2" variant="outline" size="sm" onClick={() => { void copy(credential.secret); }}>{es ? "Copiar secreto" : "Copy secret"}</Button></div>
+        <p className="text-xs text-muted-foreground">{es
+          ? "Firma: HMAC-SHA256 sobre v1.{timestamp}.{cuerpo JSON exacto}. Envía X-PerkOS-Timestamp y X-PerkOS-Signature: v1=<hex>. El cuerpo incluye eventId y facts; editorialNotes es opcional."
+          : "Signature: HMAC-SHA256 over v1.{timestamp}.{exact JSON body}. Send X-PerkOS-Timestamp and X-PerkOS-Signature: v1=<hex>. The body includes eventId and facts; editorialNotes is optional."}</p>
+      </div>}
+      <DialogFooter><Button onClick={close}>{es ? "Ya la guardé" : "I saved it"}</Button></DialogFooter>
+    </DialogContent>
+  </Dialog>;
 }
 
 function DraftReview({ run, memory, es, pending, canRevise, revise, save }: { run: Run; memory: Memory; es: boolean; pending: boolean; canRevise: boolean;
