@@ -75,9 +75,14 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
       try {
         const run = await readResponse<Run>(await authedFetch(`${base}/runs/${activeId}`, { signal: controller.signal }));
         if (controller.signal.aborted) return;
+        if (!active(run) && !run.needsAttention) {
+          // Publish terminal run, budget and activeRunId together. Publishing the
+          // run first changes needsPoll and aborts this effect's final read.
+          await load(controller.signal);
+          return;
+        }
         setState(old => old ? { ...old, runs: old.runs.map(r => r.requestId === run.requestId ? run : r) } : old);
         if (active(run)) timer = setTimeout(() => { void poll(); }, 5000);
-        else if (!run.needsAttention) await load(controller.signal);
       } catch { if (!controller.signal.aborted) setError("ARTIZEN_UNAVAILABLE"); }
       finally { inFlight = false; }
     };
