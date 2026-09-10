@@ -24,7 +24,8 @@ type State = { configured: boolean; agentName: string | null; budget: { limitMic
   activeRunId: string | null; runReservationMicros: number; runs: Run[]; memory: Memory;
   scheduling?: { enabled: boolean; minDelayMs: number; maxDelayMs: number };
   webhook?: WebhookState;
-  draftFormat?: { contract: string; paragraphs: number; minWords: number; maxWords: number } };
+  draftFormat?: { contract: string; paragraphs: number; sentencesPerParagraph?: number;
+    minWordsPerSentence?: number; maxWordsPerSentence?: number; minWords: number; maxWords: number } };
 
 const active = (run?: Run) => !!run && !run.needsAttention && ["queued", "executing", "awaiting_stop"].includes(run.phase);
 const field = "w-full min-w-0 rounded-lg border border-border bg-background p-3 text-sm";
@@ -252,6 +253,9 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
       {state.draftFormat?.contract === "artizen-update-v1" && <p className="text-sm">{es
         ? "Formato de esta plantilla: dos párrafos, 90–120 palabras en total; avances primero, límites y trabajo pendiente después. Las preferencias no cambian este formato."
         : "Template format: two paragraphs, 90–120 words total; progress first, limitations and ongoing work second. Preferences do not change this format."}</p>}
+      {state.draftFormat?.contract === "artizen-update-v2" && <p className="text-sm">{es
+        ? "Formato de esta plantilla: dos párrafos, tres oraciones por párrafo y 15–20 palabras por oración (90–120 en total). Las preferencias no cambian este formato."
+        : "Template format: two paragraphs, three sentences per paragraph and 15–20 words per sentence (90–120 total). Preferences do not change this format."}</p>}
       <p id="artizen-editorial-help" className="text-xs text-muted-foreground">{es
         ? (state.draftFormat ? "Tono y estilo dentro del formato de la plantilla. Estas preferencias no son hechos." : "Tono, extensión o formato. Estas preferencias no son hechos ni deben aparecer como instrucciones en el borrador.")
         : (state.draftFormat ? "Tone and style within the template format. These preferences are not facts." : "Tone, length or format. These preferences are not facts and should not appear as instructions in the draft.")}</p>
