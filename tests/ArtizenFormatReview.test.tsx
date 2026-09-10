@@ -18,6 +18,16 @@ it("a passing format is not a factuality verdict and edits never silently inheri
   expect(screen.getByRole("status")).toHaveTextContent("not your changes");
   expect(screen.getByRole("status")).toHaveTextContent("not the facts");
 });
+it.each([false, true])("shows a persistent actionable V2 block warning without a retry action (es=%s)", es => {
+  render(<ArtizenFormatReview review={{ contract: "artizen-update-v2", status: "needs-review", wordCount: 94,
+    paragraphCount: 2, issues: ["structured_output_invalid"] }} es={es} />);
+  const alert = screen.getByRole("alert");
+  expect(alert).toHaveTextContent("94");
+  expect(alert).toHaveTextContent(es ? "2 párrafos × 3 oraciones" : "2 paragraphs × 3 sentences");
+  expect(alert).toHaveTextContent("15–20");
+  expect(alert).toHaveTextContent(es ? "No se volverá a generar automáticamente" : "No automatic regeneration");
+  expect(screen.queryByRole("button")).not.toBeInTheDocument();
+});
 it("legacy results have no fabricated assessment", () => {
   const { container } = render(<ArtizenFormatReview es={false} />);
   expect(container).toBeEmptyDOMElement();
