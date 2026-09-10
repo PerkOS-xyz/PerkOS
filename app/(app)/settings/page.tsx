@@ -44,6 +44,7 @@ import { UsernameCard } from "../../components/UsernameCard";
 import { ProfileAvatarCard } from "../../components/ProfileAvatarCard";
 import { useWalletSession } from "../../lib/useWalletSession";
 import { useAdvancedFeatures } from "../../lib/advancedFeatures";
+import { AccountProfileWizard } from "../../components/AccountProfileWizard";
 
 const ORG_DRAFT_KEY = "swarm.organization.draft.v1";
 
@@ -112,6 +113,8 @@ export default function SettingsPage() {
           {t("settings.header.subtitle")}
         </p>
       </header>
+
+      <AccountProfileWizard settings />
 
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Account */}

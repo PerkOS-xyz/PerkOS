@@ -1,6 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { ArtizenWorkLink } from "@/app/components/ArtizenProjectBoard";
+import { ArtizenFailureLabel, ArtizenRunFailure, isArtizenUnsuccessful } from "@/app/components/ArtizenRunFailure";
+import { TaskAgentCard, taskAgentName } from "@/app/components/TaskAgentCard";
 import { useRouter, useSearchParams } from "next/navigation";
 import { use, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -26,7 +29,6 @@ import { cn } from "@/lib/utils";
 import {
   deleteTask,
   getWalletProject,
-  type Task,
 } from "../../../../../lib/perkosApi";
 import { ConfirmDialog } from "../../../../../components/ConfirmDialog";
 import { EditTaskDialog } from "../../../../../components/EditTaskDialog";
@@ -36,15 +38,6 @@ import { TaskAttachmentList } from "../../../../../components/TaskAttachments";
 type PageProps = {
   params: Promise<{ projectId: string; taskId: string }>;
 };
-
-function initials(name: string): string {
-  return name
-    .split(/\s+|-/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase())
-    .join("");
-}
 
 export default function TaskDetailPage({ params }: PageProps) {
   const { projectId, taskId } = use(params);
@@ -71,6 +64,7 @@ export default function TaskDetailPage({ params }: PageProps) {
   });
 
   const task = data?.tasks.find((t) => t.id === taskId);
+  const assignedAgent = data?.taskAgents?.find(a => a.name === task?.agent);
   const projectName = data?.project.name;
 
   const deleteMutation = useMutation({
@@ -124,14 +118,14 @@ export default function TaskDetailPage({ params }: PageProps) {
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <TaskStatusBadge status={task.status} />
+            {task.executionMode === "artizen-on-demand" && isArtizenUnsuccessful({ ...task, phase: task.executionPhase }) ? <ArtizenFailureLabel /> : <TaskStatusBadge status={task.status} />}
             <PriorityBadge priority={task.priority} />
           </div>
           <h1 className="text-3xl font-medium leading-tight text-foreground">
             {task.name}
           </h1>
         </div>
-        <div className="flex items-center gap-2">
+        {task.executionMode === "artizen-on-demand" ? <ArtizenWorkLink projectId={projectId} /> : <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -150,7 +144,7 @@ export default function TaskDetailPage({ params }: PageProps) {
             <Trash2 className="h-3.5 w-3.5" />
             Delete
           </Button>
-        </div>
+        </div>}
       </header>
 
       <Card>
@@ -178,13 +172,13 @@ export default function TaskDetailPage({ params }: PageProps) {
         <MetaTile label="Due date" value="Not set" Icon={Calendar} muted />
         <MetaTile
           label="Assigned agent"
-          value={task.agent || "—"}
+          value={task.agent ? taskAgentName(task.agent, task.executionMode === "artizen-on-demand", assignedAgent) : "—"}
           Icon={Bot}
         />
       </section>
 
       {task.agent ? (
-        <AgentCard agentName={task.agent} agentRuntime={undefined} />
+        <TaskAgentCard name={task.agent} onDemand={task.executionMode === "artizen-on-demand"} agent={assignedAgent} />
       ) : null}
 
       {task.logs && task.logs.length > 0 ? (
@@ -193,7 +187,7 @@ export default function TaskDetailPage({ params }: PageProps) {
 
       <TaskAttachmentList attachments={task.attachments ?? []} />
 
-      {task.result ? <ResultSection result={task.result} /> : null}
+      {task.result ? <ResultSection result={task.result} /> : task.executionMode === "artizen-on-demand" ? <ArtizenRunFailure run={{ ...task, phase: task.executionPhase }} /> : null}
 
       {ownerWallet ? (
         <EditTaskDialog
@@ -313,38 +307,6 @@ function MetaTile({
     <div className="flex flex-col gap-1 rounded-md border border-border bg-card px-4 py-3">
       {content}
     </div>
-  );
-}
-
-function AgentCard({
-  agentName,
-  agentRuntime,
-}: {
-  agentName: string;
-  agentRuntime?: string;
-}) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Agent on this task</CardTitle>
-      </CardHeader>
-      <CardContent className="flex items-center gap-3">
-        <div className="relative">
-          <div className="grid h-12 w-12 place-items-center rounded-full bg-primary/15 text-sm font-medium text-primary">
-            {initials(agentName)}
-          </div>
-          <span className="absolute -bottom-0.5 -right-0.5 grid h-2.5 w-2.5 place-items-center rounded-full bg-emerald-400 ring-2 ring-card" />
-        </div>
-        <div className="flex flex-col">
-          <span className="text-sm font-medium text-foreground">
-            {agentName}
-          </span>
-          <span className="text-xs text-muted-foreground">
-            {agentRuntime ?? "Online"}
-          </span>
-        </div>
-      </CardContent>
-    </Card>
   );
 }
 

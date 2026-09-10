@@ -20,6 +20,18 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == walletAddress;
     }
 
+    // Immutable server-owned template binding, not a client-editable project flag.
+    function isArtizenProject(w, pid) {
+      let path = /databases/$(database)/documents/project_template_instances/$(w + '--' + pid);
+      return pid.matches('template-.*') && exists(path)
+        && get(path).data.get('templateId', '') == 'artizen-creator-update';
+    }
+    function isArtizenAgent(id) {
+      let path = /databases/$(database)/documents/agents/$(id);
+      return id.matches('Artizen-.*') && exists(path)
+        && get(path).data.get('executionMode', '') == 'artizen-on-demand';
+    }
+
     // Membership / sharing helpers (GitHub-like) ------------------------
     //
     // Members are recorded (Admin SDK, via PerkOS-API) at
@@ -106,7 +118,15 @@ service cloud.firestore {
     // require the request to come from a session whose uid matches.
 
     match /wallets/{walletAddress}/{document=**} {
-      allow read, write: if isSelf(walletAddress);
+      allow read: if isSelf(walletAddress);
+    }
+    match /wallets/{walletAddress} {
+      allow write: if isSelf(walletAddress);
+    }
+    match /wallets/{walletAddress}/{collectionName}/{id}/{document=**} {
+      allow write: if isSelf(walletAddress)
+        && (collectionName != 'projects' || !isArtizenProject(walletAddress, id))
+        && (collectionName != 'agents' || !isArtizenAgent(id));
     }
 
     // Privacy invariant: conversation message BODIES never live in
@@ -121,8 +141,8 @@ service cloud.firestore {
     // doc) bypasses these rules, so nothing useful is blocked.
     //
     // NOTE: this rule is matched AFTER the broader workspace rule above.
-    // Firestore evaluates all matching rules; the most specific deny wins
-    // because a single `false` in any matched rule denies the operation.
+    // Firestore grants when ANY matching rule allows. This deny alone does
+    // not override the owner wildcard; server code must uphold the invariant.
 
     match /wallets/{walletAddress}/conversations/{convId}/messages/{messageId} {
       allow read, write: if false;
@@ -228,9 +248,9 @@ service cloud.firestore {
       // would let an editor re-point which org's members can see the project.
       // `.get(...,null)` keeps legacy (no-orgId) projects writable and avoids
       // missing-field errors.
-      allow write: if isSelf(w)
+      allow write: if !isArtizenProject(w, pid) && (isSelf(w)
         || (canWriteProject(w, pid)
-            && request.resource.data.get('orgId', null) == resource.data.get('orgId', null));
+            && request.resource.data.get('orgId', null) == resource.data.get('orgId', null)));
 
       // Tasks + chat: readable by any member, writable by editors/owners. These
       // are listed explicitly (NOT a `{document=**}` write) so editor write
@@ -240,7 +260,7 @@ service cloud.firestore {
         allow read: if isSelf(w)
           || isProjectMember(w, pid)
           || isOrgMember(w, projectOrgId(w, pid));
-        allow write: if isSelf(w) || canWriteProject(w, pid);
+        allow write: if !isArtizenProject(w, pid) && (isSelf(w) || canWriteProject(w, pid));
       }
       // Project (board) chat. NOTE: this is a DIFFERENT collection from
       // `conversations/{convId}/messages` (the C-hybrid DM/channel bodies that
