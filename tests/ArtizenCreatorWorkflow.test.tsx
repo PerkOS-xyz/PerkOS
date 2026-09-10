@@ -140,6 +140,21 @@ it.each(["en", "es"])("shows structured format, failed historical assessment and
   expect(screen.getByRole("button", { name: language === "es" ? "Aprobar y guardar ejemplo" : "Approve and save example" })).toBeEnabled();
 });
 
+it.each(["en", "es"])("restores the V2 structured review warning after loading in %s", async language => {
+  mock.language = language;
+  const run = { ...completed(), result: { ...completed().result, formatReview: {
+    contract: "artizen-update-v2", status: "needs-review", wordCount: 94, paragraphCount: 2,
+    issues: ["structured_output_invalid"] } } };
+  mock.fetch.mockResolvedValue(json({ ...initial(), draftFormat: { contract: "artizen-update-v2", paragraphs: 2,
+    sentencesPerParagraph: 3, minWordsPerSentence: 15, maxWordsPerSentence: 20, minWords: 90, maxWords: 120 }, runs: [run] }));
+  render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  const alert = await screen.findByRole("alert");
+  expect(alert).toHaveTextContent(language === "es" ? "2 párrafos × 3 oraciones" : "2 paragraphs × 3 sentences");
+  expect(alert).toHaveTextContent("15–20");
+  expect(screen.getByText(language === "es" ? /Formato de esta plantilla:/ : /Template format:/)).toHaveTextContent("90–120");
+  expect(mock.fetch.mock.calls.filter(c => c[1]?.method)).toHaveLength(0);
+});
+
 it.each([["en", "prepare-update"], ["es", "prepare-update"], ["en", "revise-update"], ["es", "revise-update"]])("warns of copied notes in %s/%s without changing the draft or generating again", async (language, action) => {
   mock.language = language;
   mock.fetch.mockImplementation(async () => json({ ...initial(), runs: [{ ...completed(), action, draftEchoesNotes: true }] }));
@@ -325,11 +340,14 @@ it.each(["en", "es"])("keeps the final workspace read alive and synchronizes bud
 });
 
 it("keeps accounting conservative after a failed final read and recovers with manual refresh", async () => {
+  let failFinalRead!: (reason: Error) => void;
   mock.fetch.mockResolvedValueOnce(json(runningState())).mockResolvedValueOnce(json(completed()))
-    .mockRejectedValueOnce(new Error("ARTIZEN_UNAVAILABLE"));
+    .mockImplementationOnce(() => new Promise<Response>((_resolve, reject) => { failFinalRead = reject; }));
   render(<ArtizenCreatorWorkflow projectId="template-example" />);
   await screen.findByLabelText("¿Qué avances puedes confirmar?");
   await resumePolling();
+  expect(mock.fetch).toHaveBeenCalledTimes(3);
+  await act(async () => { failFinalRead(new Error("ARTIZEN_UNAVAILABLE")); });
   expect(screen.getByRole("alert")).toHaveTextContent("Actualiza el estado");
   expect(screen.getByRole("button", { name: "Preparar borrador" })).toBeDisabled();
   expect(screen.getByText("Hermes está trabajando")).toBeVisible();
