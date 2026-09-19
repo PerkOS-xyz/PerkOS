@@ -11,7 +11,7 @@ import { ContentSection, FeatureGrid, PublicPageShell } from "../components/mark
  * open needs right click and Open, and hiding that only costs trust.
  */
 
-const VERSION = "0.5.9";
+const VERSION = "0.6.1";
 const DMG = `https://github.com/PerkOS-xyz/PerkOS-Runtime/releases/download/v${VERSION}/PerkOS-${VERSION}-arm64.dmg`;
 const RELEASE = `https://github.com/PerkOS-xyz/PerkOS-Runtime/releases/tag/v${VERSION}`;
 const REPO = "https://github.com/PerkOS-xyz/PerkOS-Runtime";
@@ -29,7 +29,7 @@ export default function FloorPage() {
     <PublicPageShell
       eyebrow="PerkOS Floor"
       title="They draft. You approve."
-      intro="A Mac app where a desk of agents works tokenized stocks on Base. Scout reads the market, Risk sets the size and can block, Trader drafts the order and never executes, Auditor keeps the record. Nothing moves until you hold and sign in your own wallet."
+      intro="A Mac app where a desk of agents works tokenized stocks on Base. Scout reads the market, Risk sets the size and can block, Trader writes the order, Auditor keeps the record. Ask a question and the draft waits for you to hold and sign. Give an order and the Trader can buy on its own, from a Dynamic wallet you own and delegate, within limits you set and revoke."
       ctaId="floor"
       breadcrumbs={[{ name: "Home", path: "/" }, { name: "Floor", path: "/floor" }]}
     >
@@ -42,7 +42,7 @@ export default function FloorPage() {
             Download for macOS
           </a>
           <p className="mt-4 text-sm">
-            Version {VERSION}, Apple Silicon, 141 MB. Signed with a Developer ID certificate.
+            Version {VERSION}, Apple Silicon, 135 MB. Signed with a Developer ID certificate.
           </p>
           <p className="mt-2 text-sm">
             This build is not notarized yet, so the first open needs a right click on the app and then Open.
@@ -61,7 +61,8 @@ export default function FloorPage() {
           items={[
             { title: "It reads the market", body: "Prices come from Uniswap and Aerodrome on Base, with a second quote from Bankr beside them. The desk refuses a stock whose deepest pool is too thin to trade." },
             { title: "It sizes and can block", body: "Risk measures the clip against the pool, sets the exits and stops an order outright when the references disagree." },
-            { title: "It drafts, never executes", body: "Trader builds the exact transaction and leaves it on the table. You hold to approve, and the signature happens in your own wallet." },
+            { title: "It drafts, you hold", body: "Ask what to buy and Trader builds the exact transaction, then leaves it on the table. You hold to approve, and the signature happens in your own wallet." },
+            { title: "Or it buys within your limits", body: "Delegate a Dynamic wallet you own and the Trader can fill an order you gave, once Risk clears it. You set the per order cap and what it may touch, Dynamic enforces them in its enclave, and one press revokes the whole thing." },
             { title: "It keeps the record", body: "Auditor reconciles what was asked against what happened. Every decision stays in your history with the facts behind it." },
             { title: "It launches tokens", body: "One sentence drafts a launch paired with a tokenized stock, simulated with Bankr before you hold. Creator fees go to your wallet." },
             { title: "It stays yours", body: "Chat history is encrypted on your machine under a key derived from a wallet signature, and your notes stay in your own folder, in Markdown." },
@@ -84,6 +85,7 @@ export default function FloorPage() {
       <ContentSection title="What you need">
         <p>A Mac with Apple Silicon, a wallet you already use, and an AI subscription for the voice that talks to you. The agents run on PerkOS infrastructure and rest between tasks.</p>
         <p>Orders are capped at 100 USDC while the desk is new. Everything runs on Base mainnet with your own money, so the cap is there on purpose.</p>
+        <p>Delegating a wallet to the Trader is optional. It is a Dynamic embedded wallet you own: the desk gets a limited share of it, never your key, and the proceeds land back in the same wallet.</p>
       </ContentSection>
     </PublicPageShell>
   );
