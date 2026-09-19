@@ -11,7 +11,7 @@ import { ContentSection, FeatureGrid, PublicPageShell } from "../components/mark
  * open needs right click and Open, and hiding that only costs trust.
  */
 
-const VERSION = "0.5.8";
+const VERSION = "0.5.9";
 const DMG = `https://github.com/PerkOS-xyz/PerkOS-Runtime/releases/download/v${VERSION}/PerkOS-${VERSION}-arm64.dmg`;
 const RELEASE = `https://github.com/PerkOS-xyz/PerkOS-Runtime/releases/tag/v${VERSION}`;
 const REPO = "https://github.com/PerkOS-xyz/PerkOS-Runtime";
