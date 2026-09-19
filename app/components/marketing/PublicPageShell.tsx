@@ -125,6 +125,7 @@ export function PublicPageShell({ eyebrow, title, intro, children, ctaId, breadc
             <Link href="/solutions/real-estate">Real estate</Link>
             <Link href="/solutions/ecommerce">Ecommerce</Link>
             <Link href="/solutions/agencies">Agencies</Link>
+            <Link href="/floor">Floor</Link>
             <Link href="/privacy">Privacy</Link>
             <a href="https://www.instagram.com/perkos.xyz/" target="_blank" rel="noopener noreferrer">Instagram</a>
           </div>
