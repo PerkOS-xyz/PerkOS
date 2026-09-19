@@ -42,7 +42,7 @@ export default function FloorPage() {
             Download for macOS
           </a>
           <p className="mt-4 text-sm">
-            Version {VERSION}, Apple Silicon, 135 MB. Signed with a Developer ID certificate.
+            Version {VERSION}, Apple Silicon, 141 MB. Signed with a Developer ID certificate.
           </p>
           <p className="mt-2 text-sm">
             This build is not notarized yet, so the first open needs a right click on the app and then Open.
