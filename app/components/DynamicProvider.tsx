@@ -29,7 +29,9 @@ export function DynamicOuter({ children }: { children: ReactNode }) {
         initialAuthenticationMode: "connect-only",
         overrides: { evmNetworks: networks },
         appName: "PerkOS",
-        appLogoUrl: "/perkos-landing-logo.png",
+        // Absolute HTTPS URLs also work in wallet connector metadata and mobile handoffs.
+        appLogoUrl: "https://perkos.xyz/perkos-landing-logo.png",
+        privacyPolicyUrl: "https://perkos.xyz/privacy",
       }}
     >
       {children}
