@@ -115,7 +115,7 @@ export const INITIAL_WIZARD_STATE: WizardState = {
   runtimeKind: null,
   importedHermesApiUrl: "",
   externalNote: "",
-  llmSource: null,
+  llmSource: "byok",
   byokProvider: "",
   byokModel: "",
   byokApiKey: "",

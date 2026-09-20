@@ -2276,7 +2276,7 @@ export type MyBilling = {
   enrolled: boolean;
   infra?: {
     allowed: boolean;
-    reason: "exempt" | "funded" | "payment-required" | "credits-exhausted";
+    reason: "approval-required" | "exempt" | "funded" | "payment-required" | "credits-exhausted";
     hoursRemaining: number | null;
     rateUsdPerTeamHour: number;
   };

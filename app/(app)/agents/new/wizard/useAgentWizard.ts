@@ -359,7 +359,7 @@ export function useAgentWizard() {
         return state.personaId !== null && state.runtime !== null;
       case "llm":
         if (state.llmSource === "perkos") return llmAllowed;
-        if (state.llmSource === "skip") return true;
+        if (state.llmSource === "skip") return state.deployMode !== "perkos-ecs";
         if (state.llmSource === "byok")
           return state.byokApiKey.trim().length > 0 && !apiKeyError;
         return false;
@@ -375,6 +375,11 @@ export function useAgentWizard() {
         // server rejects it (IMAGE_TAG_REQUIRED) and we'd strand a doc. Block
         // the launch button until an image is resolved.
         if (state.deployMode === "perkos-ecs" && !state.imageTag) return false;
+        if (state.deployMode === "perkos-ecs") {
+          if (state.llmSource === "perkos" && !llmAllowed) return false;
+          if (state.llmSource === "byok" && (!state.byokApiKey.trim() || apiKeyError)) return false;
+          if (state.llmSource !== "perkos" && state.llmSource !== "byok") return false;
+        }
         if (!isValidAgentName(resolveAgentName(state.agentName, preset?.name ?? "Untitled agent"))) {
           return false;
         }

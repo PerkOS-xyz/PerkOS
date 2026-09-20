@@ -70,11 +70,7 @@ export function StepLLM({
                 ) : null}
               </div>
               <p className="text-sm text-muted-foreground">
-                {t("wizard.llm.perkos.descBefore")}{" "}
-                <code className="rounded bg-muted px-1 font-mono text-[11px]">
-                  api.llm.perkos.xyz
-                </code>{" "}
-                {t("wizard.llm.perkos.descAfter")}
+                {t("companyNew.config.llmPerkosDesc")}
               </p>
               {!llmAccessLoading && !llmAllowed ? (
                 <p className="text-xs text-muted-foreground">
@@ -108,7 +104,8 @@ export function StepLLM({
 
         <SelectableCard
           selected={state.llmSource === "skip"}
-          onClick={() => onChange({ llmSource: "skip" })}
+          onClick={() => state.deployMode !== "perkos-ecs" && onChange({ llmSource: "skip" })}
+          disabled={state.deployMode === "perkos-ecs"}
         >
           <div className="flex items-start justify-between gap-3">
             <div className="flex flex-col gap-1">
@@ -122,7 +119,7 @@ export function StepLLM({
                 {t("wizard.llm.skip.description")}
               </p>
             </div>
-            <RadioGroupItem value="skip" id="llm-skip" />
+            <RadioGroupItem value="skip" id="llm-skip" disabled={state.deployMode === "perkos-ecs"} />
           </div>
         </SelectableCard>
       </RadioGroup>
