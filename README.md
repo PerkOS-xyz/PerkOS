@@ -122,7 +122,7 @@ See [`.env.example`](./.env.example) for the full list. Minimum to boot:
 creates only `perkos-app-dev`, connects it to the shared proxy network and
 requires Firebase Admin credentials for `perkos-app-dev`. Invoke Compose with
 `--env-file .env.development`; never reuse `/opt/perkos-miniapp/.env`.
-- `NEXT_PUBLIC_PRIVY_APP_ID` — Privy browser auth app; optional `NEXT_PUBLIC_PRIVY_CLIENT_ID` selects a client configuration.
+- `NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID` — Dynamic browser login environment. Enable Google/email and EVM embedded wallets in its dashboard and allow the site's origin. PerkOS still verifies a wallet nonce and applies its own allowlist; Dynamic login does not grant platform access. Farcaster/Base Mini App host connectors are unchanged. Existing Privy wallets/accounts are not automatically migrated.
 - `NEXT_PUBLIC_FIREBASE_*` — Firebase web SDK config (public).
 - `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` — Admin SDK (server only).
 - `NEXT_PUBLIC_PERKOS_WHITELIST` — comma-separated wallet allowlist for the private alpha. **If empty, no wallet has access.**

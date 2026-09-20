@@ -1,7 +1,7 @@
 "use client";
 
-export const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? "";
-export const PRIVY_CLIENT_ID = process.env.NEXT_PUBLIC_PRIVY_CLIENT_ID ?? "";
+export const DYNAMIC_ENVIRONMENT_ID =
+  process.env.NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID?.trim() ?? "";
 
 type MaybeCoinbaseProvider = { isCoinbaseBrowser?: boolean } | undefined;
 
@@ -21,10 +21,10 @@ export function isCoinbaseInAppBrowser(): boolean {
   return /CoinbaseWallet|CoinbaseBrowser|org\.toshi/i.test(ua);
 }
 
-/** Privy is browser-only; verified Mini App and Coinbase host wallets keep wagmi. */
-export function privyBrowserEnabled(isInMiniApp: boolean | null): boolean {
+/** Dynamic is browser-only; verified Mini App and Coinbase host wallets keep wagmi. */
+export function dynamicBrowserEnabled(isInMiniApp: boolean | null): boolean {
   if (isInMiniApp !== false) return false;
-  if (!PRIVY_APP_ID) return false;
+  if (!DYNAMIC_ENVIRONMENT_ID) return false;
   if (isCoinbaseInAppBrowser()) return false;
   return true;
 }

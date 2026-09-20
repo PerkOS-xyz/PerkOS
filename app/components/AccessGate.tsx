@@ -13,7 +13,7 @@ import { useTranslation } from "react-i18next";
 import { emailSchema } from "../lib/validators";
 import { useWalletSession } from "../lib/useWalletSession";
 import { useIsInMiniApp } from "../lib/useIsInMiniApp";
-import { privyBrowserEnabled } from "../lib/privyBrowser";
+import { dynamicBrowserEnabled } from "../lib/dynamicBrowser";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -35,9 +35,9 @@ export function AccessGate({ address }: Props) {
   const { t } = useTranslation();
   const session = useWalletSession();
   const isInMiniApp = useIsInMiniApp();
-  // "Use a different wallet" only makes sense in a real browser (Privy owns
+  // "Use a different wallet" only makes sense in a real browser (Dynamic owns
   // the wallet). In Farcaster / Base App the wallet is the host identity.
-  const privyEnabled = privyBrowserEnabled(isInMiniApp);
+  const dynamicEnabled = dynamicBrowserEnabled(isInMiniApp);
   const [loggingOut, setLoggingOut] = useState(false);
   const [accessCode, setAccessCode] = useState("");
   const [email, setEmail] = useState("");
@@ -57,8 +57,8 @@ export function AccessGate({ address }: Props) {
   const usernameValid = /^[a-z0-9_-]{3,20}$/.test(username.trim().toLowerCase());
 
   async function useDifferentWallet() {
-    // Fully log out the Privy wallet + Firebase (a bare wagmi disconnect() is
-    // a no-op on the browser/Privy path), then start over from the landing.
+    // Fully log out the Dynamic wallet + Firebase (a bare wagmi disconnect() is
+    // a no-op on the browser/Dynamic path), then start over from the landing.
     setLoggingOut(true);
     try {
       await session.logout();
@@ -312,12 +312,12 @@ export function AccessGate({ address }: Props) {
             </form>
           )}
 
-          {/* Browser/Privy only — the wallet is connected through Privy, so
-              "use a different wallet" fully logs it out (Privy + Firebase) and
+          {/* Browser/Dynamic only — the wallet is connected through Dynamic, so
+              "use a different wallet" fully logs it out (Dynamic + Firebase) and
               returns to the landing to start over. Hidden in Farcaster / Base App
               (Mini App + in-app browser): there the wallet IS the host identity
               and can't be disconnected. */}
-          {privyEnabled ? (
+          {dynamicEnabled ? (
             <Button
               variant="outline"
               size="sm"
