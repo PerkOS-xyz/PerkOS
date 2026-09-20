@@ -6,6 +6,7 @@ import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
 import { base, baseSepolia, celo } from "viem/chains";
 import { robinhoodChain } from "../lib/chains";
 import { DYNAMIC_ENVIRONMENT_ID } from "../lib/dynamicBrowser";
+import { PERKOS_WALLET_LOGO, PERKOS_WALLET_STYLES, PERKOS_WALLET_LOCALE } from "../lib/dynamicBranding";
 
 const networks = [base, celo, robinhoodChain, baseSepolia].map((chain) => ({
   chainId: chain.id,
@@ -22,6 +23,7 @@ export function DynamicOuter({ children }: { children: ReactNode }) {
   return (
     <DynamicContextProvider
       theme="dark"
+      locale={PERKOS_WALLET_LOCALE}
       settings={{
         environmentId: DYNAMIC_ENVIRONMENT_ID,
         walletConnectors: [EthereumWalletConnectors],
@@ -30,7 +32,8 @@ export function DynamicOuter({ children }: { children: ReactNode }) {
         overrides: { evmNetworks: networks },
         appName: "PerkOS",
         // Absolute HTTPS URLs also work in wallet connector metadata and mobile handoffs.
-        appLogoUrl: "https://perkos.xyz/perkos-landing-logo.png",
+        appLogoUrl: PERKOS_WALLET_LOGO,
+        cssOverrides: PERKOS_WALLET_STYLES,
         privacyPolicyUrl: "https://perkos.xyz/privacy",
       }}
     >
