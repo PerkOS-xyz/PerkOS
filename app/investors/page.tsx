@@ -5,7 +5,6 @@ import {
   ArrowLeft,
   BarChart3,
   Coins,
-  CreditCard,
   Shield,
   Zap,
 } from "lucide-react";
@@ -36,10 +35,13 @@ const ROI_METRICS = [
 // Planned utility is labelled as planned. None of the token mechanics below
 // are built yet: the credits contract has no operators wired and the claim
 // vault's rewardToken is still deferred. Describing intent as if it shipped is
-// how a utility token starts reading like a promise of return.
+// how a utility token starts reading like a promise of return. Paying plans in
+// $PERKOS is no longer the direction, so it is not listed: the utility we are
+// building sits in access to the product, and the mechanism is still being
+// decided, which is why none of it is described here as a commitment.
 const TOKEN_BENEFITS = [
-  { Icon: CreditCard, title: "Planned: pay with $PERKOS", copy: "We intend to let plans be paid in $PERKOS at a discount versus card. Not built yet." },
-  { Icon: Shield, title: "Planned: hold for perks", copy: "We intend to offer priority support and early access to capabilities for holders. Not built yet." },
+  { Icon: Shield, title: "Planned: access for holders", copy: "We intend to unlock access to premium PerkOS services for holders. Not built yet." },
+  { Icon: Coins, title: "Planned: benefits inside the product", copy: "We intend holder benefits to live inside PerkOS itself rather than around it. Not built yet." },
   { Icon: Zap, title: "Live: payments on Base", copy: "Teammates settle usage in USDC micropayments on Base, through the x402 facilitator we operate. This part is running today." },
 ];
 
@@ -51,6 +53,11 @@ const TOKEN_CONTRACTS = [
     chain: "Base",
     ca: "0xF714E60f85497D70508F7E356b5DB80e64539BA3",
     explorer: "https://basescan.org/token/0xF714E60f85497D70508F7E356b5DB80e64539BA3",
+  },
+  {
+    chain: "Robinhood Chain",
+    ca: "0x56663EcFbe0547B493d348D5fc30De521864Eba3",
+    explorer: "https://robinhoodchain.blockscout.com/token/0x56663EcFbe0547B493d348D5fc30De521864Eba3",
   },
 ];
 
@@ -136,7 +143,8 @@ export default function InvestorsPage() {
             </div>
 
             <p className="mt-8 text-center text-sm text-muted-foreground">
-              Contract address, for reference.
+              Contract addresses, for reference. Two separate community launches
+              of 100B each, one per chain, with no bridge between them yet.
             </p>
             <div className="mx-auto mt-4 grid max-w-xl grid-cols-1 gap-3">
               {TOKEN_CONTRACTS.map(({ chain, ca, explorer }) => (
