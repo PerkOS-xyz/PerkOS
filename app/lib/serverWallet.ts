@@ -4,8 +4,8 @@ import { authedFetch } from "./apiClient";
 
 /**
  * Client for the user's PerkOS-operated server wallet (Dynamic WaaS), exposed
- * by PerkOS-API at /wallet/*. Phase 2: read-only — ensure (create-or-return)
- * + multi-chain balances. Transfers (signing) land later.
+ * by PerkOS-API at /wallet/*. New wallets use Dynamic; existing wallets keep
+ * their provider. Supports balances and explicitly requested transfers.
  */
 
 export type ServerWallet = {

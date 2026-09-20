@@ -9,6 +9,7 @@
  */
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Banknote, Clock, Bot, Sparkles, Plus, LockKeyhole } from "lucide-react";
 
@@ -28,6 +29,7 @@ export function BillingCard({
   address: string;
   showBlockchain?: boolean;
 }) {
+  const { t } = useTranslation();
   const query = useQuery({
     queryKey: ["my-billing", address],
     queryFn: getMyBilling,
@@ -107,8 +109,7 @@ export function BillingCard({
             <div className="rounded-md border border-sky-500/30 bg-sky-500/5 px-3 py-2">
               <span className="text-xs font-medium text-sky-300">Sponsored — runs free</span>
               <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
-                This is a PerkOS internal / tester account. Your team is never
-                charged or paused.
+                {t("companyNew.config.sponsoredAccessPolicy")}
               </p>
             </div>
           ) : (
@@ -153,13 +154,14 @@ export function BillingCard({
                 >
                   {infra.allowed
                     ? "PerkOS Infra enabled"
+                    : infra.reason === "approval-required"
+                      ? t("companyNew.config.infraApprovalRequired")
                     : infra.reason === "credits-exhausted"
                       ? "PerkOS Infra paused — credits exhausted"
                       : "PerkOS Infra locked — payment required"}
                 </span>
                 <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
-                  Managed agents can only launch or wake while prepaid Infra
-                  credits are available.
+                  {t("companyNew.config.infraPaymentPolicy")}
                 </p>
               </div>
 

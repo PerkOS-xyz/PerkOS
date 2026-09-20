@@ -3,6 +3,9 @@
 /** Canonical new-project wizard. Routed at /projects/new. */
 
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { fetchLlmAccess } from "../lib/llmAccess";
+import { fetchEcsAccess } from "../lib/ecsAccess";
 import { useRouter } from "next/navigation";
 import { useAppAccount } from "../lib/useAppAccount";
 import { toast } from "sonner";
@@ -142,7 +145,18 @@ export default function NewProjectWizard() {
   const [saveAsTemplate, setSaveAsTemplate] = useState(false);
   const [templateName, setTemplateName] = useState("");
   const [myTemplates, setMyTemplates] = useState<TeamTemplate[]>([]);
-  const [llmMode, setLlmMode] = useState<"perkos" | "byok">("perkos");
+  const [llmMode, setLlmMode] = useState<"perkos" | "byok">("byok");
+  const llmAccess = useQuery({
+    queryKey: ["llm-access", address],
+    queryFn: fetchLlmAccess,
+    enabled: Boolean(address),
+  });
+  const ecsAccess = useQuery({
+    queryKey: ["ecs-access", address],
+    queryFn: fetchEcsAccess,
+    enabled: Boolean(address),
+  });
+  const llmAllowed = llmAccess.data?.allowed === true;
   const [byokProvider, setByokProvider] = useState(PROVIDERS[0]?.id ?? "openai");
   const [byokModel, setByokModel] = useState(PROVIDERS[0]?.defaultModel ?? "");
   const [byokKey, setByokKey] = useState("");
@@ -258,6 +272,16 @@ export default function NewProjectWizard() {
   async function launchCompany() {
     if (!address || !mode || !projectName.trim()) return;
     const roles = teamRoles;
+    if (roles.length > 0 && agentSource === "perkos") {
+      if (ecsAccess.data?.allowed !== true) {
+        toast.error(t("companyNew.config.infraApprovalRequired"));
+        return;
+      }
+      if (llmMode === "perkos" && !llmAllowed) {
+        toast.error(t("companyNew.launch.enterKey"));
+        return;
+      }
+    }
     if (mode !== "empty" && agentSource !== "existing" && roles.length === 0) {
       toast.error(t("companyNew.launch.pickRole"));
       return;
@@ -787,7 +811,7 @@ export default function NewProjectWizard() {
             <button
               type="button"
               onClick={() => setLlmMode("perkos")}
-              disabled={launching}
+              disabled={launching || !llmAllowed}
               className={cn(
                 "flex flex-col gap-1 rounded-md border p-3 text-left text-sm transition-colors",
                 llmMode === "perkos"
