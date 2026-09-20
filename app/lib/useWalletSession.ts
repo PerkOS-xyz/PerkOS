@@ -55,9 +55,9 @@ type Result = {
   retry: () => void;
   signOutFirebase: () => Promise<void>;
   /**
-   * Full sign-out: tears down the wallet (Privy in the browser, wagmi in
+   * Full sign-out: tears down the wallet (Dynamic in the browser, wagmi in
    * Mini App hosts) AND the Firebase session. Use this for the logout button,
-   * not a bare wagmi `disconnect()` (a no-op on the browser/Privy path).
+   * not a bare wagmi `disconnect()` (a no-op on the browser/Dynamic path).
    */
   logout: () => Promise<void>;
 };
@@ -108,8 +108,8 @@ export function resolveWalletSessionStatus({
  * Wallet source depends on the host:
  *  - Mini App hosts (Farcaster / Base App): wagmi (`useConnection`), connected
  *    by AutoConnect through the host connector.
- *  - Regular browser tab: Privy, via BrowserWalletContext. The browser path
- *    reads address + connection + signer straight from Privy and leaves the
+ *  - Regular browser tab: Dynamic, via BrowserWalletContext. The browser path
+ *    reads address + connection + signer straight from Dynamic and leaves the
  *    Mini App wagmi connector tree isolated.
  *
  * Components that just need "is this user authorized?" check `status === "signed-in"`.
@@ -124,7 +124,7 @@ export function useWalletSession(): Result {
   const { disconnect } = useDisconnect();
   const { user: firebaseUser, loading: firebaseLoading } = useFirebaseUser();
 
-  // Browser/Privy path: when the context is present, Privy owns the wallet
+  // Browser/Dynamic path: when the context is present, Dynamic owns the wallet
   // and we read everything from it. In Mini App hosts it's null → use wagmi.
   const browserWallet = useContext(BrowserWalletContext);
   const address = browserWallet ? browserWallet.address : wagmiAddress;
@@ -132,7 +132,7 @@ export function useWalletSession(): Result {
     ? browserWallet.isConnected
     : wagmiIsConnected;
 
-  // Active signer (Privy-native or wagmi) held in a ref so runSignIn's
+  // Active signer (Dynamic-native or wagmi) held in a ref so runSignIn's
   // callback doesn't churn its deps when the source flips.
   const signMessageRef = useRef<(message: string) => Promise<string>>(
     (message) => signMessageAsync({ message }),
@@ -227,7 +227,7 @@ export function useWalletSession(): Result {
   ]);
 
   // If wagmi disconnects, drop the Firebase session too. Mini App path only —
-  // in the browser (Privy) path wagmi is always disconnected (no bridge),
+  // in the browser (Dynamic) path wagmi is always disconnected (no bridge),
   // which would spuriously sign the user out.
   useEffect(() => {
     if (!browserWallet && wagmiStatus === "disconnected" && firebaseUser) {
@@ -243,7 +243,7 @@ export function useWalletSession(): Result {
   const logout = useCallback(async () => {
     loggingOut = true;
     try {
-      // Browser/Privy path: clears the active user. No-op elsewhere.
+      // Browser/Dynamic path: clears the active user. No-op elsewhere.
       if (browserWallet) {
         try {
           await browserWallet.logout();

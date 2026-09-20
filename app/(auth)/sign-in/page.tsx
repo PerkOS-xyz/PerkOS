@@ -10,16 +10,16 @@ import { useConnect, useConnection, useDisconnect } from "wagmi";
 import { formatAddress } from "../../lib/format";
 import { useWalletSession } from "../../lib/useWalletSession";
 import { useIsInMiniApp } from "../../lib/useIsInMiniApp";
-import { privyBrowserEnabled } from "../../lib/privyBrowser";
+import { dynamicBrowserEnabled } from "../../lib/dynamicBrowser";
 import { AccessGate } from "../../components/AccessGate";
 import { trackEvent } from "../../lib/analytics";
 
-// Code-split: Privy loads only when the Privy browser button is
+// Code-split: Dynamic loads only when the Dynamic browser button is
 // actually rendered (browser + env id set).
-const PrivySignInButton = dynamic(
+const DynamicSignInButton = dynamic(
   () =>
-    import("../../components/PrivySignInButton").then(
-      (m) => m.PrivySignInButton,
+    import("../../components/DynamicSignInButton").then(
+      (m) => m.DynamicSignInButton,
     ),
   {
     ssr: false,
@@ -37,9 +37,9 @@ export default function SignInPage() {
   const { disconnect } = useDisconnect();
   const session = useWalletSession();
   const isInMiniApp = useIsInMiniApp();
-  // In a browser (with Privy configured) offer Privy's connect modal
+  // In a browser (with Dynamic configured) offer Dynamic's connect modal
   // instead of the baseAccount / injected buttons. Off everywhere else.
-  const privyEnabled = privyBrowserEnabled(isInMiniApp);
+  const dynamicEnabled = dynamicBrowserEnabled(isInMiniApp);
   const loginTracked = useRef(false);
 
   const baseAccountConnector = connectors.find((c) => c.id === "baseAccount");
@@ -93,12 +93,12 @@ export default function SignInPage() {
       if (!loginTracked.current) {
         loginTracked.current = true;
         trackEvent("login", {
-          method: privyEnabled ? "privy" : "wallet",
+          method: dynamicEnabled ? "dynamic" : "wallet",
         });
       }
       router.replace("/continue");
     }
-  }, [session.status, privyEnabled, router]);
+  }, [session.status, dynamicEnabled, router]);
 
   // Auto-recover from the half-hydrated wagmi state. Disconnect clears
   // the stale `current` connector UID in the store and reset() clears
@@ -110,23 +110,23 @@ export default function SignInPage() {
     reset();
   }, [isStuckOnStaleConnector, disconnect, reset]);
 
-  // Which wallet drives the UI. In the browser/Privy path the wallet is
-  // Privy (read from the session); wagmi may hold a STALE persisted
+  // Which wallet drives the UI. In the browser/Dynamic path the wallet is
+  // Dynamic (read from the session); wagmi may hold a STALE persisted
   // connection there (a prior injected/EIP-6963 login, wallet now locked so
   // eth_accounts is empty), and we must NOT let that show a disabled
-  // "Continue as 0x…" and hide the Privy connect button — that strands the
+  // "Continue as 0x…" and hide the Dynamic connect button — that strands the
   // user with no way to connect and no popup. In Mini App hosts wagmi IS the
   // wallet source.
-  const connectedAddress = privyEnabled
+  const connectedAddress = dynamicEnabled
     ? session.address
     : isConnected
       ? address
       : undefined;
 
   const handleUseDifferentAccount = () => {
-    // Privy owns the wallet in the browser path, so fully log out (Privy +
+    // Dynamic owns the wallet in the browser path, so fully log out (Dynamic +
     // Firebase) — a bare wagmi disconnect() wouldn't clear it. wagmi elsewhere.
-    if (privyEnabled) {
+    if (dynamicEnabled) {
       void session.logout();
     } else {
       disconnect();
@@ -184,14 +184,14 @@ export default function SignInPage() {
               {t("signIn.useDifferentAccount")}
             </button>
           </div>
-        ) : privyEnabled ? (
-          // Browser + Privy configured → Privy's connect modal (email /
+        ) : dynamicEnabled ? (
+          // Browser + Dynamic configured → Dynamic's connect modal (email /
           // social / external + embedded wallet). Keyed off the SESSION above
-          // (Privy), NOT wagmi — a stale persisted wagmi connection must not
+          // (Dynamic), NOT wagmi — a stale persisted wagmi connection must not
           // hide this button. Checked before the wagmi-state branches below so
           // the browser path never falls into them.
           <div className="flex w-full flex-col gap-4">
-            <PrivySignInButton />
+            <DynamicSignInButton />
           </div>
         ) : isInMiniApp === null ? (
           // Still resolving whether we're inside a Mini App host. Render

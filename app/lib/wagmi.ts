@@ -30,7 +30,7 @@ export const wagmiConfig = createConfig({
   // Anchor contract lives there during alpha — receipt code keeps
   // talking to Sepolia even when the user switches header chain.
   //
-  // Browser Privy and Mini App wagmi paths expose this same chain set.
+  // Browser Dynamic and Mini App wagmi paths expose this same chain set.
   chains: [base, celo, robinhoodChain, baseSepolia],
   connectors: [
     // Auto-detected when running inside Farcaster (Warpcast web/mobile)

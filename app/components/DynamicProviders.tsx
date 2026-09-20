@@ -7,10 +7,10 @@ import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { wagmiConfig } from "../lib/wagmi";
 import { OnboardingProvider } from "../lib/onboardingState";
-import { PrivyOuter } from "./PrivyProvider";
-import { PrivyWalletBridge } from "./PrivyWalletBridge";
+import { DynamicOuter } from "./DynamicProvider";
+import { DynamicWalletBridge } from "./DynamicWalletBridge";
 
-export default function PrivyProviders({
+export default function DynamicProviders({
   queryClient,
   children,
 }: {
@@ -18,15 +18,15 @@ export default function PrivyProviders({
   children: ReactNode;
 }) {
   return (
-    <PrivyOuter>
+    <DynamicOuter>
       <WagmiProvider config={wagmiConfig} reconnectOnMount={false}>
         <QueryClientProvider client={queryClient}>
-          <PrivyWalletBridge>
+          <DynamicWalletBridge>
             <OnboardingProvider>{children}</OnboardingProvider>
-          </PrivyWalletBridge>
+          </DynamicWalletBridge>
           <Toaster richColors closeButton />
         </QueryClientProvider>
       </WagmiProvider>
-    </PrivyOuter>
+    </DynamicOuter>
   );
 }

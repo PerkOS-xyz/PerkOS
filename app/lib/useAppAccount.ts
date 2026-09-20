@@ -30,7 +30,7 @@ export function resolveAppAccount({
 /**
  * Unified account view for product screens.
  *
- * Browser users authenticate through Privy (including Google/email embedded
+ * Browser users authenticate through Dynamic (including Google/email embedded
  * wallets), while Mini App hosts still connect through wagmi. Product screens
  * must never read wagmi alone or a Google user will appear signed in but have
  * no account-scoped data.
