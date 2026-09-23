@@ -304,6 +304,11 @@ function settledState() {
     runs: [completed()], memory: { revision: 1, text: "Approved original", sourceRunId: "older-run", updatedAtMs: 1 } };
 }
 async function resumePolling() {
+  // findByLabelText can observe the committed form before React flushes the
+  // passive effect that subscribes to visibilitychange. Flush that effect in
+  // a separate act scope before dispatching; an event sent before subscription
+  // is lost and leaves only the initial fetch under fake timers.
+  await act(async () => {});
   vi.useFakeTimers();
   // Resume a mounted workspace as a real tab would; clear its original timer.
   await act(async () => { document.dispatchEvent(new Event("visibilitychange")); });
