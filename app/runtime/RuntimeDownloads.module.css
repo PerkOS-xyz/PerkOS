@@ -1,0 +1,212 @@
+/* The download button and the platform cards. Colors come from the page's tokens. */
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 26px;
+  border-radius: 999px;
+  background: var(--ember);
+  color: #fff;
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(236, 27, 105, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: transform 160ms var(--ease), filter 160ms var(--ease);
+}
+
+a.pill:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.07);
+}
+
+.arrow {
+  width: 16px;
+  height: 16px;
+  transition: transform 200ms var(--ease);
+}
+
+a.pill:hover .arrow {
+  transform: translateX(3px);
+}
+
+a.pill:hover .arrowDown {
+  transform: translateY(2px);
+}
+
+.pillSoon {
+  border: 1px solid rgba(236, 27, 105, 0.4);
+  background: rgba(236, 27, 105, 0.08);
+  color: var(--ink);
+  box-shadow: none;
+  cursor: default;
+}
+
+.textLink {
+  color: var(--ink-2);
+  font-size: 13px;
+  border-bottom: 1px solid var(--hair-strong);
+  padding-bottom: 2px;
+  transition: color 200ms var(--ease), border-color 200ms var(--ease);
+}
+
+.textLink:hover {
+  color: var(--ink);
+  border-color: var(--coral);
+}
+
+.meta {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--mute);
+  font-size: 12px;
+}
+
+.rack {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 26px;
+  border: 1px solid var(--hair);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(15, 20, 36, 0.82), rgba(8, 11, 21, 0.82));
+  transition: transform 250ms var(--ease), border-color 250ms var(--ease);
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  border-color: var(--hair-strong);
+}
+
+.cardMine,
+.cardMine:hover {
+  border-color: transparent;
+  background:
+    linear-gradient(180deg, rgba(22, 15, 30, 0.96), rgba(10, 11, 22, 0.96)) padding-box,
+    var(--ember) border-box;
+  box-shadow: 0 24px 60px -24px rgba(236, 27, 105, 0.55);
+}
+
+.mine {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 5px 10px;
+  border: 1px solid rgba(236, 27, 105, 0.5);
+  border-radius: 999px;
+  background: rgba(236, 27, 105, 0.16);
+  color: #fff;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.glyph {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border: 1px solid var(--hair);
+  border-radius: 16px;
+  background: rgba(120, 160, 255, 0.05);
+  color: var(--ink);
+}
+
+.glyph svg {
+  width: 26px;
+  height: 26px;
+}
+
+.cardMine .glyph {
+  border-color: rgba(236, 27, 105, 0.45);
+  color: var(--coral);
+}
+
+.cardName {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 0;
+  color: var(--mute);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--coral);
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+.dotLive {
+  background: var(--ok);
+  box-shadow: 0 0 10px rgba(61, 220, 151, 0.7);
+  animation: none;
+}
+
+.detail {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 13px;
+}
+
+.cardAction {
+  margin-top: auto;
+  padding-top: 6px;
+}
+
+.cardAction .pill {
+  width: 100%;
+}
+
+.soon {
+  display: flex;
+  justify-content: center;
+  padding: 13px 20px;
+  border: 1px dashed var(--hair-strong);
+  border-radius: 999px;
+  color: var(--mute);
+  font-size: 13px;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 960px) {
+  .rack {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .cardName {
+    font-size: 26px;
+  }
+}
