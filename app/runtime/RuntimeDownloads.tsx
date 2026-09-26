@@ -71,6 +71,11 @@ export function PrimaryDownload({ builds, version }: Props) {
       <a className={styles.textLink} href="#download">
         Other platforms
       </a>
+      {build.alt ? (
+        <a className={styles.textLink} href={build.alt.url}>
+          {build.alt.label}
+        </a>
+      ) : null}
       {meta ? <p className={styles.meta}>{meta}</p> : null}
     </>
   );
@@ -98,6 +103,7 @@ export function PlatformRack({ builds, version }: Props) {
               </p>
             </div>
             {meta ? <p className={styles.detail}>{meta}</p> : null}
+            {build.url && build.note ? <p className={styles.note}>{build.note}</p> : null}
             <div className={styles.cardAction}>
               {build.url ? (
                 <a className={styles.pill} href={build.url}>
@@ -106,6 +112,11 @@ export function PlatformRack({ builds, version }: Props) {
               ) : (
                 <span className={styles.soon}>Coming soon</span>
               )}
+              {build.url && build.alt ? (
+                <a className={styles.altLink} href={build.alt.url}>
+                  {build.alt.label}
+                </a>
+              ) : null}
             </div>
           </article>
         );
