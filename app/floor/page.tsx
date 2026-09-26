@@ -5,16 +5,16 @@ import { ContentSection, FeatureGrid, PublicPageShell } from "../components/mark
 /**
  * /floor — download page for the PerkOS Floor desktop app.
  *
- * The build lives in the PerkOS-Runtime release, so the button points straight
+ * The build lives in the PerkOS-Floor release, so the button points straight
  * at the release asset and the version lives in one constant here. The app is
  * signed with Developer ID but not notarized yet, and the page says so: a first
  * open needs right click and Open, and hiding that only costs trust.
  */
 
 const VERSION = "0.6.2";
-const DMG = `https://github.com/PerkOS-xyz/PerkOS-Runtime/releases/download/v${VERSION}/PerkOS-${VERSION}-arm64.dmg`;
-const RELEASE = `https://github.com/PerkOS-xyz/PerkOS-Runtime/releases/tag/v${VERSION}`;
-const REPO = "https://github.com/PerkOS-xyz/PerkOS-Runtime";
+const DMG = `https://github.com/PerkOS-xyz/PerkOS-Floor/releases/download/v${VERSION}/PerkOS-${VERSION}-arm64.dmg`;
+const RELEASE = `https://github.com/PerkOS-xyz/PerkOS-Floor/releases/tag/v${VERSION}`;
+const REPO = "https://github.com/PerkOS-xyz/PerkOS-Floor";
 const VIDEO = "https://www.youtube.com/embed/ZsdH46NOCdk";
 
 export const metadata: Metadata = {
