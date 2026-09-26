@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowUpRight, Check } from "lucide-react";
 
 import { RUNTIME_BUILDS, RUNTIME_SOURCE, RUNTIME_VERSION } from "./downloads";
+import { Embers } from "./Embers";
 import { PlatformRack, PrimaryDownload } from "./RuntimeDownloads";
 import styles from "./runtime.module.css";
 
@@ -124,6 +125,7 @@ export default function RuntimePage() {
             <div className={styles.stage}>
               <div className={styles.glow} aria-hidden />
               <div className={styles.rings} aria-hidden />
+              <Embers className={styles.embers} count={56} size={3} speed={1.3} />
               <Image
                 className={styles.sparky}
                 src="/runtime/sparky-samurai.webp"
@@ -134,6 +136,7 @@ export default function RuntimePage() {
                 loading="eager"
                 fetchPriority="high"
               />
+              <Embers className={`${styles.embers} ${styles.embersFront}`} count={10} size={5} speed={2.2} />
               <p className={styles.bubble}>
                 Hi, I&rsquo;m Sparky. <span>Let&rsquo;s find your desk.</span>
               </p>
@@ -150,14 +153,17 @@ export default function RuntimePage() {
           </section>
 
           <section className={`${styles.section} ${styles.team}`}>
-            <Image
-              className={styles.teamArt}
-              src="/runtime/sparky-team.webp"
-              alt="Sparky with the agents of a desk"
-              width={1600}
-              height={800}
-              sizes="(max-width: 1180px) 100vw, 1180px"
-            />
+            <div className={styles.teamStage}>
+              <Image
+                className={styles.teamArt}
+                src="/runtime/sparky-team.webp"
+                alt="Sparky with the agents of a desk"
+                width={1600}
+                height={800}
+                sizes="(max-width: 1180px) 100vw, 1180px"
+              />
+              <Embers className={`${styles.embers} ${styles.embersOver}`} count={56} size={2.8} speed={1.2} />
+            </div>
             <div className={styles.teamCopy}>
               <p className={styles.kicker}>Desks</p>
               <h2 className={styles.h2}>Every desk brings its own team.</h2>
@@ -200,7 +206,10 @@ export default function RuntimePage() {
           </section>
 
           <section className={styles.final}>
-            <Image className={styles.face} src="/runtime/sparky-head.webp" alt="" width={256} height={256} />
+            <div className={styles.faceStage}>
+              <Embers className={styles.embers} count={22} size={2.6} />
+              <Image className={styles.face} src="/runtime/sparky-head.webp" alt="" width={256} height={256} />
+            </div>
             <h2 className={styles.h2}>Sparky is ready when you are.</h2>
             <div className={styles.cta}>
               <PrimaryDownload builds={RUNTIME_BUILDS} version={RUNTIME_VERSION} />
