@@ -1,6 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import nextConfig from "@/next.config";
 import { buildFor, buildMeta, detectOs, RUNTIME_BUILDS, type RuntimeBuild } from "@/app/runtime/downloads";
 import { PlatformRack, PrimaryDownload } from "@/app/runtime/RuntimeDownloads";
 
@@ -108,5 +109,14 @@ describe("PlatformRack", () => {
     expect(within(ubuntu!).queryByRole("link")).toBeNull();
     expect(within(windows!).getAllByText("Coming soon")).toHaveLength(2);
     expect(within(windows!).queryByText("Your system")).toBeNull();
+  });
+});
+
+describe("/Runtime", () => {
+  it("serves the same page as /runtime, as a rewrite so the lowercase address is never redirected", async () => {
+    const rewrites = await nextConfig.rewrites?.();
+    expect(rewrites).toEqual([{ source: "/Runtime", destination: "/runtime" }]);
+    const redirects = (await nextConfig.redirects?.()) ?? [];
+    expect(redirects.some((redirect) => redirect.source.toLowerCase() === "/runtime")).toBe(false);
   });
 });

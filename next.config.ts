@@ -22,6 +22,19 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // perkos.xyz/Runtime, with a capital R, serves the Runtime download page too.
+  // A rewrite and not a redirect: custom routes match without regard to case
+  // (experimental.caseSensitiveRoutes is off), so a redirect from /Runtime
+  // would also catch /runtime and send it to itself. /runtime is a page, and
+  // pages are matched before these rewrites, so only the other spellings get here.
+  async rewrites() {
+    return [
+      {
+        source: "/Runtime",
+        destination: "/runtime",
+      },
+    ];
+  },
 };
 
 export default nextConfig;
