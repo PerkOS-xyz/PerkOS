@@ -27,7 +27,7 @@ export type RuntimeBuild = {
 };
 
 /** Shown next to the download once set, for example "0.1.0". */
-export const RUNTIME_VERSION = "0.1.0";
+export const RUNTIME_VERSION = "0.1.1";
 
 /** The GitHub release the installers are attached to. */
 const RELEASE = `https://github.com/PerkOS-xyz/PerkOS-Runtime/releases/download/v${RUNTIME_VERSION}`;
@@ -45,7 +45,7 @@ export const RUNTIME_BUILDS: readonly RuntimeBuild[] = [
     os: "ubuntu",
     name: "Ubuntu",
     url: `${RELEASE}/PerkOS-Runtime-${RUNTIME_VERSION}-x86_64.AppImage`,
-    detail: "x64 · .AppImage · 123 MB",
+    detail: "x64 · .AppImage · 124 MB",
     note: "Make the file executable (chmod +x), then open it.",
   },
   {
