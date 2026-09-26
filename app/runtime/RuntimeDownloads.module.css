@@ -175,6 +175,30 @@ a.pill:hover .arrowDown {
   padding-top: 6px;
 }
 
+.note {
+  margin: -8px 0 0;
+  color: var(--mute);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.altLink {
+  display: block;
+  margin-top: 12px;
+  color: var(--ink-2);
+  font-size: 12px;
+  text-align: center;
+  text-decoration: underline;
+  text-decoration-color: var(--hair-strong);
+  text-underline-offset: 3px;
+  transition: color 200ms var(--ease), text-decoration-color 200ms var(--ease);
+}
+
+.altLink:hover {
+  color: var(--ink);
+  text-decoration-color: var(--coral);
+}
+
 .cardAction .pill {
   width: 100%;
 }

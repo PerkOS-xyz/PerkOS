@@ -20,15 +20,41 @@ export type RuntimeBuild = {
   url: string;
   /** One line under the name once the build is out, for example "Apple Silicon · .dmg · 140 MB". */
   detail?: string;
+  /** What the first open asks of the person, while the build is not notarized or signed. */
+  note?: string;
+  /** A second installer for the same system, for example the Intel build of macOS. */
+  alt?: { label: string; url: string };
 };
 
 /** Shown next to the download once set, for example "0.1.0". */
-export const RUNTIME_VERSION = "";
+export const RUNTIME_VERSION = "0.1.0";
+
+/** The GitHub release the installers are attached to. */
+const RELEASE = `https://github.com/PerkOS-xyz/PerkOS-Runtime/releases/download/v${RUNTIME_VERSION}`;
 
 export const RUNTIME_BUILDS: readonly RuntimeBuild[] = [
-  { os: "macos", name: "macOS", url: "" },
-  { os: "ubuntu", name: "Ubuntu", url: "" },
-  { os: "windows", name: "Windows", url: "" },
+  {
+    os: "macos",
+    name: "macOS",
+    url: `${RELEASE}/PerkOS-Runtime-${RUNTIME_VERSION}-arm64.dmg`,
+    detail: "Apple Silicon · .dmg · 117 MB",
+    note: "Signed, not notarized yet: the first time, allow it in System Settings, Privacy & Security.",
+    alt: { label: "Intel Mac? Get the x64 build (124 MB)", url: `${RELEASE}/PerkOS-Runtime-${RUNTIME_VERSION}-x64.dmg` },
+  },
+  {
+    os: "ubuntu",
+    name: "Ubuntu",
+    url: `${RELEASE}/PerkOS-Runtime-${RUNTIME_VERSION}-x86_64.AppImage`,
+    detail: "x64 · .AppImage · 123 MB",
+    note: "Make the file executable (chmod +x), then open it.",
+  },
+  {
+    os: "windows",
+    name: "Windows",
+    url: `${RELEASE}/PerkOS-Runtime-Setup-${RUNTIME_VERSION}.exe`,
+    detail: "x64 installer · .exe · 100 MB",
+    note: "Not signed yet: on the SmartScreen prompt, choose More info, then Run anyway.",
+  },
 ];
 
 export const RUNTIME_SOURCE = "https://github.com/PerkOS-xyz/PerkOS-Runtime";

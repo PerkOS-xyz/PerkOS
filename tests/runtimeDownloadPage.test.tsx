@@ -2,7 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import nextConfig from "@/next.config";
-import { buildFor, buildMeta, detectOs, RUNTIME_BUILDS, type RuntimeBuild } from "@/app/runtime/downloads";
+import { buildFor, buildMeta, detectOs, RUNTIME_BUILDS, RUNTIME_VERSION, type RuntimeBuild } from "@/app/runtime/downloads";
 import { PlatformRack, PrimaryDownload } from "@/app/runtime/RuntimeDownloads";
 
 const MAC = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15";
@@ -18,7 +18,14 @@ const SOON: RuntimeBuild[] = [
   { os: "windows", name: "Windows", url: "" },
 ];
 const MAC_OUT: RuntimeBuild[] = [
-  { os: "macos", name: "macOS", url: "https://downloads.example.com/PerkOS-Runtime.dmg", detail: "Apple Silicon · .dmg" },
+  {
+    os: "macos",
+    name: "macOS",
+    url: "https://downloads.example.com/PerkOS-Runtime.dmg",
+    detail: "Apple Silicon · .dmg",
+    note: "Allow it in Privacy & Security the first time.",
+    alt: { label: "Intel Mac? Get the x64 build", url: "https://downloads.example.com/PerkOS-Runtime-x64.dmg" },
+  },
   ...SOON.slice(1),
 ];
 
@@ -60,6 +67,13 @@ describe("Runtime builds", () => {
     expect(buildFor("unknown")).toBeUndefined();
   });
 
+  it("points every published installer at the release of the version it shows", () => {
+    const links = RUNTIME_BUILDS.flatMap((build) => [build.url, build.alt?.url ?? ""]).filter(Boolean);
+    for (const link of links) {
+      expect(link.startsWith(`https://github.com/PerkOS-xyz/PerkOS-Runtime/releases/download/v${RUNTIME_VERSION}/`)).toBe(true);
+    }
+  });
+
   it("describes a published build by its version and detail", () => {
     expect(buildMeta(MAC_OUT[0]!, "0.1.0")).toBe("Version 0.1.0 · Apple Silicon · .dmg");
     expect(buildMeta(SOON[1]!, "")).toBe("");
@@ -75,10 +89,11 @@ describe("PrimaryDownload", () => {
     expect(screen.getByRole("link", { name: "All platforms" })).toHaveAttribute("href", "#download");
   });
 
-  it("downloads the visitor's build once it has a link", () => {
+  it("downloads the visitor's build once it has a link, and offers the other installer for the system", () => {
     visitWith(MAC);
     render(<PrimaryDownload builds={MAC_OUT} version="0.1.0" />);
     expect(screen.getByRole("link", { name: /Download for macOS/ })).toHaveAttribute("href", MAC_OUT[0]!.url);
+    expect(screen.getByRole("link", { name: "Intel Mac? Get the x64 build" })).toHaveAttribute("href", MAC_OUT[0]!.alt!.url);
     expect(screen.getByText("Version 0.1.0 · Apple Silicon · .dmg")).toBeInTheDocument();
   });
 
@@ -104,6 +119,8 @@ describe("PlatformRack", () => {
 
     const [mac, ubuntu, windows] = cards;
     expect(within(mac!).getByRole("link", { name: "Download for macOS" })).toHaveAttribute("href", MAC_OUT[0]!.url);
+    expect(within(mac!).getByRole("link", { name: "Intel Mac? Get the x64 build" })).toHaveAttribute("href", MAC_OUT[0]!.alt!.url);
+    expect(within(mac!).getByText("Allow it in Privacy & Security the first time.")).toBeInTheDocument();
     expect(within(mac!).getByText("Available")).toBeInTheDocument();
     expect(within(ubuntu!).getByText("Your system")).toBeInTheDocument();
     expect(within(ubuntu!).queryByRole("link")).toBeNull();
