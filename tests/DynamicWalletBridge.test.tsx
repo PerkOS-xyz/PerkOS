@@ -1,6 +1,6 @@
 import { useContext, useEffect } from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { BrowserWalletContext, type BrowserWalletState } from "../app/lib/browserWallet";
 import { DynamicWalletBridge } from "../app/components/DynamicWalletBridge";
 import { DynamicSignInButton } from "../app/components/DynamicSignInButton";
@@ -8,6 +8,7 @@ import { DynamicSignInButton } from "../app/components/DynamicSignInButton";
 const mock = vi.hoisted(() => ({ context: {} as Record<string, unknown> }));
 vi.mock("@dynamic-labs/sdk-react-core", () => ({ useDynamicContext: () => mock.context }));
 vi.mock("@dynamic-labs/ethereum", () => ({ isEthereumWallet: (w: { chain?: string }) => w.chain === "EVM" }));
+vi.mock("@dynamic-labs/solana", () => ({ isSolanaWallet: (w: { chain?: string }) => w.chain === "SOL" }));
 vi.mock("next/image", () => ({ default: () => null }));
 let state: BrowserWalletState;
 function Consumer() {
@@ -18,7 +19,9 @@ function Consumer() {
 const wallet = () => ({ chain: "EVM", address: `0x${"1".repeat(40)}`, signMessage: vi.fn().mockResolvedValue("0xsigned") });
 
 describe("Dynamic browser wallet bridge", () => {
+  afterEach(() => vi.unstubAllEnvs());
   beforeEach(() => {
+    vi.stubEnv("NEXT_PUBLIC_SOLANA_LOGIN_ENABLED", "false");
     mock.context = { sdkHasLoaded: true, primaryWallet: wallet(), user: { email: "test@example.com" }, handleLogOut: vi.fn().mockResolvedValue(undefined), setShowAuthFlow: vi.fn() };
   });
   it("exposes the active EVM wallet and signs the PerkOS challenge", async () => {
@@ -42,10 +45,25 @@ describe("Dynamic browser wallet bridge", () => {
     render(<DynamicWalletBridge><Consumer /></DynamicWalletBridge>);
     expect(state.isConnected).toBe(false);
     expect(state.loading).toBe(false);
-    await expect(state.signMessage("nonce")).rejects.toThrow("No EVM");
+    await expect(state.signMessage("nonce")).rejects.toThrow("No supported");
   });
   it("rejects non-EVM wallets", () => {
     mock.context.primaryWallet = { ...wallet(), chain: "SOL" };
+    render(<DynamicWalletBridge><Consumer /></DynamicWalletBridge>);
+    expect(state.isConnected).toBe(false);
+  });
+  it("preserves the Solana public key when the rollout gate is enabled", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SOLANA_LOGIN_ENABLED", "true");
+    const address = "So11111111111111111111111111111111111111112";
+    mock.context.primaryWallet = { ...wallet(), chain: "SOL", address };
+    render(<DynamicWalletBridge><Consumer /></DynamicWalletBridge>);
+    expect(state.isConnected).toBe(true);
+    expect(state.address).toBe(address);
+    await state.signMessage("Solana challenge");
+    expect((mock.context.primaryWallet as ReturnType<typeof wallet>).signMessage).toHaveBeenCalledWith("Solana challenge");
+  });
+  it("keeps a valid Solana wallet disconnected while the rollout gate is off", () => {
+    mock.context.primaryWallet = { ...wallet(), chain: "SOL", address: "So11111111111111111111111111111111111111112" };
     render(<DynamicWalletBridge><Consumer /></DynamicWalletBridge>);
     expect(state.isConnected).toBe(false);
   });

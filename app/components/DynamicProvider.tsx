@@ -3,6 +3,8 @@
 import type { ReactNode } from "react";
 import { DynamicContextProvider } from "@dynamic-labs/sdk-react-core";
 import { EthereumWalletConnectors } from "@dynamic-labs/ethereum";
+import { SolanaWalletConnectors } from "@dynamic-labs/solana";
+import { solanaLoginEnabled } from "../lib/solanaLogin";
 import { base, baseSepolia, celo } from "viem/chains";
 import { robinhoodChain } from "../lib/chains";
 import { DYNAMIC_ENVIRONMENT_ID } from "../lib/dynamicBrowser";
@@ -26,7 +28,7 @@ export function DynamicOuter({ children }: { children: ReactNode }) {
       locale={PERKOS_WALLET_LOCALE}
       settings={{
         environmentId: DYNAMIC_ENVIRONMENT_ID,
-        walletConnectors: [EthereumWalletConnectors],
+        walletConnectors: solanaLoginEnabled() ? [EthereumWalletConnectors, SolanaWalletConnectors] : [EthereumWalletConnectors],
         // PerkOS verifies its own wallet nonce before issuing a Firebase session.
         initialAuthenticationMode: "connect-only",
         overrides: { evmNetworks: networks },
