@@ -8,6 +8,7 @@ import { firebaseAuth } from "./firebase";
 import { signInWithWallet } from "./walletAuth";
 import { useFirebaseUser } from "./useFirebaseUser";
 import { BrowserWalletContext } from "./browserWallet";
+import { normalizeWalletAddress } from "@perkos/shared-types";
 
 /**
  * Module-level mutex shared by every useWalletSession() consumer in
@@ -147,7 +148,7 @@ export function useWalletSession(): Result {
   const [denial, setDenial] = useState<"not-allowlisted" | "error" | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
-  const normalizedAddress = address?.toLowerCase();
+  const normalizedAddress = address ? normalizeWalletAddress(address) : undefined;
   const inSync =
     firebaseUser && normalizedAddress
       ? firebaseUser.uid === normalizedAddress
