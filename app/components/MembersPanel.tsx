@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizeWalletAddress, WalletAddressSchema } from "@perkos/shared-types";
+
 import { useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -43,7 +45,7 @@ export function MembersPanel({
   const account = useAppAccount();
   const advanced = useAdvancedFeatures(account.address);
   const qc = useQueryClient();
-  const key = ["members", kind, id];
+  const key = ["members", kind, id, account.address ? normalizeWalletAddress(account.address) : null];
   const [wallet, setWallet] = useState("");
   const [role, setRole] = useState<"editor" | "viewer">("editor");
 
@@ -56,12 +58,12 @@ export function MembersPanel({
     queryKey: key,
     queryFn: () =>
       kind === "org" ? listOrgMembers(id) : listProjectMembers(id),
-    enabled: Boolean(id),
+    enabled: Boolean(id && account.address),
   });
   const members: Member[] = membersQuery.data ?? [];
 
   // Avatars/usernames for the listed members (one batched read, shared cache).
-  const memberWallets = members.map((m) => m.wallet.toLowerCase());
+  const memberWallets = members.map((m) => normalizeWalletAddress(m.wallet));
   const profilesQuery = useQuery({
     queryKey: ["user-profiles", memberWallets.join(",")],
     queryFn: () => getUserProfiles(memberWallets),
@@ -73,7 +75,7 @@ export function MembersPanel({
   // convertía "sumar a alguien al equipo" en una operación técnica: el invitado
   // tenía que activar el modo avanzado solo para poder leer la suya y pasarla.
   const identifier = wallet.trim();
-  const isWallet = /^0x[a-fA-F0-9]{40}$/.test(identifier);
+  const isWallet = WalletAddressSchema.safeParse(identifier).success;
   const isUsername = /^@?[a-z0-9_]{3,20}$/i.test(identifier) && !identifier.startsWith("0x");
   const canInvite = isWallet || isUsername;
 
@@ -182,7 +184,7 @@ export function MembersPanel({
           </li>
         ) : (
           members.map((m, index) => {
-            const profile = profilesQuery.data?.[m.wallet.toLowerCase()];
+            const profile = profilesQuery.data?.[normalizeWalletAddress(m.wallet)];
             // Prefer the handle the API resolved: a teammate's own profile is
             // unreadable from here, so `profile` is only ever populated for the
             // caller themselves.

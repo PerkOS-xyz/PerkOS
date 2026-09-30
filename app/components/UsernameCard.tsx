@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizeWalletAddress } from "@perkos/shared-types";
+
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { AtSign, Check, Loader2 } from "lucide-react";
@@ -69,7 +71,7 @@ export function UsernameCard({
         .then((owner) => {
           if (my !== seq.current) return;
           if (!owner) setAvail("available");
-          else if (address && owner.toLowerCase() === address.toLowerCase())
+          else if (address && normalizeWalletAddress(owner) === normalizeWalletAddress(address))
             setAvail("mine");
           else setAvail("taken");
         })

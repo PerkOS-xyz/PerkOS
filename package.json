@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "test:rules": "npx --yes --package=firebase-tools@13.35.1 firebase emulators:exec --only firestore,storage --project demo-artizen-workspace --config firebase.rules-test.json 'npx vitest run tests/walletRules.test.ts tests/artizenFirestoreRules.test.ts --fileParallelism=false'",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
@@ -73,6 +74,7 @@
     "@vitest/coverage-v8": "^4.1.7",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "fake-indexeddb": "6.2.5",
     "jsdom": "^27.0.1",
     "tailwindcss": "^4",
     "typescript": "^5",

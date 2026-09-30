@@ -1,4 +1,6 @@
 "use client";
+
+import { normalizeWalletAddress } from "@perkos/shared-types";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -27,7 +29,7 @@ export function AccountProfileWizard({
   const { address } = useAppAccount();
   return address ? (
     <ProfileForm
-      key={address.toLowerCase()}
+      key={normalizeWalletAddress(address)}
       settings={settings}
       address={address}
     />

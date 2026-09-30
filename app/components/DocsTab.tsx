@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizeWalletAddress } from "@perkos/shared-types";
+
 import { useEffect, useMemo, useState } from "react";
 import { useAppAccount } from "../lib/useAppAccount";
 import { toast } from "sonner";
@@ -137,7 +139,7 @@ export function DocsTab({
       const id = await ensureProjectPlan({
         walletAddress: wallet,
         projectId,
-        createdBy: `user:${address.toLowerCase()}`,
+        createdBy: `user:${normalizeWalletAddress(address)}`,
       });
       setSelectedId(id);
     } catch (e) {
@@ -161,7 +163,7 @@ export function DocsTab({
         projectId,
         type,
         title,
-        createdBy: `user:${address.toLowerCase()}`,
+        createdBy: `user:${normalizeWalletAddress(address)}`,
       });
       setSelectedId(id);
       setCreating(false);
@@ -272,7 +274,7 @@ export function DocsTab({
           wallet={wallet}
           projectId={projectId}
           docId={selectedId}
-          me={address ? `user:${address.toLowerCase()}` : null}
+          me={address ? `user:${normalizeWalletAddress(address)}` : null}
           meWallet={address ?? undefined}
           participants={participants}
           onDeleted={() => setSelectedId(null)}
@@ -875,7 +877,7 @@ function DocChat({
             const mine =
               m.from === "user" &&
               (!m.agentName ||
-                m.agentName.toLowerCase() === (address ?? "").toLowerCase());
+                normalizeWalletAddress(m.agentName) === normalizeWalletAddress(address ?? ""));
             return (
               <div
                 key={m.id}

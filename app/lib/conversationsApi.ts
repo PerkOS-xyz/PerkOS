@@ -1,3 +1,4 @@
+import { normalizeWalletAddress } from "@perkos/shared-types";
 /**
  * Conversations data layer (C-hybrid privacy model).
  *
@@ -117,7 +118,7 @@ function conversationsCol(walletAddress: string) {
   return collection(
     firebaseDb(),
     "wallets",
-    walletAddress.toLowerCase(),
+    normalizeWalletAddress(walletAddress),
     "conversations",
   ).withConverter(conversationConverter);
 }
@@ -126,7 +127,7 @@ function conversationDoc(walletAddress: string, convId: string) {
   return doc(
     firebaseDb(),
     "wallets",
-    walletAddress.toLowerCase(),
+    normalizeWalletAddress(walletAddress),
     "conversations",
     convId,
   ).withConverter(conversationConverter);
@@ -137,7 +138,7 @@ function conversationDoc(walletAddress: string, convId: string) {
 // ---------------------------------------------------------------------------
 
 export function userIdentity(walletAddress: string): ConvIdentity {
-  return `user:${walletAddress.toLowerCase()}` as ConvIdentity;
+  return `user:${normalizeWalletAddress(walletAddress)}` as ConvIdentity;
 }
 
 export function agentIdentity(agentName: string): ConvIdentity {

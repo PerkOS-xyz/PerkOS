@@ -3,6 +3,78 @@
 Estado: base de autenticación implementada, lanzamiento bloqueado por compatibilidad.
 Decisión del usuario: cuentas independientes; ninguna asociación automática con EVM.
 
+## Continuación de workspace (30-09)
+
+Base fusionada: App #377, API #302 y Shared Types #7. Esta continuación no activa
+banderas ni despliega servicios. No confundir merge de código con login usable.
+
+- App: identidad exacta en las rutas de datos de perfil, proyectos, miembros,
+  tareas, documentos, conversaciones, menciones y cachés. Miembros y menciones
+  incluyen la cuenta actual en su query key; Dynamic participa en las menciones.
+- API: proyectos/organizaciones y sus miembros conservan el caso, incluida la
+  autorización de lectura/escritura, mirrors y resolución de perfiles.
+  La comprobación live de capacidades usa la misma política Solana inicial:
+  allowlist exacta/modo público, suspensión prioritaria, sin admin/ECS/LLM/VPS
+  ni consulta al saldo EVM. Esto no implementa billing Solana.
+- Chat: claims Solana verificadas detrás de un gate independiente cerrado,
+  frames y digests exactos, historial/recibos restringidos al history host y
+  a participantes actuales. Sin persistir cuerpos de mensajes en Firestore.
+- A2A: un único parser EVM/Solana para los dos bridges, scope de conversación y
+  contexto del dispatcher sensibles al caso. No publicación npm ni actualización
+  de agentes reales; Platform Tools y el resto del ciclo siguen por revisar.
+- Sesión App: una firma por generación de cuenta, cancelación de prompts/HTTP
+  obsoletos y commits Firebase serializados con limpieza antes de cambiar de UID.
+  Logout compartido entre consumidores, sin relogin automático si falla la salida
+  del proveedor; restauración, unmount y reintento explícito cubiertos en pruebas.
+- Caché Chat: IndexedDB v2 con clave `[walletAddress, convId, id]`, migración
+  transaccional de v1 y conexiones cerradas. Borrado/poda limitados al scope exacto.
+  Una pestaña v1 antigua puede bloquear la migración: cerrarla y recargar. Un fallo
+  revierte toda la migración, no borra la base anterior. No se puede reconstruir el
+  caso de una dirección Solana que ya hubiera sido alterado por código histórico.
+- Verificación local anterior: App 658 correctas/3 omitidas; API 1771/2; A2A 231/0;
+  cuatro grupos de pruebas Chat correctos. Compilaciones App/API/A2A correctas.
+  App usa Firebase sintético y flag local de compilación, sin credenciales reales.
+
+Pruebas nuevas App: 24 regresiones de sesión/coordinador/autenticación y 11 de
+IndexedDB usando fake-indexeddb 6.2.5 (solo desarrollo). Incluyen StrictMode,
+consumidores simultáneos, EVM Mini App y cambios EVM/Solana durante firma/commit.
+Son pruebas locales con proveedores y Firebase simulados, no E2E con wallets reales.
+Verificación final de esta revisión: App 693 correctas, 3 omitidas; lint de archivos
+modificados, TypeScript y build Next correctos. Sin despliegue ni activación.
+
+Pendiente antes de habilitar: verificar/desplegar reglas revisadas, rutas de agentes y recursos, Platform Tools,
+billing/BYOK/límites, E2E real con recarga y permisos, artefacto productivo y dRPC.
+Verificar también logout/cambio de wallet y migración IndexedDB en navegador real,
+incluida interacción entre pestañas con Firebase persistido. La partición del caché
+no es una frontera de autorización ni impide acceso local al perfil del navegador.
+
+## Reglas Firestore y Storage: validación local (30-09)
+
+- `npm run test:rules` inicia ambos emuladores, ejecuta las suites wallet y Artizen
+  y los detiene al finalizar. Firebase CLI 13.35.1 fijada, Node 22/Java 17, proyecto
+  ficticio `demo-artizen-workspace`. Los tests rechazan hosts no loopback; ninguna
+  credencial, cuenta, saldo o archivo real participa. CI ejecuta el mismo comando.
+- 31 pruebas del bloque correctas, sin omitidas: 7 del guard local y 24 de reglas,
+  incluidas las 3 regresiones Artizen existentes. Cobertura de UID exacto EVM/Solana,
+  variantes base58 válidas con distinto caso, roles viewer/editor, revocación,
+  escalamiento por roster/orgId, enumeración, archivos privados, avatares públicos
+  y límites de 25/5 MiB. Admin SDK continúa escribiendo datos canónicos.
+- Cuatro pruebas rojas antes de corregir reprodujeron tres familias de permisos
+  aditivos excesivos: créditos/ledger editables por el dueño, recibos reescribibles
+  y cuerpos privados de chat permitidos en Firestore. El wildcard ahora excluye
+  esas escrituras; conversaciones solo conceden acceso a metadata y recibos usan
+  la regla específica de creación/anclaje único. Lectura propia de billing sigue.
+- No se ha comprobado la versión de reglas desplegada ni si hubo abuso. El
+  resultado es del código del repositorio ejecutado localmente, no una auditoría
+  forense de producción. Revisar y desplegar las reglas con prioridad por el riesgo
+  de integridad de créditos, sin esperar a activar Solana. No despliegue automático.
+- Storage mantiene enlaces de descarga como capacidades compartibles. Los tests
+  comprueban permisos del SDK por UID, no revocación de enlaces ya divulgados.
+- Estas reglas no consultan el flag Solana de API. Apagar ese flag no revoca
+  sesiones Firebase emitidas ni cambia por sí solo la política de Storage.
+
+Referencia del harness: [Firebase Rules unit tests](https://firebase.google.com/docs/rules/unit-tests).
+
 ## Implementado y probado localmente
 
 - Shared Types conserva `AddressSchema` exclusivamente EVM y añade validación de
@@ -18,7 +90,7 @@ Decisión del usuario: cuentas independientes; ninguna asociación automática c
 - App conserva el flujo EVM local y envía pruebas Solana al proxy de API.
 - Ambas banderas están desactivadas por defecto. No se modificaron entornos reales.
 
-## Bloqueos verificados en código
+## Inventario inicial (progreso de esta continuación arriba)
 
 | Área | Consumidores relevantes | Trabajo pendiente |
 | --- | --- | --- |
@@ -27,7 +99,7 @@ Decisión del usuario: cuentas independientes; ninguna asociación automática c
 | Autorización API | `src/routes/projects.ts`, `src/services/orgMembers.ts`, `src/services/accessControl.ts` y consumidores de wallet en rutas de agentes | Revisar propietario, invitaciones, miembros y permisos usando identidad exacta. No ampliar esquemas de transacciones EVM. |
 | Chat | `src/auth.mjs`, `src/router.mjs`, `src/internal.mjs` en PerkOS-Chat | Rechazo actual de UID no `0x`, minúsculas en frames, historial y digest. Actualizar con pruebas de aislamiento entre dos wallets y participantes. |
 | Plugins de agentes | PerkOS-A2A y adaptadores de runtimes | Auditar propagación de `forWallet`, respuestas e historial antes de prometer chat funcional. No acceder a hosts privados. |
-| Cambio de wallet | `useWalletSession.ts` | Probar cambio EVM/Solana, desconexión y logout mientras hay firma pendiente. La prueba del bridge no acredita el ciclo Firebase completo. |
+| Cambio de wallet | `useWalletSession.ts`, `walletSignInCoordinator.ts` | Cobertura local de cambios EVM/Solana, firma/commit pendientes, logout y Mini App; falta E2E real y múltiples pestañas. |
 | Billing y límites | Access, BYOK, cuotas, provisión y server wallets | Conectar una wallet no autoriza infraestructura, patrocinio ni transacciones. No vincular cuentas ni heredar saldos EVM. |
 
 ## Secuencia de activación
@@ -55,5 +127,6 @@ desactivar App exige reconstrucción y despliegue. No borrar cuentas ni datos. P
 también accesos directos a Firebase con tokens ya emitidos antes de declarar que un
 rollback revoca toda sesión: los flags no modifican las reglas ni revocan tokens.
 
-No realizado: E2E con wallet real, despliegue, apertura de registro Solana, cambios
-de Chat/plugins, publicación npm o modificación de credenciales/permisos reales.
+No realizado: E2E con wallet real, despliegue, apertura de registro Solana,
+publicación npm o modificación de credenciales/permisos reales. Chat y A2A tienen
+cambios locales coordinados, todavía no están instalados en los servicios/agentes.

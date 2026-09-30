@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizeWalletAddress } from "@perkos/shared-types";
+
 /**
  * Settings → Profile picture. Lets the user pick which avatar they show
  * (ENS / Basename — auto-resolved on login — / a custom upload / the generated
@@ -76,7 +78,7 @@ export function ProfileAvatarCard({ showOnchain = false }: { showOnchain?: boole
 
   function invalidate() {
     if (!address) return;
-    qc.invalidateQueries({ queryKey: ["user-profile", address.toLowerCase()] });
+    qc.invalidateQueries({ queryKey: ["user-profile", normalizeWalletAddress(address)] });
     qc.invalidateQueries({ queryKey: ["user-profiles"] });
   }
 

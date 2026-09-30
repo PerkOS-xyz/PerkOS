@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizeWalletAddress } from "@perkos/shared-types";
+
 import { collection, onSnapshot, type Timestamp } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
@@ -71,7 +73,7 @@ export function useWalletAgents(
     const ref = collection(
       firebaseDb(),
       "wallets",
-      walletAddress.toLowerCase(),
+      normalizeWalletAddress(walletAddress),
       "agents"
     );
     const unsubscribe = onSnapshot(

@@ -40,7 +40,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - name: Artizen Firestore rules (local demo only)
-        run: npx --yes --package=firebase-tools@13.35.1 firebase emulators:exec --only firestore --project demo-artizen-workspace --config firebase.rules-test.json 'npx vitest run tests/artizenFirestoreRules.test.ts'
+      - name: Wallet and Artizen Firestore/Storage rules (local demo only)
+        run: npm run test:rules
       - name: Build (production)
         run: npm run build

@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizeWalletAddress } from "@perkos/shared-types";
+
 /**
  * Read a wallet's profile (username + avatar fields) for display, cached by
  * react-query so the header chip, member list and mentions share one fetch.
@@ -9,7 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getUserProfile, type UserProfile } from "./perkosApi";
 
 export function useUserProfile(address?: string | null) {
-  const wallet = address ? address.toLowerCase() : null;
+  const wallet = address ? normalizeWalletAddress(address) : null;
   return useQuery<UserProfile | null>({
     queryKey: ["user-profile", wallet],
     queryFn: () => (wallet ? getUserProfile(wallet) : Promise.resolve(null)),

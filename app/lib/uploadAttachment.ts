@@ -1,3 +1,4 @@
+import { normalizeWalletAddress } from "@perkos/shared-types";
 /**
  * Chat attachment uploads → Firebase Storage.
  *
@@ -83,7 +84,7 @@ export async function uploadAttachment(input: {
     );
   }
 
-  const wallet = walletAddress.toLowerCase();
+  const wallet = normalizeWalletAddress(walletAddress);
   const stamp = `${Date.now()}-${index}`;
   const path = `attachments/${wallet}/${conversationId}/${stamp}-${sanitizeName(file.name)}`;
   const storageRef = ref(firebaseStorage(), path);

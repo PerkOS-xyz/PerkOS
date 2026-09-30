@@ -1,4 +1,6 @@
 "use client";
+
+import { normalizeWalletAddress } from "@perkos/shared-types";
 import {useAgentPresence} from "../../../lib/useAgentPresence";
 
 import Link from "next/link";
@@ -360,14 +362,14 @@ export default function AgentDetailPage({ params }: PageProps) {
         <VoiceCredentialDeliveryPanel
           agentId={agent.id}
           agentName={agent.name}
-          owner={Boolean(address) && address!.toLowerCase() === agent.walletAddress.toLowerCase()}
+          owner={Boolean(address) && normalizeWalletAddress(address!) === normalizeWalletAddress(agent.walletAddress)}
         />
       ) : null}
 
       {isVoiceEnabled() ? <VoiceHealthPanel
         agentId={agent.id}
         agentName={agent.name}
-        owner={Boolean(address) && address!.toLowerCase() === agent.walletAddress.toLowerCase()}
+        owner={Boolean(address) && normalizeWalletAddress(address!) === normalizeWalletAddress(agent.walletAddress)}
       /> : null}
 
       <WebhookPanel agent={agent} />

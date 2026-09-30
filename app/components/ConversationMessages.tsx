@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizeWalletAddress } from "@perkos/shared-types";
+
 import { Loader2 } from "lucide-react";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 
@@ -205,7 +207,7 @@ function MessageRow({
   planAlreadyApproved?: boolean;
   proposalActionable?: boolean;
 }) {
-  const me = `user:${walletAddress.toLowerCase()}`;
+  const me = `user:${normalizeWalletAddress(walletAddress)}`;
   const fromMe = message.from === me;
   const fromAgent = message.from.startsWith("agent:");
   const fromService = message.from.startsWith("service:");

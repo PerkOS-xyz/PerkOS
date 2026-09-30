@@ -1,7 +1,9 @@
 "use client";
 
+import { normalizeWalletAddress } from "@perkos/shared-types";
+
 import { useQuery } from "@tanstack/react-query";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "./useAppAccount";
 
 import { listProjectMembers } from "./membershipApi";
 import { getUserProfiles, type ProjectDetail } from "./perkosApi";
@@ -19,18 +21,18 @@ export function useMentionParticipants(
   projectId: string,
   ownerWallet?: string,
 ): MentionParticipant[] {
-  const { address } = useConnection();
+  const { address } = useAppAccount();
 
   const { data: members } = useQuery({
-    queryKey: ["project-members", projectId, ownerWallet],
+    queryKey: ["project-members", projectId, ownerWallet, address ? normalizeWalletAddress(address) : null],
     queryFn: () => listProjectMembers(projectId, ownerWallet),
-    enabled: Boolean(projectId),
+    enabled: Boolean(projectId && address),
   });
 
-  const memberWallets = (members ?? []).map((m) => m.wallet.toLowerCase());
+  const memberWallets = (members ?? []).map((m) => normalizeWalletAddress(m.wallet));
   // Always include the connected wallet (in case the members list is empty/loading).
   const humanWallets = Array.from(
-    new Set([...(address ? [address.toLowerCase()] : []), ...memberWallets])
+    new Set([...(address ? [normalizeWalletAddress(address)] : []), ...memberWallets])
   );
 
   const { data: profiles } = useQuery({

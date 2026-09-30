@@ -15,7 +15,7 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Wallet auth flow mints custom tokens with uid = walletAddress.toLowerCase()
+    // Custom token uid: lowercase valid EVM; exact canonical base58 for Solana.
     function isSelf(walletAddress) {
       return isSignedIn() && request.auth.uid == walletAddress;
     }
@@ -37,7 +37,7 @@ service cloud.firestore {
     // Members are recorded (Admin SDK, via PerkOS-API) at
     //   /wallets/{owner}/organizations/{orgId}/members/{memberUid}
     //   /wallets/{owner}/projects/{projectId}/members/{memberUid}
-    // keyed by the member's uid (= their wallet, lowercased). These helpers
+    // keyed by the exact member uid (only EVM is lowercased). These helpers
     // let a member READ (and, with editor/owner role, WRITE) the owner's org /
     // project subtree. Rules are ADDITIVE (Firestore grants if ANY match
     // allows), so the owner keeps full access via the workspace wildcard.
@@ -117,16 +117,22 @@ service cloud.firestore {
     // /wallets/{addr}/** is owned by the wallet holder. Reads + writes
     // require the request to come from a session whose uid matches.
 
-    match /wallets/{walletAddress}/{document=**} {
-      allow read: if isSelf(walletAddress);
-    }
     match /wallets/{walletAddress} {
-      allow write: if isSelf(walletAddress);
+      allow read, write: if isSelf(walletAddress);
     }
     match /wallets/{walletAddress}/{collectionName}/{id}/{document=**} {
+      // Conversation metadata is granted separately, never nested chat bodies.
+      allow read: if isSelf(walletAddress) && collectionName != 'conversations';
       allow write: if isSelf(walletAddress)
+        // Specific denies cannot override an additive owner grant. Credits and
+        // ledger mutations are Admin SDK only; receipts have narrower rules.
+        && !(collectionName in ['billing_account', 'billing_ledger', 'receipts', 'conversations'])
         && (collectionName != 'projects' || !isArtizenProject(walletAddress, id))
         && (collectionName != 'agents' || !isArtizenAgent(id));
+    }
+
+    match /wallets/{walletAddress}/conversations/{convId} {
+      allow read, write: if isSelf(walletAddress);
     }
 
     // Privacy invariant: conversation message BODIES never live in
@@ -140,9 +146,8 @@ service cloud.firestore {
     // SDK (used by PerkOS-Chat for `lastMessageAt` bumps on the parent
     // doc) bypasses these rules, so nothing useful is blocked.
     //
-    // NOTE: this rule is matched AFTER the broader workspace rule above.
-    // Firestore grants when ANY matching rule allows. This deny alone does
-    // not override the owner wildcard; server code must uphold the invariant.
+    // The general owner rule excludes conversations, so no additive grant
+    // overrides this denial. Admin SDK writers must also uphold the invariant.
 
     match /wallets/{walletAddress}/conversations/{convId}/messages/{messageId} {
       allow read, write: if false;

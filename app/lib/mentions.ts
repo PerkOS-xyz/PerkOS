@@ -7,6 +7,8 @@
  * types after `@` (a chosen username, or a short address, or an agent name).
  */
 
+import { normalizeWalletAddress } from "@perkos/shared-types";
+
 export type MentionParticipant = {
   /** Stable identity stored in message.mentions[]: "user:0x…" | "agent:Name". */
   id: string;
@@ -51,8 +53,8 @@ export function mentionsWallet(
   wallet: string | null | undefined
 ): boolean {
   if (!mentions || !wallet) return false;
-  const w = wallet.toLowerCase();
-  return mentions.some((m) => m.toLowerCase() === `user:${w}`);
+  const w = normalizeWalletAddress(wallet);
+  return mentions.some((m) => m.startsWith("user:") && normalizeWalletAddress(m.slice(5)) === w);
 }
 
 /**

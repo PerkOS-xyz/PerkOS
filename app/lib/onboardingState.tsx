@@ -1,4 +1,6 @@
 "use client";
+
+import { normalizeWalletAddress } from "@perkos/shared-types";
 import {
   createContext,
   useContext,
@@ -58,7 +60,7 @@ function subscribe(callback: () => void) {
  * Never migrate the old unscoped browser key: its owner cannot be established. */
 export function OnboardingProvider({ children }: { children: ReactNode }) {
   const { address } = useAppAccount();
-  const wallet = address?.toLowerCase() ?? "";
+  const wallet = address ? normalizeWalletAddress(address) : "";
   const snapshot = useSyncExternalStore(
     subscribe,
     useCallback(() => read(wallet), [wallet]),

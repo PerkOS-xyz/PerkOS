@@ -33,7 +33,7 @@ const liveAgents: Record<string, AgentLiveStatus> = {
 };
 
 const participants = [
-  { id: "user:0xabc", label: "Julio", kind: "human" as const },
+  { id: "user:0xabababababababababababababababababababab", label: "Julio", kind: "human" as const },
   { id: "agent:bragi", label: "bragi", kind: "agent" as const },
   { id: "agent:Alice", label: "Alice", kind: "agent" as const },
 ];
@@ -49,7 +49,7 @@ describe("ProjectTeamPanel", () => {
         participants={participants}
         liveAgents={liveAgents}
         pmAgent="Bragi"
-        currentWallet="0xAbC"
+        currentWallet="0xAbAbAbAbAbAbAbAbAbAbAbAbAbAbAbAbAbAbAbAb"
         chatConnected
         onDesignatePm={vi.fn()}
       />,

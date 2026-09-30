@@ -11,7 +11,7 @@ vi.mock("../app/lib/firebase", () => ({
 describe("entityKey", () => {
   it("builds the shared key format for every entity type", () => {
     expect(entityKey.agent("Researcher")).toBe("agent:Researcher");
-    expect(entityKey.user("0xAbC123")).toBe("user:0xabc123"); // lowercased
+    expect(entityKey.user("0xAbAbAbAbAbAbAbAbAbAbAbAbAbAbAbAbAbAbAbAb")).toBe("user:0xabababababababababababababababababababab"); // lowercased
     expect(entityKey.task("p1", "t1")).toBe("task:p1/t1");
     expect(entityKey.doc("p1", "d1")).toBe("doc:p1/d1");
     expect(entityKey.project("p1")).toBe("project:p1");

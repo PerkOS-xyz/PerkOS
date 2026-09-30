@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useConnection, useDisconnect, useSignMessage } from "wagmi";
 import { signOut } from "firebase/auth";
 
@@ -9,6 +9,7 @@ import { signInWithWallet } from "./walletAuth";
 import { useFirebaseUser } from "./useFirebaseUser";
 import { BrowserWalletContext } from "./browserWallet";
 import { normalizeWalletAddress } from "@perkos/shared-types";
+import { WalletSignInCoordinator } from "./walletSignInCoordinator";
 
 /**
  * Module-level mutex shared by every useWalletSession() consumer in
@@ -19,20 +20,11 @@ import { normalizeWalletAddress } from "@perkos/shared-types";
  * fires its own signInWithWallet → the wallet receives multiple
  * personal_sign requests with different nonces queued up.
  *
- * `pendingSignIn` holds the in-flight Promise so all instances await
- * the same one and their reactive state (firebaseUser, syncing) picks
- * up the result via the existing useFirebaseUser subscription.
+ * The coordinator shares one flight per account generation, cancels stale
+ * prompts, and serializes Firebase commits and their cleanup.
  */
-let pendingSignIn: Promise<unknown> | null = null;
-
-/**
- * Set while `logout()` tears the session down. The auto-sign-in effect below
- * checks it so that clearing Firebase (firebaseUser → null) mid-logout doesn't
- * immediately re-trigger `signInWithWallet` (which would pop a fresh signature
- * prompt and re-log the user in). Module-level so it's shared across every
- * useWalletSession() instance, same as `pendingSignIn`.
- */
-let loggingOut = false;
+const coordinator = new WalletSignInCoordinator();
+let sessionConsumers = 0;
 
 export type WalletSessionStatus =
   /** waiting for the wallet or Firebase to settle */
@@ -144,68 +136,70 @@ export function useWalletSession(): Result {
       : (message: string) => signMessageAsync({ message });
   }, [browserWallet, signMessageAsync]);
 
-  const [syncing, setSyncing] = useState(false);
-  const [denial, setDenial] = useState<"not-allowlisted" | "error" | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | undefined>();
+  const [attempt, setAttempt] = useState<{
+    wallet?: string; syncing: boolean; denial: "not-allowlisted" | "error" | null; error?: string;
+  }>({ syncing: false, denial: null });
+  const localRun = useRef(0);
+  const mounted = useRef(false);
 
   const normalizedAddress = address ? normalizeWalletAddress(address) : undefined;
+  const blockedWallet = useSyncExternalStore(coordinator.subscribe, coordinator.getBlockedWallet, () => null);
+  const loggingOut = useSyncExternalStore(coordinator.subscribe, coordinator.getLoggingOut, () => false);
+  const logoutSuppressed = Boolean(normalizedAddress && blockedWallet === normalizedAddress);
+  const currentAttempt = attempt.wallet === normalizedAddress ? attempt : null;
+  const syncing = currentAttempt?.syncing ?? false;
+  const denial = currentAttempt?.denial ?? null;
+  const errorMessage = currentAttempt?.error;
+  const walletLoading = browserWallet ? browserWallet.loading
+    : wagmiStatus === "connecting" || wagmiStatus === "reconnecting";
   const inSync =
     firebaseUser && normalizedAddress
       ? firebaseUser.uid === normalizedAddress
       : false;
 
+  useEffect(() => {
+    mounted.current = true;
+    sessionConsumers += 1;
+    return () => {
+      mounted.current = false;
+      localRun.current += 1;
+      sessionConsumers -= 1;
+      if (sessionConsumers === 0) coordinator.invalidate();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (loggingOut) return;
+    if (walletLoading) { coordinator.invalidate(); return; }
+    coordinator.select(isConnected && normalizedAddress ? normalizedAddress : null);
+  }, [isConnected, normalizedAddress, walletLoading, loggingOut]);
+
   const runSignIn = useCallback(async () => {
-    if (!address || !normalizedAddress) return;
-
-    // If another hook instance is already running the sign-in, join its
-    // Promise instead of starting our own. Only the first caller shows the
-    // wallet's signature prompt; everyone else awaits the result and lets
-    // useFirebaseUser propagate the success.
-    if (pendingSignIn) {
-      setSyncing(true);
-      try {
-        await pendingSignIn;
-      } catch {
-        // The owning instance handled the error and set its own denial state.
-      } finally {
-        setSyncing(false);
-      }
-      return;
-    }
-
-    setSyncing(true);
-    setDenial(null);
-    setErrorMessage(undefined);
-
-    const promise = signInWithWallet({
-      address,
-      signMessage: (message) => signMessageRef.current(message),
-    });
-    pendingSignIn = promise;
+    if (coordinator.getLoggingOut() || logoutSuppressed || walletLoading || !isConnected || !normalizedAddress) return;
+    const run = ++localRun.current;
+    const signer = signMessageRef.current;
+    setAttempt({ wallet: normalizedAddress, syncing: true, denial: null });
 
     try {
-      await promise;
+      await coordinator.run(normalizedAddress, signal => signInWithWallet({
+        address: normalizedAddress, signMessage: signer, signal,
+      }));
     } catch (err) {
+      if (!mounted.current || localRun.current !== run || (err instanceof Error && err.name === "AbortError")) return;
       const msg = err instanceof Error ? err.message : "Sign-in failed.";
-      if (msg.toLowerCase().includes("allowlist")) {
-        setDenial("not-allowlisted");
-      } else {
-        setDenial("error");
-        setErrorMessage(msg);
-      }
+      setAttempt({ wallet: normalizedAddress, syncing: false,
+        denial: msg.toLowerCase().includes("allowlist") ? "not-allowlisted" : "error", error: msg });
     } finally {
-      // Only clear the mutex if we're still the owner — a follow-up call could
-      // have already swapped in a new promise after we resolved.
-      if (pendingSignIn === promise) pendingSignIn = null;
-      setSyncing(false);
+      if (mounted.current && localRun.current === run) setAttempt(current => ({ ...current, syncing: false }));
     }
-  }, [address, normalizedAddress]);
+  }, [isConnected, normalizedAddress, walletLoading, logoutSuppressed]);
 
   // When the wallet has an address and there's no matching Firebase session,
   // run the sign-in flow exactly once. The user can `retry()` if it failed.
   useEffect(() => {
     if (loggingOut) return; // a logout is tearing the session down
     if (firebaseLoading) return;
+    if (walletLoading) return;
     if (!isConnected || !normalizedAddress) return;
     if (inSync) return;
     if (syncing) return;
@@ -218,7 +212,9 @@ export function useWalletSession(): Result {
       cancelled = true;
     };
   }, [
+    loggingOut,
     firebaseLoading,
+    walletLoading,
     isConnected,
     normalizedAddress,
     inSync,
@@ -227,14 +223,16 @@ export function useWalletSession(): Result {
     runSignIn,
   ]);
 
-  // If wagmi disconnects, drop the Firebase session too. Mini App path only —
-  // in the browser (Dynamic) path wagmi is always disconnected (no bridge),
-  // which would spuriously sign the user out.
+  // Disconnect applies to the active provider only, after wallet restoration.
+  // Serialize with any non-cancellable Firebase commit already in flight.
   useEffect(() => {
-    if (!browserWallet && wagmiStatus === "disconnected" && firebaseUser) {
-      void signOut(firebaseAuth());
+    if (!loggingOut && !walletLoading && !isConnected && firebaseUser) {
+      void coordinator.run(null, async signal => {
+        signal.throwIfAborted();
+        await signOut(firebaseAuth());
+      }).catch(() => {});
     }
-  }, [browserWallet, wagmiStatus, firebaseUser]);
+  }, [walletLoading, isConnected, firebaseUser, loggingOut]);
 
   // Full logout: drop the wallet on whichever path owns it, then the Firebase
   // session. `loggingOut` suppresses the auto-sign-in effect so clearing
@@ -242,7 +240,10 @@ export function useWalletSession(): Result {
   // log the wallet out FIRST (so `isConnected` flips false) before signing out
   // of Firebase.
   const logout = useCallback(async () => {
-    loggingOut = true;
+    if (coordinator.getLoggingOut()) return;
+    coordinator.setLoggingOut(true);
+    coordinator.suspend(normalizedAddress ?? null);
+    localRun.current += 1;
     try {
       // Browser/Dynamic path: clears the active user. No-op elsewhere.
       if (browserWallet) {
@@ -260,15 +261,15 @@ export function useWalletSession(): Result {
       }
       // Firebase custom-token session.
       try {
-        await signOut(firebaseAuth());
+        await coordinator.run(null, async () => { await signOut(firebaseAuth()); });
       } catch {
         // ignore
       }
-      pendingSignIn = null;
+      if (mounted.current) setAttempt({ syncing: false, denial: null });
     } finally {
-      loggingOut = false;
+      coordinator.setLoggingOut(false);
     }
-  }, [browserWallet, disconnect]);
+  }, [browserWallet, disconnect, normalizedAddress]);
 
   const status = resolveWalletSessionStatus({
     firebaseLoading,
@@ -282,12 +283,20 @@ export function useWalletSession(): Result {
   });
 
   return {
-    status,
+    status: loggingOut || logoutSuppressed ? "signed-out" : status,
     address: normalizedAddress,
     identityLabel: browserWallet?.identityLabel,
     error: errorMessage,
-    retry: runSignIn,
-    signOutFirebase: () => signOut(firebaseAuth()),
+    retry: () => {
+      if (logoutSuppressed && normalizedAddress) {
+        coordinator.resume(normalizedAddress);
+        setAttempt({ syncing: false, denial: null });
+      } else { void runSignIn(); }
+    },
+    signOutFirebase: async () => {
+      coordinator.suspend(normalizedAddress ?? null);
+      await coordinator.run(null, async () => { await signOut(firebaseAuth()); });
+    },
     logout,
   };
 }

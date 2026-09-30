@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizeWalletAddress } from "@perkos/shared-types";
+
 import {
   collection,
   onSnapshot,
@@ -55,7 +57,7 @@ export function useProjectMessages(
       collection(
         firebaseDb(),
         "wallets",
-        walletAddress.toLowerCase(),
+        normalizeWalletAddress(walletAddress),
         "projects",
         projectId,
         "messages"

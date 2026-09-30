@@ -1,3 +1,4 @@
+import { normalizeWalletAddress } from "@perkos/shared-types";
 /**
  * Browser-side client for PerkOS-Chat (wss://chat.perkos.xyz/chat).
  *
@@ -329,7 +330,7 @@ export class ChatClient {
     if (type === "auth_ok") {
       const session = (frame.session ?? {}) as { walletAddress?: string };
       this.currentSession = session.walletAddress
-        ? { walletAddress: session.walletAddress.toLowerCase() }
+        ? { walletAddress: normalizeWalletAddress(session.walletAddress) }
         : null;
       this.reconnectMs = MIN_RECONNECT_MS;
       this.setStatus("connected");
