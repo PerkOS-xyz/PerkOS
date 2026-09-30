@@ -3,14 +3,16 @@ import { readFileSync } from "node:fs";
 import { beforeAll, afterAll, describe, it } from "vitest";
 import { initializeTestEnvironment, assertFails, assertSucceeds, type RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { localEmulator } from "./helpers/localEmulator";
 
 // Run with a demo-only local emulator; never a live Firebase project.
 describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)("Artizen canonical write boundaries", () => {
   let env: RulesTestEnvironment;
   const owner = "fixture-owner"; const pid = "template-fixture"; const agent = "Artizen-fixture";
   beforeAll(async () => {
-    const [host, port] = process.env.FIRESTORE_EMULATOR_HOST!.split(":");
-    env = await initializeTestEnvironment({ projectId: "demo-artizen-workspace", firestore: { host, port: Number(port), rules: readFileSync("firestore.rules", "utf8") } });
+    env = await initializeTestEnvironment({ projectId: "demo-artizen-workspace", firestore: {
+      ...localEmulator(process.env.FIRESTORE_EMULATOR_HOST), rules: readFileSync("firestore.rules", "utf8"),
+    } });
     await env.withSecurityRulesDisabled(async context => {
       const db = context.firestore();
       await setDoc(doc(db, `project_template_instances/${owner}--${pid}`), { templateId: "artizen-creator-update" });

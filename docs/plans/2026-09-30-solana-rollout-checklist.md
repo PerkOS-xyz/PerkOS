@@ -42,11 +42,38 @@ Son pruebas locales con proveedores y Firebase simulados, no E2E con wallets rea
 Verificación final de esta revisión: App 693 correctas, 3 omitidas; lint de archivos
 modificados, TypeScript y build Next correctos. Sin despliegue ni activación.
 
-Pendiente antes de habilitar: reglas Firebase/Storage en emulador, rutas de agentes y recursos, Platform Tools,
+Pendiente antes de habilitar: verificar/desplegar reglas revisadas, rutas de agentes y recursos, Platform Tools,
 billing/BYOK/límites, E2E real con recarga y permisos, artefacto productivo y dRPC.
 Verificar también logout/cambio de wallet y migración IndexedDB en navegador real,
 incluida interacción entre pestañas con Firebase persistido. La partición del caché
 no es una frontera de autorización ni impide acceso local al perfil del navegador.
+
+## Reglas Firestore y Storage: validación local (30-09)
+
+- `npm run test:rules` inicia ambos emuladores, ejecuta las suites wallet y Artizen
+  y los detiene al finalizar. Firebase CLI 13.35.1 fijada, Node 22/Java 17, proyecto
+  ficticio `demo-artizen-workspace`. Los tests rechazan hosts no loopback; ninguna
+  credencial, cuenta, saldo o archivo real participa. CI ejecuta el mismo comando.
+- 31 pruebas del bloque correctas, sin omitidas: 7 del guard local y 24 de reglas,
+  incluidas las 3 regresiones Artizen existentes. Cobertura de UID exacto EVM/Solana,
+  variantes base58 válidas con distinto caso, roles viewer/editor, revocación,
+  escalamiento por roster/orgId, enumeración, archivos privados, avatares públicos
+  y límites de 25/5 MiB. Admin SDK continúa escribiendo datos canónicos.
+- Cuatro pruebas rojas antes de corregir reprodujeron tres familias de permisos
+  aditivos excesivos: créditos/ledger editables por el dueño, recibos reescribibles
+  y cuerpos privados de chat permitidos en Firestore. El wildcard ahora excluye
+  esas escrituras; conversaciones solo conceden acceso a metadata y recibos usan
+  la regla específica de creación/anclaje único. Lectura propia de billing sigue.
+- No se ha comprobado la versión de reglas desplegada ni si hubo abuso. El
+  resultado es del código del repositorio ejecutado localmente, no una auditoría
+  forense de producción. Revisar y desplegar las reglas con prioridad por el riesgo
+  de integridad de créditos, sin esperar a activar Solana. No despliegue automático.
+- Storage mantiene enlaces de descarga como capacidades compartibles. Los tests
+  comprueban permisos del SDK por UID, no revocación de enlaces ya divulgados.
+- Estas reglas no consultan el flag Solana de API. Apagar ese flag no revoca
+  sesiones Firebase emitidas ni cambia por sí solo la política de Storage.
+
+Referencia del harness: [Firebase Rules unit tests](https://firebase.google.com/docs/rules/unit-tests).
 
 ## Implementado y probado localmente
 

@@ -8,7 +8,7 @@ rules_version = '2';
 // bypasses these rules. Direct SDK reads are therefore limited to the OWNING
 // wallet as defence in depth (a signed-in stranger who guesses/obtains a path
 // still can't read another wallet's file). Uploads are restricted to the owning wallet
-// (uid == lowercased address, matching the Firestore `isSelf` convention)
+// (uid == exact address: lowercase EVM, case-sensitive Solana, as in `isSelf`)
 // with a hard size cap that mirrors MAX_ATTACHMENT_BYTES.
 service firebase.storage {
   match /b/{bucket}/o {
