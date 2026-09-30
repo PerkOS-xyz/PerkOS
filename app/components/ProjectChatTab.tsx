@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizeWalletAddress } from "@perkos/shared-types";
+
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -84,7 +86,7 @@ export function ProjectChatTab({
   const [mobileTeamOpen, setMobileTeamOpen] = useState(false);
   const chatSectionRef = useRef<HTMLElement>(null);
   const shared = Boolean(
-    ownerWallet && ownerWallet.toLowerCase() !== (address ?? "").toLowerCase(),
+    ownerWallet && normalizeWalletAddress(ownerWallet) !== normalizeWalletAddress((address ?? "")),
   );
   const owner = shared ? ownerWallet : undefined;
   const participants = useMentionParticipants(detail, projectId, ownerWallet);
@@ -149,7 +151,7 @@ export function ProjectChatTab({
       if (chatId && address && convId) {
         void cacheMessages(address, convId, [{
           id: chatId,
-          from: `user:${address.toLowerCase()}`,
+          from: `user:${normalizeWalletAddress(address)}`,
           text,
           timestamp: new Date().toISOString(),
         }]).catch(() => {});
@@ -188,7 +190,7 @@ export function ProjectChatTab({
         );
         void cacheMessages(address, convId, [{
           id: ack.id,
-          from: `user:${address.toLowerCase()}`,
+          from: `user:${normalizeWalletAddress(address)}`,
           text,
           timestamp: ack.timestamp,
         }]).catch(() => {});
@@ -225,7 +227,7 @@ export function ProjectChatTab({
       {
         id,
         convId,
-        from: `user:${address.toLowerCase()}`,
+        from: `user:${normalizeWalletAddress(address)}`,
         text,
         timestamp: new Date().toISOString(),
         pending: true,
@@ -236,7 +238,7 @@ export function ProjectChatTab({
     // not erase an accepted human message.
     void cacheMessages(address, convId, [{
       id,
-      from: `user:${address.toLowerCase()}`,
+      from: `user:${normalizeWalletAddress(address)}`,
       text,
       timestamp: new Date().toISOString(),
     }]).catch(() => {});
@@ -251,7 +253,7 @@ export function ProjectChatTab({
         sourceRef: id,
         sourceLabel: text.slice(0, 80),
       });
-      if (identity.startsWith("user:") && identity !== `user:${address.toLowerCase()}`) {
+      if (identity.startsWith("user:") && identity !== `user:${normalizeWalletAddress(address)}`) {
         void notifyProjectMention({
           projectId,
           target: identity.slice("user:".length),
@@ -590,7 +592,7 @@ export function ProjectTeamPanel({
     return realtimeAgentStatus(live).label === STATUS_AVAILABLE;
   }).length;
   const agentCount = participants.filter((participant) => participant.kind === "agent").length;
-  const currentIdentity = currentWallet ? `user:${currentWallet.toLowerCase()}` : "";
+  const currentIdentity = currentWallet ? `user:${normalizeWalletAddress(currentWallet)}` : "";
 
   return (
     <aside

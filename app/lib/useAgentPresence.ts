@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizeWalletAddress } from "@perkos/shared-types";
+
 import {useQuery} from "@tanstack/react-query";
 import {authedFetch} from "./apiClient";
 
@@ -18,7 +20,7 @@ export const unavailablePresence:PresencePatch={presenceSource:"redis",presenceE
 export function useAgentPresence(wallet:string|null|undefined,requestedIds:string[]){
   const ids=[...new Set(requestedIds)].sort();
   const query=useQuery({
-    queryKey:["agent-presence",wallet?.toLowerCase(),ids.join(",")],
+    queryKey:["agent-presence",wallet ? normalizeWalletAddress(wallet) : undefined,ids.join(",")],
     enabled:Boolean(wallet)&&ids.length>0,
     queryFn:async()=>{
       let enabled=false;const presence:Record<string,PresencePatch>={};

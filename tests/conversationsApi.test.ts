@@ -11,7 +11,13 @@ import {
 
 describe("identity helpers", () => {
   it("userIdentity lowercases the wallet address", () => {
-    expect(userIdentity("0xABCDEF")).toBe("user:0xabcdef");
+    expect(userIdentity("0xABABABABABABABABABABABABABABABABABABABAB")).toBe("user:0xabababababababababababababababababababab");
+  });
+
+  it("keeps Solana case variants as independent chat identities", () => {
+    const wallet = "So11111111111111111111111111111111111111112";
+    expect(userIdentity(wallet)).toBe(`user:${wallet}`);
+    expect(userIdentity(wallet)).not.toBe(userIdentity(wallet.toLowerCase()));
   });
 
   it("agentIdentity keeps the name verbatim", () => {
@@ -20,10 +26,10 @@ describe("identity helpers", () => {
   });
 
   it("isUserIdentity / isAgentIdentity classify correctly", () => {
-    expect(isUserIdentity(userIdentity("0xabc"))).toBe(true);
+    expect(isUserIdentity(userIdentity("0xabababababababababababababababababababab"))).toBe(true);
     expect(isUserIdentity(agentIdentity("x"))).toBe(false);
     expect(isAgentIdentity(agentIdentity("x"))).toBe(true);
-    expect(isAgentIdentity(userIdentity("0xabc"))).toBe(false);
+    expect(isAgentIdentity(userIdentity("0xabababababababababababababababababababab"))).toBe(false);
   });
 });
 
@@ -41,19 +47,19 @@ describe("dmCounterparty", () => {
   }
 
   it("returns the other identity for a 2-person DM", () => {
-    const conv = makeConv(["user:0xabc", "agent:apollo"], "dm");
-    expect(dmCounterparty(conv, "0xabc")).toBe("agent:apollo");
+    const conv = makeConv(["user:0xabababababababababababababababababababab", "agent:apollo"], "dm");
+    expect(dmCounterparty(conv, "0xabababababababababababababababababababab")).toBe("agent:apollo");
   });
 
   it("normalizes wallet casing via userIdentity()", () => {
-    const conv = makeConv(["user:0xabc", "agent:apollo"], "dm");
-    expect(dmCounterparty(conv, "0xABC")).toBe("agent:apollo");
-    expect(dmCounterparty(conv, "0xabc")).toBe("agent:apollo");
+    const conv = makeConv(["user:0xabababababababababababababababababababab", "agent:apollo"], "dm");
+    expect(dmCounterparty(conv, "0xABABABABABABABABABABABABABABABABABABABAB")).toBe("agent:apollo");
+    expect(dmCounterparty(conv, "0xabababababababababababababababababababab")).toBe("agent:apollo");
   });
 
   it("returns null for non-DM conversations", () => {
-    const conv = makeConv(["user:0xabc", "agent:apollo", "agent:hermes"], "channel");
-    expect(dmCounterparty(conv, "0xabc")).toBeNull();
+    const conv = makeConv(["user:0xabababababababababababababababababababab", "agent:apollo", "agent:hermes"], "channel");
+    expect(dmCounterparty(conv, "0xabababababababababababababababababababab")).toBeNull();
   });
 
   it("returns the first non-self participant — caller doesn't need to be in the list", () => {
@@ -62,6 +68,6 @@ describe("dmCounterparty", () => {
     // is fine in practice because we only load convs where the caller is
     // a participant via Firestore rules.
     const conv = makeConv(["user:0xdef", "agent:apollo"], "dm");
-    expect(dmCounterparty(conv, "0xabc")).toBe("user:0xdef");
+    expect(dmCounterparty(conv, "0xabababababababababababababababababababab")).toBe("user:0xdef");
   });
 });

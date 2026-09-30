@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizeWalletAddress } from "@perkos/shared-types";
+
 import { doc, onSnapshot, type FirestoreDataConverter, type Timestamp } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
@@ -71,7 +73,7 @@ export function useConversation(
     const ref = doc(
       firebaseDb(),
       "wallets",
-      walletAddress.toLowerCase(),
+      normalizeWalletAddress(walletAddress),
       "conversations",
       convId,
     ).withConverter(converter);

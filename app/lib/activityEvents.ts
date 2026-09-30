@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizeWalletAddress } from "@perkos/shared-types";
+
 /**
  * Activity events — the append-only "what happened" stream behind the
  * dashboard feed, KPI strip, and heatmap.
@@ -78,7 +80,7 @@ export function logActivity(
     const col = collection(
       firebaseDb(),
       "wallets",
-      walletAddress.toLowerCase(),
+      normalizeWalletAddress(walletAddress),
       "activity_events",
     );
     // Strip undefined optional fields — Firestore rejects undefined values.
@@ -121,7 +123,7 @@ export function useActivityFeed(
 
   useEffect(() => {
     if (!walletAddress) return;
-    const wallet = walletAddress.toLowerCase();
+    const wallet = normalizeWalletAddress(walletAddress);
     const q = query(
       collection(firebaseDb(), "wallets", wallet, "activity_events"),
       orderBy("ts", "desc"),
@@ -152,7 +154,7 @@ export function useActivityFeed(
     );
   }, [walletAddress, max]);
 
-  const current = state.wallet === (walletAddress ?? "").toLowerCase();
+  const current = state.wallet === normalizeWalletAddress((walletAddress ?? ""));
   return {
     events: current ? state.events : [],
     loaded: current ? state.loaded : false,

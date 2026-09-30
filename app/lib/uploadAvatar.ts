@@ -1,3 +1,4 @@
+import { normalizeWalletAddress } from "@perkos/shared-types";
 /**
  * Profile-avatar uploads → Firebase Storage (client-direct, like
  * uploadAttachment). The image is downscaled to a small square-ish webp in the
@@ -36,7 +37,7 @@ export async function uploadAvatar(input: {
     throw new Error("Image is too large after processing.");
   }
 
-  const wallet = input.walletAddress.toLowerCase();
+  const wallet = normalizeWalletAddress(input.walletAddress);
   const path = `avatars/${wallet}/avatar-${Date.now()}.webp`;
   const storageRef = ref(firebaseStorage(), path);
   await uploadBytes(storageRef, compressed, { contentType: "image/webp" });

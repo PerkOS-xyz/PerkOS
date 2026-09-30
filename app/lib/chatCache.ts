@@ -1,3 +1,4 @@
+import { normalizeWalletAddress } from "@perkos/shared-types";
 /**
  * IndexedDB cache for chat messages (C-hybrid privacy model, browser layer).
  *
@@ -83,7 +84,7 @@ export async function putMessages(
   for (const m of messages) {
     const record: CachedMessage = {
       id: m.id,
-      walletAddress: walletAddress.toLowerCase(),
+      walletAddress: normalizeWalletAddress(walletAddress),
       convId,
       from: m.from,
       text: m.text,
@@ -147,7 +148,7 @@ export async function clearConv(
   if (!db) return;
   const store = tx(db, "readwrite");
   const idx = store.index("byConv");
-  const range = IDBKeyRange.only([walletAddress.toLowerCase(), convId]);
+  const range = IDBKeyRange.only([normalizeWalletAddress(walletAddress), convId]);
   await new Promise<void>((resolve, reject) => {
     const cursorReq = idx.openCursor(range);
     cursorReq.onsuccess = () => {
@@ -172,7 +173,7 @@ async function collectByConv(
 ): Promise<CachedMessage[]> {
   const store = tx(db, "readonly");
   const idx = store.index("byConv");
-  const range = IDBKeyRange.only([walletAddress.toLowerCase(), convId]);
+  const range = IDBKeyRange.only([normalizeWalletAddress(walletAddress), convId]);
   return promiseRequest(idx.getAll(range)) as Promise<CachedMessage[]>;
 }
 

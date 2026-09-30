@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizeWalletAddress } from "@perkos/shared-types";
+
 import { notFound, useParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
@@ -102,7 +104,7 @@ export default function ConversationPage() {
       const msg: OptimisticMessage = {
         id,
         convId,
-        from: `user:${address.toLowerCase()}`,
+        from: `user:${normalizeWalletAddress(address)}`,
         text,
         timestamp: new Date().toISOString(),
         replyTo: null,

@@ -1,3 +1,4 @@
+import { normalizeWalletAddress } from "@perkos/shared-types";
 /**
  * PerkOS data layer — Firestore-backed.
  *
@@ -359,7 +360,7 @@ export const perkosApiBaseUrl = "/api/platform";
 // ---------------------------------------------------------------------------
 
 function normalize(address: string): string {
-  return address.toLowerCase();
+  return normalizeWalletAddress(address);
 }
 
 function tsToIso(value: unknown): string | undefined {
@@ -951,7 +952,7 @@ export async function getOrgProjects(input: {
 }): Promise<Project[]> {
   const orgId = input.org.id;
   const owner = input.org.ownerWallet || input.myWallet;
-  if (input.org.shared && owner.toLowerCase() !== input.myWallet.toLowerCase()) {
+  if (input.org.shared && normalizeWalletAddress(owner) !== normalizeWalletAddress(input.myWallet)) {
     const snap = await getDocs(
       query(projectsCol(owner), where("orgId", "==", orgId))
     );

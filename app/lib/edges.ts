@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizeWalletAddress } from "@perkos/shared-types";
+
 /**
  * Entity graph edges — typed relations between the things in a workspace:
  *
@@ -50,7 +52,7 @@ export type Edge = {
 /** Entity key helpers — single format across writers and readers. */
 export const entityKey = {
   agent: (name: string) => `agent:${name}`,
-  user: (wallet: string) => `user:${wallet.toLowerCase()}`,
+  user: (wallet: string) => `user:${normalizeWalletAddress(wallet)}`,
   task: (projectId: string, taskId: string) => `task:${projectId}/${taskId}`,
   doc: (projectId: string, docId: string) => `doc:${projectId}/${docId}`,
   project: (projectId: string) => `project:${projectId}`,
@@ -69,7 +71,7 @@ function edgesCol(walletAddress: string) {
   return collection(
     firebaseDb(),
     "wallets",
-    walletAddress.toLowerCase(),
+    normalizeWalletAddress(walletAddress),
     "edges",
   );
 }

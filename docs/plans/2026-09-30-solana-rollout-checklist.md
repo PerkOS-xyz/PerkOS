@@ -3,6 +3,35 @@
 Estado: base de autenticación implementada, lanzamiento bloqueado por compatibilidad.
 Decisión del usuario: cuentas independientes; ninguna asociación automática con EVM.
 
+## Continuación de workspace (30-09)
+
+Base fusionada: App #377, API #302 y Shared Types #7. Esta continuación no activa
+banderas ni despliega servicios. No confundir merge de código con login usable.
+
+- App: identidad exacta en las rutas de datos de perfil, proyectos, miembros,
+  tareas, documentos, conversaciones, menciones y cachés. Miembros y menciones
+  incluyen la cuenta actual en su query key; Dynamic participa en las menciones.
+- API: proyectos/organizaciones y sus miembros conservan el caso, incluida la
+  autorización de lectura/escritura, mirrors y resolución de perfiles.
+  La comprobación live de capacidades usa la misma política Solana inicial:
+  allowlist exacta/modo público, suspensión prioritaria, sin admin/ECS/LLM/VPS
+  ni consulta al saldo EVM. Esto no implementa billing Solana.
+- Chat: claims Solana verificadas detrás de un gate independiente cerrado,
+  frames y digests exactos, historial/recibos restringidos al history host y
+  a participantes actuales. Sin persistir cuerpos de mensajes en Firestore.
+- A2A: un único parser EVM/Solana para los dos bridges, scope de conversación y
+  contexto del dispatcher sensibles al caso. No publicación npm ni actualización
+  de agentes reales; Platform Tools y el resto del ciclo siguen por revisar.
+- Verificación local: App 658 correctas/3 omitidas; API 1771/2; A2A 231/0;
+  cuatro grupos de pruebas Chat correctos. Compilaciones App/API/A2A correctas.
+  App usa Firebase sintético y flag local de compilación, sin credenciales reales.
+
+Pendiente antes de habilitar: cambio de wallet con firma pendiente y logout,
+reglas Firebase/Storage en emulador, rutas de agentes y recursos, Platform Tools,
+billing/BYOK/límites, E2E real con recarga y permisos, artefacto productivo y dRPC.
+El caché IndexedDB conserva su esquema anterior por ID de mensaje global; probar
+colisiones entre cuentas antes de considerar cerrado el aislamiento de caché.
+
 ## Implementado y probado localmente
 
 - Shared Types conserva `AddressSchema` exclusivamente EVM y añade validación de
@@ -18,7 +47,7 @@ Decisión del usuario: cuentas independientes; ninguna asociación automática c
 - App conserva el flujo EVM local y envía pruebas Solana al proxy de API.
 - Ambas banderas están desactivadas por defecto. No se modificaron entornos reales.
 
-## Bloqueos verificados en código
+## Inventario inicial (progreso de esta continuación arriba)
 
 | Área | Consumidores relevantes | Trabajo pendiente |
 | --- | --- | --- |
@@ -55,5 +84,6 @@ desactivar App exige reconstrucción y despliegue. No borrar cuentas ni datos. P
 también accesos directos a Firebase con tokens ya emitidos antes de declarar que un
 rollback revoca toda sesión: los flags no modifican las reglas ni revocan tokens.
 
-No realizado: E2E con wallet real, despliegue, apertura de registro Solana, cambios
-de Chat/plugins, publicación npm o modificación de credenciales/permisos reales.
+No realizado: E2E con wallet real, despliegue, apertura de registro Solana,
+publicación npm o modificación de credenciales/permisos reales. Chat y A2A tienen
+cambios locales coordinados, todavía no están instalados en los servicios/agentes.

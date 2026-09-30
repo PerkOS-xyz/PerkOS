@@ -1,7 +1,9 @@
 "use client";
 
+import { normalizeWalletAddress } from "@perkos/shared-types";
+
 import { useCallback, useEffect, useState } from "react";
-import { useConnection } from "wagmi";
+import { useAppAccount } from "./useAppAccount";
 import {
   addDoc,
   collection,
@@ -44,7 +46,7 @@ function notificationsCol(wallet: string) {
   return collection(
     firebaseDb(),
     "wallets",
-    wallet.toLowerCase(),
+    normalizeWalletAddress(wallet),
     "notifications"
   );
 }
@@ -58,8 +60,8 @@ function notificationsCol(wallet: string) {
  * rules: workspace wildcard isSelf).
  */
 export function useNotifications() {
-  const { address } = useConnection();
-  const wallet = address?.toLowerCase() ?? null;
+  const { address } = useAppAccount();
+  const wallet = address ? normalizeWalletAddress(address) : null;
   const [items, setItems] = useState<Notification[]>([]);
 
   useEffect(() => {

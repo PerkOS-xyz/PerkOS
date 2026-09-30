@@ -33,7 +33,7 @@ import { taskConverter } from "../app/lib/projectTaskConverter";
 import { getWalletProject } from "../app/lib/perkosApi";
 import { ArtizenProjectBoard } from "../app/components/ArtizenProjectBoard";
 const failed = { name: "Prepare supporter update", status: "Review", priority: "Medium", agent: "Hermes", result: "", executionMode: "artizen-on-demand", artizenRunId: "fixture-run", executionPhase: "awaiting_stop", stopReason: "failed" };
-function Board() { const { tasks } = useProjectTasks("FIXTURE-OWNER", "fixture-project"); return <ArtizenProjectBoard projectId="fixture-project" tasks={tasks} />; }
+function Board() { const { tasks } = useProjectTasks("0xABABABABABABABABABABABABABABABABABABABAB", "fixture-project"); return <ArtizenProjectBoard projectId="fixture-project" tasks={tasks} />; }
 beforeEach(() => { vi.clearAllMocks(); mock.rows = [{ ...failed }]; mock.language = "es"; mock.emit = null; mock.fail = null; });
 afterEach(cleanup);
 
@@ -45,7 +45,7 @@ it.each(["es", "en"])("keeps failed realtime snapshots outside review in %s, inc
   expect(screen.queryByText(/Resultado pendiente|Result pending/)).not.toBeInTheDocument();
   act(() => mock.emit?.());
   expect(mock.subscribe).toHaveBeenCalledTimes(1);
-  expect(mock.subscribe).toHaveBeenCalledWith("wallets/fixture-owner/projects/fixture-project/tasks", taskConverter);
+  expect(mock.subscribe).toHaveBeenCalledWith("wallets/0xabababababababababababababababababababab/projects/fixture-project/tasks", taskConverter);
   view.unmount(); expect(mock.unsubscribe).toHaveBeenCalledTimes(1);
   render(<Board />);
   expect(screen.getByRole("alert")).toHaveTextContent(language === "es" ? "No se volverá a generar" : "will not regenerate automatically");
@@ -74,6 +74,21 @@ it("initial project reads and realtime use identical projections", async () => {
   expect(result.current.tasks).toEqual(initial.tasks);
   expect(mock.getDocs).toHaveBeenCalledTimes(3); expect(mock.updateDoc).not.toHaveBeenCalled();
 });
+it("preserves exact Solana subscription scopes across wallet switches and reload", async () => {
+  const wallet = "So11111111111111111111111111111111111111112";
+  const other = "so11111111111111111111111111111111111111112";
+  const view = renderHook(({ owner }) => useProjectTasks(owner, "fixture-project"), { initialProps: { owner: wallet } });
+  expect(mock.subscribe).toHaveBeenLastCalledWith(`wallets/${wallet}/projects/fixture-project/tasks`, taskConverter);
+  view.rerender({ owner: other });
+  expect(mock.unsubscribe).toHaveBeenCalledTimes(1);
+  expect(mock.subscribe).toHaveBeenLastCalledWith(`wallets/${other}/projects/fixture-project/tasks`, taskConverter);
+  view.unmount();
+  renderHook(() => useProjectTasks(wallet, "fixture-project"));
+  expect(mock.subscribe).toHaveBeenLastCalledWith(`wallets/${wallet}/projects/fixture-project/tasks`, taskConverter);
+  await getWalletProject({ walletAddress: wallet, projectId: "fixture-project" });
+  expect(mock.getDocs).toHaveBeenCalledWith(`wallets/${wallet}/projects/fixture-project/tasks`);
+});
+
 it("keeps missing scope dormant, handles errors and unsubscribes when scope changes", () => {
   const { result, rerender, unmount } = renderHook(({ project }: { project: string | null }) => useProjectTasks("fixture-owner", project), { initialProps: { project: null } as { project: string | null } });
   expect(mock.subscribe).not.toHaveBeenCalled(); expect(result.current.loaded).toBe(false);

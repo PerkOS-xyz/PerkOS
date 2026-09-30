@@ -1,4 +1,6 @@
 "use client";
+
+import { normalizeWalletAddress } from "@perkos/shared-types";
 import { isVoiceEnabled } from "@/app/lib/voiceFeature";
 
 import Link from "next/link";
@@ -100,7 +102,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
   const { activeOrg } = useActiveOrg();
   const ownerWallet = ownerParam || activeOrg?.ownerWallet || address;
   const isShared = Boolean(
-    ownerWallet && ownerWallet.toLowerCase() !== (address ?? "").toLowerCase(),
+    ownerWallet && normalizeWalletAddress(ownerWallet) !== normalizeWalletAddress((address ?? "")),
   );
   const initialTab = (searchParams.get("tab") as Tab) || "tasks";
   const TABS: Tab[] = ["tasks", "docs", "conductor", "agents", "map", "chat", "meetings", "members"];

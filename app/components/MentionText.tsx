@@ -25,15 +25,13 @@ export function MentionText({
   className?: string;
 }) {
   const segs = segmentMentions(text, participants);
-  const me = meWallet?.toLowerCase();
   return (
     <span className={className} style={{ whiteSpace: "pre-wrap" }}>
       {segs.map((s, i) => {
         if (s.type === "text") return <Fragment key={i}>{s.value}</Fragment>;
         const isMe =
           s.participant.kind === "human" &&
-          !!me &&
-          s.participant.id.toLowerCase() === `user:${me}`;
+          mentionsWallet([s.participant.id], meWallet);
         return (
           <span
             key={i}

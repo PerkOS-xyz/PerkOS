@@ -1,3 +1,4 @@
+import { normalizeWalletAddress } from "@perkos/shared-types";
 /**
  * User visual identity — the address-hashed gradient + wallet initials shown
  * when a user has no ENS / basename / custom avatar. The human counterpart to
@@ -17,5 +18,5 @@ export function userInitials(address?: string | null): string {
 
 /** Stable hue [0,360) derived from the address. */
 export function userHue(address?: string | null): number {
-  return nameHue((address ?? "").toLowerCase());
+  return nameHue(normalizeWalletAddress((address ?? "")));
 }

@@ -1,5 +1,7 @@
 "use client";
 
+import { normalizeWalletAddress } from "@perkos/shared-types";
+
 import {
   collection,
   doc,
@@ -41,7 +43,7 @@ export function useActivePlanId(
     const ref = doc(
       firebaseDb(),
       "wallets",
-      walletAddress.toLowerCase(),
+      normalizeWalletAddress(walletAddress),
       "projects",
       projectId
     );
@@ -84,7 +86,7 @@ export function useDocs(
       collection(
         firebaseDb(),
         "wallets",
-        walletAddress.toLowerCase(),
+        normalizeWalletAddress(walletAddress),
         "projects",
         projectId,
         "docs"
@@ -147,7 +149,7 @@ export function useDoc(
       setState({ doc: null, blocks: [], loading: false, error: null });
       return;
     }
-    const wallet = walletAddress.toLowerCase();
+    const wallet = normalizeWalletAddress(walletAddress);
     const base = ["wallets", wallet, "projects", projectId, "docs", docId];
 
     const docRef = doc(firebaseDb(), base[0], ...base.slice(1));
@@ -246,7 +248,7 @@ export function useDocMessages(
       collection(
         firebaseDb(),
         "wallets",
-        walletAddress.toLowerCase(),
+        normalizeWalletAddress(walletAddress),
         "projects",
         projectId,
         "docs",
@@ -300,7 +302,7 @@ export function useDocRevisions(
       collection(
         firebaseDb(),
         "wallets",
-        walletAddress.toLowerCase(),
+        normalizeWalletAddress(walletAddress),
         "projects",
         projectId,
         "docs",

@@ -2,7 +2,7 @@ import { beforeEach, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { OnboardingProvider, useOnboarding } from "../app/lib/onboardingState";
 import { usernameCopy } from "../app/lib/usernameCopy";
-const account = vi.hoisted(() => ({ address: "ONE" }));
+const account = vi.hoisted(() => ({ address: "0xABABABABABABABABABABABABABABABABABABABAB" }));
 vi.mock("../app/lib/useAppAccount", () => ({ useAppAccount: () => account }));
 function Consumer() {
   const state = useOnboarding();
@@ -18,7 +18,7 @@ function Consumer() {
 beforeEach(() => {
   cleanup();
   localStorage.clear();
-  account.address = "ONE";
+  account.address = "0xABABABABABABABABABABABABABABABABABABABAB";
 });
 it("scopes optional workspace hints to the connected account and never adopts the legacy key", () => {
   localStorage.setItem(
@@ -33,14 +33,14 @@ it("scopes optional workspace hints to the connected account and never adopts th
   expect(screen.getByTestId("workspace")).toHaveTextContent("");
   fireEvent.click(screen.getByText("Save hint"));
   expect(screen.getByTestId("workspace")).toHaveTextContent("Private");
-  account.address = "TWO";
+  account.address = "0xcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd";
   view.rerender(
     <OnboardingProvider>
       <Consumer />
     </OnboardingProvider>,
   );
   expect(screen.getByTestId("workspace")).toHaveTextContent("");
-  account.address = "one";
+  account.address = "0xabababababababababababababababababababab";
   view.rerender(
     <OnboardingProvider>
       <Consumer />
@@ -48,6 +48,20 @@ it("scopes optional workspace hints to the connected account and never adopts th
   );
   expect(screen.getByTestId("workspace")).toHaveTextContent("Private");
 });
+it("does not share workspace hints between Solana case variants, including reload", () => {
+  const wallet = "So11111111111111111111111111111111111111112";
+  account.address = wallet;
+  const view = render(<OnboardingProvider><Consumer /></OnboardingProvider>);
+  fireEvent.click(screen.getByText("Save hint"));
+  account.address = wallet.toLowerCase();
+  view.rerender(<OnboardingProvider><Consumer /></OnboardingProvider>);
+  expect(screen.getByTestId("workspace").textContent).toBe("");
+  view.unmount();
+  account.address = wallet;
+  render(<OnboardingProvider><Consumer /></OnboardingProvider>);
+  expect(screen.getByTestId("workspace")).toHaveTextContent("Private");
+});
+
 it("provides username messages for every supported account language", () => {
   for (const lang of ["en", "es", "fr", "pt", "it", "ja", "ko", "zh"])
     expect(
