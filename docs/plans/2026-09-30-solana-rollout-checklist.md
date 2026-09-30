@@ -22,15 +22,31 @@ banderas ni despliega servicios. No confundir merge de código con login usable.
 - A2A: un único parser EVM/Solana para los dos bridges, scope de conversación y
   contexto del dispatcher sensibles al caso. No publicación npm ni actualización
   de agentes reales; Platform Tools y el resto del ciclo siguen por revisar.
-- Verificación local: App 658 correctas/3 omitidas; API 1771/2; A2A 231/0;
+- Sesión App: una firma por generación de cuenta, cancelación de prompts/HTTP
+  obsoletos y commits Firebase serializados con limpieza antes de cambiar de UID.
+  Logout compartido entre consumidores, sin relogin automático si falla la salida
+  del proveedor; restauración, unmount y reintento explícito cubiertos en pruebas.
+- Caché Chat: IndexedDB v2 con clave `[walletAddress, convId, id]`, migración
+  transaccional de v1 y conexiones cerradas. Borrado/poda limitados al scope exacto.
+  Una pestaña v1 antigua puede bloquear la migración: cerrarla y recargar. Un fallo
+  revierte toda la migración, no borra la base anterior. No se puede reconstruir el
+  caso de una dirección Solana que ya hubiera sido alterado por código histórico.
+- Verificación local anterior: App 658 correctas/3 omitidas; API 1771/2; A2A 231/0;
   cuatro grupos de pruebas Chat correctos. Compilaciones App/API/A2A correctas.
   App usa Firebase sintético y flag local de compilación, sin credenciales reales.
 
-Pendiente antes de habilitar: cambio de wallet con firma pendiente y logout,
-reglas Firebase/Storage en emulador, rutas de agentes y recursos, Platform Tools,
+Pruebas nuevas App: 24 regresiones de sesión/coordinador/autenticación y 11 de
+IndexedDB usando fake-indexeddb 6.2.5 (solo desarrollo). Incluyen StrictMode,
+consumidores simultáneos, EVM Mini App y cambios EVM/Solana durante firma/commit.
+Son pruebas locales con proveedores y Firebase simulados, no E2E con wallets reales.
+Verificación final de esta revisión: App 693 correctas, 3 omitidas; lint de archivos
+modificados, TypeScript y build Next correctos. Sin despliegue ni activación.
+
+Pendiente antes de habilitar: reglas Firebase/Storage en emulador, rutas de agentes y recursos, Platform Tools,
 billing/BYOK/límites, E2E real con recarga y permisos, artefacto productivo y dRPC.
-El caché IndexedDB conserva su esquema anterior por ID de mensaje global; probar
-colisiones entre cuentas antes de considerar cerrado el aislamiento de caché.
+Verificar también logout/cambio de wallet y migración IndexedDB en navegador real,
+incluida interacción entre pestañas con Firebase persistido. La partición del caché
+no es una frontera de autorización ni impide acceso local al perfil del navegador.
 
 ## Implementado y probado localmente
 
@@ -56,7 +72,7 @@ colisiones entre cuentas antes de considerar cerrado el aislamiento de caché.
 | Autorización API | `src/routes/projects.ts`, `src/services/orgMembers.ts`, `src/services/accessControl.ts` y consumidores de wallet en rutas de agentes | Revisar propietario, invitaciones, miembros y permisos usando identidad exacta. No ampliar esquemas de transacciones EVM. |
 | Chat | `src/auth.mjs`, `src/router.mjs`, `src/internal.mjs` en PerkOS-Chat | Rechazo actual de UID no `0x`, minúsculas en frames, historial y digest. Actualizar con pruebas de aislamiento entre dos wallets y participantes. |
 | Plugins de agentes | PerkOS-A2A y adaptadores de runtimes | Auditar propagación de `forWallet`, respuestas e historial antes de prometer chat funcional. No acceder a hosts privados. |
-| Cambio de wallet | `useWalletSession.ts` | Probar cambio EVM/Solana, desconexión y logout mientras hay firma pendiente. La prueba del bridge no acredita el ciclo Firebase completo. |
+| Cambio de wallet | `useWalletSession.ts`, `walletSignInCoordinator.ts` | Cobertura local de cambios EVM/Solana, firma/commit pendientes, logout y Mini App; falta E2E real y múltiples pestañas. |
 | Billing y límites | Access, BYOK, cuotas, provisión y server wallets | Conectar una wallet no autoriza infraestructura, patrocinio ni transacciones. No vincular cuentas ni heredar saldos EVM. |
 
 ## Secuencia de activación

@@ -73,6 +73,7 @@
     "@vitest/coverage-v8": "^4.1.7",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "fake-indexeddb": "6.2.5",
     "jsdom": "^27.0.1",
     "tailwindcss": "^4",
     "typescript": "^5",
