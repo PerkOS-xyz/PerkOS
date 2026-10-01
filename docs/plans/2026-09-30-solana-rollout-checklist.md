@@ -42,11 +42,30 @@ Son pruebas locales con proveedores y Firebase simulados, no E2E con wallets rea
 Verificación final de esta revisión: App 693 correctas, 3 omitidas; lint de archivos
 modificados, TypeScript y build Next correctos. Sin despliegue ni activación.
 
-Pendiente antes de habilitar: verificar/desplegar reglas revisadas, rutas de agentes y recursos, Platform Tools,
+Pendiente antes de habilitar: verificar Storage desplegado, rutas de agentes y recursos, Platform Tools,
 billing/BYOK/límites, E2E real con recarga y permisos, artefacto productivo y dRPC.
 Verificar también logout/cambio de wallet y migración IndexedDB en navegador real,
 incluida interacción entre pestañas con Firebase persistido. La partición del caché
 no es una frontera de autorización ni impide acceso local al perfil del navegador.
+
+## Canje de acceso Solana (01-10)
+
+- App #378 y #379 están fusionados. API #303, Chat #15 y A2A #106 continúan
+  pendientes; esta implementación no enciende flags ni despliega servicios.
+- El formulario usa un desafío Ed25519 de un solo uso con propósito exclusivo
+  `redeem-access-code`. API verifica la firma antes de canjear, conserva base58
+  exacto y aplica límite/cupo, suspensión y unicidad del usuario en transacción.
+- Una firma de login no sirve para canjear ni viceversa. Reintentos no duplican
+  cupos ni restauran una entrada eliminada. No concede infra, LLM o saldo.
+- La App cancela esperas al cambiar/desconectar la wallet y conserva el endpoint
+  EVM existente. No consume ningún código real durante las pruebas.
+- Verificación: API 1782 correctas/2 omitidas; App 706 correctas/24 omitidas;
+  TypeScript y builds correctos. Incluye concurrencia por el último cupo,
+  firmas Ed25519 reales generadas en memoria, replay y cancelación de firma.
+- El canje implementado no equivale a login activado. Quedan rutas de agentes
+  y billing con normalización EVM; deben corregirse o rechazar Solana de forma
+  explícita antes de abrir el acceso. Falta E2E con wallet real y servicios
+  coordinados desplegados. El formulario sin código sigue siendo EVM-only.
 
 ## Reglas Firestore y Storage: validación local (30-09)
 
@@ -64,10 +83,11 @@ no es una frontera de autorización ni impide acceso local al perfil del navegad
   y cuerpos privados de chat permitidos en Firestore. El wildcard ahora excluye
   esas escrituras; conversaciones solo conceden acceso a metadata y recibos usan
   la regla específica de creación/anclaje único. Lectura propia de billing sigue.
-- No se ha comprobado la versión de reglas desplegada ni si hubo abuso. El
-  resultado es del código del repositorio ejecutado localmente, no una auditoría
-  forense de producción. Revisar y desplegar las reglas con prioridad por el riesgo
-  de integridad de créditos, sin esperar a activar Solana. No despliegue automático.
+- Actualización 01-10: Firestore de producción fue desplegado con autorización
+  y verificado por hash remoto a las 05:19 UTC. SHA-256:
+  `93cf92928551274059f4b73f010591f5ea20600dc2ac32bf8eed809edbb1502d`.
+  Dashboard/proyecto siguen legibles. No se investigó abuso histórico ni se hizo
+  una prueba productiva de escritura con dos miembros. Storage no fue desplegado.
 - Storage mantiene enlaces de descarga como capacidades compartibles. Los tests
   comprueban permisos del SDK por UID, no revocación de enlaces ya divulgados.
 - Estas reglas no consultan el flag Solana de API. Apagar ese flag no revoca
@@ -127,6 +147,6 @@ desactivar App exige reconstrucción y despliegue. No borrar cuentas ni datos. P
 también accesos directos a Firebase con tokens ya emitidos antes de declarar que un
 rollback revoca toda sesión: los flags no modifican las reglas ni revocan tokens.
 
-No realizado: E2E con wallet real, despliegue, apertura de registro Solana,
+No realizado: E2E con wallet real, despliegue de servicios Solana, apertura de registro Solana,
 publicación npm o modificación de credenciales/permisos reales. Chat y A2A tienen
 cambios locales coordinados, todavía no están instalados en los servicios/agentes.
