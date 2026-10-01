@@ -23,6 +23,7 @@
  * receipt is signed locally and stored in Firestore.
  */
 
+import { normalizeWalletAddress } from "@perkos/shared-types";
 import {
   collection,
   doc,
@@ -125,7 +126,7 @@ function receiptsCol(walletAddress: string) {
   return collection(
     firebaseDb(),
     "wallets",
-    walletAddress.toLowerCase(),
+    normalizeWalletAddress(walletAddress),
     "receipts",
   ).withConverter(converter);
 }
@@ -134,7 +135,7 @@ function receiptDoc(walletAddress: string, receiptId: string) {
   return doc(
     firebaseDb(),
     "wallets",
-    walletAddress.toLowerCase(),
+    normalizeWalletAddress(walletAddress),
     "receipts",
     receiptId,
   ).withConverter(converter);

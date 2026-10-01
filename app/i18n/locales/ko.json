@@ -1,4 +1,12 @@
 {
+  "walletCapabilities": {
+    "accessCodeLabel": "초대 코드 (필수)",
+    "title": "계정 기능",
+    "unavailable": "사용 불가",
+    "billing": "Solana 계정에서는 결제와 관리형 인프라를 아직 사용할 수 없습니다. EVM 지갑을 연결하면 별도의 계정이 열리며 작업 공간이나 크레딧은 이전되지 않습니다.",
+    "receipts": "서명된 영수증과 블록체인 기록은 현재 EVM 계정이 필요합니다. 채팅과 기록은 계속 사용할 수 있습니다.",
+    "accessCodeRequired": "Solana로 접속하려면 초대 코드가 필요합니다. 코드 없는 신청은 아직 지원하지 않습니다."
+  },
   "nav": {
     "dashboard": "대시보드",
     "projects": "프로젝트",

@@ -1,4 +1,5 @@
 import "server-only";
+import { isEvmWalletAddress } from "@perkos/shared-types";
 
 /**
  * Resolve a wallet's ENS + Basename avatars and persist them onto
@@ -26,6 +27,8 @@ export async function resolveAndPersistAvatar(
   address: string,
   opts?: { force?: boolean }
 ): Promise<ResolvedAvatars | null> {
+  // ENS/Basename are EVM-only. Do not write to a lowercased Solana profile.
+  if (!isEvmWalletAddress(address)) return null;
   try {
     const wallet = address.toLowerCase();
     const ref = adminDb()

@@ -1,4 +1,12 @@
 {
+  "walletCapabilities": {
+    "accessCodeLabel": "邀请码（必填）",
+    "title": "账户功能",
+    "unavailable": "暂不可用",
+    "billing": "Solana 账户暂不支持支付和托管基础设施。连接 EVM 钱包会打开独立账户，不会转移您的工作空间或额度。",
+    "receipts": "签名收据和链上存证目前需要 EVM 账户。聊天和历史记录仍可使用。",
+    "accessCodeRequired": "Solana 访问目前需要邀请码，暂不支持无邀请码申请。"
+  },
   "nav": {
     "dashboard": "仪表盘",
     "projects": "项目",

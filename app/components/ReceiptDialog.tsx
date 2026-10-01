@@ -10,6 +10,8 @@ import {
   useWriteContract,
 } from "wagmi";
 import type { Address, Hex } from "viem";
+import { isEvmWalletAddress } from "@perkos/shared-types";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -92,7 +94,24 @@ type AnchorState = {
  * The manifest is reproducible: anyone with the host agent's jsonl can
  * recompute the hash, then verify the signature via ecrecover.
  */
-export function ReceiptDialog({
+export function ReceiptDialog(props: Props) {
+  const { t } = useTranslation();
+  if (!isEvmWalletAddress(props.walletAddress)) {
+    return (
+      <Dialog open={props.open} onOpenChange={props.onOpenChange}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("walletCapabilities.title")}</DialogTitle>
+            <DialogDescription>{t("walletCapabilities.receipts")}</DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+  return <EvmReceiptDialog {...props} />;
+}
+
+function EvmReceiptDialog({
   open,
   onOpenChange,
   conversation,

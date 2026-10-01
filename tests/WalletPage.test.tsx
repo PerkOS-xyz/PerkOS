@@ -6,8 +6,8 @@ import i18n from "../app/lib/i18n";
 
 let balanceData: WalletBalances;
 
-vi.mock("wagmi", () => ({
-  useAccount: () => ({
+vi.mock("../app/lib/useAppAccount", () => ({
+  useAppAccount: () => ({
     address: "0x1111111111111111111111111111111111111111",
     isConnected: true,
   }),

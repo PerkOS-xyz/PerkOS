@@ -3,6 +3,25 @@
 Estado: base de autenticación implementada, lanzamiento bloqueado por compatibilidad.
 Decisión del usuario: cuentas independientes; ninguna asociación automática con EVM.
 
+## Estado actualizado (01-10, capacidades UI)
+
+Esta sección sustituye los pendientes históricos de merge enumerados más abajo.
+
+- Fusionados App #380, API #303/#304, Tools #14, A2A #106 y Chat #15.
+  No equivale a servicios desplegados ni login habilitado.
+- UI: cuentas no EVM no montan firmas, pagos, server wallets ni anclaje de recibos
+  EVM. Avisos en ocho idiomas explican las restricciones y cuentas independientes.
+  AccessGate exige código para Solana; el flujo EVM sin código permanece disponible.
+- Wallet usa identidad unificada Dynamic/Mini App, con consulta server wallet
+  particionada por cuenta EVM. Lecturas de recibos conservan Solana exacto.
+  Resolución de avatares EVM rechaza otras identidades antes de consultar/escribir.
+- A2A 0.12.69 todavía no publicado: workflow `36828215536` falló antes de publicar
+  por `EALLOWGIT` tras actualizar npm a latest. Corrección en revisión fija npm
+  11.20.0 y permite únicamente dependencias Git directas, en CI y publicación.
+- Pendientes: revisión/merge de esta UI y corrección de publicación, publicación
+  A2A, despliegue coordinado, Storage activo/dRPC/artefactos y E2E con firma real.
+  No se alteraron flags, cuentas, códigos de campaña, agentes ni pagos reales.
+
 ## Continuación de workspace (30-09)
 
 Base fusionada: App #377, API #302 y Shared Types #7. Esta continuación no activa
