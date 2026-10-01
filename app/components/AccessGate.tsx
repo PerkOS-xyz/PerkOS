@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState, type FormEvent } from "react";
+import { useContext, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import {
   CheckCircle2,
   Loader2,
@@ -14,6 +14,9 @@ import { emailSchema } from "../lib/validators";
 import { useWalletSession } from "../lib/useWalletSession";
 import { useIsInMiniApp } from "../lib/useIsInMiniApp";
 import { dynamicBrowserEnabled } from "../lib/dynamicBrowser";
+import { BrowserWalletContext } from "../lib/browserWallet";
+import { isSolanaWalletAddress } from "@perkos/shared-types";
+import { redeemSolanaAccessCode } from "../lib/redeemSolanaAccessCode";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -34,6 +37,9 @@ type Props = {
 export function AccessGate({ address }: Props) {
   const { t } = useTranslation();
   const session = useWalletSession();
+  const browserWallet = useContext(BrowserWalletContext);
+  const pendingRedemption = useRef<AbortController | null>(null);
+  useEffect(() => () => pendingRedemption.current?.abort(), [address, browserWallet?.address, browserWallet?.isConnected]);
   const isInMiniApp = useIsInMiniApp();
   // "Use a different wallet" only makes sense in a real browser (Dynamic owns
   // the wallet). In Farcaster / Base App the wallet is the host identity.
@@ -57,6 +63,7 @@ export function AccessGate({ address }: Props) {
   const usernameValid = /^[a-z0-9_-]{3,20}$/.test(username.trim().toLowerCase());
 
   async function useDifferentWallet() {
+    pendingRedemption.current?.abort();
     // Fully log out the Dynamic wallet + Firebase (a bare wagmi disconnect() is
     // a no-op on the browser/Dynamic path), then start over from the landing.
     setLoggingOut(true);
@@ -87,6 +94,16 @@ export function AccessGate({ address }: Props) {
     setError(null);
     try {
       if (hasCode) {
+        if (isSolanaWalletAddress(address)) {
+          if (!browserWallet?.isConnected || browserWallet.address !== address) throw new Error("Connect the matching Solana wallet first.");
+          pendingRedemption.current?.abort();
+          const controller = new AbortController();
+          pendingRedemption.current = controller;
+          await redeemSolanaAccessCode({ address, code: accessCode.trim(), email: email.trim(), username: username.trim(), company: company.trim() || undefined, website: website.trim() || undefined }, browserWallet.signMessage, controller.signal);
+          controller.signal.throwIfAborted();
+          window.location.assign("/onboarding/welcome");
+          return;
+        }
         // Redeem path: valid code → allowlisted instantly, then re-enter.
         const res = await fetch("/api/redeem-access-code", {
           method: "POST",
@@ -139,6 +156,7 @@ export function AccessGate({ address }: Props) {
       }
       setSubmitted(true);
     } catch (err) {
+      if (err instanceof Error && err.name === "AbortError") return;
       setError(
         err instanceof Error ? err.message : t("chrome.accessGate.submitError"),
       );
