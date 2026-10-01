@@ -60,6 +60,7 @@ export function AccessGate({ address }: Props) {
   // registry: 3-20 chars, [a-z0-9_-]). Without a code it's the normal
   // request-access flow (email + username + company).
   const hasCode = accessCode.trim().length > 0;
+  const requiresCode = isSolanaWalletAddress(address);
   const usernameValid = /^[a-z0-9_-]{3,20}$/.test(username.trim().toLowerCase());
 
   async function useDifferentWallet() {
@@ -81,6 +82,7 @@ export function AccessGate({ address }: Props) {
   }, [email]);
   const canSubmit =
     !submitting &&
+    (!requiresCode || hasCode) &&
     !emailError &&
     (hasCode
       ? usernameValid
@@ -223,10 +225,11 @@ export function AccessGate({ address }: Props) {
             <form onSubmit={onSubmit} noValidate className="flex flex-col gap-3">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="access-code">
-                  {t("chrome.accessGate.accessCodeLabel")}
+                  {requiresCode ? t("walletCapabilities.accessCodeLabel") : t("chrome.accessGate.accessCodeLabel")}
                 </Label>
                 <Input
                   id="access-code"
+                  required={requiresCode}
                   value={accessCode}
                   onChange={(e) => setAccessCode(e.target.value)}
                   placeholder={t("chrome.accessGate.accessCodePlaceholder")}
@@ -235,7 +238,7 @@ export function AccessGate({ address }: Props) {
                   className="uppercase"
                 />
                 <p className="text-xs text-muted-foreground">
-                  {t("chrome.accessGate.accessCodeHint")}
+                  {requiresCode ? t("walletCapabilities.accessCodeRequired") : t("chrome.accessGate.accessCodeHint")}
                 </p>
               </div>
               <div className="flex flex-col gap-1.5">

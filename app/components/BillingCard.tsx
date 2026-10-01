@@ -17,6 +17,8 @@ import { cn } from "@/lib/utils";
 
 import { getMyBilling } from "../lib/perkosApi";
 import { DepositDialog } from "./DepositDialog";
+import { isEvmWalletAddress } from "@perkos/shared-types";
+import { WalletFeatureNotice } from "./WalletFeatureNotice";
 
 function fmtHours(h: number): string {
   return h.toLocaleString(undefined, { maximumFractionDigits: 1 });
@@ -30,6 +32,7 @@ export function BillingCard({
   showBlockchain?: boolean;
 }) {
   const { t } = useTranslation();
+  const evmActions = isEvmWalletAddress(address);
   const query = useQuery({
     queryKey: ["my-billing", address],
     queryFn: getMyBilling,
@@ -98,14 +101,14 @@ export function BillingCard({
               icon={<LockKeyhole className="h-3.5 w-3.5 text-primary" />}
               label="Infra left"
               value={
-                infra.hoursRemaining === null
+                !evmActions ? t("walletCapabilities.unavailable") : infra.hoursRemaining === null
                   ? "Sponsored"
                   : `${fmtHours(infra.hoursRemaining)}h`
               }
             />
           </div>
 
-          {b.exempt ? (
+          {!evmActions ? <WalletFeatureNotice feature="billing" /> : b.exempt ? (
             <div className="rounded-md border border-sky-500/30 bg-sky-500/5 px-3 py-2">
               <span className="text-xs font-medium text-sky-300">Sponsored — runs free</span>
               <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">

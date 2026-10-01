@@ -21,6 +21,8 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 import { firebaseAuth } from "../lib/firebase";
+import { isEvmWalletAddress } from "@perkos/shared-types";
+import { WalletFeatureNotice } from "./WalletFeatureNotice";
 
 const CHAIN_ID: Record<"base" | "celo", number> = { base: 8453, celo: 42220 };
 
@@ -110,7 +112,12 @@ async function idToken(): Promise<string> {
   return user.getIdToken();
 }
 
-export function DepositDialog({
+export function DepositDialog(props: { address: string; onDeposited?: () => void }) {
+  if (!isEvmWalletAddress(props.address)) return <WalletFeatureNotice feature="billing" />;
+  return <EvmDepositDialog {...props} />;
+}
+
+function EvmDepositDialog({
   address,
   onDeposited,
 }: {

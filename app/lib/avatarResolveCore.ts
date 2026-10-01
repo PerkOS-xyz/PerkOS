@@ -22,6 +22,7 @@ import {
 } from "viem";
 import { base, mainnet } from "viem/chains";
 import { normalize } from "viem/ens";
+import { isEvmWalletAddress } from "@perkos/shared-types";
 
 const BASE_L2_RESOLVER: Address = "0xC6d566A56A1aFf6508b41f6c90ff131615583BCD";
 const BASE_REVERSE_NODE = namehash("80002105.reverse");
@@ -60,6 +61,9 @@ export async function resolveOnchainAvatars(
   address: string,
   alchemyKey?: string
 ): Promise<ResolvedAvatars> {
+  if (!isEvmWalletAddress(address)) {
+    return { ensName: null, ensAvatarUrl: null, basename: null, basenameAvatarUrl: null };
+  }
   const addr = address as Address;
   const mainnetClient = createPublicClient({
     chain: mainnet,

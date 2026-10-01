@@ -1,4 +1,12 @@
 {
+  "walletCapabilities": {
+    "accessCodeLabel": "Invitation code (required)",
+    "title": "Account capabilities",
+    "unavailable": "Unavailable",
+    "billing": "Payments and managed infrastructure are not available for Solana accounts yet. Connecting an EVM wallet opens a separate account; it does not transfer your workspace or credits.",
+    "receipts": "Signed receipts and on-chain anchoring currently require an EVM account. Your chat and history remain available.",
+    "accessCodeRequired": "Solana access currently requires an invitation code. Requests without a code are not supported yet."
+  },
   "nav": {
     "dashboard": "Dashboard",
     "projects": "Projects",

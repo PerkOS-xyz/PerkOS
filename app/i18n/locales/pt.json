@@ -1,4 +1,12 @@
 {
+  "walletCapabilities": {
+    "accessCodeLabel": "Código de convite (obrigatório)",
+    "title": "Recursos da conta",
+    "unavailable": "Indisponível",
+    "billing": "Pagamentos e infraestrutura gerenciada ainda não estão disponíveis para contas Solana. Conectar uma carteira EVM abre uma conta separada, sem transferir seu espaço de trabalho ou créditos.",
+    "receipts": "Recibos assinados e registro na blockchain exigem uma conta EVM por enquanto. Seu chat e histórico continuam disponíveis.",
+    "accessCodeRequired": "O acesso Solana exige um código de convite. Solicitações sem código ainda não estão disponíveis."
+  },
   "nav": {
     "dashboard": "Painel",
     "projects": "Projetos",

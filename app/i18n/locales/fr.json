@@ -1,4 +1,12 @@
 {
+  "walletCapabilities": {
+    "accessCodeLabel": "Code d’invitation (obligatoire)",
+    "title": "Fonctions du compte",
+    "unavailable": "Indisponible",
+    "billing": "Les paiements et l’infrastructure gérée ne sont pas encore disponibles pour les comptes Solana. Connecter un portefeuille EVM ouvre un compte distinct, sans transférer votre espace de travail ni vos crédits.",
+    "receipts": "Les reçus signés et l’ancrage sur la blockchain nécessitent actuellement un compte EVM. Votre chat et votre historique restent disponibles.",
+    "accessCodeRequired": "L’accès Solana nécessite actuellement un code d’invitation. Les demandes sans code ne sont pas encore disponibles."
+  },
   "nav": {
     "dashboard": "Tableau de bord",
     "projects": "Projets",

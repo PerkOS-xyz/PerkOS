@@ -3,7 +3,9 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { useAccount } from "wagmi";
+import { isEvmWalletAddress } from "@perkos/shared-types";
+import { useAppAccount } from "@/app/lib/useAppAccount";
+import { WalletFeatureNotice } from "@/app/components/WalletFeatureNotice";
 import {
   Wallet,
   Copy,
@@ -90,8 +92,13 @@ function assetInitial(symbol: string): string {
 }
 
 export default function WalletPage() {
+  const { address, isConnected } = useAppAccount();
+  if (!isEvmWalletAddress(address)) return <WalletFeatureNotice feature="billing" />;
+  return <EvmWalletPage key={address.toLowerCase()} connectedAddress={address} isConnected={isConnected} />;
+}
+
+function EvmWalletPage({ connectedAddress, isConnected }: { connectedAddress: string; isConnected: boolean }) {
   const { t, i18n } = useTranslation();
-  const { address: connectedAddress, isConnected } = useAccount();
   const [copied, setCopied] = useState(false);
   const [expandedAssets, setExpandedAssets] = useState<Set<string>>(
     () => new Set(),
@@ -100,7 +107,7 @@ export default function WalletPage() {
     useState<WalletSource>("connected");
 
   const walletQuery = useQuery({
-    queryKey: ["server-wallet"],
+    queryKey: ["server-wallet", connectedAddress.toLowerCase()],
     queryFn: ensureServerWallet,
     enabled: walletSource === "managed",
     staleTime: 5 * 60_000,
