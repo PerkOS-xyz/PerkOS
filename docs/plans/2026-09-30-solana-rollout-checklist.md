@@ -3,6 +3,26 @@
 Estado: base de autenticación implementada, lanzamiento bloqueado por compatibilidad.
 Decisión del usuario: cuentas independientes; ninguna asociación automática con EVM.
 
+## Estado vigente (02-10, cadena de release)
+
+- App382 (`f05adf9`) y API305 (`81c006c`) confirmados fusionados. Sus correcciones
+  de empaquetado no equivalen a despliegue ni activación.
+- A2A 0.12.69 publicado por OIDC y verificado contra SHA-512 del registro npm.
+  Se incorpora el tarball exacto a `public/artifacts`, sin recompilarlo, junto
+  con su checksum SHA-256. La prueba local comprueba ambos hashes. Conservar
+  artefactos antiguos: invitaciones ya entregadas pueden referenciarlos.
+- API debe fijar las invitaciones nativas Hermes/OpenClaw a 0.12.69 y el mismo
+  hash. Desplegar/verificar la URL pública antes de desplegar esa actualización
+  de invitaciones. El pin Docker es independiente y no se adelanta a una imagen
+  inexistente. No actualizar ni reiniciar agentes externos por este cambio.
+- Preflight de solo lectura confirma que el upstream actual de `perkos.xyz`
+  usa una imagen con Privy; su Compose no tiene el ID Dynamic Live. Reconciliar
+  configuración aprobada antes del reemplazo, sin usar un ID histórico al azar.
+  Sesión del dashboard Dynamic expirada; se solicitó autenticación del dueño.
+- Solana permanece cerrado. Faltan despliegue coordinado, bridge Docker público
+  compatible si se ofrece ese camino, verificación dRPC y E2E con firma real.
+  Las secciones siguientes son el historial, no una lista vigente de PR abiertos.
+
 ## Estado actualizado (01-10, capacidades UI)
 
 Actualización de empaquetado: App381 y A2A107 fusionados. El workflow A2A
