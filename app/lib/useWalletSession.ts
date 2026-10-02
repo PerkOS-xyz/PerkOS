@@ -21,7 +21,7 @@ import { WalletSignInCoordinator } from "./walletSignInCoordinator";
  * personal_sign requests with different nonces queued up.
  *
  * The coordinator shares one flight per account generation, cancels stale
- * prompts, and serializes Firebase commits and their cleanup.
+ * prompts, serializes Firebase commits, and retains failures for late consumers.
  */
 const coordinator = new WalletSignInCoordinator();
 let sessionConsumers = 0;
@@ -137,19 +137,21 @@ export function useWalletSession(): Result {
   }, [browserWallet, signMessageAsync]);
 
   const [attempt, setAttempt] = useState<{
-    wallet?: string; syncing: boolean; denial: "not-allowlisted" | "error" | null; error?: string;
-  }>({ syncing: false, denial: null });
+    wallet?: string; syncing: boolean;
+  }>({ syncing: false });
   const localRun = useRef(0);
   const mounted = useRef(false);
 
   const normalizedAddress = address ? normalizeWalletAddress(address) : undefined;
   const blockedWallet = useSyncExternalStore(coordinator.subscribe, coordinator.getBlockedWallet, () => null);
   const loggingOut = useSyncExternalStore(coordinator.subscribe, coordinator.getLoggingOut, () => false);
+  const sharedFailure = useSyncExternalStore(coordinator.subscribe, coordinator.getFailure, () => null);
   const logoutSuppressed = Boolean(normalizedAddress && blockedWallet === normalizedAddress);
   const currentAttempt = attempt.wallet === normalizedAddress ? attempt : null;
   const syncing = currentAttempt?.syncing ?? false;
-  const denial = currentAttempt?.denial ?? null;
-  const errorMessage = currentAttempt?.error;
+  const failure = sharedFailure?.wallet === normalizedAddress ? sharedFailure : null;
+  const errorMessage = failure ? (failure.error instanceof Error ? failure.error.message : "Sign-in failed.") : undefined;
+  const denial = failure ? (errorMessage?.toLowerCase().includes("allowlist") ? "not-allowlisted" : "error") : null;
   const walletLoading = browserWallet ? browserWallet.loading
     : wagmiStatus === "connecting" || wagmiStatus === "reconnecting";
   const inSync =
@@ -178,17 +180,15 @@ export function useWalletSession(): Result {
     if (coordinator.getLoggingOut() || logoutSuppressed || walletLoading || !isConnected || !normalizedAddress) return;
     const run = ++localRun.current;
     const signer = signMessageRef.current;
-    setAttempt({ wallet: normalizedAddress, syncing: true, denial: null });
+    setAttempt({ wallet: normalizedAddress, syncing: true });
 
     try {
       await coordinator.run(normalizedAddress, signal => signInWithWallet({
         address: normalizedAddress, signMessage: signer, signal,
       }));
-    } catch (err) {
-      if (!mounted.current || localRun.current !== run || (err instanceof Error && err.name === "AbortError")) return;
-      const msg = err instanceof Error ? err.message : "Sign-in failed.";
-      setAttempt({ wallet: normalizedAddress, syncing: false,
-        denial: msg.toLowerCase().includes("allowlist") ? "not-allowlisted" : "error", error: msg });
+    } catch {
+      // The coordinator publishes one account-bound failure to every consumer.
+      // Cancellation is intentionally not a terminal error.
     } finally {
       if (mounted.current && localRun.current === run) setAttempt(current => ({ ...current, syncing: false }));
     }
@@ -265,7 +265,7 @@ export function useWalletSession(): Result {
       } catch {
         // ignore
       }
-      if (mounted.current) setAttempt({ syncing: false, denial: null });
+      if (mounted.current) setAttempt({ syncing: false });
     } finally {
       coordinator.setLoggingOut(false);
     }
@@ -290,8 +290,11 @@ export function useWalletSession(): Result {
     retry: () => {
       if (logoutSuppressed && normalizedAddress) {
         coordinator.resume(normalizedAddress);
-        setAttempt({ syncing: false, denial: null });
-      } else { void runSignIn(); }
+        setAttempt({ syncing: false });
+      } else {
+        if (normalizedAddress) coordinator.retry(normalizedAddress);
+        void runSignIn();
+      }
     },
     signOutFirebase: async () => {
       coordinator.suspend(normalizedAddress ?? null);

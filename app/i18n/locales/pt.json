@@ -27,6 +27,7 @@
     "listView": "Visualização em lista"
   },
   "signIn": {
+    "failed": "Não foi possível entrar. Tente novamente quando quiser.",
     "signingIn": "Fazendo login…",
     "continueAs": "Continuar como {{address}}",
     "retry": "Tentar login novamente",

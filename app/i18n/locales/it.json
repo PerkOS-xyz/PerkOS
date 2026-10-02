@@ -25,6 +25,7 @@
     "mainNavigation": "Navigazione principale"
   },
   "signIn": {
+    "failed": "Accesso non riuscito. Riprova quando vuoi.",
     "signingIn": "Accesso in corso…",
     "continueAs": "Continua come {{address}}",
     "retry": "Riprova l'accesso",

@@ -25,6 +25,7 @@
     "mainNavigation": "主导航"
   },
   "signIn": {
+    "failed": "登录失败。准备好后请重试。",
     "signingIn": "正在登录…",
     "continueAs": "以 {{address}} 继续",
     "retry": "重试登录",
