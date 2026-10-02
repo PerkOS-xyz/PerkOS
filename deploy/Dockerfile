@@ -7,6 +7,7 @@
 
 FROM node:22-alpine AS deps
 WORKDIR /app
+RUN apk add --no-cache git
 COPY package.json package-lock.json* ./
 RUN npm ci --no-audit --no-fund --legacy-peer-deps
 
@@ -32,6 +33,7 @@ ARG NEXT_PUBLIC_RECEIPT_ANCHOR_ADDRESS
 ARG NEXT_PUBLIC_RECEIPT_ANCHOR_CHAIN_ID
 ARG NEXT_PUBLIC_ALCHEMY_API_KEY
 ARG NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID
+ARG NEXT_PUBLIC_SOLANA_LOGIN_ENABLED=false
 ARG PERKOS_ENVIRONMENT=production
 ARG PERKOS_VOICE_ENABLED=false
 ENV PERKOS_VOICE_ENABLED=$PERKOS_VOICE_ENABLED
@@ -50,6 +52,7 @@ ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
     NEXT_PUBLIC_RECEIPT_ANCHOR_CHAIN_ID=$NEXT_PUBLIC_RECEIPT_ANCHOR_CHAIN_ID \
     NEXT_PUBLIC_ALCHEMY_API_KEY=$NEXT_PUBLIC_ALCHEMY_API_KEY \
     NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID=$NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID \
+    NEXT_PUBLIC_SOLANA_LOGIN_ENABLED=$NEXT_PUBLIC_SOLANA_LOGIN_ENABLED \
     PERKOS_ENVIRONMENT=$PERKOS_ENVIRONMENT
 RUN npm run build
 
@@ -83,10 +86,12 @@ COPY --from=build /app/public ./public
 # `react-server` export condition (Next sets it; tsx doesn't), so we
 # ship a no-op shim — the worker is unambiguously server-side and the
 # client-import check is meaningless here.
-RUN npm install -g tsx@4 \
+RUN apk add --no-cache --virtual .git-deps git \
+ && npm install -g tsx@4 \
  && cd /app && npm install --omit=dev --no-save --no-audit --no-fund --legacy-peer-deps \
       @aws-sdk/client-ecs \
       @aws-sdk/client-secrets-manager \
+ && apk del .git-deps \
  && mkdir -p /app/node_modules/server-only \
  && printf 'module.exports = {};\n' > /app/node_modules/server-only/index.js \
  && printf '{"name":"server-only","version":"0.0.0-worker-shim","main":"index.js"}\n' \

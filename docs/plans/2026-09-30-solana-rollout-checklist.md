@@ -5,6 +5,19 @@ Decisión del usuario: cuentas independientes; ninguna asociación automática c
 
 ## Estado actualizado (01-10, capacidades UI)
 
+Actualización de empaquetado: App381 y A2A107 fusionados. El workflow A2A
+36873764354 informa publicación exitosa de 0.12.69; verificar disponibilidad
+del registro antes de actualizar consumidores. Storage productivo releído:
+su lógica coincide con la fuente probada (solo cambian comentarios/espacios),
+sin despliegue necesario. Artefactos web/API actuales aún no incluyen Solana.
+
+Preflight Docker detectó Git ausente en las imágenes mínimas App/API y flag
+Solana no propagado al build web. La corrección usa el mismo commit Shared Types
+por HTTPS, instala Git donde se necesita y expone el flag con default false en
+los tres Compose. El contexto App excluye entornos/credenciales locales. CI
+construye imágenes reales, además de las pruebas de código, con datos sintéticos.
+No se modifican flags reales, permisos, versiones del contrato ni cuentas.
+
 Esta sección sustituye los pendientes históricos de merge enumerados más abajo.
 
 - Fusionados App #380, API #303/#304, Tools #14, A2A #106 y Chat #15.

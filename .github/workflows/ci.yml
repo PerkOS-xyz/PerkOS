@@ -44,3 +44,35 @@ jobs:
         run: npm run test:rules
       - name: Build (production)
         run: npm run build
+
+  container:
+    name: Production container smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build real image with synthetic config and Solana enabled
+        run: |
+          docker build -f deploy/Dockerfile -t perkos-app:ci \
+            --build-arg NEXT_PUBLIC_FIREBASE_API_KEY=ci-stub \
+            --build-arg NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=ci.example.com \
+            --build-arg NEXT_PUBLIC_FIREBASE_PROJECT_ID=perkos-ci \
+            --build-arg NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=perkos-ci.appspot.com \
+            --build-arg NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=1 \
+            --build-arg NEXT_PUBLIC_FIREBASE_APP_ID=1:1:web:ci \
+            --build-arg NEXT_PUBLIC_SITE_URL=https://ci.example.com \
+            --build-arg NEXT_PUBLIC_SOLANA_LOGIN_ENABLED=true .
+      - name: Start standalone without external network
+        run: |
+          docker run -d --network none --name perkos-app-ci perkos-app:ci
+          for attempt in $(seq 1 30); do
+            if docker exec perkos-app-ci node -e 'fetch("http://127.0.0.1:3000/").then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))'; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs perkos-app-ci
+          exit 1
+      - name: Remove CI container
+        if: always()
+        run: docker rm -f perkos-app-ci || true

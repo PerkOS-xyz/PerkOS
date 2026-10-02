@@ -1,0 +1,13 @@
+.git
+.github
+node_modules
+.next
+coverage
+.env
+.env.*
+.secrets
+**/*.pem
+**/*.key
+**/*firebase-adminsdk*.json
+*.log
+.DS_Store
