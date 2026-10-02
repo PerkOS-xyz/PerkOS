@@ -25,6 +25,7 @@
     "mainNavigation": "기본 탐색"
   },
   "signIn": {
+    "failed": "로그인하지 못했습니다. 준비되면 다시 시도하세요.",
     "signingIn": "로그인 중…",
     "continueAs": "{{address}}(으)로 계속",
     "retry": "다시 로그인",

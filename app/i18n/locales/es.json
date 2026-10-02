@@ -27,6 +27,7 @@
     "listView": "Vista de lista"
   },
   "signIn": {
+    "failed": "No se pudo iniciar sesión. Reintenta cuando quieras.",
     "signingIn": "Iniciando sesión…",
     "continueAs": "Continuar como {{address}}",
     "retry": "Reintentar inicio de sesión",

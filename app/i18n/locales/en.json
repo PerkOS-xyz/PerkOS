@@ -27,6 +27,7 @@
     "listView": "List view"
   },
   "signIn": {
+    "failed": "Sign-in failed. Retry when you are ready.",
     "signingIn": "Signing you in…",
     "continueAs": "Continue as {{address}}",
     "retry": "Retry sign-in",

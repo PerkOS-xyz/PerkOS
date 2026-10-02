@@ -228,4 +228,62 @@ describe("wallet session lifecycle across providers and consumers", () => {
     expect(provider.signMessage).toHaveBeenCalledOnce();
     expect(mocks.mint).not.toHaveBeenCalled();
   });
+
+  it.each(["not-allowlisted", "error"])("retains %s across late consumers and route remounts until explicit retry", async (status) => {
+    const provider = wallet(A);
+    if (status === "error") {
+      provider.signMessage = vi.fn(async () => { throw new Error("user rejected"); });
+    } else {
+      fetchMock.mockImplementation(async (url: string) => url.includes("/nonce?")
+        ? { ok: true, json: async () => ({ nonce: "nonce", message: "Sign challenge" }) }
+        : { ok: false, json: async () => ({ error: "Wallet not on the allowlist." }) });
+    }
+    const view = render(<Harness value={provider} count={1} />);
+    await allStatus(status);
+    view.rerender(<Harness value={provider} count={3} />);
+    await allStatus(status);
+    expect(provider.signMessage).toHaveBeenCalledOnce();
+    view.rerender(<Harness value={{ ...provider, loading: true }} count={3} />);
+    await allStatus("loading");
+    view.rerender(<Harness value={provider} count={3} />);
+    await allStatus(status);
+    expect(provider.signMessage).toHaveBeenCalledOnce();
+    view.unmount();
+    render(<Harness value={provider} count={2} />);
+    await allStatus(status);
+    expect(provider.signMessage).toHaveBeenCalledOnce();
+    expect(mocks.mint).not.toHaveBeenCalled();
+
+    vi.mocked(provider.signMessage).mockResolvedValue("explicit retry signature");
+    fetchMock.mockImplementation(async (url: string) => url.includes("/nonce?")
+      ? { ok: true, json: async () => ({ nonce: "new nonce", message: "Sign challenge" }) }
+      : { ok: true, json: async () => ({ token: A }) });
+    await act(async () => { sessions[1].retry(); });
+    await allStatus("signed-in");
+    expect(provider.signMessage).toHaveBeenCalledTimes(2);
+    expect(mocks.mint).toHaveBeenCalledOnce();
+  });
+
+  it("does not carry a rejected account's result to a different account", async () => {
+    const rejected = wallet(A);
+    rejected.signMessage = vi.fn(async () => { throw new Error("user rejected"); });
+    const view = render(<Harness value={rejected} />);
+    await allStatus("error");
+    const next = wallet(B);
+    view.rerender(<Harness value={next} />);
+    await allStatus("signed-in");
+    expect(rejected.signMessage).toHaveBeenCalledOnce();
+    expect(next.signMessage).toHaveBeenCalledOnce();
+    expect(mocks.auth.currentUser?.uid).toBe(B);
+  });
+
+  it("treats a wallet's AbortError as terminal when the account was not cancelled", async () => {
+    const provider = wallet(A);
+    provider.signMessage = vi.fn(async () => { throw new DOMException("User cancelled", "AbortError"); });
+    const view = render(<Harness value={provider} count={1} />);
+    await allStatus("error");
+    view.rerender(<Harness value={provider} count={3} />);
+    await allStatus("error");
+    expect(provider.signMessage).toHaveBeenCalledOnce();
+  });
 });

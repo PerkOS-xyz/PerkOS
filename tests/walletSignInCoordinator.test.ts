@@ -87,10 +87,41 @@ describe("shared wallet sign-in coordinator", () => {
     unsubscribe();
   });
 
-  it("allows retry after a rejected flight", async () => {
+  it("retains a rejected flight until explicit retry", async () => {
     const coordinator = new WalletSignInCoordinator();
     coordinator.select("A");
     await expect(coordinator.run("A", async () => { throw new Error("denied"); })).rejects.toThrow("denied");
+    const repeated = vi.fn(async () => "unexpected");
+    await expect(coordinator.run("A", repeated)).rejects.toThrow("denied");
+    expect(repeated).not.toHaveBeenCalled();
+    coordinator.retry("A");
     await expect(coordinator.run("A", async () => "retry")).resolves.toBe("retry");
+  });
+
+  it("keeps failure through unmount invalidation and same-account restoration", async () => {
+    const coordinator = new WalletSignInCoordinator();
+    coordinator.select("A");
+    await expect(coordinator.run("A", async () => { throw new Error("denied"); })).rejects.toThrow("denied");
+    const failure = coordinator.getFailure();
+    coordinator.invalidate();
+    coordinator.select("A");
+    expect(coordinator.getFailure()).toBe(failure);
+    coordinator.select("B");
+    expect(coordinator.getFailure()).toBeNull();
+    await expect(coordinator.run("B", async () => "other account")).resolves.toBe("other account");
+  });
+
+  it("does not persist an old account's late error", async () => {
+    const coordinator = new WalletSignInCoordinator();
+    const completion = deferred<void>();
+    coordinator.select("A");
+    const old = coordinator.run("A", async () => { await completion.promise; throw new Error("late failure"); });
+    const rejected = expect(old).rejects.toThrow("late failure");
+    await Promise.resolve();
+    coordinator.select("B");
+    completion.resolve();
+    await rejected;
+    expect(coordinator.getFailure()).toBeNull();
+    await expect(coordinator.run("B", async () => "new account")).resolves.toBe("new account");
   });
 });

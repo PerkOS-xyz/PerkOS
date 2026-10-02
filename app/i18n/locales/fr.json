@@ -25,6 +25,7 @@
     "mainNavigation": "Navigation principale"
   },
   "signIn": {
+    "failed": "La connexion a échoué. Réessayez quand vous le souhaitez.",
     "signingIn": "Connexion en cours…",
     "continueAs": "Continuer en tant que {{address}}",
     "retry": "Réessayer la connexion",

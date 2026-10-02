@@ -25,6 +25,7 @@
     "mainNavigation": "メインナビゲーション"
   },
   "signIn": {
+    "failed": "サインインに失敗しました。準備ができたら再試行してください。",
     "signingIn": "サインインしています…",
     "continueAs": "{{address}} として続行",
     "retry": "サインインを再試行",

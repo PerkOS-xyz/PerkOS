@@ -136,7 +136,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     session.status === "syncing" ||
     session.status === "error"
   ) {
-    return <SessionSplash status={session.status} error={session.error} />;
+    return <SessionSplash status={session.status} error={session.error} onRetry={session.retry} />;
   }
 
   return (
@@ -287,16 +287,19 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 function SessionSplash({
   status,
   error,
+  onRetry,
 }: {
   status: "loading" | "syncing" | "error";
   error?: string;
+  onRetry: () => void;
 }) {
+  const { t } = useTranslation();
   const label =
     status === "syncing"
-      ? "Signing you in…"
+      ? t("signIn.signingIn")
       : status === "error"
-      ? "Sign-in failed"
-      : "Loading session…";
+      ? t("signIn.failed")
+      : t("signIn.restoringSession");
 
   return (
     <div
@@ -318,6 +321,9 @@ function SessionSplash({
         <p className="text-sm text-muted-foreground">{label}</p>
         {error ? (
           <p className="max-w-sm text-xs text-destructive">{error}</p>
+        ) : null}
+        {status === "error" ? (
+          <Button type="button" onClick={onRetry}>{t("signIn.retry")}</Button>
         ) : null}
       </div>
     </div>

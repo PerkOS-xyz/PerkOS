@@ -24,6 +24,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
 
 import { AccessGate } from "../components/AccessGate";
 import { useWalletSession } from "../lib/useWalletSession";
@@ -33,6 +35,7 @@ import i18n, { isSupportedLanguage, persistLanguagePreference } from "../lib/i18
 const LOADING_TIMEOUT_MS = 10_000;
 
 export default function ContinuePage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const session = useWalletSession();
   const [timedOut, setTimedOut] = useState(false);
@@ -114,11 +117,16 @@ export default function ContinuePage() {
         />
         <p className="text-sm text-[#7975a8]">
           {session.status === "error"
-            ? "Sign-in failed. Retrying…"
+            ? t("signIn.failed")
             : "Checking access…"}
         </p>
         {session.error ? (
           <p className="max-w-sm text-xs text-destructive">{session.error}</p>
+        ) : null}
+        {session.status === "error" ? (
+          <Button type="button" onClick={session.retry}>
+            {t("signIn.retry")}
+          </Button>
         ) : null}
         <Link
           href="/"
