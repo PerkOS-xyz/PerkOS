@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 import { useChatbot } from "./ChatbotProvider";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,7 @@ import { cn } from "@/lib/utils";
  */
 export function ChatbotTrigger() {
   const { open, toggle, spotlight } = useChatbot();
+  const pathname = usePathname();
 
   // Only on empty screens. The assistant is always reachable from the header
   // button; this bubble is the invitation shown where there is no content to
@@ -20,7 +22,7 @@ export function ChatbotTrigger() {
   // /agents, /chat, /projects, /tasks, /wallet, /dashboard and /settings —
   // nearly the whole product — because a fixed disc intercepts whatever
   // scrolls under it no matter how the page is padded.
-  if (!spotlight) return null;
+  if (!spotlight || pathname === "/dashboard") return null;
 
   return (
     <button
