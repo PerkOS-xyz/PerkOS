@@ -69,8 +69,8 @@ import { BrowserWalletContext } from "../lib/browserWallet";
 import {
   SOLANA_PERKOS,
   SOLANA_STABLECOIN,
-  fetchSolanaTokenBalance,
 } from "../lib/solanaBalances";
+import { fetchOwnSolanaTokenBalance } from "../lib/solanaBalancesClient";
 
 const BASE_APP_CLIENT_FID = 309857;
 const COINBASE_WALLET_RDNS = "com.coinbase.wallet";
@@ -472,7 +472,7 @@ function SolanaNetworkPill({ address }: { address: string }) {
 function useSolanaTokenBalance(owner: string, mint: string) {
   return useQuery({
     queryKey: ["solana-token-balance", owner, mint],
-    queryFn: ({ signal }) => fetchSolanaTokenBalance(owner, mint, signal),
+    queryFn: ({ signal }) => fetchOwnSolanaTokenBalance(mint, signal),
     staleTime: 30_000,
     retry: 1,
   });
