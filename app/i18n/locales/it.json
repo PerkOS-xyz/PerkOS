@@ -1709,7 +1709,7 @@
       "donePerAgent": "Completate per agente",
       "unassigned": "Non assegnato"
     },
-    "graph": { "expand": "Espandi", "close": "Chiudi", "rotateHint": "Trascina per ruotare · pizzica o scorri per ingrandire", "selected": "Nodo selezionato", "neighbors_one": "{{count}} connessione diretta", "neighbors_other": "{{count}} connessioni dirette", "openEntity": "Apri dettagli" },
+    "graph": { "expand": "Espandi", "close": "Chiudi", "rotateHint": "Trascina per ruotare · pizzica o scorri per ingrandire", "selected": "Nodo selezionato", "neighbors_one": "{{count}} connessione diretta", "neighbors_other": "{{count}} connessioni dirette", "openEntity": "Apri dettagli", "resetView": "Reimposta vista", "clear": "Cancella", "clickToFocus": "Fai clic per mettere a fuoco", "connectedTo": "Collegato a", "showFullMap": "Mostra la mappa completa" },
     "knowledgeGraph": {
       "title": "Conoscenza del progetto", "description": "Le relazioni tra persone, agenti, lavoro e fonti collegate del progetto.", "showCompleted": "Mostra completate",
       "empty": "La conoscenza apparirà qui aggiungendo agenti, attività e fonti.", "ariaLabel": "Grafo interattivo della conoscenza del progetto", "legend": "Progetto · agenti · lavoro · fonti collegate",

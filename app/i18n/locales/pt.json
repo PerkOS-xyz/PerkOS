@@ -2041,7 +2041,12 @@
       "selected": "Nó selecionado",
       "neighbors_one": "{{count}} conexão direta",
       "neighbors_other": "{{count}} conexões diretas",
-      "openEntity": "Abrir detalhes"
+      "openEntity": "Abrir detalhes",
+      "resetView": "Redefinir vista",
+      "clear": "Limpar",
+      "clickToFocus": "Clique para focar",
+      "connectedTo": "Conectado a",
+      "showFullMap": "Mostrar mapa completo"
     },
     "knowledgeGraph": {
       "title": "Conhecimento do projeto",

@@ -1,16 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
-import ForceGraph3D from "react-force-graph-3d";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import ForceGraph3D, { type ForceGraphMethods } from "react-force-graph-3d";
 import * as THREE from "three";
-import { ExternalLink, MousePointer2, Rotate3D } from "lucide-react";
+import { ExternalLink, Focus, MousePointer2, Rotate3D, RotateCcw, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 import type { GraphEdge, GraphNode } from "./ProjectContextMap";
 
-type ForceNode = GraphNode & { id: string; val: number; color: string };
+type ForceNode = GraphNode & { id: string; val: number; color: string; z?: number };
 type ForceLink = GraphEdge & { source: string | ForceNode; target: string | ForceNode };
 
 const NODE_COLORS: Record<GraphNode["kind"], string> = {
@@ -36,46 +36,51 @@ function safeTooltip(node: ForceNode): string {
   return `<div style="padding:6px 8px;border:1px solid ${node.color};border-radius:8px;background:#0e0716;color:#ececff"><strong>${escape(node.label)}</strong><br/><small>${escape(node.status || node.kind)}</small></div>`;
 }
 
-function labelSprite(text: string, color: string): THREE.Sprite {
+function labelSprite(node: ForceNode, dimmed: boolean): THREE.Sprite {
+  const text = node.label;
+  const color = dimmed ? "#51465e" : node.color;
   const canvas = document.createElement("canvas");
-  canvas.width = 512;
-  canvas.height = 96;
+  canvas.width = 640;
+  canvas.height = 150;
   const context = canvas.getContext("2d");
   if (context) {
     context.clearRect(0, 0, canvas.width, canvas.height);
-    context.font = "600 30px system-ui, sans-serif";
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.fillStyle = "rgba(7,3,13,.86)";
-    context.roundRect(4, 8, 504, 80, 18);
+    context.fillStyle = dimmed ? "rgba(7,3,13,.46)" : "rgba(10,6,18,.94)";
+    context.roundRect(5, 8, 630, 134, 24);
     context.fill();
     context.strokeStyle = color;
-    context.lineWidth = 3;
+    context.lineWidth = node.kind === "project" ? 5 : 3;
     context.stroke();
-    context.fillStyle = "#f7f1ff";
-    const compact = text.length > 28 ? `${text.slice(0, 27)}…` : text;
-    context.fillText(compact, 256, 49);
+    context.font = "600 32px system-ui, sans-serif";
+    context.fillStyle = dimmed ? "rgba(247,241,255,.4)" : "#f7f1ff";
+    const compact = text.length > 32 ? `${text.slice(0, 31)}…` : text;
+    context.fillText(compact, 320, 60);
+    context.font = "500 18px system-ui, sans-serif";
+    context.fillStyle = dimmed ? "rgba(170,164,190,.3)" : color;
+    context.fillText((node.status || (node.isPM ? "LEAD AGENT" : node.kind)).toUpperCase(), 320, 104);
   }
   const material = new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true, depthWrite: false });
   const sprite = new THREE.Sprite(material);
-  sprite.scale.set(58, 11, 1);
+  const width = node.kind === "project" ? 88 : node.kind === "task" ? 76 : 68;
+  sprite.scale.set(width, width * (150 / 640), 1);
   return sprite;
 }
 
 function blockObject(node: ForceNode, dimmed: boolean): THREE.Object3D {
   const group = new THREE.Group();
   const color = dimmed ? "#30283d" : node.color;
-  const isAgent = node.shape === "agent-block";
-  const isTask = node.shape === "task-block";
-  const geometry = isAgent
-    ? new THREE.BoxGeometry(30, 18, 12, 2, 2, 2)
-    : isTask
-      ? new THREE.BoxGeometry(38, 13, 9, 2, 2, 2)
-      : new THREE.SphereGeometry(Math.max(6, node.val / 1.8), 18, 12);
+  const isProject = node.kind === "project";
+  const isAgent = node.kind === "agent";
+  const isTask = node.kind === "task";
+  const isSource = node.kind === "source";
+  const radius = isProject ? 13 : isAgent ? 9 : isTask ? 7 : isSource ? 6.5 : 6;
+  const geometry = new THREE.SphereGeometry(radius, 28, 20);
   const material = new THREE.MeshStandardMaterial({
     color,
     emissive: color,
-    emissiveIntensity: dimmed ? 0.05 : node.live?.bridgeConnected || node.status === "In progress" ? 0.48 : 0.2,
+    emissiveIntensity: dimmed ? 0.04 : node.live?.bridgeConnected || node.status === "In progress" ? 0.55 : isProject ? 0.42 : 0.24,
     metalness: 0.28,
     roughness: 0.42,
     transparent: true,
@@ -83,16 +88,29 @@ function blockObject(node: ForceNode, dimmed: boolean): THREE.Object3D {
   });
   const mesh = new THREE.Mesh(geometry, material);
   group.add(mesh);
-  if (isAgent || isTask) {
-    const outline = new THREE.LineSegments(
-      new THREE.EdgesGeometry(geometry),
-      new THREE.LineBasicMaterial({ color: dimmed ? "#51465e" : "#ffffff", transparent: true, opacity: dimmed ? 0.15 : 0.48 }),
+  const halo = new THREE.Mesh(
+    new THREE.SphereGeometry(radius * 1.34, 24, 18),
+    new THREE.MeshBasicMaterial({
+      color,
+      transparent: true,
+      opacity: dimmed ? 0.025 : node.live?.bridgeConnected || node.status === "In progress" ? 0.14 : 0.07,
+      depthWrite: false,
+      side: THREE.BackSide,
+    }),
+  );
+  group.add(halo);
+  if (isProject || isAgent) {
+    const orbit = new THREE.Mesh(
+      new THREE.TorusGeometry(radius * 1.62, isProject ? 0.55 : 0.36, 10, 52),
+      new THREE.MeshBasicMaterial({ color, transparent: true, opacity: dimmed ? 0.08 : 0.48 }),
     );
-    group.add(outline);
-    const label = labelSprite(node.label, color);
-    label.position.set(0, isAgent ? 16 : 13, 0);
-    group.add(label);
+    orbit.rotation.x = Math.PI * 0.62;
+    orbit.rotation.z = Math.PI * 0.12;
+    group.add(orbit);
   }
+  const label = labelSprite(node, dimmed);
+  label.position.set(0, isProject ? 27 : isAgent ? 22 : 18, 0);
+  group.add(label);
   return group;
 }
 
@@ -109,8 +127,11 @@ export function InteractiveGraph3D({
 }) {
   const { t } = useTranslation();
   const hostRef = useRef<HTMLDivElement>(null);
+  const graphRef = useRef<ForceGraphMethods<ForceNode, ForceLink> | undefined>(undefined);
   const [size, setSize] = useState({ width: 720, height: 430 });
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const hasAutoFit = useRef(false);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -156,6 +177,40 @@ export function InteractiveGraph3D({
     return result;
   }, [graphData.links, selectedId]);
 
+  const connectedNodes = useMemo(() => selectedId
+    ? graphData.nodes.filter((node) => node.id !== selectedId && neighbors.has(node.id))
+    : [], [graphData.nodes, neighbors, selectedId]);
+
+  const fitGraph = useCallback((animated = true) => {
+    graphRef.current?.zoomToFit(animated ? 600 : 0, 74);
+  }, []);
+
+  useEffect(() => {
+    hasAutoFit.current = false;
+    const frame = window.setTimeout(() => fitGraph(false), 80);
+    return () => window.clearTimeout(frame);
+  }, [fitGraph, graphData]);
+
+  useEffect(() => {
+    const controls = graphRef.current?.controls() as { autoRotate?: boolean; autoRotateSpeed?: number } | undefined;
+    if (!controls) return;
+    controls.autoRotate = !selectedId && !hoveredId;
+    controls.autoRotateSpeed = 0.22;
+    return () => { controls.autoRotate = false; };
+  }, [hoveredId, selectedId]);
+
+  const selectNode = useCallback((node: ForceNode) => {
+    setSelectedId(node.id);
+    const distance = 105;
+    const length = Math.hypot(node.x || 1, node.y || 1, node.z || 1);
+    const ratio = 1 + distance / length;
+    graphRef.current?.cameraPosition(
+      { x: (node.x || 0) * ratio, y: (node.y || 0) * ratio, z: (node.z || 0) * ratio },
+      { x: node.x || 0, y: node.y || 0, z: node.z || 0 },
+      650,
+    );
+  }, []);
+
   return (
     <div
       ref={hostRef}
@@ -166,12 +221,14 @@ export function InteractiveGraph3D({
       role="application"
       aria-label={ariaLabel}
     >
+      <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_45%,rgba(236,27,105,.10),transparent_38%),linear-gradient(rgba(255,255,255,.022)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.022)_1px,transparent_1px)] bg-[size:auto,32px_32px,32px_32px]" />
       <ForceGraph3D<ForceNode, ForceLink>
+        ref={graphRef}
         width={size.width}
         height={size.height}
         graphData={graphData}
         backgroundColor="#07030d"
-        controlType="trackball"
+        controlType="orbit"
         enableNavigationControls
         enableNodeDrag
         showNavInfo={false}
@@ -188,28 +245,49 @@ export function InteractiveGraph3D({
             ? "#ffffff"
             : "rgba(70,60,88,.16)";
         }}
-        linkWidth={(link) => link.active ? 2.2 : selectedId && (endpointId(link.source) === selectedId || endpointId(link.target) === selectedId) ? 1.8 : 0.7}
-        linkOpacity={0.58}
-        linkDirectionalParticles={(link) => link.active ? 3 : 0}
-        linkDirectionalArrowLength={5}
+        linkWidth={(link) => link.active ? 2.8 : selectedId && (endpointId(link.source) === selectedId || endpointId(link.target) === selectedId) ? 2.2 : 1.15}
+        linkOpacity={0.72}
+        linkDirectionalParticles={(link) => link.active ? 4 : 1}
+        linkDirectionalArrowLength={7}
         linkDirectionalArrowRelPos={0.88}
         linkDirectionalArrowColor={(link) => selectedId && !(endpointId(link.source) === selectedId || endpointId(link.target) === selectedId) ? "rgba(70,60,88,.16)" : link.color}
-        linkDirectionalParticleWidth={1.8}
+        linkDirectionalParticleWidth={(link) => link.active ? 2.2 : 0.9}
         linkDirectionalParticleColor={() => "#ffffff"}
-        linkDirectionalParticleSpeed={0.006}
-        d3VelocityDecay={0.32}
-        cooldownTime={6_000}
-        onNodeClick={(node) => setSelectedId(node.id)}
+        linkDirectionalParticleSpeed={(link) => link.active ? 0.007 : 0.0025}
+        d3AlphaDecay={0.018}
+        d3VelocityDecay={0.34}
+        warmupTicks={32}
+        cooldownTicks={360}
+        onEngineStop={() => {
+          if (!hasAutoFit.current) {
+            hasAutoFit.current = true;
+            fitGraph(true);
+          }
+        }}
+        onNodeClick={selectNode}
+        onNodeHover={(node) => setHoveredId(node?.id ?? null)}
         onBackgroundClick={() => setSelectedId(null)}
       />
 
-      <div className="pointer-events-none absolute left-3 top-3 flex items-center gap-2 rounded-full border border-white/10 bg-black/55 px-3 py-1.5 text-[10px] text-white/70 backdrop-blur">
-        <Rotate3D className="h-3.5 w-3.5 text-primary" />
-        {t("components.graph.rotateHint")}
+      <div className="absolute left-3 top-3 z-10 flex flex-wrap items-center gap-2">
+        <div className="pointer-events-none flex items-center gap-2 rounded-full border border-white/10 bg-black/70 px-3 py-1.5 text-[10px] text-white/70 backdrop-blur">
+          <Rotate3D className="h-3.5 w-3.5 text-primary" />
+          {t("components.graph.rotateHint")}
+        </div>
+        <button type="button" onClick={() => fitGraph(true)} className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/70 px-3 py-1.5 text-[10px] text-white/75 backdrop-blur transition hover:border-primary/40 hover:text-white">
+          <RotateCcw className="h-3.5 w-3.5" /> {t("components.graph.resetView")}
+        </button>
+        {selectedId ? <button type="button" onClick={() => { setSelectedId(null); fitGraph(true); }} className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/70 px-3 py-1.5 text-[10px] text-white/75 backdrop-blur transition hover:border-primary/40 hover:text-white"><X className="h-3.5 w-3.5" /> {t("components.graph.clear")}</button> : null}
       </div>
 
+      <div className="pointer-events-none absolute bottom-3 left-3 z-10 hidden flex-wrap gap-1.5 sm:flex">
+        {Object.entries(NODE_COLORS).map(([kind, color]) => <span key={kind} className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/65 px-2 py-1 text-[9px] capitalize text-white/65 backdrop-blur"><i className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: color, boxShadow: `0 0 8px ${color}` }} />{kind}</span>)}
+      </div>
+
+      {hoveredId && !selectedId ? <div className="pointer-events-none absolute bottom-3 right-3 z-10 rounded-full border border-white/10 bg-black/70 px-3 py-1.5 text-[10px] text-white/70 backdrop-blur">{t("components.graph.clickToFocus")}</div> : null}
+
       {selected ? (
-        <aside className="absolute bottom-3 left-3 right-3 z-10 rounded-xl border border-primary/35 bg-[#0e0716]/95 p-3 shadow-2xl backdrop-blur sm:left-auto sm:top-3 sm:w-64">
+        <aside className="absolute bottom-3 left-3 right-3 z-10 rounded-xl border border-primary/35 bg-[#0e0716]/95 p-4 shadow-2xl backdrop-blur sm:bottom-auto sm:left-auto sm:right-3 sm:top-14 sm:w-72">
           <div className="flex items-center gap-2">
             <span className="h-3 w-3 rounded-full shadow-[0_0_12px_currentColor]" style={{ backgroundColor: selected.color, color: selected.color }} />
             <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{t("components.graph.selected")}</span>
@@ -220,11 +298,13 @@ export function InteractiveGraph3D({
             <MousePointer2 className="h-3 w-3" />
             {t("components.graph.neighbors", { count: Math.max(0, neighbors.size - 1) })}
           </p>
+          {connectedNodes.length > 0 ? <div className="mt-3 border-t border-white/10 pt-3"><p className="text-[9px] uppercase tracking-[.16em] text-muted-foreground">{t("components.graph.connectedTo")}</p><div className="mt-2 flex flex-wrap gap-1.5">{connectedNodes.slice(0, 6).map((node) => <button key={node.id} type="button" onClick={() => selectNode(node)} className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[.04] px-2 py-1 text-[9px] text-foreground transition hover:border-primary/40"><i className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: node.color }} />{node.label}</button>)}</div></div> : null}
           {selected.href ? (
             <Link href={selected.href} className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline">
               {t("components.graph.openEntity")} <ExternalLink className="h-3 w-3" />
             </Link>
           ) : null}
+          <button type="button" onClick={() => fitGraph(true)} className="mt-3 inline-flex items-center gap-1.5 text-[10px] text-muted-foreground transition hover:text-foreground"><Focus className="h-3 w-3" />{t("components.graph.showFullMap")}</button>
         </aside>
       ) : null}
     </div>
