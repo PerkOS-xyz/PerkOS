@@ -46,4 +46,12 @@ describe("Solana feature boundaries", () => {
     expect(screen.queryByRole("button", { name: "Add" })).toBeNull();
     expect(screen.queryByText(/payment required/i)).toBeNull();
   });
+  it("shows a sponsored Solana account as sponsored without payment actions", () => {
+    query.mockReturnValueOnce({ data: { month: "2026-10", usage: { activeHours: 0, agentCount: 0, llmTokens: 0 }, exempt: true, creditsUsd: 0, enrolled: true, infra: { hoursRemaining: null } }, isLoading: false });
+    render(<BillingCard address={account.address} showBlockchain />);
+    expect(screen.getAllByText(/Sponsored/).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/not available for Solana/)).toBeNull();
+    expect(screen.queryByRole("button", { name: "Add" })).toBeNull();
+    expect(evmHook).not.toHaveBeenCalled();
+  });
 });
