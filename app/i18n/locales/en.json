@@ -1915,7 +1915,12 @@
       "selected": "Selected node",
       "neighbors_one": "{{count}} direct connection",
       "neighbors_other": "{{count}} direct connections",
-      "openEntity": "Open details"
+      "openEntity": "Open details",
+      "resetView": "Reset view",
+      "clear": "Clear",
+      "clickToFocus": "Click to focus",
+      "connectedTo": "Connected to",
+      "showFullMap": "Show full map"
     },
     "knowledgeGraph": {
       "title": "Project knowledge",

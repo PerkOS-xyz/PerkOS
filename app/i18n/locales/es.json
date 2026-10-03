@@ -1915,7 +1915,12 @@
       "selected": "Nodo seleccionado",
       "neighbors_one": "{{count}} conexión directa",
       "neighbors_other": "{{count}} conexiones directas",
-      "openEntity": "Abrir detalles"
+      "openEntity": "Abrir detalles",
+      "resetView": "Restablecer vista",
+      "clear": "Limpiar",
+      "clickToFocus": "Haz clic para enfocar",
+      "connectedTo": "Conectado con",
+      "showFullMap": "Mostrar mapa completo"
     },
     "knowledgeGraph": {
       "title": "Conocimiento del proyecto",
