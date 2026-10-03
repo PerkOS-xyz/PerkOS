@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useConnection } from "wagmi";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -16,6 +15,7 @@ import {
   type LaunchAgentCredentials,
 } from "@/app/lib/perkosApi";
 import { useOnboarding } from "@/app/lib/onboardingState";
+import { useAppAccount } from "@/app/lib/useAppAccount";
 import { validateApiKey } from "@/app/lib/validators";
 import {
   ALL_PRESETS,
@@ -47,7 +47,8 @@ export function useAgentWizard() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
-  const { address, isConnected } = useConnection();
+  // Dynamic browser accounts (including Solana) have no wagmi connection.
+  const { address, isConnected } = useAppAccount();
   const { markAgentRegistered } = useOnboarding();
   const fromOnboarding = searchParams.get("from") === "onboarding";
 
