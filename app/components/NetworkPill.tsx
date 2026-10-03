@@ -22,6 +22,9 @@
  *   3. Plain web browser
  *      → Same as Farcaster.
  *
+ *   4. Solana account (browser sign-in through Dynamic)
+ *      → Static Solana pill with USDC + $PERKOS read from the Solana RPC.
+ *
  * UX spec source: ui-ux-designer agent, 2026-05-25. The PERKOS slot
  * was added afterwards (the original spec was USDC-only); both
  * balances share the same loading + error treatment. Robinhood Chain uses
@@ -29,7 +32,7 @@
  */
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   useAccount,
   useChainId,
@@ -39,6 +42,8 @@ import {
   type Connector,
 } from "wagmi";
 import { erc20Abi } from "viem";
+import { useQuery } from "@tanstack/react-query";
+import { isSolanaWalletAddress } from "@perkos/shared-types";
 import { base, celo } from "wagmi/chains";
 import { sdk } from "@farcaster/miniapp-sdk";
 import { ChevronDown, Loader2 } from "lucide-react";
@@ -60,6 +65,12 @@ import {
   type SupportedChainId,
 } from "../lib/tokenAddresses";
 import { robinhoodChain } from "../lib/chains";
+import { BrowserWalletContext } from "../lib/browserWallet";
+import {
+  SOLANA_PERKOS,
+  SOLANA_STABLECOIN,
+  fetchSolanaTokenBalance,
+} from "../lib/solanaBalances";
 
 const BASE_APP_CLIENT_FID = 309857;
 const COINBASE_WALLET_RDNS = "com.coinbase.wallet";
@@ -168,7 +179,20 @@ function formatBalance(raw: bigint, decimals: number): string {
   return (wholeNum + fractionScaled).toFixed(2);
 }
 
+/**
+ * Solana accounts have no wagmi connection, so the EVM pill would fall
+ * back to Base with empty balances. They get the Solana pill instead.
+ */
 export function NetworkPill() {
+  const browserWallet = useContext(BrowserWalletContext);
+  const address = browserWallet?.address;
+  if (address && isSolanaWalletAddress(address)) {
+    return <SolanaNetworkPill address={address} />;
+  }
+  return <EvmNetworkPill />;
+}
+
+function EvmNetworkPill() {
   const { t } = useTranslation();
   const { address, isConnected } = useAccount();
   const activeChainId = useChainId();
@@ -386,6 +410,72 @@ export function NetworkPill() {
       </DropdownMenuContent>
     </DropdownMenu>
   );
+}
+
+// ---------------------------------------------------------------------
+// Solana account — static pill (no chain switcher).
+// ---------------------------------------------------------------------
+
+function SolanaNetworkPill({ address }: { address: string }) {
+  const { t } = useTranslation();
+  const stablecoinQuery = useSolanaTokenBalance(address, SOLANA_STABLECOIN.mint);
+  const perkosQuery = useSolanaTokenBalance(address, SOLANA_PERKOS.mint);
+
+  const stablecoinLabel = formatQueryResult(
+    stablecoinQuery,
+    SOLANA_STABLECOIN.decimals,
+    true,
+  );
+  const perkosLabel = formatQueryResult(
+    perkosQuery,
+    SOLANA_PERKOS.decimals,
+    true,
+  );
+
+  const ariaLabel = t("chrome.network.balancesSummary", {
+    usdc:
+      stablecoinLabel === null
+        ? t("chrome.network.loadingToken", { token: SOLANA_STABLECOIN.symbol })
+        : stablecoinLabel === "—"
+          ? t("chrome.network.tokenUnavailable", {
+              token: SOLANA_STABLECOIN.symbol,
+            })
+          : t("chrome.network.usdcBalance", { amount: stablecoinLabel }),
+    perkos:
+      perkosLabel === null
+        ? t("chrome.network.loadingToken", { token: "PERKOS" })
+        : perkosLabel === "—"
+          ? t("chrome.network.tokenUnavailable", { token: "PERKOS" })
+          : t("chrome.network.perkosBalance", { amount: perkosLabel }),
+    network: "Solana",
+  });
+
+  return (
+    <PillShell static aria-label={ariaLabel}>
+      <Image
+        src="/solana.svg"
+        alt=""
+        width={16}
+        height={16}
+        aria-hidden
+        className="shrink-0"
+      />
+      <BalancesBody
+        stablecoinLabel={stablecoinLabel}
+        stablecoinSymbol={SOLANA_STABLECOIN.symbol}
+        perkosLabel={perkosLabel}
+      />
+    </PillShell>
+  );
+}
+
+function useSolanaTokenBalance(owner: string, mint: string) {
+  return useQuery({
+    queryKey: ["solana-token-balance", owner, mint],
+    queryFn: ({ signal }) => fetchSolanaTokenBalance(owner, mint, signal),
+    staleTime: 30_000,
+    retry: 1,
+  });
 }
 
 // ---------------------------------------------------------------------
