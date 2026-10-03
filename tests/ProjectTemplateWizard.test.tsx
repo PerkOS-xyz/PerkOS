@@ -31,6 +31,26 @@ const published = {
     id: "artizen",
     name: { es: "Actualizaciones Artizen", en: "Artizen updates" },
     description: { es: "Borradores", en: "Drafts" },
+    team: [
+      {
+        roleId: "creator-update",
+        name: { es: "Actualizaciones", en: "Creator Update" },
+        responsibility: {
+          es: "Prepara borradores editables.",
+          en: "Prepares editable drafts.",
+        },
+        presetId: "marketing",
+        isLead: true,
+        order: 0,
+        policy: {
+          readScopes: ["project", "task"],
+          readNodeTypes: ["project-brief", "fact", "task", "artifact"],
+          actions: ["read", "create-artifact", "request-approval"],
+          escalation: ["external-write", "human-decision"],
+        },
+        avatarSeed: "artizen-creator-update:creator-update",
+      },
+    ],
     steps: [
       {
         id: "project",
@@ -110,6 +130,9 @@ describe("project template wizard", () => {
     });
     expect(screen.getByText("English", { selector: "dd" })).toBeInTheDocument();
     expect(screen.getByText("My project")).toBeInTheDocument();
+    expect(screen.getByText("Creator Update")).toBeInTheDocument();
+    expect(screen.getByText("Prepares editable drafts.")).toBeInTheDocument();
+    expect(screen.getByText("Knowledge access")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Create configured project" }));
     await waitFor(() => expect(mock.fetch).toHaveBeenCalledTimes(2));
     expect(JSON.parse(mock.fetch.mock.calls[1][1].body).answers["content-language"]).toBe("en");

@@ -9,6 +9,7 @@ import {
   templateText,
   templateAnswerText,
 } from "../lib/projectTemplateTypes";
+import { ProjectTeamPreview } from "./ProjectTeamPreview";
 
 export function ProjectTemplateConfiguration({
   projectId,
@@ -82,6 +83,13 @@ export function ProjectTemplateConfiguration({
             ))}
         </dl>
       </details>
+      <div className="mt-5">
+        <ProjectTeamPreview
+          team={result.template.team}
+          language={i18n.language}
+          title={es ? "Equipo configurado" : "Configured team"}
+        />
+      </div>
       {result.template.id === "artizen-creator-update" && <ArtizenCreatorWorkflow key={key} projectId={projectId} />}
     </section>
   );
