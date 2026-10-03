@@ -192,12 +192,12 @@ export function InteractiveGraph3D({
   }, [fitGraph, graphData]);
 
   useEffect(() => {
-    const controls = graphRef.current?.controls() as { autoRotate?: boolean; autoRotateSpeed?: number } | undefined;
-    if (!controls) return;
-    controls.autoRotate = !selectedId && !hoveredId;
-    controls.autoRotateSpeed = 0.22;
-    return () => { controls.autoRotate = false; };
-  }, [hoveredId, selectedId]);
+    const charge = graphRef.current?.d3Force("charge") as { strength?: (value: number) => unknown } | undefined;
+    const link = graphRef.current?.d3Force("link") as { distance?: (value: number) => unknown } | undefined;
+    charge?.strength?.(-260);
+    link?.distance?.(112);
+    graphRef.current?.d3ReheatSimulation();
+  }, [graphData]);
 
   const selectNode = useCallback((node: ForceNode) => {
     setSelectedId(node.id);
@@ -205,7 +205,7 @@ export function InteractiveGraph3D({
     const length = Math.hypot(node.x || 1, node.y || 1, node.z || 1);
     const ratio = 1 + distance / length;
     graphRef.current?.cameraPosition(
-      { x: (node.x || 0) * ratio, y: (node.y || 0) * ratio, z: (node.z || 0) * ratio },
+      { x: (node.x || 0) * ratio, y: (node.y || 0) * ratio, z: 120 },
       { x: node.x || 0, y: node.y || 0, z: node.z || 0 },
       650,
     );
@@ -229,6 +229,7 @@ export function InteractiveGraph3D({
         graphData={graphData}
         backgroundColor="#07030d"
         controlType="orbit"
+        numDimensions={2}
         enableNavigationControls
         enableNodeDrag
         showNavInfo={false}
