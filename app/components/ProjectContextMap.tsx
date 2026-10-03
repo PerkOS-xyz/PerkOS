@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
-import { Expand, GitBranch, Loader2, Minimize2, Network } from "lucide-react";
+import { Box, Expand, GitBranch, Loader2, Minimize2, Network, Orbit } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import type { Task } from "../lib/perkosApi";
 import type { Project } from "../lib/perkosApi";
 import type { AgentLiveStatus } from "../lib/useWalletAgents";
 import { agentColor } from "./charts";
+import { ProjectStage } from "./ProjectStage";
 
 const W = 920;
 const H = 520;
@@ -69,6 +70,7 @@ export function ProjectKnowledgeGraph({
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
+  const [view, setView] = useState<"stage" | "graph">("stage");
 
   const { nodes, edges, hiddenTasks } = useMemo(() => {
     const nodes: GraphNode[] = [{ key: "project", kind: "project", label: projectName, x: CX, y: CY }];
@@ -127,16 +129,26 @@ export function ProjectKnowledgeGraph({
       expanded={expanded}
       onExpandedChange={setExpanded}
       toolbar={
-        <label className="flex items-center gap-2 text-xs text-muted-foreground">
-          <input type="checkbox" checked={showCompleted} onChange={(event) => setShowCompleted(event.target.checked)} className="accent-primary" />
-          {t("components.knowledgeGraph.showCompleted")}
-        </label>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex rounded-lg border border-border bg-background/40 p-0.5" aria-label="Knowledge view">
+            <button type="button" onClick={() => setView("stage")} className={cn("inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] transition", view === "stage" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground")} aria-pressed={view === "stage"}><Box className="h-3 w-3" />Stage</button>
+            <button type="button" onClick={() => setView("graph")} className={cn("inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] transition", view === "graph" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground")} aria-pressed={view === "graph"}><Orbit className="h-3 w-3" />Explore</button>
+          </div>
+          <label className="flex items-center gap-2 text-xs text-muted-foreground">
+            <input type="checkbox" checked={showCompleted} onChange={(event) => setShowCompleted(event.target.checked)} className="accent-primary" />
+            {t("components.knowledgeGraph.showCompleted")}
+          </label>
+        </div>
       }
     >
       {agentNames.length === 0 && tasks.length === 0 ? (
         <GraphEmpty text={t("components.knowledgeGraph.empty")} />
       ) : (
-        <GraphCanvas nodes={nodes} edges={edges} ariaLabel={t("components.knowledgeGraph.ariaLabel")} expanded={expanded} />
+        view === "stage" ? (
+          <ProjectStage projectId={projectId} projectName={projectName} pmAgent={pmAgent} agentNames={agentNames} tasks={tasks.filter((task) => showCompleted || task.status !== "Done")} liveAgents={liveAgents} externalSystems={externalSystems} />
+        ) : (
+          <GraphCanvas nodes={nodes} edges={edges} ariaLabel={t("components.knowledgeGraph.ariaLabel")} expanded={expanded} />
+        )
       )}
       <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-muted-foreground">
         <span>{t("components.knowledgeGraph.legend")}</span>
