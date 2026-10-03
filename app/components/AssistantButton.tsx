@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,9 @@ import { useChatbot } from "./ChatbotProvider";
 export function AssistantButton({ className }: { className?: string }) {
   const { open, toggle } = useChatbot();
   const { t } = useTranslation();
+  const pathname = usePathname();
+
+  if (pathname === "/dashboard") return null;
 
   return (
     <Button

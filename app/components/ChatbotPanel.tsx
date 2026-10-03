@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   useCallback,
   useEffect,
@@ -10,6 +10,7 @@ import {
   useState,
   type FormEvent,
   type KeyboardEvent,
+  type RefObject,
 } from "react";
 import { useAppAccount } from "../lib/useAppAccount";
 import { useTranslation } from "react-i18next";
@@ -29,6 +30,10 @@ import {
   Mic,
   Paperclip,
   Pause,
+  Radio,
+  Square,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -63,8 +68,12 @@ function genId() {
   return Math.random().toString(36).slice(2, 10);
 }
 
-export function ChatbotPanel() {
-  const { t } = useTranslation();
+const CONTINUOUS_VOICE_KEY = "perkos:sparky:continuous-voice";
+
+type SparkyVoiceState = "idle" | "listening" | "thinking" | "speaking";
+
+export function ChatbotPanel({ embedded = false }: { embedded?: boolean }) {
+  const { t, i18n } = useTranslation();
   const {
     open,
     setOpen,
@@ -77,6 +86,8 @@ export function ChatbotPanel() {
     convError,
   } = useChatbot();
   const router = useRouter();
+  const pathname = usePathname();
+  const suppressed = !embedded && pathname === "/dashboard";
   const { address, isConnected } = useAppAccount();
   const [draft, setDraft] = useState("");
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -89,19 +100,34 @@ export function ChatbotPanel() {
   // True while we're waiting for an Assistant reply after sending —
   // toggles the typing bubble. Cleared when any non-self message arrives.
   const [awaitingReply, setAwaitingReply] = useState(false);
+  const [continuousVoice, setContinuousVoice] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+  const continuousSendRef = useRef<(text: string) => void>(() => undefined);
+  const speakReplyRef = useRef<(text: string) => void>(() => undefined);
+  const speechStopRef = useRef<() => void>(() => undefined);
 
   // Dictation (Web Speech API). Appends transcribed phrases to the draft.
   const speech = useSpeechToText({
     onFinal: (chunk) => {
       const cleaned = chunk.trim();
       if (!cleaned) return;
+      if (continuousVoice) {
+        speechStopRef.current();
+        continuousSendRef.current(cleaned);
+        return;
+      }
       setDraft((prev) => {
         const sep = !prev || /[.,;:!?\s]$/.test(prev) ? "" : " ";
         return `${prev}${sep}${cleaned}`;
       });
     },
   });
+  const speechStart = speech.start;
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    speechStopRef.current = speech.stop;
+  }, [speech.stop]);
 
   const isEmpty = messages.length === 0;
 
@@ -110,7 +136,7 @@ export function ChatbotPanel() {
   // the message list, skipping echoes of our own sends.
   const chat = useChatPerkosClient({
     convId,
-    enabled: open && isConnected,
+    enabled: !suppressed && (open || embedded) && isConnected,
     onMessage: (msg) => {
       if (sentIdsRef.current.has(msg.id)) {
         // Our own message echoing back from the server broadcast — skip.
@@ -123,7 +149,10 @@ export function ChatbotPanel() {
         role: isFromAgent ? "agent" : "user",
         text: msg.text,
       });
-      if (isFromAgent) setAwaitingReply(false);
+      if (isFromAgent) {
+        setAwaitingReply(false);
+        speakReplyRef.current(msg.text);
+      }
     },
     onHistory: (chunk) => {
       // history_chunk arrives chronologically (oldest first within the
@@ -151,18 +180,45 @@ export function ChatbotPanel() {
   // Re-enable history loading after a wallet switch (new convId) or a
   // fresh panel open, so the button works again on the next session.
   useEffect(() => {
-    if (!open || !convId) setHistoryLoaded(false);
-  }, [open, convId]);
+    // This state follows the external conversation identity.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (!(open || embedded) || !convId) setHistoryLoaded(false);
+  }, [open, embedded, convId]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!(open || embedded)) return;
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [open, messages.length, awaitingReply]);
+  }, [open, embedded, messages.length, awaitingReply]);
+
+  useEffect(() => {
+    if (!embedded) return;
+    setOpen(true);
+    return () => setOpen(false);
+  }, [embedded, setOpen]);
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(CONTINUOUS_VOICE_KEY) === "true";
+      const timer = window.setTimeout(() => setContinuousVoice(saved), 0);
+      return () => window.clearTimeout(timer);
+    } catch {
+      // Storage can be unavailable in private browsing; voice still works for
+      // the current page.
+    }
+  }, []);
+
+  useEffect(() => () => {
+    speechStopRef.current();
+    if (typeof window !== "undefined") window.speechSynthesis?.cancel();
+  }, []);
 
   // If the WS connection drops, also clear the typing indicator so the
   // user doesn't see a stale "Assistant is typing…" forever.
   useEffect(() => {
+    // Authentication is external websocket state; clear a pending indicator
+    // as soon as that transport is no longer able to deliver a reply.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!chat.authed) setAwaitingReply(false);
   }, [chat.authed]);
 
@@ -195,7 +251,7 @@ export function ChatbotPanel() {
     setAttachments((prev) => prev.filter((a) => a.url !== url));
   }
 
-  function send(text: string) {
+  const send = useCallback((text: string) => {
     const trimmed = text.trim();
     if (!trimmed && attachments.length === 0) return;
     if (!isConnected || !address) {
@@ -235,6 +291,61 @@ export function ChatbotPanel() {
     setDraft("");
     setAttachments([]);
     setAwaitingReply(true);
+  }, [address, appendMessage, attachments, chat, convError, convId, isConnected, loadingConv, t]);
+
+  useEffect(() => {
+    continuousSendRef.current = send;
+  }, [send]);
+
+  const speakReply = useCallback((text: string) => {
+    if (
+      !continuousVoice
+      || typeof window === "undefined"
+      || !("speechSynthesis" in window)
+      || !("SpeechSynthesisUtterance" in window)
+    ) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text.replace(/[`*_#]/g, ""));
+    utterance.lang = i18n.language.startsWith("es") ? "es-ES" : "en-US";
+    utterance.onstart = () => setSpeaking(true);
+    utterance.onend = () => {
+      setSpeaking(false);
+      speechStart();
+    };
+    utterance.onerror = () => {
+      setSpeaking(false);
+    };
+    window.speechSynthesis.speak(utterance);
+  }, [continuousVoice, i18n.language, speechStart]);
+
+  useEffect(() => {
+    speakReplyRef.current = speakReply;
+  }, [speakReply]);
+
+  function toggleContinuousVoice() {
+    const next = !continuousVoice;
+    setContinuousVoice(next);
+    try { window.localStorage.setItem(CONTINUOUS_VOICE_KEY, String(next)); } catch { /* ignore */ }
+    if (next) {
+      window.speechSynthesis?.cancel();
+      setSpeaking(false);
+      speech.start();
+    } else {
+      speech.stop();
+      window.speechSynthesis?.cancel();
+      setSpeaking(false);
+    }
+  }
+
+  function interruptAndListen() {
+    window.speechSynthesis?.cancel();
+    setSpeaking(false);
+    speech.start();
+  }
+
+  function muteSpeaking() {
+    window.speechSynthesis?.cancel();
+    setSpeaking(false);
   }
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -261,7 +372,35 @@ export function ChatbotPanel() {
     return -1;
   }, [messages]);
 
-  if (!open) return null;
+  if (suppressed || (!embedded && !open)) return null;
+
+  const voiceState: SparkyVoiceState = speaking
+    ? "speaking"
+    : speech.listening
+      ? "listening"
+      : awaitingReply
+        ? "thinking"
+        : "idle";
+
+  if (embedded) {
+    return (
+      <EmbeddedSparkyConversation
+        voiceState={voiceState}
+        messages={messages}
+        awaitingReply={awaitingReply}
+        draft={draft}
+        setDraft={setDraft}
+        onSubmit={onSubmit}
+        onKey={onKey}
+        speech={speech}
+        continuousVoice={continuousVoice}
+        onToggleContinuous={toggleContinuousVoice}
+        onInterrupt={interruptAndListen}
+        onMute={muteSpeaking}
+        scrollRef={scrollRef}
+      />
+    );
+  }
 
   return (
     <>
@@ -431,6 +570,170 @@ export function ChatbotPanel() {
         </div>
       </div>
     </>
+  );
+}
+
+function EmbeddedSparkyConversation({
+  voiceState,
+  messages,
+  awaitingReply,
+  draft,
+  setDraft,
+  onSubmit,
+  onKey,
+  speech,
+  continuousVoice,
+  onToggleContinuous,
+  onInterrupt,
+  onMute,
+  scrollRef,
+}: {
+  voiceState: SparkyVoiceState;
+  messages: ChatBubble[];
+  awaitingReply: boolean;
+  draft: string;
+  setDraft: (value: string) => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onKey: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
+  speech: ReturnType<typeof useSpeechToText>;
+  continuousVoice: boolean;
+  onToggleContinuous: () => void;
+  onInterrupt: () => void;
+  onMute: () => void;
+  scrollRef: RefObject<HTMLDivElement | null>;
+}) {
+  const { i18n } = useTranslation();
+  const es = i18n.language.startsWith("es");
+  const isEmpty = messages.length === 0;
+  const stateLabel =
+    voiceState === "listening"
+      ? (es ? "Escuchando" : "Listening")
+      : voiceState === "thinking"
+        ? (es ? "Pensando" : "Thinking")
+        : voiceState === "speaking"
+          ? (es ? "Hablando" : "Speaking")
+          : (es ? "Listo" : "Ready");
+
+  return (
+    <article
+      className="relative min-h-[620px] overflow-hidden rounded-2xl border border-primary/30 bg-[radial-gradient(circle_at_62%_38%,rgba(236,27,105,.22),transparent_30%),radial-gradient(circle_at_50%_110%,rgba(245,106,87,.14),transparent_38%),rgba(9,5,16,.92)] shadow-[0_0_45px_-28px_rgba(236,27,105,.9)]"
+      aria-label={es ? "Conversación con Sparky" : "Conversation with Sparky"}
+      data-sparky-state={voiceState}
+    >
+      <div className={`relative z-10 grid min-h-[540px] gap-4 p-5 md:p-8 ${isEmpty ? "place-items-center" : "lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,.8fr)]"}`}>
+        {!isEmpty ? (
+          <div ref={scrollRef} className="flex max-h-[440px] min-h-0 flex-col gap-3 overflow-y-auto pr-2" aria-live="polite">
+            {messages.map((message) => (
+              <Bubble key={message.id} bubble={message} showReactions={false} />
+            ))}
+            {awaitingReply ? <TypingBubble /> : null}
+          </div>
+        ) : null}
+
+        <div className={`flex flex-col items-center justify-center text-center ${isEmpty ? "max-w-xl" : "lg:sticky lg:top-8"}`}>
+          <div className="relative grid place-items-center">
+            <span
+              aria-hidden
+              className={cn(
+                "absolute h-56 w-56 rounded-full bg-primary/20 blur-3xl transition duration-500",
+                voiceState === "listening" && "scale-110 bg-sky-500/25",
+                voiceState === "thinking" && "animate-pulse bg-violet-500/25",
+                voiceState === "speaking" && "scale-125 animate-pulse bg-primary/35",
+              )}
+            />
+            <button
+              type="button"
+              onClick={voiceState === "speaking" ? onInterrupt : speech.toggle}
+              className="relative h-44 w-44 rounded-[2rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary md:h-52 md:w-52"
+              aria-label={voiceState === "speaking" ? (es ? "Interrumpir y hablar" : "Interrupt and speak") : (es ? "Hablar con Sparky" : "Talk to Sparky")}
+            >
+              <Image
+                src="/runtime/sparky-head.webp"
+                alt="Sparky"
+                fill
+                sizes="208px"
+                priority
+                className={cn(
+                  "object-contain drop-shadow-[0_0_28px_rgba(236,27,105,.7)] motion-safe:animate-[pulse_4s_ease-in-out_infinite]",
+                  voiceState === "listening" && "motion-safe:animate-[pulse_1.25s_ease-in-out_infinite]",
+                  voiceState === "thinking" && "motion-safe:animate-spin motion-safe:[animation-duration:8s]",
+                  voiceState === "speaking" && "motion-safe:animate-[pulse_.55s_ease-in-out_infinite]",
+                )}
+              />
+            </button>
+          </div>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Sparky</h1>
+          <p className="mt-1 flex items-center gap-2 text-xs font-medium text-primary" aria-live="polite">
+            <span className={cn("h-2 w-2 rounded-full bg-emerald-400", voiceState !== "idle" && "animate-pulse bg-primary")} />
+            {stateLabel}
+          </p>
+          {isEmpty ? (
+            <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
+              {es
+                ? "Cuéntame el resultado que necesitas. Organizaré el contexto y coordinaré a tus agentes."
+                : "Tell me the outcome you need. I’ll organize the context and coordinate your agents."}
+            </p>
+          ) : null}
+        </div>
+      </div>
+
+      <form onSubmit={onSubmit} className="relative z-20 mx-auto mb-5 w-[calc(100%-2.5rem)] max-w-3xl md:mb-7">
+        {speech.error ? (
+          <p className="mb-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">{speech.error}</p>
+        ) : null}
+        <div className="flex items-end gap-2 rounded-2xl border border-primary/35 bg-background/90 p-2 pl-4 shadow-[0_12px_40px_rgba(0,0,0,.35)] backdrop-blur-xl focus-within:border-primary">
+          <textarea
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            onKeyDown={onKey}
+            placeholder={speech.listening ? (speech.interimText || (es ? "Escuchando…" : "Listening…")) : (es ? "Escribe o habla con Sparky" : "Message or talk to Sparky")}
+            rows={1}
+            className="min-h-10 flex-1 resize-none bg-transparent py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+          />
+          <div className="flex shrink-0 items-center gap-1">
+            {speech.supported ? (
+              <>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  onClick={voiceState === "speaking" ? onInterrupt : speech.toggle}
+                  className={cn("h-9 w-9 rounded-full", speech.listening && "animate-pulse bg-primary/15 text-primary")}
+                  aria-label={speech.listening ? (es ? "Detener micrófono" : "Stop microphone") : (es ? "Activar micrófono" : "Start microphone")}
+                >
+                  {speech.listening ? <Square className="h-3.5 w-3.5 fill-current" /> : <Mic className="h-4 w-4" />}
+                </Button>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant={continuousVoice ? "default" : "ghost"}
+                  onClick={onToggleContinuous}
+                  className="h-9 w-9 rounded-full"
+                  aria-pressed={continuousVoice}
+                  aria-label={continuousVoice ? (es ? "Desactivar conversación continua" : "Turn off continuous conversation") : (es ? "Activar conversación continua" : "Turn on continuous conversation")}
+                  title={es ? "Conversación continua" : "Continuous conversation"}
+                >
+                  {continuousVoice ? <Radio className="h-4 w-4 animate-pulse" /> : <Volume2 className="h-4 w-4" />}
+                </Button>
+                {voiceState === "speaking" ? (
+                  <Button type="button" size="icon" variant="ghost" onClick={onMute} className="h-9 w-9 rounded-full" aria-label={es ? "Silenciar a Sparky" : "Mute Sparky"}>
+                    <VolumeX className="h-4 w-4" />
+                  </Button>
+                ) : null}
+              </>
+            ) : null}
+            <Button type="submit" size="icon" disabled={awaitingReply || draft.trim().length === 0} className="h-9 w-9 rounded-full" aria-label={es ? "Enviar" : "Send"}>
+              {awaitingReply ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowUp className="h-4 w-4" />}
+            </Button>
+          </div>
+        </div>
+        <p className="mt-2 text-center text-[10px] text-muted-foreground">
+          {continuousVoice
+            ? (es ? "Conversación continua activa. Sparky vuelve a escuchar después de responder." : "Continuous conversation is on. Sparky listens again after replying.")
+            : (es ? "La conversación continua está apagada." : "Continuous conversation is off.")}
+        </p>
+      </form>
+    </article>
   );
 }
 
