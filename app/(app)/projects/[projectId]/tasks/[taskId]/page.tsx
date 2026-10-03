@@ -29,11 +29,14 @@ import { cn } from "@/lib/utils";
 import {
   deleteTask,
   getWalletProject,
+  retryTask,
 } from "../../../../../lib/perkosApi";
 import { ConfirmDialog } from "../../../../../components/ConfirmDialog";
 import { EditTaskDialog } from "../../../../../components/EditTaskDialog";
 import { Markdown } from "../../../../../components/Markdown";
 import { TaskAttachmentList } from "../../../../../components/TaskAttachments";
+import { TaskExecutionStatus } from "../../../../../components/TaskExecutionStatus";
+import { useProjectTasks } from "../../../../../lib/useProjectTasks";
 
 type PageProps = {
   params: Promise<{ projectId: string; taskId: string }>;
@@ -63,7 +66,8 @@ export default function TaskDetailPage({ params }: PageProps) {
     enabled: Boolean(ownerWallet) && Boolean(projectId),
   });
 
-  const task = data?.tasks.find((t) => t.id === taskId);
+  const liveTasks = useProjectTasks(ownerWallet, projectId);
+  const task = (liveTasks.loaded ? liveTasks.tasks : data?.tasks)?.find((t) => t.id === taskId);
   const assignedAgent = data?.taskAgents?.find(a => a.name === task?.agent);
   const projectName = data?.project.name;
 
@@ -83,6 +87,19 @@ export default function TaskDetailPage({ params }: PageProps) {
       toast.error("Couldn't delete task", { description: err.message });
       setDeleteOpen(false);
     },
+  });
+
+  const retryMutation = useMutation({
+    mutationFn: () => {
+      if (!ownerWallet) throw new Error("Connect a wallet.");
+      return retryTask({ walletAddress: ownerWallet, projectId, taskId });
+    },
+    onSuccess: () =>
+      toast.success("Task queued again", {
+        description: "PerkOS will deliver it automatically.",
+      }),
+    onError: (err: Error) =>
+      toast.error("Couldn't retry task", { description: err.message }),
   });
 
   if (isLoading) {
@@ -161,6 +178,12 @@ export default function TaskDetailPage({ params }: PageProps) {
           )}
         </CardContent>
       </Card>
+
+      <TaskExecutionStatus
+        task={task}
+        retrying={retryMutation.isPending}
+        onRetry={() => retryMutation.mutate()}
+      />
 
       <section className="grid grid-cols-1 gap-3 md:grid-cols-3">
         <MetaTile

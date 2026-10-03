@@ -128,6 +128,12 @@ export type Task = {
   prompt?: string;
   result?: string;
   logs?: string[];
+  dispatched?: boolean;
+  dispatchState?: "queued" | "starting" | "retrying" | "waiting_on_dependency" | "payment-required" | "failed" | "completed" | string;
+  dispatchAttempts?: number;
+  dispatchStuck?: boolean;
+  lastDispatchError?: string;
+  dispatchedAt?: string;
   /** Files attached when the task was created or edited (same shape as chat). */
   attachments?: TaskAttachment[];
   createdAt?: string;
@@ -1472,6 +1478,22 @@ export async function updateTask(input: {
   );
   const payload = await parseJson(response);
   if (!response.ok) throw new Error(apiError(payload, "Couldn't update task"));
+  return { task: (payload as unknown as { task: Task }).task };
+}
+
+export async function retryTask(input: {
+  walletAddress: string;
+  projectId: string;
+  taskId: string;
+}): Promise<{ task: Task }> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/projects/${input.projectId}/tasks/${encodeURIComponent(input.taskId)}/retry` +
+      `?owner=${encodeURIComponent(input.walletAddress)}`,
+    { method: "POST" },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't retry task"));
   return { task: (payload as unknown as { task: Task }).task };
 }
 

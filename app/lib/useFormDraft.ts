@@ -44,7 +44,8 @@ function clearDraft(name: string) {
  */
 export function useFormDraft<T>(
   name: string,
-  defaults: T
+  defaults: T,
+  options?: { authoritativeKeys?: readonly (keyof T)[] }
 ): readonly [T, (next: T | ((prev: T) => T)) => void, () => void] {
   const [value, setValue] = useState<T>(defaults);
   const hydrated = useRef(false);
@@ -53,13 +54,18 @@ export function useFormDraft<T>(
   useEffect(() => {
     const stored = readDraft<T>(name);
     if (stored != null) {
+      // Hydration is the subscription callback for the localStorage-backed draft.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setValue((current) =>
         typeof current === "object" && current !== null && !Array.isArray(current)
-          ? ({ ...(current as object), ...(stored as object) } as T)
+          ? mergeDraft(current, stored, options?.authoritativeKeys)
           : stored
       );
     }
     hydrated.current = true;
+    // Callers pass authoritative keys as configuration for this draft name;
+    // changing them mid-session would unexpectedly re-hydrate the whole form.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name]);
 
   // Persist after each change, but only after the initial hydration so we
@@ -76,4 +82,14 @@ export function useFormDraft<T>(
   }, [name]);
 
   return [value, setValue, clear] as const;
+}
+
+export function mergeDraft<T>(
+  defaults: T,
+  stored: T,
+  authoritativeKeys: readonly (keyof T)[] = [],
+): T {
+  const merged = { ...(defaults as object), ...(stored as object) } as T;
+  for (const key of authoritativeKeys) merged[key] = defaults[key];
+  return merged;
 }
