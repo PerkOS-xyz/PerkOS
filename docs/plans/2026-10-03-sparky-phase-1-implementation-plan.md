@@ -11,6 +11,12 @@ Deliver one cohesive project-creation journey:
 5. project creation stores immutable snapshots of the intent, template revision, role policies, and visual identities;
 6. no agent runtime, encrypted knowledge access, or autonomous execution is introduced in this phase.
 
+After authentication and required profile setup, the primary dashboard is a
+two-pane workspace: Sparky conversation on the left and the user's living
+knowledge graph on the right. Before the first project exists, the graph shows
+the emerging `ProjectIntent`; after a project is selected, both panes share the
+same project context and authorization boundary.
+
 The implementation spans PerkOS App and PerkOS API. API work must begin in a clean worktree based on its current `main`; the existing local API checkout has unrelated uncommitted changes and must not be reused.
 
 ## Product decisions
@@ -211,13 +217,14 @@ The stored identity contains versioned, deterministic visual attributes such as 
 
 **Implementation notes**
 
-1. Make `/projects/new` lead with two clear choices: “Tell Sparky what you need” and “Browse templates”. Sparky is primary, not mandatory.
-2. The intake view contains Sparky, a focused transcript, suggested prompts, composer, and a live intent summary.
-3. Sparky asks one useful question at a time and visibly separates confirmed facts from assumptions.
-4. Autosave only server-confirmed revisions; never store sensitive drafts in shared browser storage.
-5. The review screen permits editing every canonical field before confirmation.
-6. Resuming a draft loads by authenticated intent ID; switching accounts clears all in-memory state.
-7. Network and model failures preserve typed input and show a retry path.
+1. Make the authenticated dashboard a responsive two-pane workspace: Sparky on the left and the living knowledge view on the right. On narrow screens, preserve both as explicit tabs rather than hiding either surface.
+2. Make `/projects/new` lead with two clear choices: “Tell Sparky what you need” and “Browse templates”. Sparky is primary, not mandatory.
+3. The intake view contains Sparky, a focused transcript, suggested prompts, composer, and a live intent/knowledge view in the right pane.
+4. Sparky asks one useful question at a time and visibly separates confirmed facts from assumptions.
+5. Autosave only server-confirmed revisions; never store sensitive drafts in shared browser storage.
+6. The review screen permits editing every canonical field before confirmation.
+7. Resuming a draft loads by authenticated intent ID; switching accounts clears all in-memory state.
+8. Network and model failures preserve typed input and show a retry path.
 
 **Verification**
 
