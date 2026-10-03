@@ -11,6 +11,8 @@ vi.mock("react-force-graph-3d", () => ({
       zoomToFit: vi.fn(),
       cameraPosition: vi.fn(),
       controls: () => ({}),
+      d3Force: () => ({ strength: vi.fn(), distance: vi.fn() }),
+      d3ReheatSimulation: vi.fn(),
     }));
     return (
       <div data-testid="force-graph">
