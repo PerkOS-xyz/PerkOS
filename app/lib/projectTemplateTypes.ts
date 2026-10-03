@@ -13,6 +13,53 @@ export type TemplateQuestion = {
   validation: "none" | "artizen-url";
   options: { value: string; label: LocalizedText }[];
 };
+
+export type KnowledgeScope = "personal" | "organization" | "project" | "task";
+export type KnowledgeNodeType =
+  | "user-profile"
+  | "organization-policy"
+  | "project-brief"
+  | "source"
+  | "fact"
+  | "assumption"
+  | "decision"
+  | "approval"
+  | "task"
+  | "artifact"
+  | "result"
+  | "conversation-summary";
+export type RoleAction =
+  | "read"
+  | "propose-knowledge"
+  | "create-task"
+  | "update-task"
+  | "create-artifact"
+  | "request-approval";
+export type EscalationCondition =
+  | "sensitive-data"
+  | "external-write"
+  | "financial-commitment"
+  | "policy-exception"
+  | "human-decision";
+
+export type TemplateRolePolicy = {
+  readScopes: KnowledgeScope[];
+  readNodeTypes: KnowledgeNodeType[];
+  actions: RoleAction[];
+  escalation: EscalationCondition[];
+};
+
+export type TemplateTeamRole = {
+  roleId: string;
+  name: LocalizedText;
+  responsibility: LocalizedText;
+  presetId?: string;
+  isLead: boolean;
+  order: number;
+  policy: TemplateRolePolicy;
+  avatarSeed: string;
+};
+
 export type ProjectTemplate = {
   id: string;
   name: LocalizedText;
@@ -27,6 +74,7 @@ export type ProjectTemplate = {
   };
   actions: ["prepare-update", "revise-update", "save-approved-update"];
   delivery: "draft-only";
+  team: TemplateTeamRole[];
 };
 export type PublishedTemplate = {
   template: ProjectTemplate;
