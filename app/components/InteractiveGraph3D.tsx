@@ -63,7 +63,7 @@ function labelSprite(node: ForceNode, dimmed: boolean): THREE.Sprite {
   }
   const material = new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true, depthWrite: false });
   const sprite = new THREE.Sprite(material);
-  const width = node.kind === "project" ? 88 : node.kind === "task" ? 76 : 68;
+  const width = node.kind === "project" ? 132 : node.kind === "task" ? 112 : 104;
   sprite.scale.set(width, width * (150 / 640), 1);
   return sprite;
 }
@@ -75,7 +75,7 @@ function blockObject(node: ForceNode, dimmed: boolean): THREE.Object3D {
   const isAgent = node.kind === "agent";
   const isTask = node.kind === "task";
   const isSource = node.kind === "source";
-  const radius = isProject ? 13 : isAgent ? 9 : isTask ? 7 : isSource ? 6.5 : 6;
+  const radius = isProject ? 18 : isAgent ? 13 : isTask ? 10 : isSource ? 9 : 8;
   const geometry = new THREE.SphereGeometry(radius, 28, 20);
   const material = new THREE.MeshStandardMaterial({
     color,
@@ -182,7 +182,7 @@ export function InteractiveGraph3D({
     : [], [graphData.nodes, neighbors, selectedId]);
 
   const fitGraph = useCallback((animated = true) => {
-    graphRef.current?.zoomToFit(animated ? 600 : 0, 74);
+    graphRef.current?.zoomToFit(animated ? 600 : 0, 32);
   }, []);
 
   useEffect(() => {
