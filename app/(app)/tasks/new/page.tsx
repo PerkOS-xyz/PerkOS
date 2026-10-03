@@ -10,6 +10,7 @@ import {
   createProjectTasks,
   setProjectPm,
   getWalletAgents,
+  getWalletProject,
   type Project,
 } from "../../../lib/perkosApi";
 import { useFormDraft } from "../../../lib/useFormDraft";
@@ -29,14 +30,19 @@ export default function CreateTaskPage() {
   const { address, isConnected } = useAppAccount();
 
   const initialProjectId = searchParams.get("projectId") ?? "";
+  const initialOwnerWallet = searchParams.get("owner") ?? "";
 
-  const [draft, setDraft, clearDraft] = useFormDraft("task.new.v1", {
-    projectId: initialProjectId,
-    name: "",
-    description: "",
-    priority: "Medium" as Priority,
-    agent: "App Agent",
-  });
+  const [draft, setDraft, clearDraft] = useFormDraft(
+    "task.new.v1",
+    {
+      projectId: initialProjectId,
+      name: "",
+      description: "",
+      priority: "Medium" as Priority,
+      agent: "App Agent",
+    },
+    { authoritativeKeys: ["projectId"] },
+  );
   const { projectId, name, description, priority, agent } = draft;
   const setProjectId = (v: string) =>
     setDraft((d) => ({ ...d, projectId: v }));
@@ -52,13 +58,32 @@ export default function CreateTaskPage() {
   // project list showed several.
   const projectsQuery = useVisibleProjects();
 
+  // A project deep-link can come from outside the currently selected org.
+  // Load that exact project by its owner so the route cannot silently fall
+  // back to the first project in the active org's dropdown.
+  const routedProjectQuery = useQuery({
+    queryKey: ["task-create-project", initialOwnerWallet, initialProjectId],
+    queryFn: () =>
+      getWalletProject({
+        walletAddress: initialOwnerWallet,
+        projectId: initialProjectId,
+      }),
+    enabled: Boolean(initialOwnerWallet) && Boolean(initialProjectId),
+  });
+
   const agentsQuery = useQuery({
     queryKey: ["wallet-agents", address],
     queryFn: () => getWalletAgents(address!),
     enabled: Boolean(address),
   });
 
-  const projects = projectsQuery.projects;
+  const routedProject = routedProjectQuery.data?.project
+    ? { ...routedProjectQuery.data.project, ownerWallet: initialOwnerWallet }
+    : null;
+  const projects =
+    routedProject?.id && !projectsQuery.projects.some((p) => p.id === routedProject.id)
+      ? [routedProject, ...projectsQuery.projects]
+      : projectsQuery.projects;
   const selectedProject = projects.find((p) => p.id === projectId) ?? null;
   const projectAgents = selectedProject?.agentIds ?? [];
   const [leadPick, setLeadPick] = useState("");
@@ -135,7 +160,7 @@ export default function CreateTaskPage() {
         ],
       });
     },
-    onSuccess: () => {
+    onSuccess: ({ tasks }) => {
       queryClient.invalidateQueries({
         queryKey: ["wallet-project", address, projectId],
       });
@@ -144,7 +169,12 @@ export default function CreateTaskPage() {
         description: `"${name.trim()}" was added to the project.`,
       });
       clearDraft();
-      router.replace(`/projects/${projectId}`);
+      const createdTaskId = tasks[0]?.id;
+      router.replace(
+        createdTaskId
+          ? `/projects/${projectId}/tasks/${createdTaskId}?owner=${encodeURIComponent(selectedProject?.ownerWallet ?? address!)}`
+          : `/projects/${projectId}`,
+      );
     },
     onError: (err: Error) => {
       toast.error("Task creation failed", { description: err.message });

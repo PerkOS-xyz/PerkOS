@@ -895,7 +895,9 @@ function TasksTab({
   const queryClient = useQueryClient();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const newTaskHref = `/tasks/new?projectId=${encodeURIComponent(projectId)}`;
+  const newTaskHref =
+    `/tasks/new?projectId=${encodeURIComponent(projectId)}` +
+    (effWallet ? `&owner=${encodeURIComponent(effWallet)}` : "");
 
   // Map tasks to KanbanItem shape; carry the original task in `task` for renderCard.
   const kanbanItems = tasks
