@@ -39,21 +39,19 @@ import {
 import { useOnboarding } from "../../lib/onboardingState";
 import { useActiveOrg } from "../../lib/useActiveOrg";
 import { orgDisplayName } from "../../lib/orgDisplayName";
-import { formatAddress, formatRelativeShort } from "../../lib/format";
+import { formatRelativeShort } from "../../lib/format";
 import { useActivityFeed } from "../../lib/activityEvents";
 import {
   realtimeAgentStatus,
   useWalletAgents,
   STATUS_AVAILABLE,
 } from "../../lib/useWalletAgents";
-import { ActiveAgentsPanel } from "../../components/ActiveAgentsPanel";
-import { AgentOrb } from "../../components/AgentOrb";
+import { SparkyDashboardWorkspace } from "../../components/SparkyDashboardWorkspace";
 import { ActivityFeedCard } from "../../components/ActivityFeedCard";
 import { ActivityHeatmap } from "../../components/charts";
 import { KpiStrip } from "../../components/KpiStrip";
 import { ModelUsagePanel } from "../../components/ModelUsagePanel";
 import { BillingCard } from "../../components/BillingCard";
-import { OrganizationKnowledgeGraph } from "../../components/ProjectContextMap";
 import {
   WaitingOnYouCard,
   type WaitingItem,
@@ -223,18 +221,12 @@ export default function DashboardPage() {
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
       <div className="flex min-w-0 flex-col gap-6">
-        <GreetingBanner orgName={displayWorkspace} />
-
-        <WorkspaceCard
-          name={displayWorkspace}
-          ownerAddress={address}
-        />
-
-        <OrganizationKnowledgeGraph
+        <SparkyDashboardWorkspace
           organizationName={displayWorkspace}
           ownerWallet={activeOrg?.ownerWallet ?? address}
           projects={orgProjects}
           agents={data?.agents ?? []}
+          liveAgents={liveAgents}
         />
 
         {error ? (
@@ -249,11 +241,6 @@ export default function DashboardPage() {
           inFlight={stats.activeTasks}
           needsAttention={needsAttention}
           doneThisWeek={doneThisWeek}
-          isLoading={isLoading}
-        />
-
-        <ActiveAgentsPanel
-          agents={data?.agents ?? []}
           isLoading={isLoading}
         />
 
@@ -438,59 +425,6 @@ function StarterCallout({ address }: { address: string }) {
         </Button>
       </CardContent>
     </Card>
-  );
-}
-
-function GreetingBanner({ orgName }: { orgName?: string }) {
-  const { t } = useTranslation();
-  return (
-    <div className="relative overflow-hidden rounded-xl border border-primary/30 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent p-5">
-      <div className="flex items-start gap-3">
-        <div className="relative">
-          <AgentOrb name="PerkOS Assistant" presetId="assistant" size={48} />
-          <span className="absolute -bottom-0.5 -right-0.5 grid h-3 w-3 place-items-center rounded-full bg-emerald-400 ring-2 ring-background" />
-        </div>
-        <div className="flex flex-col gap-1">
-          <h1 className="text-xl font-medium text-foreground md:text-2xl">
-            {t("dashboard.greeting.welcomeBack")}
-            {orgName ? (
-              <span className="ml-2 text-sm font-medium text-primary">
-                {orgName}
-              </span>
-            ) : null}
-          </h1>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {t("dashboard.greeting.intro")}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function WorkspaceCard({
-  name,
-  ownerAddress,
-}: {
-  name: string;
-  ownerAddress?: string;
-}) {
-  const { t } = useTranslation();
-  return (
-    <div className="glow-hero flex flex-col gap-1 rounded-md border border-primary/30 bg-card p-4">
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-foreground">{name}</span>
-        <Badge variant="secondary" className="border-border">
-          {t("dashboard.workspace.orgBadge")}
-        </Badge>
-      </div>
-      <p className="text-xs text-muted-foreground">
-        {t("dashboard.workspace.memberCount")}
-        <span className="px-2">·</span>
-        {t("dashboard.workspace.ownedBy")}{" "}
-        <span className="font-mono">{formatAddress(ownerAddress)}</span>
-      </p>
-    </div>
   );
 }
 

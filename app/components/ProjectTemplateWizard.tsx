@@ -13,6 +13,7 @@ import {
   templateText,
   templateAnswerText,
 } from "../lib/projectTemplateTypes";
+import { ProjectTeamPreview } from "./ProjectTeamPreview";
 
 const text = (es: boolean) =>
   es
@@ -35,6 +36,7 @@ const text = (es: boolean) =>
         done: "Configuración guardada",
         open: "Abrir proyecto",
         placeholder: "Selecciona una opción",
+        team: "Tu equipo propuesto",
       }
     : {
         title: "Project templates",
@@ -55,6 +57,7 @@ const text = (es: boolean) =>
         done: "Configuration saved",
         open: "Open project",
         placeholder: "Choose an option",
+        team: "Your proposed team",
       };
 
 export function ProjectTemplateGallery() {
@@ -315,11 +318,16 @@ function Wizard({ templateId }: { templateId: string }) {
                         </div>
                       ))}
                   </dl>
-                  <p className="text-sm">
-                    Hermes · 1{" "}
+                  <ProjectTeamPreview
+                    team={data.template.team}
+                    language={locale}
+                    title={copy.team}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Hermes · {data.template.team.length}{" "}
                     {locale === "es"
-                      ? "agente previsto, sin activar"
-                      : "planned agent, not activated"}
+                      ? "agentes previstos, sin activar"
+                      : "planned agents, not activated"}
                   </p>
                 </div>
               )}
