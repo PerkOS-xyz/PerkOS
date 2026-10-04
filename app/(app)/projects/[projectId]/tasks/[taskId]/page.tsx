@@ -12,18 +12,13 @@ import { useActiveOrg } from "../../../../../lib/useActiveOrg";
 import { toast } from "sonner";
 import {
   ArrowLeft,
-  Bot,
-  Calendar,
-  Folder,
   Pencil,
-  Sparkles,
   Terminal,
   Trash2,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 import {
@@ -32,8 +27,13 @@ import {
 } from "../../../../../lib/perkosApi";
 import { ConfirmDialog } from "../../../../../components/ConfirmDialog";
 import { EditTaskDialog } from "../../../../../components/EditTaskDialog";
-import { Markdown } from "../../../../../components/Markdown";
-import { DocumentView } from "../../../../../components/DocumentView";
+import {
+  DeliverableSheet,
+  PendingDeliverable,
+  TaskMobileSummary,
+  TaskRail,
+  type TaskPeople,
+} from "../../../../../components/TaskDetailLayout";
 import { TaskAttachmentList } from "../../../../../components/TaskAttachments";
 
 type PageProps = {
@@ -112,83 +112,82 @@ export default function TaskDetailPage({ params }: PageProps) {
     );
   }
 
+  const onDemand = task.executionMode === "artizen-on-demand";
+  const people: TaskPeople = {
+    agentName: task.agent || null,
+    agentLabel: task.agent ? taskAgentName(task.agent, onDemand, assignedAgent) : null,
+    runtime: onDemand ? "On-demand Hermes" : assignedAgent?.runtime ?? null,
+    projectId,
+    projectName,
+  };
+
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5 md:gap-6">
       <BackLink projectId={projectId} projectName={projectName} />
 
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex flex-col gap-3">
+      <header className="flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-1 duration-500 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 flex-col gap-2.5">
           <div className="flex flex-wrap items-center gap-2">
-            {task.executionMode === "artizen-on-demand" && isArtizenUnsuccessful({ ...task, phase: task.executionPhase }) ? <ArtizenFailureLabel /> : <TaskStatusBadge status={task.status} />}
+            {onDemand && isArtizenUnsuccessful({ ...task, phase: task.executionPhase }) ? <ArtizenFailureLabel /> : <TaskStatusBadge status={task.status} />}
             <PriorityBadge priority={task.priority} />
           </div>
-          <h1 className="text-3xl font-medium leading-tight text-foreground">
+          <h1 className="text-balance text-2xl font-medium leading-tight text-foreground md:text-3xl">
             {task.name}
           </h1>
         </div>
-        {task.executionMode === "artizen-on-demand" ? <ArtizenWorkLink projectId={projectId} /> : <div className="flex items-center gap-2">
+        {onDemand ? <ArtizenWorkLink projectId={projectId} /> : <div className="flex shrink-0 items-center gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setEditOpen(true)}
             className="gap-1.5"
+            aria-label="Edit"
           >
             <Pencil className="h-3.5 w-3.5" />
-            Edit
+            <span className="hidden sm:inline">Edit</span>
           </Button>
           <Button
             variant="destructive"
             size="sm"
             onClick={() => setDeleteOpen(true)}
             className="gap-1.5"
+            aria-label="Delete"
           >
             <Trash2 className="h-3.5 w-3.5" />
-            Delete
+            <span className="hidden sm:inline">Delete</span>
           </Button>
         </div>}
       </header>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Description</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {task.prompt?.trim() ? (
-            <Markdown>{task.prompt}</Markdown>
+      <TaskMobileSummary people={people} prompt={task.prompt} className="lg:hidden" />
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_19rem] xl:grid-cols-[minmax(0,1fr)_21rem]">
+        <div className="flex min-w-0 flex-col gap-6">
+          {task.result ? (
+            <DeliverableSheet result={task.result} title={task.name} agentLabel={people.agentLabel} />
+          ) : onDemand ? (
+            <ArtizenRunFailure run={{ ...task, phase: task.executionPhase }} />
           ) : (
-            <p className="text-sm text-muted-foreground">
-              No description was provided when this task was created.
-            </p>
+            <PendingDeliverable status={task.status} />
           )}
-        </CardContent>
-      </Card>
 
-      <section className="grid grid-cols-1 gap-3 md:grid-cols-3">
-        <MetaTile
-          label="Project"
-          value={projectName ?? "—"}
-          Icon={Folder}
-          href={`/projects/${projectId}`}
-        />
-        <MetaTile label="Due date" value="Not set" Icon={Calendar} muted />
-        <MetaTile
-          label="Assigned agent"
-          value={task.agent ? taskAgentName(task.agent, task.executionMode === "artizen-on-demand", assignedAgent) : "—"}
-          Icon={Bot}
-        />
-      </section>
+          {onDemand && task.agent ? (
+            <TaskAgentCard name={task.agent} onDemand agent={assignedAgent} />
+          ) : null}
 
-      {task.agent ? (
-        <TaskAgentCard name={task.agent} onDemand={task.executionMode === "artizen-on-demand"} agent={assignedAgent} />
-      ) : null}
+          <TaskAttachmentList attachments={task.attachments ?? []} />
 
-      {task.logs && task.logs.length > 0 ? (
-        <LogsSection logs={task.logs} />
-      ) : null}
+          {task.logs && task.logs.length > 0 ? (
+            <LogsSection logs={task.logs} />
+          ) : null}
+        </div>
 
-      <TaskAttachmentList attachments={task.attachments ?? []} />
-
-      {task.result ? <ResultSection result={task.result} /> : task.executionMode === "artizen-on-demand" ? <ArtizenRunFailure run={{ ...task, phase: task.executionPhase }} /> : null}
+        <aside className="hidden lg:block">
+          <div className="sticky top-6">
+            <TaskRail people={people} prompt={task.prompt} />
+          </div>
+        </aside>
+      </div>
 
       {ownerWallet ? (
         <EditTaskDialog
@@ -262,66 +261,16 @@ function PriorityBadge({ priority }: { priority: string }) {
   );
 }
 
-function MetaTile({
-  label,
-  value,
-  Icon,
-  muted,
-  href,
-}: {
-  label: string;
-  value: string;
-  Icon: typeof Folder;
-  muted?: boolean;
-  href?: string;
-}) {
-  const content = (
-    <>
-      <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
-        <Icon className="h-3.5 w-3.5" />
-        {label}
-      </div>
-      <span
-        className={cn(
-          "truncate text-sm",
-          muted ? "text-muted-foreground" : "text-foreground"
-        )}
-        title={value}
-      >
-        {value}
-      </span>
-    </>
-  );
-
-  if (href) {
-    return (
-      <Link
-        href={href}
-        className="flex flex-col gap-1 rounded-md border border-border bg-card px-4 py-3 transition-colors hover:border-primary/40"
-      >
-        {content}
-      </Link>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-1 rounded-md border border-border bg-card px-4 py-3">
-      {content}
-    </div>
-  );
-}
-
 function LogsSection({ logs }: { logs: string[] }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Terminal className="h-4 w-4 text-muted-foreground" />
-          Runtime logs
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ul className="flex flex-col gap-2 font-mono text-xs text-muted-foreground">
+    <details className="group rounded-xl border border-border bg-card">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-4 text-sm font-medium text-foreground marker:content-none">
+        <Terminal className="h-4 w-4 text-muted-foreground" />
+        Runtime logs
+        <span className="text-xs font-normal text-muted-foreground">({logs.length})</span>
+      </summary>
+      <div className="border-t border-border px-4 py-3">
+        <ul className="flex flex-col gap-2 overflow-x-auto font-mono text-xs text-muted-foreground">
           {logs.map((line, idx) => (
             <li
               key={idx}
@@ -331,24 +280,8 @@ function LogsSection({ logs }: { logs: string[] }) {
             </li>
           ))}
         </ul>
-      </CardContent>
-    </Card>
-  );
-}
-
-function ResultSection({ result }: { result: string }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Sparkles className="h-4 w-4 text-primary" />
-          Agent result
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <DocumentView title="Agent result">{result}</DocumentView>
-      </CardContent>
-    </Card>
+      </div>
+    </details>
   );
 }
 
@@ -358,14 +291,12 @@ function DetailSkeleton({ projectId }: { projectId: string }) {
       <BackLink projectId={projectId} projectName={null} />
       <div className="h-7 w-40 animate-pulse rounded-md bg-muted" />
       <div className="h-10 w-72 animate-pulse rounded-md bg-muted" />
-      <div className="h-32 animate-pulse rounded-md border border-border bg-card" />
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="h-20 animate-pulse rounded-md border border-border bg-card"
-          />
-        ))}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_19rem] xl:grid-cols-[minmax(0,1fr)_21rem]">
+        <div className="h-96 animate-pulse rounded-xl border border-border bg-card" />
+        <div className="hidden flex-col gap-4 lg:flex">
+          <div className="h-40 animate-pulse rounded-xl border border-border bg-card" />
+          <div className="h-56 animate-pulse rounded-xl border border-border bg-card" />
+        </div>
       </div>
     </div>
   );
