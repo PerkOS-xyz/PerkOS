@@ -101,14 +101,14 @@ export function BillingCard({
               icon={<LockKeyhole className="h-3.5 w-3.5 text-primary" />}
               label="Infra left"
               value={
-                !evmActions ? t("walletCapabilities.unavailable") : infra.hoursRemaining === null
+                !evmActions && !b.exempt ? t("walletCapabilities.unavailable") : infra.hoursRemaining === null
                   ? "Sponsored"
                   : `${fmtHours(infra.hoursRemaining)}h`
               }
             />
           </div>
 
-          {!evmActions ? <WalletFeatureNotice feature="billing" /> : b.exempt ? (
+          {!evmActions && !b.exempt ? <WalletFeatureNotice feature="billing" /> : b.exempt ? (
             <div className="rounded-md border border-sky-500/30 bg-sky-500/5 px-3 py-2">
               <span className="text-xs font-medium text-sky-300">Sponsored — runs free</span>
               <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground">
