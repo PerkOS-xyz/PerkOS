@@ -39,6 +39,7 @@ import {
 } from "../lib/perkosApi";
 import { EmptyState } from "./EmptyState";
 import { Markdown } from "./Markdown";
+import { DocumentView } from "./DocumentView";
 import { MentionText } from "./MentionText";
 import { MentionInput } from "./MentionInput";
 import { extractMentions, type MentionParticipant } from "../lib/mentions";
@@ -690,7 +691,7 @@ function TaskResultBlock({ block }: { block: PlanBlock }) {
         <span className="hidden text-[11px] font-normal text-emerald-200/70 group-open:inline">Collapse</span>
       </summary>
       <div className="border-t border-emerald-500/15 px-3 py-3 text-sm text-[#cfcbef]">
-        <Markdown>{body}</Markdown>
+        <DocumentView title={title}>{body}</DocumentView>
       </div>
     </details>
   );

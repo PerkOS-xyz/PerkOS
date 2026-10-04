@@ -1,4 +1,10 @@
 {
+  "documentView": {
+    "copy": "コピー",
+    "copied": "コピーしました",
+    "download": ".md をダウンロード",
+    "expand": "全画面"
+  },
   "walletCapabilities": {
     "accessCodeLabel": "招待コード（必須）",
     "title": "アカウントの機能",

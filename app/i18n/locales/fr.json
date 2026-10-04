@@ -1,4 +1,10 @@
 {
+  "documentView": {
+    "copy": "Copier",
+    "copied": "Copié",
+    "download": "Télécharger .md",
+    "expand": "Plein écran"
+  },
   "walletCapabilities": {
     "accessCodeLabel": "Code d’invitation (obligatoire)",
     "title": "Fonctions du compte",

@@ -1,4 +1,10 @@
 {
+  "documentView": {
+    "copy": "Copy",
+    "copied": "Copied",
+    "download": "Download .md",
+    "expand": "Full screen"
+  },
   "walletCapabilities": {
     "accessCodeLabel": "Invitation code (required)",
     "title": "Account capabilities",
