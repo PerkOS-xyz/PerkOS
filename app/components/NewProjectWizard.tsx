@@ -8,6 +8,7 @@ import { fetchLlmAccess } from "../lib/llmAccess";
 import { fetchEcsAccess } from "../lib/ecsAccess";
 import { useRouter } from "next/navigation";
 import { useAppAccount } from "../lib/useAppAccount";
+import { teamAgentName } from "../lib/teamAgentName";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { ProjectTemplateGallery } from "./ProjectTemplateWizard";
@@ -345,7 +346,7 @@ export default function NewProjectWizard() {
         let i = 0;
         for (const role of roles) {
           i++;
-          const reqName = `${slug}-${slugify(role.role)}`;
+          const reqName = teamAgentName(slug, slugify(role.role));
           if (agentSource === "invite") {
             setProgress(
               t("companyNew.launch.registering", {
