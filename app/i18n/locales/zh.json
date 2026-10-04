@@ -1,4 +1,10 @@
 {
+  "documentView": {
+    "copy": "复制",
+    "copied": "已复制",
+    "download": "下载 .md",
+    "expand": "全屏"
+  },
   "walletCapabilities": {
     "accessCodeLabel": "邀请码（必填）",
     "title": "账户功能",

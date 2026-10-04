@@ -1,4 +1,10 @@
 {
+  "documentView": {
+    "copy": "복사",
+    "copied": "복사됨",
+    "download": ".md 다운로드",
+    "expand": "전체 화면"
+  },
   "walletCapabilities": {
     "accessCodeLabel": "초대 코드 (필수)",
     "title": "계정 기능",

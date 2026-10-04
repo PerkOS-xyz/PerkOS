@@ -1,4 +1,10 @@
 {
+  "documentView": {
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "download": "Baixar .md",
+    "expand": "Tela cheia"
+  },
   "walletCapabilities": {
     "accessCodeLabel": "Código de convite (obrigatório)",
     "title": "Recursos da conta",

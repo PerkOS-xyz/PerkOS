@@ -33,6 +33,7 @@ import {
 import { ConfirmDialog } from "../../../../../components/ConfirmDialog";
 import { EditTaskDialog } from "../../../../../components/EditTaskDialog";
 import { Markdown } from "../../../../../components/Markdown";
+import { DocumentView } from "../../../../../components/DocumentView";
 import { TaskAttachmentList } from "../../../../../components/TaskAttachments";
 
 type PageProps = {
@@ -345,7 +346,7 @@ function ResultSection({ result }: { result: string }) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Markdown>{result}</Markdown>
+        <DocumentView title="Agent result">{result}</DocumentView>
       </CardContent>
     </Card>
   );
