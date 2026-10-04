@@ -2333,6 +2333,11 @@ async function parseJson(response: Response): Promise<Record<string, unknown>> {
 }
 
 function apiError(payload: Record<string, unknown>, fallback: string) {
+  // PerkOS-API answers `{ error: { code, message } }`; older routes send a string.
+  const nested = payload.error as { message?: unknown } | null | undefined;
+  if (nested && typeof nested === "object" && typeof nested.message === "string" && nested.message) {
+    return nested.message;
+  }
   return typeof payload.error === "string" && payload.error
     ? payload.error
     : fallback;
