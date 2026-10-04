@@ -61,6 +61,8 @@ export function DeliverableSheet({
         <DocumentView
           title={title}
           centered
+          // Header, toolbar and text share one reading column.
+          className="mx-auto w-full max-w-[72ch]"
           header={
             <div className="flex min-w-0 flex-col gap-1">
               <span className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-primary">
