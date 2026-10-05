@@ -15,7 +15,7 @@ import type { Task } from "../lib/perkosApi";
 import { AgentOrb } from "./AgentOrb";
 import { agentHue } from "./CoordinationRow";
 
-export type SeatState = "working" | "review" | "waiting" | "done" | "resting" | "ready";
+export type SeatState = "working" | "review" | "waiting" | "starting" | "done" | "resting" | "ready";
 
 export type Seat = {
   name: string;
@@ -29,7 +29,12 @@ export type Seat = {
   doneCount: number;
 };
 
-type Presence = { hibernationState?: string | null } | undefined;
+type Presence = { status?: string | null; hibernationState?: string | null } | undefined;
+
+/** A teammate whose runtime is still booting (new launch or waking up). */
+export function agentStarting(presence: Presence): boolean {
+  return presence?.status === "provisioning" || presence?.hibernationState === "waking";
+}
 
 /** Pure seat derivation so the stage can be tested without Firestore. */
 export function deriveSeats(
@@ -60,6 +65,7 @@ export function deriveSeats(
       const parent = (waiting.parents ?? []).map((p) => byId.get(p)).find((p) => p && p.status !== "Done");
       return { name, lead, state: "waiting", task: waiting, waitingOn: parent?.agent, doneCount };
     }
+    if (agentStarting(presence[name])) return { name, lead, state: "starting", task: next ?? lastDone, doneCount };
     if (next) return { name, lead, state: sleeping ? "resting" : "ready", task: next, doneCount };
     if (lastDone) return { name, lead, state: "done", task: lastDone, doneCount };
     return { name, lead, state: sleeping ? "resting" : "ready", doneCount };
@@ -88,6 +94,7 @@ const STATUS: Record<SeatState, string> = {
   working: "Working on it",
   review: "Waiting for review",
   waiting: "Waiting",
+  starting: "Starting up · about 2 minutes",
   done: "Delivered",
   resting: "Resting · wakes when work arrives",
   ready: "Ready for the next assignment",
@@ -168,7 +175,7 @@ function SeatCard({ seat, clock, onFocus }: { seat: Seat; clock: string | null; 
         ) : (
           <span
             aria-hidden
-            className="absolute inset-0 rounded-full"
+            className={cn("absolute inset-0 rounded-full", seat.state === "starting" && "animate-pulse")}
             style={{ boxShadow: `inset 0 0 0 2px ${seat.state === "done" ? "rgba(52,211,153,.6)" : seat.state === "waiting" || seat.state === "resting" ? "rgba(255,255,255,.1)" : agentHue(seat.name, 0.35)}` }}
           />
         )}

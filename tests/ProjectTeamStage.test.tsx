@@ -24,6 +24,14 @@ describe("deriveSeats", () => {
     expect(seats[1].doneCount).toBe(1);
   });
 
+  it("says a teammate is starting up while its runtime boots", () => {
+    const seats = deriveSeats([SEO, WRITER], null, [], {
+      [SEO]: { status: "provisioning" },
+      [WRITER]: { status: "ready", hibernationState: "waking" },
+    });
+    expect(seats.map((s) => s.state)).toEqual(["starting", "starting"]);
+  });
+
   it("shows a resting teammate when its runtime is hibernated", () => {
     const seats = deriveSeats([SEO], null, [], { [SEO]: { hibernationState: "hibernated" } });
     expect(seats[0].state).toBe("resting");

@@ -1458,6 +1458,8 @@
       "runPmTitleWithPm": "你的团队负责人会规划目标并分配工作",
       "runPmTitleNoPm": "你需要选择由哪个智能体来带领团队",
       "teamWorking": "团队工作中…",
+      "awaitingApproval": "等待你的批准",
+      "planning": "规划中…",
       "putTeamToWork": "让团队开始工作",
       "projectComplete": "项目已完成",
       "wakeTeamTitle": "立即扩容此项目的所有智能体(预热团队)",
@@ -1484,6 +1486,7 @@
       },
       "firstRun": {
         "title": "你的团队已经准备就绪,以下是开始方式",
+        "titleStarting": "你的团队正在启动（约 2 分钟）。现在就可以让它开始工作。",
         "step1Bold": "让团队开始工作",
         "step1WithPm": ":{{pmAgent}} 会阅读你的目标,把工作拆解成任务,团队会自主完成。这是最快捷的一键方式。",
         "step1NoPm": ":你需要先选择由哪个智能体带领团队,然后它会把目标拆解成任务,交由团队自主完成。",
@@ -1758,6 +1761,7 @@
     "pmBanner": {
       "teamLead": "团队负责人",
       "paused": "已暂停",
+      "awaitingApproval": "等待你的批准",
       "round": "· 第 {{current}}/{{max}} 轮",
       "lastRun": "· 上次运行 {{time}}",
       "reasons": {

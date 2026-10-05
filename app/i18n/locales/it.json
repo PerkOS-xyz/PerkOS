@@ -1458,6 +1458,8 @@
       "runPmTitleWithPm": "Il tuo Capo Team pianifica l'obiettivo e distribuisce il lavoro",
       "runPmTitleNoPm": "Sceglierai tu quale agente guida il team",
       "teamWorking": "Team al lavoro…",
+      "awaitingApproval": "In attesa della tua approvazione",
+      "planning": "Pianificazione…",
       "putTeamToWork": "Metti il team al lavoro",
       "projectComplete": "Progetto completato",
       "wakeTeamTitle": "Attiva subito tutti gli agenti di questo progetto (prepara il team in anticipo)",
@@ -1484,6 +1486,7 @@
       },
       "firstRun": {
         "title": "Il tuo team è pronto: ecco come iniziare",
+        "titleStarting": "Il tuo team si sta avviando (circa 2 minuti). Puoi già metterlo al lavoro.",
         "step1Bold": "Metti il team al lavoro",
         "step1WithPm": ": {{pmAgent}} legge il tuo obiettivo, lo trasforma in attività e il team le porta a termine da solo. È il modo più rapido, con un solo clic.",
         "step1NoPm": ": sceglierai tu quale agente guida il team, poi pianifica l'obiettivo in attività e il team le porta a termine da solo.",
@@ -1761,6 +1764,7 @@
     "pmBanner": {
       "teamLead": "Capo Team",
       "paused": "In pausa",
+      "awaitingApproval": "In attesa della tua approvazione",
       "round": "· round {{current}}/{{max}}",
       "lastRun": "· ultima esecuzione {{time}}",
       "reasons": {

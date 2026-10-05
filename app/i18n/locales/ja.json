@@ -1468,6 +1468,8 @@
       "runPmTitleWithPm": "チームリーダーが目標を計画し、チームに仕事を割り振ります",
       "runPmTitleNoPm": "どのエージェントがチームを率いるか選択します",
       "teamWorking": "チームが作業中…",
+      "awaitingApproval": "承認待ち",
+      "planning": "計画中…",
       "putTeamToWork": "チームに仕事を任せる",
       "projectComplete": "プロジェクト完了",
       "wakeTeamTitle": "このプロジェクトのエージェントを今すぐ全員起動します（チームを事前に準備しておきます）",
@@ -1494,6 +1496,7 @@
       },
       "firstRun": {
         "title": "チームの準備ができました。始め方はこちら",
+        "titleStarting": "チームを起動しています（約2分）。今すぐ作業を任せることもできます。",
         "step1Bold": "チームに仕事を任せる",
         "step1WithPm": "。{{pmAgent}}が目標を読み取り、タスクに落とし込み、チームが自律的に完了させます。ワンクリックでできる方法です。",
         "step1NoPm": "。どのエージェントがチームを率いるか選び、そのエージェントが目標をタスクに計画し、チームが自律的に完了させます。",
@@ -1772,6 +1775,7 @@
     "pmBanner": {
       "teamLead": "チームリーダー",
       "paused": "一時停止中",
+      "awaitingApproval": "承認待ち",
       "round": "・ラウンド{{current}}/{{max}}",
       "lastRun": "・前回の実行 {{time}}",
       "reasons": {

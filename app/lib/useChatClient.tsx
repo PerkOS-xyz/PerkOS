@@ -23,6 +23,9 @@ import { mergeChatHistory, upsertLiveMessage } from "./chatMessageMerge";
 
 const ChatClientContext = createContext<ChatClient | null>(null);
 
+/** How often an offline host is asked again for the conversation history. */
+const HOST_OFFLINE_RETRY_MS = 15_000;
+
 /**
  * Wraps the chat tree with a single ChatClient instance scoped to the
  * current Firebase user. On sign-out the client is stopped; on a new
@@ -221,6 +224,33 @@ export function useChatHistory(convId: string | null | undefined): {
       cancelled = true;
     };
   }, [client, convId, wallet]);
+
+  // A host that is still starting answers HOST_OFFLINE once; keep asking so
+  // the banner clears and the history loads as soon as the agent is back.
+  useEffect(() => {
+    if (!hostOffline || !client || !convId) return;
+    let cancelled = false;
+    const timer = window.setInterval(async () => {
+      try {
+        const page = await client.history({ convId });
+        if (cancelled) return;
+        for (const m of page.messages) seenRef.current.add(m.id);
+        setHistory((current) => mergeChatHistory(current, page.messages));
+        setHasMore(page.hasMore);
+        setHostOffline(false);
+        setFromCache(false);
+        if (wallet) {
+          void cachePut(wallet, convId, page.messages).catch(() => {});
+        }
+      } catch {
+        // Still offline: the next tick asks again.
+      }
+    }, HOST_OFFLINE_RETRY_MS);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [client, convId, hostOffline, wallet]);
 
   const loadOlder = useCallback(async () => {
     if (!client || !convId || loadingMore || !hasMore || history.length === 0) return;
