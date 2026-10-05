@@ -1468,6 +1468,8 @@
       "runPmTitleWithPm": "Votre chef d'équipe planifie l'objectif et répartit le travail",
       "runPmTitleNoPm": "Vous choisirez quel agent dirige l'équipe",
       "teamWorking": "L'équipe travaille…",
+      "awaitingApproval": "En attente de votre approbation",
+      "planning": "Planification…",
       "putTeamToWork": "Mettre l'équipe au travail",
       "projectComplete": "Projet terminé",
       "wakeTeamTitle": "Réveiller dès maintenant tous les agents de ce projet (préchauffer l'équipe)",
@@ -1494,6 +1496,7 @@
       },
       "firstRun": {
         "title": "Votre équipe est prête : voici comment démarrer",
+        "titleStarting": "Votre équipe démarre (environ 2 minutes). Vous pouvez déjà la mettre au travail.",
         "step1Bold": "Mettre l'équipe au travail",
         "step1WithPm": " : {{pmAgent}} lit votre objectif, le transforme en tâches, et l'équipe s'en charge seule. C'est la solution en un clic.",
         "step1NoPm": " : vous choisirez quel agent dirige l'équipe, puis il transforme l'objectif en tâches et l'équipe s'en charge seule.",
@@ -1775,6 +1778,7 @@
     "pmBanner": {
       "teamLead": "Chef d'équipe",
       "paused": "En pause",
+      "awaitingApproval": "En attente de votre approbation",
       "round": "· tour {{current}}/{{max}}",
       "lastRun": "· dernière exécution {{time}}",
       "reasons": {

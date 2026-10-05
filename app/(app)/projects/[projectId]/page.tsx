@@ -66,7 +66,7 @@ import { formatRelativeShort } from "../../../lib/format";
 import { logActivity } from "../../../lib/activityEvents";
 import { ProjectChatTab } from "../../../components/ProjectChatTab";
 import { ProjectLiveLayout } from "../../../components/ProjectLiveLayout";
-import { ProjectTeamStage } from "../../../components/ProjectTeamStage";
+import { agentStarting, ProjectTeamStage } from "../../../components/ProjectTeamStage";
 import { ProjectTemplateConfiguration } from "../../../components/ProjectTemplateConfiguration";
 import { ArtizenProjectBoard, ArtizenWorkLink } from "../../../components/ArtizenProjectBoard";
 import { SearchInput, matchesQuery } from "../../../components/SearchInput";
@@ -256,6 +256,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
             compact={tab === "chat"}
             overview={liveDetail.project.executionMode === "artizen-on-demand"}
             onShowMembers={() => setTab("members")}
+            teamStarting={uniqueAgents(liveDetail.tasks, liveDetail.project.agentIds ?? []).some((name) => agentStarting(ownerAgents[name]))}
           />
           {liveDetail.project.executionMode === "artizen-on-demand" ? (
             <>
@@ -324,6 +325,7 @@ function DetailHeader({
   compact = false,
   overview = true,
   onShowMembers,
+  teamStarting = false,
 }: {
   detail: ProjectDetail;
   ownerWallet?: string;
@@ -332,6 +334,8 @@ function DetailHeader({
   /** Knowledge graph + stats; the live layout shows them in its stage. */
   overview?: boolean;
   onShowMembers: () => void;
+  /** Some teammates are still booting, so the team is not ready yet. */
+  teamStarting?: boolean;
 }) {
   const { t } = useTranslation();
   const { project, tasks } = detail;
@@ -573,9 +577,13 @@ function DetailHeader({
             )}
             {projectComplete
               ? t("projectRoom.header.projectComplete")
-              : pmActive
-                ? t("projectRoom.header.teamWorking")
-                : t("projectRoom.header.putTeamToWork")}
+              : project.workflow?.phase === "awaiting_approval"
+                ? t("projectRoom.header.awaitingApproval")
+                : project.workflow?.phase === "planning"
+                  ? t("projectRoom.header.planning")
+                  : pmActive
+                    ? t("projectRoom.header.teamWorking")
+                    : t("projectRoom.header.putTeamToWork")}
           </Button>}
           {project.workflow?.phase === "planning" ? (
             <Button
@@ -655,6 +663,7 @@ function DetailHeader({
           planningAttempt={project.workflow?.planningAttempt}
           planningMaxAttempts={project.workflow?.planningMaxAttempts}
           failureReason={project.workflow?.failureReason}
+          workflowPhase={project.workflow?.phase}
         />
         ) : null
       ) : null}
@@ -698,7 +707,7 @@ function DetailHeader({
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-primary" />
             <h2 className="text-sm font-semibold text-foreground">
-              {t("projectRoom.header.firstRun.title")}
+              {teamStarting ? t("projectRoom.header.firstRun.titleStarting") : t("projectRoom.header.firstRun.title")}
             </h2>
           </div>
           <ol className="flex flex-col gap-2 text-sm text-muted-foreground">

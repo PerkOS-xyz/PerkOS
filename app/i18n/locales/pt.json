@@ -1778,6 +1778,8 @@
       "runPmTitleWithPm": "O líder da sua equipe planeja a meta e distribui o trabalho",
       "runPmTitleNoPm": "Você escolherá qual agente liderará a equipe",
       "teamWorking": "Equipe trabalhando…",
+      "awaitingApproval": "Aguardando sua aprovação",
+      "planning": "Planejando…",
       "putTeamToWork": "Coloque a equipe para trabalhar",
       "cancelPlanning": "Cancelar planejamento",
       "projectComplete": "Projeto concluído",
@@ -1805,6 +1807,7 @@
       },
       "firstRun": {
         "title": "Sua equipe está pronta: veja como começar",
+        "titleStarting": "Sua equipe está iniciando (cerca de 2 minutos). Você já pode colocá-la para trabalhar.",
         "step1Bold": "Coloque a equipe para trabalhar",
         "step1WithPm": ". {{pmAgent}} lê sua meta, planeja o trabalho em tarefas e a equipe realiza isso sozinha. Esta é a maneira de um clique.",
         "step1NoPm": ". Você escolherá qual agente liderará a equipe, então eles planejarão a meta em tarefas e a equipe realizará isso sozinha.",
@@ -2121,6 +2124,7 @@
     "pmBanner": {
       "teamLead": "Líder de equipe",
       "paused": "Pausado",
+      "awaitingApproval": "Aguardando sua aprovação",
       "round": "· redondo {{current}}/{{max}}",
       "lastRun": "· última execução {{time}}",
       "planningAttempt": "· tentativa de planejamento {{current}}/{{max}}",

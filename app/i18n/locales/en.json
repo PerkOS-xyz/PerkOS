@@ -1652,6 +1652,8 @@
       "runPmTitleWithPm": "Your team lead plans the goal and hands out the work",
       "runPmTitleNoPm": "You'll pick which agent leads the team",
       "teamWorking": "Team working…",
+      "awaitingApproval": "Waiting for your approval",
+      "planning": "Planning…",
       "putTeamToWork": "Put the team to work",
       "cancelPlanning": "Cancel planning",
       "projectComplete": "Project complete",
@@ -1679,6 +1681,7 @@
       },
       "firstRun": {
         "title": "Your team is ready: here's how to start",
+        "titleStarting": "Your team is starting up (about 2 minutes). You can already put it to work.",
         "step1Bold": "Put the team to work",
         "step1WithPm": ". {{pmAgent}} reads your goal, plans the work into tasks, and the team gets it done on its own. This is the one-click way.",
         "step1NoPm": ". You'll pick which agent leads the team, then they plan the goal into tasks and the team gets it done on its own.",
@@ -1995,6 +1998,7 @@
     "pmBanner": {
       "teamLead": "Team lead",
       "paused": "Paused",
+      "awaitingApproval": "Waiting for your approval",
       "round": "· round {{current}}/{{max}}",
       "lastRun": "· last run {{time}}",
       "planningAttempt": "· planning attempt {{current}}/{{max}}",

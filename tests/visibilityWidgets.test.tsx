@@ -151,6 +151,23 @@ describe("PmSessionBanner", () => {
     expect(screen.getByText(/last run/)).toBeInTheDocument();
   });
 
+  it("lights Plan and asks for approval while a proposed plan waits", () => {
+    render(<PmSessionBanner session={session({ status: "working" })} pmAgent="Maya" workflowPhase="awaiting_approval" />);
+    expect(screen.getByText("Plan")).toHaveClass("font-semibold");
+    expect(screen.getByText("Work")).not.toHaveClass("font-semibold");
+    expect(screen.getByText(/Waiting for your approval/)).toBeInTheDocument();
+  });
+
+  it("follows the workflow once the approved plan runs", () => {
+    render(<PmSessionBanner session={session({ status: "planning" })} pmAgent="Maya" workflowPhase="running" />);
+    expect(screen.getByText("Work")).toHaveClass("font-semibold");
+  });
+
+  it("keeps internal run labels out of the banner", () => {
+    render(<PmSessionBanner session={session({ reason: "approved-plan" })} pmAgent="Maya" />);
+    expect(screen.queryByText(/approved-plan/)).not.toBeInTheDocument();
+  });
+
   it("translates the no-pm stop reason to team-lead language", () => {
     render(
       <PmSessionBanner

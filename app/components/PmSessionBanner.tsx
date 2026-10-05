@@ -19,6 +19,18 @@ const REASON_KEYS: Record<string, string> = {
   "planning-timeout": "components.pmBanner.reasons.planningTimeout",
 };
 
+// Where the workflow is, as a step of the pipeline below. The workflow phase is
+// the truth: the PM session status still reads "working" while a proposed plan
+// waits for the person's approval.
+const WORKFLOW_STEP: Record<string, number> = {
+  planning: 0,
+  awaiting_approval: 0,
+  approved: 1,
+  running: 1,
+  pm_review: 2,
+  complete: 3,
+};
+
 // The PM loop's phases, in order — rendered as a mini pipeline so the owner
 // can see WHERE in the loop the session is, not just that it's "running".
 const PHASES: { id: string; labelKey: string }[] = [
@@ -39,30 +51,38 @@ export function PmSessionBanner({
   planningAttempt,
   planningMaxAttempts,
   failureReason,
+  workflowPhase,
 }: {
   session?: PmSession;
   pmAgent?: string | null;
   planningAttempt?: number;
   planningMaxAttempts?: number;
   failureReason?: string;
+  workflowPhase?: string | null;
 }) {
   const { t } = useTranslation();
   if (!session) return null;
 
+  const awaitingApproval = workflowPhase === "awaiting_approval";
   const active =
-    session.status === "planning" ||
-    session.status === "working" ||
-    session.status === "reviewing";
+    !awaitingApproval &&
+    (session.status === "planning" ||
+      session.status === "working" ||
+      session.status === "reviewing");
   const tone =
-    session.status === "done" ? "ok" : session.status === "stopped" ? "warn" : "active";
+    session.status === "done" || workflowPhase === "complete"
+      ? "ok"
+      : session.status === "stopped" || awaitingApproval
+        ? "warn"
+        : "active";
 
-  const Icon = active ? Loader2 : session.status === "done" ? CheckCircle2 : PauseCircle;
-  const reason = session.reason
-    ? REASON_KEYS[session.reason]
-      ? t(REASON_KEYS[session.reason])
-      : session.reason
-    : null;
-  const phaseIdx = PHASES.findIndex((p) => p.id === session.status);
+  const Icon = active ? Loader2 : tone === "ok" ? CheckCircle2 : PauseCircle;
+  // Only known reasons are shown; internal run labels stay out of the UI.
+  const reason = session.reason && REASON_KEYS[session.reason] ? t(REASON_KEYS[session.reason]) : null;
+  const phaseIdx =
+    workflowPhase && workflowPhase in WORKFLOW_STEP
+      ? WORKFLOW_STEP[workflowPhase]!
+      : PHASES.findIndex((p) => p.id === session.status);
 
   return (
     <div
@@ -124,6 +144,7 @@ export function PmSessionBanner({
           })}
         </span>
       ) : null}
+      {awaitingApproval ? <span className="font-medium">· {t("components.pmBanner.awaitingApproval")}</span> : null}
       {reason ? <span className="opacity-70">· {reason}</span> : null}
       {failureReason ? <span className="basis-full opacity-80">{failureReason}</span> : null}
     </div>
