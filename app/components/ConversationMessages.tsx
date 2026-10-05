@@ -243,9 +243,12 @@ function MessageRow({
   const fromMe = message.from === me;
   const fromAgent = message.from.startsWith("agent:");
   const fromService = message.from.startsWith("service:");
+  // PerkOS's own coordination messages speak as Sparky, not as a service id.
   const label = fromMe
     ? "you"
-    : message.from.replace(/^(?:user|agent|service):/, "");
+    : fromService
+      ? "Sparky"
+      : message.from.replace(/^(?:user|agent):/, "");
   const proposal =
     message.event?.domain === "project_workflow" &&
     message.event.type === "plan_proposed" &&
@@ -263,7 +266,7 @@ function MessageRow({
     >
       <span className="px-1 text-[10px] uppercase tracking-wider text-muted-foreground">
         {label}
-        {fromAgent ? " · agent" : fromService ? " · workflow" : ""}
+        {fromAgent ? " · agent" : ""}
         {message.pending ? " · sending…" : ""}
       </span>
       <div
