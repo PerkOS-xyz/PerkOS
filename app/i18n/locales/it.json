@@ -1983,6 +1983,28 @@
         "doneWhen": "Fatto quando:",
         "proposedBy": "Proposta da {{owner}} · bozza"
       },
+      "reader": {
+        "byline": "di {{name}}",
+        "stats": "{{words}} parole · {{minutes}} min di lettura",
+        "taskCount_one": "{{count}} attività",
+        "taskCount_other": "{{count}} attività",
+        "updated": "Aggiornato il {{date}}",
+        "progress": "{{done}} di {{total}} consegnate",
+        "doneWhen": "Completata quando",
+        "assignedTo": "Assegnata a",
+        "openTask": "Apri attività",
+        "result": "Risultato",
+        "readMore": "Leggi il risultato completo",
+        "readLess": "Mostra meno",
+        "noteBy": "Nota di {{owner}}",
+        "status": {
+          "planned": "Pianificata",
+          "toDo": "Da fare",
+          "inProgress": "In corso",
+          "review": "In revisione",
+          "done": "Completata"
+        }
+      },
       "docChat": {
         "sendError": "Impossibile inviare",
         "headerTitle": "{{title}}: Discussione",

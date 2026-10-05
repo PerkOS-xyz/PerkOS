@@ -1980,6 +1980,28 @@
         "doneWhen": "完成条件:",
         "proposedBy": "由 {{owner}} 提议 · 草稿"
       },
+      "reader": {
+        "byline": "作者：{{name}}",
+        "stats": "{{words}} 字 · 约 {{minutes}} 分钟读完",
+        "taskCount_one": "{{count}} 个任务",
+        "taskCount_other": "{{count}} 个任务",
+        "updated": "更新于 {{date}}",
+        "progress": "已交付 {{done}}/{{total}}",
+        "doneWhen": "完成标准",
+        "assignedTo": "负责人",
+        "openTask": "打开任务",
+        "result": "成果",
+        "readMore": "阅读完整成果",
+        "readLess": "收起",
+        "noteBy": "{{owner}} 的备注",
+        "status": {
+          "planned": "已规划",
+          "toDo": "待办",
+          "inProgress": "进行中",
+          "review": "审核中",
+          "done": "已完成"
+        }
+      },
       "docChat": {
         "sendError": "无法发送",
         "headerTitle": "{{title}} · 讨论",

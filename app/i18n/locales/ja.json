@@ -1997,6 +1997,28 @@
         "doneWhen": "完了条件：",
         "proposedBy": "{{owner}}が提案・下書き"
       },
+      "reader": {
+        "byline": "作成: {{name}}",
+        "stats": "{{words}} 語 · 約 {{minutes}} 分で読めます",
+        "taskCount_one": "タスク {{count}} 件",
+        "taskCount_other": "タスク {{count}} 件",
+        "updated": "{{date}} に更新",
+        "progress": "{{total}} 件中 {{done}} 件を納品",
+        "doneWhen": "完了条件",
+        "assignedTo": "担当",
+        "openTask": "タスクを開く",
+        "result": "成果物",
+        "readMore": "成果物をすべて読む",
+        "readLess": "折りたたむ",
+        "noteBy": "{{owner}} のメモ",
+        "status": {
+          "planned": "計画済み",
+          "toDo": "未着手",
+          "inProgress": "進行中",
+          "review": "レビュー中",
+          "done": "完了"
+        }
+      },
       "docChat": {
         "sendError": "送信できませんでした",
         "headerTitle": "{{title}}の議論",

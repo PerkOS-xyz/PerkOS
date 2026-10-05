@@ -2000,6 +2000,28 @@
         "doneWhen": "Terminé quand :",
         "proposedBy": "Proposé par {{owner}} · brouillon"
       },
+      "reader": {
+        "byline": "par {{name}}",
+        "stats": "{{words}} mots · {{minutes}} min de lecture",
+        "taskCount_one": "{{count}} tâche",
+        "taskCount_other": "{{count}} tâches",
+        "updated": "Mis à jour le {{date}}",
+        "progress": "{{done}} sur {{total}} livrées",
+        "doneWhen": "Terminée quand",
+        "assignedTo": "Assignée à",
+        "openTask": "Ouvrir la tâche",
+        "result": "Résultat",
+        "readMore": "Lire le résultat complet",
+        "readLess": "Afficher moins",
+        "noteBy": "Note de {{owner}}",
+        "status": {
+          "planned": "Planifiée",
+          "toDo": "À faire",
+          "inProgress": "En cours",
+          "review": "En revue",
+          "done": "Terminée"
+        }
+      },
       "docChat": {
         "sendError": "Impossible d'envoyer",
         "headerTitle": "{{title}} : Discussion",

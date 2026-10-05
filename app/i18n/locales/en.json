@@ -2222,6 +2222,28 @@
         "doneWhen": "Done when:",
         "proposedBy": "Proposed by {{owner}} · draft"
       },
+      "reader": {
+        "byline": "by {{name}}",
+        "stats": "{{words}} words · {{minutes}} min read",
+        "taskCount_one": "{{count}} task",
+        "taskCount_other": "{{count}} tasks",
+        "updated": "Updated {{date}}",
+        "progress": "{{done}} of {{total}} delivered",
+        "doneWhen": "Done when",
+        "assignedTo": "Assigned to",
+        "openTask": "Open task",
+        "result": "Result",
+        "readMore": "Read the full result",
+        "readLess": "Show less",
+        "noteBy": "Note by {{owner}}",
+        "status": {
+          "planned": "Planned",
+          "toDo": "To do",
+          "inProgress": "In progress",
+          "review": "In review",
+          "done": "Done"
+        }
+      },
       "docChat": {
         "sendError": "Couldn't send",
         "headerTitle": "{{title}}: Discussion",

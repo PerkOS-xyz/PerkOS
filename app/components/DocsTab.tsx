@@ -38,13 +38,15 @@ import {
   type ProjectDetail,
 } from "../lib/perkosApi";
 import { EmptyState } from "./EmptyState";
-import { Markdown } from "./Markdown";
 import { DocumentView } from "./DocumentView";
+import { DocGroupHeading, DocSheet, PlanProgress, PlanTaskSection, ResultPanel } from "./DocReader";
+import { readingStats } from "./TaskDetailLayout";
 import { MentionText } from "./MentionText";
 import { MentionInput } from "./MentionInput";
 import { extractMentions, type MentionParticipant } from "../lib/mentions";
 import { useMentionParticipants } from "../lib/useMentionParticipants";
 import { formatAddress } from "../lib/format";
+import { docToMarkdown, readDoc } from "../lib/docReading";
 import {
   useDoc,
   useDocMessages,
@@ -206,7 +208,7 @@ export function DocsTab({
   return (
     <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
       {/* Doc tree */}
-      <aside className="flex flex-col gap-1.5">
+      <aside className="flex min-w-0 flex-col gap-1.5">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium uppercase tracking-wide text-[#7975a8]">
             {t("chat.docs.tree.heading")}
@@ -229,43 +231,49 @@ export function DocsTab({
           <p className="px-1 py-2 text-xs text-[#4f4b6e]">{t("chat.docs.tree.noDocsYet")}</p>
         ) : null}
 
-        {liveDocs.map((d) => (
-          <DocTreeItem
-            key={d.id}
-            doc={d}
-            active={d.id === selectedId}
-            isPlan={d.id === activePlanId}
-            onSelect={() => setSelectedId(d.id ?? null)}
-          />
-        ))}
+        {/* Phones: one scrollable row of chips. md and up: the vertical tree. */}
+        <nav
+          aria-label={t("chat.docs.tree.heading")}
+          className="-mx-1 flex snap-x gap-1.5 overflow-x-auto overscroll-x-contain px-1 pb-1 [scrollbar-width:none] md:mx-0 md:flex-col md:gap-1.5 md:overflow-visible md:px-0 md:pb-0 [&::-webkit-scrollbar]:hidden"
+        >
+          {liveDocs.map((d) => (
+            <DocTreeItem
+              key={d.id}
+              doc={d}
+              active={d.id === selectedId}
+              isPlan={d.id === activePlanId}
+              onSelect={() => setSelectedId(d.id ?? null)}
+            />
+          ))}
 
-        {!activePlanId ? (
-          <button
-            type="button"
-            onClick={startPlan}
-            disabled={busy}
-            className="mt-1 flex items-center gap-1.5 rounded-md border border-dashed border-[#1b1833] px-2 py-1.5 text-xs text-[#7975a8] hover:text-[#ececff]"
-          >
-            <ListChecks className="h-3.5 w-3.5" /> {t("chat.docs.empty.startSprintPlan")}
-          </button>
-        ) : null}
+          {!activePlanId ? (
+            <button
+              type="button"
+              onClick={startPlan}
+              disabled={busy}
+              className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md border border-dashed border-[#1b1833] px-2 py-1.5 text-xs text-[#7975a8] hover:text-[#ececff] md:mt-1"
+            >
+              <ListChecks className="h-3.5 w-3.5" /> {t("chat.docs.empty.startSprintPlan")}
+            </button>
+          ) : null}
 
-        {pmDrafts.length > 0 ? (
-          <div className="mt-3 flex flex-col gap-1.5">
-            <span className="flex items-center gap-1 text-xs font-medium uppercase tracking-wide text-[#7975a8]">
-              <Bot className="h-3 w-3" /> {t("chat.docs.tree.teamLeadDrafts")}
-            </span>
-            {pmDrafts.map((d) => (
-              <DocTreeItem
-                key={d.id}
-                doc={d}
-                active={d.id === selectedId}
-                isDraft
-                onSelect={() => setSelectedId(d.id ?? null)}
-              />
-            ))}
-          </div>
-        ) : null}
+          {pmDrafts.length > 0 ? (
+            <div className="contents md:mt-3 md:flex md:flex-col md:gap-1.5">
+              <span className="hidden items-center gap-1 text-xs font-medium uppercase tracking-wide text-[#7975a8] md:flex">
+                <Bot className="h-3 w-3" /> {t("chat.docs.tree.teamLeadDrafts")}
+              </span>
+              {pmDrafts.map((d) => (
+                <DocTreeItem
+                  key={d.id}
+                  doc={d}
+                  active={d.id === selectedId}
+                  isDraft
+                  onSelect={() => setSelectedId(d.id ?? null)}
+                />
+              ))}
+            </div>
+          ) : null}
+        </nav>
       </aside>
 
       {/* Editor + per-doc chat */}
@@ -274,6 +282,8 @@ export function DocsTab({
           key={selectedId}
           wallet={wallet}
           projectId={projectId}
+          ownerWallet={ownerWallet}
+          tasks={detail.tasks}
           docId={selectedId}
           me={address ? `user:${normalizeWalletAddress(address)}` : null}
           meWallet={address ?? undefined}
@@ -308,7 +318,10 @@ function DocTreeItem({
     <button
       type="button"
       onClick={onSelect}
-      className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors ${
+      aria-current={active ? "page" : undefined}
+      className={`flex max-w-[15rem] shrink-0 snap-start items-center gap-2 rounded-full border px-3 py-1.5 text-left text-sm transition-colors md:w-full md:max-w-none md:rounded-md md:border-transparent md:px-2 ${
+        isDraft ? "border-dashed border-[#1b1833]" : "border-[#1b1833]"
+      } ${
         active
           ? "bg-[#1b1833] text-[#ececff]"
           : "text-[#a9a4d4] hover:bg-[#14101f] hover:text-[#ececff]"
@@ -385,6 +398,8 @@ function NewDocForm({
 function DocEditor({
   wallet,
   projectId,
+  ownerWallet,
+  tasks,
   docId,
   me,
   meWallet,
@@ -393,13 +408,15 @@ function DocEditor({
 }: {
   wallet?: string;
   projectId: string;
+  ownerWallet?: string;
+  tasks: ProjectDetail["tasks"];
   docId: string;
   me: string | null;
   meWallet?: string;
   participants: MentionParticipant[];
   onDeleted: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { doc, blocks, loading } = useDoc(wallet, projectId, docId);
   const { revisions } = useDocRevisions(wallet, projectId, docId);
   const [draft, setDraft] = useState("");
@@ -410,7 +427,33 @@ function DocEditor({
   const isPlan = doc?.type === "plan";
   const status = (doc?.status as string) ?? null;
   const statusMeta = status ? PLAN_STATUS_META[status] : null;
-  const taskCount = blocks.filter((b) => b.type === "planTask").length;
+  const reading = useMemo(() => readDoc(blocks, tasks), [blocks, tasks]);
+  const docTitle = doc?.title || t("chat.docs.untitled");
+  const source = useMemo(
+    () =>
+      docToMarkdown(docTitle, reading.items, {
+        doneWhen: t("chat.docs.reader.doneWhen"),
+        assignedTo: t("chat.docs.reader.assignedTo"),
+        result: t("chat.docs.reader.result"),
+      }),
+    [docTitle, reading, t],
+  );
+  const { words, minutes } = readingStats(source);
+  // Who wrote it: the doc's creator, else the lead that proposed its tasks.
+  const author = doc?.createdBy ?? blocks.find((b) => b.type === "planTask")?.owner ?? null;
+  const meta = [
+    author ? t("chat.docs.reader.byline", { name: ownerLabel(author, t) }) : null,
+    isPlan ? t("chat.docs.reader.taskCount", { count: reading.taskCount }) : null,
+    t("chat.docs.reader.stats", { words: words.toLocaleString(i18n.language), minutes }),
+    doc?.updatedAt
+      ? t("chat.docs.reader.updated", {
+          date: new Date(doc.updatedAt).toLocaleDateString(i18n.language, { month: "short", day: "numeric" }),
+        })
+      : null,
+  ].filter((piece): piece is string => Boolean(piece));
+  const taskHref = (taskId: string) =>
+    `/projects/${encodeURIComponent(projectId)}/tasks/${encodeURIComponent(taskId)}` +
+    (ownerWallet ? `?owner=${encodeURIComponent(ownerWallet)}` : "");
 
   const addNote = async () => {
     const text = draft.trim();
@@ -482,82 +525,36 @@ function DocEditor({
   };
 
   const editor = (
-    <div className="flex flex-col gap-3">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <h2 className="truncate text-lg font-semibold text-[#ececff]">
-            {doc?.title || t("chat.docs.untitled")}
-          </h2>
-          <span className="text-[11px] uppercase tracking-wide text-[#7975a8]">
-            {t(DOC_TYPE_LABEL[doc?.type ?? "note"] ?? DOC_TYPE_LABEL.note)}
-            {doc?.draft ? ` · ${t("chat.docs.editor.leadsDraft")}` : ""}
-          </span>
-        </div>
-        <div className="flex flex-wrap items-center gap-1.5 sm:shrink-0 sm:justify-end">
-          {doc?.draft ? (
-            <Button size="sm" variant="outline" onClick={promote}>
-              {t("chat.docs.editor.promote")}
-            </Button>
-          ) : null}
-          <Button
-            size="sm"
-            variant={showChat ? "secondary" : "outline"}
-            onClick={() => setShowChat((v) => !v)}
-          >
-            <MessageSquare className="h-4 w-4" /> {t("chat.docs.editor.discussion")}
+    <div className="flex min-w-0 flex-col gap-3">
+      <div className="flex flex-wrap items-center justify-end gap-1.5">
+        {doc?.draft ? (
+          <Button size="sm" variant="outline" onClick={promote}>
+            {t("chat.docs.editor.promote")}
           </Button>
-          <Button
-            size="sm"
-            variant={showHistory ? "secondary" : "outline"}
-            onClick={() => setShowHistory((value) => !value)}
-          >
-            <History className="h-4 w-4" /> History ({revisions.length})
-          </Button>
-          <button
-            type="button"
-            onClick={remove}
-            className="rounded p-1.5 text-[#7975a8] hover:text-red-400"
-            aria-label={t("chat.docs.editor.deleteDocAria")}
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
-        </div>
+        ) : null}
+        <Button
+          size="sm"
+          variant={showChat ? "secondary" : "outline"}
+          onClick={() => setShowChat((v) => !v)}
+        >
+          <MessageSquare className="h-4 w-4" /> {t("chat.docs.editor.discussion")}
+        </Button>
+        <Button
+          size="sm"
+          variant={showHistory ? "secondary" : "outline"}
+          onClick={() => setShowHistory((value) => !value)}
+        >
+          <History className="h-4 w-4" /> History ({revisions.length})
+        </Button>
+        <button
+          type="button"
+          onClick={remove}
+          className="grid h-9 w-9 place-items-center rounded-md text-muted-foreground hover:text-red-400 sm:h-8 sm:w-8"
+          aria-label={t("chat.docs.editor.deleteDocAria")}
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
       </div>
-
-      {isPlan ? (
-        <div className="flex flex-wrap items-center gap-2 rounded-md border border-[#1b1833] bg-[#0e0716] px-3 py-2">
-          {statusMeta ? (
-            <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs ${statusMeta.cls}`}>
-              {t(statusMeta.labelKey)}
-            </span>
-          ) : null}
-          <span className="text-xs text-[#7975a8]">
-            {t("chat.docs.editor.draftTaskCount", { count: taskCount })}
-          </span>
-          {canApprove ? (
-            <Button size="xs" onClick={approve} disabled={approving}>
-              {approving ? (
-                <>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" /> {t("chat.docs.editor.approving")}
-                </>
-              ) : (
-                <>
-                  <Check className="h-3.5 w-3.5" />{" "}
-                  {t("chat.docs.editor.approveAndCreate", { count: unmaterializedTasks })}
-                </>
-              )}
-            </Button>
-          ) : status === "materialized" ? (
-            <span className="text-xs text-emerald-200/80">
-              {t("chat.docs.editor.tasksCreatedNote")}
-            </span>
-          ) : status === "plan_proposed" ? (
-            <span className="text-xs text-amber-200/80">
-              {t("chat.docs.editor.proposedNoTasks")}
-            </span>
-          ) : null}
-        </div>
-      ) : null}
 
       {showHistory ? (
         <div className="rounded-md border border-[#1b1833] bg-[#0e0716] p-3">
@@ -594,44 +591,94 @@ function DocEditor({
           <Loader2 className="h-4 w-4 animate-spin" /> {t("common.loading")}
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
-          {blocks.length === 0 ? (
-            <p className="rounded-md border border-dashed border-[#1b1833] bg-[#0e0716] px-4 py-6 text-center text-sm text-[#7975a8]">
+        <DocSheet
+          title={docTitle}
+          eyebrow={`${t(DOC_TYPE_LABEL[doc?.type ?? "note"] ?? DOC_TYPE_LABEL.note)}${doc?.draft ? ` · ${t("chat.docs.editor.leadsDraft")}` : ""}`}
+          icon={docIcon(doc?.type)}
+          meta={meta.map((piece, index) => (
+            <span key={index} className="inline-flex min-w-0 max-w-full items-center gap-x-1.5">
+              {index > 0 ? <span aria-hidden>·</span> : null}
+              <span className="min-w-0 truncate">{piece}</span>
+            </span>
+          ))}
+          source={source}
+        >
+          {isPlan ? (
+            <PlanProgress
+              reading={reading}
+              statusPill={
+                statusMeta ? (
+                  <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs ${statusMeta.cls}`}>
+                    {t(statusMeta.labelKey)}
+                  </span>
+                ) : null
+              }
+              action={
+                canApprove ? (
+                  <Button size="sm" onClick={approve} disabled={approving}>
+                    {approving ? (
+                      <>
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" /> {t("chat.docs.editor.approving")}
+                      </>
+                    ) : (
+                      <>
+                        <Check className="h-3.5 w-3.5" />{" "}
+                        {t("chat.docs.editor.approveAndCreate", { count: unmaterializedTasks })}
+                      </>
+                    )}
+                  </Button>
+                ) : status === "plan_proposed" ? (
+                  <span className="text-xs text-amber-200/80">{t("chat.docs.editor.proposedNoTasks")}</span>
+                ) : null
+              }
+            />
+          ) : null}
+          {reading.items.length === 0 ? (
+            <p className="rounded-lg border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
               {isPlan ? t("chat.docs.editor.emptyDocPlan") : t("chat.docs.editor.emptyDocNote")}
             </p>
           ) : (
-            blocks.map((b) =>
-              b.type === "note" ? (
-                b.owner === "service:perkos-api" ? (
-                  <TaskResultBlock key={b.id} block={b} />
-                ) : (
-                  <PlanNoteBlock
-                    key={b.id}
-                    block={b}
-                    canEdit={Boolean(me) && b.owner === me}
-                    onSave={async (text) => {
-                      if (!wallet) return;
-                      await updateDocNote({ walletAddress: wallet, projectId, docId, blockId: b.id!, text });
-                    }}
-                    onDelete={async () => {
-                      if (!wallet) return;
-                      await deleteDocBlock({ walletAddress: wallet, projectId, docId, blockId: b.id! });
-                    }}
+            reading.items.map((item, index) => {
+              if (item.kind === "group") {
+                return (
+                  <DocGroupHeading key={item.block.id}>
+                    {item.block.title || t("chat.docs.editor.untitledGroup")}
+                  </DocGroupHeading>
+                );
+              }
+              if (item.kind === "task") {
+                return (
+                  <PlanTaskSection
+                    key={item.view.block.id}
+                    view={item.view}
+                    last={reading.items[index + 1]?.kind !== "task"}
+                    taskHref={taskHref}
+                    proposedBy={t("chat.docs.task.proposedBy", { owner: ownerLabel(item.view.block.owner, t) })}
                   />
-                )
-              ) : b.type === "planGroup" ? (
-                <div key={b.id} className="pt-2">
-                  <h3 className="text-sm font-semibold text-[#ececff]">
-                    {b.title || t("chat.docs.editor.untitledGroup")}
-                  </h3>
-                  <div className="mt-1 h-px bg-[#1b1833]" />
-                </div>
-              ) : (
-                <PlanTaskBlock key={b.id} block={b} />
-              )
-            )
+                );
+              }
+              if (item.kind === "result") {
+                return <ResultPanel key={item.block.id} title={item.parts.title} text={item.parts.body} showTitle />;
+              }
+              const b = item.block;
+              return (
+                <PlanNoteBlock
+                  key={b.id}
+                  block={b}
+                  canEdit={Boolean(me) && b.owner === me}
+                  onSave={async (text) => {
+                    if (!wallet) return;
+                    await updateDocNote({ walletAddress: wallet, projectId, docId, blockId: b.id!, text });
+                  }}
+                  onDelete={async () => {
+                    if (!wallet) return;
+                    await deleteDocBlock({ walletAddress: wallet, projectId, docId, blockId: b.id! });
+                  }}
+                />
+              );
+            })
           )}
-        </div>
+        </DocSheet>
       )}
 
       <div className="flex flex-col gap-2 rounded-md border border-[#1b1833] bg-[#0e0716] p-3">
@@ -671,32 +718,6 @@ function DocEditor({
   );
 }
 
-function TaskResultBlock({ block }: { block: PlanBlock }) {
-  const text = block.text ?? "";
-  const lines = text.split("\n");
-  const headingIndex = lines.findIndex((line) => line.trim().length > 0);
-  const title = headingIndex >= 0
-    ? lines[headingIndex]!.replace(/^#{1,6}\s*/, "").trim()
-    : "Completed task result";
-  const body = headingIndex >= 0
-    ? lines.filter((_line, index) => index !== headingIndex).join("\n").trim()
-    : text;
-
-  return (
-    <details className="group rounded-md border border-emerald-500/20 bg-emerald-500/[0.04]">
-      <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 text-sm font-medium text-[#ececff] marker:content-none">
-        <FileText className="h-4 w-4 shrink-0 text-emerald-300" />
-        <span className="min-w-0 flex-1 truncate">{title}</span>
-        <span className="text-[11px] font-normal text-emerald-200/70 group-open:hidden">Open result</span>
-        <span className="hidden text-[11px] font-normal text-emerald-200/70 group-open:inline">Collapse</span>
-      </summary>
-      <div className="border-t border-emerald-500/15 px-3 py-3 text-sm text-[#cfcbef]">
-        <DocumentView title={title}>{body}</DocumentView>
-      </div>
-    </details>
-  );
-}
-
 function PlanNoteBlock({
   block,
   canEdit,
@@ -730,7 +751,7 @@ function PlanNoteBlock({
   };
 
   return (
-    <div className="group rounded-md border border-[#1b1833] bg-[#0e0716] px-3 py-2.5">
+    <div className="group rounded-r-md border-l-2 border-border py-1 pl-4">
       {editing ? (
         <div className="flex flex-col gap-2">
           <textarea
@@ -750,12 +771,17 @@ function PlanNoteBlock({
         </div>
       ) : (
         <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0 flex-1 text-sm text-[#cfcbef]">
-            <Markdown>{block.text ?? ""}</Markdown>
-            <p className="mt-1 text-[11px] text-[#4f4b6e]">{ownerLabel(block.owner, t)}</p>
+          <div className="min-w-0 flex-1">
+            <DocumentView title={t("chat.docs.docType.note")} toolbar={false}>
+              {block.text ?? ""}
+            </DocumentView>
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              {t("chat.docs.reader.noteBy", { owner: ownerLabel(block.owner, t) })}
+            </p>
           </div>
           {canEdit ? (
-            <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+            // Always visible on touch screens; revealed on hover with a mouse.
+            <div className="flex shrink-0 items-center gap-1 transition-opacity focus-within:opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
               <button
                 type="button"
                 onClick={() => setEditing(true)}
@@ -776,35 +802,6 @@ function PlanNoteBlock({
           ) : null}
         </div>
       )}
-    </div>
-  );
-}
-
-function PlanTaskBlock({ block }: { block: PlanBlock }) {
-  const { t } = useTranslation();
-  return (
-    <div className="ml-3 rounded-md border-l-2 border-[#ec1b69]/40 border-y border-r border-y-[#1b1833] border-r-[#1b1833] bg-[#0c0613] px-3 py-2.5">
-      <div className="flex items-start justify-between gap-2">
-        <span className="text-sm font-medium text-[#ececff]">
-          {block.title || t("chat.docs.task.untitledTask")}
-        </span>
-        {block.suggestedAgent ? (
-          <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[#1b1833] px-2 py-0.5 text-[11px] text-[#a9a4d4]">
-            <Bot className="h-3 w-3" /> {block.suggestedAgent}
-          </span>
-        ) : null}
-      </div>
-      {block.desc ? (
-        <p className="mt-1 whitespace-pre-wrap text-xs text-[#a9a4d4]">{block.desc}</p>
-      ) : null}
-      {block.acceptance ? (
-        <p className="mt-1.5 text-[11px] text-[#7975a8]">
-          <span className="text-[#a9a4d4]">{t("chat.docs.task.doneWhen")}</span> {block.acceptance}
-        </p>
-      ) : null}
-      <p className="mt-1 text-[11px] text-[#4f4b6e]">
-        {t("chat.docs.task.proposedBy", { owner: ownerLabel(block.owner, t) })}
-      </p>
     </div>
   );
 }
