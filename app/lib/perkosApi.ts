@@ -133,6 +133,15 @@ export type Task = {
   attachments?: TaskAttachment[];
   createdAt?: string;
   updatedAt?: string;
+  /** Tasks that must be Done before this one is dispatched. */
+  parents?: string[];
+  /** Dispatcher progress (the private claim token is never read). */
+  dispatchState?: string;
+  dispatchAttempts?: number;
+  dispatchStuck?: boolean;
+  lastDispatchError?: string;
+  dispatchedAt?: string;
+  lastWorkerUpdateAt?: string;
 };
 
 /**

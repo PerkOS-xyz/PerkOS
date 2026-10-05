@@ -39,6 +39,15 @@ export const taskConverter: FirestoreDataConverter<Task> = {
       attachments: Array.isArray(data.attachments) ? (data.attachments as TaskAttachment[]) : undefined,
       createdAt: tsToIso(data.createdAt),
       updatedAt: tsToIso(data.updatedAt),
+      parents: Array.isArray(data.parents)
+        ? (data.parents as unknown[]).filter((p): p is string => typeof p === "string")
+        : undefined,
+      dispatchState: typeof data.dispatchState === "string" ? data.dispatchState : undefined,
+      dispatchAttempts: typeof data.dispatchAttempts === "number" ? data.dispatchAttempts : undefined,
+      dispatchStuck: data.dispatchStuck === true ? true : undefined,
+      lastDispatchError: typeof data.lastDispatchError === "string" ? data.lastDispatchError : undefined,
+      dispatchedAt: tsToIso(data.dispatchedAt),
+      lastWorkerUpdateAt: tsToIso(data.lastWorkerUpdateAt),
     };
   },
 };
