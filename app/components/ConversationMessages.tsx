@@ -9,12 +9,16 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import type { ChatMessage } from "../lib/chatClient";
+import type { CoordinationMessage } from "../lib/useCoordinationLog";
+import { CoordinationRow } from "./CoordinationRow";
 import { Markdown } from "./Markdown";
 import { ToolPill } from "./ToolPill";
 
 export type OptimisticMessage = ChatMessage & {
   /** Local-only marker for messages this client just sent. */
   pending?: boolean;
+  /** Set on coordination log entries merged into the thread. */
+  coordination?: CoordinationMessage["coordination"];
 };
 
 type Props = {
@@ -35,6 +39,10 @@ type Props = {
   approvingPlanId?: string | null;
   /** Only the current server-authorized proposal may expose decision buttons. */
   actionablePlanId?: string | null;
+  /** Sparky ↔ teammates coordination entries, merged into the thread by time. */
+  coordination?: CoordinationMessage[];
+  /** Link target for a delivered task result. */
+  taskHref?: (taskId: string) => string;
 };
 
 export function ConversationMessages({
@@ -51,17 +59,20 @@ export function ConversationMessages({
   onRequestPlanChanges,
   approvingPlanId,
   actionablePlanId,
+  coordination,
+  taskHref,
 }: Props) {
-  // Merge history + live + pending; dedupe by id, then sort.
+  // Merge history + live + pending + coordination; dedupe by id, then sort.
   const merged = useMemo(() => {
     const map = new Map<string, OptimisticMessage>();
     for (const m of history) map.set(m.id, m);
     for (const m of live) map.set(m.id, m);
     if (pending) for (const m of pending) if (!map.has(m.id)) map.set(m.id, m);
+    if (coordination) for (const m of coordination) map.set(m.id, m);
     return Array.from(map.values()).sort((a, b) =>
       a.timestamp.localeCompare(b.timestamp),
     );
-  }, [history, live, pending]);
+  }, [history, live, pending, coordination]);
   const approvedPlanIds = useMemo(
     () =>
       new Set(
@@ -171,7 +182,13 @@ export function ConversationMessages({
           </p>
         ) : null}
 
-        {merged.map((m) => (
+        {merged.map((m) => m.coordination ? (
+          <CoordinationRow
+            key={m.id}
+            message={m as CoordinationMessage}
+            taskHref={taskHref}
+          />
+        ) : (
           <MessageRow
             key={m.id}
             message={m}
