@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { isSolanaWalletAddress } from "@perkos/shared-types";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
@@ -70,6 +71,7 @@ export function ProjectTemplateGallery() {
       id: string;
       name: LocalizedText;
       description: LocalizedText;
+      kind?: string;
     }[];
   } | null>(null);
   useEffect(() => {
@@ -85,12 +87,17 @@ export function ProjectTemplateGallery() {
       .catch(() => {});
     return () => controller.abort();
   }, [address]);
-  if (catalog?.owner !== address || !catalog?.templates.length) return null;
+  // Desks ("fleet" templates) trade through an EVM wallet the owner delegates
+  // on Base or Robinhood Chain; a Solana account cannot sign for them.
+  const templates = (catalog?.templates ?? []).filter(
+    (item) => !(item.kind === "fleet" && isSolanaWalletAddress(address)),
+  );
+  if (catalog?.owner !== address || !templates.length) return null;
   return (
     <section className="space-y-3">
       <h2 className="text-lg font-semibold">{copy.title}</h2>
       <div className="grid gap-4 sm:grid-cols-2">
-        {catalog.templates.map((item) => (
+        {templates.map((item) => (
           <article
             className="flex flex-col gap-3 rounded-lg border border-primary/30 p-5"
             key={item.id}
