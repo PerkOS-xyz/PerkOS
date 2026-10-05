@@ -61,6 +61,7 @@ import {
 } from "./ConversationMessages";
 import { OfflineBanner } from "./OfflineBanner";
 import { AgentOrb } from "./AgentOrb";
+import { useCoordinationLog } from "../lib/useCoordinationLog";
 
 export function ProjectChatTab({
   detail,
@@ -90,6 +91,7 @@ export function ProjectChatTab({
   );
   const owner = shared ? ownerWallet : undefined;
   const participants = useMentionParticipants(detail, projectId, ownerWallet);
+  const { messages: coordination } = useCoordinationLog(ownerWallet ?? address, projectId);
   const { byName: liveAgents } = useWalletAgents(ownerWallet ?? address);
   const pmAgent = detail.project.pmAgent ?? null;
   const workflowPhase = detail.project.workflow?.phase ?? "draft";
@@ -475,6 +477,12 @@ export function ProjectChatTab({
             workflowPhase === "awaiting_approval"
               ? detail.project.workflow?.planId ?? null
               : null
+          }
+          coordination={coordination}
+          taskHref={(taskId) =>
+            owner
+              ? `/projects/${projectId}/tasks/${taskId}?owner=${encodeURIComponent(owner)}`
+              : `/projects/${projectId}/tasks/${taskId}`
           }
         />
         {changeRequestPlanId ? (
