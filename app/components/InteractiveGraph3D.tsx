@@ -196,7 +196,10 @@ export function InteractiveGraph3D({
     const link = graphRef.current?.d3Force("link") as { distance?: (value: number) => unknown } | undefined;
     charge?.strength?.(-260);
     link?.distance?.(112);
-    graphRef.current?.d3ReheatSimulation();
+    // No manual reheat: new graphData already restarts the simulation once the
+    // library has built its layout. Reheating earlier starts the engine with
+    // no layout, the first frame throws ("reading 'tick'") and the graph stays
+    // blank.
   }, [graphData]);
 
   const selectNode = useCallback((node: ForceNode) => {

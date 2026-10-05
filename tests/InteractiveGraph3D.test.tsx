@@ -2,6 +2,8 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { forwardRef, useImperativeHandle } from "react";
 import { describe, expect, it, vi } from "vitest";
 
+const engine = vi.hoisted(() => ({ reheat: vi.fn(), strength: vi.fn(), distance: vi.fn() }));
+
 vi.mock("react-force-graph-3d", () => ({
   default: forwardRef(function MockForceGraph(
     props: { graphData: { nodes: Array<{ id: string; label: string }> }; onNodeClick?: (node: unknown) => void },
@@ -11,8 +13,8 @@ vi.mock("react-force-graph-3d", () => ({
       zoomToFit: vi.fn(),
       cameraPosition: vi.fn(),
       controls: () => ({}),
-      d3Force: () => ({ strength: vi.fn(), distance: vi.fn() }),
-      d3ReheatSimulation: vi.fn(),
+      d3Force: () => ({ strength: engine.strength, distance: engine.distance }),
+      d3ReheatSimulation: engine.reheat,
     }));
     return (
       <div data-testid="force-graph">
@@ -64,5 +66,20 @@ describe("InteractiveGraph3D", () => {
     expect(screen.getByText("Connected to")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Coffee launch" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Draft campaign" })).toBeInTheDocument();
+  });
+
+  it("configures the forces without starting the engine before the library has a layout", () => {
+    engine.reheat.mockClear();
+    engine.strength.mockClear();
+    render(
+      <InteractiveGraph3D
+        ariaLabel="Workflow"
+        expanded={false}
+        nodes={[{ key: "project", kind: "project", label: "Tea launch", status: "Active", x: 0, y: 0 }]}
+        edges={[]}
+      />,
+    );
+    expect(engine.strength).toHaveBeenCalledWith(-260);
+    expect(engine.reheat).not.toHaveBeenCalled();
   });
 });
