@@ -1996,6 +1996,28 @@
         "doneWhen": "완료 조건:",
         "proposedBy": "제안자: {{owner}} · 초안"
       },
+      "reader": {
+        "byline": "작성: {{name}}",
+        "stats": "{{words}}단어 · {{minutes}}분 분량",
+        "taskCount_one": "작업 {{count}}개",
+        "taskCount_other": "작업 {{count}}개",
+        "updated": "{{date}} 업데이트",
+        "progress": "{{total}}개 중 {{done}}개 전달됨",
+        "doneWhen": "완료 조건",
+        "assignedTo": "담당",
+        "openTask": "작업 열기",
+        "result": "결과",
+        "readMore": "결과 전체 읽기",
+        "readLess": "접기",
+        "noteBy": "{{owner}}의 메모",
+        "status": {
+          "planned": "계획됨",
+          "toDo": "할 일",
+          "inProgress": "진행 중",
+          "review": "검토 중",
+          "done": "완료"
+        }
+      },
       "docChat": {
         "sendError": "보내지 못했어요",
         "headerTitle": "{{title}} · 논의",

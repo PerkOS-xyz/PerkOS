@@ -177,6 +177,7 @@ export function useDoc(
                 status: (v.status as string | null) ?? null,
                 parentId: (v.parentId as string | null) ?? null,
                 draft: v.draft === true,
+                createdBy: (v.createdBy as string | null) ?? null,
                 revision: (v.revision as number) ?? 0,
                 updatedAt: tsToIso(v.updatedAt),
               }
@@ -204,6 +205,7 @@ export function useDoc(
             acceptance: (b.acceptance as string | null) ?? null,
             deps: Array.isArray(b.deps) ? (b.deps as string[]) : [],
             materializedTaskId: (b.materializedTaskId as string | null) ?? null,
+            sourceTaskId: (b.sourceTaskId as string | null) ?? null,
             updatedAt: tsToIso(b.updatedAt),
           };
         });

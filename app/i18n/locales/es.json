@@ -2222,6 +2222,28 @@
         "doneWhen": "Se considera hecha cuando:",
         "proposedBy": "Propuesto por {{owner}} · borrador"
       },
+      "reader": {
+        "byline": "por {{name}}",
+        "stats": "{{words}} palabras · {{minutes}} min de lectura",
+        "taskCount_one": "{{count}} tarea",
+        "taskCount_other": "{{count}} tareas",
+        "updated": "Actualizado {{date}}",
+        "progress": "{{done}} de {{total}} entregadas",
+        "doneWhen": "Lista cuando",
+        "assignedTo": "Asignada a",
+        "openTask": "Abrir tarea",
+        "result": "Resultado",
+        "readMore": "Leer el resultado completo",
+        "readLess": "Mostrar menos",
+        "noteBy": "Nota de {{owner}}",
+        "status": {
+          "planned": "Planificada",
+          "toDo": "Por hacer",
+          "inProgress": "En progreso",
+          "review": "En revisión",
+          "done": "Hecha"
+        }
+      },
       "docChat": {
         "sendError": "No se pudo enviar",
         "headerTitle": "{{title}}: Discusión",

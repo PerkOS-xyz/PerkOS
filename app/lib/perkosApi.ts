@@ -250,6 +250,8 @@ export type PlanBlock = {
   acceptance?: string | null;
   deps?: string[];
   materializedTaskId?: string | null;
+  // note written by the API when a board task delivers (its result)
+  sourceTaskId?: string | null;
   updatedAt?: string;
 };
 
