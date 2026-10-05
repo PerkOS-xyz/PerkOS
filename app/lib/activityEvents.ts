@@ -190,3 +190,21 @@ export function verbPhrase(verb: string, t: TFunction): string {
     ? t(`components.activityFeed.verbs.${key}`)
     : verb.replace(/_/g, " ");
 }
+
+const RESOLVES_PLAN = new Set(["approved_plan", "started_task", "completed_task", "goal_done"]);
+
+/**
+ * Plan proposals still waiting for the owner: proposed since `since` and not
+ * followed, in the same project, by an approval or by work starting. Approval
+ * does not always leave its own event, so started or finished work counts too.
+ */
+export function pendingPlanProposals(events: ActivityEvent[], since: number): ActivityEvent[] {
+  return events.filter(
+    (e) =>
+      e.verb === "proposed_plan" &&
+      e.tsMs >= since &&
+      !events.some(
+        (later) => later.projectId === e.projectId && later.tsMs > e.tsMs && RESOLVES_PLAN.has(later.verb),
+      ),
+  );
+}

@@ -40,7 +40,7 @@ import { useOnboarding } from "../../lib/onboardingState";
 import { useActiveOrg } from "../../lib/useActiveOrg";
 import { orgDisplayName } from "../../lib/orgDisplayName";
 import { formatRelativeShort } from "../../lib/format";
-import { useActivityFeed } from "../../lib/activityEvents";
+import { pendingPlanProposals, useActivityFeed } from "../../lib/activityEvents";
 import {
   realtimeAgentStatus,
   useWalletAgents,
@@ -138,15 +138,7 @@ export default function DashboardPage() {
   ).length;
 
   // Plans proposed recently and not yet approved (resolved via later events).
-  const approvedProjects = new Set(
-    events.filter((e) => e.verb === "approved_plan").map((e) => e.projectId),
-  );
-  const proposedPlans = events.filter(
-    (e) =>
-      e.verb === "proposed_plan" &&
-      e.tsMs >= weekAgo &&
-      !approvedProjects.has(e.projectId),
-  );
+  const proposedPlans = pendingPlanProposals(events, weekAgo);
   const planProjects = [...new Set(proposedPlans.map((e) => e.projectId))].filter(
     (pid): pid is string => Boolean(pid),
   );
@@ -161,7 +153,7 @@ export default function DashboardPage() {
           ? t("dashboard.waiting.planLabelWithObject", { object: ev.object })
           : t("dashboard.waiting.planLabel"),
         hint: ev?.actor
-          ? t("dashboard.waiting.proposedBy", { actor: ev.actor })
+          ? t("dashboard.waiting.proposedBy", { actor: ev.actor.replace(/^agent:/, "") })
           : undefined,
         href: `/projects/${encodeURIComponent(pid)}?tab=docs`,
       };
