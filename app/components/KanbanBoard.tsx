@@ -19,6 +19,7 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { GripVertical } from "lucide-react";
+import { LayoutGroup, MotionConfig, motion } from "motion/react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -76,6 +77,13 @@ export function KanbanBoard<T extends KanbanItem>({
   // When the parent refetches and pushes new `items`, we sync.
   const [items, setItems] = useState<T[]>(incoming);
   const [activeId, setActiveId] = useState<string | null>(null);
+  // Cards mounted after the first frame arrived by moving (or are new), so
+  // they glow; the board's first render stays calm.
+  const [settled, setSettled] = useState(false);
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => setSettled(true));
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   useEffect(() => {
     setItems(incoming);
@@ -144,6 +152,10 @@ export function KanbanBoard<T extends KanbanItem>({
       onDragEnd={onDragEnd}
       onDragCancel={() => setActiveId(null)}
     >
+      {/* Cards glide to their new column when an agent moves them; motion is
+          skipped for people who ask their system to reduce it. */}
+      <MotionConfig reducedMotion="user">
+      <LayoutGroup id="kanban">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {COLUMNS.map((col) => (
           <KanbanColumn
@@ -161,6 +173,8 @@ export function KanbanBoard<T extends KanbanItem>({
               <DraggableCard
                 key={item.id}
                 id={item.id}
+                status={item.status}
+                arrived={settled}
                 isActive={activeId === item.id}
                 onMoveLeft={() => moveItemByDelta(item.id, -1)}
                 onMoveRight={() => moveItemByDelta(item.id, 1)}
@@ -171,6 +185,8 @@ export function KanbanBoard<T extends KanbanItem>({
           </KanbanColumn>
         ))}
       </div>
+      </LayoutGroup>
+      </MotionConfig>
 
       <DragOverlay dropAnimation={null}>
         {activeItem ? (
@@ -228,14 +244,26 @@ function KanbanColumn({
   );
 }
 
+/** The glow a card gives off when it lands in a column. */
+const ARRIVAL_GLOW: Record<KanbanStatus, string> = {
+  todo: "rgba(236,27,105,.55)",
+  in_progress: "rgba(251,191,36,.7)",
+  done: "rgba(52,211,153,.75)",
+};
+
 function DraggableCard({
   id,
+  status,
+  arrived,
   isActive,
   children,
   onMoveLeft,
   onMoveRight,
 }: {
   id: string;
+  status: KanbanStatus;
+  /** Mounted after the board settled: it just moved here, so it glows once. */
+  arrived: boolean;
   isActive: boolean;
   children: ReactNode;
   onMoveLeft: () => void;
@@ -245,6 +273,9 @@ function DraggableCard({
   const { setNodeRef, attributes, listeners, isDragging } = useDraggable({
     id,
   });
+  // Decided once, when this card mounts: cards already on the board when it
+  // first rendered never glow; a card that lands here later does.
+  const [glow] = useState(arrived);
 
   function onKeyDown(e: ReactKeyboardEvent<HTMLButtonElement>) {
     if (e.key === "ArrowLeft") {
@@ -257,13 +288,27 @@ function DraggableCard({
   }
 
   return (
-    <li
+    <motion.li
       ref={setNodeRef}
+      layout="position"
+      layoutId={`kanban-${id}`}
+      transition={{ type: "spring", stiffness: 420, damping: 34 }}
       className={cn(
         "relative group",
         (isDragging || isActive) && "opacity-30"
       )}
     >
+      {/* Arrival glow: a card that just moved here lights up and fades. */}
+      {glow ? (
+        <motion.span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-20 rounded-md"
+          style={{ boxShadow: `0 0 0 1.5px ${ARRIVAL_GLOW[status]}, 0 0 28px -6px ${ARRIVAL_GLOW[status]}` }}
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 0 }}
+          transition={{ duration: 1.6, ease: "easeOut" }}
+        />
+      ) : null}
       <button
         type="button"
         {...attributes}
@@ -275,6 +320,6 @@ function DraggableCard({
         <GripVertical className="h-3.5 w-3.5" />
       </button>
       {children}
-    </li>
+    </motion.li>
   );
 }
