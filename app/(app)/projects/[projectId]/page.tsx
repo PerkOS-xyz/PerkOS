@@ -65,6 +65,8 @@ import { ActivityFeedCard } from "../../../components/ActivityFeedCard";
 import { formatRelativeShort } from "../../../lib/format";
 import { logActivity } from "../../../lib/activityEvents";
 import { ProjectChatTab } from "../../../components/ProjectChatTab";
+import { ProjectLiveLayout } from "../../../components/ProjectLiveLayout";
+import { ProjectTeamStage } from "../../../components/ProjectTeamStage";
 import { ProjectTemplateConfiguration } from "../../../components/ProjectTemplateConfiguration";
 import { ArtizenProjectBoard, ArtizenWorkLink } from "../../../components/ArtizenProjectBoard";
 import { SearchInput, matchesQuery } from "../../../components/SearchInput";
@@ -107,7 +109,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
   const initialTab = (searchParams.get("tab") as Tab) || "tasks";
   const TABS: Tab[] = ["tasks", "docs", "conductor", "agents", "map", "chat", "meetings", "members"];
   const [tab, setTab] = useState<Tab>(
-    TABS.includes(initialTab) ? initialTab : "tasks"
+    TABS.includes(initialTab) && initialTab !== "chat" && initialTab !== "map" ? initialTab : "tasks"
   );
 
   // Keep tab in sync if user lands via a deep link.
@@ -153,6 +155,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
   // we never stamp `warmedAt` on an active PM. The curator gives a warmed-but-
   // unused PM a short idle (config/curator.warmIdleMinutes, default 10m).
   const { byName: myAgents } = useWalletAgents(address);
+  const { byName: ownerAgents } = useWalletAgents(ownerWallet ?? address);
   const warmedForProject = useRef<string | null>(null);
   useEffect(() => {
     if (isShared || !projectId || projectId.startsWith("template-")) return;
@@ -167,29 +170,8 @@ export default function ProjectDetailPage({ params }: PageProps) {
     void warmAgent(a.id);
   }, [data?.project?.pmAgent, myAgents, isShared, projectId]);
 
-  return (
-    <div className={cn("flex min-w-0 max-w-full flex-col overflow-x-hidden", tab === "chat" ? "gap-3" : "gap-6")}>
-      <Link
-        href="/projects"
-        className="inline-flex w-fit items-center gap-2 text-sm text-[#7975a8] hover:text-[#ececff]"
-      >
-        <ChevronLeftIcon />
-        {t("projectRoom.backToProjects")}
-      </Link>
-
-      {isLoading ? <DetailSkeleton /> : null}
-      {error ? <ErrorBanner message={(error as Error).message} /> : null}
-      {liveDetail ? (
-        <>
-          {!isShared && <ProjectTemplateConfiguration projectId={projectId} />}
-          <DetailHeader
-            detail={liveDetail}
-            ownerWallet={ownerWallet ?? undefined}
-            isShared={isShared}
-            compact={tab === "chat"}
-            onShowMembers={() => setTab("members")}
-          />
-          <Tabs current={tab} onChange={setTab} onDemand={liveDetail.project.executionMode === "artizen-on-demand"} />
+  const workArea = liveDetail ? (
+    <>
           {liveDetail.project.executionMode === "artizen-on-demand" && ["chat", "conductor", "meetings"].includes(tab) && <ArtizenWorkLink projectId={projectId} />}
           {tab === "tasks" && liveDetail.project.executionMode === "artizen-on-demand" ? <ArtizenProjectBoard tasks={liveDetail.tasks} projectId={projectId} /> : tab === "tasks" ? (
             <TasksTab
@@ -249,6 +231,85 @@ export default function ProjectDetailPage({ params }: PageProps) {
               />
             </div>
           ) : null}
+    </>
+  ) : null;
+
+  return (
+    <div className={cn("flex min-w-0 max-w-full flex-col overflow-x-hidden", tab === "chat" ? "gap-3" : "gap-6")}>
+      <Link
+        href="/projects"
+        className="inline-flex w-fit items-center gap-2 text-sm text-[#7975a8] hover:text-[#ececff]"
+      >
+        <ChevronLeftIcon />
+        {t("projectRoom.backToProjects")}
+      </Link>
+
+      {isLoading ? <DetailSkeleton /> : null}
+      {error ? <ErrorBanner message={(error as Error).message} /> : null}
+      {liveDetail ? (
+        <>
+          {!isShared && <ProjectTemplateConfiguration projectId={projectId} />}
+          <DetailHeader
+            detail={liveDetail}
+            ownerWallet={ownerWallet ?? undefined}
+            isShared={isShared}
+            compact={tab === "chat"}
+            overview={liveDetail.project.executionMode === "artizen-on-demand"}
+            onShowMembers={() => setTab("members")}
+          />
+          {liveDetail.project.executionMode === "artizen-on-demand" ? (
+            <>
+              <Tabs current={tab} onChange={setTab} onDemand />
+              {workArea}
+            </>
+          ) : (
+            <ProjectLiveLayout
+              conversation={
+                <ProjectChatTab
+                  detail={liveDetail}
+                  projectId={projectId}
+                  ownerWallet={ownerWallet ?? undefined}
+                  onDesignatePm={() => setTab("agents")}
+                  variant="panel"
+                />
+              }
+              initialStage={initialTab === "map" ? "workflow" : "team"}
+              initialMobile={initialTab === "chat" ? "talk" : searchParams.get("tab") ? "work" : "talk"}
+              counts={{
+                working: liveDetail.tasks.filter((t) => t.status === "In progress").length,
+                done: liveDetail.tasks.filter((t) => t.status === "Done").length,
+                total: liveDetail.tasks.length,
+              }}
+              stage={(view, focusAgent) =>
+                view === "team" ? (
+                  <ProjectTeamStage
+                    agentNames={uniqueAgents(liveDetail.tasks, liveDetail.project.agentIds ?? [])}
+                    pmAgent={liveDetail.project.pmAgent}
+                    tasks={liveDetail.tasks}
+                    presence={ownerAgents}
+                    onFocusAgent={focusAgent}
+                  />
+                ) : view === "workflow" ? (
+                  <MapTab detail={liveDetail} projectId={projectId} ownerWallet={ownerWallet ?? undefined} />
+                ) : (
+                  <ProjectKnowledgeGraph
+                    projectId={projectId}
+                    projectName={liveDetail.project.name}
+                    pmAgent={liveDetail.project.pmAgent}
+                    agentNames={uniqueAgents(liveDetail.tasks, liveDetail.project.agentIds ?? [])}
+                    tasks={liveDetail.tasks}
+                    liveAgents={ownerAgents}
+                  />
+                )
+              }
+              work={
+                <div className="flex min-w-0 flex-col gap-4">
+                  <Tabs current={tab} onChange={setTab} exclude={["chat", "map"]} />
+                  {workArea}
+                </div>
+              }
+            />
+          )}
         </>
       ) : null}
     </div>
@@ -260,12 +321,15 @@ function DetailHeader({
   ownerWallet,
   isShared,
   compact = false,
+  overview = true,
   onShowMembers,
 }: {
   detail: ProjectDetail;
   ownerWallet?: string;
   isShared?: boolean;
   compact?: boolean;
+  /** Knowledge graph + stats; the live layout shows them in its stage. */
+  overview?: boolean;
   onShowMembers: () => void;
 }) {
   const { t } = useTranslation();
@@ -597,7 +661,7 @@ function DetailHeader({
       {/* One desktop composition: persistent knowledge at left and project
           information at right. Mobile leads with information, then the graph.
           Runtime flow remains in the Execution tab below. */}
-      {!compact && project.id ? (
+      {!compact && overview && project.id ? (
         <div className="grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(320px,2fr)]">
           <div className="order-2 min-w-0 xl:order-1">
             <ProjectKnowledgeGraph
@@ -818,10 +882,13 @@ function Tabs({
   current,
   onChange,
   onDemand = false,
+  exclude = [],
 }: {
   current: Tab;
   onChange: (t: Tab) => void;
   onDemand?: boolean;
+  /** Tabs shown elsewhere in the live layout (conversation, workflow stage). */
+  exclude?: Tab[];
 }) {
   const { t } = useTranslation();
   const items: { id: Tab; label: string }[] = [
@@ -840,7 +907,7 @@ function Tabs({
       role="tablist"
       className="flex overflow-x-auto overscroll-x-contain border-b border-[#1b1833] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
-      {items.filter(item => !onDemand || !["chat", "conductor", "meetings"].includes(item.id)).map((item) => {
+      {items.filter(item => (!onDemand || !["chat", "conductor", "meetings"].includes(item.id)) && !exclude.includes(item.id)).map((item) => {
         const active = current === item.id;
         return (
           <button

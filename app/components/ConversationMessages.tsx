@@ -244,6 +244,7 @@ function MessageRow({
         "flex flex-col gap-1",
         fromMe ? "items-end" : "items-start",
       )}
+      data-agent={fromAgent ? label : undefined}
     >
       <span className="px-1 text-[10px] uppercase tracking-wider text-muted-foreground">
         {label}

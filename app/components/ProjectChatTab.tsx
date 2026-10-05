@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { normalizeWalletAddress } from "@perkos/shared-types";
 
 import Link from "next/link";
@@ -68,12 +69,16 @@ export function ProjectChatTab({
   projectId,
   ownerWallet,
   onDesignatePm,
+  variant = "tab",
 }: {
   detail: ProjectDetail;
   projectId: string;
   ownerWallet?: string;
   onDesignatePm: () => void;
+  /** "panel": the left column of the live project view; the team lives in the stage. */
+  variant?: "tab" | "panel";
 }) {
+  const panel = variant === "panel";
   const { address, isConnected } = useAppAccount();
   const client = useChatClient();
   const queryClient = useQueryClient();
@@ -331,21 +336,36 @@ export function ProjectChatTab({
     <div
       className={cn(
         "relative grid min-h-0 grid-cols-1 gap-3",
-        !teamCollapsed && "lg:grid-cols-[minmax(0,1fr)_320px]",
+        !teamCollapsed && !panel && "lg:grid-cols-[minmax(0,1fr)_320px]",
       )}
     >
       <section
         ref={chatSectionRef}
         data-project-chat
-        className="flex h-[var(--project-chat-available-height,calc(100dvh-15.5rem))] min-h-72 min-w-0 flex-col overflow-hidden rounded-md border border-border bg-background lg:h-[calc(100dvh-20rem)] lg:min-h-[28rem]"
+        className={cn(
+          "flex h-[var(--project-chat-available-height,calc(100dvh-15.5rem))] min-h-72 min-w-0 flex-col overflow-hidden rounded-md border border-border bg-background lg:h-[calc(100dvh-20rem)] lg:min-h-[28rem]",
+          panel && "rounded-2xl bg-card/70 lg:h-[calc(100dvh-8rem)]",
+        )}
       >
         <header className="flex shrink-0 flex-col gap-2 border-b border-border px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between md:px-4">
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium"># {detail.project.name}</p>
-            <p className="text-xs text-muted-foreground">
-              {pmAgent ? `${pmAgent} coordinates this project` : "No PM designated"}
-            </p>
-          </div>
+          {panel ? (
+            <div className="flex min-w-0 items-center gap-3">
+              <Image src="/runtime/sparky-head.webp" alt="" width={36} height={36} className="h-9 w-9 shrink-0 rounded-full object-cover" />
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium">Sparky</p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {pmAgent ? `Coordinating the team · ${pmAgent} leads` : "Coordinating the team"}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium"># {detail.project.name}</p>
+              <p className="text-xs text-muted-foreground">
+                {pmAgent ? `${pmAgent} coordinates this project` : "No PM designated"}
+              </p>
+            </div>
+          )}
           <div className="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 sm:flex sm:w-auto sm:flex-wrap sm:justify-end">
             <label className="min-w-0 flex-1 sm:max-w-48">
               <span className="sr-only">Conversation history</span>
@@ -369,7 +389,7 @@ export function ProjectChatTab({
                 ) : null}
               </select>
             </label>
-            <Button
+            {!panel ? <><Button
               type="button"
               variant="ghost"
               size="sm"
@@ -395,7 +415,7 @@ export function ProjectChatTab({
               ) : (
                 <PanelRightClose className="h-4 w-4" />
               )}
-            </Button>
+            </Button></> : null}
             <Button
               variant="outline"
               size="sm"
@@ -509,7 +529,7 @@ export function ProjectChatTab({
         />
       </section>
 
-      {!teamCollapsed ? (
+      {!teamCollapsed && !panel ? (
         <ProjectTeamPanel
           className="hidden min-h-0 lg:flex"
           participants={participants}

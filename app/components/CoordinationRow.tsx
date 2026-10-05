@@ -78,7 +78,7 @@ export function CoordinationRow({
   if (message.from.startsWith("agent:")) {
     const name = agentName(message.from);
     return (
-      <div className="mr-6 flex gap-2.5">
+      <div className="mr-6 flex gap-2.5" data-agent={name}>
         <AgentOrb name={name} size={28} />
         <div className="flex min-w-0 flex-col gap-1">
           <div className="flex items-center gap-2 text-xs">
@@ -111,7 +111,7 @@ export function CoordinationRow({
   // Sparky (or PerkOS) speaking to a teammate: the goal or an assignment.
   const target = to.startsWith("agent:") ? agentName(to) : null;
   return (
-    <div className="mr-6 flex gap-2.5">
+    <div className="mr-6 flex gap-2.5" data-agent={target ?? undefined}>
       <SparkyFace dim={Boolean(target)} />
       <div className="flex min-w-0 flex-col gap-1">
         <div className="flex flex-wrap items-center gap-1.5 text-xs">
