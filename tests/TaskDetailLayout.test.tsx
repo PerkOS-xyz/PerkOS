@@ -61,6 +61,36 @@ describe("PendingDeliverable", () => {
     render(<PendingDeliverable status="Backlog" />);
     expect(screen.getByText("No deliverable yet")).toBeInTheDocument();
   });
+
+  it("shows how long the agent has been working", () => {
+    const dispatchedAt = new Date(Date.now() - 125_000).toISOString();
+    render(<PendingDeliverable status="In progress" progress={{ dispatchState: "working", dispatchedAt }} />);
+    expect(screen.getByText(/Working for 2m/)).toBeInTheDocument();
+  });
+
+  it("explains a retry with the attempt and the reason", () => {
+    render(
+      <PendingDeliverable
+        status="In progress"
+        progress={{ dispatchState: "retrying", dispatchAttempts: 2, lastDispatchError: "Replied without the deliverable." }}
+      />,
+    );
+    expect(screen.getByText("Trying the agent again")).toBeInTheDocument();
+    expect(screen.getByText(/Attempt 2/)).toBeInTheDocument();
+    expect(screen.getByText("Replied without the deliverable.")).toBeInTheDocument();
+  });
+
+  it("says when PerkOS paused a task the agent could not finish", () => {
+    render(
+      <PendingDeliverable
+        status="In progress"
+        progress={{ dispatchStuck: true, dispatchAttempts: 3, lastDispatchError: "Runtime delivery attempts exhausted." }}
+      />,
+    );
+    expect(screen.getByText("The agent could not finish this task")).toBeInTheDocument();
+    expect(screen.getByText(/tried 3 times/)).toBeInTheDocument();
+    expect(screen.queryByText(/Working for/)).not.toBeInTheDocument();
+  });
 });
 
 describe("TaskRail", () => {

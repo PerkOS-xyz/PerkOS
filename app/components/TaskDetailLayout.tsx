@@ -8,13 +8,15 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Calendar, ChevronDown, Clock3, Folder, Sparkles } from "lucide-react";
+import { Calendar, ChevronDown, Clock3, Folder, Sparkles, TriangleAlert } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+import type { Task } from "../lib/perkosApi";
 import { AgentOrb } from "./AgentOrb";
 import { DocumentView } from "./DocumentView";
 import { Markdown } from "./Markdown";
+import { elapsed, useNow } from "./ProjectTeamStage";
 
 const WORDS_PER_MINUTE = 220;
 
@@ -89,17 +91,59 @@ export function DeliverableSheet({
   );
 }
 
-export function PendingDeliverable({ status }: { status: string }) {
+/** Dispatcher progress the task page can show while there is no result yet. */
+export type TaskProgress = Pick<
+  Task,
+  "dispatchState" | "dispatchAttempts" | "dispatchStuck" | "lastDispatchError" | "dispatchedAt"
+>;
+
+export function PendingDeliverable({ status, progress }: { status: string; progress?: TaskProgress }) {
   const working = status === "In progress" || status === "Review";
+  const stuck = progress?.dispatchStuck === true || progress?.dispatchState === "failed";
+  const retrying = !stuck && progress?.dispatchState === "retrying";
+  const attempts = progress?.dispatchAttempts ?? 0;
+  const now = useNow(working && !stuck);
+  const clock = working && !stuck ? elapsed(progress?.dispatchedAt, now) : null;
+  const reason = progress?.lastDispatchError?.trim();
+
+  const title = stuck
+    ? "The agent could not finish this task"
+    : retrying
+      ? "Trying the agent again"
+      : working
+        ? "The agent is working on this task"
+        : "No deliverable yet";
+  const detail = stuck
+    ? `PerkOS tried ${attempts > 1 ? `${attempts} times` : "it"} and paused the task so it stops waking the agent.`
+    : retrying
+      ? `Attempt ${Math.max(attempts, 2)}. The agent's result appears here as soon as it delivers.`
+      : "The agent's result appears here as a document as soon as the task is done.";
+
   return (
-    <section className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border px-6 py-12 text-center animate-in fade-in duration-500">
-      <Clock3 className={cn("h-5 w-5", working ? "text-amber-300" : "text-muted-foreground")} />
-      <p className="text-sm font-medium text-foreground">
-        {working ? "The agent is working on this task" : "No deliverable yet"}
-      </p>
-      <p className="max-w-sm text-xs leading-relaxed text-muted-foreground">
-        The agent&apos;s result appears here as a document as soon as the task is done.
-      </p>
+    <section
+      aria-live="polite"
+      className={cn(
+        "flex flex-col items-center gap-2 rounded-xl border border-dashed px-6 py-12 text-center animate-in fade-in duration-500",
+        stuck ? "border-red-500/40 bg-red-500/[0.04]" : retrying ? "border-amber-500/40" : "border-border",
+      )}
+    >
+      {stuck || retrying ? (
+        <TriangleAlert className={cn("h-5 w-5", stuck ? "text-red-300" : "text-amber-300")} />
+      ) : (
+        <Clock3 className={cn("h-5 w-5", working ? "text-amber-300" : "text-muted-foreground")} />
+      )}
+      <p className="text-sm font-medium text-foreground">{title}</p>
+      <p className="max-w-sm text-xs leading-relaxed text-muted-foreground">{detail}</p>
+      {clock ? (
+        <p className="inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
+          <Clock3 className="h-3 w-3" /> Working for {clock}
+        </p>
+      ) : null}
+      {(stuck || retrying) && reason ? (
+        <p className="max-w-md rounded-md border border-border bg-background/60 px-3 py-2 text-xs text-foreground/80">
+          {reason}
+        </p>
+      ) : null}
     </section>
   );
 }

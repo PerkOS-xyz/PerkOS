@@ -66,7 +66,7 @@ export function deriveSeats(
   });
 }
 
-function useNow(active: boolean): number {
+export function useNow(active: boolean): number {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     if (!active) return;
@@ -76,7 +76,7 @@ function useNow(active: boolean): number {
   return now;
 }
 
-function elapsed(since: string | undefined, now: number): string | null {
+export function elapsed(since: string | undefined, now: number): string | null {
   if (!since) return null;
   const ms = now - new Date(since).getTime();
   if (!Number.isFinite(ms) || ms < 0) return null;
