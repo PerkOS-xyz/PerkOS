@@ -347,7 +347,13 @@ export function ProjectChatTab({
           panel && "rounded-2xl bg-card/70 lg:h-[calc(100dvh-8rem)]",
         )}
       >
-        <header className="flex shrink-0 flex-col gap-2 border-b border-border px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between md:px-4">
+        <header
+          className={cn(
+            "flex shrink-0 flex-col gap-2 border-b border-border px-3 py-2.5 md:px-4",
+            // The panel column is narrow at every breakpoint: keep two rows.
+            !panel && "sm:flex-row sm:items-center sm:justify-between",
+          )}
+        >
           {panel ? (
             <div className="flex min-w-0 items-center gap-3">
               <Image src="/runtime/sparky-head.webp" alt="" width={36} height={36} className="h-9 w-9 shrink-0 rounded-full object-cover" />
@@ -366,7 +372,12 @@ export function ProjectChatTab({
               </p>
             </div>
           )}
-          <div className="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 sm:flex sm:w-auto sm:flex-wrap sm:justify-end">
+          <div
+            className={cn(
+              "grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2",
+              panel ? "grid-cols-[minmax(0,1fr)_auto]" : "sm:flex sm:w-auto sm:flex-wrap sm:justify-end",
+            )}
+          >
             <label className="min-w-0 flex-1 sm:max-w-48">
               <span className="sr-only">Conversation history</span>
               <select
@@ -429,7 +440,7 @@ export function ProjectChatTab({
             {canStartPlanning ? (
               <Button
                 size="sm"
-                className="col-span-3 w-full gap-1.5 sm:w-auto"
+                className={cn(panel ? "col-span-full" : "col-span-3 sm:w-auto", "w-full gap-1.5")}
                 disabled={!pmAgent || startPlanning.isPending}
                 onClick={() => startPlanning.mutate()}
               >
