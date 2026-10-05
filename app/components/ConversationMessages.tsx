@@ -17,6 +17,8 @@ import { ToolPill } from "./ToolPill";
 export type OptimisticMessage = ChatMessage & {
   /** Local-only marker for messages this client just sent. */
   pending?: boolean;
+  /** Accepted while its agent was offline; it is delivered when the agent wakes. */
+  queued?: boolean;
   /** Set on coordination log entries merged into the thread. */
   coordination?: CoordinationMessage["coordination"];
 };
@@ -268,6 +270,7 @@ function MessageRow({
         {label}
         {fromAgent ? " · agent" : ""}
         {message.pending ? " · sending…" : ""}
+        {!message.pending && message.queued ? " · delivered when the agent wakes" : ""}
       </span>
       <div
         className={cn(

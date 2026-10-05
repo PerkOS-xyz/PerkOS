@@ -230,6 +230,22 @@ describe("ChatClient message routing", () => {
     client.stop();
   });
 
+  it("reports how many offline agents the chat server queued a message for", async () => {
+    const client = new ChatClient({
+      url: "ws://test/chat",
+      getToken: async () => "token",
+    });
+    client.start();
+    await new Promise((r) => setTimeout(r, 5));
+    activeFake!.push({ type: "auth_ok", session: { walletAddress: "0xabc" } });
+
+    const acks: { delivered: number; queued: number }[] = [];
+    const id = client.send({ convId: "project-1", text: "Are you there?", onAck: (ack) => acks.push(ack) });
+    activeFake!.push({ type: "ack", id, convId: "project-1", delivered: 0, queued: 1, timestamp: "2026-10-05T10:44:00.000Z" });
+    expect(acks).toEqual([expect.objectContaining({ delivered: 0, queued: 1 })]);
+    client.stop();
+  });
+
   it("delivers chat_message frames to the registered conv listener", async () => {
     const client = new ChatClient({
       url: "ws://test/chat",

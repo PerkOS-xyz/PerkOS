@@ -112,4 +112,20 @@ describe("ConversationMessages with coordination", () => {
     expect(screen.queryByText(/perkos-api/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/workflow/i)).not.toBeInTheDocument();
   });
+
+  it("says a message waits for an agent that was offline", () => {
+    render(
+      <ConversationMessages
+        history={[]}
+        live={[]}
+        pending={[{ id: "q1", convId: "c", from: "user:0xabc", text: "Are you there?", timestamp: "2026-10-05T01:05:00.000Z", queued: true }]}
+        walletAddress="0xabc"
+        loadingInitial={false}
+        loadingMore={false}
+        hasMore={false}
+        onLoadOlder={() => {}}
+      />,
+    );
+    expect(screen.getByText(/delivered when the agent wakes/)).toBeInTheDocument();
+  });
 });
