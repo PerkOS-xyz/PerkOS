@@ -62,6 +62,12 @@ export default function TaskDetailPage({ params }: PageProps) {
     queryFn: () =>
       getWalletProject({ walletAddress: ownerWallet!, projectId }),
     enabled: Boolean(ownerWallet) && Boolean(projectId),
+    // Until the result lands, poll so the page shows progress, retries and
+    // the deliverable on its own; no manual refresh.
+    refetchInterval: (q) => {
+      const current = q.state.data?.tasks.find((t) => t.id === taskId);
+      return current && current.status !== "Done" && !current.result ? 10_000 : false;
+    },
   });
 
   const task = data?.tasks.find((t) => t.id === taskId);
@@ -168,7 +174,7 @@ export default function TaskDetailPage({ params }: PageProps) {
           ) : onDemand ? (
             <ArtizenRunFailure run={{ ...task, phase: task.executionPhase }} />
           ) : (
-            <PendingDeliverable status={task.status} />
+            <PendingDeliverable status={task.status} progress={task} />
           )}
 
           {onDemand && task.agent ? (
