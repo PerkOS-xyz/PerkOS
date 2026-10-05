@@ -30,11 +30,13 @@ import {
   ensureProjectChat,
   listProjectChatThreads,
   mentionAgent,
+  wakeAgentApi,
   notifyProjectMention,
   pmTurn,
   requestPlanChanges,
 } from "../lib/perkosApi";
 import type { ChatIdentity } from "../lib/chatClient";
+import { mentionFollowUp } from "../lib/mentionFollowUp";
 import {
   useChatClient,
   useChatClientStatus,
@@ -213,19 +215,18 @@ export function ProjectChatTab({
           });
         }
 
-        // A resting explicitly-mentioned agent has no chat socket. Wake and
-        // deliver through A2A only when PerkOS-Chat confirms nobody received it.
-        if (ack.delivered === 0) {
-          for (const identity of mentions) {
-            if (identity.startsWith("agent:")) {
-              void mentionAgent({
-                projectId,
-                agentName: identity.slice("agent:".length),
-                text,
-                owner,
-              });
-            }
-          }
+        // A resting explicitly-mentioned agent has no chat socket. When
+        // PerkOS-Chat held the message for it, only wake it: the held message
+        // reaches it as soon as it connects, and sending the text again
+        // through A2A would make it answer twice. Without a held copy, wake
+        // and deliver through A2A when nobody received it.
+        const followUp = mentionFollowUp(ack, mentions);
+        for (const agentName of followUp.wake) {
+          const agentId = liveAgents[agentName]?.id;
+          if (agentId) void wakeAgentApi({ agentId }).catch(() => {});
+        }
+        for (const agentName of followUp.resend) {
+          void mentionAgent({ projectId, agentName, text, owner });
         }
       },
     });
