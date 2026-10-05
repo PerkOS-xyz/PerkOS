@@ -76,7 +76,14 @@ export type ChatClientStatus =
 
 export type StatusListener = (status: ChatClientStatus, detail?: string) => void;
 export type MessageListener = (msg: ChatMessage) => void;
-export type AckListener = (ack: { id: string; convId: string; delivered: number; timestamp: string }) => void;
+export type AckListener = (ack: {
+  id: string;
+  convId: string;
+  delivered: number;
+  /** Agents that were offline: PerkOS-Chat holds the message until they connect. */
+  queued: number;
+  timestamp: string;
+}) => void;
 
 const DEFAULT_URL = "wss://chat.perkos.xyz/chat";
 const MIN_RECONNECT_MS = 1_000;
@@ -369,6 +376,7 @@ export class ChatClient {
           id,
           convId: String(frame.convId),
           delivered: Number(frame.delivered ?? 0),
+          queued: Number(frame.queued ?? 0),
           timestamp: String(frame.timestamp),
         });
       }

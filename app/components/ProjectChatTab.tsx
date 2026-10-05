@@ -192,7 +192,7 @@ export function ProjectChatTab({
       onAck: (ack) => {
         setOptimistic((prev) =>
           prev.map((message) =>
-            message.id === ack.id ? { ...message, pending: false } : message,
+            message.id === ack.id ? { ...message, pending: false, queued: ack.queued > 0 } : message,
           ),
         );
         void cacheMessages(address, convId, [{

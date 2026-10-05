@@ -95,7 +95,7 @@ export default function ConversationPage() {
           setOptimistic((prev) =>
             prev.map((message) =>
               message.id === ack.id
-                ? { ...message, pending: false }
+                ? { ...message, pending: false, queued: ack.queued > 0 }
                 : message,
             ),
           );
