@@ -146,7 +146,9 @@ export default function NewProjectWizard() {
   const [saveAsTemplate, setSaveAsTemplate] = useState(false);
   const [templateName, setTemplateName] = useState("");
   const [myTemplates, setMyTemplates] = useState<TeamTemplate[]>([]);
-  const [llmMode, setLlmMode] = useState<"perkos" | "byok">("byok");
+  // Until the person picks, the model follows their access: PerkOS LLM when
+  // the wallet is approved for it, otherwise their own key.
+  const [llmChoice, setLlmMode] = useState<"perkos" | "byok" | null>(null);
   const llmAccess = useQuery({
     queryKey: ["llm-access", address],
     queryFn: fetchLlmAccess,
@@ -158,6 +160,7 @@ export default function NewProjectWizard() {
     enabled: Boolean(address),
   });
   const llmAllowed = llmAccess.data?.allowed === true;
+  const llmMode = llmChoice ?? (llmAllowed ? "perkos" : "byok");
   const [byokProvider, setByokProvider] = useState(PROVIDERS[0]?.id ?? "openai");
   const [byokModel, setByokModel] = useState(PROVIDERS[0]?.defaultModel ?? "");
   const [byokKey, setByokKey] = useState("");
