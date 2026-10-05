@@ -96,6 +96,11 @@ type Props = {
   header?: ReactNode;
   /** Center the reading column inside a wider sheet. */
   centered?: boolean;
+  /**
+   * Render this instead of the Markdown (e.g. a doc made of interactive
+   * blocks); the toolbar still copies, downloads and expands `children`.
+   */
+  body?: ReactNode;
   className?: string;
 };
 
@@ -121,7 +126,7 @@ function DocumentBody({ source, className }: { source: string; className?: strin
   );
 }
 
-function DocumentViewImpl({ children, title, toolbar = true, header, centered = false, className }: Props) {
+function DocumentViewImpl({ children, title, toolbar = true, header, centered = false, body, className }: Props) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -172,7 +177,7 @@ function DocumentViewImpl({ children, title, toolbar = true, header, centered = 
         </div>
       ) : null}
 
-      <DocumentBody source={children} className={centered ? "mx-auto w-full" : undefined} />
+      {body ?? <DocumentBody source={children} className={centered ? "mx-auto w-full" : undefined} />}
 
       {toolbar ? (
         <Dialog open={expanded} onOpenChange={setExpanded}>
