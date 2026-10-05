@@ -1584,6 +1584,14 @@
     },
     "taskCard": {
       "agent": "에이전트: {{agent}}",
+      "signal": {
+        "pickedUp": "접수됨",
+        "retrying": "재시도 중",
+        "working": "작업 중",
+        "delivered": "전달됨",
+        "paused": "일시 중지",
+        "waiting": "이전 단계 대기 중"
+      },
       "selectAria": "{{name}} 선택",
       "editTask": "작업 수정",
       "deleteTask": "작업 삭제",

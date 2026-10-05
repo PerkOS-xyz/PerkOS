@@ -264,6 +264,16 @@ body {
   }
 }
 
+/* Task card "working" bar (TaskSignal.tsx): a light sweeps along the top edge. */
+@keyframes pk-card-progress {
+  0% {
+    background-position: -40% 0;
+  }
+  100% {
+    background-position: 140% 0;
+  }
+}
+
 /* Infinite ticker track (Marquee.tsx) — track is duplicated, so -50% loops. */
 @keyframes marquee-x {
   0% {

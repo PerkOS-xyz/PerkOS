@@ -1584,6 +1584,14 @@
     },
     "taskCard": {
       "agent": "エージェント：{{agent}}",
+      "signal": {
+        "pickedUp": "受付済み",
+        "retrying": "再試行中",
+        "working": "作業中",
+        "delivered": "納品済み",
+        "paused": "一時停止",
+        "waiting": "前の作業待ち"
+      },
       "selectAria": "{{name}}を選択",
       "editTask": "タスクを編集",
       "deleteTask": "タスクを削除",

@@ -1897,6 +1897,14 @@
     },
     "taskCard": {
       "agent": "Agente: {{agent}}",
+      "signal": {
+        "pickedUp": "Assumida",
+        "retrying": "Tentando de novo",
+        "working": "Trabalhando",
+        "delivered": "Entregue",
+        "paused": "Pausada",
+        "waiting": "Aguardando etapas anteriores"
+      },
       "selectAria": "Selecione {{name}}",
       "editTask": "Editar tarefa",
       "deleteTask": "Excluir tarefa",

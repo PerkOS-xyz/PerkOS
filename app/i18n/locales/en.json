@@ -1771,6 +1771,14 @@
     },
     "taskCard": {
       "agent": "Agent: {{agent}}",
+      "signal": {
+        "pickedUp": "Picked up",
+        "retrying": "Retrying",
+        "working": "Working",
+        "delivered": "Delivered",
+        "paused": "Paused",
+        "waiting": "Waiting on earlier steps"
+      },
       "selectAria": "Select {{name}}",
       "editTask": "Edit task",
       "deleteTask": "Delete task",

@@ -1574,6 +1574,14 @@
     },
     "taskCard": {
       "agent": "Agente: {{agent}}",
+      "signal": {
+        "pickedUp": "Presa in carico",
+        "retrying": "Nuovo tentativo",
+        "working": "In lavorazione",
+        "delivered": "Consegnata",
+        "paused": "In pausa",
+        "waiting": "In attesa dei passi precedenti"
+      },
       "selectAria": "Seleziona {{name}}",
       "editTask": "Modifica attività",
       "deleteTask": "Elimina attività",
