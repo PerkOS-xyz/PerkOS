@@ -25,6 +25,7 @@ const STAGE_TABS: { id: StageView; label: string; Icon: typeof Users }[] = [
 
 export function ProjectLiveLayout({
   conversation,
+  summary,
   stage,
   initialStage = "team",
   work,
@@ -32,6 +33,8 @@ export function ProjectLiveLayout({
   initialMobile = "talk",
 }: {
   conversation: ReactNode;
+  /** Goal, task counters and team workload: always on desktop, with Tasks on phones. */
+  summary?: ReactNode;
   stage: (view: StageView, focusAgent: (name: string) => void) => ReactNode;
   initialStage?: StageView;
   work: ReactNode;
@@ -94,6 +97,11 @@ export function ProjectLiveLayout({
         </div>
 
         <div className="flex min-w-0 flex-col gap-5">
+          {summary ? (
+            <section aria-label="Project summary" className={cn("min-w-0 lg:block", mobile === "work" ? "block" : "hidden")}>
+              {summary}
+            </section>
+          ) : null}
           <section
             aria-label="Project stage"
             className={cn("min-w-0 rounded-2xl border border-border bg-card/70 p-4 md:p-5 lg:block", mobile === "team" ? "block" : "hidden")}
