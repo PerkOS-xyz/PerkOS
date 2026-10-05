@@ -12,3 +12,28 @@ export function teamAgentName(projectSlug: string, roleSlug: string): string {
   const project = room > 0 ? projectSlug.slice(0, room).replace(/-+$/g, "") : "";
   return project ? `${project}-${role}` : role;
 }
+
+/**
+ * Names for a whole team, sharing ONE project prefix so teammates read as a
+ * set ("Harbor-Tea-Product-Copywriter", "Harbor-Tea-Customer-Support"), not
+ * one cut per role ("Harbor-Tea-Sh-…", "Harbor-Tea-S-…"). The prefix is cut at
+ * a word boundary to fit the longest role, falls back to the project's
+ * initials, and is dropped only when not even those fit.
+ */
+export function teamAgentNames(projectSlug: string, roleSlugs: string[]): string[] {
+  const roles = roleSlugs.map((r) => r.slice(0, AGENT_NAME_MAX - 2).replace(/-+$/g, ""));
+  const longest = Math.max(0, ...roles.map((r) => r.length));
+  const room = AGENT_NAME_MAX - longest - 1;
+  const words = projectSlug.split("-").filter(Boolean);
+  let prefix = "";
+  for (const word of words) {
+    const next = prefix ? `${prefix}-${word}` : word;
+    if (next.length > room) break;
+    prefix = next;
+  }
+  if (!prefix && words.length > 0) {
+    const initials = words.map((w) => w[0]).join("");
+    if (initials.length >= 2 && initials.length <= room) prefix = initials.toUpperCase();
+  }
+  return roles.map((role) => (prefix ? `${prefix}-${role}` : role));
+}

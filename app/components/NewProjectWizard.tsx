@@ -8,7 +8,7 @@ import { fetchLlmAccess } from "../lib/llmAccess";
 import { fetchEcsAccess } from "../lib/ecsAccess";
 import { useRouter } from "next/navigation";
 import { useAppAccount } from "../lib/useAppAccount";
-import { teamAgentName } from "../lib/teamAgentName";
+import { teamAgentName, teamAgentNames } from "../lib/teamAgentName";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { ProjectTemplateGallery } from "./ProjectTemplateWizard";
@@ -344,9 +344,11 @@ export default function NewProjectWizard() {
         launched.push(...buildExistingTeamRoster(existingAgentNames, existingPm));
       } else {
         let i = 0;
+        // One shared project prefix for the whole team.
+        const names = teamAgentNames(slug, roles.map((r) => slugify(r.role)));
         for (const role of roles) {
           i++;
-          const reqName = teamAgentName(slug, slugify(role.role));
+          const reqName = names[i - 1] ?? teamAgentName(slug, slugify(role.role));
           if (agentSource === "invite") {
             setProgress(
               t("companyNew.launch.registering", {

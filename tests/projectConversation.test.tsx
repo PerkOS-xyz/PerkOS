@@ -94,4 +94,22 @@ describe("ConversationMessages with coordination", () => {
     expect(text.indexOf("Launch the cold brew line")).toBeLessThan(text.indexOf("Plan this project"));
     expect(text.indexOf("Plan this project")).toBeLessThan(text.indexOf("Plan approved."));
   });
+
+  it("speaks PerkOS workflow messages as Sparky", () => {
+    const chat = [{ id: "w1", convId: "c", from: "service:perkos-api" as const, text: "Plan approved. Starting 3 tasks.", timestamp: "2026-10-05T01:04:00.000Z" }];
+    render(
+      <ConversationMessages
+        history={chat}
+        live={[]}
+        walletAddress="0xabc"
+        loadingInitial={false}
+        loadingMore={false}
+        hasMore={false}
+        onLoadOlder={() => {}}
+      />,
+    );
+    expect(screen.getByText("Sparky")).toBeInTheDocument();
+    expect(screen.queryByText(/perkos-api/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/workflow/i)).not.toBeInTheDocument();
+  });
 });
