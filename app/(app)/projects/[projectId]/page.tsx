@@ -51,6 +51,7 @@ import {
 import { Bot, Loader2, Plus } from "lucide-react";
 
 import { KanbanBoard } from "../../../components/KanbanBoard";
+import { TaskSignal } from "../../../components/TaskSignal";
 import { ConductorBoard } from "../../../components/ConductorBoard";
 import type { SwarmDefinition } from "../../../lib/swarm";
 import { EmptyState } from "../../../components/EmptyState";
@@ -1300,6 +1301,7 @@ function TaskCard({
         <span className="text-sm text-[#ececff]">{task.name}</span>
         <PriorityBadge priority={task.priority} />
       </div>
+      <TaskSignal task={task} />
       <div className="flex flex-wrap items-center gap-3 text-xs text-[#7975a8]">
         <span>{t("projectRoom.taskCard.agent", { agent: task.agent || "—" })}</span>
         {task.updatedAt ? (

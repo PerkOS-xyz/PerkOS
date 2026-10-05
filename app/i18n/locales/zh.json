@@ -1574,6 +1574,14 @@
     },
     "taskCard": {
       "agent": "智能体:{{agent}}",
+      "signal": {
+        "pickedUp": "已接手",
+        "retrying": "重试中",
+        "working": "进行中",
+        "delivered": "已交付",
+        "paused": "已暂停",
+        "waiting": "等待前置步骤"
+      },
       "selectAria": "选择 {{name}}",
       "editTask": "编辑任务",
       "deleteTask": "删除任务",

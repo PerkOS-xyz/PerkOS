@@ -1771,6 +1771,14 @@
     },
     "taskCard": {
       "agent": "Agente: {{agent}}",
+      "signal": {
+        "pickedUp": "Tomada",
+        "retrying": "Reintentando",
+        "working": "Trabajando",
+        "delivered": "Entregada",
+        "paused": "En pausa",
+        "waiting": "Esperando pasos previos"
+      },
       "selectAria": "Seleccionar {{name}}",
       "editTask": "Editar tarea",
       "deleteTask": "Eliminar tarea",
