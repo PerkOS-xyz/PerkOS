@@ -286,6 +286,15 @@ service cloud.firestore {
           || isProjectMember(w, pid)
           || isOrgMember(w, projectOrgId(w, pid));
       }
+      // Coordination log: Sparky's readable story of the project (goal to the
+      // lead, assignments, results, approvals). Written only by the PerkOS API
+      // (Admin SDK); any member who can see the project can read it. No client
+      // write grant here, so editors cannot forge coordination lines.
+      match /coordination/{entryId} {
+        allow read: if isSelf(w)
+          || isProjectMember(w, pid)
+          || isOrgMember(w, projectOrgId(w, pid));
+      }
       // Agent roster edge (agent membership, gap #2). Readable by any member;
       // writes go through the server API (Admin SDK) so the forward edge + the
       // /agents/{name}/assignments reverse index stay consistent — clients

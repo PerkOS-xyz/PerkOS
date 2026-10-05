@@ -40,7 +40,7 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)("wallet Firestore rule iso
       }
       await setDoc(doc(db, project), { orgId: "rules-org", name: "Fixture project" });
       await setDoc(doc(db, org), { name: "Fixture org" });
-      for (const path of ["tasks/task", "docs/note", "docs/note/blocks/block", "messages/post", "agentMembers/fixture"]) {
+      for (const path of ["tasks/task", "docs/note", "docs/note/blocks/block", "messages/post", "agentMembers/fixture", "coordination/entry"]) {
         await setDoc(doc(db, `${project}/${path}`), { value: "fixture" });
       }
       await setDoc(doc(db, "agents/rules-fixture"), { private: "synthetic" });
@@ -94,6 +94,17 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)("wallet Firestore rule iso
     await assertFails(setDoc(doc(db, `${project}/members/${variant}`), { role: "owner" }));
     await assertFails(updateDoc(doc(db, `${project}/agentMembers/fixture`), { value: "edited" }));
     await assertFails(getDoc(doc(db, `wallets/${owner}/profile/main`)));
+  });
+
+  it("lets members read the coordination log but never write it", async () => {
+    await env.withSecurityRulesDisabled(context => setDoc(doc(context.firestore(), `${project}/members/${evm}`), { role: "editor", status: "active" }));
+    const editor = env.authenticatedContext(evm).firestore();
+    await assertSucceeds(getDoc(doc(editor, `${project}/coordination/entry`)));
+    await assertFails(setDoc(doc(editor, `${project}/coordination/forged`), { kind: "system", text: "forged" }));
+    await assertFails(updateDoc(doc(editor, `${project}/coordination/entry`), { value: "edited" }));
+    const outsider = env.authenticatedContext(variant).firestore();
+    await assertFails(getDoc(doc(outsider, `${project}/coordination/entry`)));
+    await env.withSecurityRulesDisabled(context => deleteDoc(doc(context.firestore(), `${project}/members/${evm}`)));
   });
 
   it("revokes membership even if discovery pointers still exist", async () => {
