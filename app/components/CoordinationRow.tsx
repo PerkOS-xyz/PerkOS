@@ -8,6 +8,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useId, useState } from "react";
 import { ArrowUpRight, CheckCircle2, CircleAlert, FileText } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -25,6 +26,41 @@ function agentName(identity: string): string {
 export function agentHue(name: string, alpha = 1): string {
   const { accentHue } = deriveAgentAvatarIdentity(name);
   return `hsl(${accentHue} 80% 66% / ${alpha})`;
+}
+
+/** Longer than this, an assignment shows its first lines and folds the rest. */
+const BRIEF_PREVIEW_CHARS = 220;
+
+/**
+ * Sparky's goal or assignment: the task and the first lines of its brief, with
+ * the full brief one tap away, so a few assignments don't bury the
+ * conversation.
+ */
+function BriefText({ text }: { text: string }) {
+  const id = useId();
+  const [open, setOpen] = useState(false);
+  const long = text.length > BRIEF_PREVIEW_CHARS;
+  return (
+    <>
+      <div
+        id={id}
+        className={cn(long && !open && "max-h-[4.75rem] overflow-hidden [mask-image:linear-gradient(to_bottom,#000_55%,transparent)]")}
+      >
+        <Markdown>{text}</Markdown>
+      </div>
+      {long ? (
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls={id}
+          onClick={() => setOpen((v) => !v)}
+          className="mt-1 text-[11px] font-medium text-muted-foreground hover:text-foreground"
+        >
+          {open ? "Show less" : "Show the full brief"}
+        </button>
+      ) : null}
+    </>
+  );
 }
 
 function Time({ iso }: { iso: string }) {
@@ -133,7 +169,7 @@ export function CoordinationRow({
           className="rounded-2xl rounded-tl-md border border-dashed px-3.5 py-2.5 text-sm leading-relaxed text-foreground/80"
           style={target ? { borderColor: agentHue(target, 0.35) } : undefined}
         >
-          <Markdown>{message.text}</Markdown>
+          <BriefText text={message.text} />
         </div>
       </div>
     </div>

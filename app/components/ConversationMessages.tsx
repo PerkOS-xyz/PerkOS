@@ -114,6 +114,21 @@ export function ConversationMessages({
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Content that grows after it lands (Markdown, images, the panel resizing to
+  // the window) must not push the newest message out of view either.
+  const hasMessages = merged.length > 0;
+  useEffect(() => {
+    const el = scrollRef.current;
+    const content = el?.firstElementChild;
+    if (!el || !content || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => {
+      if (stickToBottomRef.current) el.scrollTop = el.scrollHeight;
+    });
+    observer.observe(content);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMessages]);
+
   // Auto-scroll on new messages when at-bottom; preserve scroll on prepend.
   useLayoutEffect(() => {
     const el = scrollRef.current;
@@ -269,11 +284,11 @@ function MessageRow({
           </div>
         ) : null}
         {proposal && onApprovePlan && proposalActionable && !planAlreadyApproved ? (
-          <div className="mt-3 flex flex-col items-stretch gap-2 rounded-md border border-primary/30 bg-primary/5 p-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-3 flex flex-col gap-2 rounded-md border border-primary/30 bg-primary/5 p-2.5">
             <span className="text-xs text-muted-foreground">
               Approval is required before tasks start.
             </span>
-            <div className="flex shrink-0 gap-1.5">
+            <div className="flex flex-wrap justify-end gap-1.5">
               {onRequestPlanChanges ? (
                 <Button
                   type="button"

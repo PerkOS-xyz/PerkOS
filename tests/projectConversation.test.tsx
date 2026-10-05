@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { ConversationMessages } from "../app/components/ConversationMessages";
@@ -37,6 +37,20 @@ describe("CoordinationRow", () => {
     expect(screen.getByText("Sparky")).toBeInTheDocument();
     expect(screen.getByText("@Seoul-Beans-SEO-Specialist")).toBeInTheDocument();
     expect(screen.getByText("Find the keywords")).toBeInTheDocument();
+  });
+
+  it("folds a long brief behind a toggle", () => {
+    const brief = `Draft the customer FAQ: ${"Cover caffeine, brewing, allergens, shipping and how to choose. ".repeat(6)}`;
+    render(<CoordinationRow message={entry("d", { from: "sparky", to: "agent:Harbor-Support", kind: "assignment", text: brief, ts: at("2026-10-05T01:00:00Z") })} />);
+    const toggle = screen.getByRole("button", { name: "Show the full brief" });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(toggle);
+    expect(screen.getByRole("button", { name: "Show less" })).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("keeps a short assignment as is", () => {
+    render(<CoordinationRow message={entry("e", { from: "sparky", to: "agent:Harbor-Support", kind: "assignment", text: "Draft the FAQ", ts: at("2026-10-05T01:00:00Z") })} />);
+    expect(screen.queryByRole("button", { name: "Show the full brief" })).not.toBeInTheDocument();
   });
 
   it("links a delivered result to its task", () => {

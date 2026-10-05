@@ -7,7 +7,7 @@
  * sticky switcher shows one area at a time with live counts.
  */
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CircleDot, GitBranch, MessageSquare, Network, Users } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -43,6 +43,35 @@ export function ProjectLiveLayout({
 }) {
   const [stageView, setStageView] = useState<StageView>(initialStage);
   const [mobile, setMobile] = useState<MobileView>(initialMobile);
+  const conversationFrame = useRef<HTMLDivElement>(null);
+
+  // Desktop: the conversation fills the window from wherever it starts down to
+  // the bottom edge, so the newest messages and the composer stay in view. It
+  // grows as the page scrolls until it sticks to the top.
+  useEffect(() => {
+    const el = conversationFrame.current;
+    if (!el) return;
+    let frame = 0;
+    const fit = () => {
+      frame = 0;
+      const top = Math.max(16, el.getBoundingClientRect().top);
+      el.style.setProperty("--live-chat-height", `${Math.max(448, Math.floor(window.innerHeight - top - 16))}px`);
+    };
+    const schedule = () => {
+      if (!frame) frame = window.requestAnimationFrame(fit);
+    };
+    fit();
+    document.addEventListener("scroll", schedule, { capture: true, passive: true });
+    window.addEventListener("resize", schedule);
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(schedule);
+    observer?.observe(document.body);
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      document.removeEventListener("scroll", schedule, { capture: true });
+      window.removeEventListener("resize", schedule);
+      observer?.disconnect();
+    };
+  }, []);
 
   function focusAgent(name: string) {
     setMobile("talk");
@@ -93,7 +122,7 @@ export function ProjectLiveLayout({
 
       <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-[minmax(340px,400px)_minmax(0,1fr)] xl:grid-cols-[420px_minmax(0,1fr)]">
         <div id={CONVERSATION_ID} className={cn("min-w-0 lg:block", mobile === "talk" ? "block" : "hidden")}>
-          <div className="lg:sticky lg:top-4">{conversation}</div>
+          <div ref={conversationFrame} className="lg:sticky lg:top-4">{conversation}</div>
         </div>
 
         <div className="flex min-w-0 flex-col gap-5">
