@@ -32,6 +32,15 @@ describe("deriveSeats", () => {
     expect(seats.map((s) => s.state)).toEqual(["starting", "starting"]);
   });
 
+  it("stops saying starting up once the bridge phoned home after the wake", () => {
+    const wakeStartedMs = Date.parse("2026-10-05T10:43:45Z");
+    const seats = deriveSeats([SEO, WRITER], null, [], {
+      [SEO]: { status: "ready", hibernationState: "waking", wakeStartedMs, lastBridgeSeenMs: wakeStartedMs + 120_000 },
+      [WRITER]: { status: "ready", hibernationState: "waking", wakeStartedMs, lastBridgeSeenMs: wakeStartedMs - 60_000 },
+    });
+    expect(seats.map((s) => s.state)).toEqual(["ready", "starting"]);
+  });
+
   it("shows a resting teammate when its runtime is hibernated", () => {
     const seats = deriveSeats([SEO], null, [], { [SEO]: { hibernationState: "hibernated" } });
     expect(seats[0].state).toBe("resting");

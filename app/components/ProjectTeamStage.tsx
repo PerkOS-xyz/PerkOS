@@ -29,11 +29,23 @@ export type Seat = {
   doneCount: number;
 };
 
-type Presence = { status?: string | null; hibernationState?: string | null } | undefined;
+type Presence =
+  | {
+      status?: string | null;
+      hibernationState?: string | null;
+      /** Last bridge heartbeat and wake start, epoch ms. */
+      lastBridgeSeenMs?: number;
+      wakeStartedMs?: number;
+    }
+  | undefined;
 
 /** A teammate whose runtime is still booting (new launch or waking up). */
 export function agentStarting(presence: Presence): boolean {
-  return presence?.status === "provisioning" || presence?.hibernationState === "waking";
+  if (presence?.status === "provisioning") return true;
+  if (presence?.hibernationState !== "waking") return false;
+  // A heartbeat after the wake started means it is already up, even if the
+  // stored hibernation state has not caught up yet.
+  return !((presence.lastBridgeSeenMs ?? 0) > (presence.wakeStartedMs ?? 0));
 }
 
 /** Pure seat derivation so the stage can be tested without Firestore. */
