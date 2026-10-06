@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
-import { Box, Expand, GitBranch, Loader2, Minimize2, Network, Orbit } from "lucide-react";
+import { Box, Expand, GitBranch, Lightbulb, Loader2, Minimize2, Network, Orbit } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,8 @@ import type { Project } from "../lib/perkosApi";
 import type { AgentLiveStatus } from "../lib/useWalletAgents";
 import { agentColor } from "./charts";
 import { ProjectStage } from "./ProjectStage";
+import { ProjectLearnings } from "./ProjectLearnings";
+import { projectLearnings } from "../lib/projectLearnings";
 
 const W = 920;
 const H = 520;
@@ -122,6 +124,16 @@ export function ProjectKnowledgeGraph({
     return { nodes, edges, hiddenTasks: Math.max(0, eligibleTasks.length - visibleTasks.length) };
   }, [agentNames, externalSystems, liveAgents, pmAgent, projectId, projectName, showCompleted, tasks]);
 
+  // What the team learned opens first once results exist; Stage and Explore
+  // stay one click away.
+  const learnings = useMemo(() => projectLearnings(tasks), [tasks]);
+  const [learnedChoice, setLearnedChoice] = useState<boolean | null>(null);
+  const learnedView = learnedChoice ?? learnings.length > 0;
+  const showView = (next: "stage" | "graph") => {
+    setLearnedChoice(false);
+    setView(next);
+  };
+
   return (
     <GraphSurface
       title={t("components.knowledgeGraph.title")}
@@ -131,8 +143,9 @@ export function ProjectKnowledgeGraph({
       toolbar={
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex rounded-lg border border-border bg-background/40 p-0.5" aria-label="Knowledge view">
-            <button type="button" onClick={() => setView("stage")} className={cn("inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] transition", view === "stage" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground")} aria-pressed={view === "stage"}><Box className="h-3 w-3" />Stage</button>
-            <button type="button" onClick={() => setView("graph")} className={cn("inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] transition", view === "graph" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground")} aria-pressed={view === "graph"}><Orbit className="h-3 w-3" />Explore</button>
+            <button type="button" onClick={() => setLearnedChoice(true)} className={cn("inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] transition", learnedView ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground")} aria-pressed={learnedView}><Lightbulb className="h-3 w-3" />Learned</button>
+            <button type="button" onClick={() => showView("stage")} className={cn("inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] transition", !learnedView && view === "stage" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground")} aria-pressed={!learnedView && view === "stage"}><Box className="h-3 w-3" />Stage</button>
+            <button type="button" onClick={() => showView("graph")} className={cn("inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] transition", !learnedView && view === "graph" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground")} aria-pressed={!learnedView && view === "graph"}><Orbit className="h-3 w-3" />Explore</button>
           </div>
           <label className="flex items-center gap-2 text-xs text-muted-foreground">
             <input type="checkbox" checked={showCompleted} onChange={(event) => setShowCompleted(event.target.checked)} className="accent-primary" />
@@ -141,7 +154,12 @@ export function ProjectKnowledgeGraph({
         </div>
       }
     >
-      {agentNames.length === 0 && tasks.length === 0 ? (
+      {learnedView ? (
+        <ProjectLearnings
+          learnings={learnings}
+          taskHref={(taskId) => `/projects/${encodeURIComponent(projectId)}/tasks/${encodeURIComponent(taskId)}`}
+        />
+      ) : agentNames.length === 0 && tasks.length === 0 ? (
         <GraphEmpty text={t("components.knowledgeGraph.empty")} />
       ) : (
         view === "stage" ? (
@@ -150,6 +168,7 @@ export function ProjectKnowledgeGraph({
           <GraphCanvas nodes={nodes} edges={edges} ariaLabel={t("components.knowledgeGraph.ariaLabel")} expanded={expanded} />
         )
       )}
+      {learnedView ? null : (
       <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-muted-foreground">
         <span>{t("components.knowledgeGraph.legend")}</span>
         <span>
@@ -159,6 +178,7 @@ export function ProjectKnowledgeGraph({
           {hiddenTasks > 0 ? t("components.knowledgeGraph.hiddenTasks", { count: hiddenTasks }) : ""}
         </span>
       </div>
+      )}
     </GraphSurface>
   );
 }
