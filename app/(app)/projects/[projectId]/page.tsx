@@ -52,7 +52,6 @@ import { Bot, Loader2, Plus } from "lucide-react";
 
 import { KanbanBoard } from "../../../components/KanbanBoard";
 import { TaskSignal } from "../../../components/TaskSignal";
-import { ProjectProgress } from "../../../components/ProjectProgress";
 import { TaskAssignee } from "../../../components/TaskAssignee";
 import { ConductorBoard } from "../../../components/ConductorBoard";
 import type { SwarmDefinition } from "../../../lib/swarm";
@@ -71,6 +70,7 @@ import { ProjectChatTab } from "../../../components/ProjectChatTab";
 import { ProjectLiveLayout } from "../../../components/ProjectLiveLayout";
 import { agentStarting, ProjectTeamStage } from "../../../components/ProjectTeamStage";
 import { ProjectTemplateConfiguration } from "../../../components/ProjectTemplateConfiguration";
+import { ProjectProgress } from "../../../components/ProjectProgress";
 import { ArtizenProjectBoard, ArtizenWorkLink } from "../../../components/ArtizenProjectBoard";
 import { SearchInput, matchesQuery } from "../../../components/SearchInput";
 import { useActiveOrg } from "../../../lib/useActiveOrg";
