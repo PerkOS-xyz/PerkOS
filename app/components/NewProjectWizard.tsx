@@ -2,6 +2,7 @@
 
 /** Canonical new-project wizard. Routed at /projects/new. */
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchLlmAccess } from "../lib/llmAccess";
@@ -12,12 +13,14 @@ import { teamAgentName, teamAgentNames } from "../lib/teamAgentName";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { ProjectTemplateGallery } from "./ProjectTemplateWizard";
+import { AgentOrb } from "./AgentOrb";
 import {
   ArrowLeft,
   Bot,
   Briefcase,
   Calculator,
   Check,
+  ChevronDown,
   GraduationCap,
   Hammer,
   HeartPulse,
@@ -123,6 +126,9 @@ function withValidPm(roles: CompanyRole[]): CompanyRole[] {
 
 const PROVIDERS = byokProviderOptions("OpenClaw");
 
+/** Roles offered first when building a team; the rest sit behind More roles. */
+const SUGGESTED_ROLE_IDS = ["researcher", "analyst", "marketing", "support", "sales", "builder"];
+
 export default function NewProjectWizard() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -172,6 +178,8 @@ export default function NewProjectWizard() {
   const launchRequestId = useRef<string | null>(null);
   // Only the browser-driven fallback (older API) needs this tab kept open.
   const [launchingInBrowser, setLaunchingInBrowser] = useState(false);
+  const [showAllRoles, setShowAllRoles] = useState(false);
+  const [runsOpen, setRunsOpen] = useState(false);
 
   useEffect(() => {
     if (!address) return;
@@ -235,10 +243,6 @@ export default function NewProjectWizard() {
     setExistingPm("");
     setSaveAsTemplate(false);
     setTemplateName("");
-  }
-
-  function setPm(roleName: string) {
-    setTeamRoles((prev) => prev.map((r) => ({ ...r, isPM: r.role === roleName })));
   }
 
   function removeRole(roleName: string) {
@@ -558,6 +562,20 @@ export default function NewProjectWizard() {
       agentSource === "existing" ? existingAgentNames.length : teamSize;
     const canSaveTemplate =
       agentSource !== "existing" && teamSize > 0 && (mode === "custom" || modified);
+    // What the summary lists: picked agents, or the roles about to start.
+    const summaryNames = agentSource === "existing" ? existingAgentNames : teamRoles.map((r) => r.role);
+    const runsSummary = [
+      agentSource === "existing"
+        ? t("companyNew.config.sourceExisting")
+        : agentSource === "invite"
+          ? t("companyNew.config.sourceInvite")
+          : t("companyNew.config.sourcePerkos"),
+      agentSource === "perkos" && teamSize > 0
+        ? llmMode === "byok" ? t("companyNew.config.llmByok") : t("companyNew.config.llmPerkos")
+        : null,
+    ].filter(Boolean).join(" · ");
+    // Open the setup on its own when it is not the default one.
+    const runsNeedAttention = agentSource !== "perkos" || (teamSize > 0 && llmMode === "byok");
     return (
       <div className="flex flex-col gap-6">
         <button
@@ -595,88 +613,10 @@ export default function NewProjectWizard() {
           </div>
         </header>
 
-        {/* Team editor — recommended roles, fully editable */}
-        {mode !== "empty" && agentSource !== "existing" ? (
-          <section className="flex flex-col gap-2">
-            <h2 className="text-sm font-medium text-foreground">
-              {t("companyNew.config.teamHeading", { count: teamRoles.length })}
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              {mode === "template"
-                ? t("companyNew.config.teamHintTemplate")
-                : t("companyNew.config.teamHintCustom")}
-            </p>
-            <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {teamRoles.map((role) => (
-                <li
-                  key={role.role}
-                  className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm"
-                >
-                  <Bot className="h-4 w-4 shrink-0 text-primary" />
-                  <span className="min-w-0 truncate text-foreground">{role.role}</span>
-                  <label
-                    className={cn(
-                      "ml-auto flex shrink-0 cursor-pointer items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium",
-                      role.isPM
-                        ? "border-primary/40 bg-primary/10 text-primary"
-                        : "border-border text-muted-foreground hover:border-primary/40",
-                    )}
-                    title={t("companyNew.config.leadTitle")}
-                  >
-                    <input
-                      type="radio"
-                      name="team-pm"
-                      className="sr-only"
-                      checked={role.isPM === true}
-                      onChange={() => setPm(role.role)}
-                      disabled={launching}
-                    />
-                    {t("companyNew.config.lead")}
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => removeRole(role.role)}
-                    disabled={launching}
-                    aria-label={t("companyNew.config.removeRoleAria", { role: role.role })}
-                    className="shrink-0 text-muted-foreground hover:text-destructive"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </li>
-              ))}
-              {teamRoles.length === 0 ? (
-                <li className="rounded-md border border-dashed border-border px-3 py-2 text-sm text-muted-foreground">
-                  {t("companyNew.config.noRoles")}
-                </li>
-              ) : null}
-            </ul>
-
-            {addablePresets.length > 0 ? (
-              <div className="mt-1 flex flex-col gap-1.5">
-                <span className="text-xs font-medium text-muted-foreground">{t("companyNew.config.addRole")}</span>
-                <div className="flex flex-wrap gap-1.5">
-                  {addablePresets.map((p) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => addPresetRole(p.id)}
-                      disabled={launching}
-                      className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
-                      title={p.blurb}
-                    >
-                      <Plus className="h-3 w-3" />
-                      <span>{p.emoji}</span>
-                      {p.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-          </section>
-        ) : null}
-
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="flex min-w-0 flex-col gap-6">
         {/* Project name */}
-        <section className="flex max-w-lg flex-col gap-2">
+        <section className="flex flex-col gap-2">
           <label htmlFor="company-name" className="text-sm font-medium text-foreground">
             {t("companyNew.config.nameLabel")}
           </label>
@@ -691,7 +631,7 @@ export default function NewProjectWizard() {
         </section>
 
         {/* Goal — feeds the PM's planning */}
-        <section className="flex max-w-lg flex-col gap-2">
+        <section className="flex flex-col gap-2">
           <label htmlFor="project-goal" className="text-sm font-medium text-foreground">
             {configuredTeamSize > 0
               ? t("companyNew.config.goalLabelTeam")
@@ -718,9 +658,93 @@ export default function NewProjectWizard() {
           ) : null}
         </section>
 
-        {/* Agent source — managed PerkOS agents vs the user's own */}
+        {/* Team editor — recommended roles, fully editable */}
+        {mode !== "empty" && agentSource !== "existing" ? (
+          <section className="flex flex-col gap-2">
+            <h2 className="text-sm font-medium text-foreground">
+              {t("companyNew.config.teamHeading", { count: teamRoles.length })}
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              {mode === "template"
+                ? t("companyNew.config.teamHintTemplate")
+                : t("companyNew.config.teamHintCustom")}
+            </p>
+            <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {teamRoles.map((role) => (
+                <li
+                  key={role.role}
+                  className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm"
+                >
+                  <AgentOrb name={role.role} size={24} />
+                  <span className="min-w-0 truncate text-foreground">{role.role}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeRole(role.role)}
+                    disabled={launching}
+                    aria-label={t("companyNew.config.removeRoleAria", { role: role.role })}
+                    className="ml-auto shrink-0 text-muted-foreground hover:text-destructive"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </li>
+              ))}
+              {teamRoles.length === 0 ? (
+                <li className="rounded-md border border-dashed border-border px-3 py-2 text-sm text-muted-foreground">
+                  {t("companyNew.config.noRoles")}
+                </li>
+              ) : null}
+            </ul>
+
+            {addablePresets.length > 0 ? (
+              <div className="mt-1 flex flex-col gap-1.5">
+                <span className="text-xs font-medium text-muted-foreground">{showAllRoles ? t("companyNew.config.addRole") : t("companyNew.config.suggestedRoles")}</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {(showAllRoles ? addablePresets : addablePresets.filter((p) => SUGGESTED_ROLE_IDS.includes(p.id))).map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => addPresetRole(p.id)}
+                      disabled={launching}
+                      className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+                      title={p.blurb}
+                    >
+                      <Plus className="h-3 w-3" />
+                      <span>{p.emoji}</span>
+                      {p.name}
+                    </button>
+                  ))}
+                  {addablePresets.some((p) => !SUGGESTED_ROLE_IDS.includes(p.id)) ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowAllRoles((v) => !v)}
+                      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs text-primary hover:underline"
+                    >
+                      {showAllRoles ? t("companyNew.config.fewerRoles") : t("companyNew.config.moreRoles")}
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
+          </section>
+        ) : null}
+
         {mode !== "empty" ? (
-          <section className="flex max-w-lg flex-col gap-2">
+          <details
+            open={runsOpen || runsNeedAttention}
+            onToggle={(e) => setRunsOpen(e.currentTarget.open)}
+            className="group rounded-xl border border-border bg-card/40"
+          >
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm">
+              <span className="font-medium text-foreground">{t("companyNew.config.runsHeading")}</span>
+              <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                {runsSummary}
+                <ChevronDown className="h-4 w-4 transition-transform group-open:rotate-180" />
+              </span>
+            </summary>
+            <div className="flex flex-col gap-5 border-t border-border px-4 py-4">
+        {/* Agent source — managed PerkOS agents vs the user's own */}
+        {(
+          <section className="flex flex-col gap-2">
             <span className="text-sm font-medium text-foreground">{t("companyNew.config.sourceHeading")}</span>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               <button
@@ -882,11 +906,11 @@ export default function NewProjectWizard() {
               </div>
             ) : null}
           </section>
-        ) : null}
+        )}
 
         {/* LLM choice — only when WE host the agents */}
         {teamSize > 0 && agentSource === "perkos" ? (
-        <section className="flex max-w-lg flex-col gap-2">
+        <section className="flex flex-col gap-2">
           <span className="text-sm font-medium text-foreground">{t("companyNew.config.llmHeading")}</span>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <button
@@ -965,9 +989,38 @@ export default function NewProjectWizard() {
         </section>
         ) : null}
 
+            </div>
+          </details>
+        ) : null}
+      </div>
+      <aside className="flex flex-col gap-4 rounded-xl border border-primary/25 bg-card/70 p-4 shadow-[0_0_40px_-24px_rgba(236,27,105,.6)] lg:sticky lg:top-4">
+        <div className="flex items-center gap-3">
+          <Image src="/runtime/sparky-head.webp" alt="" width={40} height={40} className="h-10 w-10 shrink-0 rounded-full object-cover" />
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-foreground">{t("companyNew.config.sparkyCoordinates")}</p>
+            <p className="text-xs text-muted-foreground">{t("companyNew.config.readyHint")}</p>
+          </div>
+        </div>
+        {mode !== "empty" ? (
+          <div className="flex flex-col gap-2">
+            <span className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">{t("companyNew.config.summaryTitle")}</span>
+            {summaryNames.length > 0 ? (
+              <ul className="flex flex-col gap-1.5">
+                {summaryNames.map((name) => (
+                  <li key={name} className="flex items-center gap-2 text-sm text-foreground">
+                    <AgentOrb name={name} size={22} />
+                    <span className="min-w-0 truncate">{name}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs text-muted-foreground">{t("companyNew.config.noTeamYet")}</p>
+            )}
+          </div>
+        ) : null}
         {/* Save the edited team as a personal template */}
         {canSaveTemplate ? (
-          <section className="flex max-w-lg flex-col gap-2 rounded-md border border-border bg-card p-3">
+          <section className="flex flex-col gap-2 rounded-md border border-border bg-background/60 p-3">
             <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
               <input
                 type="checkbox"
@@ -997,7 +1050,7 @@ export default function NewProjectWizard() {
           </section>
         ) : null}
 
-        <div className="flex max-w-lg items-center gap-3">
+        <div className="flex flex-col gap-2">
           <Button
             onClick={launchCompany}
             disabled={
@@ -1009,7 +1062,7 @@ export default function NewProjectWizard() {
                   ? existingAgentNames.length === 0 || !existingPm
                   : teamRoles.length === 0))
             }
-            className="gap-2"
+            className="w-full gap-2"
           >
             {launching ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -1034,6 +1087,8 @@ export default function NewProjectWizard() {
             </span>
           ) : null}
         </div>
+      </aside>
+      </div>
       </div>
     );
   }
@@ -1069,15 +1124,9 @@ export default function NewProjectWizard() {
             icon={Users}
             accent={BRAND_ACCENT}
             emphasized
-            onSelect={() => {
-              const pm = AGENT_PRESETS.find((p) => p.id === "pm");
-              select(
-                "custom",
-                pm
-                  ? [{ role: pm.name, runtime: "OpenClaw", presetId: pm.id, isPM: true }]
-                  : [],
-              );
-            }}
+            // Sparky coordinates every team, so a custom team starts with no
+            // lead role: the owner adds the specialists the project needs.
+            onSelect={() => select("custom", [])}
           />
         </li>
         <li>
