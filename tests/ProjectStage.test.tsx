@@ -26,6 +26,24 @@ describe("ProjectStage", () => {
     expect(screen.getByRole("link", { name: /Create loyalty offers/i })).toHaveAttribute("href", "/projects/project-1/tasks/task-1");
   });
 
+  it("shows each teammate's orb instead of a letter", () => {
+    render(
+      <ProjectStage
+        projectId="project-1"
+        projectName="Harbor Autumn Launch"
+        pmAgent="Harbor-Team-Lead"
+        agentNames={["Harbor-Team-Lead", "Harbor-Researcher"]}
+        liveAgents={{}}
+        tasks={[]}
+      />,
+    );
+
+    for (const name of ["Harbor-Team-Lead", "Harbor-Researcher"]) {
+      const column = screen.getByTestId(`stage-agent-${name}`);
+      expect(column.querySelector(`[data-avatar-seed="${name}"]`)).not.toBeNull();
+    }
+  });
+
   it("keeps unassigned work visible", () => {
     render(
       <ProjectStage

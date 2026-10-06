@@ -59,6 +59,7 @@ import { EmptyState } from "../../../components/EmptyState";
 import { DocsTab } from "../../../components/DocsTab";
 import { useProjectTasks } from "../../../lib/useProjectTasks";
 import { useProject } from "../../../lib/useProject";
+import { AgentOrb } from "../../../components/AgentOrb";
 import { useWalletAgents, realtimeAgentStatus, STATUS_AVAILABLE, STATUS_RESTING, STATUS_GETTING_READY, STATUS_GOING_TO_REST, type AgentLiveStatus } from "../../../lib/useWalletAgents";
 import { MembersPanel } from "../../../components/MembersPanel";
 import { ProjectInsights } from "../../../components/ProjectInsights";
@@ -859,23 +860,16 @@ function PrimaryAgentAvatar({ name }: { name: string | null }) {
       </div>
     );
   }
-  const initial = name.slice(0, 1).toUpperCase();
-  // Stable hue per agent name so the avatar tint persists across renders
-  // without needing a per-agent color stored in Firestore.
-  const seed = name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-  const hue = seed % 360;
+  // The same orb the agent wears in its seat, the board and the conversation.
   return (
-    <div
-      className="grid h-14 w-14 shrink-0 place-items-center rounded-full border border-primary/50 font-mono text-xl font-medium text-foreground"
-      style={{
-        background: `radial-gradient(circle at 30% 30%, hsla(${hue}, 70%, 60%, 0.45), hsla(${hue}, 70%, 35%, 0.2))`,
-        boxShadow: `0 0 18px -2px hsla(${hue}, 80%, 55%, 0.55)`,
-      }}
+    <span
+      className="shrink-0"
+      role="img"
       aria-label={t("projectRoom.header.avatar.primaryAgent", { name })}
       title={t("projectRoom.header.avatar.primaryAgent", { name })}
     >
-      {initial}
-    </div>
+      <AgentOrb name={name} size={56} />
+    </span>
   );
 }
 
@@ -1528,8 +1522,8 @@ function AgentsTab({
               className="flex items-center justify-between gap-3 rounded-md border border-[#1b1833] bg-[#0e0716] px-4 py-3"
             >
               <div className="flex min-w-0 items-center gap-3">
-                <span className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#ec1b69]/20 text-xs font-medium text-[#ec1b69]">
-                  {initials(name)}
+                <span className="relative h-9 w-9 shrink-0">
+                  <AgentOrb name={name} size={36} />
                   {/* Live status dot (Online / Starting / Hibernated / …) */}
                   <span
                     className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[#0e0716] ${workingAgents.has(name) ? "bg-amber-400" : realtimeAgentStatus(agentStatus[name]).color}`}
@@ -1749,9 +1743,7 @@ function AddAgentToProjectDialog({
                   checked={selected.has(a.name)}
                   onCheckedChange={(on) => toggle(a.name, on === true)}
                 />
-                <span className="grid h-8 w-8 place-items-center rounded-full bg-[#ec1b69]/20 text-xs font-medium text-[#ec1b69]">
-                  {initials(a.name)}
-                </span>
+                <AgentOrb name={a.name} size={32} />
                 <div className="flex flex-col">
                   <span className="text-sm text-[#ececff]">{a.name}</span>
                   <span className="text-xs text-[#7975a8]">
@@ -1793,15 +1785,6 @@ function uniqueAgents(tasks: Task[], agentIds: string[]): string[] {
 
 function countTasksFor(name: string, tasks: Task[]): number {
   return tasks.filter((t) => t.agent === name).length;
-}
-
-function initials(name: string): string {
-  return name
-    .split(/\s+|-/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase())
-    .join("");
 }
 
 function DetailSkeleton() {
