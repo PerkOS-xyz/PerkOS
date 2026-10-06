@@ -41,7 +41,10 @@ export function ProjectLiveLayout({
   counts: { working: number; done: number; total: number };
   initialMobile?: MobileView;
 }) {
-  const [stageView, setStageView] = useState<StageView>(initialStage);
+  // A finished project opens on what the team learned.
+  const [stageView, setStageView] = useState<StageView>(
+    initialStage === "team" && counts.total > 0 && counts.done === counts.total ? "knowledge" : initialStage,
+  );
   const [mobile, setMobile] = useState<MobileView>(initialMobile);
   const conversationFrame = useRef<HTMLDivElement>(null);
 

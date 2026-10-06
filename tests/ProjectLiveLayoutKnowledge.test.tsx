@@ -26,16 +26,27 @@ describe("ProjectLiveLayout knowledge area", () => {
     expect(screen.getByTestId("stage-view")).toHaveTextContent("team");
   });
 
-  it("can open a finished project on knowledge", () => {
+  it("opens a finished project on knowledge", () => {
     render(
       <ProjectLiveLayout
         conversation={<div>Conversation</div>}
         stage={(view) => <div data-testid="stage-view">{view}</div>}
         work={<div>Tasks</div>}
         counts={{ working: 0, done: 4, total: 4 }}
-        initialStage="knowledge"
       />,
     );
     expect(screen.getByTestId("stage-view")).toHaveTextContent("knowledge");
+  });
+
+  it("keeps a project with open work on the team", () => {
+    render(
+      <ProjectLiveLayout
+        conversation={<div>Conversation</div>}
+        stage={(view) => <div data-testid="stage-view">{view}</div>}
+        work={<div>Tasks</div>}
+        counts={{ working: 1, done: 2, total: 4 }}
+      />,
+    );
+    expect(screen.getByTestId("stage-view")).toHaveTextContent("team");
   });
 });
