@@ -1780,7 +1780,9 @@
         "badPlan": "无法制定有效的计划",
         "emptyPlan": "没有工作要做",
         "llmError": "模型出错了",
-        "noPm": "尚未指定团队负责人"
+        "noPm": "尚未指定团队负责人",
+        "usageLimit": "已达到 PerkOS 使用上限，请稍后再开始",
+        "planningFailed": "Sparky 需要再试一次，请重新让团队开始工作"
       },
       "phases": {
         "plan": "计划",

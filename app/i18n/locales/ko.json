@@ -1793,7 +1793,9 @@
         "badPlan": "유효한 계획을 세우지 못했어요",
         "emptyPlan": "할 일이 없어요",
         "llmError": "모델에서 오류가 발생했어요",
-        "noPm": "팀장이 지정되지 않았어요"
+        "noPm": "팀장이 지정되지 않았어요",
+        "usageLimit": "PerkOS 사용 한도에 도달했습니다. 잠시 후 다시 시작하세요",
+        "planningFailed": "Sparky가 한 번 더 시도해야 합니다. 팀을 다시 가동하세요"
       },
       "phases": {
         "plan": "계획",

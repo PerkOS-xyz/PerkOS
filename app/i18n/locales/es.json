@@ -2019,7 +2019,9 @@
         "emptyPlan": "No hay trabajo por hacer",
         "llmError": "El modelo tuvo un error",
         "noPm": "No hay líder de equipo designado",
-        "planningTimeout": "El líder del equipo no produjo un plan a tiempo"
+        "planningTimeout": "El líder del equipo no produjo un plan a tiempo",
+        "usageLimit": "Se alcanzó el límite de uso de PerkOS. Vuelve a empezar en un rato",
+        "planningFailed": "Sparky necesita otro intento. Pon al equipo a trabajar de nuevo"
       },
       "phases": {
         "plan": "Plan",

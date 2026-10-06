@@ -17,6 +17,8 @@ const REASON_KEYS: Record<string, string> = {
   "llm-error": "components.pmBanner.reasons.llmError",
   "no-pm": "components.pmBanner.reasons.noPm",
   "planning-timeout": "components.pmBanner.reasons.planningTimeout",
+  "usage-limit": "components.pmBanner.reasons.usageLimit",
+  "planning-failed": "components.pmBanner.reasons.planningFailed",
 };
 
 // Where the workflow is, as a step of the pipeline below. The workflow phase is

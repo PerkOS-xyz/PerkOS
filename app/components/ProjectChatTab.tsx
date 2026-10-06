@@ -154,7 +154,7 @@ export function ProjectChatTab({
 
   const startPlanning = useMutation({
     mutationFn: () => pmTurn({ projectId, trigger: "run-button", owner }),
-    onSuccess: () => toast.success("PM is preparing a plan for approval"),
+    onSuccess: () => toast.success("Sparky is preparing a plan for your approval"),
     onError: (error: Error) => toast.error("Couldn't start planning", { description: error.message }),
   });
 
@@ -180,7 +180,7 @@ export function ProjectChatTab({
         }]).catch(() => {});
       }
       setChangeRequestPlanId(null);
-      toast.success("Changes sent to the PM");
+      toast.success("Changes sent to Sparky");
       void queryClient.invalidateQueries({ queryKey: ["wallet-project", ownerWallet ?? address, projectId] });
     },
     onError: (error: Error) => toast.error("Couldn't request changes", { description: error.message }),
@@ -292,7 +292,7 @@ export function ProjectChatTab({
     : status !== "connected"
       ? "Connecting to PerkOS Chat…"
       : !pmAgent
-        ? "Designate a PM or mention an agent"
+        ? "Choose a team lead or mention a teammate"
         : undefined;
 
   // The project header, app chrome and mobile bottom nav all have dynamic
@@ -380,7 +380,7 @@ export function ProjectChatTab({
             <div className="min-w-0">
               <p className="truncate text-sm font-medium"># {detail.project.name}</p>
               <p className="text-xs text-muted-foreground">
-                {pmAgent ? `${pmAgent} coordinates this project` : "No PM designated"}
+                {pmAgent ? `Sparky coordinates this project with ${pmAgent}` : "No team lead yet"}
               </p>
             </div>
           )}
@@ -457,14 +457,14 @@ export function ProjectChatTab({
                 onClick={() => startPlanning.mutate()}
               >
                 {startPlanning.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
-                Plan with PM
+                Plan with Sparky
               </Button>
             ) : null}
           </div>
         </header>
         {workflowPhase === "awaiting_approval" ? (
           <div className="flex shrink-0 flex-col gap-2 border-b border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs sm:flex-row sm:items-center sm:justify-between">
-            <span>The PM&apos;s plan is ready for your decision.</span>
+            <span>Sparky&apos;s plan is ready for your decision.</span>
             <div className="flex gap-2">
               {detail.project.workflow?.planId ? (
                 <Button
@@ -487,7 +487,7 @@ export function ProjectChatTab({
           </div>
         ) : ["approved", "running", "pm_review"].includes(workflowPhase) ? (
           <div className="shrink-0 border-b border-primary/20 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
-            The approved plan is in progress. Task and PM updates appear here.
+            The approved plan is in progress. Task and Sparky updates appear here.
           </div>
         ) : workflowPhase === "complete" ? (
           <div className="flex shrink-0 items-center justify-between gap-3 border-b border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs">
@@ -537,7 +537,7 @@ export function ProjectChatTab({
         />
         {changeRequestPlanId ? (
           <div className="flex shrink-0 items-center justify-between gap-3 border-t border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs">
-            <span>Describe what the PM should change in this plan.</span>
+            <span>Tell Sparky what to change in this plan.</span>
             <Button type="button" size="sm" variant="ghost" className="h-7" onClick={() => setChangeRequestPlanId(null)}>
               Cancel
             </Button>
@@ -690,7 +690,7 @@ export function ProjectTeamPanel({
         </div>
       </div>
       {!pmAgent ? (
-        <Button size="sm" variant="outline" onClick={onDesignatePm}>Designate PM</Button>
+        <Button size="sm" variant="outline" onClick={onDesignatePm}>Choose team lead</Button>
       ) : null}
       <ul className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-1">
         {participants.map((participant) => {

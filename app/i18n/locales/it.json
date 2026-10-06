@@ -1783,7 +1783,9 @@
         "badPlan": "Impossibile creare un piano valido",
         "emptyPlan": "Nessun lavoro da fare",
         "llmError": "Il modello ha restituito un errore",
-        "noPm": "Nessun Capo Team designato"
+        "noPm": "Nessun Capo Team designato",
+        "usageLimit": "Limite di utilizzo PerkOS raggiunto. Riprova tra poco",
+        "planningFailed": "Sparky ha bisogno di un altro tentativo. Rimetti il team al lavoro"
       },
       "phases": {
         "plan": "Piano",
