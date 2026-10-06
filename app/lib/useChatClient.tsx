@@ -130,6 +130,16 @@ export function useConversationLiveMessages(convId: string | null | undefined): 
  *    cached view. The UI surfaces a banner.
  * 4. Every server-returned message is persisted to cache (id-keyed upsert).
  */
+/**
+ * A history answer that means the conversation's host is not up yet: offline
+ * (HOST_OFFLINE), or a brand-new project whose first teammate has not
+ * connected (NO_HOST). Both clear on their own, so the view retries instead of
+ * showing an error.
+ */
+export function historyHostStarting(message: string): boolean {
+  return /HOST_OFFLINE|NO_HOST/i.test(message);
+}
+
 export function useChatHistory(convId: string | null | undefined): {
   history: ChatMessage[];
   loadingInitial: boolean;
@@ -210,7 +220,7 @@ export function useChatHistory(convId: string | null | undefined): {
       } catch (err) {
         if (cancelled) return;
         const msg = err instanceof Error ? err.message : String(err);
-        if (/HOST_OFFLINE/i.test(msg)) {
+        if (historyHostStarting(msg)) {
           setHostOffline(true);
           // Keep showing the cached view.
         } else {
