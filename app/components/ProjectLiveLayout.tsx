@@ -45,29 +45,29 @@ export function ProjectLiveLayout({
   const [mobile, setMobile] = useState<MobileView>(initialMobile);
   const conversationFrame = useRef<HTMLDivElement>(null);
 
-  // Desktop: the conversation fills the window from wherever it starts down to
-  // the bottom edge, so the newest messages and the composer stay in view. It
-  // grows as the page scrolls until it sticks to the top.
+  // Desktop: the conversation fills the window from where it rests down to the
+  // bottom edge, so the newest messages and the composer are in view on
+  // arrival. Its height comes from the resting position, not the scroll, so it
+  // keeps one size and sticks to the top while the page scrolls.
   useEffect(() => {
     const el = conversationFrame.current;
-    if (!el) return;
+    const cell = el?.parentElement;
+    if (!el || !cell) return;
     let frame = 0;
     const fit = () => {
       frame = 0;
-      const top = Math.max(16, el.getBoundingClientRect().top);
-      el.style.setProperty("--live-chat-height", `${Math.max(448, Math.floor(window.innerHeight - top - 16))}px`);
+      const restingTop = Math.max(16, cell.getBoundingClientRect().top + window.scrollY);
+      el.style.setProperty("--live-chat-height", `${Math.max(448, Math.floor(window.innerHeight - restingTop - 16))}px`);
     };
     const schedule = () => {
       if (!frame) frame = window.requestAnimationFrame(fit);
     };
     fit();
-    document.addEventListener("scroll", schedule, { capture: true, passive: true });
     window.addEventListener("resize", schedule);
     const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(schedule);
     observer?.observe(document.body);
     return () => {
       if (frame) window.cancelAnimationFrame(frame);
-      document.removeEventListener("scroll", schedule, { capture: true });
       window.removeEventListener("resize", schedule);
       observer?.disconnect();
     };

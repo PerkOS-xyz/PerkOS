@@ -237,7 +237,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
   ) : null;
 
   return (
-    <div className={cn("flex min-w-0 max-w-full flex-col overflow-x-hidden", tab === "chat" ? "gap-3" : "gap-6")}>
+    <div className={cn("flex min-w-0 max-w-full flex-col overflow-x-clip", tab === "chat" ? "gap-3" : "gap-6")}>
       <Link
         href="/projects"
         className="inline-flex w-fit items-center gap-2 text-sm text-[#7975a8] hover:text-[#ececff]"
