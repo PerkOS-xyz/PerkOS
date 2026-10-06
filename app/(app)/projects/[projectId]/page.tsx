@@ -52,6 +52,7 @@ import { Bot, Loader2, Plus } from "lucide-react";
 
 import { KanbanBoard } from "../../../components/KanbanBoard";
 import { TaskSignal } from "../../../components/TaskSignal";
+import { ProjectProgress } from "../../../components/ProjectProgress";
 import { TaskAssignee } from "../../../components/TaskAssignee";
 import { ConductorBoard } from "../../../components/ConductorBoard";
 import type { SwarmDefinition } from "../../../lib/swarm";
@@ -276,7 +277,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
                   variant="panel"
                 />
               }
-              summary={<ProjectSummary detail={liveDetail} />}
+              summary={<ProjectSummary detail={liveDetail} ownerWallet={ownerWallet ?? undefined} />}
               initialStage={initialTab === "map" ? "workflow" : "team"}
               initialMobile={initialTab === "chat" ? "talk" : searchParams.get("tab") ? "work" : "talk"}
               counts={{
@@ -879,12 +880,9 @@ function PrimaryAgentAvatar({ name }: { name: string | null }) {
   );
 }
 
-/** Goal, live task counters and team workload, shown above the live stage. */
-function ProjectSummary({ detail }: { detail: ProjectDetail }) {
-  const { t } = useTranslation();
+/** Goal, where the project stands and team workload, shown above the live stage. */
+function ProjectSummary({ detail, ownerWallet }: { detail: ProjectDetail; ownerWallet?: string }) {
   const { project, tasks } = detail;
-  const inProgress = tasks.filter((task) => task.status === "In progress").length;
-  const done = tasks.filter((task) => task.status === "Done").length;
   return (
     <div className="grid min-w-0 items-start gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(300px,0.85fr)]">
       <div className="flex min-w-0 flex-col gap-3">
@@ -893,12 +891,7 @@ function ProjectSummary({ detail }: { detail: ProjectDetail }) {
             <p className="text-sm leading-relaxed text-[#7975a8]">{project.goal}</p>
           </div>
         ) : null}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatTile label={t("projectRoom.header.stats.totalTasks")} value={tasks.length} />
-          <StatTile label={t("projectRoom.header.stats.inProgress")} value={inProgress} />
-          <StatTile label={t("projectRoom.header.stats.done")} value={done} />
-          <StatTile label={t("projectRoom.header.stats.agents")} value={project.agents} />
-        </div>
+        <ProjectProgress detail={detail} projectId={project.id ?? ""} ownerWallet={ownerWallet} />
       </div>
       {tasks.length > 0 ? <ProjectInsights tasks={tasks} /> : null}
     </div>
