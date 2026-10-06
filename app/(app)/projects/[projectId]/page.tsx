@@ -53,8 +53,6 @@ import { Bot, Loader2, Plus } from "lucide-react";
 import { KanbanBoard } from "../../../components/KanbanBoard";
 import { TaskSignal } from "../../../components/TaskSignal";
 import { TaskAssignee } from "../../../components/TaskAssignee";
-import { ConductorBoard } from "../../../components/ConductorBoard";
-import type { SwarmDefinition } from "../../../lib/swarm";
 import { EmptyState } from "../../../components/EmptyState";
 import { DocsTab } from "../../../components/DocsTab";
 import { useProjectTasks } from "../../../lib/useProjectTasks";
@@ -79,7 +77,7 @@ const ProjectMeetingsTab = dynamic(() => import("../../../components/ProjectMeet
   loading: () => <div className="h-64 animate-pulse rounded-xl border border-border bg-card" />,
 });
 
-type Tab = "tasks" | "docs" | "conductor" | "agents" | "map" | "chat" | "meetings" | "members";
+type Tab = "tasks" | "docs" | "agents" | "map" | "chat" | "meetings" | "members";
 
 type PageProps = {
   params: Promise<{ projectId: string }>;
@@ -109,7 +107,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
     ownerWallet && normalizeWalletAddress(ownerWallet) !== normalizeWalletAddress((address ?? "")),
   );
   const initialTab = (searchParams.get("tab") as Tab) || "tasks";
-  const TABS: Tab[] = ["tasks", "docs", "conductor", "agents", "map", "chat", "meetings", "members"];
+  const TABS: Tab[] = ["tasks", "docs", "agents", "map", "chat", "meetings", "members"];
   const [tab, setTab] = useState<Tab>(
     TABS.includes(initialTab) && initialTab !== "chat" && initialTab !== "map" ? initialTab : "tasks"
   );
@@ -174,7 +172,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
 
   const workArea = liveDetail ? (
     <>
-          {liveDetail.project.executionMode === "artizen-on-demand" && ["chat", "conductor", "meetings"].includes(tab) && <ArtizenWorkLink projectId={projectId} />}
+          {liveDetail.project.executionMode === "artizen-on-demand" && ["chat", "meetings"].includes(tab) && <ArtizenWorkLink projectId={projectId} />}
           {tab === "tasks" && liveDetail.project.executionMode === "artizen-on-demand" ? <ArtizenProjectBoard tasks={liveDetail.tasks} projectId={projectId} /> : tab === "tasks" ? (
             <TasksTab
               tasks={liveDetail.tasks}
@@ -185,15 +183,6 @@ export default function ProjectDetailPage({ params }: PageProps) {
           {tab === "docs" ? (
             <DocsTab
               detail={liveDetail}
-              projectId={projectId}
-              ownerWallet={ownerWallet ?? undefined}
-            />
-          ) : null}
-          {tab === "conductor" && liveDetail.project.executionMode !== "artizen-on-demand" ? (
-            <ConductorTab
-              tasks={liveDetail.tasks}
-              swarm={liveDetail.project.swarm}
-              agentNames={liveDetail.project.agentIds ?? []}
               projectId={projectId}
               ownerWallet={ownerWallet ?? undefined}
             />
@@ -932,7 +921,6 @@ function Tabs({
   const items: { id: Tab; label: string }[] = [
     { id: "tasks", label: t("projectRoom.tabs.tasks") },
     { id: "docs", label: t("projectRoom.tabs.docs") },
-    { id: "conductor", label: t("projectRoom.tabs.conductor") },
     { id: "agents", label: t("projectRoom.tabs.agents") },
     { id: "map", label: t("projectRoom.tabs.execution") },
     { id: "chat", label: t("projectRoom.tabs.chat") },
@@ -945,7 +933,7 @@ function Tabs({
       role="tablist"
       className="flex overflow-x-auto overscroll-x-contain border-b border-[#1b1833] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
-      {items.filter(item => (!onDemand || !["chat", "conductor", "meetings"].includes(item.id)) && !exclude.includes(item.id)).map((item) => {
+      {items.filter(item => (!onDemand || !["chat", "meetings"].includes(item.id)) && !exclude.includes(item.id)).map((item) => {
         const active = current === item.id;
         return (
           <button
@@ -1174,69 +1162,6 @@ function TasksTab({
         pending={deleteMut.isPending}
         onConfirm={() => deleteMut.mutate()}
       />
-    </div>
-  );
-}
-
-function ConductorTab({
-  tasks,
-  swarm,
-  agentNames,
-  projectId,
-  ownerWallet,
-}: {
-  tasks: Task[];
-  swarm?: SwarmDefinition;
-  agentNames: string[];
-  projectId: string;
-  /** Owner wallet for a SHARED project (editors write to it). */
-  ownerWallet?: string;
-}) {
-  const { address } = useAppAccount();
-  const { t } = useTranslation();
-  const effWallet = ownerWallet ?? address;
-  const queryClient = useQueryClient();
-
-  const invalidate = () =>
-    queryClient.invalidateQueries({
-      queryKey: ["wallet-project", effWallet, projectId],
-    });
-
-  const dragMoveMut = useMutation({
-    mutationFn: ({ taskId, status }: { taskId: string; status: TaskStatus }) =>
-      updateTask({ walletAddress: effWallet!, projectId, taskId, patch: { status } }),
-    onSuccess: () => invalidate(),
-    onError: (e: Error) => {
-      toast.error(t("projectRoom.board.moveTaskError"), { description: e.message });
-      invalidate();
-    },
-  });
-
-  const handleDragMove = (taskId: string, status: TaskStatus) => {
-    const current = tasks.find((t) => t.id === taskId);
-    if (current && current.status === status) return;
-    if (!effWallet) {
-      toast.error(t("projectRoom.board.connectWalletMove"));
-      invalidate();
-      return;
-    }
-    dragMoveMut.mutate({ taskId, status });
-  };
-
-  return (
-    <div className="flex flex-col gap-3">
-      <ConductorBoard
-        tasks={tasks}
-        swarm={swarm}
-        agentNames={agentNames}
-        projectId={projectId}
-        onMove={(taskId, nextStatus) =>
-          handleDragMove(taskId, KANBAN_TO_BACKEND[nextStatus])
-        }
-      />
-      <p className="text-[10px] text-muted-foreground">
-        {t("projectRoom.conductorTab.rosterHint")}
-      </p>
     </div>
   );
 }
