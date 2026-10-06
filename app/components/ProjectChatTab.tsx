@@ -30,6 +30,7 @@ import {
   ensureProjectChat,
   listProjectChatThreads,
   mentionAgent,
+  messageSparky,
   wakeAgentApi,
   notifyProjectMention,
   pmTurn,
@@ -119,6 +120,16 @@ export function ProjectChatTab({
   });
   const convId = activeConvId ?? conversationQuery.data?.convId ?? null;
   const live = useConversationLiveMessages(convId);
+  // Live-message count when the owner last asked Sparky; Sparky is replying
+  // until a Sparky message lands after it (or the wait times out).
+  const [sparkyAskedAt, setSparkyAskedAt] = useState<number | null>(null);
+  const sparkyReplying =
+    sparkyAskedAt !== null && !live.slice(sparkyAskedAt).some((message) => String(message.from).startsWith("service:"));
+  useEffect(() => {
+    if (sparkyAskedAt === null) return;
+    const timer = window.setTimeout(() => setSparkyAskedAt(null), 45_000);
+    return () => window.clearTimeout(timer);
+  }, [sparkyAskedAt]);
   const historyState = useChatHistory(convId);
   const liveIds = useMemo(() => new Set(live.map((message) => message.id)), [live]);
   const pending = useMemo(
@@ -181,12 +192,9 @@ export function ProjectChatTab({
     }
     setSendError(null);
     const mentions = extractMentions(text, participants) as ChatIdentity[];
-    const targets: ChatIdentity[] | undefined =
-      mentions.length > 0
-        ? mentions
-        : pmAgent
-          ? [`agent:${pmAgent}`]
-          : undefined;
+    // A message without an @-mention is for Sparky, who answers and
+    // coordinates the team; a mention still goes straight to that teammate.
+    const targets: ChatIdentity[] | undefined = mentions.length > 0 ? mentions : undefined;
     const id = client.send({
       convId,
       text,
@@ -203,15 +211,16 @@ export function ProjectChatTab({
           text,
           timestamp: ack.timestamp,
         }]).catch(() => {});
-        // A resting PM has no chat socket. When PerkOS-Chat confirms nobody
-        // received the message, start the PM workflow so it wakes the agent
-        // and advances planning. An online PM already received the chat
-        // message, so dispatching a second A2A turn here would duplicate work.
-        if (ack.delivered === 0 && pmAgent && mentions.length === 0) {
-          void pmTurn({ projectId, trigger: "chat", owner }).catch((error: Error) => {
-            toast.error("Sparky couldn't pick up this message", {
-              description: error.message,
-            });
+        if (mentions.length === 0) {
+          const askedAt = live.length;
+          void messageSparky({ projectId, text, convId, owner }).then((handled) => {
+            if (handled) {
+              setSparkyAskedAt(askedAt);
+              return;
+            }
+            // Sparky does not answer here (an older API, or the team lead
+            // plans): hand the message to the team lead as before.
+            if (pmAgent) void mentionAgent({ projectId, agentName: pmAgent, text, owner }).catch(() => {});
           });
         }
 
@@ -306,7 +315,8 @@ export function ProjectChatTab({
         ?? window.visualViewport?.height
         ?? window.innerHeight;
       const height = projectChatAvailableHeight({
-        sectionTop: section.getBoundingClientRect().top,
+        // Where the section rests on the page, so scrolling never resizes it.
+        sectionTop: section.getBoundingClientRect().top + window.scrollY,
         viewportBottom,
       });
       section.style.setProperty(
@@ -320,14 +330,12 @@ export function ProjectChatTab({
     const mainContent = document.querySelector<HTMLElement>("#main-content");
     if (mainContent) resizeObserver.observe(mainContent);
     window.addEventListener("resize", updateHeight);
-    window.addEventListener("scroll", updateHeight, { passive: true });
     window.visualViewport?.addEventListener("resize", updateHeight);
     mobile.addEventListener("change", updateHeight);
 
     return () => {
       resizeObserver.disconnect();
       window.removeEventListener("resize", updateHeight);
-      window.removeEventListener("scroll", updateHeight);
       window.visualViewport?.removeEventListener("resize", updateHeight);
       mobile.removeEventListener("change", updateHeight);
     };
@@ -525,13 +533,19 @@ export function ProjectChatTab({
             </Button>
           </div>
         ) : null}
+        {sparkyReplying ? (
+          <p className="flex shrink-0 items-center gap-2 px-4 py-1.5 text-xs text-muted-foreground" role="status">
+            <span aria-hidden className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+            Sparky is replying…
+          </p>
+        ) : null}
         {sendError ? <p className="shrink-0 px-4 py-2 text-xs text-destructive">{sendError}</p> : null}
         <ChatComposer
           value={draft}
           onChange={setDraft}
           onSend={send}
           disabled={disabled || requestChanges.isPending}
-          placeholder={changeRequestPlanId ? "Describe the requested plan changes…" : disabledReason ?? `Message ${pmAgent ?? "the project team"}…`}
+          placeholder={changeRequestPlanId ? "Describe the requested plan changes…" : disabledReason ?? "Message Sparky and the team…"}
           uploadFile={
             address && convId
               ? (file, index) => uploadAttachment({ file, walletAddress: address, conversationId: convId, index })
