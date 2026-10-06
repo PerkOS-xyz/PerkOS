@@ -65,6 +65,7 @@ import { ProjectInsights } from "../../../components/ProjectInsights";
 import { ProjectExecutionGraph, ProjectKnowledgeGraph } from "../../../components/ProjectContextMap";
 import { ActivityFeedCard } from "../../../components/ActivityFeedCard";
 import { formatRelativeShort } from "../../../lib/format";
+import { plainPreview } from "../../../lib/plainPreview";
 import { logActivity } from "../../../lib/activityEvents";
 import { ProjectChatTab } from "../../../components/ProjectChatTab";
 import { ProjectLiveLayout } from "../../../components/ProjectLiveLayout";
@@ -603,7 +604,8 @@ function DetailHeader({
               {t("projectRoom.header.cancelPlanning")}
             </Button>
           ) : null}
-          {project.executionMode !== "artizen-on-demand" && <Button
+          {/* A finished project has nothing left to wake the team for. */}
+          {project.executionMode !== "artizen-on-demand" && !projectComplete && <Button
             variant="outline"
             size="sm"
             className="gap-1.5"
@@ -1293,7 +1295,7 @@ function TaskCard({
   // detail just to confirm the agent actually produced something.
   const resultPreview =
     task.status === "Done" && task.result
-      ? task.result.replace(/[#*`>\-|]/g, "").replace(/\s+/g, " ").trim().slice(0, 120)
+      ? plainPreview(task.result)
       : null;
 
   const inner = (
