@@ -114,6 +114,32 @@ function blockObject(node: ForceNode, dimmed: boolean): THREE.Object3D {
   return group;
 }
 
+function disposeObject(object: THREE.Object3D) {
+  object.traverse((child) => {
+    const mesh = child as THREE.Mesh;
+    mesh.geometry?.dispose?.();
+    const materials = Array.isArray(mesh.material) ? mesh.material : mesh.material ? [mesh.material] : [];
+    for (const material of materials) {
+      const map = (material as THREE.Material & { map?: THREE.Texture }).map;
+      map?.dispose();
+      material.dispose();
+    }
+  });
+}
+
+function useReducedMotionPreference() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    if (typeof window.matchMedia !== "function") return;
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduced(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+  return reduced;
+}
+
 export function InteractiveGraph3D({
   nodes,
   edges,
@@ -128,10 +154,12 @@ export function InteractiveGraph3D({
   const { t } = useTranslation();
   const hostRef = useRef<HTMLDivElement>(null);
   const graphRef = useRef<ForceGraphMethods<ForceNode, ForceLink> | undefined>(undefined);
+  const objectCache = useRef(new Map<string, THREE.Object3D>());
   const [size, setSize] = useState({ width: 720, height: 430 });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const hasAutoFit = useRef(false);
+  const reducedMotion = useReducedMotionPreference();
 
   useEffect(() => {
     const host = hostRef.current;
@@ -145,6 +173,11 @@ export function InteractiveGraph3D({
     });
     observer.observe(host);
     return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => () => {
+    for (const object of objectCache.current.values()) disposeObject(object);
+    objectCache.current.clear();
   }, []);
 
   const graphData = useMemo(() => {
@@ -182,8 +215,8 @@ export function InteractiveGraph3D({
     : [], [graphData.nodes, neighbors, selectedId]);
 
   const fitGraph = useCallback((animated = true) => {
-    graphRef.current?.zoomToFit(animated ? 600 : 0, 32);
-  }, []);
+    graphRef.current?.zoomToFit(animated && !reducedMotion ? 600 : 0, 32);
+  }, [reducedMotion]);
 
   useEffect(() => {
     hasAutoFit.current = false;
@@ -210,9 +243,28 @@ export function InteractiveGraph3D({
     graphRef.current?.cameraPosition(
       { x: (node.x || 0) * ratio, y: (node.y || 0) * ratio, z: 120 },
       { x: node.x || 0, y: node.y || 0, z: node.z || 0 },
-      650,
+      reducedMotion ? 0 : 650,
     );
-  }, []);
+  }, [reducedMotion]);
+
+  const nodeObject = useCallback((node: ForceNode) => {
+    const dimmed = Boolean(selectedId && !neighbors.has(node.id));
+    const key = `${node.id}:${node.label}:${node.status ?? ""}:${node.color}:${dimmed ? "dim" : "full"}`;
+    const cached = objectCache.current.get(key);
+    if (cached) return cached;
+    const object = blockObject(node, dimmed);
+    objectCache.current.set(key, object);
+    return object;
+  }, [neighbors, selectedId]);
+
+  useEffect(() => {
+    const prefixes = graphData.nodes.map((node) => `${node.id}:${node.label}:${node.status ?? ""}:${node.color}:`);
+    for (const [key, object] of objectCache.current) {
+      if (prefixes.some((prefix) => key.startsWith(prefix))) continue;
+      disposeObject(object);
+      objectCache.current.delete(key);
+    }
+  }, [graphData.nodes]);
 
   return (
     <div
@@ -237,7 +289,7 @@ export function InteractiveGraph3D({
         enableNodeDrag
         showNavInfo={false}
         nodeLabel={safeTooltip}
-        nodeThreeObject={(node) => blockObject(node, Boolean(selectedId && !neighbors.has(node.id)))}
+        nodeThreeObject={nodeObject}
         nodeThreeObjectExtend={false}
         nodeVal="val"
         nodeColor={(node) => selectedId && !neighbors.has(node.id) ? "#30283d" : node.color}
@@ -251,13 +303,13 @@ export function InteractiveGraph3D({
         }}
         linkWidth={(link) => link.active ? 2.8 : selectedId && (endpointId(link.source) === selectedId || endpointId(link.target) === selectedId) ? 2.2 : 1.15}
         linkOpacity={0.72}
-        linkDirectionalParticles={(link) => link.active ? 4 : 1}
+        linkDirectionalParticles={(link) => reducedMotion ? 0 : link.active ? 4 : 1}
         linkDirectionalArrowLength={7}
         linkDirectionalArrowRelPos={0.88}
         linkDirectionalArrowColor={(link) => selectedId && !(endpointId(link.source) === selectedId || endpointId(link.target) === selectedId) ? "rgba(70,60,88,.16)" : link.color}
         linkDirectionalParticleWidth={(link) => link.active ? 2.2 : 0.9}
         linkDirectionalParticleColor={() => "#ffffff"}
-        linkDirectionalParticleSpeed={(link) => link.active ? 0.007 : 0.0025}
+        linkDirectionalParticleSpeed={(link) => reducedMotion ? 0 : link.active ? 0.007 : 0.0025}
         d3AlphaDecay={0.018}
         d3VelocityDecay={0.34}
         warmupTicks={32}
@@ -265,13 +317,21 @@ export function InteractiveGraph3D({
         onEngineStop={() => {
           if (!hasAutoFit.current) {
             hasAutoFit.current = true;
-            fitGraph(true);
+            fitGraph(!reducedMotion);
           }
         }}
         onNodeClick={selectNode}
         onNodeHover={(node) => setHoveredId(node?.id ?? null)}
         onBackgroundClick={() => setSelectedId(null)}
       />
+
+      <ul className="sr-only" aria-label={`${ariaLabel} nodes`}>
+        {graphData.nodes.map((node) => (
+          <li key={node.id}>
+            <button type="button" onClick={() => selectNode(node)}>{node.label}: {node.status || node.kind}</button>
+          </li>
+        ))}
+      </ul>
 
       <div className="absolute left-3 top-3 z-10 flex flex-wrap items-center gap-2">
         <div className="pointer-events-none flex items-center gap-2 rounded-full border border-white/10 bg-black/70 px-3 py-1.5 text-[10px] text-white/70 backdrop-blur">

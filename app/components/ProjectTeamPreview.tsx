@@ -20,7 +20,7 @@ export function ProjectTeamPreview({
         {sorted.map((role) => (
           <article key={role.roleId} className="rounded-xl border border-primary/20 bg-primary/[0.03] p-4">
             <div className="flex items-start gap-3">
-              <AgentIdentityAvatar identity={deriveAgentAvatarIdentity(role.avatarSeed)} size={52} />
+              <AgentIdentityAvatar identity={deriveAgentAvatarIdentity(role.avatarSeed, templateText(role.name, language))} size={52} />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="font-semibold">{templateText(role.name, language)}</h3>

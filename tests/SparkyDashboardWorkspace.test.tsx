@@ -47,7 +47,7 @@ describe("SparkyDashboardWorkspace", () => {
     expect(screen.getByText("Researcher")).toBeInTheDocument();
     expect(screen.getByText("Writer")).toBeInTheDocument();
     expect(screen.getByTestId("knowledge-graph")).toHaveTextContent("2");
-    expect(container.querySelectorAll("[data-avatar-kit='runtime-v1']")).toHaveLength(2);
+    expect(container.querySelectorAll("[data-avatar-kit='companion-v3']")).toHaveLength(2);
   });
 
   it("shows an honest empty state instead of fake active agents", () => {

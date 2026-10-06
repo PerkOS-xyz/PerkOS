@@ -5,7 +5,7 @@ import { AgentOrb } from "../app/components/AgentOrb";
 import { deriveAgentAvatarIdentity } from "../app/lib/agentAvatarIdentity";
 
 describe("AgentIdentityAvatar", () => {
-  it("renders every stored identity layer without exposing decorative SVG", () => {
+  it("renders the stored 3D archetype without exposing decorative SVG", () => {
     const identity = deriveAgentAvatarIdentity("template:1:researcher");
     const { container } = render(
       <div aria-label="Researcher">
@@ -15,10 +15,13 @@ describe("AgentIdentityAvatar", () => {
     expect(screen.getByLabelText("Researcher")).toBeInTheDocument();
     const avatar = container.querySelector("[data-avatar-seed]");
     expect(avatar).toHaveAttribute("data-avatar-seed", identity.seed);
-    expect(avatar).toHaveAttribute("data-avatar-version", "1");
+    expect(avatar).toHaveAttribute("data-avatar-version", "3");
+    expect(avatar).toHaveAttribute("data-avatar-kit", "companion-v3");
+    expect(avatar).toHaveAttribute("data-avatar-archetype", String(identity.archetypeId));
     expect(avatar).toHaveAttribute("data-avatar-state", "working");
     expect(avatar).toHaveAttribute("aria-hidden", "true");
-    expect(container.querySelector("svg")).toBeInTheDocument();
+    expect(container.querySelector("img")).toHaveAttribute("src", identity.assetPath);
+    expect(container.querySelector("svg")).not.toBeInTheDocument();
   });
 
   it("keeps AgentOrb backward compatible while accepting a stored identity", () => {
