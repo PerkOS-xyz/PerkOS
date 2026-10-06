@@ -1883,6 +1883,22 @@
     }
   },
   "components": {
+    "taskRetry": {
+      "retry": "Retry",
+      "retryWith": "Retry with {{agent}}",
+      "retrying": "Retrying…",
+      "aria": "Retry {{task}}",
+      "ariaWith": "Retry {{task}} with {{agent}}",
+      "toast": {
+        "retryingWith": "Retrying with {{agent}}",
+        "retrying": "Retrying this task",
+        "afterDependencies": "It starts as soon as the steps before it are done.",
+        "error": "Couldn't start the retry"
+      },
+      "errors": {
+        "connectWallet": "Connect your wallet to retry this task."
+      }
+    },
     "kanban": {
       "todo": "To do",
       "inProgress": "In progress",

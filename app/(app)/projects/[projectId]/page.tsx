@@ -51,7 +51,8 @@ import {
 import { Bot, Loader2, Plus } from "lucide-react";
 
 import { KanbanBoard } from "../../../components/KanbanBoard";
-import { TaskSignal } from "../../../components/TaskSignal";
+import { TaskSignal, taskSignal } from "../../../components/TaskSignal";
+import { TaskRetryButton } from "../../../components/TaskRetryButton";
 import { TaskAssignee } from "../../../components/TaskAssignee";
 import { EmptyState } from "../../../components/EmptyState";
 import { DocsTab } from "../../../components/DocsTab";
@@ -1209,6 +1210,9 @@ function TaskCard({
 
   const cardClass =
     "glow-card relative flex flex-col gap-2 rounded-md border border-primary/25 bg-[#0e0716] px-4 py-3 transition-colors hover:border-primary/50";
+  // A paused task gets its Retry right on the card. The card is a link, so the
+  // button sits beside it and the card leaves room for it at the bottom.
+  const paused = taskSignal(task) === "paused";
 
   // Done cards get a one-line peek at the deliverable — saves a click into
   // detail just to confirm the agent actually produced something.
@@ -1265,10 +1269,21 @@ function TaskCard({
           `/projects/${encodeURIComponent(projectId)}/tasks/${encodeURIComponent(task.id)}` +
           (ownerWallet ? `?owner=${encodeURIComponent(ownerWallet)}` : "")
         }
-        className={cn(cardClass, selectable && "pl-9")}
+        className={cn(cardClass, selectable && "pl-9", paused && "pb-12")}
       >
         {inner}
       </Link>
+      {paused ? (
+        <TaskRetryButton
+          variant="card"
+          walletAddress={effWallet}
+          projectId={projectId}
+          taskId={task.id}
+          taskName={task.name}
+          agent={task.agent}
+          className={cn("absolute bottom-3", selectable ? "left-9" : "left-4")}
+        />
+      ) : null}
       <div className="absolute right-2 top-2 flex items-center gap-0.5 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
         <button
           type="button"

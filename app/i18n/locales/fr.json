@@ -1696,6 +1696,22 @@
     }
   },
   "components": {
+    "taskRetry": {
+      "retry": "Réessayer",
+      "retryWith": "Réessayer avec {{agent}}",
+      "retrying": "Nouvel essai…",
+      "aria": "Réessayer {{task}}",
+      "ariaWith": "Réessayer {{task}} avec {{agent}}",
+      "toast": {
+        "retryingWith": "Nouvel essai avec {{agent}}",
+        "retrying": "Nouvel essai de cette tâche",
+        "afterDependencies": "Elle démarre dès que les étapes précédentes sont terminées.",
+        "error": "Impossible de lancer le nouvel essai"
+      },
+      "errors": {
+        "connectWallet": "Connectez votre portefeuille pour réessayer cette tâche."
+      }
+    },
     "kanban": {
       "todo": "À faire",
       "inProgress": "En cours",

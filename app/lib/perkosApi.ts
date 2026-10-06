@@ -1490,6 +1490,52 @@ export async function deleteTask(input: {
   }
 }
 
+export type RetryTaskResult = {
+  /** The task as the server left it (back in Backlog, queued or waiting). */
+  task?: Task;
+  /** Who the task went back to; empty when nobody is assigned. */
+  agent: string;
+  /** A step this task depends on is still open, so it starts after that. */
+  waitingOnDependency: boolean;
+  /** The project's paused run is tracking this task again. */
+  workflowResumed: boolean;
+};
+
+/**
+ * Retry a paused task through the server (`POST /projects/:pid/tasks/:taskId/retry`).
+ *
+ * Server-side because only the API can clear the dispatcher's delivery
+ * markers, re-register the board, put a paused workflow back to work and wake
+ * the agent. Older API builds answer without `retry`; the task fills in.
+ */
+export async function retryTask(input: {
+  walletAddress: string;
+  projectId: string;
+  taskId: string;
+}): Promise<RetryTaskResult> {
+  const { authedFetch } = await import("./apiClient");
+  const response = await authedFetch(
+    `/api/projects/${encodeURIComponent(input.projectId)}/tasks/${encodeURIComponent(input.taskId)}/retry` +
+      `?owner=${encodeURIComponent(input.walletAddress)}`,
+    { method: "POST" },
+  );
+  const payload = await parseJson(response);
+  if (!response.ok) throw new Error(apiError(payload, "Couldn't retry this task"));
+  const task = (payload.task ?? undefined) as Task | undefined;
+  const retry = (payload.retry ?? {}) as {
+    agent?: unknown;
+    waitingOnDependency?: unknown;
+    workflowResumed?: unknown;
+  };
+  return {
+    task,
+    agent: typeof retry.agent === "string" ? retry.agent : (task?.agent ?? ""),
+    waitingOnDependency:
+      retry.waitingOnDependency === true || task?.dispatchState === "waiting_on_dependency",
+    workflowResumed: retry.workflowResumed === true,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Project chat
 // ---------------------------------------------------------------------------

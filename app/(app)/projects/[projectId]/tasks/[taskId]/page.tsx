@@ -35,6 +35,7 @@ import {
   type TaskPeople,
 } from "../../../../../components/TaskDetailLayout";
 import { TaskAttachmentList } from "../../../../../components/TaskAttachments";
+import { TaskRetryButton } from "../../../../../components/TaskRetryButton";
 
 type PageProps = {
   params: Promise<{ projectId: string; taskId: string }>;
@@ -174,7 +175,20 @@ export default function TaskDetailPage({ params }: PageProps) {
           ) : onDemand ? (
             <ArtizenRunFailure run={{ ...task, phase: task.executionPhase }} />
           ) : (
-            <PendingDeliverable status={task.status} progress={task} />
+            <PendingDeliverable
+              status={task.status}
+              progress={task}
+              retryAction={
+                <TaskRetryButton
+                  walletAddress={ownerWallet}
+                  projectId={projectId}
+                  taskId={taskId}
+                  taskName={task.name}
+                  agent={task.agent}
+                  agentLabel={people.agentLabel}
+                />
+              }
+            />
           )}
 
           {onDemand && task.agent ? (
