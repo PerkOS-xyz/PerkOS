@@ -52,7 +52,6 @@ import { Bot, Loader2, Plus } from "lucide-react";
 
 import { KanbanBoard } from "../../../components/KanbanBoard";
 import { TaskSignal } from "../../../components/TaskSignal";
-import { AgentOrb } from "../../../components/AgentOrb";
 import { TaskAssignee } from "../../../components/TaskAssignee";
 import { ConductorBoard } from "../../../components/ConductorBoard";
 import type { SwarmDefinition } from "../../../lib/swarm";
@@ -60,6 +59,7 @@ import { EmptyState } from "../../../components/EmptyState";
 import { DocsTab } from "../../../components/DocsTab";
 import { useProjectTasks } from "../../../lib/useProjectTasks";
 import { useProject } from "../../../lib/useProject";
+import { AgentOrb } from "../../../components/AgentOrb";
 import { useWalletAgents, realtimeAgentStatus, STATUS_AVAILABLE, STATUS_RESTING, STATUS_GETTING_READY, STATUS_GOING_TO_REST, type AgentLiveStatus } from "../../../lib/useWalletAgents";
 import { MembersPanel } from "../../../components/MembersPanel";
 import { ProjectInsights } from "../../../components/ProjectInsights";
