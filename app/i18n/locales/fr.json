@@ -1797,7 +1797,9 @@
         "badPlan": "Impossible d'établir un plan valide",
         "emptyPlan": "Aucun travail à faire",
         "llmError": "Le modèle a rencontré une erreur",
-        "noPm": "Aucun chef d'équipe désigné"
+        "noPm": "Aucun chef d'équipe désigné",
+        "usageLimit": "Limite d'utilisation PerkOS atteinte. Relancez dans un moment",
+        "planningFailed": "Sparky a besoin d'un nouvel essai. Remettez l'équipe au travail"
       },
       "phases": {
         "plan": "Planification",

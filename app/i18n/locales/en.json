@@ -2019,7 +2019,9 @@
         "emptyPlan": "No work to do",
         "llmError": "The model errored",
         "noPm": "No team lead designated",
-        "planningTimeout": "The team lead did not produce a plan in time"
+        "planningTimeout": "The team lead did not produce a plan in time",
+        "usageLimit": "PerkOS usage limit reached. Start again in a little while",
+        "planningFailed": "Sparky needs another try. Put the team to work again"
       },
       "phases": {
         "plan": "Plan",
