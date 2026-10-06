@@ -1573,6 +1573,8 @@
       "invitesRegistered_one": "Project created: {{count}} agent invite registered",
       "invitesRegistered_other": "Project created: {{count}} agent invites registered",
       "teamLaunched": "{{name}} launched",
+      "teamLaunching": "{{name}} is launching",
+      "descServer": "Your teammates keep starting up on PerkOS, so you can close this tab anytime. The project page shows their progress.",
       "yourTeamFallback": "Your team",
       "descNoAgents": "Add agents to it any time from the Agents tab.",
       "descExisting": "The selected agents kept their existing identities and were assigned to the project.",
@@ -1632,6 +1634,11 @@
   },
   "projectRoom": {
     "backToProjects": "Go back to projects",
+    "launch": {
+      "launching": "Launching your team · {{launched}} of {{total}} on their way",
+      "partial": "{{launched}} of {{total}} teammates joined. Add {{names}} again anytime from the Agents tab.",
+      "failed": "Your teammates could not start this time. Add them again from the Agents tab."
+    },
     "membersTab": {
       "note": "People with access to this project. Editors can edit the board + chat; viewers are read-only. (Org members already have access.)"
     },

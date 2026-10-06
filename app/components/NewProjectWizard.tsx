@@ -2,7 +2,7 @@
 
 /** Canonical new-project wizard. Routed at /projects/new. */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchLlmAccess } from "../lib/llmAccess";
 import { fetchEcsAccess } from "../lib/ecsAccess";
@@ -62,6 +62,7 @@ import {
 import { useActiveOrg } from "../lib/useActiveOrg";
 import { buildExistingTeamRoster } from "../lib/existingAgentTeam";
 import { fetchActiveRuntimes } from "../lib/runtimeImages";
+import { launchTeam, newTeamLaunchRequestId } from "../lib/teamLaunch";
 import {
   BRAND_ACCENT,
   INDUSTRY_LABELS,
@@ -166,6 +167,11 @@ export default function NewProjectWizard() {
   const [byokKey, setByokKey] = useState("");
   const [launching, setLaunching] = useState(false);
   const [progress, setProgress] = useState("");
+  // One id per team being configured: a retry after a lost answer returns the
+  // project the server already created instead of launching the team twice.
+  const launchRequestId = useRef<string | null>(null);
+  // Only the browser-driven fallback (older API) needs this tab kept open.
+  const [launchingInBrowser, setLaunchingInBrowser] = useState(false);
 
   useEffect(() => {
     if (!address) return;
@@ -218,6 +224,7 @@ export default function NewProjectWizard() {
   /** Enter the config step with a seeded team. */
   function select(id: string, roles: CompanyRole[]) {
     const seeded = withValidPm(roles.map((r) => ({ ...r })));
+    launchRequestId.current = null;
     setSelectedId(id);
     setTeamRoles(seeded);
     setSeedJson(JSON.stringify(seeded));
@@ -305,6 +312,73 @@ export default function NewProjectWizard() {
     }
     setLaunching(true);
     try {
+      // The server launches the whole team, so the owner can leave right after
+      // this call. An API without the endpoint answers null: the browser then
+      // launches the team below, as it always did.
+      if (agentSource !== "existing" && roles.length > 0) {
+        setProgress(t("companyNew.launch.creatingProject"));
+        launchRequestId.current ??= newTeamLaunchRequestId();
+        const names = teamAgentNames(slugify(projectName), roles.map((r) => slugify(r.role)));
+        const started = await launchTeam({
+          requestId: launchRequestId.current,
+          name: projectName.trim(),
+          goal: goal.trim() || tmpl?.blurb || "",
+          orgId: activeOrgId ?? undefined,
+          templateId: tmpl?.id ?? myTmpl?.baseTemplateId ?? undefined,
+          llm:
+            agentSource === "perkos" && llmMode === "byok"
+              ? { modelKey: byokKey.trim(), llmBaseUrl: byokBaseUrl(byokProvider), llmModel: byokModel.trim() }
+              : undefined,
+          roles: roles.map((role, i) => {
+            const name = names[i] ?? teamAgentName(slugify(projectName), slugify(role.role));
+            const base = { name, role: role.role, runtime: role.runtime, lead: Boolean(role.isPM) };
+            if (agentSource === "invite") {
+              return { ...base, external: { runtimeKind: "custom" as const, note: role.role } };
+            }
+            const r = resolveRole(role, name);
+            return { ...base, soul: r.soul || undefined, plugins: r.plugins, skills: r.skills };
+          }),
+        });
+        if (started) {
+          if (saveAsTemplate) {
+            await saveTeamTemplate({
+              walletAddress: address,
+              name:
+                templateName.trim() ||
+                t("companyNew.launch.defaultTemplateName", { name: projectName.trim() }),
+              baseTemplateId: tmpl?.id ?? myTmpl?.baseTemplateId ?? null,
+              roles,
+            }).catch(() => {
+              toast.warning(t("companyNew.launch.templateSaveFailed"));
+            });
+          }
+          toast.success(
+            agentSource === "invite"
+              ? t("companyNew.launch.invitesRegistered", { count: roles.length })
+              : t("companyNew.launch.teamLaunching", {
+                  name: tmpl?.name ?? myTmpl?.name ?? t("companyNew.launch.yourTeamFallback"),
+                }),
+            {
+              description:
+                agentSource === "invite"
+                  ? t("companyNew.launch.descInvite")
+                  : t("companyNew.launch.descServer"),
+            },
+          );
+          const templateId = tmpl?.id ?? (myTmpl ? "saved_template" : mode);
+          trackEvent("project_created", { creation_flow: "company_wizard", template_id: templateId });
+          trackEvent("team_created", {
+            creation_flow: "company_wizard",
+            agent_source: agentSource,
+            team_size: roles.length,
+            template_id: templateId,
+          });
+          router.push(`/projects/${started.projectId}`);
+          return;
+        }
+        setLaunchingInBrowser(true);
+      }
+
       // Resolve the active runtime image per runtime FIRST — without an
       // imageTag the launch route registers the agent but never provisions an
       // ECS service ("no service"), so the whole team would be dead-on-arrival.
@@ -465,6 +539,7 @@ export default function NewProjectWizard() {
         description: e instanceof Error ? e.message : String(e),
       });
       setLaunching(false);
+      setLaunchingInBrowser(false);
       setProgress("");
     }
   }
@@ -953,7 +1028,7 @@ export default function NewProjectWizard() {
                     ? t("companyNew.config.inviteButton", { count: teamRoles.length })
                     : t("companyNew.config.startTeam", { count: teamRoles.length })}
           </Button>
-          {launching ? (
+          {launching && launchingInBrowser ? (
             <span className="text-xs text-muted-foreground">
               {t("companyNew.config.dontClose")}
             </span>

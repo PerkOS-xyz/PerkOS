@@ -69,6 +69,7 @@ import { logActivity } from "../../../lib/activityEvents";
 import { ProjectChatTab } from "../../../components/ProjectChatTab";
 import { ProjectLiveLayout } from "../../../components/ProjectLiveLayout";
 import { agentStarting, ProjectTeamStage } from "../../../components/ProjectTeamStage";
+import { TeamLaunchStatus } from "../../../components/TeamLaunchStatus";
 import { ProjectTemplateConfiguration } from "../../../components/ProjectTemplateConfiguration";
 import { ProjectProgress } from "../../../components/ProjectProgress";
 import { ArtizenProjectBoard, ArtizenWorkLink } from "../../../components/ArtizenProjectBoard";
@@ -260,6 +261,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
             onShowMembers={() => openWorkTab("members")}
             teamStarting={uniqueAgents(liveDetail.tasks, liveDetail.project.agentIds ?? []).some((name) => agentStarting(ownerAgents[name]))}
           />
+          <TeamLaunchStatus launch={liveDetail.project.launch} />
           {liveDetail.project.executionMode === "artizen-on-demand" ? (
             <>
               <Tabs current={tab} onChange={setTab} onDemand />

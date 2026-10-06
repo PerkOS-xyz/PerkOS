@@ -46,6 +46,7 @@ import { formatAddress } from "./format";
 import { logActivity } from "./activityEvents";
 import { entityKey, writeEdge } from "./edges";
 import { validateSwarm, type SwarmDefinition } from "./swarm";
+import { readTeamLaunch, type TeamLaunchProgress } from "./teamLaunch";
 
 export type PmSessionStatus =
   | "planning"
@@ -106,6 +107,8 @@ export type Project = {
     planningMaxAttempts?: number;
     failureReason?: string;
   };
+  /** Server-side team launch progress (POST /projects/launch-team). */
+  launch?: TeamLaunchProgress;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -446,6 +449,7 @@ const projectConverter: FirestoreDataConverter<Project> = {
       pmAgent: (data.pmAgent as string | null | undefined) ?? null,
       pmSession,
       workflow,
+      launch: readTeamLaunch(data.launch),
       createdAt: tsToIso(data.createdAt),
       updatedAt: tsToIso(data.updatedAt),
     };

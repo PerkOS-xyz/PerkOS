@@ -1390,6 +1390,8 @@
       "invitesRegistered_one": "Projet créé : {{count}} invitation d'agent enregistrée",
       "invitesRegistered_other": "Projet créé : {{count}} invitations d'agent enregistrées",
       "teamLaunched": "{{name}} lancée",
+      "teamLaunching": "{{name}} est en cours de lancement",
+      "descServer": "Vos coéquipiers continuent de démarrer sur PerkOS : vous pouvez fermer cet onglet à tout moment. La page du projet affiche leur progression.",
       "yourTeamFallback": "Votre équipe",
       "descNoAgents": "Ajoutez-y des agents à tout moment depuis l'onglet Agents.",
       "descInvite": "Ouvrez chaque agent pour copier son texte d'intégration et connecter votre propre environnement d'exécution.",
@@ -1448,6 +1450,11 @@
   },
   "projectRoom": {
     "backToProjects": "Retour aux projets",
+    "launch": {
+      "launching": "Lancement de votre équipe · {{launched}} sur {{total}} en route",
+      "partial": "{{launched}} coéquipiers sur {{total}} ont rejoint l'équipe. Ajoutez à nouveau {{names}} à tout moment depuis l'onglet Agents.",
+      "failed": "Vos coéquipiers n'ont pas pu démarrer cette fois. Ajoutez-les à nouveau depuis l'onglet Agents."
+    },
     "membersTab": {
       "note": "Les personnes ayant accès à ce projet. Les éditeurs peuvent modifier le tableau et le chat ; les lecteurs sont en lecture seule. (Les membres de l'organisation ont déjà accès.)"
     },
