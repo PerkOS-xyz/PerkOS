@@ -1584,6 +1584,7 @@
     },
     "taskCard": {
       "agent": "에이전트: {{agent}}",
+      "unassigned": "미할당",
       "signal": {
         "pickedUp": "접수됨",
         "retrying": "재시도 중",

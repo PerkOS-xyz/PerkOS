@@ -1574,6 +1574,7 @@
     },
     "taskCard": {
       "agent": "智能体:{{agent}}",
+      "unassigned": "未分配",
       "signal": {
         "pickedUp": "已接手",
         "retrying": "重试中",

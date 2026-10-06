@@ -23,6 +23,7 @@ import {
   type TaskStatus,
 } from "../../lib/perkosApi";
 import { KanbanBoard } from "../../components/KanbanBoard";
+import { TaskAssignee } from "../../components/TaskAssignee";
 import {
   SearchInput,
   matchesQuery,
@@ -339,7 +340,7 @@ export default function TasksPage() {
                       <Folder className="h-3 w-3" />
                       <span className="truncate">{item.projectName}</span>
                     </span>
-                    <span className="shrink-0">{t("tasks.card.agent", { agent: item.task.agent || "—" })}</span>
+                    <TaskAssignee agent={item.task.agent} className="max-w-[50%] shrink-0" />
                   </div>
                 </Link>
               </div>
