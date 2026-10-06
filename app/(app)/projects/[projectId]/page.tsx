@@ -113,11 +113,19 @@ export default function ProjectDetailPage({ params }: PageProps) {
     TABS.includes(initialTab) && initialTab !== "chat" && initialTab !== "map" ? initialTab : "tasks"
   );
 
+  // Opening a work tab from a link or a button also brings it into view.
+  const [workFocus, setWorkFocus] = useState(0);
+  const openWorkTab = (next: Tab) => {
+    setTab(next);
+    setWorkFocus((n) => n + 1);
+  };
+
   // Keep tab in sync if user lands via a deep link.
   useEffect(() => {
     const next = searchParams.get("tab") as Tab | null;
     if (next && TABS.includes(next)) {
       setTab(next);
+      if (next !== "chat") setWorkFocus((n) => n + 1);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
@@ -247,7 +255,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
             isShared={isShared}
             compact={tab === "chat"}
             overview={liveDetail.project.executionMode === "artizen-on-demand"}
-            onShowMembers={() => setTab("members")}
+            onShowMembers={() => openWorkTab("members")}
             teamStarting={uniqueAgents(liveDetail.tasks, liveDetail.project.agentIds ?? []).some((name) => agentStarting(ownerAgents[name]))}
           />
           {liveDetail.project.executionMode === "artizen-on-demand" ? (
@@ -262,13 +270,14 @@ export default function ProjectDetailPage({ params }: PageProps) {
                   detail={liveDetail}
                   projectId={projectId}
                   ownerWallet={ownerWallet ?? undefined}
-                  onDesignatePm={() => setTab("agents")}
+                  onDesignatePm={() => openWorkTab("agents")}
                   variant="panel"
                 />
               }
               summary={<ProjectSummary detail={liveDetail} />}
               initialStage={initialTab === "map" ? "workflow" : "team"}
               initialMobile={initialTab === "chat" ? "talk" : searchParams.get("tab") ? "work" : "talk"}
+              workFocus={workFocus}
               counts={{
                 working: liveDetail.tasks.filter((t) => t.status === "In progress").length,
                 done: liveDetail.tasks.filter((t) => t.status === "Done").length,
