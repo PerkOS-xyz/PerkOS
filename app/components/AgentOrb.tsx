@@ -46,6 +46,7 @@ export function AgentOrb({
     identity ??
     deriveAgentAvatarIdentity(
       identitySeed || [presetId, role, name].filter(Boolean).join(":") || name,
+      role || presetId || name,
     );
   return (
     <AgentIdentityAvatar
