@@ -1584,6 +1584,7 @@
     },
     "taskCard": {
       "agent": "エージェント：{{agent}}",
+      "unassigned": "未割り当て",
       "signal": {
         "pickedUp": "受付済み",
         "retrying": "再試行中",

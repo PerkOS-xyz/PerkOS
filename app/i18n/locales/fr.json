@@ -1584,6 +1584,7 @@
     },
     "taskCard": {
       "agent": "Agent : {{agent}}",
+      "unassigned": "Non assignée",
       "signal": {
         "pickedUp": "Prise en charge",
         "retrying": "Nouvel essai",

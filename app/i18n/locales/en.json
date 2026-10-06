@@ -1771,6 +1771,7 @@
     },
     "taskCard": {
       "agent": "Agent: {{agent}}",
+      "unassigned": "Unassigned",
       "signal": {
         "pickedUp": "Picked up",
         "retrying": "Retrying",
