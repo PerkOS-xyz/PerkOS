@@ -162,7 +162,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           />
         </aside>
 
-        <main className={cn("min-w-0 flex-1 overflow-x-hidden", isChatRoute && "flex min-h-0 flex-col overflow-hidden")}>
+        <main className={cn("min-w-0 flex-1 overflow-x-clip", isChatRoute && "flex min-h-0 flex-col overflow-hidden")}>
           {/* Desktop/tablet topbar. Tablet (md→lg) runs compact: the search
               hint collapses to an icon and the balance pill drops $PERKOS —
               one row, nothing wraps or overlaps. Full layout returns at lg. */}

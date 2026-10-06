@@ -306,7 +306,8 @@ export function ProjectChatTab({
         ?? window.visualViewport?.height
         ?? window.innerHeight;
       const height = projectChatAvailableHeight({
-        sectionTop: section.getBoundingClientRect().top,
+        // Where the section rests on the page, so scrolling never resizes it.
+        sectionTop: section.getBoundingClientRect().top + window.scrollY,
         viewportBottom,
       });
       section.style.setProperty(
@@ -320,14 +321,12 @@ export function ProjectChatTab({
     const mainContent = document.querySelector<HTMLElement>("#main-content");
     if (mainContent) resizeObserver.observe(mainContent);
     window.addEventListener("resize", updateHeight);
-    window.addEventListener("scroll", updateHeight, { passive: true });
     window.visualViewport?.addEventListener("resize", updateHeight);
     mobile.addEventListener("change", updateHeight);
 
     return () => {
       resizeObserver.disconnect();
       window.removeEventListener("resize", updateHeight);
-      window.removeEventListener("scroll", updateHeight);
       window.visualViewport?.removeEventListener("resize", updateHeight);
       mobile.removeEventListener("change", updateHeight);
     };
