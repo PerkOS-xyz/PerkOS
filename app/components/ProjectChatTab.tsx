@@ -38,6 +38,7 @@ import {
 } from "../lib/perkosApi";
 import type { ChatIdentity } from "../lib/chatClient";
 import { mentionFollowUp } from "../lib/mentionFollowUp";
+import { conversationTargets } from "../lib/conversationTargets";
 import {
   useChatClient,
   useChatClientStatus,
@@ -197,7 +198,7 @@ export function ProjectChatTab({
     const mentions = extractMentions(text, participants) as ChatIdentity[];
     // A message without an @-mention is for Sparky, who answers and
     // coordinates the team; a mention still goes straight to that teammate.
-    const targets: ChatIdentity[] | undefined = mentions.length > 0 ? mentions : undefined;
+    const targets = conversationTargets({ mentions, address, shared });
     const id = client.send({
       convId,
       text,
