@@ -1460,6 +1460,7 @@
     },
     "header": {
       "lead": "负责人：{{name}}",
+      "coordinatedBySparky": "由 Sparky 协调",
       "noPrimaryAgent": "尚未指定负责人",
       "activeSuffix": "活跃于 {{time}}",
       "runPmTitleWithPm": "你的团队负责人会规划目标并分配工作",

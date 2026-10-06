@@ -531,10 +531,12 @@ function DetailHeader({
               </span>
             </div>
             <span className="text-xs text-muted-foreground">
-              {/* The lead was only ever reported here; changing it meant finding
-                  "Make lead" inside the Agents tab. The picker already existed
-                  for the no-lead case, so the label just becomes its entry
-                  point — same dialog, discoverable where the lead is shown. */}
+              {/* Sparky coordinates every project, so a staffed project says so;
+                  the picker stays the entry point while no teammate hosts the
+                  conversation yet (and for Artizen projects). */}
+              {primaryAgent && project.executionMode !== "artizen-on-demand" ? (
+                <span>{t("projectRoom.header.coordinatedBySparky")}</span>
+              ) : (
               <button
                 type="button"
                 onClick={() => {
@@ -550,6 +552,7 @@ function DetailHeader({
                   ? t("projectRoom.header.lead", { name: project.executionMode === "artizen-on-demand" ? "Hermes" : primaryAgent })
                   : t("projectRoom.header.noPrimaryAgent")}
               </button>
+              )}
               {project.updatedAt ? (
                 <> · {t("projectRoom.header.activeSuffix", { time: formatRelativeShort(project.updatedAt) })}</>
               ) : null}
