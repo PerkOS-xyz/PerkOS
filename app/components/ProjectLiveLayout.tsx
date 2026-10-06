@@ -31,6 +31,7 @@ export function ProjectLiveLayout({
   work,
   counts,
   initialMobile = "talk",
+  workFocus = 0,
 }: {
   conversation: ReactNode;
   /** Goal, task counters and team workload: always on desktop, with Tasks on phones. */
@@ -40,10 +41,24 @@ export function ProjectLiveLayout({
   work: ReactNode;
   counts: { working: number; done: number; total: number };
   initialMobile?: MobileView;
+  /** Bumped when a link opens a work tab (Members, Docs…): show it and scroll to it. */
+  workFocus?: number;
 }) {
   const [stageView, setStageView] = useState<StageView>(initialStage);
   const [mobile, setMobile] = useState<MobileView>(initialMobile);
   const conversationFrame = useRef<HTMLDivElement>(null);
+  const workSection = useRef<HTMLElement>(null);
+
+  // A link to a work tab lands on it: phones switch to the work area, and both
+  // phones and desktop scroll it into view instead of changing a tab off screen.
+  useEffect(() => {
+    if (!workFocus) return;
+    setMobile("work");
+    const frame = window.requestAnimationFrame(() => {
+      workSection.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [workFocus]);
 
   // Desktop: the conversation fills the window from wherever it starts down to
   // the bottom edge, so the newest messages and the composer stay in view. It
@@ -165,7 +180,7 @@ export function ProjectLiveLayout({
             {stage(stageView, focusAgent)}
           </section>
 
-          <section aria-label="Project work" className={cn("min-w-0 lg:block", mobile === "work" ? "block" : "hidden")}>
+          <section ref={workSection} aria-label="Project work" className={cn("min-w-0 scroll-mt-4 lg:block", mobile === "work" ? "block" : "hidden")}>
             {work}
           </section>
         </div>
