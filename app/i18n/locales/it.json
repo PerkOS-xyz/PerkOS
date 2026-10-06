@@ -1460,6 +1460,7 @@
     },
     "header": {
       "lead": "Lead: {{name}}",
+      "coordinatedBySparky": "Coordinato da Sparky",
       "noPrimaryAgent": "Nessun lead assegnato",
       "activeSuffix": "attivo {{time}}",
       "runPmTitleWithPm": "Il tuo Capo Team pianifica l'obiettivo e distribuisce il lavoro",

@@ -49,13 +49,13 @@ const PHASES: { id: string; labelKey: string }[] = [
  */
 export function PmSessionBanner({
   session,
-  pmAgent,
   planningAttempt,
   planningMaxAttempts,
   failureReason,
   workflowPhase,
 }: {
   session?: PmSession;
+  /** The teammate hosting the conversation; Sparky is shown as the coordinator. */
   pmAgent?: string | null;
   planningAttempt?: number;
   planningMaxAttempts?: number;
@@ -98,7 +98,7 @@ export function PmSessionBanner({
       <Icon className={cn("h-4 w-4 shrink-0", active && "animate-spin")} />
       <span className="inline-flex items-center gap-1 font-medium">
         <Compass className="h-3.5 w-3.5" />
-        {pmAgent ? `${pmAgent}` : t("components.pmBanner.teamLead")}
+        Sparky
       </span>
 
       {/* Phase pipeline: Plan → Work → Review → Done */}

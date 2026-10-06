@@ -1780,6 +1780,7 @@
     },
     "header": {
       "lead": "Lead: {{name}}",
+      "coordinatedBySparky": "Coordenado por Sparky",
       "noPrimaryAgent": "Sem lead definido",
       "activeSuffix": "ativo {{time}}",
       "runPmTitleWithPm": "O líder da sua equipe planeja a meta e distribui o trabalho",

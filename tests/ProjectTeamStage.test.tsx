@@ -59,6 +59,13 @@ describe("ProjectTeamStage", () => {
     expect(focus).toHaveBeenCalledWith(WRITER);
   });
 
+  it("shows the teammate in the lead seat as a teammate, not as the coordinator", () => {
+    render(<ProjectTeamStage agentNames={[LEAD, WRITER]} pmAgent={LEAD} tasks={[]} />);
+    expect(screen.queryByText("Coordinating the plan")).toBeNull();
+    expect(screen.queryByText("Lead")).toBeNull();
+    expect(screen.getAllByText("0 delivered")).toHaveLength(2);
+  });
+
   it("explains an empty team", () => {
     render(<ProjectTeamStage agentNames={[]} pmAgent={null} tasks={[]} />);
     expect(screen.getByText(/No teammates yet/)).toBeInTheDocument();
