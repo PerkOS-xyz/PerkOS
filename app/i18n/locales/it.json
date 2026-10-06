@@ -1686,6 +1686,22 @@
     }
   },
   "components": {
+    "taskRetry": {
+      "retry": "Riprova",
+      "retryWith": "Riprova con {{agent}}",
+      "retrying": "Nuovo tentativo…",
+      "aria": "Riprova {{task}}",
+      "ariaWith": "Riprova {{task}} con {{agent}}",
+      "toast": {
+        "retryingWith": "Nuovo tentativo con {{agent}}",
+        "retrying": "Nuovo tentativo per questa attività",
+        "afterDependencies": "Parte appena i passi precedenti sono completati.",
+        "error": "Impossibile avviare il nuovo tentativo"
+      },
+      "errors": {
+        "connectWallet": "Connetti il tuo portafoglio per riprovare questa attività."
+      }
+    },
     "kanban": {
       "todo": "Da fare",
       "inProgress": "In corso",

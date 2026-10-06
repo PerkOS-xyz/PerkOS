@@ -1696,6 +1696,22 @@
     }
   },
   "components": {
+    "taskRetry": {
+      "retry": "再試行",
+      "retryWith": "{{agent}} で再試行",
+      "retrying": "再試行中…",
+      "aria": "{{task}} を再試行",
+      "ariaWith": "{{task}} を {{agent}} で再試行",
+      "toast": {
+        "retryingWith": "{{agent}} で再試行しています",
+        "retrying": "このタスクを再試行しています",
+        "afterDependencies": "前のステップが終わりしだい開始します。",
+        "error": "再試行を開始できませんでした"
+      },
+      "errors": {
+        "connectWallet": "このタスクを再試行するにはウォレットを接続してください。"
+      }
+    },
     "kanban": {
       "todo": "未着手",
       "inProgress": "進行中",

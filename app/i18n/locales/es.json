@@ -1883,6 +1883,22 @@
     }
   },
   "components": {
+    "taskRetry": {
+      "retry": "Reintentar",
+      "retryWith": "Reintentar con {{agent}}",
+      "retrying": "Reintentando…",
+      "aria": "Reintentar {{task}}",
+      "ariaWith": "Reintentar {{task}} con {{agent}}",
+      "toast": {
+        "retryingWith": "Reintentando con {{agent}}",
+        "retrying": "Reintentando esta tarea",
+        "afterDependencies": "Empieza en cuanto terminen los pasos anteriores.",
+        "error": "No se pudo iniciar el reintento"
+      },
+      "errors": {
+        "connectWallet": "Conecta tu billetera para reintentar esta tarea."
+      }
+    },
     "kanban": {
       "todo": "Por hacer",
       "inProgress": "En curso",

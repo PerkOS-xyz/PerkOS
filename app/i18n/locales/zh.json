@@ -1686,6 +1686,22 @@
     }
   },
   "components": {
+    "taskRetry": {
+      "retry": "重试",
+      "retryWith": "让 {{agent}} 重试",
+      "retrying": "正在重试…",
+      "aria": "重试 {{task}}",
+      "ariaWith": "让 {{agent}} 重试 {{task}}",
+      "toast": {
+        "retryingWith": "正在让 {{agent}} 重试",
+        "retrying": "正在重试此任务",
+        "afterDependencies": "前置步骤完成后会立即开始。",
+        "error": "无法开始重试"
+      },
+      "errors": {
+        "connectWallet": "请先连接钱包才能重试此任务。"
+      }
+    },
     "kanban": {
       "todo": "待办",
       "inProgress": "进行中",

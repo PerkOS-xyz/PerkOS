@@ -97,7 +97,16 @@ export type TaskProgress = Pick<
   "dispatchState" | "dispatchAttempts" | "dispatchStuck" | "lastDispatchError" | "dispatchedAt"
 >;
 
-export function PendingDeliverable({ status, progress }: { status: string; progress?: TaskProgress }) {
+export function PendingDeliverable({
+  status,
+  progress,
+  retryAction,
+}: {
+  status: string;
+  progress?: TaskProgress;
+  /** Shown under a paused task so the person can hand it back to its agent. */
+  retryAction?: React.ReactNode;
+}) {
   const working = status === "In progress" || status === "Review";
   const stuck = progress?.dispatchStuck === true || progress?.dispatchState === "failed";
   const retrying = !stuck && progress?.dispatchState === "retrying";
@@ -144,6 +153,7 @@ export function PendingDeliverable({ status, progress }: { status: string; progr
           {reason}
         </p>
       ) : null}
+      {stuck && retryAction ? <div className="mt-2 flex justify-center">{retryAction}</div> : null}
     </section>
   );
 }

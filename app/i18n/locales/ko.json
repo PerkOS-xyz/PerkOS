@@ -1696,6 +1696,22 @@
     }
   },
   "components": {
+    "taskRetry": {
+      "retry": "다시 시도",
+      "retryWith": "{{agent}} 에이전트로 다시 시도",
+      "retrying": "다시 시도하는 중…",
+      "aria": "{{task}} 다시 시도",
+      "ariaWith": "{{task}} 다시 시도 ({{agent}})",
+      "toast": {
+        "retryingWith": "{{agent}} 에이전트로 다시 시도하는 중",
+        "retrying": "이 작업을 다시 시도하는 중",
+        "afterDependencies": "앞 단계가 끝나는 대로 시작해요.",
+        "error": "다시 시도를 시작하지 못했어요"
+      },
+      "errors": {
+        "connectWallet": "이 작업을 다시 시도하려면 지갑을 연결하세요."
+      }
+    },
     "kanban": {
       "todo": "할 일",
       "inProgress": "진행 중",

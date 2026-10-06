@@ -2009,6 +2009,22 @@
     }
   },
   "components": {
+    "taskRetry": {
+      "retry": "Tentar de novo",
+      "retryWith": "Tentar de novo com {{agent}}",
+      "retrying": "Tentando de novo…",
+      "aria": "Tentar {{task}} de novo",
+      "ariaWith": "Tentar {{task}} de novo com {{agent}}",
+      "toast": {
+        "retryingWith": "Tentando de novo com {{agent}}",
+        "retrying": "Tentando esta tarefa de novo",
+        "afterDependencies": "Ela começa assim que as etapas anteriores terminarem.",
+        "error": "Não foi possível tentar de novo"
+      },
+      "errors": {
+        "connectWallet": "Conecte sua carteira para tentar esta tarefa de novo."
+      }
+    },
     "kanban": {
       "todo": "Pendência",
       "inProgress": "Em andamento",
