@@ -46,3 +46,18 @@ export const chatAgentStateLabel: Record<ChatAgentOperationalState, string> = {
   unavailable: "Unavailable",
   checking: "Checking status",
 };
+
+/**
+ * The project conversation warns that the lead cannot read messages only while
+ * its live presence agrees. A failed history load on its own (an old
+ * HOST_OFFLINE answer) must not keep the warning up once the lead is back.
+ */
+export function leadOfflineBannerState(
+  hostOffline: boolean,
+  lead?: AgentLiveStatus,
+): Exclude<ChatAgentOperationalState, "online" | "checking"> | null {
+  if (!hostOffline) return null;
+  const state = chatAgentOperationalState(lead);
+  if (state === "online") return null;
+  return state === "checking" ? "unavailable" : state;
+}

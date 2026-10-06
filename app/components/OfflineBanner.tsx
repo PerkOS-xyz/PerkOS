@@ -40,14 +40,14 @@ export function OfflineBanner({
     ? `${name} is sleeping to save resources.`
     : starting
       ? `Waking ${name}…`
-      : `${name} is unavailable.`;
+      : `${name} is reconnecting.`;
   const detail = sleeping
     ? "Wake it to process your messages. Messages written now will remain queued."
     : starting
       ? "This usually takes 30–60 seconds. You can keep this page open."
       : fromCache
-        ? "Showing locally-cached messages. New messages will appear when the agent reconnects."
-        : "Messages will remain queued until the agent reconnects.";
+        ? "Showing saved messages. New ones appear as soon as it is back."
+        : "Your messages are saved and will be delivered as soon as it is back.";
   return (
     <div
       role="status"

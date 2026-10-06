@@ -63,6 +63,7 @@ import {
   type OptimisticMessage,
 } from "./ConversationMessages";
 import { OfflineBanner } from "./OfflineBanner";
+import { leadOfflineBannerState } from "../lib/chatAgentStatus";
 import { AgentOrb } from "./AgentOrb";
 import { useCoordinationLog } from "../lib/useCoordinationLog";
 
@@ -120,6 +121,8 @@ export function ProjectChatTab({
   const convId = activeConvId ?? conversationQuery.data?.convId ?? null;
   const live = useConversationLiveMessages(convId);
   const historyState = useChatHistory(convId);
+  const leadLive = pmAgent ? liveAgents[pmAgent] : undefined;
+  const leadBannerState = leadOfflineBannerState(historyState.hostOffline, leadLive);
   const liveIds = useMemo(() => new Set(live.map((message) => message.id)), [live]);
   const pending = useMemo(
     () => optimistic.filter((message) => !liveIds.has(message.id)),
@@ -486,8 +489,15 @@ export function ProjectChatTab({
             </Link>
           </div>
         ) : null}
-        {historyState.hostOffline && convId ? (
-          <OfflineBanner historyHost={`agent:${pmAgent ?? "unknown"}`} fromCache={historyState.fromCache} />
+        {leadBannerState && convId ? (
+          <OfflineBanner
+            historyHost={`agent:${pmAgent ?? "unknown"}`}
+            agentName={pmAgent ?? undefined}
+            agentState={leadBannerState}
+            fromCache={historyState.fromCache}
+            managed={Boolean(leadLive && !leadLive.external)}
+            onWake={leadLive && !leadLive.external ? () => void wakeAgentApi({ agentId: leadLive.id }).catch(() => {}) : undefined}
+          />
         ) : null}
         <ConversationMessages
           history={historyState.history}
