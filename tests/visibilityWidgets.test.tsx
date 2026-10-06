@@ -130,9 +130,10 @@ describe("PmSessionBanner", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("shows the lead, the phase pipeline, and the round", () => {
+  it("shows Sparky as the coordinator, the phase pipeline, and the round", () => {
     render(<PmSessionBanner session={session()} pmAgent="Maya" />);
-    expect(screen.getByText("Maya")).toBeInTheDocument();
+    expect(screen.getByText("Sparky")).toBeInTheDocument();
+    expect(screen.queryByText("Maya")).toBeNull();
     expect(screen.getByText("Plan")).toBeInTheDocument();
     expect(screen.getByText("Work")).toBeInTheDocument();
     expect(screen.getByText("Review")).toBeInTheDocument();
@@ -175,7 +176,7 @@ describe("PmSessionBanner", () => {
       />,
     );
     expect(screen.getByText(/No team lead designated/)).toBeInTheDocument();
-    expect(screen.getByText("Team lead")).toBeInTheDocument();
+    expect(screen.getByText("Sparky")).toBeInTheDocument();
   });
 });
 
