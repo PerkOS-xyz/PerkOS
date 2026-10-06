@@ -5,14 +5,11 @@ import { ArrowRight, Bot, Check, CircleAlert, Clock3, Database, Radio, Sparkles 
 
 import type { Task } from "../lib/perkosApi";
 import type { AgentLiveStatus } from "../lib/useWalletAgents";
+import { AgentOrb } from "./AgentOrb";
 import { agentColor } from "./charts";
 import { cn } from "@/lib/utils";
 
 const MAX_TASKS_PER_AGENT = 4;
-
-function initials(name: string) {
-  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "AI";
-}
 
 function taskState(task: Task) {
   if (task.status === "Done") return { label: "Done", icon: Check, tone: "text-emerald-300 border-emerald-400/25 bg-emerald-400/10" };
@@ -28,8 +25,8 @@ function AgentColumn({ name, isPM, tasks, live, projectId }: { name: string; isP
   return (
     <article className="relative min-w-[220px] flex-1 basis-56" data-testid={`stage-agent-${name}`}>
       <div className="relative z-10 flex flex-col items-center text-center">
-        <div className="grid h-14 w-14 place-items-center rounded-full border bg-[#0d0a16] text-sm font-semibold text-white shadow-[0_0_24px_var(--agent-glow)]" style={{ borderColor: color, "--agent-glow": agentColor(name, 0.28) } as React.CSSProperties}>
-          {initials(name)}
+        <div className="grid h-14 w-14 place-items-center rounded-full border bg-[#0d0a16] shadow-[0_0_24px_var(--agent-glow)]" style={{ borderColor: color, "--agent-glow": agentColor(name, 0.28) } as React.CSSProperties}>
+          <AgentOrb name={name} size={50} />
         </div>
         <div className="mt-2 flex items-center gap-1.5">
           <strong className="max-w-[160px] truncate text-xs text-foreground">{name}</strong>

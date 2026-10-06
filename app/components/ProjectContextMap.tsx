@@ -69,7 +69,9 @@ export function ProjectKnowledgeGraph({
 }: CommonProps & { agentNames: string[]; externalSystems?: string[] }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
-  const [showCompleted, setShowCompleted] = useState(false);
+  // A finished project shows its finished work unless the viewer hides it.
+  const [showCompletedChoice, setShowCompleted] = useState<boolean | null>(null);
+  const showCompleted = showCompletedChoice ?? (tasks.length > 0 && tasks.every((task) => task.status === "Done"));
   const [view, setView] = useState<"stage" | "graph">("stage");
 
   const { nodes, edges, hiddenTasks } = useMemo(() => {
