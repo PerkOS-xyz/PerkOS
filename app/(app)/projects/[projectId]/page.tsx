@@ -277,7 +277,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
                 />
               }
               summary={<ProjectSummary detail={liveDetail} />}
-              initialStage={initialTab === "map" ? "workflow" : "team"}
+              initialStage={initialTab === "map" ? "workflow" : liveDetail.project.workflow?.phase === "complete" ? "knowledge" : "team"}
               initialMobile={initialTab === "chat" ? "talk" : searchParams.get("tab") ? "work" : "talk"}
               counts={{
                 working: liveDetail.tasks.filter((t) => t.status === "In progress").length,

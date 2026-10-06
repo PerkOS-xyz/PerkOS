@@ -88,11 +88,29 @@ export function ProjectLiveLayout({
     });
   }
 
-  const switcher: { id: MobileView; label: string; badge: string; Icon: typeof Users }[] = [
-    { id: "talk", label: "Conversation", badge: "Sparky", Icon: MessageSquare },
+  // Knowledge sits next to the conversation, the team and the tasks: on
+  // phones it is one tap away and opens the team area on the knowledge stage.
+  const switcher: { id: MobileView | "knowledge"; label: string; badge: string; Icon: typeof Users }[] = [
+    { id: "talk", label: "Chat", badge: "Sparky", Icon: MessageSquare },
     { id: "team", label: "Team", badge: counts.working > 0 ? `${counts.working} working` : "idle", Icon: Users },
     { id: "work", label: "Tasks", badge: `${counts.done}/${counts.total} done`, Icon: CircleDot },
+    { id: "knowledge", label: "Knowledge", badge: counts.done > 0 ? `${counts.done} learned` : "growing", Icon: Network },
   ];
+  const switcherActive = (id: MobileView | "knowledge") =>
+    id === "knowledge"
+      ? mobile === "team" && stageView === "knowledge"
+      : id === "team"
+        ? mobile === "team" && stageView !== "knowledge"
+        : mobile === id;
+  const selectArea = (id: MobileView | "knowledge") => {
+    if (id === "knowledge") {
+      setStageView("knowledge");
+      setMobile("team");
+    } else {
+      if (id === "team" && stageView === "knowledge") setStageView("team");
+      setMobile(id);
+    }
+  };
 
   return (
     <div className="flex min-w-0 flex-col gap-4">
@@ -104,11 +122,11 @@ export function ProjectLiveLayout({
           <button
             key={id}
             type="button"
-            aria-pressed={mobile === id}
-            onClick={() => setMobile(id)}
+            aria-pressed={switcherActive(id)}
+            onClick={() => selectArea(id)}
             className={cn(
-              "flex min-h-11 flex-1 flex-col items-center justify-center rounded-lg text-xs transition-colors",
-              mobile === id ? "bg-primary/15 text-foreground" : "text-muted-foreground",
+              "flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center rounded-lg text-xs transition-colors",
+              switcherActive(id) ? "bg-primary/15 text-foreground" : "text-muted-foreground",
             )}
           >
             <span className="inline-flex items-center gap-1.5 font-medium">
