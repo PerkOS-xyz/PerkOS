@@ -2600,6 +2600,31 @@ export async function mentionAgent(input: {
   });
 }
 
+/**
+ * Hand the owner's message to Sparky, who answers in the project chat and
+ * coordinates the team. False when Sparky does not answer here (an older API,
+ * or the team lead plans), so the caller delivers the message to the lead.
+ */
+export async function messageSparky(input: {
+  projectId: string;
+  text: string;
+  convId?: string;
+  owner?: string;
+}): Promise<boolean> {
+  const { authedFetch } = await import("./apiClient");
+  try {
+    const res = await authedFetch(`/api/projects/${input.projectId}/sparky/messages`, {
+      method: "POST",
+      body: JSON.stringify({ text: input.text, convId: input.convId, owner: input.owner }),
+    });
+    if (!res.ok) return false;
+    const body = (await res.json().catch(() => ({}))) as { handled?: boolean };
+    return body.handled === true;
+  } catch {
+    return false;
+  }
+}
+
 export type ApprovePlanResult = {
   /** New status after approval (materialized when tasks were created). */
   status: PlanStatus | string;
