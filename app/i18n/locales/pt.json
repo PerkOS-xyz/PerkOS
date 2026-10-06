@@ -1699,6 +1699,8 @@
       "invitesRegistered_one": "Projeto criado: convite do agente {{count}} registrado",
       "invitesRegistered_other": "Projeto criado: convites do agente {{count}} registrados",
       "teamLaunched": "{{name}} lançado",
+      "teamLaunching": "{{name}} está sendo lançado",
+      "descServer": "Seus colegas de equipe continuam iniciando no PerkOS, então você pode fechar esta guia quando quiser. A página do projeto mostra o progresso.",
       "yourTeamFallback": "Sua equipe",
       "descNoAgents": "Adicione agentes a qualquer momento na guia Agentes.",
       "descExisting": "Os agentes selecionados mantiveram suas identidades e foram atribuídos ao projeto.",
@@ -1758,6 +1760,11 @@
   },
   "projectRoom": {
     "backToProjects": "Voltar para os projetos",
+    "launch": {
+      "launching": "Lançando sua equipe · {{launched}} de {{total}} a caminho",
+      "partial": "{{launched}} de {{total}} colegas de equipe entraram. Adicione {{names}} novamente quando quiser na guia Agentes.",
+      "failed": "Seus colegas de equipe não conseguiram iniciar desta vez. Adicione-os novamente na guia Agentes."
+    },
     "membersTab": {
       "note": "Pessoas com acesso a este projeto. Os editores podem editar o quadro + chat; os visualizadores são somente leitura. (Os membros da organização já têm acesso.)"
     },

@@ -1380,6 +1380,8 @@
       "invitesRegistered_one": "Progetto creato: {{count}} invito agente registrato",
       "invitesRegistered_other": "Progetto creato: {{count}} inviti agente registrati",
       "teamLaunched": "{{name}} avviato",
+      "teamLaunching": "{{name}} è in fase di avvio",
+      "descServer": "I tuoi compagni di squadra continuano ad avviarsi su PerkOS, quindi puoi chiudere questa scheda quando vuoi. La pagina del progetto mostra i loro progressi.",
       "yourTeamFallback": "Il tuo team",
       "descNoAgents": "Aggiungi agenti in qualsiasi momento dalla scheda Agenti.",
       "descInvite": "Apri ogni agente per copiare il suo prompt di onboarding e collegare il tuo runtime.",
@@ -1438,6 +1440,11 @@
   },
   "projectRoom": {
     "backToProjects": "Torna ai progetti",
+    "launch": {
+      "launching": "Avvio del tuo team · {{launched}} di {{total}} in arrivo",
+      "partial": "{{launched}} compagni di squadra su {{total}} si sono uniti. Aggiungi di nuovo {{names}} quando vuoi dalla scheda Agenti.",
+      "failed": "I tuoi compagni di squadra non sono riusciti ad avviarsi questa volta. Aggiungili di nuovo dalla scheda Agenti."
+    },
     "membersTab": {
       "note": "Le persone con accesso a questo progetto. Gli editor possono modificare bacheca e chat; i visualizzatori hanno accesso in sola lettura. (I membri dell'organizzazione hanno già accesso.)"
     },

@@ -1380,6 +1380,8 @@
       "invitesRegistered_one": "项目已创建,已注册 {{count}} 个智能体邀请",
       "invitesRegistered_other": "项目已创建,已注册 {{count}} 个智能体邀请",
       "teamLaunched": "{{name}} 已启动",
+      "teamLaunching": "{{name}} 正在启动",
+      "descServer": "你的团队成员会在 PerkOS 上继续启动,你可以随时关闭此标签页。项目页面会显示他们的进度。",
       "yourTeamFallback": "你的团队",
       "descNoAgents": "你可以随时从“智能体”标签页为它添加智能体。",
       "descInvite": "打开每个智能体,复制它的引导提示词,连接你自己的运行环境。",
@@ -1438,6 +1440,11 @@
   },
   "projectRoom": {
     "backToProjects": "返回项目列表",
+    "launch": {
+      "launching": "正在启动你的团队 · {{total}} 位中已有 {{launched}} 位在路上",
+      "partial": "{{total}} 位团队成员中已有 {{launched}} 位加入。你可以随时从“智能体”标签页重新添加 {{names}}。",
+      "failed": "这次团队成员未能启动。请从“智能体”标签页重新添加他们。"
+    },
     "membersTab": {
       "note": "有权访问此项目的人员。编辑者可以编辑看板和聊天;查看者仅可查看。(组织成员已自动拥有访问权限。)"
     },
