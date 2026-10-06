@@ -47,6 +47,8 @@ async function startCustomTeam() {
     </QueryClientProvider>,
   );
   fireEvent.click(screen.getByText("Pick your roles"));
+  // A custom team starts empty (Sparky coordinates); add one specialist.
+  fireEvent.click(screen.getByRole("button", { name: /Researcher/ }));
   fireEvent.change(screen.getByLabelText("Name your project"), { target: { value: "Harbor Tea" } });
   // Let the access checks resolve before launching.
   await new Promise((resolve) => setTimeout(resolve, 0));
@@ -60,6 +62,20 @@ beforeEach(() => {
   mock.launchAgent.mockImplementation(async (input: { name: string }) => ({ result: { agent: { name: input.name } } }));
   mock.assignAgentsToProject.mockResolvedValue({ added: 1, total: 1 });
   mock.setProjectPm.mockResolvedValue(undefined);
+});
+
+describe("NewProjectWizard custom team", () => {
+  it("starts with no lead role and keeps Start off until a specialist is added", async () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <NewProjectWizard />
+      </QueryClientProvider>,
+    );
+    fireEvent.click(screen.getByText("Pick your roles"));
+    expect(screen.queryByText("Team Lead")).toBeNull();
+    expect(screen.getByText("Sparky coordinates your team")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Start your team/ })).toBeDisabled();
+  });
 });
 
 describe("NewProjectWizard launch", () => {
