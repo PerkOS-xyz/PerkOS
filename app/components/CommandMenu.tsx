@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useAppAccount } from "../lib/useAppAccount";
 import { useWalletSession } from "../lib/useWalletSession";
+import { letterShortcutAllowed } from "../lib/keyboardShortcuts";
 import {
   ArrowRight,
   Bot,
@@ -122,6 +123,9 @@ export function CommandMenu() {
         return;
       }
       if (open) return; // don't interfere with the menu's own input
+      // Letters typed while a button, link or widget still holds focus (for
+      // example right after clicking Send) are text, not a shortcut.
+      if (!letterShortcutAllowed(e)) return;
 
       const key = e.key.toLowerCase();
       if (!/^[a-z]$/.test(key)) {
