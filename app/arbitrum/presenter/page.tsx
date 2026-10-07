@@ -84,14 +84,14 @@ export default function ArbitrumPresenterPage() {
   const nextSlide = ARBITRUM_SLIDES[current + 1];
 
   return (
-    <main className="min-h-screen bg-[#0D0D14] text-[#F5F4F8]">
+    <main className="min-h-screen bg-[#070A08] text-[#F5F4F8]">
       <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-6 px-6 py-6">
-        <header className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#2A2935] bg-[#17161F] px-6 py-4">
+        <header className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#1E2B23] bg-[#0E1511] px-6 py-4">
           <div className="flex items-center gap-4">
             <span className="font-mono text-4xl font-bold tabular-nums">
               {fmt(elapsed)}
             </span>
-            <span className="font-mono text-sm text-[#B0ACD9]">
+            <span className="font-mono text-sm text-[#8E9A92]">
               / {fmt(TOTAL_BUDGET)}
             </span>
             <span
@@ -109,7 +109,7 @@ export default function ArbitrumPresenterPage() {
             <button
               type="button"
               onClick={() => setRunning((r) => !r)}
-              className="inline-flex items-center gap-2 rounded-full bg-[#EC1B69] px-5 py-2 text-sm font-semibold text-white"
+              className="inline-flex items-center gap-2 rounded-full bg-[#7CF0A2] px-5 py-2 text-sm font-semibold text-[#070A08]"
             >
               {running ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
               {running ? "Pause" : elapsed > 0 ? "Resume" : "Start clock"}
@@ -121,7 +121,7 @@ export default function ArbitrumPresenterPage() {
                 setRunning(false);
               }}
               aria-label="Reset clock"
-              className="grid h-9 w-9 place-items-center rounded-full border border-[#2A2935] text-[#B0ACD9] hover:text-white"
+              className="grid h-9 w-9 place-items-center rounded-full border border-[#1E2B23] text-[#8E9A92] hover:text-white"
             >
               <RotateCcw className="h-4 w-4" />
             </button>
@@ -132,30 +132,30 @@ export default function ArbitrumPresenterPage() {
           <section className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-semibold">
-                <span className="mr-3 font-mono text-[#FF8AB4]">
+                <span className="mr-3 font-mono text-[#7CF0A2]">
                   {String(current + 1).padStart(2, "0")}
                 </span>
                 {slide.title}
               </h1>
-              <span className="font-mono text-sm text-[#B0ACD9]">
+              <span className="font-mono text-sm text-[#8E9A92]">
                 budget {fmt(slide.budgetSeconds)}
               </span>
             </div>
-            <div className="flex-1 rounded-2xl border border-[#2A2935] bg-[#17161F] p-6">
+            <div className="flex-1 rounded-2xl border border-[#1E2B23] bg-[#0E1511] p-6">
               <p className="text-[19px] leading-relaxed text-[#E8E6F2]">
                 {slide.notes}
               </p>
             </div>
-            <div className="flex items-center justify-between rounded-2xl border border-[#2A2935] bg-[#17161F] px-6 py-4">
+            <div className="flex items-center justify-between rounded-2xl border border-[#1E2B23] bg-[#0E1511] px-6 py-4">
               <button
                 type="button"
                 onClick={() => goTo(current - 1)}
                 disabled={current === 0}
-                className="inline-flex items-center gap-2 rounded-full border border-[#2A2935] px-5 py-2 text-sm font-semibold text-[#B0ACD9] disabled:opacity-30"
+                className="inline-flex items-center gap-2 rounded-full border border-[#1E2B23] px-5 py-2 text-sm font-semibold text-[#8E9A92] disabled:opacity-30"
               >
                 <ArrowLeft className="h-4 w-4" /> Prev
               </button>
-              <span className="text-sm text-[#B0ACD9]">
+              <span className="text-sm text-[#8E9A92]">
                 Next up:{" "}
                 <span className="font-semibold text-white">
                   {nextSlide ? nextSlide.title : "Q&A, you are done"}
@@ -165,7 +165,7 @@ export default function ArbitrumPresenterPage() {
                 type="button"
                 onClick={() => goTo(current + 1)}
                 disabled={current === ARBITRUM_SLIDES.length - 1}
-                className="inline-flex items-center gap-2 rounded-full bg-[#EC1B69] px-5 py-2 text-sm font-semibold text-white disabled:opacity-30"
+                className="inline-flex items-center gap-2 rounded-full bg-[#7CF0A2] px-5 py-2 text-sm font-semibold text-[#070A08] disabled:opacity-30"
               >
                 Next <ArrowRight className="h-4 w-4" />
               </button>
@@ -173,7 +173,7 @@ export default function ArbitrumPresenterPage() {
           </section>
 
           <aside className="flex flex-col gap-2 overflow-y-auto">
-            <p className="text-xs uppercase tracking-wider text-[#B0ACD9]">
+            <p className="text-xs uppercase tracking-wider text-[#8E9A92]">
               Jump to slide
             </p>
             {ARBITRUM_SLIDES.map((s, i) => (
@@ -184,8 +184,8 @@ export default function ArbitrumPresenterPage() {
                 className={
                   "flex items-center gap-3 rounded-xl border px-4 py-2.5 text-left text-sm transition-colors " +
                   (i === current
-                    ? "border-[#EC1B69] bg-[#EC1B69]/10 text-white"
-                    : "border-[#2A2935] text-[#B0ACD9] hover:border-[#EC1B69]/40 hover:text-white")
+                    ? "border-[#7CF0A2] bg-[#7CF0A2]/10 text-white"
+                    : "border-[#1E2B23] text-[#8E9A92] hover:border-[#7CF0A2]/40 hover:text-white")
                 }
               >
                 <span className="font-mono text-xs">
@@ -199,7 +199,7 @@ export default function ArbitrumPresenterPage() {
             ))}
             <Link
               href="/arbitrum"
-              className="mt-2 rounded-xl border border-[#2A2935] px-4 py-2.5 text-center text-sm text-[#B0ACD9] hover:text-white"
+              className="mt-2 rounded-xl border border-[#1E2B23] px-4 py-2.5 text-center text-sm text-[#8E9A92] hover:text-white"
             >
               Open the deck window
             </Link>

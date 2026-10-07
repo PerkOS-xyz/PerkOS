@@ -124,10 +124,10 @@ export default function ArbitrumPitchPage() {
   if (presenting) {
     const Slide = ARBITRUM_SLIDES[current].Component;
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0D0D14]">
-        <div className="absolute inset-x-0 top-0 z-20 h-1 bg-[#17161F]">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#070A08]">
+        <div className="absolute inset-x-0 top-0 z-20 h-1 bg-[#0E1511]">
           <div
-            className="h-full bg-[#EC1B69] transition-[width] duration-300"
+            className="h-full bg-[#7CF0A2] transition-[width] duration-300"
             style={{ width: `${((current + 1) / ARBITRUM_SLIDES.length) * 100}%` }}
           />
         </div>
@@ -136,7 +136,7 @@ export default function ArbitrumPitchPage() {
           <button
             type="button"
             aria-label="Resume presentation"
-            className="absolute inset-0 z-30 bg-[#0D0D14]"
+            className="absolute inset-0 z-30 bg-[#070A08]"
             onClick={() => setBlanked(false)}
           />
         ) : null}
@@ -177,11 +177,11 @@ export default function ArbitrumPitchPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0D0D14] pb-24 text-[#F5F4F8]">
-      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[#2A2935] bg-[#0D0D14]/90 px-6 py-4 backdrop-blur">
+    <main className="min-h-screen bg-[#070A08] pb-24 text-[#F5F4F8]">
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[#1E2B23] bg-[#070A08]/90 px-6 py-4 backdrop-blur">
         <Link href="/" className="flex items-center gap-3">
           <Image src="/perkos-header.png" alt="PerkOS" width={120} height={40} />
-          <span className="rounded-full border border-[#2A2935] px-2.5 py-0.5 text-[11px] uppercase tracking-wider text-[#B0ACD9]">
+          <span className="rounded-full border border-[#1E2B23] px-2.5 py-0.5 text-[11px] uppercase tracking-wider text-[#8E9A92]">
             Arbitrum · Pre-seed
           </span>
         </Link>
@@ -189,7 +189,7 @@ export default function ArbitrumPitchPage() {
           <Link
             href="/arbitrum/presenter"
             target="_blank"
-            className="inline-flex items-center gap-2 rounded-full border border-[#2A2935] px-5 py-2.5 text-sm font-semibold text-[#B0ACD9] transition-colors hover:border-[#EC1B69]/50 hover:text-white"
+            className="inline-flex items-center gap-2 rounded-full border border-[#1E2B23] px-5 py-2.5 text-sm font-semibold text-[#8E9A92] transition-colors hover:border-[#7CF0A2]/50 hover:text-white"
           >
             <NotebookPen className="h-4 w-4" />
             Presenter notes
@@ -197,7 +197,7 @@ export default function ArbitrumPitchPage() {
           <button
             type="button"
             onClick={() => enterPresent(0)}
-            className="inline-flex items-center gap-2 rounded-full bg-[#EC1B69] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_0_30px_-8px_rgba(236,27,105,0.9)] transition-opacity hover:opacity-90"
+            className="inline-flex items-center gap-2 rounded-full bg-[#7CF0A2] px-6 py-2.5 text-sm font-semibold text-[#070A08] shadow-[0_0_30px_-8px_rgba(124,240,162,0.55)] transition-opacity hover:opacity-90"
           >
             <MonitorPlay className="h-4 w-4" />
             Present
@@ -247,7 +247,7 @@ function ScaledSlide({
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="font-mono text-xs text-[#B0ACD9]">
+      <span className="font-mono text-xs text-[#8E9A92]">
         {String(index + 1).padStart(2, "0")} · {title}
       </span>
       <div
@@ -258,7 +258,7 @@ function ScaledSlide({
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") onPresent();
         }}
-        className="group relative cursor-pointer overflow-hidden rounded-2xl border border-[#2A2935] transition-colors hover:border-[#EC1B69]/50"
+        className="group relative cursor-pointer overflow-hidden rounded-2xl border border-[#1E2B23] transition-colors hover:border-[#7CF0A2]/50"
         style={{
           height: scale > 0 ? H * scale : undefined,
           aspectRatio: scale > 0 ? undefined : "16/9",

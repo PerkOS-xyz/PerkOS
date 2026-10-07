@@ -17,19 +17,22 @@ import {
 export const W = 1920;
 export const H = 1080;
 
-const BG = "#0D0D14";
-const ELEV = "#17161F";
-const BORDER = "#2A2935";
+const BG = "#070A08";
+const ELEV = "#0E1511";
+const BORDER = "#1E2B23";
 const FG = "#F5F4F8";
-const LAV_T = "#B0ACD9";
-const PINK_T = "#FF8AB4";
-const PINK = "#EC1B69";
+const MUTED = "#8E9A92";
+const ACCENT_T = "#7CF0A2";
+const ACCENT = "#7CF0A2";
+// EQLTY palette (eqlty.perkos.xyz): dark green field with soft glows.
+const GLOW =
+  "radial-gradient(circle at 82% 16%, rgba(57, 145, 82, 0.13), transparent 28%), radial-gradient(circle at 8% 92%, rgba(196, 255, 42, 0.05), transparent 30%)";
 
 function Frame({ children }: { children: ReactNode }) {
   return (
     <div
       className="relative box-border flex flex-col overflow-hidden"
-      style={{ width: W, height: H, background: BG, color: FG, padding: 80 }}
+      style={{ width: W, height: H, background: `${GLOW}, ${BG}`, color: FG, padding: 80 }}
     >
       {children}
     </div>
@@ -39,10 +42,10 @@ function Frame({ children }: { children: ReactNode }) {
 function Kicker({ children }: { children: ReactNode }) {
   return (
     <div className="flex items-center gap-4">
-      <span className="h-[4px] w-14 rounded-full" style={{ background: PINK }} />
+      <span className="h-[4px] w-14 rounded-full" style={{ background: ACCENT }} />
       <span
         className="text-[20px] font-semibold uppercase"
-        style={{ color: PINK_T, letterSpacing: "0.08em" }}
+        style={{ color: ACCENT_T, letterSpacing: "0.08em" }}
       >
         {children}
       </span>
@@ -50,11 +53,44 @@ function Kicker({ children }: { children: ReactNode }) {
   );
 }
 
+function EqltyMark({ size, wordmark }: { size: number; wordmark: number }) {
+  return (
+    <div className="flex items-center gap-4">
+      <Image src="/eqlty-logo-mark.png" alt="EQLTY" width={size} height={size} />
+      <span
+        className="font-semibold tracking-tight"
+        style={{ fontSize: wordmark, color: FG }}
+      >
+        EQLTY
+      </span>
+    </div>
+  );
+}
+
+/** Chain shown as a labelled pill, the way eqlty.perkos.xyz shows it. */
+function ChainPill() {
+  return (
+    <span
+      className="inline-flex items-center gap-3 rounded-full border px-5 py-2 font-mono text-[18px] uppercase"
+      style={{ borderColor: "rgba(124, 240, 162, 0.35)", color: ACCENT, letterSpacing: "0.08em" }}
+    >
+      <span className="h-2.5 w-2.5 rounded-full" style={{ background: ACCENT }} />
+      Robinhood Chain
+    </span>
+  );
+}
+
 function Footer() {
   return (
     <div className="mt-auto flex items-center justify-between pt-8">
-      <Image src="/perkos-header.png" alt="PerkOS" width={140} height={30} />
-      <span className="text-[18px]" style={{ color: LAV_T }}>
+      <div className="flex items-center gap-6">
+        <EqltyMark size={36} wordmark={22} />
+        <span className="text-[16px]" style={{ color: MUTED }}>
+          powered by
+        </span>
+        <Image src="/perkos-header.png" alt="PerkOS" width={120} height={26} />
+      </div>
+      <span className="text-[18px]" style={{ color: MUTED }}>
         perkos.xyz/arbitrum
       </span>
     </div>
@@ -64,6 +100,10 @@ function Footer() {
 function SlideHero() {
   return (
     <Frame>
+      <div className="mb-14 flex items-center justify-between">
+        <EqltyMark size={88} wordmark={44} />
+        <ChainPill />
+      </div>
       <Kicker>Company pitch · Pre-seed</Kicker>
       <h1
         className="mt-10 max-w-[1500px] font-semibold tracking-tight"
@@ -73,7 +113,7 @@ function SlideHero() {
         <br />
         You approve. Then you can buy.
       </h1>
-      <p className="mt-8 max-w-[1200px] text-[28px]" style={{ color: LAV_T }}>
+      <p className="mt-8 max-w-[1200px] text-[28px]" style={{ color: MUTED }}>
         <strong style={{ color: FG }}>EQLTY</strong> is the app.{" "}
         <strong style={{ color: FG }}>PerkOS</strong> is the agent
         infrastructure underneath. Live on{" "}
@@ -84,30 +124,75 @@ function SlideHero() {
   );
 }
 
+function SlideAudience() {
+  return (
+    <Frame>
+      <Kicker>Who it is for</Kicker>
+      <h2 className="mt-10 max-w-[1500px] text-[56px] font-semibold tracking-tight">
+        Crypto-native investors who want stock exposure guided by a clear goal.
+      </h2>
+      <div className="mt-14 grid grid-cols-3 gap-8">
+        {[
+          {
+            t: "Already on-chain",
+            d: "Uses a wallet and holds stablecoins. Wants exposure to companies like NVDA or AMZN in eligible regions.",
+          },
+          {
+            t: "Thinks in goals",
+            d: "Starts from an outcome, like tech exposure with a monthly budget, and wants the plan in plain words.",
+          },
+          {
+            t: "Keeps control",
+            d: "Holds custody, sets limits once, and approves every trade.",
+          },
+        ].map((c) => (
+          <div
+            key={c.t}
+            className="rounded-3xl border p-10"
+            style={{ borderColor: BORDER, background: ELEV }}
+          >
+            <h3 className="text-[34px] font-semibold">{c.t}</h3>
+            <p className="mt-4 text-[24px]" style={{ color: MUTED }}>
+              {c.d}
+            </p>
+          </div>
+        ))}
+      </div>
+      <p className="mt-12 text-[24px]" style={{ color: MUTED }}>
+        <strong style={{ color: ACCENT }}>First cohort:</strong> crypto-native
+        retail on Robinhood Chain. <strong style={{ color: ACCENT }}>Next:</strong>{" "}
+        people with a savings goal who want to start investing.
+      </p>
+      <Footer />
+    </Frame>
+  );
+}
+
 function SlideProblem() {
   return (
     <Frame>
-      <Kicker>Problem</Kicker>
-      <h2 className="mt-10 max-w-[1400px] text-[56px] font-semibold tracking-tight">
-        AI trading tools either hide the risk or give the bot the keys.
+      <Kicker>Their pain</Kicker>
+      <h2 className="mt-10 max-w-[1500px] text-[56px] font-semibold tracking-tight">
+        &ldquo;I want stocks from my wallet. Today that means becoming a trader
+        or trusting a bot.&rdquo;
       </h2>
       <div className="mt-14 grid grid-cols-2 gap-8">
         {[
           {
-            t: "Black-box advice",
-            d: "A chat answer with no policy, no limits, and no on-chain trail.",
+            t: "Too many steps",
+            d: "Pools, slippage, routes and signatures before a single buy.",
           },
           {
-            t: "Autonomous spend",
-            d: "A bot with a wallet. Fine until one bad decision is irreversible.",
+            t: "Advice without proof",
+            d: "AI chats answer fast, with no sources, limits or record.",
           },
           {
-            t: "No human gate",
-            d: "Most stacks optimize for speed. We optimize for an approve step.",
+            t: "Bots with the keys",
+            d: "Automation that spends on its own, where one bad call is final.",
           },
           {
-            t: "Hard to trust RWA rails",
-            d: "Stock tokens need clear limits, evidence, and a fail-closed vault.",
+            t: "Hard to check",
+            d: "No easy way to confirm a decision respected my rules before money moves.",
           },
         ].map((c) => (
           <div
@@ -116,7 +201,7 @@ function SlideProblem() {
             style={{ borderColor: BORDER, background: ELEV }}
           >
             <h3 className="text-[32px] font-semibold">{c.t}</h3>
-            <p className="mt-4 text-[24px]" style={{ color: LAV_T }}>
+            <p className="mt-4 text-[24px]" style={{ color: MUTED }}>
               {c.d}
             </p>
           </div>
@@ -157,9 +242,9 @@ function SlideLoop() {
             className="rounded-3xl border p-10"
             style={{ borderColor: BORDER, background: ELEV }}
           >
-            <c.icon className="h-12 w-12" style={{ color: PINK }} />
+            <c.icon className="h-12 w-12" style={{ color: ACCENT }} />
             <h3 className="mt-6 text-[36px] font-semibold">{c.t}</h3>
-            <p className="mt-4 text-[24px]" style={{ color: LAV_T }}>
+            <p className="mt-4 text-[24px]" style={{ color: MUTED }}>
               {c.d}
             </p>
           </div>
@@ -191,14 +276,56 @@ function SlideRoles() {
             style={{ borderColor: BORDER, background: ELEV }}
           >
             <div className="flex items-baseline gap-4">
-              <span className="text-[22px] font-semibold" style={{ color: PINK_T }}>
+              <span className="text-[22px] font-semibold" style={{ color: ACCENT_T }}>
                 {n}
               </span>
               <h3 className="text-[36px] font-semibold">{name}</h3>
             </div>
-            <p className="mt-4 text-[24px]" style={{ color: LAV_T }}>
+            <p className="mt-4 text-[24px]" style={{ color: MUTED }}>
               {job}
             </p>
+          </div>
+        ))}
+      </div>
+      <Footer />
+    </Frame>
+  );
+}
+
+function SlideEdge() {
+  const rows = [
+    ["Robinhood", "Catalog and execution", "A portable decision you can audit outside one platform."],
+    ["Uniswap", "Liquidity and routes", "Policy, a veto and a receipt before the swap."],
+    ["Social buy apps", "Speed and signals", "Deliberation, evidence and discipline."],
+    ["Trading bots", "Automation", "Human approval, on-chain limits, reasoning you can verify."],
+  ] as const;
+  return (
+    <Frame>
+      <Kicker>What sets us apart</Kicker>
+      <h2 className="mt-8 max-w-[1500px] text-[52px] font-semibold tracking-tight">
+        The decision layer between asking and executing.
+      </h2>
+      <div
+        className="mt-12 overflow-hidden rounded-3xl border"
+        style={{ borderColor: BORDER, background: ELEV }}
+      >
+        <div
+          className="grid grid-cols-[300px_340px_1fr] gap-8 px-10 py-5 text-[18px] uppercase"
+          style={{ color: MUTED, letterSpacing: "0.08em", borderBottom: `1px solid ${BORDER}` }}
+        >
+          <span>Alternative</span>
+          <span>Optimizes for</span>
+          <span style={{ color: ACCENT_T }}>EQLTY adds</span>
+        </div>
+        {rows.map(([who, focus, ours], i) => (
+          <div
+            key={who}
+            className="grid grid-cols-[300px_340px_1fr] items-center gap-8 px-10 py-6 text-[26px]"
+            style={i < rows.length - 1 ? { borderBottom: `1px solid ${BORDER}` } : undefined}
+          >
+            <span className="font-semibold">{who}</span>
+            <span style={{ color: MUTED }}>{focus}</span>
+            <span>{ours}</span>
           </div>
         ))}
       </div>
@@ -210,7 +337,10 @@ function SlideRoles() {
 function SlideWhy() {
   return (
     <Frame>
-      <Kicker>Why Arbitrum</Kicker>
+      <div className="flex items-center justify-between">
+        <Kicker>Why Arbitrum</Kicker>
+        <ChainPill />
+      </div>
       <h2 className="mt-8 max-w-[1400px] text-[52px] font-semibold tracking-tight">
         Built on Robinhood Chain because that is where the stock-token rails are.
       </h2>
@@ -223,22 +353,22 @@ function SlideWhy() {
           <li key={line} className="flex items-start gap-5 text-[28px]">
             <CheckCircle2
               className="mt-1 h-9 w-9 shrink-0"
-              style={{ color: PINK }}
+              style={{ color: ACCENT }}
             />
-            <span style={{ color: LAV_T }}>{line}</span>
+            <span style={{ color: MUTED }}>{line}</span>
           </li>
         ))}
       </ul>
-      <p className="mt-12 font-mono text-[20px]" style={{ color: PINK_T }}>
+      <p className="mt-12 font-mono text-[20px]" style={{ color: ACCENT_T }}>
         Vault 0x033f13BC2CCB53dbfBEef7594668F9cfa4A70833
       </p>
-      <p className="mt-3 font-mono text-[20px]" style={{ color: LAV_T }}>
+      <p className="mt-3 font-mono text-[20px]" style={{ color: MUTED }}>
         Live buy: 1 USDG → AMZN through the vault ·{" "}
         <a
           href="https://robinhoodchain.blockscout.com/tx/0xce325f28bc900d0a2801f7ace3e307db8da402fb3d162627c06726b45b4e7def"
           target="_blank"
           rel="noreferrer"
-          style={{ color: PINK_T }}
+          style={{ color: ACCENT_T }}
         >
           tx 0xce32…7def
         </a>
@@ -345,7 +475,7 @@ function SlideTraction() {
       <h2 className="mt-8 text-[52px] font-semibold tracking-tight">
         Closed beta, live on mainnet rails.
       </h2>
-      <p className="mt-6 max-w-[1200px] text-[26px]" style={{ color: LAV_T }}>
+      <p className="mt-6 max-w-[1200px] text-[26px]" style={{ color: MUTED }}>
         We start with a small invite cohort and a clear path to paid decisions.
       </p>
       <div className="mt-12 grid grid-cols-4 gap-6">
@@ -356,7 +486,7 @@ function SlideTraction() {
             style={{ borderColor: BORDER, background: ELEV }}
           >
             <p className="text-[40px] font-semibold">{t}</p>
-            <p className="mt-4 text-[22px]" style={{ color: LAV_T }}>
+            <p className="mt-4 text-[22px]" style={{ color: MUTED }}>
               {d}
             </p>
           </div>
@@ -415,7 +545,7 @@ function SlideRoadmap() {
             style={{ borderColor: BORDER, background: ELEV }}
           >
             <div className="flex items-baseline justify-between">
-              <span className="text-[24px] font-semibold" style={{ color: PINK_T }}>
+              <span className="text-[24px] font-semibold" style={{ color: ACCENT_T }}>
                 {q.when}
               </span>
             </div>
@@ -425,9 +555,9 @@ function SlideRoadmap() {
                 <li
                   key={item}
                   className="flex gap-3 text-[20px]"
-                  style={{ color: LAV_T }}
+                  style={{ color: MUTED }}
                 >
-                  <span style={{ color: PINK }}>·</span>
+                  <span style={{ color: ACCENT }}>·</span>
                   <span>{item}</span>
                 </li>
               ))}
@@ -447,7 +577,7 @@ function SlideAsk() {
       <h2 className="mt-10 max-w-[1400px] text-[56px] font-semibold tracking-tight">
         Raising a pre-seed of about $1.0–1.5M on a SAFE.
       </h2>
-      <p className="mt-8 max-w-[1200px] text-[28px]" style={{ color: LAV_T }}>
+      <p className="mt-8 max-w-[1200px] text-[28px]" style={{ color: MUTED }}>
         Funds the next three quarters: product usability on Robinhood Chain, controlled
         monetization of verifiable decisions, and the first operating capacity
         beyond a solo founder. Product and on-chain hardening first.
@@ -481,7 +611,7 @@ function SlideClose() {
         <br />
         You approve every trade.
       </h2>
-      <p className="mt-10 text-[30px]" style={{ color: LAV_T }}>
+      <p className="mt-10 text-[30px]" style={{ color: MUTED }}>
         eqlty.perkos.xyz · stack.perkos.xyz · perkos.xyz/arbitrum
       </p>
       <Footer />
@@ -501,23 +631,31 @@ export const ARBITRUM_SLIDES: ArbitrumSlide[] = [
   {
     hash: "hero",
     title: "Recommend · Approve · Buy",
-    budgetSeconds: 45,
+    budgetSeconds: 40,
     notes:
       "Open with the product sentence. EQLTY is the app, PerkOS is infra, Robinhood Chain is the rail. Do not digress into other products.",
     Component: SlideHero,
   },
   {
-    hash: "problem",
-    title: "Problem",
-    budgetSeconds: 60,
+    hash: "user",
+    title: "Who it is for",
+    budgetSeconds: 45,
     notes:
-      "Contrast black-box advice and bots with keys. Our wedge is the human approve gate plus on-chain limits.",
+      "Start from the user. Crypto-native investor, already holds stablecoins, wants stock exposure from a goal and keeps custody. First cohort on Robinhood Chain.",
+    Component: SlideAudience,
+  },
+  {
+    hash: "problem",
+    title: "Their pain",
+    budgetSeconds: 45,
+    notes:
+      "Read the quote in their voice. Too many steps, advice without proof, bots with keys, nothing to check before money moves.",
     Component: SlideProblem,
   },
   {
     hash: "loop",
     title: "Product loop",
-    budgetSeconds: 60,
+    budgetSeconds: 50,
     notes:
       "Walk Recommend → Approve → Buy once. Emphasize that buy is optional and gated.",
     Component: SlideLoop,
@@ -525,15 +663,23 @@ export const ARBITRUM_SLIDES: ArbitrumSlide[] = [
   {
     hash: "roles",
     title: "Four roles",
-    budgetSeconds: 60,
+    budgetSeconds: 45,
     notes:
       "Scout finds, Risk vetoes, Trader is the only spend role, Auditor reconciles. Mention fail-closed vault.",
     Component: SlideRoles,
   },
   {
+    hash: "edge",
+    title: "What sets us apart",
+    budgetSeconds: 50,
+    notes:
+      "Robinhood and Uniswap solve access and execution. We add the decision layer before money moves: policy, veto, evidence and a receipt.",
+    Component: SlideEdge,
+  },
+  {
     hash: "why-arbitrum",
     title: "Why Robinhood Chain",
-    budgetSeconds: 45,
+    budgetSeconds: 40,
     notes:
       "Orbit chain for stock tokens + USDG. Vault and Uniswap v4 already live. Show the AMZN buy on the explorer.",
     Component: SlideWhy,
@@ -557,7 +703,7 @@ export const ARBITRUM_SLIDES: ArbitrumSlide[] = [
   {
     hash: "traction",
     title: "Closed beta",
-    budgetSeconds: 45,
+    budgetSeconds: 35,
     notes:
       "Small, deliberate cohort of ~10 active wallets. Live product and four roles. Self-funded so far.",
     Component: SlideTraction,
@@ -565,7 +711,7 @@ export const ARBITRUM_SLIDES: ArbitrumSlide[] = [
   {
     hash: "roadmap",
     title: "Next three quarters",
-    budgetSeconds: 75,
+    budgetSeconds: 60,
     notes:
       "Q4 2026 usability + paid loop. Q1 2027 retention + second desk. Q2 2027 prove company metrics.",
     Component: SlideRoadmap,
@@ -573,7 +719,7 @@ export const ARBITRUM_SLIDES: ArbitrumSlide[] = [
   {
     hash: "ask",
     title: "Pre-seed ask",
-    budgetSeconds: 60,
+    budgetSeconds: 50,
     notes:
       "Ask ~$1.0–1.5M SAFE for the next three quarters. Use of funds: product and on-chain hardening first.",
     Component: SlideAsk,
@@ -581,7 +727,7 @@ export const ARBITRUM_SLIDES: ArbitrumSlide[] = [
   {
     hash: "close",
     title: "Close",
-    budgetSeconds: 30,
+    budgetSeconds: 25,
     notes:
       "Leave them with the line: four agents, one verifiable decision, human approve every trade. Offer EQLTY demo.",
     Component: SlideClose,
