@@ -249,27 +249,58 @@ export default function ArbitrumPitchPage() {
           </p>
         </section>
 
-        {/* Traction honesty */}
+        {/* Traction / beta */}
         <section className="mt-16">
           <h2 className="text-2xl font-semibold tracking-tight">
-            Stage (pre-seed honesty)
+            Where we are (closed beta)
           </h2>
+          <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
+            We are not pretending to be at scale. We are past vaporware: the
+            product runs on mainnet rails, with a small beta cohort and a clear
+            path to paid decisions.
+          </p>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="rounded-2xl border border-border bg-card p-5">
+              <p className="text-2xl font-semibold">Live</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                EQLTY on Robinhood Chain with vault + Uniswap v4 path
+              </p>
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-5">
+              <p className="text-2xl font-semibold">4 roles</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Scout, Risk, Trader, Auditor in production desk flow
+              </p>
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-5">
+              <p className="text-2xl font-semibold">Beta</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Small invite cohort · ~10 active wallets validating the loop
+              </p>
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-5">
+              <p className="text-2xl font-semibold">Pre-seed</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Self-funded to date · raising ~$1.0–1.5M SAFE for Q1–Q3
+              </p>
+            </div>
+          </div>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <div className="rounded-2xl border border-border p-6">
-              <h3 className="font-semibold">What is real</h3>
+              <h3 className="font-semibold">Proof you can open</h3>
               <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-                <li>EQLTY live at eqlty.perkos.xyz</li>
-                <li>Mainnet path on Robinhood Chain (vault + Uniswap v4)</li>
-                <li>PerkOS agent runtimes and Stack facilitator in production</li>
-                <li>Self-funded to date; no prior outside raise</li>
+                <li>eqlty.perkos.xyz · public markets without a wallet wall</li>
+                <li>Mainnet buys documented on Robinhood Chain explorers</li>
+                <li>PerkOS Stack x402 facilitator in production</li>
+                <li>Public repo: PerkOS-xyz/PerkOS-EQLTY</li>
               </ul>
             </div>
             <div className="rounded-2xl border border-border p-6">
-              <h3 className="font-semibold">What we are not claiming</h3>
+              <h3 className="font-semibold">Honest limits</h3>
               <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-                <li>Revenue is still zero on purpose (closed beta)</li>
-                <li>No promised returns or trading alpha</li>
-                <li>Traction is early; the machine comes before growth spend</li>
+                <li>Still closed beta; not mass consumer scale yet</li>
+                <li>Charging for decisions not fully flipped on</li>
+                <li>No yield promises; product is the decision layer</li>
               </ul>
             </div>
           </div>
