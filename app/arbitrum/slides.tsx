@@ -248,6 +248,90 @@ function SlideWhy() {
   );
 }
 
+function SlideDifferentiation() {
+  return (
+    <Frame>
+      <Kicker>What differentiates us</Kicker>
+      <h2 className="mt-8 max-w-[1500px] text-[52px] font-semibold tracking-tight">
+        Not another trading bot. A committee with an on-chain gate.
+      </h2>
+      <div className="mt-12 grid grid-cols-2 gap-8">
+        {[
+          {
+            t: "Human approve is load-bearing",
+            d: "Recommendations can be strong. Spend still waits for the user. Speed is secondary to control.",
+          },
+          {
+            t: "Fail-closed vault",
+            d: "Policy and limits live in EQLTYVault. No silent spend path if Risk or the human says no.",
+          },
+          {
+            t: "Separated roles",
+            d: "Scout, Risk, Trader, Auditor. Only Trader touches the spend rail. Evidence is part of the loop.",
+          },
+          {
+            t: "Rails already live",
+            d: "Robinhood Chain + Uniswap v4 + USDG path deployed. Differentiation is product architecture, not a pitch deck claim.",
+          },
+        ].map((c) => (
+          <div
+            key={c.t}
+            className="rounded-3xl border p-8"
+            style={{ borderColor: BORDER, background: ELEV }}
+          >
+            <h3 className="text-[30px] font-semibold">{c.t}</h3>
+            <p className="mt-4 text-[24px]" style={{ color: LAV_T }}>
+              {c.d}
+            </p>
+          </div>
+        ))}
+      </div>
+      <Footer />
+    </Frame>
+  );
+}
+
+function SlideAudience() {
+  return (
+    <Frame>
+      <Kicker>Target audience</Kicker>
+      <h2 className="mt-8 max-w-[1500px] text-[52px] font-semibold tracking-tight">
+        Crypto-native users who want stock tokens without giving a bot the keys.
+      </h2>
+      <div className="mt-12 grid grid-cols-3 gap-8">
+        {[
+          {
+            t: "Primary",
+            d: "Retail and power users on Robinhood Chain who already buy or explore stock tokens and want AI help with a hard approve step.",
+          },
+          {
+            t: "Not for",
+            d: "People who want fully autonomous trading, yield promises, or black-box tips with no policy trail.",
+          },
+          {
+            t: "Secondary",
+            d: "Small desks and operators who need the same committee + vault pattern for controlled decisions.",
+          },
+        ].map((c) => (
+          <div
+            key={c.t}
+            className="rounded-3xl border p-8"
+            style={{ borderColor: BORDER, background: ELEV }}
+          >
+            <h3 className="text-[28px] font-semibold" style={{ color: PINK_T }}>
+              {c.t}
+            </h3>
+            <p className="mt-4 text-[24px]" style={{ color: LAV_T }}>
+              {c.d}
+            </p>
+          </div>
+        ))}
+      </div>
+      <Footer />
+    </Frame>
+  );
+}
+
 function SlideTraction() {
   const cards = [
     ["Live", "EQLTY on Robinhood Chain with vault + Uniswap v4 path"],
@@ -453,6 +537,22 @@ export const ARBITRUM_SLIDES: ArbitrumSlide[] = [
     notes:
       "Orbit chain for stock tokens + USDG. Vault and Uniswap v4 already live. Show the AMZN buy on the explorer.",
     Component: SlideWhy,
+  },
+  {
+    hash: "differentiation",
+    title: "What differentiates us",
+    budgetSeconds: 60,
+    notes:
+      "Contrast vs trading bots: human approve, fail-closed vault, separated roles, live rails. Do not claim first/only.",
+    Component: SlideDifferentiation,
+  },
+  {
+    hash: "audience",
+    title: "Target audience",
+    budgetSeconds: 45,
+    notes:
+      "Primary: crypto-native users who want stock tokens with a hard approve gate. Not autonomous traders. Desks are secondary.",
+    Component: SlideAudience,
   },
   {
     hash: "traction",
