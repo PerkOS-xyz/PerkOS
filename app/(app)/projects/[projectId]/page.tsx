@@ -12,7 +12,7 @@ import { useAppAccount } from "../../../lib/useAppAccount";
 import { useAdvancedFeatures } from "../../../lib/advancedFeatures";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import { Pencil, Trash2, Sparkles, Compass, Users, Zap, Play, Pause } from "lucide-react";
+import { ArrowRight, Pencil, Trash2, Sparkles, Compass, Users, Zap, Play, Pause } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -68,11 +68,10 @@ import { formatRelativeShort } from "../../../lib/format";
 import { plainPreview } from "../../../lib/plainPreview";
 import { logActivity } from "../../../lib/activityEvents";
 import { ProjectChatTab } from "../../../components/ProjectChatTab";
-import { ProjectLiveLayout } from "../../../components/ProjectLiveLayout";
+import { ProjectLiveLayout, type StageView } from "../../../components/ProjectLiveLayout";
 import { agentStarting, ProjectTeamStage } from "../../../components/ProjectTeamStage";
 import { TeamLaunchStatus } from "../../../components/TeamLaunchStatus";
 import { ProjectTemplateConfiguration } from "../../../components/ProjectTemplateConfiguration";
-import { ProjectProgress } from "../../../components/ProjectProgress";
 import { ArtizenProjectBoard, ArtizenWorkLink } from "../../../components/ArtizenProjectBoard";
 import { SearchInput, matchesQuery } from "../../../components/SearchInput";
 import { useActiveOrg } from "../../../lib/useActiveOrg";
@@ -117,6 +116,8 @@ export default function ProjectDetailPage({ params }: PageProps) {
   const [tab, setTab] = useState<Tab>(
     TABS.includes(initialTab) && initialTab !== "chat" && initialTab !== "map" ? initialTab : "tasks"
   );
+  const [manageTeam, setManageTeam] = useState(false);
+  const [requestedStage, setRequestedStage] = useState<StageView | undefined>();
 
   // Opening a work tab from a link or a button also brings it into view.
   const [workFocus, setWorkFocus] = useState(0);
@@ -192,6 +193,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
               tasks={liveDetail.tasks}
               projectId={projectId}
               ownerWallet={ownerWallet ?? undefined}
+              compact
             />
           ) : null}
           {tab === "docs" ? (
@@ -240,7 +242,11 @@ export default function ProjectDetailPage({ params }: PageProps) {
   ) : null;
 
   return (
-    <div className={cn("flex min-w-0 max-w-full flex-col overflow-x-clip", tab === "chat" ? "gap-3" : "gap-6")}>
+    <div className={cn(
+      "flex min-w-0 max-w-full flex-col overflow-x-clip",
+      tab === "chat" ? "gap-3" : "gap-6",
+      liveDetail?.project.executionMode !== "artizen-on-demand" && "lg:-mb-36 lg:h-[calc(100dvh-8rem)] lg:overflow-hidden",
+    )}>
       <Link
         href="/projects"
         className="inline-flex w-fit items-center gap-2 text-sm text-[#7975a8] hover:text-[#ececff]"
@@ -280,8 +286,22 @@ export default function ProjectDetailPage({ params }: PageProps) {
                   variant="panel"
                 />
               }
+              guidance={
+                <ProjectNextAction
+                  detail={liveDetail}
+                  onOpen={(next) => {
+                    if (next === "workflow" || next === "docs") {
+                      setRequestedStage(next);
+                      return;
+                    }
+                    if (next === "agents") setManageTeam(true);
+                    openWorkTab(next);
+                  }}
+                />
+              }
               summary={<ProjectSummary detail={liveDetail} ownerWallet={ownerWallet ?? undefined} />}
-              initialStage={initialTab === "map" ? "workflow" : "team"}
+              initialStage={initialTab === "map" ? "workflow" : initialTab === "docs" ? "docs" : "tasks"}
+              requestedStage={requestedStage}
               initialMobile={initialTab === "chat" ? "talk" : searchParams.get("tab") ? "work" : "talk"}
               workFocus={workFocus}
               counts={{
@@ -290,16 +310,20 @@ export default function ProjectDetailPage({ params }: PageProps) {
                 total: liveDetail.tasks.length,
               }}
               stage={(view, focusAgent) =>
-                view === "team" ? (
-                  <ProjectTeamStage
-                    agentNames={uniqueAgents(liveDetail.tasks, liveDetail.project.agentIds ?? [])}
-                    pmAgent={liveDetail.project.pmAgent}
+                view === "tasks" ? (
+                  <TasksTab
                     tasks={liveDetail.tasks}
-                    presence={ownerAgents}
-                    onFocusAgent={focusAgent}
+                    projectId={projectId}
+                    ownerWallet={ownerWallet ?? undefined}
                   />
                 ) : view === "workflow" ? (
-                  <MapTab detail={liveDetail} projectId={projectId} ownerWallet={ownerWallet ?? undefined} />
+                  <MapTab detail={liveDetail} projectId={projectId} ownerWallet={ownerWallet ?? undefined} compact />
+                ) : view === "docs" ? (
+                  <DocsTab
+                    detail={liveDetail}
+                    projectId={projectId}
+                    ownerWallet={ownerWallet ?? undefined}
+                  />
                 ) : (
                   <ProjectKnowledgeGraph
                     projectId={projectId}
@@ -313,8 +337,38 @@ export default function ProjectDetailPage({ params }: PageProps) {
               }
               work={
                 <div className="flex min-w-0 flex-col gap-4">
-                  <Tabs current={tab} onChange={setTab} exclude={["chat", "map"]} />
-                  {workArea}
+                  <Tabs
+                    current={tab === "tasks" || tab === "docs" ? "agents" : tab}
+                    onChange={(next) => {
+                      setTab(next);
+                      if (next === "agents") setManageTeam(false);
+                    }}
+                    exclude={["tasks", "chat", "map"]}
+                    compact
+                  />
+                  {tab === "tasks" || tab === "docs" || tab === "agents" ? (
+                    manageTeam ? (
+                      <div className="flex flex-col gap-3">
+                        <button type="button" onClick={() => setManageTeam(false)} className="w-fit text-xs font-medium text-primary hover:underline">
+                          ← Back to team overview
+                        </button>
+                        <AgentsTab detail={liveDetail} ownerWallet={ownerWallet!} />
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-3">
+                        <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => setManageTeam(true)}>
+                          Manage team
+                        </Button>
+                        <ProjectTeamStage
+                          agentNames={uniqueAgents(liveDetail.tasks, liveDetail.project.agentIds ?? [])}
+                          pmAgent={liveDetail.project.pmAgent}
+                          tasks={liveDetail.tasks}
+                          presence={ownerAgents}
+                          onFocusAgent={() => undefined}
+                        />
+                      </div>
+                    )
+                  ) : workArea}
                 </div>
               }
             />
@@ -884,17 +938,68 @@ function PrimaryAgentAvatar({ name }: { name: string | null }) {
 /** Goal, where the project stands and team workload, shown above the live stage. */
 function ProjectSummary({ detail, ownerWallet }: { detail: ProjectDetail; ownerWallet?: string }) {
   const { project, tasks } = detail;
+  const done = tasks.filter((task) => task.status === "Done").length;
+  const working = tasks.filter((task) => task.status === "In progress").length;
+  const agents = uniqueAgents(tasks, project.agentIds ?? []).length;
   return (
-    <div className="grid min-w-0 items-start gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(300px,0.85fr)]">
-      <div className="flex min-w-0 flex-col gap-3">
-        {project.goal ? (
-          <div className="rounded-lg border border-primary/25 bg-card/60 p-4">
-            <p className="text-sm leading-relaxed text-[#7975a8]">{project.goal}</p>
+    <div className="rounded-xl border border-border bg-card/60 p-3">
+      {project.goal ? <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">{project.goal}</p> : null}
+      <div className={cn("grid grid-cols-3 gap-1.5", project.goal && "mt-3 border-t border-border pt-3")}>
+        {[
+          ["Working", working],
+          ["Done", done],
+          ["Agents", agents],
+        ].map(([label, value]) => (
+          <div key={label} className="rounded-lg bg-background/55 px-2 py-2 text-center">
+            <p className="text-base font-semibold leading-none text-foreground">{value}</p>
+            <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{label}</p>
           </div>
-        ) : null}
-        <ProjectProgress detail={detail} projectId={project.id ?? ""} ownerWallet={ownerWallet} />
+        ))}
       </div>
-      {tasks.length > 0 ? <ProjectInsights tasks={tasks} /> : null}
+    </div>
+  );
+}
+
+function ProjectNextAction({
+  detail,
+  onOpen,
+}: {
+  detail: ProjectDetail;
+  onOpen: (tab: "tasks" | "docs" | "agents" | "workflow") => void;
+}) {
+  const phase = detail.project.workflow?.phase ?? "draft";
+  const hasLead = Boolean(detail.project.pmAgent);
+  const done = detail.tasks.filter((task) => task.status === "Done").length;
+  const action = !hasLead
+    ? { eyebrow: "Build your team", title: "Choose a team lead", body: "Give Sparky a lead agent so it can organize the work.", label: "Choose lead", tab: "agents" as const }
+    : phase === "awaiting_approval"
+      ? { eyebrow: "Ready for you", title: "Review the plan", body: "Sparky has organized the work and needs your approval.", label: "Review plan", tab: "docs" as const }
+      : phase === "complete"
+        ? { eyebrow: "Delivered", title: "Review the result", body: `${done} tasks are complete. Open the project deliverables.`, label: "Open deliverables", tab: "docs" as const }
+        : phase === "planning"
+          ? { eyebrow: "Sparky is working", title: "Planning the project", body: "The goal is becoming a coordinated plan. Tasks will appear here when it is ready.", label: "Watch planning", tab: "tasks" as const }
+          : phase === "planning_failed"
+            ? { eyebrow: "Needs attention", title: "Planning needs another try", body: "Review the conversation, then ask Sparky to prepare the plan again.", label: "Review tasks", tab: "tasks" as const }
+        : ["approved", "running", "pm_review"].includes(phase)
+          ? { eyebrow: "Team at work", title: "Watch the workflow", body: "See handoffs, active tasks and what each agent has produced.", label: "View workflow", tab: "workflow" as const }
+          : { eyebrow: "Start here", title: "Plan with Sparky", body: "Describe the outcome. Sparky will turn it into coordinated work.", label: "Open tasks", tab: "tasks" as const };
+
+  return (
+    <div className="rounded-xl border border-primary/30 bg-gradient-to-br from-primary/[.13] via-card/80 to-card/60 p-3">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-primary">{action.eyebrow}</p>
+        <p className="text-[10px] text-muted-foreground">Next best action</p>
+      </div>
+      <h2 className="mt-2 text-sm font-semibold text-foreground">{action.title}</h2>
+      <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-muted-foreground">{action.body}</p>
+      <button
+        type="button"
+        onClick={() => onOpen(action.tab)}
+        className="mt-2.5 inline-flex h-8 w-full items-center justify-between rounded-lg bg-primary px-3 text-xs font-semibold text-primary-foreground transition hover:brightness-110"
+      >
+        {action.label}
+        <ArrowRight className="h-3.5 w-3.5" />
+      </button>
     </div>
   );
 }
@@ -915,23 +1020,30 @@ function Tabs({
   onChange,
   onDemand = false,
   exclude = [],
+  compact = false,
 }: {
   current: Tab;
   onChange: (t: Tab) => void;
   onDemand?: boolean;
   /** Tabs shown elsewhere in the live layout (conversation, workflow stage). */
   exclude?: Tab[];
+  compact?: boolean;
 }) {
   const { t } = useTranslation();
-  const items: { id: Tab; label: string }[] = [
-    { id: "tasks", label: t("projectRoom.tabs.tasks") },
-    { id: "docs", label: t("projectRoom.tabs.docs") },
-    { id: "agents", label: t("projectRoom.tabs.agents") },
-    { id: "map", label: t("projectRoom.tabs.execution") },
-    { id: "chat", label: t("projectRoom.tabs.chat") },
-    ...(isVoiceEnabled() ? [{ id: "meetings" as const, label: "Meetings" }] : []),
-    { id: "members", label: t("projectRoom.tabs.members") },
-  ];
+  const items: { id: Tab; label: string }[] = compact
+    ? [
+        { id: "agents", label: "Team" },
+        { id: "members", label: t("projectRoom.tabs.members") },
+      ]
+    : [
+        { id: "tasks", label: t("projectRoom.tabs.tasks") },
+        { id: "docs", label: t("projectRoom.tabs.docs") },
+        { id: "agents", label: t("projectRoom.tabs.agents") },
+        { id: "map", label: t("projectRoom.tabs.execution") },
+        { id: "chat", label: t("projectRoom.tabs.chat") },
+        ...(isVoiceEnabled() ? [{ id: "meetings" as const, label: "Meetings" }] : []),
+        { id: "members", label: t("projectRoom.tabs.members") },
+      ];
 
   return (
     <div
@@ -947,11 +1059,11 @@ function Tabs({
             role="tab"
             aria-selected={active}
             onClick={() => onChange(item.id)}
-            className={`relative shrink-0 px-3 py-2 text-[11px] transition-colors sm:px-4 sm:py-3 sm:text-sm ${
+            className={cn("relative shrink-0 text-[11px] transition-colors", compact ? "flex-1 px-2 py-2.5 sm:text-xs" : "px-3 py-2 sm:px-4 sm:py-3 sm:text-sm",
               active
                 ? "text-[#ececff]"
                 : "text-[#7975a8] hover:text-[#ececff]"
-            }`}
+            )}
           >
             {item.label}
             {active ? (
@@ -982,12 +1094,14 @@ function TasksTab({
   tasks,
   projectId,
   ownerWallet,
+  compact = false,
 }: {
   tasks: Task[];
   projectId: string;
   /** For a SHARED project, the owner wallet — task writes target it (editors
    *  are permitted by the rules). Falls back to the connected wallet. */
   ownerWallet?: string;
+  compact?: boolean;
 }) {
   const { address } = useAppAccount();
   const { t } = useTranslation();
@@ -1138,24 +1252,59 @@ function TasksTab({
         </div>
       ) : null}
 
-      <KanbanBoard
-        items={kanbanItems}
-        emptyMessage={t("projectRoom.tasksTab.emptyMessage")}
-        columnExtras={createTaskCtaByColumn}
-        onMove={(itemId, nextStatus) =>
-          handleDragMove(itemId, KANBAN_TO_BACKEND[nextStatus])
-        }
-        renderCard={({ item }) => (
-          <TaskCard
-            task={item.task}
-            projectId={projectId}
-            selectable
-            checked={selected.has(item.id)}
-            onToggle={(on) => toggle(item.id, on)}
-            ownerWallet={ownerWallet}
-          />
-        )}
-      />
+      {compact ? (
+        <div className="flex flex-col gap-4">
+          {([
+            ["todo", "To do"],
+            ["in_progress", "In progress"],
+            ["done", "Done"],
+          ] as const).map(([status, label]) => {
+            const column = kanbanItems.filter((item) => item.status === status);
+            return (
+              <section key={status} aria-label={label} className="flex flex-col gap-2">
+                <header className="flex items-center justify-between px-1">
+                  <h3 className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">{label}</h3>
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">{column.length}</span>
+                </header>
+                {column.length ? column.map((item) => (
+                  <TaskCard
+                    key={item.id}
+                    task={item.task}
+                    projectId={projectId}
+                    selectable
+                    checked={selected.has(item.id)}
+                    onToggle={(on) => toggle(item.id, on)}
+                    ownerWallet={ownerWallet}
+                    compact
+                  />
+                )) : (
+                  <p className="rounded-lg border border-dashed border-border px-3 py-3 text-center text-[11px] text-muted-foreground">No tasks here</p>
+                )}
+                {status === "todo" ? createTaskCtaByColumn.todo : null}
+              </section>
+            );
+          })}
+        </div>
+      ) : (
+        <KanbanBoard
+          items={kanbanItems}
+          emptyMessage={t("projectRoom.tasksTab.emptyMessage")}
+          columnExtras={createTaskCtaByColumn}
+          onMove={(itemId, nextStatus) =>
+            handleDragMove(itemId, KANBAN_TO_BACKEND[nextStatus])
+          }
+          renderCard={({ item }) => (
+            <TaskCard
+              task={item.task}
+              projectId={projectId}
+              selectable
+              checked={selected.has(item.id)}
+              onToggle={(on) => toggle(item.id, on)}
+              ownerWallet={ownerWallet}
+            />
+          )}
+        />
+      )}
 
       <ConfirmDialog
         open={confirmDelete}
@@ -1178,6 +1327,7 @@ function TaskCard({
   checked,
   onToggle,
   ownerWallet,
+  compact = false,
 }: {
   task: Task;
   projectId: string;
@@ -1186,6 +1336,7 @@ function TaskCard({
   onToggle?: (on: boolean) => void;
   /** Owner wallet for a SHARED project (editors write to it). */
   ownerWallet?: string;
+  compact?: boolean;
 }) {
   const queryClient = useQueryClient();
   const { t } = useTranslation();
@@ -1216,8 +1367,10 @@ function TaskCard({
     },
   });
 
-  const cardClass =
-    "glow-card relative flex flex-col gap-2 rounded-md border border-primary/25 bg-[#0e0716] px-4 py-3 transition-colors hover:border-primary/50";
+  const cardClass = cn(
+    "glow-card relative flex flex-col rounded-md border border-primary/25 bg-[#0e0716] transition-colors hover:border-primary/50",
+    compact ? "gap-1.5 px-3 py-2.5" : "gap-2 px-4 py-3",
+  );
   // A paused task gets its Retry right on the card. The card is a link, so the
   // button sits beside it and the card leaves room for it at the bottom.
   const paused = taskSignal(task) === "paused";
@@ -1231,8 +1384,8 @@ function TaskCard({
 
   const inner = (
     <>
-      <div className="flex items-start justify-between gap-2 pr-14">
-        <span className="text-sm text-[#ececff]">{task.name}</span>
+      <div className={cn("flex items-start justify-between gap-2", compact ? "pr-12" : "pr-14")}>
+        <span className={cn("text-[#ececff]", compact ? "line-clamp-2 text-xs leading-relaxed" : "text-sm")}>{task.name}</span>
         <PriorityBadge priority={task.priority} />
       </div>
       <TaskSignal task={task} />
@@ -1365,10 +1518,12 @@ function MapTab({
   detail,
   projectId,
   ownerWallet,
+  compact = false,
 }: {
   detail: ProjectDetail;
   projectId: string;
   ownerWallet?: string;
+  compact?: boolean;
 }) {
   const { address } = useAppAccount();
   const { t } = useTranslation();
@@ -1391,13 +1546,14 @@ function MapTab({
         eventsLoaded={execution.loaded}
         hasSequenceGap={execution.hasSequenceGap}
         hasTelemetryError={Boolean(execution.error)}
+        compact={compact}
       />
-      <ActivityFeedCard
+      {!compact ? <ActivityFeedCard
         walletAddress={ownerWallet ?? address}
         projectId={projectId}
         max={15}
         title={t("projectRoom.mapTab.activityTitle")}
-      />
+      /> : null}
     </div>
   );
 }

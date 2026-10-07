@@ -18,15 +18,15 @@ describe("ProjectLiveLayout knowledge area", () => {
     expect(knowledge).toHaveTextContent("3 learned");
     fireEvent.click(knowledge);
     expect(knowledge).toHaveAttribute("aria-pressed", "true");
-    expect(within(areas).getByRole("button", { name: /Team/ })).toHaveAttribute("aria-pressed", "false");
+    expect(within(areas).getByRole("button", { name: /Tasks/ })).toHaveAttribute("aria-pressed", "false");
     expect(screen.getByTestId("stage-view")).toHaveTextContent("knowledge");
     expect(screen.getByRole("region", { name: "Project stage" }).className).not.toContain(" hidden");
 
-    fireEvent.click(within(areas).getByRole("button", { name: /Team/ }));
-    expect(screen.getByTestId("stage-view")).toHaveTextContent("team");
+    fireEvent.click(within(areas).getByRole("button", { name: /Tasks/ }));
+    expect(screen.getByTestId("stage-view")).toHaveTextContent("tasks");
   });
 
-  it("opens a finished project on knowledge", () => {
+  it("opens a finished project on tasks so coordination remains primary", () => {
     render(
       <ProjectLiveLayout
         conversation={<div>Conversation</div>}
@@ -35,10 +35,10 @@ describe("ProjectLiveLayout knowledge area", () => {
         counts={{ working: 0, done: 4, total: 4 }}
       />,
     );
-    expect(screen.getByTestId("stage-view")).toHaveTextContent("knowledge");
+    expect(screen.getByTestId("stage-view")).toHaveTextContent("tasks");
   });
 
-  it("keeps a project with open work on the team", () => {
+  it("keeps a project with open work on tasks", () => {
     render(
       <ProjectLiveLayout
         conversation={<div>Conversation</div>}
@@ -47,6 +47,18 @@ describe("ProjectLiveLayout knowledge area", () => {
         counts={{ working: 1, done: 2, total: 4 }}
       />,
     );
-    expect(screen.getByTestId("stage-view")).toHaveTextContent("team");
+    expect(screen.getByTestId("stage-view")).toHaveTextContent("tasks");
+  });
+
+  it("gives the center workspace its own scroll container", () => {
+    render(
+      <ProjectLiveLayout
+        conversation={<div>Conversation</div>}
+        stage={() => <div>Long document</div>}
+        work={<div>Tasks</div>}
+        counts={{ working: 0, done: 0, total: 0 }}
+      />,
+    );
+    expect(screen.getByTestId("project-stage-scroll")).toHaveClass("overflow-y-auto", "overscroll-contain");
   });
 });

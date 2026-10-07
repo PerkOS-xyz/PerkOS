@@ -357,7 +357,7 @@ export function ProjectChatTab({
         data-project-chat
         className={cn(
           "flex h-[var(--project-chat-available-height,calc(100dvh-15.5rem))] min-h-72 min-w-0 flex-col overflow-hidden rounded-md border border-border bg-background lg:h-[calc(100dvh-20rem)] lg:min-h-[28rem]",
-          panel && "rounded-2xl bg-card/70 lg:h-[var(--live-chat-height,calc(100dvh-8rem))]",
+          panel && "rounded-2xl bg-card/70 lg:h-full lg:min-h-0",
         )}
       >
         <header

@@ -21,12 +21,14 @@ describe("ProjectLiveLayout work links", () => {
     Element.prototype.scrollIntoView = scrollIntoView;
     const { rerender } = render(layout(0));
     const work = screen.getByRole("region", { name: "Project work" });
-    expect(work.className).toContain("hidden");
+    const rail = work.closest("aside");
+    expect(rail).not.toBeNull();
+    expect(rail?.className).toContain("hidden");
     expect(scrollIntoView).not.toHaveBeenCalled();
 
     rerender(layout(1));
     await act(() => new Promise((r) => requestAnimationFrame(() => r(null))));
-    expect(work.className).not.toContain(" hidden");
+    expect(rail?.className).toContain("block");
     expect(scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "start" });
   });
 });

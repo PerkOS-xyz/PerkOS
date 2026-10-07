@@ -41,10 +41,10 @@ export function SparkyDashboardWorkspace({
   const { i18n } = useTranslation();
   const text = copy(i18n.language.startsWith("es"));
   return (
-    <section className="flex min-w-0 flex-col gap-4" aria-label="Sparky and knowledge workspace">
+    <section className="flex min-w-0 flex-col gap-4 lg:grid lg:h-full lg:min-h-0 lg:grid-cols-[minmax(300px,.78fr)_minmax(0,1.22fr)]" aria-label="Sparky and knowledge workspace">
       <ChatbotPanel embedded />
 
-      <div className="flex min-w-0 flex-col gap-3">
+      <div className="flex min-w-0 flex-col gap-3 lg:min-h-0">
         <div className="rounded-xl border border-primary/25 bg-card/60 p-3">
           <div className="mb-3 flex items-center justify-between gap-3">
             <div>
@@ -81,12 +81,15 @@ export function SparkyDashboardWorkspace({
             </div>
           )}
         </div>
-        <OrganizationKnowledgeGraph
-          organizationName={organizationName}
-          ownerWallet={ownerWallet}
-          projects={projects}
-          agents={agents}
-        />
+        <div className="min-h-0 flex-1 lg:[&>section]:h-full">
+          <OrganizationKnowledgeGraph
+            organizationName={organizationName}
+            ownerWallet={ownerWallet}
+            projects={projects}
+            agents={agents}
+            compact
+          />
+        </div>
       </div>
     </section>
   );

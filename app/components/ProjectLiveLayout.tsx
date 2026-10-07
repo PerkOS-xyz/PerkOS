@@ -8,36 +8,43 @@
  */
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { CircleDot, GitBranch, MessageSquare, Network, Users } from "lucide-react";
+import { CircleDot, FileText, GitBranch, MessageSquare, Network, Users } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-export type StageView = "team" | "workflow" | "knowledge";
+export type StageView = "tasks" | "workflow" | "knowledge" | "docs";
 type MobileView = "talk" | "team" | "work";
 
 const CONVERSATION_ID = "project-conversation";
 
 const STAGE_TABS: { id: StageView; label: string; Icon: typeof Users }[] = [
-  { id: "team", label: "Team", Icon: Users },
+  { id: "tasks", label: "Tasks", Icon: CircleDot },
   { id: "workflow", label: "Workflow", Icon: GitBranch },
   { id: "knowledge", label: "Knowledge", Icon: Network },
+  { id: "docs", label: "Docs", Icon: FileText },
 ];
 
 export function ProjectLiveLayout({
   conversation,
+  guidance,
   summary,
   stage,
-  initialStage = "team",
+  initialStage = "tasks",
+  requestedStage,
   work,
   counts,
   initialMobile = "talk",
   workFocus = 0,
 }: {
   conversation: ReactNode;
+  /** Contextual next action: one recommendation, then at most two alternatives. */
+  guidance?: ReactNode;
   /** Goal, task counters and team workload: always on desktop, with Tasks on phones. */
   summary?: ReactNode;
   stage: (view: StageView, focusAgent: (name: string) => void) => ReactNode;
   initialStage?: StageView;
+  /** External recommendation/CTA can bring the canvas to a specific stage. */
+  requestedStage?: StageView;
   work: ReactNode;
   counts: { working: number; done: number; total: number };
   initialMobile?: MobileView;
@@ -45,12 +52,16 @@ export function ProjectLiveLayout({
   workFocus?: number;
 }) {
   // A finished project opens on what the team learned.
-  const [stageView, setStageView] = useState<StageView>(
-    initialStage === "team" && counts.total > 0 && counts.done === counts.total ? "knowledge" : initialStage,
-  );
+  const [stageView, setStageView] = useState<StageView>(initialStage);
   const [mobile, setMobile] = useState<MobileView>(initialMobile);
   const conversationFrame = useRef<HTMLDivElement>(null);
   const workSection = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!requestedStage) return;
+    setStageView(requestedStage);
+    setMobile("team");
+  }, [requestedStage]);
 
   // A link to a work tab lands on it: phones switch to the work area, and both
   // phones and desktop scroll it into view instead of changing a tab off screen.
@@ -108,30 +119,36 @@ export function ProjectLiveLayout({
 
   // Knowledge sits next to the conversation, the team and the tasks: on
   // phones it is one tap away and opens the team area on the knowledge stage.
-  const switcher: { id: MobileView | "knowledge"; label: string; badge: string; Icon: typeof Users }[] = [
+  const switcher: { id: MobileView | "knowledge" | "docs"; label: string; badge: string; Icon: typeof Users }[] = [
     { id: "talk", label: "Chat", badge: "Sparky", Icon: MessageSquare },
-    { id: "team", label: "Team", badge: counts.working > 0 ? `${counts.working} working` : "idle", Icon: Users },
-    { id: "work", label: "Tasks", badge: `${counts.done}/${counts.total} done`, Icon: CircleDot },
+    { id: "team", label: "Tasks", badge: `${counts.done}/${counts.total} done`, Icon: CircleDot },
+    { id: "work", label: "Team", badge: counts.working > 0 ? `${counts.working} working` : "ready", Icon: Users },
     { id: "knowledge", label: "Knowledge", badge: counts.done > 0 ? `${counts.done} learned` : "growing", Icon: Network },
+    { id: "docs", label: "Docs", badge: counts.done > 0 ? `${counts.done} ready` : "project", Icon: FileText },
   ];
-  const switcherActive = (id: MobileView | "knowledge") =>
+  const switcherActive = (id: MobileView | "knowledge" | "docs") =>
     id === "knowledge"
       ? mobile === "team" && stageView === "knowledge"
+      : id === "docs"
+        ? mobile === "team" && stageView === "docs"
       : id === "team"
-        ? mobile === "team" && stageView !== "knowledge"
+        ? mobile === "team" && stageView !== "knowledge" && stageView !== "docs"
         : mobile === id;
-  const selectArea = (id: MobileView | "knowledge") => {
+  const selectArea = (id: MobileView | "knowledge" | "docs") => {
     if (id === "knowledge") {
       setStageView("knowledge");
       setMobile("team");
+    } else if (id === "docs") {
+      setStageView("docs");
+      setMobile("team");
     } else {
-      if (id === "team" && stageView === "knowledge") setStageView("team");
+      if (id === "team" && (stageView === "knowledge" || stageView === "docs")) setStageView("tasks");
       setMobile(id);
     }
   };
 
   return (
-    <div className="flex min-w-0 flex-col gap-4">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4">
       <nav
         aria-label="Project areas"
         className="sticky top-0 z-20 -mx-4 flex gap-1 border-b border-border bg-background/90 px-4 py-2 backdrop-blur lg:hidden"
@@ -156,22 +173,31 @@ export function ProjectLiveLayout({
         ))}
       </nav>
 
-      <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-[minmax(340px,400px)_minmax(0,1fr)] xl:grid-cols-[420px_minmax(0,1fr)]">
-        <div id={CONVERSATION_ID} className={cn("min-w-0 lg:block", mobile === "talk" ? "block" : "hidden")}>
-          <div ref={conversationFrame} className="lg:sticky lg:top-4">{conversation}</div>
+      <div className="grid min-h-0 min-w-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[minmax(320px,360px)_minmax(0,1fr)_minmax(360px,400px)]">
+        <div
+          id={CONVERSATION_ID}
+          className={cn(
+            "min-w-0 lg:block lg:h-full lg:min-h-0 lg:overflow-hidden lg:rounded-2xl lg:border lg:border-cyan-300/15 lg:bg-cyan-300/[.015] lg:p-px lg:shadow-[0_0_38px_-22px_rgba(34,211,238,.62)]",
+            mobile === "talk" ? "block" : "hidden",
+          )}
+        >
+          <div
+            ref={conversationFrame}
+            className="h-full min-h-0 [&>*]:min-h-0 lg:flex lg:[&>*]:flex-1"
+          >
+            {conversation}
+          </div>
         </div>
 
-        <div className="flex min-w-0 flex-col gap-5">
-          {summary ? (
-            <section aria-label="Project summary" className={cn("min-w-0 lg:block", mobile === "work" ? "block" : "hidden")}>
-              {summary}
-            </section>
-          ) : null}
+        <div className="flex min-h-0 min-w-0 flex-col lg:h-full lg:overflow-hidden">
           <section
             aria-label="Project stage"
-            className={cn("min-w-0 rounded-2xl border border-border bg-card/70 p-4 md:p-5 lg:block", mobile === "team" ? "block" : "hidden")}
+            className={cn(
+              "min-h-0 min-w-0 flex-1 rounded-2xl border border-border bg-card/70 p-4 md:p-5 lg:flex lg:flex-col lg:overflow-hidden lg:border-primary/25 lg:bg-[linear-gradient(145deg,rgba(236,27,105,.045),rgba(14,7,22,.72)_24%)] lg:shadow-[0_0_42px_-22px_rgba(236,27,105,.68)]",
+              mobile === "team" ? "block" : "hidden",
+            )}
           >
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <div className="mb-4 flex shrink-0 flex-wrap items-center justify-between gap-2">
               <div role="tablist" className="inline-flex rounded-full border border-border bg-background/60 p-1">
                 {STAGE_TABS.map(({ id, label, Icon }) => (
                   <button
@@ -191,20 +217,36 @@ export function ProjectLiveLayout({
                 ))}
               </div>
               <p className="text-xs text-muted-foreground">
-                {stageView === "team"
-                  ? "Who is doing what right now, and who is waiting on whom."
+                {stageView === "tasks"
+                  ? "What the agents are doing, what is blocked and what has been delivered."
                   : stageView === "workflow"
                     ? "How work flows between teammates."
-                    : "How people, agents, work and sources relate."}
+                    : stageView === "knowledge"
+                      ? "How people, agents, work and sources relate."
+                      : "Plans, deliverables and project knowledge you can review and reuse."}
               </p>
             </div>
-            {stage(stageView, focusAgent)}
-          </section>
-
-          <section ref={workSection} aria-label="Project work" className={cn("min-w-0 scroll-mt-4 lg:block", mobile === "work" ? "block" : "hidden")}>
-            {work}
+            <div
+              data-testid="project-stage-scroll"
+              className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain pr-1 [scrollbar-gutter:stable]"
+            >
+              {stage(stageView, focusAgent)}
+            </div>
           </section>
         </div>
+
+        <aside
+          className={cn(
+            "min-w-0 lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:gap-3 lg:overflow-y-auto lg:rounded-2xl lg:border lg:border-violet-300/15 lg:bg-[linear-gradient(155deg,rgba(167,139,250,.045),rgba(14,7,22,.5)_30%)] lg:p-3 lg:shadow-[0_0_38px_-22px_rgba(167,139,250,.58)]",
+            mobile === "work" ? "block" : "hidden lg:flex",
+          )}
+        >
+          {guidance ? <section aria-label="Recommended next action">{guidance}</section> : null}
+          {summary ? <section aria-label="Project summary">{summary}</section> : null}
+          <section ref={workSection} aria-label="Project work" className="min-w-0 scroll-mt-4">
+            {work}
+          </section>
+        </aside>
       </div>
     </div>
   );

@@ -616,13 +616,13 @@ function EmbeddedSparkyConversation({
 
   return (
     <article
-      className="relative min-h-[620px] overflow-hidden rounded-2xl border border-primary/30 bg-[radial-gradient(circle_at_62%_38%,rgba(236,27,105,.22),transparent_30%),radial-gradient(circle_at_50%_110%,rgba(245,106,87,.14),transparent_38%),rgba(9,5,16,.92)] shadow-[0_0_45px_-28px_rgba(236,27,105,.9)]"
+      className="relative flex min-h-[560px] flex-col overflow-hidden rounded-2xl border border-primary/30 bg-[radial-gradient(circle_at_62%_38%,rgba(236,27,105,.22),transparent_30%),radial-gradient(circle_at_50%_110%,rgba(245,106,87,.14),transparent_38%),rgba(9,5,16,.92)] shadow-[0_0_45px_-28px_rgba(236,27,105,.9)] lg:h-full lg:min-h-0"
       aria-label={es ? "Conversación con Sparky" : "Conversation with Sparky"}
       data-sparky-state={voiceState}
     >
-      <div className={`relative z-10 grid min-h-[540px] gap-4 p-5 md:p-8 ${isEmpty ? "place-items-center" : "lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,.8fr)]"}`}>
+      <div className={`relative z-10 grid min-h-[460px] flex-1 gap-4 p-5 md:p-6 lg:min-h-0 lg:p-4 ${isEmpty ? "place-items-center" : "lg:grid-rows-[minmax(0,1fr)_auto]"}`}>
         {!isEmpty ? (
-          <div ref={scrollRef} className="flex max-h-[440px] min-h-0 flex-col gap-3 overflow-y-auto pr-2" aria-live="polite">
+          <div ref={scrollRef} className="order-2 flex max-h-[260px] min-h-0 flex-col gap-3 overflow-y-auto pr-2 lg:order-1 lg:max-h-none" aria-live="polite">
             {messages.map((message) => (
               <Bubble key={message.id} bubble={message} showReactions={false} />
             ))}
@@ -630,12 +630,12 @@ function EmbeddedSparkyConversation({
           </div>
         ) : null}
 
-        <div className={`flex flex-col items-center justify-center text-center ${isEmpty ? "max-w-xl" : "lg:sticky lg:top-8"}`}>
+        <div className={`flex flex-col items-center justify-center text-center ${isEmpty ? "max-w-xl" : "lg:order-2"}`}>
           <div className="relative grid place-items-center">
             <span
               aria-hidden
               className={cn(
-                "absolute h-56 w-56 rounded-full bg-primary/20 blur-3xl transition duration-500",
+                "absolute h-44 w-44 rounded-full bg-primary/20 blur-3xl transition duration-500 lg:h-32 lg:w-32",
                 voiceState === "listening" && "scale-110 bg-sky-500/25",
                 voiceState === "thinking" && "animate-pulse bg-violet-500/25",
                 voiceState === "speaking" && "scale-125 animate-pulse bg-primary/35",
@@ -644,14 +644,14 @@ function EmbeddedSparkyConversation({
             <button
               type="button"
               onClick={voiceState === "speaking" ? onInterrupt : speech.toggle}
-              className="relative h-44 w-44 rounded-[2rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary md:h-52 md:w-52"
+              className="relative h-40 w-40 rounded-[2rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary md:h-44 md:w-44 lg:h-28 lg:w-28"
               aria-label={voiceState === "speaking" ? (es ? "Interrumpir y hablar" : "Interrupt and speak") : (es ? "Hablar con Sparky" : "Talk to Sparky")}
             >
               <Image
                 src="/runtime/sparky-head.webp"
                 alt="Sparky"
                 fill
-                sizes="208px"
+                sizes="176px"
                 priority
                 className={cn(
                   "object-contain drop-shadow-[0_0_28px_rgba(236,27,105,.7)] motion-safe:animate-[pulse_4s_ease-in-out_infinite]",
@@ -662,13 +662,13 @@ function EmbeddedSparkyConversation({
               />
             </button>
           </div>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">Sparky</h1>
+          <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground lg:text-lg">Sparky</h1>
           <p className="mt-1 flex items-center gap-2 text-xs font-medium text-primary" aria-live="polite">
             <span className={cn("h-2 w-2 rounded-full bg-emerald-400", voiceState !== "idle" && "animate-pulse bg-primary")} />
             {stateLabel}
           </p>
           {isEmpty ? (
-            <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
+            <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground lg:text-xs">
               {es
                 ? "Cuéntame el resultado que necesitas. Organizaré el contexto y coordinaré a tus agentes."
                 : "Tell me the outcome you need. I’ll organize the context and coordinate your agents."}
@@ -677,7 +677,7 @@ function EmbeddedSparkyConversation({
         </div>
       </div>
 
-      <form onSubmit={onSubmit} className="relative z-20 mx-auto mb-5 w-[calc(100%-2.5rem)] max-w-3xl md:mb-7">
+      <form onSubmit={onSubmit} className="relative z-20 mx-auto mb-4 w-[calc(100%-2rem)] max-w-3xl">
         {speech.error ? (
           <p className="mb-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">{speech.error}</p>
         ) : null}
