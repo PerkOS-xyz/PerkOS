@@ -256,6 +256,60 @@ function SlideLoop() {
   );
 }
 
+function SlideApp() {
+  const shots = [
+    {
+      src: "/arbitrum/eqlty-home.jpg",
+      t: "Ask four agents",
+      d: "Say your goal in plain words.",
+    },
+    {
+      src: "/arbitrum/eqlty-markets.jpg",
+      t: "194 stock tokens",
+      d: "Live Uniswap markets on Robinhood Chain.",
+    },
+    {
+      src: "/arbitrum/rhc-amzn-buy.jpg",
+      t: "Every buy is on-chain",
+      d: "1 USDG to AMZN, confirmed on Robinhood Chain.",
+    },
+  ];
+  return (
+    <Frame>
+      <Kicker>The live app</Kicker>
+      <h2 className="mt-8 max-w-[1500px] text-[52px] font-semibold tracking-tight">
+        A real product, live on Robinhood Chain.
+      </h2>
+      <div className="mt-12 grid grid-cols-3 gap-8">
+        {shots.map((shot) => (
+          <figure
+            key={shot.src}
+            className="overflow-hidden rounded-3xl border"
+            style={{ borderColor: BORDER, background: ELEV }}
+          >
+            <div className="relative h-[330px] w-full">
+              <Image
+                src={shot.src}
+                alt={shot.t}
+                fill
+                sizes="560px"
+                className="object-cover object-top"
+              />
+            </div>
+            <figcaption className="p-7">
+              <p className="text-[28px] font-semibold">{shot.t}</p>
+              <p className="mt-2 text-[22px]" style={{ color: MUTED }}>
+                {shot.d}
+              </p>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+      <Footer />
+    </Frame>
+  );
+}
+
 function SlideRoles() {
   const roles = [
     ["01", "Scout", "Finds stock tokens you can buy and collects market data."],
@@ -576,6 +630,14 @@ export const ARBITRUM_SLIDES: ArbitrumSlide[] = [
     notes:
       "Go through Recommend, Approve, Buy once. Say that buying is optional and always needs your OK.",
     Component: SlideLoop,
+  },
+  {
+    hash: "app",
+    title: "The live app",
+    budgetSeconds: 40,
+    notes:
+      "Show the real app: ask in plain words, 194 stock tokens, and a real buy on the explorer.",
+    Component: SlideApp,
   },
   {
     hash: "roles",
