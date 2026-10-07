@@ -388,6 +388,26 @@ function tsToIso(value: unknown): string | undefined {
   return undefined;
 }
 
+/** Parse the API-owned workflow without dropping its execution identity. */
+export function parseProjectWorkflow(value: unknown): Project["workflow"] {
+  if (!value || typeof value !== "object") return undefined;
+  const workflow = value as Record<string, unknown>;
+  return {
+    phase: typeof workflow.phase === "string"
+      ? workflow.phase as NonNullable<Project["workflow"]>["phase"]
+      : "draft",
+    planId: typeof workflow.planId === "string" ? workflow.planId : undefined,
+    runId: typeof workflow.runId === "string" ? workflow.runId : undefined,
+    traceId: typeof workflow.traceId === "string" ? workflow.traceId : undefined,
+    taskIds: Array.isArray(workflow.taskIds)
+      ? workflow.taskIds.filter((id): id is string => typeof id === "string")
+      : [],
+    planningAttempt: typeof workflow.planningAttempt === "number" ? workflow.planningAttempt : undefined,
+    planningMaxAttempts: typeof workflow.planningMaxAttempts === "number" ? workflow.planningMaxAttempts : undefined,
+    failureReason: typeof workflow.failureReason === "string" ? workflow.failureReason : undefined,
+  };
+}
+
 const projectConverter: FirestoreDataConverter<Project> = {
   toFirestore(project) {
     // Drop client-only fields and Firestore-managed fields.
@@ -420,22 +440,7 @@ const projectConverter: FirestoreDataConverter<Project> = {
         lastRunAt: tsToIso(s.lastRunAt),
       };
     }
-    let workflow: Project["workflow"];
-    if (data.workflow && typeof data.workflow === "object") {
-      const value = data.workflow as Record<string, unknown>;
-      workflow = {
-        phase: typeof value.phase === "string"
-          ? value.phase as NonNullable<Project["workflow"]>["phase"]
-          : "draft",
-        planId: typeof value.planId === "string" ? value.planId : undefined,
-        taskIds: Array.isArray(value.taskIds)
-          ? value.taskIds.filter((id): id is string => typeof id === "string")
-          : [],
-        planningAttempt: typeof value.planningAttempt === "number" ? value.planningAttempt : undefined,
-        planningMaxAttempts: typeof value.planningMaxAttempts === "number" ? value.planningMaxAttempts : undefined,
-        failureReason: typeof value.failureReason === "string" ? value.failureReason : undefined,
-      };
-    }
+    const workflow = parseProjectWorkflow(data.workflow);
     return {
       id: snap.id,
       name: (data.name as string) ?? "",
