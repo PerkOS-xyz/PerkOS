@@ -14,6 +14,7 @@ import { agentColor } from "./charts";
 import { ProjectStage } from "./ProjectStage";
 import { ProjectLearnings } from "./ProjectLearnings";
 import { projectLearnings } from "../lib/projectLearnings";
+import type { ExecutionEventV1 } from "@perkos/shared-types";
 
 const W = 920;
 const H = 520;
@@ -186,13 +187,37 @@ export function ProjectKnowledgeGraph({
 }
 
 /** Runtime-oriented graph derived from the current orchestration state. */
-export function ProjectExecutionGraph({ projectId, projectName, pmAgent, workflowPhase, tasks, liveAgents }: CommonProps & { workflowPhase?: string }) {
+export function ProjectExecutionGraph({
+  projectId,
+  projectName,
+  pmAgent,
+  workflowPhase,
+  tasks,
+  liveAgents,
+  events = [],
+  eventsLoaded = false,
+  hasSequenceGap = false,
+  hasTelemetryError = false,
+}: CommonProps & {
+  workflowPhase?: string;
+  events?: ExecutionEventV1[];
+  eventsLoaded?: boolean;
+  hasSequenceGap?: boolean;
+  hasTelemetryError?: boolean;
+}) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const relevantTasks = useMemo(() => tasks.filter((task) => task.id).slice(0, MAX_TASKS), [tasks]);
   const { nodes, edges } = useMemo(() => {
     const nodes: GraphNode[] = [{ key: "goal", kind: "project", label: projectName, x: 90, y: CY, fx: -250, fy: 0, fz: 0 }];
     const edges: GraphEdge[] = [];
+    const latestByTask = new Map<string, ExecutionEventV1>();
+    events.forEach((event) => {
+      const taskId = event.payload && "taskId" in event.payload && typeof event.payload.taskId === "string"
+        ? event.payload.taskId
+        : event.subject.type === "task" ? event.subject.id : undefined;
+      if (taskId) latestByTask.set(taskId, event);
+    });
     const coordinatorKey = pmAgent ? `agent:${pmAgent}` : "gate:unassigned";
     nodes.push({ key: coordinatorKey, kind: pmAgent ? "agent" : "gate", label: pmAgent || t("components.executionGraph.unassignedLead"), x: 290, y: CY, isPM: Boolean(pmAgent), live: pmAgent ? liveAgents[pmAgent] : undefined, shape: pmAgent ? "agent-block" : "sphere", fx: -85, fy: 0, fz: 0 });
     edges.push({ from: "goal", to: coordinatorKey, color: "rgba(236,27,105,.58)", active: workflowPhase === "planning" });
@@ -221,11 +246,43 @@ export function ProjectExecutionGraph({ projectId, projectName, pmAgent, workflo
       const workerKey = `agent:${task.agent?.trim() || "unassigned"}`;
       const taskKey = `task:${task.id}`;
       nodes.push({ key: taskKey, kind: task.status === "Review" ? "gate" : "task", label: task.name, status: String(task.status), x: 780, y, href: `/projects/${encodeURIComponent(projectId)}/tasks/${encodeURIComponent(task.id)}`, shape: "task-block", fx: 245 + ownerIndex * 28, fy: (workerIndex - (workerNames.length - 1) / 2) * 78 + (ownerIndex - (ownerTasks.length - 1) / 2) * 24, fz: ownerIndex % 2 === 0 ? -34 : 34 });
-      const active = task.status === "In progress" || task.status === "Review";
+      const latest = latestByTask.get(task.id);
+      const active = latest
+        ? ["task.claimed", "task.dispatch_started", "task.dispatch_delivered", "task.started", "judge.started"].includes(String(latest.type))
+        : task.status === "In progress" || task.status === "Review";
       edges.push({ from: workerKey, to: taskKey, color: agentColor(task.agent || task.name, 0.72), dashed: task.status === "Done", active });
     });
+    const gateEvents = events.filter((event) =>
+      ["task.review_requested", "judge.started", "judge.failed", "task.retry_scheduled", "task.failed"].includes(String(event.type)),
+    ).slice(-6);
+    gateEvents.forEach((event, index) => {
+      const taskId = event.payload && "taskId" in event.payload && typeof event.payload.taskId === "string"
+        ? event.payload.taskId
+        : event.subject.type === "task" ? event.subject.id : undefined;
+      if (!taskId || !nodes.some((node) => node.key === `task:${taskId}`)) return;
+      const key = `gate:${event.eventId}`;
+      nodes.push({
+        key,
+        kind: "gate",
+        label: String(event.type).replaceAll(".", " "),
+        status: event.status,
+        x: 875,
+        y: 55 + index * 72,
+        shape: "sphere",
+        fx: 365,
+        fy: (index - (gateEvents.length - 1) / 2) * 58,
+        fz: 80,
+      });
+      edges.push({
+        from: `task:${taskId}`,
+        to: key,
+        color: event.status === "failed" ? "rgba(251,113,133,.78)" : "rgba(250,204,21,.68)",
+        dashed: event.type === "task.retry_scheduled",
+        active: index === gateEvents.length - 1,
+      });
+    });
     return { nodes, edges };
-  }, [liveAgents, pmAgent, projectId, projectName, relevantTasks, t, workflowPhase]);
+  }, [events, liveAgents, pmAgent, projectId, projectName, relevantTasks, t, workflowPhase]);
 
   return (
     <GraphSurface
@@ -233,15 +290,48 @@ export function ProjectExecutionGraph({ projectId, projectName, pmAgent, workflo
       description={t("components.executionGraph.description")}
       expanded={expanded}
       onExpandedChange={setExpanded}
-      badge={workflowPhase ? t("components.executionGraph.phase", { phase: workflowPhase }) : undefined}
+      badge={hasTelemetryError
+        ? t("components.executionGraph.telemetryUnavailable")
+        : hasSequenceGap
+        ? t("components.executionGraph.syncing")
+        : events.length > 0
+          ? t("components.executionGraph.liveEvents", { count: events.length })
+          : workflowPhase ? t("components.executionGraph.phase", { phase: workflowPhase }) : undefined}
     >
       {relevantTasks.length === 0 ? (
         <GraphEmpty text={t("components.executionGraph.empty")} execution />
       ) : (
-        <GraphCanvas nodes={nodes} edges={edges} ariaLabel={t("components.executionGraph.ariaLabel")} expanded={expanded} />
+        <>
+          <GraphCanvas nodes={nodes} edges={edges} ariaLabel={t("components.executionGraph.ariaLabel")} expanded={expanded} />
+          {events.length > 0 ? <ExecutionTimeline events={events.slice(-8)} /> : null}
+        </>
       )}
-      <p className="text-[10px] text-muted-foreground">{t("components.executionGraph.telemetryNote")}</p>
+      <p className="text-[10px] text-muted-foreground">
+        {hasTelemetryError
+          ? t("components.executionGraph.telemetryError")
+          : events.length > 0
+          ? t("components.executionGraph.verifiedTelemetry")
+          : eventsLoaded
+            ? t("components.executionGraph.telemetryNote")
+            : t("components.executionGraph.loadingTelemetry")}
+      </p>
     </GraphSurface>
+  );
+}
+
+function ExecutionTimeline({ events }: { events: ExecutionEventV1[] }) {
+  return (
+    <ol className="mt-3 flex gap-2 overflow-x-auto pb-1" aria-label="Execution timeline">
+      {events.map((event) => (
+        <li key={event.eventId} className="min-w-40 rounded-lg border border-border bg-background/45 px-3 py-2">
+          <div className="flex items-center gap-2">
+            <span className={cn("h-2 w-2 rounded-full", event.status === "failed" ? "bg-rose-400" : event.status === "succeeded" ? "bg-emerald-400" : "bg-primary")} />
+            <span className="truncate text-[11px] font-medium text-foreground">{String(event.type).replaceAll(".", " ")}</span>
+          </div>
+          <p className="mt-1 truncate text-[10px] text-muted-foreground">#{event.sequence} · {event.subject.label ?? event.subject.id}</p>
+        </li>
+      ))}
+    </ol>
   );
 }
 

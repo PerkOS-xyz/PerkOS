@@ -102,6 +102,8 @@ export type Project = {
   workflow?: {
     phase?: "draft" | "planning" | "planning_failed" | "awaiting_approval" | "approved" | "running" | "pm_review" | "complete" | "cancelled";
     planId?: string;
+    runId?: string;
+    traceId?: string;
     taskIds?: string[];
     planningAttempt?: number;
     planningMaxAttempts?: number;
