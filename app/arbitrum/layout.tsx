@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
-  title: "Arbitrum · EQLTY on Robinhood Chain — PerkOS",
+  title: "Arbitrum · EQLTY on Robinhood Chain",
   description:
     "PerkOS agent infrastructure powering EQLTY: verifiable stock-token decisions on Robinhood Chain (Arbitrum Orbit). Agents recommend. You approve. Then you can buy.",
   robots: { index: false, follow: false },
