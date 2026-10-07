@@ -145,11 +145,15 @@ export function InteractiveGraph3D({
   edges,
   ariaLabel,
   expanded,
+  compact = false,
+  mode = "knowledge",
 }: {
   nodes: GraphNode[];
   edges: GraphEdge[];
   ariaLabel: string;
   expanded: boolean;
+  compact?: boolean;
+  mode?: "knowledge" | "execution";
 }) {
   const { t } = useTranslation();
   const hostRef = useRef<HTMLDivElement>(null);
@@ -271,12 +275,25 @@ export function InteractiveGraph3D({
       ref={hostRef}
       className={cn(
         "relative isolate w-full overflow-hidden rounded-lg border border-border bg-[#07030d] [touch-action:none]",
-        expanded ? "h-[calc(100dvh-10rem)]" : "h-[360px] sm:h-[460px]",
+        expanded
+          ? "h-[calc(100dvh-10rem)]"
+          : compact
+            ? mode === "execution" ? "h-[460px]" : "h-[300px] lg:h-full lg:min-h-[320px]"
+            : "h-[360px] sm:h-[460px]",
       )}
       role="application"
       aria-label={ariaLabel}
     >
       <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_45%,rgba(236,27,105,.10),transparent_38%),linear-gradient(rgba(255,255,255,.022)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.022)_1px,transparent_1px)] bg-[size:auto,32px_32px,32px_32px]" />
+      {mode === "execution" ? (
+        <div className="pointer-events-none absolute inset-0 z-[1] grid grid-cols-4 pt-12" aria-hidden>
+          {["Goal", "Coordinator", "Agents", "Work"].map((label, index) => (
+            <div key={label} className={cn("relative border-white/[.055]", index < 3 && "border-r")}>
+              <span className="absolute left-3 top-0 text-[9px] font-medium uppercase tracking-[0.16em] text-white/30">{label}</span>
+            </div>
+          ))}
+        </div>
+      ) : null}
       <ForceGraph3D<ForceNode, ForceLink>
         ref={graphRef}
         width={size.width}

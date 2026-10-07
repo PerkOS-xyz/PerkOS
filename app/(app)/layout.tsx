@@ -5,7 +5,22 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useConnection } from "wagmi";
-import { Menu, LogOut, Search } from "lucide-react";
+import {
+  Bot,
+  Building2,
+  FolderKanban,
+  LayoutDashboard,
+  ListTodo,
+  LogOut,
+  Menu,
+  MessageCircle,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Search,
+  Settings,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -44,15 +59,15 @@ import { firebaseAuth } from "../lib/firebase";
 import { recordActivity } from "../lib/activityTelemetry";
 import { useTranslation } from "react-i18next";
 
-const NAV_ITEMS = [
-  { href: "/dashboard", key: "nav.dashboard" },
-  { href: "/projects", key: "nav.projects" },
-  { href: "/tasks", key: "nav.tasks" },
-  { href: "/agents", key: "nav.agents" },
-  { href: "/chat", key: "nav.chat" },
-  { href: "/organizations", key: "nav.organization" },
-  { href: "/wallet", key: "nav.wallet" },
-  { href: "/settings", key: "nav.settings" },
+const NAV_ITEMS: { href: string; key: string; Icon: LucideIcon }[] = [
+  { href: "/dashboard", key: "nav.dashboard", Icon: LayoutDashboard },
+  { href: "/projects", key: "nav.projects", Icon: FolderKanban },
+  { href: "/tasks", key: "nav.tasks", Icon: ListTodo },
+  { href: "/agents", key: "nav.agents", Icon: Bot },
+  { href: "/chat", key: "nav.chat", Icon: MessageCircle },
+  { href: "/organizations", key: "nav.organization", Icon: Building2 },
+  { href: "/wallet", key: "nav.wallet", Icon: Wallet },
+  { href: "/settings", key: "nav.settings", Icon: Settings },
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
@@ -93,7 +108,20 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     router.push("/");
   };
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const isChatRoute = pathname === "/chat" || pathname?.startsWith("/chat/");
+
+  useEffect(() => {
+    setSidebarCollapsed(window.localStorage.getItem("perkos.sidebar.collapsed") === "true");
+  }, []);
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed((current) => {
+      const next = !current;
+      window.localStorage.setItem("perkos.sidebar.collapsed", String(next));
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (session.status === "signed-out" && !loggingOut.current)
@@ -152,13 +180,29 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         </a>
 
         {/* Desktop sidebar */}
-        <aside className="hidden w-60 shrink-0 flex-col gap-6 border-r border-border bg-card p-6 md:flex">
-          <Brand />
-          <NavList pathname={pathname} showBlockchain={advancedFeatures.enabled} />
+        <aside className={cn(
+          "hidden shrink-0 flex-col border-r border-border bg-card transition-[width,padding] duration-200 md:flex",
+          sidebarCollapsed ? "w-16 gap-4 p-2" : "w-60 gap-6 p-6",
+        )}>
+          <div className={cn("flex items-center", sidebarCollapsed ? "flex-col gap-2" : "justify-between gap-2")}>
+            <Brand collapsed={sidebarCollapsed} />
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              aria-expanded={!sidebarCollapsed}
+              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-muted-foreground transition hover:bg-primary/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {sidebarCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+            </button>
+          </div>
+          <NavList pathname={pathname} showBlockchain={advancedFeatures.enabled} collapsed={sidebarCollapsed} />
           <WalletFooter
             address={address}
             showBlockchain={advancedFeatures.enabled}
             onDisconnect={hideLogout ? null : logout}
+            collapsed={sidebarCollapsed}
           />
         </aside>
 
@@ -330,13 +374,19 @@ function SessionSplash({
   );
 }
 
-function Brand() {
+function Brand({ collapsed = false }: { collapsed?: boolean }) {
   // The logo links back to the marketing landing (with ?home so LandingAutoRoute
   // doesn't bounce a signed-in user straight back to the app) — lets people
   // revisit "our services" anytime.
   return (
-    <Link href="/?home" className="flex items-center gap-3 px-4" aria-label="PerkOS">
-      <Image src="/perkos-header.png" alt="PerkOS" width={160} height={32} />
+    <Link href="/?home" className={cn("flex items-center", collapsed ? "justify-center" : "gap-3 px-2")} aria-label="PerkOS">
+      <Image
+        src={collapsed ? "/icon.png" : "/perkos-header.png"}
+        alt="PerkOS"
+        width={collapsed ? 36 : 148}
+        height={collapsed ? 36 : 32}
+        className={collapsed ? "h-9 w-9 rounded-lg object-cover" : "h-8 w-auto"}
+      />
     </Link>
   );
 }
@@ -344,9 +394,11 @@ function Brand() {
 function NavList({
   pathname,
   showBlockchain,
+  collapsed = false,
 }: {
   pathname: string | null;
   showBlockchain: boolean;
+  collapsed?: boolean;
 }) {
   const { t } = useTranslation();
   const visibleItems = showBlockchain
@@ -356,19 +408,24 @@ function NavList({
     <nav aria-label="Primary" className="flex flex-1 flex-col gap-1">
       {visibleItems.map((item) => {
         const active = pathname?.startsWith(item.href);
+        const label = t(item.key);
         return (
           <Link
             key={item.href}
             href={item.href}
             aria-current={active ? "page" : undefined}
+            aria-label={collapsed ? label : undefined}
+            title={collapsed ? label : undefined}
             className={cn(
-              "rounded-md px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              "flex min-h-10 items-center rounded-md text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              collapsed ? "justify-center px-2" : "gap-3 px-3 py-2",
               active
                 ? "bg-primary/10 text-primary"
                 : "text-muted-foreground hover:bg-muted/40 hover:text-foreground"
             )}
           >
-            {t(item.key)}
+            <item.Icon className="h-4 w-4 shrink-0" aria-hidden />
+            {collapsed ? <span className="sr-only">{label}</span> : label}
           </Link>
         );
       })}
@@ -380,15 +437,17 @@ function WalletFooter({
   address,
   showBlockchain,
   onDisconnect,
+  collapsed = false,
 }: {
   address?: string;
   showBlockchain: boolean;
   /** null → no logout affordance (Mini App hosts own the identity). */
   onDisconnect: (() => void) | null;
+  collapsed?: boolean;
 }) {
   return (
     <div className="flex flex-col gap-2 border-t border-border pt-4">
-      {address && showBlockchain ? (
+      {address && showBlockchain && !collapsed ? (
         <p
           className="truncate font-mono text-xs text-muted-foreground"
           title={address}
@@ -400,10 +459,12 @@ function WalletFooter({
         <Button
           variant="outline"
           onClick={onDisconnect}
-          className="justify-start gap-2"
+          aria-label={collapsed ? "Log out" : undefined}
+          title={collapsed ? "Log out" : undefined}
+          className={cn("gap-2", collapsed ? "h-10 w-full justify-center px-0" : "justify-start")}
         >
           <LogOut className="h-4 w-4" />
-          Log out
+          {collapsed ? <span className="sr-only">Log out</span> : "Log out"}
         </Button>
       ) : null}
     </div>

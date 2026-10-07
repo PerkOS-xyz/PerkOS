@@ -15,6 +15,7 @@ import { ProjectStage } from "./ProjectStage";
 import { ProjectLearnings } from "./ProjectLearnings";
 import { projectLearnings } from "../lib/projectLearnings";
 import type { ExecutionEventV1 } from "@perkos/shared-types";
+import { taskSignal } from "./TaskSignal";
 
 const W = 920;
 const H = 520;
@@ -198,12 +199,14 @@ export function ProjectExecutionGraph({
   eventsLoaded = false,
   hasSequenceGap = false,
   hasTelemetryError = false,
+  compact = false,
 }: CommonProps & {
   workflowPhase?: string;
   events?: ExecutionEventV1[];
   eventsLoaded?: boolean;
   hasSequenceGap?: boolean;
   hasTelemetryError?: boolean;
+  compact?: boolean;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
@@ -245,7 +248,21 @@ export function ProjectExecutionGraph({
       const y = 42 + (index / Math.max(relevantTasks.length - 1, 1)) * (H - 84);
       const workerKey = `agent:${task.agent?.trim() || "unassigned"}`;
       const taskKey = `task:${task.id}`;
-      nodes.push({ key: taskKey, kind: task.status === "Review" ? "gate" : "task", label: task.name, status: String(task.status), x: 780, y, href: `/projects/${encodeURIComponent(projectId)}/tasks/${encodeURIComponent(task.id)}`, shape: "task-block", fx: 245 + ownerIndex * 28, fy: (workerIndex - (workerNames.length - 1) / 2) * 78 + (ownerIndex - (ownerTasks.length - 1) / 2) * 24, fz: ownerIndex % 2 === 0 ? -34 : 34 });
+      const signal = taskSignal(task);
+      const runtimeStatus = signal === "pickedUp"
+        ? "Picked up"
+        : signal === "working"
+          ? "Working"
+          : signal === "retrying"
+            ? "Retrying"
+            : signal === "waiting"
+              ? "Waiting"
+              : signal === "paused"
+                ? "Paused"
+                : signal === "delivered"
+                  ? "Delivered"
+                  : String(task.status);
+      nodes.push({ key: taskKey, kind: task.status === "Review" ? "gate" : "task", label: task.name, status: runtimeStatus, x: 780, y, href: `/projects/${encodeURIComponent(projectId)}/tasks/${encodeURIComponent(task.id)}`, shape: "task-block", fx: 245 + ownerIndex * 28, fy: (workerIndex - (workerNames.length - 1) / 2) * 78 + (ownerIndex - (ownerTasks.length - 1) / 2) * 24, fz: ownerIndex % 2 === 0 ? -34 : 34 });
       const latest = latestByTask.get(task.id);
       const active = latest
         ? ["task.claimed", "task.dispatch_started", "task.dispatch_delivered", "task.started", "judge.started"].includes(String(latest.type))
@@ -284,6 +301,11 @@ export function ProjectExecutionGraph({
     return { nodes, edges };
   }, [events, liveAgents, pmAgent, projectId, projectName, relevantTasks, t, workflowPhase]);
 
+  const signals = relevantTasks.map((task) => taskSignal(task));
+  const running = signals.filter((signal) => signal === "pickedUp" || signal === "working" || signal === "retrying").length;
+  const done = signals.filter((signal) => signal === "delivered").length;
+  const waiting = Math.max(0, relevantTasks.length - running - done);
+
   return (
     <GraphSurface
       title={t("components.executionGraph.title")}
@@ -297,12 +319,21 @@ export function ProjectExecutionGraph({
         : events.length > 0
           ? t("components.executionGraph.liveEvents", { count: events.length })
           : workflowPhase ? t("components.executionGraph.phase", { phase: workflowPhase }) : undefined}
+      toolbar={
+        <div className="hidden items-center gap-1.5 sm:flex" aria-label="Workflow task status">
+          {[["Running", running, "text-primary"], ["Waiting", waiting, "text-amber-300"], ["Done", done, "text-emerald-300"]].map(([label, value, tone]) => (
+            <span key={String(label)} className="rounded-full border border-border bg-background/45 px-2 py-1 text-[10px] text-muted-foreground">
+              <strong className={cn("mr-1 font-semibold", String(tone))}>{value}</strong>{label}
+            </span>
+          ))}
+        </div>
+      }
     >
       {relevantTasks.length === 0 ? (
         <GraphEmpty text={t("components.executionGraph.empty")} execution />
       ) : (
         <>
-          <GraphCanvas nodes={nodes} edges={edges} ariaLabel={t("components.executionGraph.ariaLabel")} expanded={expanded} />
+          <GraphCanvas nodes={nodes} edges={edges} ariaLabel={t("components.executionGraph.ariaLabel")} expanded={expanded} compact={compact} mode="execution" />
           {events.length > 0 ? <ExecutionTimeline events={events.slice(-8)} /> : null}
         </>
       )}
@@ -342,12 +373,14 @@ export function OrganizationKnowledgeGraph({
   projects,
   agents,
   externalSystems = [],
+  compact = false,
 }: {
   organizationName: string;
   ownerWallet?: string | null;
   projects: Project[];
   agents: { name: string }[];
   externalSystems?: string[];
+  compact?: boolean;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
@@ -399,7 +432,7 @@ export function OrganizationKnowledgeGraph({
       {projects.length === 0 && agents.length === 0 ? (
         <GraphEmpty text={t("components.organizationGraph.empty")} />
       ) : (
-        <GraphCanvas nodes={nodes} edges={edges} ariaLabel={t("components.organizationGraph.ariaLabel")} expanded={expanded} />
+        <GraphCanvas nodes={nodes} edges={edges} ariaLabel={t("components.organizationGraph.ariaLabel")} expanded={expanded} compact={compact} />
       )}
       <p className="text-[10px] text-muted-foreground">
         {externalSystems.length > 0
@@ -447,9 +480,9 @@ function GraphSurface({ title, description, expanded, onExpandedChange, toolbar,
   );
 }
 
-function GraphCanvas({ nodes, edges, ariaLabel, expanded }: { nodes: GraphNode[]; edges: GraphEdge[]; ariaLabel: string; expanded: boolean }) {
+function GraphCanvas({ nodes, edges, ariaLabel, expanded, compact = false, mode = "knowledge" }: { nodes: GraphNode[]; edges: GraphEdge[]; ariaLabel: string; expanded: boolean; compact?: boolean; mode?: "knowledge" | "execution" }) {
   return (
-    <InteractiveGraph3D nodes={nodes} edges={edges} ariaLabel={ariaLabel} expanded={expanded} />
+    <InteractiveGraph3D nodes={nodes} edges={edges} ariaLabel={ariaLabel} expanded={expanded} compact={compact} mode={mode} />
   );
 }
 

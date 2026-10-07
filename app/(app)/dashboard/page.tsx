@@ -211,8 +211,8 @@ export default function DashboardPage() {
   });
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
-      <div className="flex min-w-0 flex-col gap-6">
+    <div className="grid grid-cols-1 gap-4 lg:-mb-36 lg:h-[calc(100dvh-8.5rem)] lg:min-h-[680px] lg:grid-cols-[minmax(0,1fr)_320px] lg:overflow-hidden">
+      <main className="flex min-w-0 flex-col gap-3 lg:min-h-0">
         <SparkyDashboardWorkspace
           organizationName={displayWorkspace}
           ownerWallet={activeOrg?.ownerWallet ?? address}
@@ -220,12 +220,6 @@ export default function DashboardPage() {
           agents={data?.agents ?? []}
           liveAgents={liveAgents}
         />
-
-        {error ? (
-          <p className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            {(error as Error).message}
-          </p>
-        ) : null}
 
         <KpiStrip
           online={online}
@@ -235,10 +229,29 @@ export default function DashboardPage() {
           doneThisWeek={doneThisWeek}
           isLoading={isLoading}
         />
+      </main>
+
+      <aside className="flex min-w-0 flex-col gap-3 lg:min-h-0 lg:overflow-y-auto lg:pr-1">
+        <NextStepCard
+          item={waitingItems[0]}
+          activeTasks={stats.activeTasks}
+        />
+
+        {error ? (
+          <p className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {(error as Error).message}
+          </p>
+        ) : null}
 
         <WaitingOnYouCard items={waitingItems} />
+        <ActivityFeedCard walletAddress={address} max={6} />
 
-        <ActivityFeedCard walletAddress={address} max={12} />
+        <QuickActionsCard />
+
+        {address ? (
+          <BillingCard address={address} showBlockchain={advancedFeatures.enabled} />
+        ) : null}
+        <ModelUsagePanel agents={allAgents} tasks={allTasks} />
 
         {events.length > 0 ? (
           <section className="glow-card flex flex-col gap-3 rounded-lg border border-primary/25 bg-card/60 px-4 py-4">
@@ -257,23 +270,6 @@ export default function DashboardPage() {
         ) : null}
 
         {showStarter && address ? <StarterCallout address={address} /> : null}
-
-        {/* Quick Actions inline (mobile/tablet only — desktop has the sidebar) */}
-        <section className="lg:hidden">
-          <SectionHeader title={t("dashboard.quickActions.title")} />
-          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
-            {QUICK_ACTIONS.map(({ href, key, Icon }) => (
-              <Link
-                key={href}
-                href={href}
-                className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-3 text-sm text-foreground transition-colors hover:border-primary/40"
-              >
-                <Icon className="h-4 w-4 text-primary" />
-                {t(`dashboard.quickActions.items.${key}.label`)}
-              </Link>
-            ))}
-          </div>
-        </section>
 
         <section className="flex flex-col gap-3">
           <SectionHeader
@@ -320,17 +316,62 @@ export default function DashboardPage() {
             </ul>
           )}
         </section>
-      </div>
-
-      {/* Quick Actions — desktop sidebar */}
-      <aside className="hidden flex-col gap-4 lg:flex">
-        <QuickActionsCard />
-        {address ? (
-          <BillingCard address={address} showBlockchain={advancedFeatures.enabled} />
-        ) : null}
-        <ModelUsagePanel agents={allAgents} tasks={allTasks} />
       </aside>
     </div>
+  );
+}
+
+function NextStepCard({
+  item,
+  activeTasks,
+}: {
+  item?: WaitingItem;
+  activeTasks: number;
+}) {
+  const { i18n } = useTranslation();
+  const es = i18n.language.startsWith("es");
+  const recommendation = item
+    ? {
+        href: item.href,
+        label: item.label,
+        hint: item.hint ?? (es ? "Sparky recomienda revisarlo ahora." : "Sparky recommends reviewing this now."),
+      }
+    : activeTasks > 0
+      ? {
+          href: "/tasks?status=active",
+          label: es ? "Ver el trabajo en curso" : "See work in progress",
+          hint: es ? `${activeTasks} tareas siguen avanzando.` : `${activeTasks} tasks are moving forward.`,
+        }
+      : {
+          href: "/projects/new",
+          label: es ? "Empezar un nuevo proyecto" : "Start a new project",
+          hint: es ? "Cuéntale a Sparky el resultado que necesitas." : "Tell Sparky the outcome you need.",
+        };
+
+  return (
+    <section className="rounded-xl border border-primary/35 bg-gradient-to-br from-primary/15 via-card to-card p-4 shadow-[0_0_32px_-24px_rgba(236,27,105,.9)]">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">
+        {es ? "Recomendación de Sparky" : "Sparky recommends"}
+      </p>
+      <h2 className="mt-1 text-base font-semibold text-foreground">
+        {es ? "¿Qué quieres hacer ahora?" : "What do you want to do now?"}
+      </h2>
+      <Link
+        href={recommendation.href}
+        className="mt-3 flex items-center justify-between gap-3 rounded-lg border border-primary/30 bg-background/55 px-3 py-3 transition-colors hover:border-primary"
+      >
+        <span className="min-w-0">
+          <span className="block truncate text-sm font-medium text-foreground">{recommendation.label}</span>
+          <span className="mt-0.5 block text-xs text-muted-foreground">{recommendation.hint}</span>
+        </span>
+        <ArrowRight className="h-4 w-4 shrink-0 text-primary" />
+      </Link>
+      <div className="mt-3 flex gap-2 text-xs">
+        <Link href="/projects" className="text-muted-foreground hover:text-primary">{es ? "Abrir proyectos" : "Open projects"}</Link>
+        <span className="text-border">·</span>
+        <Link href="/tasks" className="text-muted-foreground hover:text-primary">{es ? "Ver tareas" : "View tasks"}</Link>
+      </div>
+    </section>
   );
 }
 
