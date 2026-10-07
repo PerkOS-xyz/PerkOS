@@ -24,6 +24,10 @@ const FG = "#F5F4F8";
 const MUTED = "#8E9A92";
 const ACCENT_T = "#7CF0A2";
 const ACCENT = "#7CF0A2";
+// Pre-seed terms shown on the traction and ask slides.
+const PRESEED_AMOUNT = "$500K";
+const PRESEED_CAP = "$8M";
+
 // EQLTY palette (eqlty.perkos.xyz): dark green field with soft glows.
 const GLOW =
   "radial-gradient(circle at 82% 16%, rgba(57, 145, 82, 0.13), transparent 28%), radial-gradient(circle at 8% 92%, rgba(196, 255, 42, 0.05), transparent 30%)";
@@ -438,7 +442,7 @@ function SlideTraction() {
     ["Live", "EQLTY on Robinhood Chain, with the vault and Uniswap v4"],
     ["4 roles", "Scout, Risk, Trader and Auditor working in the live app"],
     ["Beta", "Invite only · ~10 active wallets testing the flow"],
-    ["Pre-seed", "Self-funded so far · raising ~$1.0–1.5M on a SAFE"],
+    ["Pre-seed", `Self-funded so far · raising ${PRESEED_AMOUNT} on a post-money SAFE`],
   ] as const;
   return (
     <Frame>
@@ -546,14 +550,34 @@ function SlideAsk() {
     <Frame>
       <Kicker>The ask</Kicker>
       <h2 className="mt-10 max-w-[1400px] text-[56px] font-semibold tracking-tight">
-        Raising a pre-seed of about $1.0–1.5M on a SAFE.
+        Raising a {PRESEED_AMOUNT} pre-seed.
       </h2>
-      <p className="mt-8 max-w-[1200px] text-[28px]" style={{ color: MUTED }}>
+      <div className="mt-10 grid grid-cols-3 gap-8">
+        {[
+          ["Pre-seed amount", PRESEED_AMOUNT],
+          ["Instrument", "Post-money SAFE"],
+          ["Valuation cap", PRESEED_CAP],
+        ].map(([label, value]) => (
+          <div
+            key={label}
+            className="rounded-3xl border px-8 py-6"
+            style={{ borderColor: BORDER, background: ELEV }}
+          >
+            <p className="text-[20px] uppercase" style={{ color: MUTED, letterSpacing: "0.08em" }}>
+              {label}
+            </p>
+            <p className="mt-2 text-[44px] font-semibold" style={{ color: ACCENT }}>
+              {value}
+            </p>
+          </div>
+        ))}
+      </div>
+      <p className="mt-8 max-w-[1300px] text-[26px]" style={{ color: MUTED }}>
         It covers the next three quarters: an easier product on Robinhood Chain,
         charging for decisions step by step, and our first team member. Product
         and security first.
       </p>
-      <div className="mt-14 grid grid-cols-3 gap-8">
+      <div className="mt-10 grid grid-cols-3 gap-8">
         {[
           "A product anyone can use",
           "Start charging, step by step",
@@ -684,7 +708,7 @@ export const ARBITRUM_SLIDES: ArbitrumSlide[] = [
     title: "Pre-seed ask",
     budgetSeconds: 50,
     notes:
-      "Ask ~$1.0–1.5M on a SAFE for the next three quarters. The money goes to product and security first.",
+      "Pre-seed: $500K on a post-money SAFE with an $8M cap, for the next three quarters. The money goes to product and security first.",
     Component: SlideAsk,
   },
   {
