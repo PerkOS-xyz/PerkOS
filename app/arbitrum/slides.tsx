@@ -116,8 +116,8 @@ function SlideHero() {
       <p className="mt-8 max-w-[1200px] text-[28px]" style={{ color: MUTED }}>
         <strong style={{ color: FG }}>EQLTY</strong> is the app.{" "}
         <strong style={{ color: FG }}>PerkOS</strong> is the agent
-        infrastructure underneath. Live on{" "}
-        <strong style={{ color: FG }}>Robinhood Chain</strong> (Arbitrum Orbit).
+        technology behind it. Live on{" "}
+        <strong style={{ color: FG }}>Robinhood Chain</strong> (an Arbitrum chain).
       </p>
       <Footer />
     </Frame>
@@ -129,21 +129,21 @@ function SlideAudience() {
     <Frame>
       <Kicker>Who it is for</Kicker>
       <h2 className="mt-10 max-w-[1500px] text-[56px] font-semibold tracking-tight">
-        Crypto-native investors who want stock exposure guided by a clear goal.
+        Crypto users who want to invest in stocks with a clear goal.
       </h2>
       <div className="mt-14 grid grid-cols-3 gap-8">
         {[
           {
-            t: "Already on-chain",
-            d: "Uses a wallet and holds stablecoins. Wants exposure to companies like NVDA or AMZN in eligible regions.",
+            t: "Already uses crypto",
+            d: "Has a wallet and stablecoins. Wants stock tokens of companies like NVDA or AMZN, where they are allowed.",
           },
           {
             t: "Thinks in goals",
-            d: "Starts from an outcome, like tech exposure with a monthly budget, and wants the plan in plain words.",
+            d: "Starts from a goal, like investing in tech with a monthly budget, and wants a simple plan.",
           },
           {
             t: "Keeps control",
-            d: "Holds custody, sets limits once, and approves every trade.",
+            d: "Keeps the money in their own wallet, sets limits once, and approves every trade.",
           },
         ].map((c) => (
           <div
@@ -159,9 +159,10 @@ function SlideAudience() {
         ))}
       </div>
       <p className="mt-12 text-[24px]" style={{ color: MUTED }}>
-        <strong style={{ color: ACCENT }}>First cohort:</strong> crypto-native
-        retail on Robinhood Chain. <strong style={{ color: ACCENT }}>Next:</strong>{" "}
-        people with a savings goal who want to start investing.
+        <strong style={{ color: ACCENT }}>First users:</strong> crypto users on Robinhood
+        Chain. <strong style={{ color: ACCENT }}>Next:</strong>{" "}
+        people with a savings goal, and small teams that
+        need the same agents and vault.
       </p>
       <Footer />
     </Frame>
@@ -180,19 +181,19 @@ function SlideProblem() {
         {[
           {
             t: "Too many steps",
-            d: "Pools, slippage, routes and signatures before a single buy.",
+            d: "Pools, prices, routes and signatures before one buy.",
           },
           {
             t: "Advice without proof",
-            d: "AI chats answer fast, with no sources, limits or record.",
+            d: "AI chats answer fast, but show no sources, no limits and no record.",
           },
           {
             t: "Bots with the keys",
-            d: "Automation that spends on its own, where one bad call is final.",
+            d: "Bots spend money on their own. One bad move cannot be undone.",
           },
           {
             t: "Hard to check",
-            d: "No easy way to confirm a decision respected my rules before money moves.",
+            d: "I cannot check that my rules were followed before money moves.",
           },
         ].map((c) => (
           <div
@@ -224,17 +225,17 @@ function SlideLoop() {
           {
             icon: Sparkles,
             t: "Recommend",
-            d: "Four agents compare candidates and argue with evidence. Risk can stop the cycle.",
+            d: "Four agents compare options and show the evidence. Risk can say no.",
           },
           {
             icon: Shield,
             t: "Approve",
-            d: "Policy and spend limits live on-chain in EQLTYVault. Nothing moves without the human.",
+            d: "Your rules and spending limits live on-chain in the EQLTY vault. Nothing moves without you.",
           },
           {
             icon: Workflow,
             t: "Buy",
-            d: "Optional Uniswap v4 execution on Robinhood Chain for stock tokens, settled in USDG.",
+            d: "If you approve, the buy runs on Uniswap v4 on Robinhood Chain, paid in USDG.",
           },
         ].map((c) => (
           <div
@@ -257,16 +258,16 @@ function SlideLoop() {
 
 function SlideRoles() {
   const roles = [
-    ["01", "Scout", "Finds eligible stock tokens and gathers market evidence."],
-    ["02", "Risk", "Checks policy, freshness, liquidity, and limits. Can veto."],
-    ["03", "Trader", "Prepares the Uniswap v4 route. Only role with a spend rail."],
-    ["04", "Auditor", "Reconciles the decision against on-chain evidence."],
+    ["01", "Scout", "Finds stock tokens you can buy and collects market data."],
+    ["02", "Risk", "Checks your rules, fresh data, liquidity and limits. Can say no."],
+    ["03", "Trader", "Prepares the Uniswap v4 trade. The only agent that can spend."],
+    ["04", "Auditor", "Checks the decision against what happened on-chain."],
   ] as const;
   return (
     <Frame>
-      <Kicker>Committee</Kicker>
+      <Kicker>The agents</Kicker>
       <h2 className="mt-8 text-[52px] font-semibold tracking-tight">
-        Four roles. One verifiable decision.
+        Four agents. One decision you can verify.
       </h2>
       <div className="mt-12 grid grid-cols-2 gap-8">
         {roles.map(([n, name, job]) => (
@@ -294,16 +295,16 @@ function SlideRoles() {
 
 function SlideEdge() {
   const rows = [
-    ["Robinhood", "Catalog and execution", "A portable decision you can audit outside one platform."],
-    ["Uniswap", "Liquidity and routes", "Policy, a veto and a receipt before the swap."],
-    ["Social buy apps", "Speed and signals", "Deliberation, evidence and discipline."],
-    ["Trading bots", "Automation", "Human approval, on-chain limits, reasoning you can verify."],
+    ["Robinhood", "Stock catalog and trading", "A decision you can check, on any platform."],
+    ["Uniswap", "Liquidity and trades", "Your rules, the option to say no, and a receipt before the trade."],
+    ["Social buy apps", "Speed and trends", "Time to think, real evidence and clear rules."],
+    ["Trading bots", "Automation", "You approve, limits on-chain, reasons you can check."],
   ] as const;
   return (
     <Frame>
       <Kicker>What sets us apart</Kicker>
       <h2 className="mt-8 max-w-[1500px] text-[52px] font-semibold tracking-tight">
-        The decision layer between asking and executing.
+        The step between asking and buying.
       </h2>
       <div
         className="mt-12 overflow-hidden rounded-3xl border"
@@ -313,8 +314,8 @@ function SlideEdge() {
           className="grid grid-cols-[300px_340px_1fr] gap-8 px-10 py-5 text-[18px] uppercase"
           style={{ color: MUTED, letterSpacing: "0.08em", borderBottom: `1px solid ${BORDER}` }}
         >
-          <span>Alternative</span>
-          <span>Optimizes for</span>
+          <span>Others</span>
+          <span>Good at</span>
           <span style={{ color: ACCENT_T }}>EQLTY adds</span>
         </div>
         {rows.map(([who, focus, ours], i) => (
@@ -342,13 +343,13 @@ function SlideWhy() {
         <ChainPill />
       </div>
       <h2 className="mt-8 max-w-[1400px] text-[52px] font-semibold tracking-tight">
-        Built on Robinhood Chain because that is where the stock-token rails are.
+        We build on Robinhood Chain because the stock tokens live there.
       </h2>
       <ul className="mt-14 space-y-8">
         {[
-          "Robinhood Chain is an Arbitrum Orbit chain for this RWA surface (stock tokens + USDG).",
-          "EQLTYVault and Uniswap v4 rails are already deployed and verifiable on the explorer.",
-          "PerkOS Stack runs production agent payments (x402) so decisions can leave a receipt when charging turns on.",
+          "Robinhood Chain is an Arbitrum chain made for stock tokens and USDG.",
+          "Our vault and the Uniswap v4 trades are live, and anyone can check them on the explorer.",
+          "PerkOS already runs agent payments (x402), so each decision can come with a receipt.",
         ].map((line) => (
           <li key={line} className="flex items-start gap-5 text-[28px]">
             <CheckCircle2
@@ -378,105 +379,21 @@ function SlideWhy() {
   );
 }
 
-function SlideDifferentiation() {
-  return (
-    <Frame>
-      <Kicker>What differentiates us</Kicker>
-      <h2 className="mt-8 max-w-[1500px] text-[52px] font-semibold tracking-tight">
-        Not another trading bot. A committee with an on-chain gate.
-      </h2>
-      <div className="mt-12 grid grid-cols-2 gap-8">
-        {[
-          {
-            t: "Human approve is load-bearing",
-            d: "Recommendations can be strong. Spend still waits for the user. Speed is secondary to control.",
-          },
-          {
-            t: "Fail-closed vault",
-            d: "Policy and limits live in EQLTYVault. No silent spend path if Risk or the human says no.",
-          },
-          {
-            t: "Separated roles",
-            d: "Scout, Risk, Trader, Auditor. Only Trader touches the spend rail. Evidence is part of the loop.",
-          },
-          {
-            t: "Rails already live",
-            d: "Robinhood Chain + Uniswap v4 + USDG path deployed. Differentiation is product architecture, not a pitch deck claim.",
-          },
-        ].map((c) => (
-          <div
-            key={c.t}
-            className="rounded-3xl border p-8"
-            style={{ borderColor: BORDER, background: ELEV }}
-          >
-            <h3 className="text-[30px] font-semibold">{c.t}</h3>
-            <p className="mt-4 text-[24px]" style={{ color: LAV_T }}>
-              {c.d}
-            </p>
-          </div>
-        ))}
-      </div>
-      <Footer />
-    </Frame>
-  );
-}
-
-function SlideAudience() {
-  return (
-    <Frame>
-      <Kicker>Target audience</Kicker>
-      <h2 className="mt-8 max-w-[1500px] text-[52px] font-semibold tracking-tight">
-        Crypto-native users who want stock tokens without giving a bot the keys.
-      </h2>
-      <div className="mt-12 grid grid-cols-3 gap-8">
-        {[
-          {
-            t: "Primary",
-            d: "Retail and power users on Robinhood Chain who already buy or explore stock tokens and want AI help with a hard approve step.",
-          },
-          {
-            t: "Not for",
-            d: "People who want fully autonomous trading, yield promises, or black-box tips with no policy trail.",
-          },
-          {
-            t: "Secondary",
-            d: "Small desks and operators who need the same committee + vault pattern for controlled decisions.",
-          },
-        ].map((c) => (
-          <div
-            key={c.t}
-            className="rounded-3xl border p-8"
-            style={{ borderColor: BORDER, background: ELEV }}
-          >
-            <h3 className="text-[28px] font-semibold" style={{ color: PINK_T }}>
-              {c.t}
-            </h3>
-            <p className="mt-4 text-[24px]" style={{ color: LAV_T }}>
-              {c.d}
-            </p>
-          </div>
-        ))}
-      </div>
-      <Footer />
-    </Frame>
-  );
-}
-
 function SlideTraction() {
   const cards = [
-    ["Live", "EQLTY on Robinhood Chain with vault + Uniswap v4 path"],
-    ["4 roles", "Scout, Risk, Trader, Auditor in production desk flow"],
-    ["Beta", "Small invite cohort · ~10 active wallets validating the loop"],
-    ["Pre-seed", "Self-funded to date · raising ~$1.0–1.5M SAFE for the next three quarters"],
+    ["Live", "EQLTY on Robinhood Chain, with the vault and Uniswap v4"],
+    ["4 roles", "Scout, Risk, Trader and Auditor working in the live app"],
+    ["Beta", "Invite only · ~10 active wallets testing the flow"],
+    ["Pre-seed", "Self-funded so far · raising ~$1.0–1.5M on a SAFE"],
   ] as const;
   return (
     <Frame>
       <Kicker>Where we are</Kicker>
       <h2 className="mt-8 text-[52px] font-semibold tracking-tight">
-        Closed beta, live on mainnet rails.
+        Closed beta, live on mainnet.
       </h2>
       <p className="mt-6 max-w-[1200px] text-[26px]" style={{ color: MUTED }}>
-        We start with a small invite cohort and a clear path to paid decisions.
+        We start with a small group of invited users and a clear plan to charge for decisions.
       </p>
       <div className="mt-12 grid grid-cols-4 gap-6">
         {cards.map(([t, d]) => (
@@ -502,32 +419,32 @@ function SlideRoadmap() {
     {
       id: "Q1",
       when: "Q4 2026",
-      title: "Make it usable without the founder",
+      title: "Easy to use without our help",
       items: [
-        "Conversational goals for the desk UX",
-        "Vault and policy hardening on Robinhood Chain",
-        "Controlled paid decision loop (x402)",
-        "First cohort of external weekly users",
+        "Ask for a goal in a simple chat",
+        "Stronger vault and rules on Robinhood Chain",
+        "Start charging for decisions (x402)",
+        "First outside users every week",
       ],
     },
     {
       id: "Q2",
       when: "Q1 2027",
-      title: "Retention and a second desk",
+      title: "Users come back, and a second product",
       items: [
-        "Users who return without hand-holding",
-        "Second vertical on the same PerkOS rails",
-        "Robinhood Chain / Arbitrum distribution partnerships",
+        "Users who come back on their own",
+        "A second product on the same PerkOS tools",
+        "Partnerships with Robinhood Chain and Arbitrum to reach users",
       ],
     },
     {
       id: "Q3",
       when: "Q2 2027",
-      title: "Prove the company",
+      title: "Prove the business",
       items: [
-        "Small recurring revenue from decisions or infra",
-        "First hire if the round funds it",
-        "Seed-ready retention and unit metrics",
+        "First monthly revenue",
+        "First hire, if the round allows it",
+        "Numbers ready for a seed round",
       ],
     },
   ];
@@ -578,15 +495,15 @@ function SlideAsk() {
         Raising a pre-seed of about $1.0–1.5M on a SAFE.
       </h2>
       <p className="mt-8 max-w-[1200px] text-[28px]" style={{ color: MUTED }}>
-        Funds the next three quarters: product usability on Robinhood Chain, controlled
-        monetization of verifiable decisions, and the first operating capacity
-        beyond a solo founder. Product and on-chain hardening first.
+        It covers the next three quarters: an easier product on Robinhood Chain,
+        charging for decisions step by step, and our first team member. Product
+        and security first.
       </p>
       <div className="mt-14 grid grid-cols-3 gap-8">
         {[
-          "Ship desk UX outsiders can run",
-          "Turn on paid decisions carefully",
-          "Prove retention before a seed raise",
+          "A product anyone can use",
+          "Start charging, step by step",
+          "Show users come back before a seed round",
         ].map((t) => (
           <div
             key={t}
@@ -607,7 +524,7 @@ function SlideClose() {
     <Frame>
       <Kicker>Close</Kicker>
       <h2 className="mt-16 max-w-[1500px] text-[64px] font-semibold tracking-tight">
-        Four agents. One verifiable decision.
+        Four agents. One decision you can verify.
         <br />
         You approve every trade.
       </h2>
@@ -633,7 +550,7 @@ export const ARBITRUM_SLIDES: ArbitrumSlide[] = [
     title: "Recommend · Approve · Buy",
     budgetSeconds: 40,
     notes:
-      "Open with the product sentence. EQLTY is the app, PerkOS is infra, Robinhood Chain is the rail. Do not digress into other products.",
+      "Open with the product sentence. EQLTY is the app, PerkOS is the technology behind it, Robinhood Chain is where it runs. Keep the focus on EQLTY.",
     Component: SlideHero,
   },
   {
@@ -641,7 +558,7 @@ export const ARBITRUM_SLIDES: ArbitrumSlide[] = [
     title: "Who it is for",
     budgetSeconds: 45,
     notes:
-      "Start from the user. Crypto-native investor, already holds stablecoins, wants stock exposure from a goal and keeps custody. First cohort on Robinhood Chain.",
+      "Start with the user: a crypto user with stablecoins who wants to invest in stocks from a goal and keep control. First users on Robinhood Chain.",
     Component: SlideAudience,
   },
   {
@@ -649,23 +566,23 @@ export const ARBITRUM_SLIDES: ArbitrumSlide[] = [
     title: "Their pain",
     budgetSeconds: 45,
     notes:
-      "Read the quote in their voice. Too many steps, advice without proof, bots with keys, nothing to check before money moves.",
+      "Read the quote as the user. Too many steps, advice without proof, bots with the keys, nothing to check before money moves.",
     Component: SlideProblem,
   },
   {
     hash: "loop",
-    title: "Product loop",
+    title: "How it works",
     budgetSeconds: 50,
     notes:
-      "Walk Recommend → Approve → Buy once. Emphasize that buy is optional and gated.",
+      "Go through Recommend, Approve, Buy once. Say that buying is optional and always needs your OK.",
     Component: SlideLoop,
   },
   {
     hash: "roles",
-    title: "Four roles",
+    title: "Four agents",
     budgetSeconds: 45,
     notes:
-      "Scout finds, Risk vetoes, Trader is the only spend role, Auditor reconciles. Mention fail-closed vault.",
+      "Scout finds, Risk can say no, Trader is the only one that can spend, Auditor checks. The vault blocks anything outside your limits.",
     Component: SlideRoles,
   },
   {
@@ -673,7 +590,7 @@ export const ARBITRUM_SLIDES: ArbitrumSlide[] = [
     title: "What sets us apart",
     budgetSeconds: 50,
     notes:
-      "Robinhood and Uniswap solve access and execution. We add the decision layer before money moves: policy, veto, evidence and a receipt.",
+      "Robinhood and Uniswap already solve access and trading. We add the step before money moves: your rules, the option to say no, evidence and a receipt.",
     Component: SlideEdge,
   },
   {
@@ -681,31 +598,15 @@ export const ARBITRUM_SLIDES: ArbitrumSlide[] = [
     title: "Why Robinhood Chain",
     budgetSeconds: 40,
     notes:
-      "Orbit chain for stock tokens + USDG. Vault and Uniswap v4 already live. Show the AMZN buy on the explorer.",
+      "Robinhood Chain is an Arbitrum chain for stock tokens and USDG. The vault and Uniswap v4 are live. Show the AMZN buy on the explorer.",
     Component: SlideWhy,
-  },
-  {
-    hash: "differentiation",
-    title: "What differentiates us",
-    budgetSeconds: 60,
-    notes:
-      "Contrast vs trading bots: human approve, fail-closed vault, separated roles, live rails. Do not claim first/only.",
-    Component: SlideDifferentiation,
-  },
-  {
-    hash: "audience",
-    title: "Target audience",
-    budgetSeconds: 45,
-    notes:
-      "Primary: crypto-native users who want stock tokens with a hard approve gate. Not autonomous traders. Desks are secondary.",
-    Component: SlideAudience,
   },
   {
     hash: "traction",
     title: "Closed beta",
     budgetSeconds: 35,
     notes:
-      "Small, deliberate cohort of ~10 active wallets. Live product and four roles. Self-funded so far.",
+      "Small group on purpose: ~10 active wallets. Live product, four agents. Self-funded so far.",
     Component: SlideTraction,
   },
   {
@@ -713,7 +614,7 @@ export const ARBITRUM_SLIDES: ArbitrumSlide[] = [
     title: "Next three quarters",
     budgetSeconds: 60,
     notes:
-      "Q4 2026 usability + paid loop. Q1 2027 retention + second desk. Q2 2027 prove company metrics.",
+      "Q4 2026: easier product and first charges. Q1 2027: users come back, second product. Q2 2027: prove the business.",
     Component: SlideRoadmap,
   },
   {
@@ -721,7 +622,7 @@ export const ARBITRUM_SLIDES: ArbitrumSlide[] = [
     title: "Pre-seed ask",
     budgetSeconds: 50,
     notes:
-      "Ask ~$1.0–1.5M SAFE for the next three quarters. Use of funds: product and on-chain hardening first.",
+      "Ask ~$1.0–1.5M on a SAFE for the next three quarters. The money goes to product and security first.",
     Component: SlideAsk,
   },
   {
@@ -729,7 +630,7 @@ export const ARBITRUM_SLIDES: ArbitrumSlide[] = [
     title: "Close",
     budgetSeconds: 25,
     notes:
-      "Leave them with the line: four agents, one verifiable decision, human approve every trade. Offer EQLTY demo.",
+      "End with: four agents, one decision you can verify, you approve every trade. Offer an EQLTY demo.",
     Component: SlideClose,
   },
 ];
