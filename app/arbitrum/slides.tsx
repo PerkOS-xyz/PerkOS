@@ -217,7 +217,7 @@ function SlideWhy() {
       <ul className="mt-14 space-y-8">
         {[
           "Robinhood Chain is an Arbitrum Orbit chain for this RWA surface (stock tokens + USDG).",
-          "EQLTYVault and Uniswap v4 rails are already deployed. Not a slide-only integration.",
+          "EQLTYVault and Uniswap v4 rails are already deployed and verifiable on the explorer.",
           "PerkOS Stack runs production agent payments (x402) so decisions can leave a receipt when charging turns on.",
         ].map((line) => (
           <li key={line} className="flex items-start gap-5 text-[28px]">
@@ -232,6 +232,17 @@ function SlideWhy() {
       <p className="mt-12 font-mono text-[20px]" style={{ color: PINK_T }}>
         Vault 0x033f13BC2CCB53dbfBEef7594668F9cfa4A70833
       </p>
+      <p className="mt-3 font-mono text-[20px]" style={{ color: LAV_T }}>
+        Live buy: 1 USDG → AMZN through the vault ·{" "}
+        <a
+          href="https://robinhoodchain.blockscout.com/tx/0xce325f28bc900d0a2801f7ace3e307db8da402fb3d162627c06726b45b4e7def"
+          target="_blank"
+          rel="noreferrer"
+          style={{ color: PINK_T }}
+        >
+          tx 0xce32…7def
+        </a>
+      </p>
       <Footer />
     </Frame>
   );
@@ -242,17 +253,16 @@ function SlideTraction() {
     ["Live", "EQLTY on Robinhood Chain with vault + Uniswap v4 path"],
     ["4 roles", "Scout, Risk, Trader, Auditor in production desk flow"],
     ["Beta", "Small invite cohort · ~10 active wallets validating the loop"],
-    ["Pre-seed", "Self-funded to date · raising ~$1.0–1.5M SAFE for Q1–Q3"],
+    ["Pre-seed", "Self-funded to date · raising ~$1.0–1.5M SAFE for the next three quarters"],
   ] as const;
   return (
     <Frame>
       <Kicker>Where we are</Kicker>
       <h2 className="mt-8 text-[52px] font-semibold tracking-tight">
-        Closed beta. Past vaporware.
+        Closed beta, live on mainnet rails.
       </h2>
       <p className="mt-6 max-w-[1200px] text-[26px]" style={{ color: LAV_T }}>
-        We are not pretending to be at scale. The product runs on mainnet rails,
-        with a small beta cohort and a clear path to paid decisions.
+        We start with a small invite cohort and a clear path to paid decisions.
       </p>
       <div className="mt-12 grid grid-cols-4 gap-6">
         {cards.map(([t, d]) => (
@@ -322,9 +332,6 @@ function SlideRoadmap() {
           >
             <div className="flex items-baseline justify-between">
               <span className="text-[24px] font-semibold" style={{ color: PINK_T }}>
-                {q.id}
-              </span>
-              <span className="text-[18px]" style={{ color: LAV_T }}>
                 {q.when}
               </span>
             </div>
@@ -357,7 +364,7 @@ function SlideAsk() {
         Raising a pre-seed of about $1.0–1.5M on a SAFE.
       </h2>
       <p className="mt-8 max-w-[1200px] text-[28px]" style={{ color: LAV_T }}>
-        Funds Q1–Q3: product usability on Robinhood Chain, controlled
+        Funds the next three quarters: product usability on Robinhood Chain, controlled
         monetization of verifiable decisions, and the first operating capacity
         beyond a solo founder. Product and on-chain hardening first.
       </p>
@@ -444,7 +451,7 @@ export const ARBITRUM_SLIDES: ArbitrumSlide[] = [
     title: "Why Robinhood Chain",
     budgetSeconds: 45,
     notes:
-      "Orbit chain for stock tokens + USDG. Vault and Uniswap v4 already live. Point to explorer if asked.",
+      "Orbit chain for stock tokens + USDG. Vault and Uniswap v4 already live. Show the AMZN buy on the explorer.",
     Component: SlideWhy,
   },
   {
@@ -452,15 +459,15 @@ export const ARBITRUM_SLIDES: ArbitrumSlide[] = [
     title: "Closed beta",
     budgetSeconds: 45,
     notes:
-      "Honest: ~10 active wallets, not mass scale. Live product and four roles. Self-funded so far.",
+      "Small, deliberate cohort of ~10 active wallets. Live product and four roles. Self-funded so far.",
     Component: SlideTraction,
   },
   {
     hash: "roadmap",
-    title: "Q1 · Q2 · Q3",
+    title: "Next three quarters",
     budgetSeconds: 75,
     notes:
-      "Q1 = Q4 2026 usability + paid loop. Q2 retention + second desk. Q3 prove company metrics.",
+      "Q4 2026 usability + paid loop. Q1 2027 retention + second desk. Q2 2027 prove company metrics.",
     Component: SlideRoadmap,
   },
   {
@@ -468,7 +475,7 @@ export const ARBITRUM_SLIDES: ArbitrumSlide[] = [
     title: "Pre-seed ask",
     budgetSeconds: 60,
     notes:
-      "Ask ~$1.0–1.5M SAFE for Q1–Q3. Use of funds: product and hardening, not logo spend.",
+      "Ask ~$1.0–1.5M SAFE for the next three quarters. Use of funds: product and on-chain hardening first.",
     Component: SlideAsk,
   },
   {
