@@ -1992,6 +1992,13 @@
       "empty": "No execution exists yet. Put the team to work to generate the first flow.",
       "ariaLabel": "Agent execution and orchestration graph",
       "telemetryNote": "This view uses current workflow and assignment data. Detailed handoffs, retries and verification gates will appear as runtime telemetry becomes available.",
+      "verifiedTelemetry": "Verified execution history from canonical server events. Reloading reconstructs the same sequence.",
+      "loadingTelemetry": "Connecting to the verified execution stream…",
+      "telemetryUnavailable": "Execution stream unavailable",
+      "telemetryError": "The verified execution stream could not be loaded. Workflow data remains visible while PerkOS reconnects.",
+      "syncing": "Syncing event history",
+      "liveEvents_one": "{{count}} verified event",
+      "liveEvents_other": "{{count}} verified events",
       "unassignedLead": "Lead not assigned",
       "unassignedWorker": "Unassigned",
       "coordinator": "Coordinator"

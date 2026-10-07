@@ -127,7 +127,10 @@ service cloud.firestore {
         // Specific denies cannot override an additive owner grant. Credits and
         // ledger mutations are Admin SDK only; receipts have narrower rules.
         && !(collectionName in ['billing_account', 'billing_ledger', 'receipts', 'conversations'])
-        && (collectionName != 'projects' || !isArtizenProject(walletAddress, id))
+        // Project writes are enumerated below. Keeping them out of this broad
+        // wildcard is what makes executionRuns/events server-only even for the
+        // project owner.
+        && collectionName != 'projects'
         && (collectionName != 'agents' || !isArtizenAgent(id));
     }
 
@@ -294,6 +297,20 @@ service cloud.firestore {
         allow read: if isSelf(w)
           || isProjectMember(w, pid)
           || isOrgMember(w, projectOrgId(w, pid));
+      }
+      // Canonical execution history. Every project participant may inspect
+      // the same replay, but only Admin SDK services may create or mutate it.
+      match /executionRuns/{runId} {
+        allow read: if isSelf(w)
+          || isProjectMember(w, pid)
+          || isOrgMember(w, projectOrgId(w, pid));
+        allow write: if false;
+        match /events/{eventId} {
+          allow read: if isSelf(w)
+            || isProjectMember(w, pid)
+            || isOrgMember(w, projectOrgId(w, pid));
+          allow write: if false;
+        }
       }
       // Agent roster edge (agent membership, gap #2). Readable by any member;
       // writes go through the server API (Admin SDK) so the forward edge + the

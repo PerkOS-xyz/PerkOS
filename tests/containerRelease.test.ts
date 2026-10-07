@@ -17,7 +17,7 @@ describe("Solana container release contract", () => {
   it("fetches the same immutable shared commit over HTTPS without SSH credentials", () => {
     const pkg = JSON.parse(source("package.json"));
     const lock = JSON.parse(source("package-lock.json"));
-    const pin = "git+https://github.com/PerkOS-xyz/PerkOS-Shared-Types.git#476df70e21bb8d0f4290e4ffb474f1fdc4c0868b";
+    const pin = "git+https://github.com/PerkOS-xyz/PerkOS-Shared-Types.git#001c7c73ed8517a29cf00c1bbc0cd38eb453c62a";
     expect(pkg.dependencies["@perkos/shared-types"]).toBe(pin);
     expect(lock.packages[""].dependencies["@perkos/shared-types"]).toBe(pin);
     expect(lock.packages["node_modules/@perkos/shared-types"].resolved).toBe(pin);

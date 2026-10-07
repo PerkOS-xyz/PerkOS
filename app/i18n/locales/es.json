@@ -1992,6 +1992,13 @@
       "empty": "Todavía no existe una ejecución. Pon al equipo a trabajar para generar el primer flujo.",
       "ariaLabel": "Grafo de ejecución y orquestación de agentes",
       "telemetryNote": "Esta vista usa el flujo y las asignaciones actuales. Los traspasos, reintentos y controles de verificación aparecerán cuando exista telemetría del runtime.",
+      "verifiedTelemetry": "Historial de ejecución verificado mediante eventos canónicos del servidor. Al recargar se reconstruye la misma secuencia.",
+      "loadingTelemetry": "Conectando con el flujo de ejecución verificado…",
+      "telemetryUnavailable": "Flujo de ejecución no disponible",
+      "telemetryError": "No se pudo cargar el flujo de ejecución verificado. Los datos del workflow siguen visibles mientras PerkOS se reconecta.",
+      "syncing": "Sincronizando historial",
+      "liveEvents_one": "{{count}} evento verificado",
+      "liveEvents_other": "{{count}} eventos verificados",
       "unassignedLead": "Líder sin asignar",
       "unassignedWorker": "Sin asignar",
       "coordinator": "Coordinador"

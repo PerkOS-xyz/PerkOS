@@ -76,6 +76,7 @@ import { ProjectProgress } from "../../../components/ProjectProgress";
 import { ArtizenProjectBoard, ArtizenWorkLink } from "../../../components/ArtizenProjectBoard";
 import { SearchInput, matchesQuery } from "../../../components/SearchInput";
 import { useActiveOrg } from "../../../lib/useActiveOrg";
+import { useProjectExecutionEvents } from "../../../lib/useProjectExecutionEvents";
 
 const ProjectMeetingsTab = dynamic(() => import("../../../components/ProjectMeetingsTab"), {
   ssr: false,
@@ -1372,6 +1373,11 @@ function MapTab({
   const { address } = useAppAccount();
   const { t } = useTranslation();
   const { byName } = useWalletAgents(ownerWallet ?? address);
+  const execution = useProjectExecutionEvents(
+    ownerWallet ?? address,
+    projectId,
+    detail.project.workflow?.runId,
+  );
   return (
     <div className="flex flex-col gap-4">
       <ProjectExecutionGraph
@@ -1381,6 +1387,10 @@ function MapTab({
         workflowPhase={detail.project.workflow?.phase}
         tasks={detail.tasks}
         liveAgents={byName}
+        events={execution.events}
+        eventsLoaded={execution.loaded}
+        hasSequenceGap={execution.hasSequenceGap}
+        hasTelemetryError={Boolean(execution.error)}
       />
       <ActivityFeedCard
         walletAddress={ownerWallet ?? address}

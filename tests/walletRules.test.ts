@@ -43,6 +43,8 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)("wallet Firestore rule iso
       for (const path of ["tasks/task", "docs/note", "docs/note/blocks/block", "messages/post", "agentMembers/fixture", "coordination/entry"]) {
         await setDoc(doc(db, `${project}/${path}`), { value: "fixture" });
       }
+      await setDoc(doc(db, `${project}/executionRuns/run-1`), { lastSequence: 0 });
+      await setDoc(doc(db, `${project}/executionRuns/run-1/events/event-1`), { sequence: 0, type: "execution.started" });
       await setDoc(doc(db, "agents/rules-fixture"), { private: "synthetic" });
       await setDoc(doc(db, "provision_jobs/rules-job"), { walletAddress: owner });
       await setDoc(doc(db, "provision_jobs/rules-job/log/event"), { status: "queued" });
@@ -104,6 +106,20 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)("wallet Firestore rule iso
     await assertFails(updateDoc(doc(editor, `${project}/coordination/entry`), { value: "edited" }));
     const outsider = env.authenticatedContext(variant).firestore();
     await assertFails(getDoc(doc(outsider, `${project}/coordination/entry`)));
+    await env.withSecurityRulesDisabled(context => deleteDoc(doc(context.firestore(), `${project}/members/${evm}`)));
+  });
+
+  it("lets project participants read execution history but nobody writes from a client", async () => {
+    await env.withSecurityRulesDisabled(context => setDoc(doc(context.firestore(), `${project}/members/${evm}`), { role: "editor", status: "active" }));
+    for (const address of [owner, evm]) {
+      const db = env.authenticatedContext(address).firestore();
+      await assertSucceeds(getDoc(doc(db, `${project}/executionRuns/run-1`)));
+      await assertSucceeds(getDoc(doc(db, `${project}/executionRuns/run-1/events/event-1`)));
+      await assertFails(setDoc(doc(db, `${project}/executionRuns/forged`), { lastSequence: 999 }));
+      await assertFails(setDoc(doc(db, `${project}/executionRuns/run-1/events/forged`), { type: "task.completed" }));
+    }
+    const outsider = env.authenticatedContext(variant).firestore();
+    await assertFails(getDoc(doc(outsider, `${project}/executionRuns/run-1/events/event-1`)));
     await env.withSecurityRulesDisabled(context => deleteDoc(doc(context.firestore(), `${project}/members/${evm}`)));
   });
 
