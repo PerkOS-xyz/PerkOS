@@ -1,380 +1,283 @@
-import Image from "next/image";
-import Link from "next/link";
-import type { Metadata } from "next";
-import {
-  ArrowLeft,
-  ArrowRight,
-  CheckCircle2,
-  Shield,
-  Sparkles,
-  Workflow,
-} from "lucide-react";
+"use client";
 
 /**
- * /arbitrum — Singapore / Arbitrum-facing company pitch surface.
- *
- * Dedicated page (not the SMB landing, not /investors token page).
- * Sells: EQLTY on Robinhood Chain (Arbitrum Orbit). Four agents recommend
- * stock-token decisions; the human approves; then they can buy.
- * PerkOS is the infrastructure underneath.
- *
- * Copy rules: English, no em dashes, no yield promises, no "first/only".
+ * /arbitrum — Singapore / Arbitrum pre-seed deck.
+ * Same presentation engine as /pitch: overview + Present + presenter notes.
  */
 
-export const metadata: Metadata = {
-  title: "Arbitrum · EQLTY on Robinhood Chain — PerkOS",
-  description:
-    "PerkOS agent infrastructure powering EQLTY: verifiable stock-token decisions on Robinhood Chain (Arbitrum Orbit). Agents recommend. You approve. Then you can buy.",
-  openGraph: {
-    title: "EQLTY on Robinhood Chain (Arbitrum Orbit)",
-    description:
-      "Four agents. One verifiable decision. You approve every trade.",
-    url: "https://perkos.xyz/arbitrum",
-  },
-};
+import Image from "next/image";
+import Link from "next/link";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { MonitorPlay, NotebookPen, Play, X } from "lucide-react";
 
-const ROLES = [
-  {
-    name: "Scout",
-    job: "Finds eligible stock tokens and gathers market evidence.",
-  },
-  {
-    name: "Risk",
-    job: "Checks policy, freshness, liquidity, and limits. Can veto.",
-  },
-  {
-    name: "Trader",
-    job: "Prepares the Uniswap v4 route. Only role with a spend rail.",
-  },
-  {
-    name: "Auditor",
-    job: "Reconciles the decision against on-chain evidence.",
-  },
-];
+import { ARBITRUM_SLIDES, W, H } from "./slides";
 
-const QUARTERS = [
-  {
-    id: "Q1",
-    when: "Q4 2026",
-    title: "Make it usable without the founder",
-    items: [
-      "Conversational goals (ETH Global desk UX, not a hidden form)",
-      "Vault and policy hardening on Robinhood Chain",
-      "Turn on a controlled paid decision loop (x402)",
-      "First cohort of external weekly users",
-    ],
-  },
-  {
-    id: "Q2",
-    when: "Q1 2027",
-    title: "Retention and a second desk",
-    items: [
-      "Users who return for decisions without hand-holding",
-      "Second vertical on the same PerkOS rails",
-      "Real Robinhood Chain / Arbitrum distribution partnerships",
-    ],
-  },
-  {
-    id: "Q3",
-    when: "Q2 2027",
-    title: "Prove the company",
-    items: [
-      "Small recurring revenue from decisions or infra",
-      "First hire if the round funds it",
-      "Seed-ready retention and unit metrics",
-    ],
-  },
-];
+const CHANNEL = "perkos-arbitrum-sync";
 
-const VAULT = {
-  address: "0x033f13BC2CCB53dbfBEef7594668F9cfa4A70833",
-  explorer:
-    "https://robinhoodchain.blockscout.com/address/0x033f13BC2CCB53dbfBEef7594668F9cfa4A70833",
-};
+function slideIndexFromHash(): number {
+  if (typeof window === "undefined") return 0;
+  const slug = window.location.hash.replace(/^#/, "");
+  const i = ARBITRUM_SLIDES.findIndex((s) => s.hash === slug);
+  return i >= 0 ? i : 0;
+}
 
 export default function ArbitrumPitchPage() {
+  const [presenting, setPresenting] = useState(false);
+  const [current, setCurrent] = useState(() => slideIndexFromHash());
+  const [blanked, setBlanked] = useState(false);
+  const [scale, setScale] = useState(1);
+  const channelRef = useRef<BroadcastChannel | null>(null);
+
+  useEffect(() => {
+    if (typeof BroadcastChannel === "undefined") return;
+    const ch = new BroadcastChannel(CHANNEL);
+    channelRef.current = ch;
+    ch.onmessage = (e) => {
+      const i = e.data?.slideIndex;
+      if (typeof i === "number" && i >= 0 && i < ARBITRUM_SLIDES.length) {
+        setCurrent(i);
+      }
+    };
+    return () => ch.close();
+  }, []);
+
+  const goTo = useCallback((i: number) => {
+    const next = Math.max(0, Math.min(i, ARBITRUM_SLIDES.length - 1));
+    setCurrent(next);
+    window.history.replaceState(null, "", `#${ARBITRUM_SLIDES[next].hash}`);
+    channelRef.current?.postMessage({ slideIndex: next });
+  }, []);
+
+  useEffect(() => {
+    if (!presenting) return;
+    const fit = () =>
+      setScale(Math.min(window.innerWidth / W, window.innerHeight / H));
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, [presenting]);
+
+  const enterPresent = useCallback(
+    (at?: number) => {
+      if (typeof at === "number") goTo(at);
+      setPresenting(true);
+      document.documentElement.requestFullscreen?.().catch(() => {});
+    },
+    [goTo],
+  );
+
+  const exitPresent = useCallback(() => {
+    setPresenting(false);
+    setBlanked(false);
+    if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!presenting) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") return exitPresent();
+      if (e.key === "b" || e.key === "B" || e.key === ".") {
+        e.preventDefault();
+        setBlanked((v) => !v);
+        return;
+      }
+      if (e.key === "f" || e.key === "F") {
+        e.preventDefault();
+        if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+        else document.documentElement.requestFullscreen?.().catch(() => {});
+        return;
+      }
+      if (["ArrowRight", "ArrowDown", " ", "PageDown", "Enter"].includes(e.key)) {
+        e.preventDefault();
+        setBlanked(false);
+        goTo(current + 1);
+      } else if (["ArrowLeft", "ArrowUp", "PageUp", "Backspace"].includes(e.key)) {
+        e.preventDefault();
+        setBlanked(false);
+        goTo(current - 1);
+      } else if (e.key === "Home") goTo(0);
+      else if (e.key === "End") goTo(ARBITRUM_SLIDES.length - 1);
+      else if (/^[0-9]$/.test(e.key)) {
+        const n = e.key === "0" ? 10 : Number(e.key);
+        goTo(n - 1);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [presenting, current, goTo, exitPresent]);
+
+  useEffect(() => {
+    if (!presenting) return;
+    const onFs = () => {
+      if (!document.fullscreenElement) setPresenting(false);
+    };
+    document.addEventListener("fullscreenchange", onFs);
+    return () => document.removeEventListener("fullscreenchange", onFs);
+  }, [presenting]);
+
+  if (presenting) {
+    const Slide = ARBITRUM_SLIDES[current].Component;
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0D0D14]">
+        <div className="absolute inset-x-0 top-0 z-20 h-1 bg-[#17161F]">
+          <div
+            className="h-full bg-[#EC1B69] transition-[width] duration-300"
+            style={{ width: `${((current + 1) / ARBITRUM_SLIDES.length) * 100}%` }}
+          />
+        </div>
+
+        {blanked ? (
+          <button
+            type="button"
+            aria-label="Resume presentation"
+            className="absolute inset-0 z-30 bg-[#0D0D14]"
+            onClick={() => setBlanked(false)}
+          />
+        ) : null}
+
+        <div style={{ transform: `scale(${scale})`, transformOrigin: "center" }}>
+          <Slide />
+        </div>
+
+        <button
+          type="button"
+          aria-label="Previous slide"
+          className="absolute inset-y-0 left-0 z-20 w-[15%] cursor-w-resize opacity-0"
+          onClick={() => goTo(current - 1)}
+        />
+        <button
+          type="button"
+          aria-label="Next slide"
+          className="absolute inset-y-0 right-0 z-20 w-[15%] cursor-e-resize opacity-0"
+          onClick={() => goTo(current + 1)}
+        />
+
+        <button
+          type="button"
+          onClick={exitPresent}
+          aria-label="Exit presentation"
+          className="absolute right-5 top-5 z-40 grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white/70 backdrop-blur transition-colors hover:bg-white/20 hover:text-white"
+        >
+          <X className="h-5 w-5" />
+        </button>
+        <span className="absolute bottom-5 right-6 z-20 font-mono text-sm text-white/50">
+          {String(current + 1).padStart(2, "0")} / {ARBITRUM_SLIDES.length}
+        </span>
+        <span className="absolute bottom-5 left-6 z-20 text-xs text-white/30">
+          ← → navigate · B blank · F fullscreen · Esc exit
+        </span>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
-      <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 md:px-8">
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/perkos-header.png"
-              alt="PerkOS"
-              width={130}
-              height={28}
-              priority
-            />
+    <main className="min-h-screen bg-[#0D0D14] pb-24 text-[#F5F4F8]">
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-[#2A2935] bg-[#0D0D14]/90 px-6 py-4 backdrop-blur">
+        <Link href="/" className="flex items-center gap-3">
+          <Image src="/perkos-header.png" alt="PerkOS" width={120} height={40} />
+          <span className="rounded-full border border-[#2A2935] px-2.5 py-0.5 text-[11px] uppercase tracking-wider text-[#B0ACD9]">
+            Arbitrum · Pre-seed
+          </span>
+        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/arbitrum/presenter"
+            target="_blank"
+            className="inline-flex items-center gap-2 rounded-full border border-[#2A2935] px-5 py-2.5 text-sm font-semibold text-[#B0ACD9] transition-colors hover:border-[#EC1B69]/50 hover:text-white"
+          >
+            <NotebookPen className="h-4 w-4" />
+            Presenter notes
           </Link>
-          <div className="flex items-center gap-4">
-            <span className="hidden text-xs font-medium uppercase tracking-wider text-muted-foreground sm:inline">
-              Arbitrum · Robinhood Chain
-            </span>
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Link>
-          </div>
+          <button
+            type="button"
+            onClick={() => enterPresent(0)}
+            className="inline-flex items-center gap-2 rounded-full bg-[#EC1B69] px-6 py-2.5 text-sm font-semibold text-white shadow-[0_0_30px_-8px_rgba(236,27,105,0.9)] transition-opacity hover:opacity-90"
+          >
+            <MonitorPlay className="h-4 w-4" />
+            Present
+          </button>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-12 md:px-8 md:py-16">
-        {/* Hero */}
-        <section className="space-y-6">
-          <p className="text-sm font-semibold uppercase tracking-[0.12em] text-pink-500">
-            Company pitch · Pre-seed
-          </p>
-          <h1 className="max-w-3xl text-4xl font-semibold tracking-tight md:text-5xl">
-            Agents that recommend stock tokens on Robinhood Chain.
-            You approve. Then you can buy.
-          </h1>
-          <p className="max-w-2xl text-lg text-muted-foreground">
-            <strong className="font-medium text-foreground">EQLTY</strong> is
-            the app.{" "}
-            <strong className="font-medium text-foreground">PerkOS</strong> is
-            the agent infrastructure underneath. Live on{" "}
-            <strong className="font-medium text-foreground">
-              Robinhood Chain
-            </strong>{" "}
-            (Arbitrum Orbit). Built through ETH Global; the product is a
-            four-agent committee with on-chain limits, not a bot with a key.
-          </p>
-          <div className="flex flex-wrap gap-3 pt-2">
-            <Link
-              href="https://eqlty.perkos.xyz"
-              className="inline-flex items-center gap-2 rounded-full bg-pink-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-pink-500"
-            >
-              Open EQLTY
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="https://stack.perkos.xyz"
-              className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-medium transition-colors hover:bg-muted"
-            >
-              PerkOS Stack
-            </Link>
-          </div>
-        </section>
+      <div className="mx-auto flex max-w-[1160px] flex-col gap-10 px-6 pt-10">
+        {ARBITRUM_SLIDES.map((s, i) => (
+          <ScaledSlide
+            key={s.hash}
+            index={i}
+            title={s.title}
+            onPresent={() => enterPresent(i)}
+          >
+            <s.Component />
+          </ScaledSlide>
+        ))}
+      </div>
+    </main>
+  );
+}
 
-        {/* What we sell */}
-        <section className="mt-16 grid gap-6 md:grid-cols-3">
-          <div className="rounded-2xl border border-border bg-card p-6">
-            <Sparkles className="mb-3 h-5 w-5 text-pink-500" />
-            <h2 className="text-base font-semibold">Recommend</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              You state a goal. Four agents compare candidates and argue with
-              evidence. Risk can stop the cycle.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-border bg-card p-6">
-            <Shield className="mb-3 h-5 w-5 text-pink-500" />
-            <h2 className="text-base font-semibold">Approve</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Policy and spend limits live on-chain in EQLTYVault. Nothing
-              moves without the human.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-border bg-card p-6">
-            <Workflow className="mb-3 h-5 w-5 text-pink-500" />
-            <h2 className="text-base font-semibold">Buy</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Optional Uniswap v4 execution on Robinhood Chain for stock
-              tokens, settled in USDG when you say yes.
-            </p>
-          </div>
-        </section>
+function ScaledSlide({
+  children,
+  index,
+  title,
+  onPresent,
+}: {
+  children: ReactNode;
+  index: number;
+  title: string;
+  onPresent: () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0);
 
-        {/* How it works */}
-        <section className="mt-16">
-          <h2 className="text-2xl font-semibold tracking-tight">
-            The ETH Global version we ship
-          </h2>
-          <p className="mt-3 max-w-2xl text-muted-foreground">
-            Same story we proved in public builds: a committee with separate
-            jobs, a veto path, and a vault that fails closed.
-          </p>
-          <ol className="mt-8 grid gap-4 sm:grid-cols-2">
-            {ROLES.map((role, i) => (
-              <li
-                key={role.name}
-                className="rounded-2xl border border-border bg-card p-5"
-              >
-                <div className="flex items-baseline gap-3">
-                  <span className="text-xs font-semibold text-pink-500">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <h3 className="text-lg font-semibold">{role.name}</h3>
-                </div>
-                <p className="mt-2 text-sm text-muted-foreground">{role.job}</p>
-              </li>
-            ))}
-          </ol>
-        </section>
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const fit = () => setScale(el.clientWidth / W);
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
-        {/* Why Arbitrum */}
-        <section className="mt-16 rounded-2xl border border-border bg-card p-8">
-          <h2 className="text-2xl font-semibold tracking-tight">
-            Why Arbitrum / Robinhood Chain
-          </h2>
-          <ul className="mt-6 space-y-3 text-sm text-muted-foreground">
-            <li className="flex gap-2">
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-pink-500" />
-              Robinhood Chain is an Arbitrum Orbit chain built for this RWA
-              surface (stock tokens + USDG).
-            </li>
-            <li className="flex gap-2">
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-pink-500" />
-              EQLTYVault and Uniswap v4 rails are already deployed there. This
-              is not a slide-only integration.
-            </li>
-            <li className="flex gap-2">
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-pink-500" />
-              PerkOS Stack runs production agent payments (x402) so decisions
-              can leave a receipt when we turn charging on.
-            </li>
-          </ul>
-          <p className="mt-6 text-sm">
-            Vault:{" "}
-            <a
-              href={VAULT.explorer}
-              className="font-mono text-xs text-pink-500 underline-offset-4 hover:underline"
-              target="_blank"
-              rel="noreferrer"
-            >
-              {VAULT.address}
-            </a>
-          </p>
-        </section>
-
-        {/* Traction / beta */}
-        <section className="mt-16">
-          <h2 className="text-2xl font-semibold tracking-tight">
-            Where we are (closed beta)
-          </h2>
-          <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-            We are not pretending to be at scale. We are past vaporware: the
-            product runs on mainnet rails, with a small beta cohort and a clear
-            path to paid decisions.
-          </p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-2xl border border-border bg-card p-5">
-              <p className="text-2xl font-semibold">Live</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                EQLTY on Robinhood Chain with vault + Uniswap v4 path
-              </p>
-            </div>
-            <div className="rounded-2xl border border-border bg-card p-5">
-              <p className="text-2xl font-semibold">4 roles</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Scout, Risk, Trader, Auditor in production desk flow
-              </p>
-            </div>
-            <div className="rounded-2xl border border-border bg-card p-5">
-              <p className="text-2xl font-semibold">Beta</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Small invite cohort · ~10 active wallets validating the loop
-              </p>
-            </div>
-            <div className="rounded-2xl border border-border bg-card p-5">
-              <p className="text-2xl font-semibold">Pre-seed</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Self-funded to date · raising ~$1.0–1.5M SAFE for Q1–Q3
-              </p>
-            </div>
-          </div>
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            <div className="rounded-2xl border border-border p-6">
-              <h3 className="font-semibold">Proof you can open</h3>
-              <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-                <li>eqlty.perkos.xyz · public markets without a wallet wall</li>
-                <li>Mainnet buys documented on Robinhood Chain explorers</li>
-                <li>PerkOS Stack x402 facilitator in production</li>
-                <li>Public repo: PerkOS-xyz/PerkOS-EQLTY</li>
-              </ul>
-            </div>
-            <div className="rounded-2xl border border-border p-6">
-              <h3 className="font-semibold">Honest limits</h3>
-              <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-                <li>Still closed beta; not mass consumer scale yet</li>
-                <li>Charging for decisions not fully flipped on</li>
-                <li>No yield promises; product is the decision layer</li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        {/* Roadmap */}
-        <section className="mt-16">
-          <h2 className="text-2xl font-semibold tracking-tight">
-            Next three quarters
-          </h2>
-          <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-            Q1 starts Q4 2026 from the Singapore conversation. Adjust labels if
-            you prefer calendar-year naming; the work is the same.
-          </p>
-          <div className="mt-8 grid gap-4 lg:grid-cols-3">
-            {QUARTERS.map((q) => (
-              <div
-                key={q.id}
-                className="rounded-2xl border border-border bg-card p-6"
-              >
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-sm font-semibold text-pink-500">
-                    {q.id}
-                  </span>
-                  <span className="text-xs text-muted-foreground">{q.when}</span>
-                </div>
-                <h3 className="mt-3 text-base font-semibold">{q.title}</h3>
-                <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-                  {q.items.map((item) => (
-                    <li key={item} className="flex gap-2">
-                      <span className="text-pink-500">·</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Ask */}
-        <section className="mt-16 rounded-2xl border border-pink-500/30 bg-card p-8">
-          <h2 className="text-2xl font-semibold tracking-tight">The ask</h2>
-          <p className="mt-4 max-w-2xl text-muted-foreground">
-            Raising a <strong className="text-foreground">pre-seed</strong>{" "}
-            round to fund Q1–Q3: product usability on Robinhood Chain,
-            controlled monetization of verifiable decisions, and the first
-            operating capacity beyond a solo founder.
-          </p>
-          <p className="mt-4 text-sm text-muted-foreground">
-            Amount and SAFE terms: confirm with Julio before sharing externally.
-            Use of funds prioritizes product and on-chain hardening over logo
-            sponsorships.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link
-              href="https://eqlty.perkos.xyz"
-              className="inline-flex items-center gap-2 rounded-full bg-pink-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-pink-500"
-            >
-              See the product
-            </Link>
-            <Link
-              href="https://github.com/PerkOS-xyz/PerkOS-EQLTY"
-              className="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2.5 text-sm font-medium hover:bg-muted"
-            >
-              Public repo
-            </Link>
-          </div>
-        </section>
-
-        <p className="mt-12 text-center text-sm text-muted-foreground">
-          Four agents. One verifiable decision. You approve every trade.
-        </p>
-      </main>
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="font-mono text-xs text-[#B0ACD9]">
+        {String(index + 1).padStart(2, "0")} · {title}
+      </span>
+      <div
+        ref={ref}
+        role="button"
+        tabIndex={0}
+        onClick={onPresent}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") onPresent();
+        }}
+        className="group relative cursor-pointer overflow-hidden rounded-2xl border border-[#2A2935] transition-colors hover:border-[#EC1B69]/50"
+        style={{
+          height: scale > 0 ? H * scale : undefined,
+          aspectRatio: scale > 0 ? undefined : "16/9",
+        }}
+      >
+        <div
+          style={{
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+            width: W,
+            height: H,
+          }}
+        >
+          {children}
+        </div>
+        <span className="absolute right-4 top-4 z-20 grid h-10 w-10 place-items-center rounded-full bg-black/50 text-white opacity-0 backdrop-blur transition-opacity group-hover:opacity-100">
+          <Play className="h-4 w-4" />
+        </span>
+      </div>
     </div>
   );
 }
