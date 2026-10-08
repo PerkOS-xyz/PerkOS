@@ -59,7 +59,7 @@ function labelSprite(node: ForceNode, dimmed: boolean): THREE.Sprite {
     context.fillText(compact, 320, 60);
     context.font = "500 18px system-ui, sans-serif";
     context.fillStyle = dimmed ? "rgba(170,164,190,.3)" : color;
-    context.fillText((node.status || (node.isPM ? "LEAD AGENT" : node.kind)).toUpperCase(), 320, 104);
+    context.fillText((node.status || (node.isPM ? "Team lead" : node.kind)).toUpperCase(), 320, 104);
   }
   const material = new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true, depthWrite: false });
   const sprite = new THREE.Sprite(material);
@@ -195,7 +195,7 @@ export function InteractiveGraph3D({
         ...node,
         id: node.key,
         val: Math.min(16, 4 + Math.sqrt(degree.get(node.key) ?? 1) * 3),
-        color: NODE_COLORS[node.kind],
+        color: node.color ?? NODE_COLORS[node.kind],
       })),
       links: edges.map((edge): ForceLink => ({ ...edge, source: edge.from, target: edge.to })),
     };
@@ -362,7 +362,7 @@ export function InteractiveGraph3D({
       </div>
 
       <div className="pointer-events-none absolute bottom-3 left-3 z-10 hidden flex-wrap gap-1.5 sm:flex">
-        {Object.entries(NODE_COLORS).map(([kind, color]) => <span key={kind} className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/65 px-2 py-1 text-[9px] capitalize text-white/65 backdrop-blur"><i className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: color, boxShadow: `0 0 8px ${color}` }} />{kind}</span>)}
+        {Object.entries(NODE_COLORS).filter(([kind]) => graphData.nodes.some((node) => node.kind === kind)).map(([kind, color]) => <span key={kind} className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/65 px-2 py-1 text-[9px] capitalize text-white/65 backdrop-blur"><i className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: color, boxShadow: `0 0 8px ${color}` }} />{kind}</span>)}
       </div>
 
       {hoveredId && !selectedId ? <div className="pointer-events-none absolute bottom-3 right-3 z-10 rounded-full border border-white/10 bg-black/70 px-3 py-1.5 text-[10px] text-white/70 backdrop-blur">{t("components.graph.clickToFocus")}</div> : null}

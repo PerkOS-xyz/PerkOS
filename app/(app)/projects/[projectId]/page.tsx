@@ -1547,6 +1547,7 @@ function MapTab({
         hasSequenceGap={execution.hasSequenceGap}
         hasTelemetryError={Boolean(execution.error)}
         compact={compact}
+        coordinatorName={detail.project.executionMode === "artizen-on-demand" ? "Hermes" : "Sparky"}
       />
       {!compact ? <ActivityFeedCard
         walletAddress={ownerWallet ?? address}
