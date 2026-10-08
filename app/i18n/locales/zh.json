@@ -1325,7 +1325,7 @@
       "teamHeading_other": "你的团队({{count}} 位成员)",
       "teamHintTemplate": "为这类业务推荐的配置。移除不需要的角色，并在下方添加更多角色。Sparky 负责协调团队。",
       "teamHintCustom": "添加这个项目需要的专家。Sparky 会协调他们，并与你一起规划工作。",
-      "leadTitle": "团队负责人负责规划工作并协调团队",
+      "leadTitle": "负责人主持团队对话，并可以撰写最终总结。工作由 Sparky 规划。",
       "lead": "负责人",
       "removeRoleAria": "移除 {{role}}",
       "noRoles": "还没有任何角色,请在下方至少添加一个。",

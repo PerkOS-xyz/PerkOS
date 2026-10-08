@@ -1503,7 +1503,7 @@
       "teamHeading_other": "Your team ({{count}} teammates)",
       "teamHintTemplate": "Recommended for this business. Remove what you don't need and add more roles below. Sparky coordinates the team.",
       "teamHintCustom": "Add the specialists this project needs. Sparky coordinates them and plans the work with you.",
-      "leadTitle": "The team lead plans the work and coordinates the team",
+      "leadTitle": "The lead hosts the team's conversation and can write the final summary. Sparky plans the work.",
       "lead": "Lead",
       "removeRoleAria": "Remove {{role}}",
       "noRoles": "No roles yet. Add at least one below.",

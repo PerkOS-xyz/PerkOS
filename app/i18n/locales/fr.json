@@ -1335,7 +1335,7 @@
       "teamHeading_other": "Votre équipe ({{count}} coéquipiers)",
       "teamHintTemplate": "Recommandé pour cette activité. Retirez ce dont vous n'avez pas besoin et ajoutez des rôles ci-dessous. Sparky coordonne l'équipe.",
       "teamHintCustom": "Ajoutez les spécialistes dont ce projet a besoin. Sparky les coordonne et planifie le travail avec vous.",
-      "leadTitle": "Le chef d'équipe planifie le travail et coordonne l'équipe",
+      "leadTitle": "Le chef d'équipe accueille la conversation de l'équipe et peut rédiger la synthèse finale. Sparky planifie le travail.",
       "lead": "Chef",
       "removeRoleAria": "Retirer {{role}}",
       "noRoles": "Aucun rôle pour le moment : ajoutez-en au moins un ci-dessous.",

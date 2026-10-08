@@ -1335,7 +1335,7 @@
       "teamHeading_other": "내 팀 ({{count}}명)",
       "teamHintTemplate": "이 비즈니스에 추천하는 구성입니다. 필요 없는 역할은 빼고 아래에서 역할을 추가하세요. Sparky가 팀을 조율합니다.",
       "teamHintCustom": "이 프로젝트에 필요한 전문가를 추가하세요. Sparky가 조율하고 함께 작업을 계획합니다.",
-      "leadTitle": "팀장이 업무를 계획하고 팀을 조율해요",
+      "leadTitle": "팀장은 팀 대화를 맡고 최종 요약을 쓸 수 있어요. 작업 계획은 Sparky가 세워요.",
       "lead": "팀장",
       "removeRoleAria": "{{role}} 제거",
       "noRoles": "아직 역할이 없어요. 아래에서 최소 하나를 추가하세요.",
