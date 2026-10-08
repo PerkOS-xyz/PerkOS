@@ -66,3 +66,37 @@ export function deriveAgentAvatarIdentity(seed:string,role?:string|null):AgentAv
 export function allocateAgentAvatarIdentity(input:{seed:string;role?:string|null;existing:readonly Pick<AgentAvatarIdentity,"visualSignature">[]}):AgentAvatarIdentity{
   const occupied=new Set(input.existing.map(x=>x.visualSignature)); for(let salt=0;salt<720;salt+=1){const candidate=buildIdentity(input.seed,input.role,salt);if(!occupied.has(candidate.visualSignature))return{...candidate,seed:input.seed}} return{...buildIdentity(input.seed,input.role,720),seed:input.seed};
 }
+
+/**
+ * One look per teammate inside a project: each agent keeps its usual identity
+ * unless a teammate already took that archetype or color, then the next free
+ * variant is used. Order matters, so pass the roster in a stable order.
+ */
+export function allocateTeamAvatarIdentities(names: readonly string[]): Map<string, AgentAvatarIdentity> {
+  const team = new Map<string, AgentAvatarIdentity>();
+  const archetypes = new Set<number>();
+  const palettes = new Set<number>();
+  const signatures = new Set<string>();
+  const firstVariant = (seed: string, accept: (candidate: AgentAvatarIdentity) => boolean) => {
+    for (let salt = 0; salt < 720; salt += 1) {
+      const candidate = buildIdentity(seed, seed, salt);
+      if (accept(candidate)) return candidate;
+    }
+    return null;
+  };
+  for (const name of names) {
+    const seed = name.trim();
+    if (!seed || team.has(name)) continue;
+    const paletteFree = (candidate: AgentAvatarIdentity) =>
+      palettes.size >= AGENT_AVATAR_PALETTES.length || !palettes.has(candidate.paletteIndex);
+    const chosen =
+      firstVariant(seed, (c) => !archetypes.has(c.archetypeId) && paletteFree(c)) ??
+      firstVariant(seed, (c) => !signatures.has(c.visualSignature)) ??
+      buildIdentity(seed, seed);
+    archetypes.add(chosen.archetypeId);
+    palettes.add(chosen.paletteIndex);
+    signatures.add(chosen.visualSignature);
+    team.set(name, { ...chosen, seed });
+  }
+  return team;
+}

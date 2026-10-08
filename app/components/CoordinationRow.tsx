@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { deriveAgentAvatarIdentity } from "../lib/agentAvatarIdentity";
 import type { CoordinationMessage } from "../lib/useCoordinationLog";
 import { AgentOrb } from "./AgentOrb";
+import { useAgentHue } from "./ProjectAgentIdentity";
 import { Markdown } from "./Markdown";
 
 function agentName(identity: string): string {
@@ -93,6 +94,7 @@ export function CoordinationRow({
   taskHref?: (taskId: string) => string;
 }) {
   const { kind, to, taskId, ok } = message.coordination;
+  const hue = useAgentHue();
 
   if (kind === "system") {
     return (
@@ -118,12 +120,12 @@ export function CoordinationRow({
         <AgentOrb name={name} size={28} />
         <div className="flex min-w-0 flex-col gap-1">
           <div className="flex items-center gap-2 text-xs">
-            <span className="truncate font-medium" style={{ color: agentHue(name) }}>{name}</span>
+            <span className="truncate font-medium" style={{ color: hue(name) }}>{name}</span>
             <Time iso={message.timestamp} />
           </div>
           <div
             className="rounded-2xl rounded-tl-md px-3.5 py-2.5 text-sm leading-relaxed text-foreground/90"
-            style={{ background: agentHue(name, 0.08), boxShadow: `inset 0 0 0 1px ${agentHue(name, 0.22)}` }}
+            style={{ background: hue(name, 0.08), boxShadow: `inset 0 0 0 1px ${hue(name, 0.22)}` }}
           >
             <div className={cn(kind === "result" && "line-clamp-6")}>
               <Markdown>{message.text}</Markdown>
@@ -157,7 +159,7 @@ export function CoordinationRow({
               <ArrowUpRight className="h-3 w-3 text-muted-foreground" />
               <span
                 className="max-w-[14rem] truncate rounded-full px-1.5 py-0.5 text-[11px] font-medium"
-                style={{ color: agentHue(target), background: agentHue(target, 0.12) }}
+                style={{ color: hue(target), background: hue(target, 0.12) }}
               >
                 @{target}
               </span>
@@ -167,7 +169,7 @@ export function CoordinationRow({
         </div>
         <div
           className="rounded-2xl rounded-tl-md border border-dashed px-3.5 py-2.5 text-sm leading-relaxed text-foreground/80"
-          style={target ? { borderColor: agentHue(target, 0.35) } : undefined}
+          style={target ? { borderColor: hue(target, 0.35) } : undefined}
         >
           <BriefText text={message.text} />
         </div>

@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 import type { Task } from "../lib/perkosApi";
 import { AgentOrb } from "./AgentOrb";
-import { agentHue } from "./CoordinationRow";
+import { useAgentHue } from "./ProjectAgentIdentity";
 
 export type SeatState = "working" | "review" | "waiting" | "starting" | "done" | "resting" | "ready";
 
@@ -150,7 +150,7 @@ export function ProjectTeamStage({
           ) : null}
         </div>
       ) : null}
-      <ul className={cn("grid grid-cols-1 gap-3 sm:grid-cols-2", seats.length >= 4 ? "xl:grid-cols-4" : seats.length === 3 ? "lg:grid-cols-3" : "")}>
+      <ul className={cn("grid grid-cols-1 gap-3 sm:grid-cols-2", seats.length === 3 || seats.length === 5 || seats.length === 6 ? "lg:grid-cols-3" : seats.length >= 4 ? "xl:grid-cols-4" : "")}>
         {seats.map((seat, i) => (
           <li key={seat.name} className="animate-in fade-in zoom-in-95 duration-500" style={{ animationDelay: `${i * 60}ms` }}>
             <SeatCard seat={seat} clock={seat.state === "working" ? elapsed(seat.since, now) : null} onFocus={onFocusAgent} />
@@ -162,6 +162,7 @@ export function ProjectTeamStage({
 }
 
 function SeatCard({ seat, clock, onFocus }: { seat: Seat; clock: string | null; onFocus?: (name: string) => void }) {
+  const agentHue = useAgentHue();
   const hue = agentHue(seat.name);
   const step = seat.state === "done" || seat.state === "review" ? 3 : seat.state === "working" ? 2 : seat.task ? 1 : 0;
   return (

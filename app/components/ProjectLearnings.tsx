@@ -12,7 +12,7 @@ import { ArrowUpRight, Link2 } from "lucide-react";
 
 import type { Learning } from "../lib/projectLearnings";
 import { AgentOrb } from "./AgentOrb";
-import { agentHue } from "./CoordinationRow";
+import { useAgentHue } from "./ProjectAgentIdentity";
 
 const MAX_SOURCES = 4;
 
@@ -23,6 +23,7 @@ export function ProjectLearnings({
   learnings: Learning[];
   taskHref: (taskId: string) => string;
 }) {
+  const hue = useAgentHue();
   if (learnings.length === 0) {
     return (
       <p className="rounded-xl border border-dashed border-border px-4 py-8 text-center text-sm text-muted-foreground">
@@ -52,7 +53,7 @@ export function ProjectLearnings({
                   <span className="line-clamp-2 text-sm font-medium">{learning.task}</span>
                 )}
                 {learning.agent ? (
-                  <p className="text-[11px]" style={{ color: agentHue(learning.agent, 0.9) }}>{learning.agent}</p>
+                  <p className="text-[11px]" style={{ color: hue(learning.agent, 0.9) }}>{learning.agent}</p>
                 ) : null}
               </div>
             </div>
