@@ -1514,7 +1514,7 @@
         "title": "Votre équipe est prête : voici comment démarrer",
         "titleStarting": "Votre équipe démarre (environ 2 minutes). Vous pouvez déjà la mettre au travail.",
         "step1Bold": "Mettre l'équipe au travail",
-        "step1WithPm": " : {{pmAgent}} lit votre objectif, le transforme en tâches, et l'équipe s'en charge seule. C'est la solution en un clic.",
+        "step1WithPm": ". Sparky lit votre objectif, découpe le travail en tâches que vous approuvez, et l'équipe le réalise toute seule. C'est la méthode en un clic.",
         "step1NoPm": " : vous choisirez quel agent dirige l'équipe, puis il transforme l'objectif en tâches et l'équipe s'en charge seule.",
         "step2Before": "Ou dites à l'équipe ce dont vous avez besoin dans le ",
         "step2Bold": "Chat du projet",

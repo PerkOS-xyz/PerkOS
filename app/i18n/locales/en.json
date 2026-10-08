@@ -1699,7 +1699,7 @@
         "title": "Your team is ready: here's how to start",
         "titleStarting": "Your team is starting up (about 2 minutes). You can already put it to work.",
         "step1Bold": "Put the team to work",
-        "step1WithPm": ". {{pmAgent}} reads your goal, plans the work into tasks, and the team gets it done on its own. This is the one-click way.",
+        "step1WithPm": ". Sparky reads your goal, plans the work into tasks you approve, and the team gets it done on its own. This is the one-click way.",
         "step1NoPm": ". You'll pick which agent leads the team, then they plan the goal into tasks and the team gets it done on its own.",
         "step2Before": "Or tell the team what you need in ",
         "step2Bold": "Project chat",

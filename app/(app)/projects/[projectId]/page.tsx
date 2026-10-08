@@ -995,7 +995,10 @@ function ProjectNextAction({
             ? { eyebrow: "Needs attention", title: "Planning needs another try", body: "Review the conversation, then ask Sparky to prepare the plan again.", label: "Review tasks", tab: "tasks" as const }
         : ["approved", "running", "pm_review"].includes(phase)
           ? { eyebrow: "Team at work", title: "Watch the workflow", body: "See handoffs, active tasks and what each agent has produced.", label: "View workflow", tab: "workflow" as const }
-          : { eyebrow: "Start here", title: "Plan with Sparky", body: "Describe the outcome. Sparky will turn it into coordinated work.", label: "Open tasks", tab: "tasks" as const };
+          : null;
+  // Before the first plan, the start banner and the header already offer
+  // "Put the team to work"; a third card pointing at Tasks only competed with them.
+  if (!action) return null;
 
   return (
     <div className="rounded-xl border border-primary/30 bg-gradient-to-br from-primary/[.13] via-card/80 to-card/60 p-3">
