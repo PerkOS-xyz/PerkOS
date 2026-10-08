@@ -1604,6 +1604,7 @@
       "signal": {
         "pickedUp": "受付済み",
         "retrying": "再試行中",
+        "review": "レビュー中",
         "working": "作業中",
         "delivered": "納品済み",
         "paused": "一時停止",

@@ -1604,6 +1604,7 @@
       "signal": {
         "pickedUp": "접수됨",
         "retrying": "재시도 중",
+        "review": "검토 중",
         "working": "작업 중",
         "delivered": "전달됨",
         "paused": "일시 중지",
