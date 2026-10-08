@@ -37,9 +37,49 @@ export type GraphNode = {
   fx?: number;
   fy?: number;
   fz?: number;
+  /** Overrides the color of the node kind (the coordinator's own color). */
+  color?: string;
 };
 
 export type GraphEdge = { from: string; to: string; color: string; dashed?: boolean; active?: boolean };
+
+const COORDINATOR_COLOR = "#ff6a3d";
+
+/** Plain words for the run timeline; unknown types fall back to their own name. */
+const EVENT_LABELS: Record<string, string> = {
+  "plan.created": "Plan drafted",
+  "plan.proposed": "Plan sent to you",
+  "approval.requested": "Waiting for your approval",
+  "approval.granted": "Plan approved",
+  "approval.changes_requested": "Changes requested",
+  "execution.started": "Work started",
+  "project.review_started": "Final review",
+  "project.completed": "Project delivered",
+  "workflow.cancelled": "Stopped",
+  "task.materialized": "Task created",
+  "task.blocked": "Waiting on a teammate",
+  "task.unblocked": "Ready to start",
+  "task.queued": "Queued",
+  "task.claimed": "Picked up",
+  "task.dispatch_started": "Handing off",
+  "task.dispatch_delivered": "Handed off",
+  "task.dispatch_failed": "Trying the handoff again",
+  "task.retry_scheduled": "Another try scheduled",
+  "task.started": "Working",
+  "task.review_requested": "Sent for review",
+  "task.completed": "Delivered",
+  "task.failed": "Paused",
+  "judge.started": "Checking the result",
+  "judge.passed": "Result approved",
+  "judge.failed": "Needs another pass",
+};
+
+export function executionEventLabel(type: string): string {
+  const known = EVENT_LABELS[type];
+  if (known) return known;
+  const words = type.replaceAll(".", " ").replaceAll("_", " ").trim();
+  return words ? words[0]!.toUpperCase() + words.slice(1) : type;
+}
 
 const InteractiveGraph3D = dynamic(
   () => import("./InteractiveGraph3D").then((module) => module.InteractiveGraph3D),
@@ -200,6 +240,7 @@ export function ProjectExecutionGraph({
   hasSequenceGap = false,
   hasTelemetryError = false,
   compact = false,
+  coordinatorName = "Sparky",
 }: CommonProps & {
   workflowPhase?: string;
   events?: ExecutionEventV1[];
@@ -207,6 +248,8 @@ export function ProjectExecutionGraph({
   hasSequenceGap?: boolean;
   hasTelemetryError?: boolean;
   compact?: boolean;
+  /** Who plans and hands out the work: Sparky, or Hermes on Artizen projects. */
+  coordinatorName?: string;
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
@@ -221,17 +264,17 @@ export function ProjectExecutionGraph({
         : event.subject.type === "task" ? event.subject.id : undefined;
       if (taskId) latestByTask.set(taskId, event);
     });
-    const coordinatorKey = pmAgent ? `agent:${pmAgent}` : "gate:unassigned";
-    nodes.push({ key: coordinatorKey, kind: pmAgent ? "agent" : "gate", label: pmAgent || t("components.executionGraph.unassignedLead"), x: 290, y: CY, isPM: Boolean(pmAgent), live: pmAgent ? liveAgents[pmAgent] : undefined, shape: pmAgent ? "agent-block" : "sphere", fx: -85, fy: 0, fz: 0 });
+    // The coordinator plans and hands out the work; the team lead is one more teammate.
+    const coordinatorKey = "coordinator";
+    nodes.push({ key: coordinatorKey, kind: "agent", label: coordinatorName, status: "Coordinator", color: COORDINATOR_COLOR, x: 290, y: CY, shape: "agent-block", fx: -85, fy: 0, fz: 0 });
     edges.push({ from: "goal", to: coordinatorKey, color: "rgba(236,27,105,.58)", active: workflowPhase === "planning" });
 
     const workerNames = [...new Set(relevantTasks.map((task) => task.agent?.trim() || "unassigned"))];
     workerNames.forEach((name, index) => {
-      if (name === pmAgent) return;
       const centeredIndex = index - (workerNames.length - 1) / 2;
       const y = 65 + (index / Math.max(workerNames.length - 1, 1)) * (H - 130);
       const workerKey = `agent:${name}`;
-      nodes.push({ key: workerKey, kind: name === "unassigned" ? "gate" : "agent", label: name === "unassigned" ? t("components.executionGraph.unassignedWorker") : name, x: 485, y, live: name === "unassigned" ? undefined : liveAgents[name], shape: name === "unassigned" ? "sphere" : "agent-block", fx: 70, fy: centeredIndex * 78, fz: index % 2 === 0 ? -28 : 28 });
+      nodes.push({ key: workerKey, kind: name === "unassigned" ? "gate" : "agent", label: name === "unassigned" ? t("components.executionGraph.unassignedWorker") : name, isPM: name === pmAgent, x: 485, y, live: name === "unassigned" ? undefined : liveAgents[name], shape: name === "unassigned" ? "sphere" : "agent-block", fx: 70, fy: centeredIndex * 78, fz: index % 2 === 0 ? -28 : 28 });
       edges.push({
         from: coordinatorKey,
         to: workerKey,
@@ -269,6 +312,21 @@ export function ProjectExecutionGraph({
         : task.status === "In progress" || task.status === "Review";
       edges.push({ from: workerKey, to: taskKey, color: agentColor(task.agent || task.name, 0.72), dashed: task.status === "Done", active });
     });
+    // Dependencies: amber while a task waits on its parent, green once the
+    // parent delivered and the task is free to start.
+    relevantTasks.forEach((task) => {
+      (task.parents ?? []).forEach((parentId) => {
+        const parent = relevantTasks.find((candidate) => candidate.id === parentId);
+        if (!parent || !task.id || parentId === task.id) return;
+        const released = parent.status === "Done";
+        edges.push({
+          from: `task:${parentId}`,
+          to: `task:${task.id}`,
+          color: released ? "rgba(52,211,153,.7)" : "rgba(250,204,21,.68)",
+          dashed: !released,
+        });
+      });
+    });
     const gateEvents = events.filter((event) =>
       ["task.review_requested", "judge.started", "judge.failed", "task.retry_scheduled", "task.failed"].includes(String(event.type)),
     ).slice(-6);
@@ -281,7 +339,7 @@ export function ProjectExecutionGraph({
       nodes.push({
         key,
         kind: "gate",
-        label: String(event.type).replaceAll(".", " "),
+        label: executionEventLabel(String(event.type)),
         status: event.status,
         x: 875,
         y: 55 + index * 72,
@@ -299,7 +357,7 @@ export function ProjectExecutionGraph({
       });
     });
     return { nodes, edges };
-  }, [events, liveAgents, pmAgent, projectId, projectName, relevantTasks, t, workflowPhase]);
+  }, [coordinatorName, events, liveAgents, pmAgent, projectId, projectName, relevantTasks, t, workflowPhase]);
 
   const signals = relevantTasks.map((task) => taskSignal(task));
   const running = signals.filter((signal) => signal === "pickedUp" || signal === "working" || signal === "retrying").length;
@@ -357,9 +415,9 @@ function ExecutionTimeline({ events }: { events: ExecutionEventV1[] }) {
         <li key={event.eventId} className="min-w-40 rounded-lg border border-border bg-background/45 px-3 py-2">
           <div className="flex items-center gap-2">
             <span className={cn("h-2 w-2 rounded-full", event.status === "failed" ? "bg-rose-400" : event.status === "succeeded" ? "bg-emerald-400" : "bg-primary")} />
-            <span className="truncate text-[11px] font-medium text-foreground">{String(event.type).replaceAll(".", " ")}</span>
+            <span className="truncate text-[11px] font-medium text-foreground">{executionEventLabel(String(event.type))}</span>
           </div>
-          <p className="mt-1 truncate text-[10px] text-muted-foreground">#{event.sequence} · {event.subject.label ?? event.subject.id}</p>
+          <p className="mt-1 truncate text-[10px] text-muted-foreground" title={`#${event.sequence}`}>{event.subject.label ?? (event.subject.type === "task" ? "Task" : "Project")}</p>
         </li>
       ))}
     </ol>
