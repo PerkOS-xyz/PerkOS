@@ -109,6 +109,9 @@ function resolveRole(role: CompanyRole, agentName: string) {
   };
 }
 
+/** The project goal the API keeps (team launch and project create cap it at 250). */
+const GOAL_MAX_CHARS = 250;
+
 function slugify(s: string): string {
   return (
     s
@@ -654,14 +657,26 @@ export default function NewProjectWizard() {
             }
             disabled={launching}
             rows={3}
-            maxLength={500}
+            maxLength={GOAL_MAX_CHARS}
+            aria-describedby="project-goal-count"
             className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground"
           />
-          {configuredTeamSize > 0 ? (
-            <p className="text-xs text-muted-foreground">
-              {t("companyNew.config.goalHint")}
-            </p>
-          ) : null}
+          <div className="flex items-start justify-between gap-3">
+            {configuredTeamSize > 0 ? (
+              <p className="text-xs text-muted-foreground">
+                {t("companyNew.config.goalHint")}
+              </p>
+            ) : <span />}
+            <span
+              id="project-goal-count"
+              className={cn(
+                "shrink-0 font-mono text-[11px] tabular-nums",
+                goal.length >= GOAL_MAX_CHARS ? "text-amber-300" : "text-muted-foreground",
+              )}
+            >
+              {goal.length}/{GOAL_MAX_CHARS}
+            </span>
+          </div>
         </section>
 
         {/* Team editor — recommended roles, fully editable */}
