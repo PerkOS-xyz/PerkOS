@@ -156,7 +156,10 @@ export function KanbanBoard<T extends KanbanItem>({
           skipped for people who ask their system to reduce it. */}
       <MotionConfig reducedMotion="user">
       <LayoutGroup id="kanban">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      {/* Columns follow the board's own width: in the project room's middle
+          stage a laptop window leaves far less than the viewport suggests. */}
+      <div className="@container">
+      <div className="grid grid-cols-1 gap-4 @xl:grid-cols-3">
         {COLUMNS.map((col) => (
           <KanbanColumn
             key={col.id}
@@ -184,6 +187,7 @@ export function KanbanBoard<T extends KanbanItem>({
             ))}
           </KanbanColumn>
         ))}
+      </div>
       </div>
       </LayoutGroup>
       </MotionConfig>

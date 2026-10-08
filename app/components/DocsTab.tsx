@@ -206,7 +206,10 @@ export function DocsTab({
   }
 
   return (
-    <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
+    // The doc tree sits beside the document only when the Docs area itself is
+    // wide enough; in the project room's middle stage it stacks above it.
+    <div className="@container min-w-0">
+    <div className="grid min-w-0 grid-cols-1 gap-4 @2xl:grid-cols-[220px_minmax(0,1fr)]">
       {/* Doc tree */}
       <aside className="flex min-w-0 flex-col gap-1.5">
         <div className="flex items-center justify-between">
@@ -295,6 +298,7 @@ export function DocsTab({
           {t("chat.docs.selectPrompt")}
         </div>
       )}
+    </div>
     </div>
   );
 }

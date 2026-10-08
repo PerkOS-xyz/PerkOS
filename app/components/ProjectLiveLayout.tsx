@@ -178,7 +178,7 @@ export function ProjectLiveLayout({
         ))}
       </nav>
 
-      <div className="grid min-h-0 min-w-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[minmax(320px,360px)_minmax(0,1fr)_minmax(360px,400px)]">
+      <div className="grid min-h-0 min-w-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[minmax(280px,320px)_minmax(0,1fr)_minmax(280px,320px)] 2xl:grid-cols-[minmax(320px,360px)_minmax(0,1fr)_minmax(360px,400px)]">
         <div
           id={CONVERSATION_ID}
           className={cn(
