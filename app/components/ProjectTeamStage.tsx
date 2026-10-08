@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useState } from "react";
-import { Clock3, MessageSquare } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, Clock3, MessageSquare } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -141,16 +141,16 @@ export function ProjectTeamStage({
     <div className="relative">
       <style>{`
         @keyframes pk-orbit { to { transform: rotate(360deg); } }
-        @keyframes pk-flow { from { left: 0% } to { left: 100% } }
+        @keyframes pk-flow { from { top: 0% } to { top: 100% } }
       `}</style>
       {seats.length > 1 ? (
-        <div aria-hidden className="pointer-events-none absolute inset-x-[12%] top-9 hidden h-px border-t border-dashed border-border md:block">
+        <div aria-hidden className="pointer-events-none absolute bottom-3 left-[27px] top-3 w-px border-l border-dashed border-border">
           {anyWorking ? (
-            <span className="absolute -top-[3px] h-1.5 w-8 rounded-full bg-gradient-to-r from-transparent via-primary to-transparent [animation:pk-flow_2.4s_linear_infinite]" />
+            <span className="absolute -left-[3px] h-8 w-1.5 rounded-full bg-gradient-to-b from-transparent via-primary to-transparent [animation:pk-flow_2.4s_linear_infinite]" />
           ) : null}
         </div>
       ) : null}
-      <ul className={cn("grid grid-cols-1 gap-3 sm:grid-cols-2", seats.length === 3 || seats.length === 5 || seats.length === 6 ? "lg:grid-cols-3" : seats.length >= 4 ? "xl:grid-cols-4" : "")}>
+      <ul className="relative flex flex-col gap-2.5">
         {seats.map((seat, i) => (
           <li key={seat.name} className="animate-in fade-in zoom-in-95 duration-500" style={{ animationDelay: `${i * 60}ms` }}>
             <SeatCard seat={seat} clock={seat.state === "working" ? elapsed(seat.since, now) : null} onFocus={onFocusAgent} />
@@ -169,13 +169,13 @@ function SeatCard({ seat, clock, onFocus }: { seat: Seat; clock: string | null; 
   return (
     <article
       className={cn(
-        "relative flex h-full flex-col items-center gap-3 rounded-xl border bg-background p-4 text-center",
+        "relative grid min-w-0 grid-cols-[52px_minmax(0,1fr)] gap-3 rounded-xl border bg-background/85 p-3 text-left",
         seat.state === "working" ? "border-transparent" : "border-border",
         seat.state === "resting" && "opacity-75",
       )}
       style={seat.state === "working" ? { boxShadow: `inset 0 0 0 1px ${agentHue(seat.name, 0.45)}, 0 0 40px -18px ${hue}` } : undefined}
     >
-      <div className="relative grid h-[72px] w-[72px] place-items-center">
+      <div className="relative grid h-[52px] w-[52px] place-items-center self-start">
         {seat.state === "working" ? (
           <span
             aria-hidden
@@ -193,18 +193,24 @@ function SeatCard({ seat, clock, onFocus }: { seat: Seat; clock: string | null; 
             style={{ boxShadow: `inset 0 0 0 2px ${seat.state === "done" ? "rgba(52,211,153,.6)" : seat.state === "waiting" || seat.state === "resting" ? "rgba(255,255,255,.1)" : agentHue(seat.name, 0.35)}` }}
           />
         )}
-        <AgentOrb name={seat.name} size={60} />
+        <AgentOrb name={seat.name} size={44} />
       </div>
-      <div className="w-full min-w-0">
-        <p className="truncate text-sm font-medium" title={seat.name}>{label(seat.name)}</p>
-        <p className="text-[11px] uppercase tracking-[0.12em]" style={{ color: hue }}>{`${seat.doneCount} delivered`}</p>
-      </div>
-      <p className={cn("text-xs", seat.state === "working" ? "text-foreground" : "text-muted-foreground")}>
-        {seat.state === "waiting" && seat.waitingOn ? `Waiting for ${label(seat.waitingOn)}` : STATUS[seat.state]}
-      </p>
-      {seat.task ? (
-        <div className="w-full rounded-lg border border-border bg-card/80 p-2.5 text-left">
-          <p className="line-clamp-2 text-xs text-foreground/90">{seat.task.name}</p>
+      <div className="min-w-0">
+        <div className="flex min-w-0 items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="break-words text-sm font-semibold leading-5 text-foreground" title={seat.name}>{label(seat.name)}</p>
+            <p className={cn("mt-0.5 text-xs leading-4", seat.state === "working" ? "text-foreground" : "text-muted-foreground")}>
+              {seat.state === "waiting" && seat.waitingOn ? `Waiting for ${label(seat.waitingOn)}` : STATUS[seat.state]}
+            </p>
+          </div>
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-card/70 px-2 py-1 text-[10px] font-medium" style={{ color: hue }}>
+            {seat.doneCount > 0 ? <CheckCircle2 className="h-3 w-3" /> : null}
+            {seat.doneCount} delivered
+          </span>
+        </div>
+        {seat.task ? (
+          <div className="mt-2.5 rounded-lg border border-border bg-card/70 p-2.5">
+          <p className="line-clamp-2 text-xs font-medium leading-4 text-foreground/90">{seat.task.name}</p>
           <div className="mt-2 flex items-center gap-1" aria-label={`Step ${step} of 3`}>
             {[1, 2, 3].map((n) => (
               <span
@@ -218,15 +224,16 @@ function SeatCard({ seat, clock, onFocus }: { seat: Seat; clock: string | null; 
             <span>{seat.state === "done" ? "Delivered" : seat.state === "working" ? "Working" : seat.state === "review" ? "In review" : "Up next"}</span>
             {clock ? <span className="inline-flex items-center gap-1 font-mono"><Clock3 className="h-3 w-3" />{clock}</span> : null}
           </div>
-        </div>
-      ) : (
-        <div className="w-full rounded-lg border border-dashed border-border p-2.5 text-xs text-muted-foreground">No task yet</div>
-      )}
-      {onFocus ? (
-        <button type="button" onClick={() => onFocus(seat.name)} className="mt-auto inline-flex min-h-9 items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground">
-          <MessageSquare className="h-3 w-3" /> See in conversation
-        </button>
-      ) : null}
+          </div>
+        ) : (
+          <div className="mt-2.5 rounded-lg border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">No task yet</div>
+        )}
+        {onFocus ? (
+          <button type="button" aria-label={`See in conversation with ${seat.name}`} onClick={() => onFocus(seat.name)} className="mt-2.5 inline-flex min-h-8 items-center gap-1.5 rounded-md px-1 text-[11px] font-medium text-muted-foreground transition-colors hover:text-foreground">
+            <MessageSquare className="h-3 w-3" /> Conversation <ArrowUpRight className="h-3 w-3" />
+          </button>
+        ) : null}
+      </div>
     </article>
   );
 }
