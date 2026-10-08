@@ -1067,6 +1067,35 @@
           "description": "Store and recall facts across the conversation."
         }
       },
+      "extraFeatures": "Extra features",
+      "extraFeaturesHelp": "Off by default so your agent starts fast and stays light. Turn on only what it needs. You can change them later from the agent's page.",
+      "needsFeature": "Needs {{feature}} on",
+      "features": {
+        "dreaming": {
+          "label": "Nightly memory review",
+          "description": "Each night, keeps the facts that matter in long-term memory."
+        },
+        "github": {
+          "label": "GitHub reader",
+          "description": "Previews GitHub links and reads docs from public repos."
+        },
+        "location": {
+          "label": "Approximate location",
+          "description": "Guesses a visitor's city from their IP address."
+        },
+        "voice-talk": {
+          "label": "Talk voices",
+          "description": "Lists and picks the voice for Talk mode."
+        },
+        "paired-devices": {
+          "label": "Paired devices",
+          "description": "Link your own computer or phone to share files, alerts, camera and screen panels."
+        },
+        "computer-use": {
+          "label": "Computer use",
+          "description": "Works the screen of a paired computer. Experimental."
+        }
+      },
       "openSourceTitle": "Open-source skills",
       "openSourceHelp": "Markdown skill packs from public GitHub repos. They’re injected into your agent’s instructions. You can inspect each on GitHub.",
       "recommended": "Recommended",
@@ -1204,6 +1233,8 @@
       "skillPacks_other": "{{count}} skill packs",
       "toolsOff_one": " · {{count}} tool off",
       "toolsOff_other": " · {{count}} tools off",
+      "featuresOn_one": " · {{count}} extra feature on",
+      "featuresOn_other": " · {{count}} extra features on",
       "channels": "Channels",
       "channelsPerkosOnly": "PerkOS only",
       "configPreview": "Config preview",

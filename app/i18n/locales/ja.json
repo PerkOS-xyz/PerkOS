@@ -1064,6 +1064,35 @@
           "description": "会話をまたいで情報を記憶・呼び出しします。"
         }
       },
+      "extraFeatures": "追加機能",
+      "extraFeaturesHelp": "エージェントを速く軽く起動するため、初期状態はオフです。必要なものだけオンにしてください。あとからエージェントのページで変更できます。",
+      "needsFeature": "{{feature}}をオンにする必要があります",
+      "features": {
+        "dreaming": {
+          "label": "夜間のメモリー整理",
+          "description": "毎晩、大事な事実を長期メモリーに残します。"
+        },
+        "github": {
+          "label": "GitHubリーダー",
+          "description": "GitHubのリンクをプレビューし、公開リポジトリのドキュメントを読みます。"
+        },
+        "location": {
+          "label": "おおよその位置",
+          "description": "訪問者のIPアドレスから都市を推定します。"
+        },
+        "voice-talk": {
+          "label": "Talkの音声",
+          "description": "Talkモードの音声を一覧表示して選びます。"
+        },
+        "paired-devices": {
+          "label": "ペアリングしたデバイス",
+          "description": "自分のパソコンやスマホをつないで、ファイル、通知、カメラ、画面パネルを共有します。"
+        },
+        "computer-use": {
+          "label": "コンピューター操作",
+          "description": "ペアリングしたパソコンの画面を操作します。試験的な機能です。"
+        }
+      },
       "openSourceTitle": "オープンソーススキル",
       "openSourceHelp": "公開GitHubリポジトリ由来のMarkdown形式のスキルパックです。エージェントの指示に組み込まれます。各スキルの内容はGitHub上で確認できます。",
       "recommended": "おすすめ",
@@ -1197,6 +1226,8 @@
       "skillPacks_other": "{{count}}件のスキルパック",
       "toolsOff_one": " ・{{count}}件のツールをオフ",
       "toolsOff_other": " ・{{count}}件のツールをオフ",
+      "featuresOn_one": " ・{{count}}件の追加機能をオン",
+      "featuresOn_other": " ・{{count}}件の追加機能をオン",
       "channels": "チャネル",
       "channelsPerkosOnly": "PerkOSのみ",
       "configPreview": "設定プレビュー",

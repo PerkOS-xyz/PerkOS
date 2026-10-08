@@ -45,6 +45,11 @@ export function StepReview({ state, onChange }: StepProps) {
       : t("wizard.review.skillPacks", { count: state.skills.length })) +
     (state.disabledTools.length > 0
       ? t("wizard.review.toolsOff", { count: state.disabledTools.length })
+      : "") +
+    (state.runtime === "OpenClaw" &&
+    state.deployMode === "perkos-ecs" &&
+    state.enabledFeatures.length > 0
+      ? t("wizard.review.featuresOn", { count: state.enabledFeatures.length })
       : "");
 
   return (

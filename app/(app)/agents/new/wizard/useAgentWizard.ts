@@ -186,6 +186,12 @@ export function useAgentWizard() {
         soul: soul || undefined,
         skills: state.skills.length ? state.skills : undefined,
         disabledTools: state.disabledTools.length ? state.disabledTools : undefined,
+        enabledFeatures:
+          state.runtime === "OpenClaw" &&
+          state.deployMode === "perkos-ecs" &&
+          state.enabledFeatures.length
+            ? state.enabledFeatures
+            : undefined,
         modelKey: state.llmSource === "byok" ? state.byokApiKey : undefined,
         llmBaseUrl: state.llmSource === "byok" ? byokBaseUrl(state.byokProvider) : undefined,
         llmModel:

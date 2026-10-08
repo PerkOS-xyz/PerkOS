@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 
 import { SPEECH_VOICES, updateAgent, type AgentRow, type SpeechVoice } from "../lib/perkosApi";
+import { AgentFeatureToggles, AgentToolToggles, sameIds } from "./AgentFeatureToggles";
 import { speechVoiceOptionLabel } from "../lib/speechVoiceLabels";
 
 type Props = {
@@ -41,6 +42,14 @@ export function EditAgentDialog({
   const [speechVoice, setSpeechVoice] = useState<SpeechVoice>(agent.speechVoice ?? "alloy");
   const [pluginInput, setPluginInput] = useState("");
   const [attempted, setAttempted] = useState(false);
+  const [disabledTools, setDisabledTools] = useState<string[]>(agent.disabledTools ?? []);
+  const [enabledFeatures, setEnabledFeatures] = useState<string[]>(agent.enabledFeatures ?? []);
+  // Tool and feature switches only reach the runtime on PerkOS-managed agents
+  // (saving reprovisions them); optional features exist on OpenClaw only.
+  const showTools = Boolean(agent.managed);
+  const showFeatures = showTools && agent.runtime === "OpenClaw";
+  const toolsChanged = !sameIds(disabledTools, agent.disabledTools ?? []);
+  const featuresChanged = !sameIds(enabledFeatures, agent.enabledFeatures ?? []);
 
   useEffect(() => {
     if (open) {
@@ -49,8 +58,13 @@ export function EditAgentDialog({
       setSpeechVoice(agent.speechVoice ?? "alloy");
       setPluginInput("");
       setAttempted(false);
+      setDisabledTools(agent.disabledTools ?? []);
+      setEnabledFeatures(agent.enabledFeatures ?? []);
     }
-  }, [open, agent.displayName, agent.name, agent.plugins, agent.speechVoice]);
+    // Joined ids keep a refreshed agent row with the same lists from resetting
+    // switches the owner is still editing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, agent.displayName, agent.name, agent.plugins, agent.speechVoice, (agent.disabledTools ?? []).join(","), (agent.enabledFeatures ?? []).join(",")]);
 
   const nameError =
     displayName.trim().length < 2 ? "Display name must be at least 2 characters." : null;
@@ -58,17 +72,24 @@ export function EditAgentDialog({
   const dirty = useMemo(() => {
     if (displayName.trim() !== (agent.displayName ?? agent.name)) return true;
     if (speechVoice !== (agent.speechVoice ?? "alloy")) return true;
+    if (toolsChanged || featuresChanged) return true;
     const a = [...(agent.plugins ?? [])].sort().join(",");
     const b = [...plugins].sort().join(",");
     return a !== b;
-  }, [displayName, plugins, speechVoice, agent.displayName, agent.name, agent.plugins, agent.speechVoice]);
+  }, [displayName, plugins, speechVoice, toolsChanged, featuresChanged, agent.displayName, agent.name, agent.plugins, agent.speechVoice]);
 
   const mutation = useMutation({
     mutationFn: () =>
       updateAgent({
         walletAddress,
         agentId: agent.id,
-        patch: { displayName: displayName.trim(), plugins, ...(isVoiceEnabled() ? { speechVoice } : {}) },
+        patch: {
+          displayName: displayName.trim(),
+          plugins,
+          ...(isVoiceEnabled() ? { speechVoice } : {}),
+          ...(showTools && toolsChanged ? { disabledTools } : {}),
+          ...(showFeatures && featuresChanged ? { enabledFeatures } : {}),
+        },
       }),
     onSuccess: (result) => {
       queryClient.invalidateQueries({
@@ -118,7 +139,7 @@ export function EditAgentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-h-[90dvh] max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit agent</DialogTitle>
           <DialogDescription>
@@ -204,6 +225,28 @@ export function EditAgentDialog({
               </div>
             ) : null}
           </div>
+
+          {showTools ? (
+            <div className="flex flex-col gap-2">
+              <Label>Built-in tools</Label>
+              <AgentToolToggles compact disabledTools={disabledTools} onChange={setDisabledTools} />
+            </div>
+          ) : null}
+
+          {showFeatures ? (
+            <AgentFeatureToggles
+              compact
+              enabledFeatures={enabledFeatures}
+              disabledTools={disabledTools}
+              onChange={setEnabledFeatures}
+            />
+          ) : null}
+
+          {toolsChanged || featuresChanged ? (
+            <p className="text-xs text-muted-foreground">
+              Saving restarts the agent so the new tools and features take effect.
+            </p>
+          ) : null}
 
           <DialogFooter>
             <Button

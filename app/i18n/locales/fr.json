@@ -1064,6 +1064,35 @@
           "description": "Stocker et retrouver des informations tout au long de la conversation."
         }
       },
+      "extraFeatures": "Fonctions en plus",
+      "extraFeaturesHelp": "Désactivées par défaut pour que votre agent démarre vite et reste léger. Activez seulement ce dont il a besoin. Vous pourrez les changer plus tard depuis la page de l'agent.",
+      "needsFeature": "Nécessite {{feature}} activé",
+      "features": {
+        "dreaming": {
+          "label": "Révision nocturne de la mémoire",
+          "description": "Chaque nuit, garde les faits importants dans la mémoire à long terme."
+        },
+        "github": {
+          "label": "Lecteur GitHub",
+          "description": "Affiche les liens GitHub et lit les docs des dépôts publics."
+        },
+        "location": {
+          "label": "Position approximative",
+          "description": "Estime la ville d'un visiteur à partir de son adresse IP."
+        },
+        "voice-talk": {
+          "label": "Voix Talk",
+          "description": "Liste et choisit la voix du mode Talk."
+        },
+        "paired-devices": {
+          "label": "Appareils associés",
+          "description": "Associez votre ordinateur ou téléphone pour partager fichiers, alertes, caméra et panneaux d'écran."
+        },
+        "computer-use": {
+          "label": "Contrôle d'ordinateur",
+          "description": "Utilise l'écran d'un ordinateur associé. Expérimental."
+        }
+      },
       "openSourceTitle": "Compétences open source",
       "openSourceHelp": "Des packs de compétences en Markdown provenant de dépôts GitHub publics. Ils sont injectés dans les instructions de votre agent. Vous pouvez inspecter chacun d'eux sur GitHub.",
       "recommended": "Recommandé",
@@ -1197,6 +1226,8 @@
       "skillPacks_other": "{{count}} packs de compétences",
       "toolsOff_one": " · {{count}} outil désactivé",
       "toolsOff_other": " · {{count}} outils désactivés",
+      "featuresOn_one": " · {{count}} fonction en plus activée",
+      "featuresOn_other": " · {{count}} fonctions en plus activées",
       "channels": "Canaux",
       "channelsPerkosOnly": "PerkOS uniquement",
       "configPreview": "Aperçu de la configuration",

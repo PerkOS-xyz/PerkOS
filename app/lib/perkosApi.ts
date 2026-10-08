@@ -517,6 +517,8 @@ export type AgentRow = Agent & {
   soul?: string;
   skillIds?: string[];
   disabledTools?: string[];
+  /** Optional OpenClaw features the owner turned on (all off by default). */
+  enabledFeatures?: string[];
   /** True only for PerkOS-managed ECS agents (including legacy ECS records). */
   managed?: boolean;
   /** True for an agent installed by the user on their own VPS. */
@@ -578,6 +580,7 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
       soul: (data.soul as string | undefined) ?? undefined,
       skillIds: (data.skillIds as string[] | undefined) ?? [],
       disabledTools: (data.disabledTools as string[] | undefined) ?? [],
+      enabledFeatures: (data.enabledFeatures as string[] | undefined) ?? [],
       taskArn: (data.taskArn as string | undefined) ?? undefined,
       endpoint: (data.endpoint as string | undefined) ?? undefined,
       createdAt: tsToIso(data.createdAt),
@@ -2064,6 +2067,7 @@ export async function updateAgent(input: {
     plugins: string[];
     skillIds: string[];
     disabledTools: string[];
+    enabledFeatures: string[];
     speechVoice: SpeechVoice;
   }>;
 }): Promise<{ agent: AgentRow; applied: boolean; applyError?: string }> {
@@ -3181,6 +3185,10 @@ export async function launchAgent(input: {
    *  step (e.g. "code-execution", "browser"). Server validates against the
    *  known set + threads it to provisioning as PERKOS_DISABLED_TOOLS. */
   disabledTools?: string[];
+  /** Optional OpenClaw features the wallet turned ON in the wizard. Server
+   *  validates against the known set + threads it to provisioning as
+   *  PERKOS_ENABLED_FEATURES. */
+  enabledFeatures?: string[];
 }): Promise<LaunchAgentResponse> {
   const { authedFetch } = await import("./apiClient");
   const response = await authedFetch("/api/agents/launch", {
@@ -3200,6 +3208,7 @@ export async function launchAgent(input: {
       soul: input.soul,
       skills: input.skills,
       disabledTools: input.disabledTools,
+      enabledFeatures: input.enabledFeatures,
     }),
   });
   const payload = await parseJson(response);
