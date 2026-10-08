@@ -1503,7 +1503,7 @@
       "teamHeading_other": "Tu equipo ({{count}} integrantes)",
       "teamHintTemplate": "Recomendado para este negocio. Quita lo que no necesites y agrega más roles abajo. Sparky coordina al equipo.",
       "teamHintCustom": "Agrega los especialistas que necesita este proyecto. Sparky los coordina y planifica el trabajo contigo.",
-      "leadTitle": "El líder de equipo planea el trabajo y coordina al equipo",
+      "leadTitle": "El líder aloja la conversación del equipo y puede escribir el resumen final. Sparky planea el trabajo.",
       "lead": "Líder",
       "removeRoleAria": "Quitar {{role}}",
       "noRoles": "Todavía no hay roles: agrega al menos uno abajo.",

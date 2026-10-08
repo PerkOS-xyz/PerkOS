@@ -1325,7 +1325,7 @@
       "teamHeading_other": "Il tuo team ({{count}} compagni di team)",
       "teamHintTemplate": "Consigliato per questa attività. Rimuovi ciò che non serve e aggiungi altri ruoli qui sotto. Sparky coordina il team.",
       "teamHintCustom": "Aggiungi gli specialisti di cui ha bisogno questo progetto. Sparky li coordina e pianifica il lavoro con te.",
-      "leadTitle": "Chi guida pianifica il lavoro e coordina il team",
+      "leadTitle": "Chi guida ospita la conversazione del team e può scrivere il riepilogo finale. Sparky pianifica il lavoro.",
       "lead": "Guida",
       "removeRoleAria": "Rimuovi {{role}}",
       "noRoles": "Ancora nessun ruolo: aggiungine almeno uno qui sotto.",

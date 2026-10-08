@@ -251,6 +251,10 @@ export default function NewProjectWizard() {
     setTeamRoles((prev) => withValidPm(prev.filter((r) => r.role !== roleName)));
   }
 
+  function setLeadRole(roleName: string) {
+    setTeamRoles((prev) => prev.map((r) => ({ ...r, isPM: r.role === roleName })));
+  }
+
   function addPresetRole(presetId: string) {
     const p = AGENT_PRESETS.find((x) => x.id === presetId);
     if (!p) return;
@@ -679,12 +683,29 @@ export default function NewProjectWizard() {
                 >
                   <AgentOrb name={role.role} size={24} />
                   <span className="min-w-0 truncate text-foreground">{role.role}</span>
+                  {/* The lead is always visible and can be changed, so removing
+                      the template's lead never promotes someone silently. */}
+                  <button
+                    type="button"
+                    onClick={() => setLeadRole(role.role)}
+                    disabled={launching}
+                    aria-pressed={Boolean(role.isPM)}
+                    title={t("companyNew.config.leadTitle")}
+                    className={cn(
+                      "ml-auto shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium transition-colors",
+                      role.isPM
+                        ? "border-primary/40 bg-primary/10 text-primary"
+                        : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground",
+                    )}
+                  >
+                    {t("companyNew.config.lead")}
+                  </button>
                   <button
                     type="button"
                     onClick={() => removeRole(role.role)}
                     disabled={launching}
                     aria-label={t("companyNew.config.removeRoleAria", { role: role.role })}
-                    className="ml-auto shrink-0 text-muted-foreground hover:text-destructive"
+                    className="shrink-0 text-muted-foreground hover:text-destructive"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
