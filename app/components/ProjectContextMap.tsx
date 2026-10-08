@@ -16,6 +16,7 @@ import { ProjectLearnings } from "./ProjectLearnings";
 import { projectLearnings } from "../lib/projectLearnings";
 import type { ExecutionEventV1 } from "@perkos/shared-types";
 import { taskSignal } from "./TaskSignal";
+import { useAgentLabel } from "./ProjectAgentIdentity";
 
 const W = 920;
 const H = 520;
@@ -117,6 +118,7 @@ export function ProjectKnowledgeGraph({
   const [showCompletedChoice, setShowCompleted] = useState<boolean | null>(null);
   const showCompleted = showCompletedChoice ?? (tasks.length > 0 && tasks.every((task) => task.status === "Done"));
   const [view, setView] = useState<"stage" | "graph">("stage");
+  const agentLabel = useAgentLabel();
 
   const { nodes, edges, hiddenTasks } = useMemo(() => {
     const nodes: GraphNode[] = [{ key: "project", kind: "project", label: projectName, x: CX, y: CY }];
@@ -134,7 +136,7 @@ export function ProjectKnowledgeGraph({
     orderedAgents.forEach((name, index) => {
       const angle = -Math.PI / 2 + (index / Math.max(orderedAgents.length, 1)) * 2 * Math.PI;
       const key = `agent:${name}`;
-      nodes.push({ key, kind: "agent", label: name, x: CX + agentR * Math.cos(angle), y: CY + agentR * Math.sin(angle), isPM: name === pmAgent, live: liveAgents[name] });
+      nodes.push({ key, kind: "agent", label: agentLabel(name), x: CX + agentR * Math.cos(angle), y: CY + agentR * Math.sin(angle), isPM: name === pmAgent, live: liveAgents[name] });
       edges.push({ from: "project", to: key, color: agentColor(name, 0.42) });
     });
 
@@ -166,7 +168,7 @@ export function ProjectKnowledgeGraph({
       edges.push({ from: key, to: "project", color: "rgba(56,189,248,.42)", dashed: true });
     });
     return { nodes, edges, hiddenTasks: Math.max(0, eligibleTasks.length - visibleTasks.length) };
-  }, [agentNames, externalSystems, liveAgents, pmAgent, projectId, projectName, showCompleted, tasks]);
+  }, [agentLabel, agentNames, externalSystems, liveAgents, pmAgent, projectId, projectName, showCompleted, tasks]);
 
   // What the team learned opens first once results exist; Stage and Explore
   // stay one click away.
@@ -254,6 +256,7 @@ export function ProjectExecutionGraph({
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const relevantTasks = useMemo(() => tasks.filter((task) => task.id).slice(0, MAX_TASKS), [tasks]);
+  const agentLabel = useAgentLabel();
   const { nodes, edges } = useMemo(() => {
     const nodes: GraphNode[] = [{ key: "goal", kind: "project", label: projectName, x: 90, y: CY, fx: -250, fy: 0, fz: 0 }];
     const edges: GraphEdge[] = [];
@@ -274,7 +277,7 @@ export function ProjectExecutionGraph({
       const centeredIndex = index - (workerNames.length - 1) / 2;
       const y = 65 + (index / Math.max(workerNames.length - 1, 1)) * (H - 130);
       const workerKey = `agent:${name}`;
-      nodes.push({ key: workerKey, kind: name === "unassigned" ? "gate" : "agent", label: name === "unassigned" ? t("components.executionGraph.unassignedWorker") : name, isPM: name === pmAgent, x: 485, y, live: name === "unassigned" ? undefined : liveAgents[name], shape: name === "unassigned" ? "sphere" : "agent-block", fx: 70, fy: centeredIndex * 78, fz: index % 2 === 0 ? -28 : 28 });
+      nodes.push({ key: workerKey, kind: name === "unassigned" ? "gate" : "agent", label: name === "unassigned" ? t("components.executionGraph.unassignedWorker") : agentLabel(name), isPM: name === pmAgent, x: 485, y, live: name === "unassigned" ? undefined : liveAgents[name], shape: name === "unassigned" ? "sphere" : "agent-block", fx: 70, fy: centeredIndex * 78, fz: index % 2 === 0 ? -28 : 28 });
       edges.push({
         from: coordinatorKey,
         to: workerKey,
@@ -357,7 +360,7 @@ export function ProjectExecutionGraph({
       });
     });
     return { nodes, edges };
-  }, [coordinatorName, events, liveAgents, pmAgent, projectId, projectName, relevantTasks, t, workflowPhase]);
+  }, [agentLabel, coordinatorName, events, liveAgents, pmAgent, projectId, projectName, relevantTasks, t, workflowPhase]);
 
   const signals = relevantTasks.map((task) => taskSignal(task));
   const running = signals.filter((signal) => signal === "pickedUp" || signal === "working" || signal === "retrying").length;

@@ -67,6 +67,7 @@ import {
 import { OfflineBanner } from "./OfflineBanner";
 import { leadOfflineBannerState } from "../lib/chatAgentStatus";
 import { AgentOrb } from "./AgentOrb";
+import { useAgentLabel } from "./ProjectAgentIdentity";
 import { useCoordinationLog } from "../lib/useCoordinationLog";
 
 export function ProjectChatTab({
@@ -658,6 +659,7 @@ export function ProjectTeamPanel({
   }).length;
   const agentCount = participants.filter((participant) => participant.kind === "agent").length;
   const currentIdentity = currentWallet ? `user:${normalizeWalletAddress(currentWallet)}` : "";
+  const agentLabel = useAgentLabel();
 
   return (
     <aside
@@ -737,7 +739,7 @@ export function ProjectTeamPanel({
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex min-w-0 items-center gap-1.5">
-                  <span className="truncate text-sm font-medium text-foreground">{participant.label}</span>
+                  <span className="truncate text-sm font-medium text-foreground" title={participant.label}>{participant.kind === "agent" ? agentLabel(participant.label) : participant.label}</span>
                   {isCoordinator ? (
                     <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-primary">
                       <Crown className="h-2.5 w-2.5" /> Lead

@@ -6,6 +6,7 @@ import { ArrowRight, Bot, Check, CircleAlert, Clock3, Database, Radio, Sparkles 
 import type { Task } from "../lib/perkosApi";
 import type { AgentLiveStatus } from "../lib/useWalletAgents";
 import { AgentOrb } from "./AgentOrb";
+import { useAgentLabel } from "./ProjectAgentIdentity";
 import { agentColor } from "./charts";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +22,7 @@ function taskState(task: Task) {
 
 function AgentColumn({ name, isPM, tasks, live, projectId }: { name: string; isPM: boolean; tasks: Task[]; live?: AgentLiveStatus; projectId: string }) {
   const color = agentColor(name, 1);
+  const label = useAgentLabel();
   const active = Boolean(live?.bridgeConnected) || tasks.some((task) => task.status === "In progress");
   return (
     <article className="relative min-w-[220px] flex-1 basis-56" data-testid={`stage-agent-${name}`}>
@@ -29,7 +31,7 @@ function AgentColumn({ name, isPM, tasks, live, projectId }: { name: string; isP
           <AgentOrb name={name} size={50} />
         </div>
         <div className="mt-2 flex items-center gap-1.5">
-          <strong className="max-w-[160px] truncate text-xs text-foreground">{name}</strong>
+          <strong className="max-w-[160px] truncate text-xs text-foreground" title={name}>{label(name)}</strong>
           {isPM ? <span className="rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[8px] uppercase tracking-wider text-primary">Lead</span> : null}
         </div>
         <span className={cn("mt-1 inline-flex items-center gap-1 text-[9px] uppercase tracking-[.16em]", active ? "text-emerald-300" : "text-muted-foreground")}>

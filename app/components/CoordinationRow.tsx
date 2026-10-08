@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { deriveAgentAvatarIdentity } from "../lib/agentAvatarIdentity";
 import type { CoordinationMessage } from "../lib/useCoordinationLog";
 import { AgentOrb } from "./AgentOrb";
-import { useAgentHue } from "./ProjectAgentIdentity";
+import { useAgentHue, useAgentLabel } from "./ProjectAgentIdentity";
 import { Markdown } from "./Markdown";
 
 function agentName(identity: string): string {
@@ -95,6 +95,7 @@ export function CoordinationRow({
 }) {
   const { kind, to, taskId, ok } = message.coordination;
   const hue = useAgentHue();
+  const label = useAgentLabel();
 
   if (kind === "system") {
     return (
@@ -120,7 +121,7 @@ export function CoordinationRow({
         <AgentOrb name={name} size={28} />
         <div className="flex min-w-0 flex-col gap-1">
           <div className="flex items-center gap-2 text-xs">
-            <span className="truncate font-medium" style={{ color: hue(name) }}>{name}</span>
+            <span className="truncate font-medium" style={{ color: hue(name) }} title={name}>{label(name)}</span>
             <Time iso={message.timestamp} />
           </div>
           <div
@@ -161,7 +162,7 @@ export function CoordinationRow({
                 className="max-w-[14rem] truncate rounded-full px-1.5 py-0.5 text-[11px] font-medium"
                 style={{ color: hue(target), background: hue(target, 0.12) }}
               >
-                @{target}
+                @{label(target)}
               </span>
             </>
           ) : null}

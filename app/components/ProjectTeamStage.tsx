@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 import type { Task } from "../lib/perkosApi";
 import { AgentOrb } from "./AgentOrb";
-import { useAgentHue } from "./ProjectAgentIdentity";
+import { useAgentHue, useAgentLabel } from "./ProjectAgentIdentity";
 
 export type SeatState = "working" | "review" | "waiting" | "starting" | "done" | "resting" | "ready";
 
@@ -163,6 +163,7 @@ export function ProjectTeamStage({
 
 function SeatCard({ seat, clock, onFocus }: { seat: Seat; clock: string | null; onFocus?: (name: string) => void }) {
   const agentHue = useAgentHue();
+  const label = useAgentLabel();
   const hue = agentHue(seat.name);
   const step = seat.state === "done" || seat.state === "review" ? 3 : seat.state === "working" ? 2 : seat.task ? 1 : 0;
   return (
@@ -195,11 +196,11 @@ function SeatCard({ seat, clock, onFocus }: { seat: Seat; clock: string | null; 
         <AgentOrb name={seat.name} size={60} />
       </div>
       <div className="w-full min-w-0">
-        <p className="truncate text-sm font-medium" title={seat.name}>{seat.name}</p>
+        <p className="truncate text-sm font-medium" title={seat.name}>{label(seat.name)}</p>
         <p className="text-[11px] uppercase tracking-[0.12em]" style={{ color: hue }}>{`${seat.doneCount} delivered`}</p>
       </div>
       <p className={cn("text-xs", seat.state === "working" ? "text-foreground" : "text-muted-foreground")}>
-        {seat.state === "waiting" && seat.waitingOn ? `Waiting for ${seat.waitingOn}` : STATUS[seat.state]}
+        {seat.state === "waiting" && seat.waitingOn ? `Waiting for ${label(seat.waitingOn)}` : STATUS[seat.state]}
       </p>
       {seat.task ? (
         <div className="w-full rounded-lg border border-border bg-card/80 p-2.5 text-left">

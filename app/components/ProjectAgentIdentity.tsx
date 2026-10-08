@@ -13,14 +13,27 @@ import {
   deriveAgentAvatarIdentity,
   type AgentAvatarIdentity,
 } from "../lib/agentAvatarIdentity";
+import { teamShortLabels } from "../lib/teamLabels";
 
+const ProjectAgentLabelContext = createContext<ReadonlyMap<string, string> | null>(null);
 const ProjectAgentIdentityContext = createContext<ReadonlyMap<string, AgentAvatarIdentity> | null>(null);
 
 export function ProjectAgentIdentityProvider({ names, children }: { names: readonly string[]; children: ReactNode }) {
   const key = names.join("\n");
   // The roster key is the only input; the array itself is rebuilt each render.
   const team = useMemo(() => allocateTeamAvatarIdentities(key ? key.split("\n") : []), [key]);
-  return <ProjectAgentIdentityContext.Provider value={team}>{children}</ProjectAgentIdentityContext.Provider>;
+  const labels = useMemo(() => teamShortLabels(key ? key.split("\n") : []), [key]);
+  return (
+    <ProjectAgentIdentityContext.Provider value={team}>
+      <ProjectAgentLabelContext.Provider value={labels}>{children}</ProjectAgentLabelContext.Provider>
+    </ProjectAgentIdentityContext.Provider>
+  );
+}
+
+/** A teammate's short name inside the project ("Market Researcher"); the full name elsewhere. */
+export function useAgentLabel(): (name: string) => string {
+  const labels = useContext(ProjectAgentLabelContext);
+  return useCallback((name: string) => labels?.get(name) ?? name, [labels]);
 }
 
 /** The teammate's project identity, or null outside a project roster. */
