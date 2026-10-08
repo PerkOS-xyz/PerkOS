@@ -15,7 +15,7 @@ import type { Task } from "../lib/perkosApi";
 import { AgentOrb } from "./AgentOrb";
 import { useAgentHue, useAgentLabel } from "./ProjectAgentIdentity";
 
-export type SeatState = "working" | "review" | "waiting" | "starting" | "done" | "resting" | "ready";
+export type SeatState = "working" | "pickedUp" | "review" | "waiting" | "starting" | "done" | "resting" | "ready";
 
 export type Seat = {
   name: string;
@@ -24,6 +24,8 @@ export type Seat = {
   task?: Task;
   /** Agent this seat waits for (a parent task's owner). */
   waitingOn?: string;
+  /** Agent whose delivery just freed this seat's next task. */
+  unblockedBy?: string;
   /** ISO time the current work started, for the live clock. */
   since?: string;
   doneCount: number;
@@ -62,7 +64,9 @@ export function deriveSeats(
   return ordered.map((name) => {
     const mine = tasks.filter((t) => t.agent === name);
     const doneCount = mine.filter((t) => t.status === "Done").length;
-    const working = mine.find((t) => t.status === "In progress");
+    // Same fields as the task card's signal, so seat and card always agree.
+    const working = mine.find((t) => t.status === "In progress" || (t.status !== "Done" && t.status !== "Review" && t.dispatchState === "working"));
+    const pickedUp = mine.find((t) => (t.status === "Backlog" || t.status === "To do") && t.dispatchState === "starting");
     const review = mine.find((t) => t.status === "Review");
     const waiting = mine.find(
       (t) => t.status !== "Done" && (t.dispatchState === "waiting_on_dependency" || (t.parents ?? []).some((p) => byId.get(p)?.status !== "Done")),
@@ -73,12 +77,17 @@ export function deriveSeats(
     const lead = name === pmAgent;
     if (working) return { name, lead, state: "working", task: working, since: working.dispatchedAt ?? working.updatedAt, doneCount };
     if (review) return { name, lead, state: "review", task: review, doneCount };
+    if (pickedUp) return { name, lead, state: "pickedUp", task: pickedUp, doneCount };
     if (waiting) {
       const parent = (waiting.parents ?? []).map((p) => byId.get(p)).find((p) => p && p.status !== "Done");
       return { name, lead, state: "waiting", task: waiting, waitingOn: parent?.agent, doneCount };
     }
     if (agentStarting(presence[name])) return { name, lead, state: "starting", task: next ?? lastDone, doneCount };
-    if (next) return { name, lead, state: sleeping ? "resting" : "ready", task: next, doneCount };
+    if (next) {
+      const parents = (next.parents ?? []).map((p) => byId.get(p)).filter((p): p is Task => Boolean(p));
+      const lastParent = [...parents].sort((a, b) => Date.parse(b.updatedAt ?? "") - Date.parse(a.updatedAt ?? ""))[0];
+      return { name, lead, state: sleeping ? "resting" : "ready", task: next, doneCount, unblockedBy: lastParent?.agent || undefined };
+    }
     if (lastDone) return { name, lead, state: "done", task: lastDone, doneCount };
     return { name, lead, state: sleeping ? "resting" : "ready", doneCount };
   });
@@ -104,6 +113,7 @@ export function elapsed(since: string | undefined, now: number): string | null {
 
 const STATUS: Record<SeatState, string> = {
   working: "Working on it",
+  pickedUp: "Picked up · getting started",
   review: "Waiting for review",
   waiting: "Waiting",
   starting: "Starting up · about 2 minutes",
@@ -200,7 +210,7 @@ function SeatCard({ seat, clock, onFocus }: { seat: Seat; clock: string | null; 
           <div className="min-w-0">
             <p className="break-words text-sm font-semibold leading-5 text-foreground" title={seat.name}>{label(seat.name)}</p>
             <p className={cn("mt-0.5 text-xs leading-4", seat.state === "working" ? "text-foreground" : "text-muted-foreground")}>
-              {seat.state === "waiting" && seat.waitingOn ? `Waiting for ${label(seat.waitingOn)}` : STATUS[seat.state]}
+              {seat.state === "waiting" && seat.waitingOn ? `Waiting for ${label(seat.waitingOn)}` : seat.state === "ready" && seat.unblockedBy ? `${label(seat.unblockedBy)} delivered · ready to start` : STATUS[seat.state]}
             </p>
           </div>
           <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-card/70 px-2 py-1 text-[10px] font-medium" style={{ color: hue }}>
@@ -221,7 +231,7 @@ function SeatCard({ seat, clock, onFocus }: { seat: Seat; clock: string | null; 
             ))}
           </div>
           <div className="mt-1.5 flex items-center justify-between text-[10px] text-muted-foreground">
-            <span>{seat.state === "done" ? "Delivered" : seat.state === "working" ? "Working" : seat.state === "review" ? "In review" : "Up next"}</span>
+            <span>{seat.state === "done" ? "Delivered" : seat.state === "working" ? "Working" : seat.state === "review" ? "In review" : seat.state === "pickedUp" ? "Picked up" : "Up next"}</span>
             {clock ? <span className="inline-flex items-center gap-1 font-mono"><Clock3 className="h-3 w-3" />{clock}</span> : null}
           </div>
           </div>

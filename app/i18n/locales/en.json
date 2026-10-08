@@ -1791,6 +1791,7 @@
       "signal": {
         "pickedUp": "Picked up",
         "retrying": "Retrying",
+        "review": "In review",
         "working": "Working",
         "delivered": "Delivered",
         "paused": "Paused",

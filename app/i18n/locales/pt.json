@@ -1917,6 +1917,7 @@
       "signal": {
         "pickedUp": "Assumida",
         "retrying": "Tentando de novo",
+        "review": "Em revisão",
         "working": "Trabalhando",
         "delivered": "Entregue",
         "paused": "Pausada",

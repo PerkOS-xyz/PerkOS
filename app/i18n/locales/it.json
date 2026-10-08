@@ -1594,6 +1594,7 @@
       "signal": {
         "pickedUp": "Presa in carico",
         "retrying": "Nuovo tentativo",
+        "review": "In revisione",
         "working": "In lavorazione",
         "delivered": "Consegnata",
         "paused": "In pausa",
