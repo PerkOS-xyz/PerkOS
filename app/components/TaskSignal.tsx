@@ -25,7 +25,9 @@ export function taskSignal(
   if (task.dispatchState === "retrying") return "retrying";
   if (task.status === "Review") return "review";
   if (task.status === "In progress" || task.dispatchState === "working") return "working";
-  if (task.dispatchState === "starting") return "pickedUp";
+  // "delivered": the runtime accepted the wake and is working before the agent
+  // moves the card itself.
+  if (task.dispatchState === "starting" || task.dispatchState === "delivered") return "pickedUp";
   if (task.dispatchState === "waiting_on_dependency") return "waiting";
   return null;
 }
