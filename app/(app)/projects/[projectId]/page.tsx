@@ -76,6 +76,7 @@ import { ArtizenProjectBoard, ArtizenWorkLink } from "../../../components/Artize
 import { SearchInput, matchesQuery } from "../../../components/SearchInput";
 import { useActiveOrg } from "../../../lib/useActiveOrg";
 import { useProjectExecutionEvents } from "../../../lib/useProjectExecutionEvents";
+import { ProjectAgentIdentityProvider } from "../../../components/ProjectAgentIdentity";
 
 const ProjectMeetingsTab = dynamic(() => import("../../../components/ProjectMeetingsTab"), {
   ssr: false,
@@ -242,6 +243,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
   ) : null;
 
   return (
+    <ProjectAgentIdentityProvider names={liveDetail ? uniqueAgents(liveDetail.tasks, liveDetail.project.agentIds ?? []) : []}>
     <div className={cn(
       "flex min-w-0 max-w-full flex-col overflow-x-clip",
       tab === "chat" ? "gap-3" : "gap-6",
@@ -376,6 +378,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
         </>
       ) : null}
     </div>
+    </ProjectAgentIdentityProvider>
   );
 }
 

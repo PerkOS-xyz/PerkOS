@@ -15,6 +15,7 @@
 import type { AgentAvatarIdentity } from "../lib/agentAvatarIdentity";
 import { deriveAgentAvatarIdentity } from "../lib/agentAvatarIdentity";
 import { AgentIdentityAvatar, type AgentIdentityState } from "./AgentIdentityAvatar";
+import { useProjectAgentIdentity } from "./ProjectAgentIdentity";
 
 export function AgentOrb({
   name,
@@ -42,8 +43,10 @@ export function AgentOrb({
   identitySeed?: string | null;
   className?: string;
 }) {
+  const projectIdentity = useProjectAgentIdentity(name);
   const resolved =
     identity ??
+    projectIdentity ??
     deriveAgentAvatarIdentity(
       identitySeed || [presetId, role, name].filter(Boolean).join(":") || name,
       role || presetId || name,
