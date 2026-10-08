@@ -1699,7 +1699,7 @@
         "title": "Tu equipo está listo: así puedes empezar",
         "titleStarting": "Tu equipo está arrancando (unos 2 minutos). Ya puedes ponerlo a trabajar.",
         "step1Bold": "Poner al equipo a trabajar",
-        "step1WithPm": ": {{pmAgent}} lee tu objetivo, lo convierte en tareas y el equipo lo resuelve por su cuenta. Es la forma más rápida, con un clic.",
+        "step1WithPm": ". Sparky lee tu objetivo, planea el trabajo en tareas que tú apruebas y el equipo lo completa por su cuenta. Es la forma de un solo clic.",
         "step1NoPm": ": vas a elegir qué agente lidera el equipo; luego planea el objetivo en tareas y el equipo lo resuelve por su cuenta.",
         "step2Before": "O dile al equipo lo que necesitas en ",
         "step2Bold": "Chat del proyecto",
