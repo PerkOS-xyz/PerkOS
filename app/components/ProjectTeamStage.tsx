@@ -66,7 +66,7 @@ export function deriveSeats(
     const doneCount = mine.filter((t) => t.status === "Done").length;
     // Same fields as the task card's signal, so seat and card always agree.
     const working = mine.find((t) => t.status === "In progress" || (t.status !== "Done" && t.status !== "Review" && t.dispatchState === "working"));
-    const pickedUp = mine.find((t) => (t.status === "Backlog" || t.status === "To do") && t.dispatchState === "starting");
+    const pickedUp = mine.find((t) => (t.status === "Backlog" || t.status === "To do") && (t.dispatchState === "starting" || t.dispatchState === "delivered"));
     const review = mine.find((t) => t.status === "Review");
     const waiting = mine.find(
       (t) => t.status !== "Done" && (t.dispatchState === "waiting_on_dependency" || (t.parents ?? []).some((p) => byId.get(p)?.status !== "Done")),
