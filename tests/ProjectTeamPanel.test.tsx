@@ -59,7 +59,9 @@ describe("ProjectTeamPanel", () => {
     expect(screen.getByText("Julio")).toBeInTheDocument();
     expect(screen.getByText("You · Project member")).toBeInTheDocument();
     expect(screen.getByText("In this chat")).toBeInTheDocument();
-    expect(screen.getByText("OpenClaw · Coordinator")).toBeInTheDocument();
+    // Sparky coordinates; the lead is a teammate with a Lead badge.
+    expect(screen.getAllByText("OpenClaw · Agent")).toHaveLength(2);
+    expect(screen.getByText("Lead")).toBeInTheDocument();
     expect(screen.getByText("Available")).toBeInTheDocument();
     expect(screen.getByText(/^Offline · seen /)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Open chat with bragi" })).toHaveAttribute(
