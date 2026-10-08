@@ -373,7 +373,7 @@ export function ProjectChatTab({
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">Sparky</p>
                 <p className="truncate text-xs text-muted-foreground">
-                  {pmAgent ? `Coordinating the team · ${pmAgent} leads` : "Coordinating the team"}
+                  Coordinating your team
                 </p>
               </div>
             </div>
@@ -381,7 +381,7 @@ export function ProjectChatTab({
             <div className="min-w-0">
               <p className="truncate text-sm font-medium"># {detail.project.name}</p>
               <p className="text-xs text-muted-foreground">
-                {pmAgent ? `Sparky coordinates this project with ${pmAgent}` : "No team lead yet"}
+                {pmAgent ? "Sparky coordinates this project" : "No team lead yet"}
               </p>
             </div>
           )}
@@ -702,7 +702,7 @@ export function ProjectTeamPanel({
             && pmAgent?.toLocaleLowerCase() === agentName.toLocaleLowerCase();
           const isCurrentUser = participant.id.toLocaleLowerCase() === currentIdentity;
           const detail = participant.kind === "agent"
-            ? [live?.runtime, isCoordinator ? "Coordinator" : "Agent"].filter(Boolean).join(" · ")
+            ? [live?.runtime, "Agent"].filter(Boolean).join(" · ")
             : isCurrentUser ? "You · Project member" : "Project member";
           const statusText = participant.kind === "agent"
             ? presence.label
