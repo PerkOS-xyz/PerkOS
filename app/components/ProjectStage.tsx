@@ -20,12 +20,12 @@ function taskState(task: Task) {
   return { label: "Ready", icon: Clock3, tone: "text-muted-foreground border-white/10 bg-white/[.04]" };
 }
 
-function AgentColumn({ name, isPM, tasks, live, projectId }: { name: string; isPM: boolean; tasks: Task[]; live?: AgentLiveStatus; projectId: string }) {
+function AgentColumn({ name, isPM, tasks, live, projectId, fitted = false }: { name: string; isPM: boolean; tasks: Task[]; live?: AgentLiveStatus; projectId: string; fitted?: boolean }) {
   const color = agentColor(name, 1);
   const label = useAgentLabel();
   const active = Boolean(live?.bridgeConnected) || tasks.some((task) => task.status === "In progress");
   return (
-    <article className="relative min-w-[220px] flex-1 basis-56" data-testid={`stage-agent-${name}`}>
+    <article className={cn("relative", fitted ? "min-w-0" : "min-w-[220px] flex-1 basis-56")} data-testid={`stage-agent-${name}`}>
       <div className="relative z-10 flex flex-col items-center text-center">
         <div className="grid h-14 w-14 place-items-center rounded-full border bg-[#0d0a16] shadow-[0_0_24px_var(--agent-glow)]" style={{ borderColor: color, "--agent-glow": agentColor(name, 0.28) } as React.CSSProperties}>
           <AgentOrb name={name} size={50} />
@@ -70,6 +70,8 @@ export function ProjectStage({ projectId, projectName, pmAgent, agentNames, task
   const orderedAgents = [...agentNames.filter((name) => name === pmAgent), ...agentNames.filter((name) => name !== pmAgent)];
   const unassigned = tasks.filter((task) => !task.agent?.trim() || !orderedAgents.includes(task.agent.trim()));
   const columns = unassigned.length > 0 && !orderedAgents.includes("Unassigned") ? [...orderedAgents, "Unassigned"] : orderedAgents;
+  // Five or more teammates sit in rows of three, so nobody hides off to the side.
+  const fitted = columns.length > 4;
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#07030d] p-4 sm:p-5" role="region" aria-label="Project stage">
@@ -80,10 +82,10 @@ export function ProjectStage({ projectId, projectName, pmAgent, agentNames, task
         <div className="mt-3 h-7 w-px bg-gradient-to-b from-primary/70 to-white/10" />
       </div>
 
-      <div className="relative overflow-x-auto pb-2">
-        <div className="relative flex min-w-max gap-3 px-1 pt-4 sm:gap-4">
-          <div className="absolute left-[110px] right-[110px] top-11 h-px bg-gradient-to-r from-transparent via-primary/35 to-transparent" />
-          {columns.map((name) => <AgentColumn key={name} name={name} isPM={name === pmAgent} tasks={name === "Unassigned" ? unassigned : tasks.filter((task) => task.agent?.trim() === name)} live={liveAgents[name]} projectId={projectId} />)}
+      <div className={cn("relative pb-2", !fitted && "overflow-x-auto")}>
+        <div className={cn("relative px-1 pt-4", fitted ? "grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 sm:gap-x-4" : "flex min-w-max gap-3 sm:gap-4")}>
+          {fitted ? null : <div className="absolute left-[110px] right-[110px] top-11 h-px bg-gradient-to-r from-transparent via-primary/35 to-transparent" />}
+          {columns.map((name) => <AgentColumn key={name} name={name} isPM={name === pmAgent} tasks={name === "Unassigned" ? unassigned : tasks.filter((task) => task.agent?.trim() === name)} live={liveAgents[name]} projectId={projectId} fitted={fitted} />)}
         </div>
       </div>
 
