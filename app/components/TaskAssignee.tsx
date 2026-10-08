@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 import { AgentOrb } from "./AgentOrb";
-import { useAgentHue } from "./ProjectAgentIdentity";
+import { useAgentHue, useAgentLabel } from "./ProjectAgentIdentity";
 
 /**
  * Who owns a task, readable at a glance on a board card: the assignee's orb
@@ -20,6 +20,7 @@ export function TaskAssignee({
 }) {
   const { t } = useTranslation();
   const hue = useAgentHue();
+  const label = useAgentLabel();
   const name = agent?.trim();
 
   if (!name) {
@@ -41,7 +42,7 @@ export function TaskAssignee({
     >
       <AgentOrb name={name} size={24} />
       <span className="truncate font-medium" style={{ color: hue(name, 0.95) }}>
-        {name}
+        {label(name)}
       </span>
     </span>
   );

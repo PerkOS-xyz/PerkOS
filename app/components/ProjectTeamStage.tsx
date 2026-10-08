@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 import type { Task } from "../lib/perkosApi";
 import { AgentOrb } from "./AgentOrb";
-import { useAgentHue } from "./ProjectAgentIdentity";
+import { useAgentHue, useAgentLabel } from "./ProjectAgentIdentity";
 
 export type SeatState = "working" | "review" | "waiting" | "starting" | "done" | "resting" | "ready";
 
@@ -163,6 +163,7 @@ export function ProjectTeamStage({
 
 function SeatCard({ seat, clock, onFocus }: { seat: Seat; clock: string | null; onFocus?: (name: string) => void }) {
   const agentHue = useAgentHue();
+  const label = useAgentLabel();
   const hue = agentHue(seat.name);
   const step = seat.state === "done" || seat.state === "review" ? 3 : seat.state === "working" ? 2 : seat.task ? 1 : 0;
   return (
@@ -197,9 +198,9 @@ function SeatCard({ seat, clock, onFocus }: { seat: Seat; clock: string | null; 
       <div className="min-w-0">
         <div className="flex min-w-0 items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="break-words text-sm font-semibold leading-5 text-foreground" title={seat.name}>{seat.name}</p>
+            <p className="break-words text-sm font-semibold leading-5 text-foreground" title={seat.name}>{label(seat.name)}</p>
             <p className={cn("mt-0.5 text-xs leading-4", seat.state === "working" ? "text-foreground" : "text-muted-foreground")}>
-              {seat.state === "waiting" && seat.waitingOn ? `Waiting for ${seat.waitingOn}` : STATUS[seat.state]}
+              {seat.state === "waiting" && seat.waitingOn ? `Waiting for ${label(seat.waitingOn)}` : STATUS[seat.state]}
             </p>
           </div>
           <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-card/70 px-2 py-1 text-[10px] font-medium" style={{ color: hue }}>
