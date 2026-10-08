@@ -31,6 +31,7 @@ export function ProjectLiveLayout({
   stage,
   initialStage = "tasks",
   requestedStage,
+  stageRequestId = 0,
   work,
   counts,
   initialMobile = "talk",
@@ -45,6 +46,8 @@ export function ProjectLiveLayout({
   initialStage?: StageView;
   /** External recommendation/CTA can bring the canvas to a specific stage. */
   requestedStage?: StageView;
+  /** Bumped on every stage request, so asking for the same view again still switches to it. */
+  stageRequestId?: number;
   work: ReactNode;
   counts: { working: number; done: number; total: number };
   initialMobile?: MobileView;
@@ -61,7 +64,9 @@ export function ProjectLiveLayout({
     if (!requestedStage) return;
     setStageView(requestedStage);
     setMobile("team");
-  }, [requestedStage]);
+    // stageRequestId re-runs this when the same view is asked for again
+    // (a second "Review in Docs" after browsing tasks).
+  }, [requestedStage, stageRequestId]);
 
   // A link to a work tab lands on it: phones switch to the work area, and both
   // phones and desktop scroll it into view instead of changing a tab off screen.

@@ -119,6 +119,11 @@ export default function ProjectDetailPage({ params }: PageProps) {
   );
   const [manageTeam, setManageTeam] = useState(false);
   const [requestedStage, setRequestedStage] = useState<StageView | undefined>();
+  const [stageRequestId, setStageRequestId] = useState(0);
+  const requestStage = (view: StageView) => {
+    setRequestedStage(view);
+    setStageRequestId((n) => n + 1);
+  };
 
   // Opening a work tab from a link or a button also brings it into view.
   const [workFocus, setWorkFocus] = useState(0);
@@ -133,6 +138,10 @@ export default function ProjectDetailPage({ params }: PageProps) {
     if (next && TABS.includes(next)) {
       setTab(next);
       if (next !== "chat") setWorkFocus((n) => n + 1);
+      // The live project view shows Docs and Workflow in its stage, so a link
+      // such as the chat's "Review in Docs" switches the stage too.
+      if (next === "docs") requestStage("docs");
+      if (next === "map") requestStage("workflow");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
@@ -293,7 +302,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
                   detail={liveDetail}
                   onOpen={(next) => {
                     if (next === "workflow" || next === "docs") {
-                      setRequestedStage(next);
+                      requestStage(next);
                       return;
                     }
                     if (next === "agents") setManageTeam(true);
@@ -304,6 +313,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
               summary={<ProjectSummary detail={liveDetail} ownerWallet={ownerWallet ?? undefined} />}
               initialStage={initialTab === "map" ? "workflow" : initialTab === "docs" ? "docs" : "tasks"}
               requestedStage={requestedStage}
+              stageRequestId={stageRequestId}
               initialMobile={initialTab === "chat" ? "talk" : searchParams.get("tab") ? "work" : "talk"}
               workFocus={workFocus}
               counts={{
