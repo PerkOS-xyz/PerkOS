@@ -82,6 +82,10 @@ export type WizardState = {
    *  launch payload sends it as `disabledTools` and the runtime entrypoints
    *  translate it to OpenClaw tools.deny / a Hermes custom toolset. */
   disabledTools: string[];
+  /** Optional OpenClaw features the wallet turned ON. Empty = all off
+   *  (default). Each id is a FEATURE_ID; the launch payload sends it as
+   *  `enabledFeatures` and the OpenClaw entrypoint turns on its plugins. */
+  enabledFeatures: string[];
 
   // Messaging gateways. Each enabled entry is POSTed to
   // /api/agents/{agentId}/gateways right after launchAgent returns. Secrets
@@ -124,6 +128,7 @@ export const INITIAL_WIZARD_STATE: WizardState = {
   skills: [],
   communitySkills: [],
   disabledTools: [],
+  enabledFeatures: [],
   gatewayTelegramEnabled: false,
   gatewayTelegramBotToken: "",
   gatewayTelegramAllowedUsers: "",

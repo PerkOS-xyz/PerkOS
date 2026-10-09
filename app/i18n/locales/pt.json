@@ -1067,6 +1067,35 @@
           "description": "Armazene e lembre-se de fatos durante a conversa."
         }
       },
+      "extraFeatures": "Recursos extras",
+      "extraFeaturesHelp": "Desligados por padrão para seu agente iniciar rápido e leve. Ligue só o que ele precisa. Você pode mudar depois na página do agente.",
+      "needsFeature": "Precisa de {{feature}} ligado",
+      "features": {
+        "dreaming": {
+          "label": "Revisão noturna da memória",
+          "description": "Toda noite guarda na memória de longo prazo os fatos importantes."
+        },
+        "github": {
+          "label": "Leitor do GitHub",
+          "description": "Mostra links do GitHub e lê documentos de repositórios públicos."
+        },
+        "location": {
+          "label": "Localização aproximada",
+          "description": "Estima a cidade de um visitante pelo endereço IP."
+        },
+        "voice-talk": {
+          "label": "Vozes do Talk",
+          "description": "Lista e escolhe a voz do modo Talk."
+        },
+        "paired-devices": {
+          "label": "Dispositivos pareados",
+          "description": "Conecte seu computador ou celular para compartilhar arquivos, alertas, câmera e painéis de tela."
+        },
+        "computer-use": {
+          "label": "Uso do computador",
+          "description": "Usa a tela de um computador pareado. Experimental."
+        }
+      },
       "openSourceTitle": "Habilidades de código aberto",
       "openSourceHelp": "Pacotes de habilidades de Markdown de repositórios públicos do GitHub. Eles são injetados nas instruções do seu agente. Você pode inspecionar cada um no GitHub.",
       "recommended": "Recomendado",
@@ -1204,6 +1233,8 @@
       "skillPacks_other": "Pacotes de habilidades {{count}}",
       "toolsOff_one": "· Ferramenta {{count}} desativada",
       "toolsOff_other": "· Ferramentas {{count}} desativadas",
+      "featuresOn_one": "· {{count}} recurso extra ligado",
+      "featuresOn_other": "· {{count}} recursos extras ligados",
       "channels": "Canais",
       "channelsPerkosOnly": "Somente PerkOS",
       "configPreview": "Pré-visualização da configuração",

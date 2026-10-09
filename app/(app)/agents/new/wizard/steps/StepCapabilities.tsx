@@ -24,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 import { findPreset } from "@/app/lib/agentPresets";
+import { AgentFeatureToggles } from "@/app/components/AgentFeatureToggles";
 import {
   SKILLS_CATALOG,
   findSkillPack,
@@ -190,6 +191,17 @@ export function StepCapabilities({ state, onChange }: StepProps) {
           </p>
         ) : null}
       </div>
+
+      {/* Optional OpenClaw features — off by default so the agent starts light;
+          the ids turned on ride the launch payload as enabledFeatures. Only for
+          PerkOS-managed OpenClaw, the one path that renders them today. */}
+      {state.runtime === "OpenClaw" && state.deployMode === "perkos-ecs" ? (
+        <AgentFeatureToggles
+          enabledFeatures={state.enabledFeatures}
+          disabledTools={state.disabledTools}
+          onChange={(next) => onChange({ enabledFeatures: next })}
+        />
+      ) : null}
 
       <OpenSourceSkills
         state={state}

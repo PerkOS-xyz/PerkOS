@@ -1064,6 +1064,35 @@
           "description": "대화 전반에 걸쳐 정보를 저장하고 다시 불러와요."
         }
       },
+      "extraFeatures": "추가 기능",
+      "extraFeaturesHelp": "에이전트가 빠르고 가볍게 시작하도록 기본으로 꺼져 있어요. 필요한 것만 켜세요. 나중에 에이전트 페이지에서 바꿀 수 있어요.",
+      "needsFeature": "{{feature}}을(를) 켜야 해요",
+      "features": {
+        "dreaming": {
+          "label": "야간 메모리 정리",
+          "description": "매일 밤 중요한 사실을 장기 메모리에 남겨요."
+        },
+        "github": {
+          "label": "GitHub 리더",
+          "description": "GitHub 링크를 미리 보고 공개 저장소의 문서를 읽어요."
+        },
+        "location": {
+          "label": "대략적인 위치",
+          "description": "방문자의 IP 주소로 도시를 추정해요."
+        },
+        "voice-talk": {
+          "label": "Talk 음성",
+          "description": "Talk 모드의 음성을 보여주고 골라요."
+        },
+        "paired-devices": {
+          "label": "연결된 기기",
+          "description": "내 컴퓨터나 휴대폰을 연결해 파일, 알림, 카메라, 화면 패널을 공유해요."
+        },
+        "computer-use": {
+          "label": "컴퓨터 사용",
+          "description": "연결된 컴퓨터의 화면을 다뤄요. 실험 기능이에요."
+        }
+      },
       "openSourceTitle": "오픈소스 스킬",
       "openSourceHelp": "공개 GitHub 저장소에서 가져온 마크다운 스킬 팩이에요. 에이전트의 지침에 삽입돼요. GitHub에서 각 스킬을 직접 확인할 수 있어요.",
       "recommended": "추천",
@@ -1197,6 +1226,8 @@
       "skillPacks_other": "스킬 팩 {{count}}개",
       "toolsOff_one": " · 도구 {{count}}개 꺼짐",
       "toolsOff_other": " · 도구 {{count}}개 꺼짐",
+      "featuresOn_one": " · 추가 기능 {{count}}개 켜짐",
+      "featuresOn_other": " · 추가 기능 {{count}}개 켜짐",
       "channels": "채널",
       "channelsPerkosOnly": "PerkOS 전용",
       "configPreview": "설정 미리보기",

@@ -1054,6 +1054,35 @@
           "description": "在对话中存储并回忆信息。"
         }
       },
+      "extraFeatures": "额外功能",
+      "extraFeaturesHelp": "默认关闭，让智能体启动快、占用少。只开启需要的功能。之后可以在智能体页面修改。",
+      "needsFeature": "需要先开启{{feature}}",
+      "features": {
+        "dreaming": {
+          "label": "夜间记忆整理",
+          "description": "每晚把重要的事实存入长期记忆。"
+        },
+        "github": {
+          "label": "GitHub 阅读器",
+          "description": "预览 GitHub 链接，并读取公开仓库的文档。"
+        },
+        "location": {
+          "label": "大致位置",
+          "description": "根据访客的 IP 地址推断所在城市。"
+        },
+        "voice-talk": {
+          "label": "Talk 语音",
+          "description": "列出并选择 Talk 模式的语音。"
+        },
+        "paired-devices": {
+          "label": "已配对设备",
+          "description": "连接你自己的电脑或手机，共享文件、通知、摄像头和屏幕面板。"
+        },
+        "computer-use": {
+          "label": "电脑操作",
+          "description": "操作已配对电脑的屏幕。实验功能。"
+        }
+      },
       "openSourceTitle": "开源技能",
       "openSourceHelp": "来自公开 GitHub 仓库的 Markdown 技能包,会被注入到你的智能体指令中。你可以在 GitHub 上逐一查看每个技能包。",
       "recommended": "推荐",
@@ -1187,6 +1216,8 @@
       "skillPacks_other": "{{count}} 个技能包",
       "toolsOff_one": " · {{count}} 个工具已关闭",
       "toolsOff_other": " · {{count}} 个工具已关闭",
+      "featuresOn_one": " · 已开启 {{count}} 个额外功能",
+      "featuresOn_other": " · 已开启 {{count}} 个额外功能",
       "channels": "渠道",
       "channelsPerkosOnly": "仅限 PerkOS",
       "configPreview": "配置预览",

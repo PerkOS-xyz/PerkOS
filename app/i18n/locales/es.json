@@ -1067,6 +1067,35 @@
           "description": "Guarda y recuerda datos a lo largo de la conversación."
         }
       },
+      "extraFeatures": "Funciones extra",
+      "extraFeaturesHelp": "Apagadas por defecto para que tu agente arranque rápido y liviano. Enciende solo lo que necesita. Puedes cambiarlas después desde la página del agente.",
+      "needsFeature": "Requiere {{feature}} encendido",
+      "features": {
+        "dreaming": {
+          "label": "Repaso nocturno de memoria",
+          "description": "Cada noche guarda en la memoria a largo plazo los datos importantes."
+        },
+        "github": {
+          "label": "Lector de GitHub",
+          "description": "Muestra enlaces de GitHub y lee documentos de repos públicos."
+        },
+        "location": {
+          "label": "Ubicación aproximada",
+          "description": "Estima la ciudad de un visitante a partir de su IP."
+        },
+        "voice-talk": {
+          "label": "Voces de Talk",
+          "description": "Lista y elige la voz del modo Talk."
+        },
+        "paired-devices": {
+          "label": "Dispositivos vinculados",
+          "description": "Vincula tu computadora o teléfono para compartir archivos, avisos, cámara y paneles de pantalla."
+        },
+        "computer-use": {
+          "label": "Uso de computadora",
+          "description": "Usa la pantalla de una computadora vinculada. Experimental."
+        }
+      },
       "openSourceTitle": "Habilidades de código abierto",
       "openSourceHelp": "Paquetes de habilidades en Markdown de repositorios públicos de GitHub. Se incorporan a las instrucciones de tu agente. Puedes revisar cada uno en GitHub.",
       "recommended": "Recomendado",
@@ -1204,6 +1233,8 @@
       "skillPacks_other": "{{count}} paquetes de habilidades",
       "toolsOff_one": " · {{count}} herramienta desactivada",
       "toolsOff_other": " · {{count}} herramientas desactivadas",
+      "featuresOn_one": " · {{count}} función extra encendida",
+      "featuresOn_other": " · {{count}} funciones extra encendidas",
       "channels": "Canales",
       "channelsPerkosOnly": "Solo PerkOS",
       "configPreview": "Vista previa de la configuración",
