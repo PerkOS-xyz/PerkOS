@@ -122,6 +122,8 @@ beforeEach(() => {
   docState["runtime_images/hermes:v2.0"] = { tag: "v2.0", runtime: "hermes", active: true };
   docState["runtime_images/hermes:v1.9"] = { tag: "v1.9", runtime: "hermes", active: true };
   docState["runtime_images/hermes:inactive"] = { tag: "inactive", runtime: "hermes", active: false };
+  docState["agents/Bot"] = { name: "Bot", walletAddress: "0xabcdef1234567890abcdef1234567890abcdef12", agentId: "a1" };
+  docState["wallets/0xabcdef1234567890abcdef1234567890abcdef12/agents/a1"] = { name: "Bot" };
 });
 
 describe("imageTagFromUri", () => {
@@ -291,7 +293,7 @@ describe("upgradeAgent", () => {
       });
 
     const result = await upgradeAgent({
-      walletAddress: "0xabcdef1234567890",
+      walletAddress: "0xabcdef1234567890abcdef1234567890abcdef12",
       agentId: "a1",
       agentName: "Bot",
       runtime: "Hermes",
@@ -351,7 +353,7 @@ describe("upgradeAgent", () => {
 
     await expect(
       upgradeAgent({
-        walletAddress: "0xabcdef1234567890",
+        walletAddress: "0xabcdef1234567890abcdef1234567890abcdef12",
         agentId: "a1",
         agentName: "Bot",
         runtime: "Hermes",

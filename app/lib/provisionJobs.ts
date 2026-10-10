@@ -63,6 +63,7 @@ export type JobStatus =
   | "failed";
 
 export type ProvisionJobInput = {
+  kind?: "launch";
   runtime: "Hermes" | "OpenClaw";
   imageTag: string;
   /** Where the runtime's LLM Authorization header comes from.

@@ -20,6 +20,7 @@ import "server-only";
 import { FieldValue } from "firebase-admin/firestore";
 
 import { adminDb } from "../lib/firebaseAdmin";
+import { loadLegacyAgentOperation } from "../lib/agentOwnership";
 import { provisionEcsAgent } from "../lib/ecsProvision";
 import { registerLlmAgent } from "../lib/llmAgentRegistry";
 import { getMetrics } from "../lib/metrics";
@@ -32,15 +33,24 @@ import {
 } from "../lib/provisionJobs";
 
 export async function processJob(job: ProvisionJob): Promise<void> {
-  const { jobId, agentName, walletAddress, agentId, input } = job;
+  const { jobId, agentName, input } = job;
+  let { walletAddress, agentId } = job;
   const db = adminDb();
-  const agentRef = db
-    .collection("wallets")
-    .doc(walletAddress)
-    .collection("agents")
-    .doc(agentId);
+  let owned: Awaited<ReturnType<typeof loadLegacyAgentOperation>> | undefined;
 
   try {
+    // API lifecycle jobs share this collection, but this retired consumer
+    // only understands the original launch shape. Never reinterpret a wake,
+    // delete or upgrade as a new launch.
+    if ((input.kind !== undefined && input.kind !== "launch")
+      || !["Hermes", "OpenClaw"].includes(input.runtime)
+      || !["byok", "perkos"].includes(input.llmSource)) {
+      throw new Error("Unsupported legacy job. Use the API worker.");
+    }
+    owned = await loadLegacyAgentOperation({ walletAddress, agentId, agentName });
+    walletAddress = owned.wallet;
+    agentId = owned.id;
+    const agentRef = owned.ref;
     await markRunning(jobId);
     await appendLog(
       jobId,
@@ -127,31 +137,10 @@ export async function processJob(job: ProvisionJob): Promise<void> {
       `Provisioning ECS service (image tag: ${input.imageTag})…`,
     );
 
-    // Fetch the agent's relayApiKey from the global registry — the
-    // a2a-bridge sidecar (added in ecsProvision when
-    // PERKOS_A2A_BRIDGE_ENABLED is on) needs it to authenticate to
-    // chat.perkos.xyz + transport.perkos.xyz. Missing key is non-fatal:
-    // provisioning continues without the sidecar, the agent runs
-    // unreachable but functional.
-    let relayApiKey: string | undefined;
-    try {
-      const globalAgentSnap = await db
-        .collection("agents")
-        .doc(agentName)
-        .get();
-      const data = globalAgentSnap.data() as
-        | { relayApiKey?: string }
-        | undefined;
-      relayApiKey = data?.relayApiKey;
-    } catch (err) {
-      await appendLog(
-        jobId,
-        "warn",
-        `relayApiKey lookup failed (bridge sidecar disabled for this provision): ${
-          err instanceof Error ? err.message : String(err)
-        }`,
-      );
-    }
+    // Revalidate before ECS, after any gateway work. Lookup failure must stop.
+    const current = await loadLegacyAgentOperation({ walletAddress, agentId, agentName });
+    const relayApiKey = typeof current.registry.relayApiKey === "string"
+      ? current.registry.relayApiKey : undefined;
 
     const ecsResult = await provisionEcsAgent({
       walletAddress,
@@ -198,7 +187,7 @@ export async function processJob(job: ProvisionJob): Promise<void> {
     const message = err instanceof Error ? err.message : String(err);
     await appendLog(jobId, "error", `Provisioning failed: ${message.slice(0, 200)}`);
     await failJob(jobId, message);
-    await agentRef.set(
+    if (owned) await owned.ref.set(
       {
         ecs: {
           lastError: message.slice(0, 500),
