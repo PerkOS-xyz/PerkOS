@@ -32,6 +32,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # High-severity bigint-buffer is unpatched upstream in Dynamic's Solana
+      # chain. Report it, block critical regressions, and keep public launch
+      # gated separately; do not mistake this check for a clean audit.
+      - name: Production dependency audit (critical gate)
+        run: npm audit --omit=dev --audit-level=critical
       - name: Typecheck
         run: npm run typecheck
       - name: Tests
