@@ -38,6 +38,12 @@ export const OPTIONAL_FEATURES: {
   { id: "computer-use", icon: MousePointerClick, needs: "paired-devices" },
 ];
 
+// Features with a real effect on a PerkOS-managed agent today, and the only
+// ones the App shows. GitHub reader and Approximate location only feed
+// OpenClaw's own Control UI, and the device features need a phone or computer
+// paired to the gateway, which a PerkOS agent does not expose yet.
+export const CLOUD_READY_FEATURES = new Set(["dreaming"]);
+
 // Built-in tools, on by default (the wizard's Capabilities step owns the same
 // ids). Must match CAPABILITY_IDS in PerkOS-API provision.ts.
 export const BUILT_IN_TOOLS: { id: string; icon: LucideIcon }[] = [
@@ -193,7 +199,7 @@ export function AgentFeatureToggles({
         {t("wizard.capabilities.extraFeaturesHelp")}
       </p>
       <div className={cn("grid grid-cols-1 gap-2", !compact && "sm:grid-cols-2")}>
-        {OPTIONAL_FEATURES.map((feature) => {
+        {OPTIONAL_FEATURES.filter((f) => CLOUD_READY_FEATURES.has(f.id)).map((feature) => {
           const met = needsMet(feature.needs);
           const enabled = met && on.has(feature.id);
           return (
