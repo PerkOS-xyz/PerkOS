@@ -2228,6 +2228,7 @@
     }
   },
   "chat": {
+    "projectRoster": "Los chats de proyecto incluyen al equipo autorizado del proyecto. Los agentes se gestionan desde el proyecto.",
     "docs": {
       "loadingDocs": "Cargando documentos…",
       "untitled": "Sin título",

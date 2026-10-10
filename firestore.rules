@@ -138,7 +138,23 @@ service cloud.firestore {
     }
 
     match /wallets/{walletAddress}/conversations/{convId} {
-      allow read, write: if isSelf(walletAddress);
+      allow read, delete: if isSelf(walletAddress);
+      allow create: if false;
+      // Participants, host, project and mirror metadata are server-owned.
+      // Presentation edits cannot turn a browser document into a grant.
+      allow update: if isSelf(walletAddress)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'pinned', 'archived', 'updatedAt'])
+        && request.resource.data.get('title', '') is string
+        && request.resource.data.get('title', '').size() <= 200
+        && request.resource.data.get('pinned', false) is bool
+        && request.resource.data.get('archived', false) is bool;
+    }
+
+    match /conversation_authorizations/{convId} {
+      allow read, write: if false;
+    }
+    match /chat_turn_authorizations/{turnId} {
+      allow read, write: if false;
     }
 
     // Privacy invariant: conversation message BODIES never live in

@@ -18,7 +18,6 @@ import { normalizeWalletAddress } from "@perkos/shared-types";
  */
 
 import {
-  addDoc,
   collection,
   deleteDoc,
   doc,
@@ -34,6 +33,7 @@ import {
 } from "firebase/firestore";
 
 import { firebaseDb } from "./firebase";
+import { authedFetch } from "./apiClient";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -188,49 +188,27 @@ export type CreateConversationInput = {
 };
 
 export async function createConversation(input: CreateConversationInput): Promise<Conversation> {
-  const me = userIdentity(input.walletAddress);
-  const others = input.participants.filter((p) => p !== me);
-  const allParticipants = [me, ...others];
-
-  const host =
-    input.historyHost ??
-    others.find(isAgentIdentity) ??
-    null;
-  if (!host) {
-    throw new Error("createConversation: at least one agent participant is required");
+  // The authenticated API controls identities and allocates the ID. Never
+  // send a wallet, convId, mirrorOf or authorization marker from the browser.
+  const path = input.projectId
+    ? `/api/projects/${encodeURIComponent(input.projectId)}/chat/new`
+    : "/api/conversations";
+  const response = await authedFetch(path, { method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify(input.projectId ? (input.title?.trim() ? { title: input.title.trim() } : {}) : {
+      kind: input.kind,
+      participants: input.participants.filter(identity => identity !== userIdentity(input.walletAddress)),
+      ...(input.title?.trim() ? { title: input.title.trim() } : {}),
+      ...(input.historyHost ? { historyHost: input.historyHost } : {}),
+    }),
+  });
+  const payload = await response.json() as { conversation?: Conversation; convId?: string; error?: { message?: string } };
+  if (!response.ok) throw new Error(payload.error?.message ?? "Conversation could not be created");
+  if (payload.conversation) return payload.conversation;
+  if (input.projectId && payload.convId) {
+    const conversation = await getConversation(input.walletAddress, payload.convId);
+    if (conversation) return conversation;
   }
-
-  const title =
-    input.title?.trim() ||
-    defaultTitleForConversation({ kind: input.kind, others });
-
-  const payload = {
-    title,
-    kind: input.kind,
-    participants: allParticipants,
-    historyHost: host,
-    pinned: false,
-    archived: false,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-    ...(input.projectId ? { projectId: input.projectId } : {}),
-  };
-
-  const ref = await addDoc(
-    conversationsCol(input.walletAddress),
-    payload as unknown as Conversation,
-  );
-
-  return {
-    id: ref.id,
-    title,
-    kind: input.kind,
-    participants: allParticipants,
-    historyHost: host,
-    pinned: false,
-    archived: false,
-    projectId: input.projectId,
-  };
+  throw new Error("Conversation could not be loaded");
 }
 
 export async function getConversation(
@@ -247,7 +225,6 @@ export type UpdateConversationInput = {
   title?: string;
   pinned?: boolean;
   archived?: boolean;
-  historyHost?: ConvIdentity;
 };
 
 export async function updateConversation(input: UpdateConversationInput): Promise<void> {
@@ -257,7 +234,6 @@ export async function updateConversation(input: UpdateConversationInput): Promis
   if (typeof input.title === "string") patch.title = input.title.trim();
   if (typeof input.pinned === "boolean") patch.pinned = input.pinned;
   if (typeof input.archived === "boolean") patch.archived = input.archived;
-  if (input.historyHost) patch.historyHost = input.historyHost;
 
   // Firestore v12's typed updateDoc expects PartialWithFieldValue<T>; the
   // dynamic patch shape we build here is intentionally loose, so cast to
@@ -300,24 +276,4 @@ export function conversationsQuery(
     constraints.push(where("archived", "==", filter.archived));
   }
   return constraints.length === 0 ? base : query(base, ...constraints);
-}
-
-// ---------------------------------------------------------------------------
-// Defaults
-// ---------------------------------------------------------------------------
-
-function defaultTitleForConversation(opts: {
-  kind: ConvKind;
-  others: ConvIdentity[];
-}): string {
-  if (opts.kind === "dm") {
-    const agent = opts.others.find(isAgentIdentity);
-    if (agent) return agent.slice("agent:".length);
-    return "New conversation";
-  }
-  const agents = opts.others.filter(isAgentIdentity).map((a) => a.slice("agent:".length));
-  if (agents.length === 0) return "New channel";
-  if (agents.length === 1) return agents[0];
-  if (agents.length === 2) return `${agents[0]} + ${agents[1]}`;
-  return `${agents[0]} + ${agents.length - 1} more`;
 }

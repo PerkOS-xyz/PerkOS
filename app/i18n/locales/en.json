@@ -2228,6 +2228,7 @@
     }
   },
   "chat": {
+    "projectRoster": "Project conversations include the authorized project team. Agent selection is managed in the project.",
     "docs": {
       "loadingDocs": "Loading docs…",
       "untitled": "Untitled",

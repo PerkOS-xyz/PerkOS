@@ -203,7 +203,19 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)("wallet Firestore rule iso
   it("preserves conversation metadata but denies Firestore chat bodies even to the owner", async () => {
     const db = env.authenticatedContext(owner).firestore();
     const path = `wallets/${owner}/conversations/rules-chat`;
-    await assertSucceeds(setDoc(doc(db, path), { title: "Fixture metadata" }));
+    await assertFails(setDoc(doc(db, path), { title: "Forged metadata", participants: [`user:${owner}`, "agent:Foreign"], historyHost: "agent:Foreign" }));
+    await env.withSecurityRulesDisabled(context => setDoc(doc(context.firestore(), path), {
+      title: "Fixture metadata", participants: [`user:${owner}`, "agent:Fixture"], historyHost: "agent:Fixture", pinned: false, archived: false,
+    }));
+    await assertSucceeds(updateDoc(doc(db, path), { title: "Renamed fixture", pinned: true, archived: true }));
+    for (const patch of [{ participants: ["agent:Foreign"] }, { historyHost: "agent:Foreign" }, { projectId: "foreign" },
+      { mirrorOf: evm }, { authorizationVersion: 1 }, { title: 123 }, { pinned: "yes" }]) {
+      await assertFails(updateDoc(doc(db, path), patch));
+    }
+    for (const root of ["conversation_authorizations", "chat_turn_authorizations"]) {
+      await assertFails(setDoc(doc(db, `${root}/forged`), { ownerWallet: owner }));
+      await assertFails(getDoc(doc(db, `${root}/forged`)));
+    }
     await assertSucceeds(getDoc(doc(db, path)));
     await assertSucceeds(getDocs(collection(db, `wallets/${owner}/conversations`)));
     await assertFails(setDoc(doc(db, `${path}/messages/forged`), { text: "must not be stored here" }));
