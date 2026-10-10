@@ -2354,6 +2354,7 @@
     }
   },
   "chat": {
+    "projectRoster": "As conversas do projeto incluem a equipe autorizada do projeto. Os agentes são gerenciados no projeto.",
     "docs": {
       "loadingDocs": "Carregando documentos…",
       "untitled": "Sem título",

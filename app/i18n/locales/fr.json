@@ -2000,6 +2000,7 @@
     }
   },
   "chat": {
+    "projectRoster": "Les conversations de projet incluent l’équipe autorisée du projet. Les agents sont gérés depuis le projet.",
     "docs": {
       "loadingDocs": "Chargement des docs…",
       "untitled": "Sans titre",

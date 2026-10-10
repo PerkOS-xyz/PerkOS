@@ -1983,6 +1983,7 @@
     }
   },
   "chat": {
+    "projectRoster": "Le conversazioni del progetto includono il team autorizzato. Gli agenti si gestiscono dal progetto.",
     "docs": {
       "loadingDocs": "Caricamento dei documenti…",
       "untitled": "Senza titolo",

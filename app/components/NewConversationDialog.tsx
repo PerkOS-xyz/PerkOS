@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Bot, Check, Hash, Loader2, MessageSquare, Plus } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +46,7 @@ export function NewConversationDialog({
   projectId,
 }: Props) {
   const router = useRouter();
+  const { t } = useTranslation();
 
   const [kind, setKind] = useState<ConvKind>(defaultKind);
   const [title, setTitle] = useState("");
@@ -112,8 +114,7 @@ export function NewConversationDialog({
   const canSubmit =
     !!walletAddress &&
     !submitting &&
-    selected.size > 0 &&
-    (kind === "dm" ? selected.size === 1 : selected.size >= 1);
+    (!!selectedProjectId || (selected.size > 0 && (kind === "dm" ? selected.size === 1 : selected.size >= 1)));
 
   async function submit() {
     if (!canSubmit || !walletAddress) return;
@@ -125,7 +126,7 @@ export function NewConversationDialog({
       );
       const conv = await createConversation({
         walletAddress,
-        kind,
+        kind: selectedProjectId ? "channel" : kind,
         title: title.trim() || undefined,
         participants,
         projectId: selectedProjectId ?? undefined,
@@ -151,7 +152,7 @@ export function NewConversationDialog({
 
         <div className="flex flex-col gap-4">
           {/* Kind toggle */}
-          <div className="grid grid-cols-2 gap-2">
+          {!selectedProjectId ? <div className="grid grid-cols-2 gap-2">
             <KindButton
               active={kind === "dm"}
               icon={MessageSquare}
@@ -166,7 +167,7 @@ export function NewConversationDialog({
               hint="2+ agents"
               onClick={() => changeKind("channel")}
             />
-          </div>
+          </div> : <p className="rounded-md border border-border bg-card p-3 text-sm text-muted-foreground">{t("chat.projectRoster")}</p>}
 
           {/* Title */}
           <div className="flex flex-col gap-1.5">
@@ -188,7 +189,7 @@ export function NewConversationDialog({
           </div>
 
           {/* Agent picker */}
-          <div className="flex flex-col gap-1.5">
+          {!selectedProjectId ? <div className="flex flex-col gap-1.5">
             <Label className="text-xs">
               {kind === "dm" ? "Agent" : `Agents (${selected.size} selected)`}
             </Label>
@@ -212,7 +213,7 @@ export function NewConversationDialog({
                 ))}
               </ul>
             )}
-          </div>
+          </div> : null}
 
           {/* Project picker (hidden if pre-bound) */}
           {!projectId ? (
