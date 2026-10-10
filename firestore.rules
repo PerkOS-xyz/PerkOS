@@ -26,11 +26,6 @@ service cloud.firestore {
       return pid.matches('template-.*') && exists(path)
         && get(path).data.get('templateId', '') == 'artizen-creator-update';
     }
-    function isArtizenAgent(id) {
-      let path = /databases/$(database)/documents/agents/$(id);
-      return id.matches('Artizen-.*') && exists(path)
-        && get(path).data.get('executionMode', '') == 'artizen-on-demand';
-    }
 
     // Membership / sharing helpers (GitHub-like) ------------------------
     //
@@ -130,8 +125,16 @@ service cloud.firestore {
         // Project writes are enumerated below. Keeping them out of this broad
         // wildcard is what makes executionRuns/events server-only even for the
         // project owner.
-        && collectionName != 'projects'
-        && (collectionName != 'agents' || !isArtizenAgent(id));
+        && !(collectionName in ['projects', 'agents']);
+    }
+
+    // Agent identity, runtime, resource handles, team and payment bindings are
+    // server-owned. UI profile edits already use the validated agents API.
+    // Excluding the entire subtree above prevents an additive owner grant from
+    // defeating this boundary, including future/nested operational fields.
+    match /wallets/{walletAddress}/agents/{agentId}/{document=**} {
+      allow read: if isSelf(walletAddress);
+      allow write: if false;
     }
 
     match /wallets/{walletAddress}/conversations/{convId} {

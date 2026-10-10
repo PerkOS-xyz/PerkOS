@@ -43,7 +43,7 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)("Artizen canonical write b
     const db = env.authenticatedContext(owner).firestore();
     await assertSucceeds(setDoc(doc(db, `wallets/${owner}`), { name: "Creator" }));
     await assertSucceeds(setDoc(doc(db, `wallets/${owner}/projects/normal/tasks/task`), { status: "Backlog" }));
-    await assertSucceeds(setDoc(doc(db, `wallets/${owner}/agents/normal`), { name: "Normal" }));
+    await assertFails(setDoc(doc(db, `wallets/${owner}/agents/normal`), { name: "Normal" }));
     await assertSucceeds(setDoc(doc(db, `wallets/${owner}/projects/${pid}/docs/note`), { text: "Project note" }));
   });
 });
