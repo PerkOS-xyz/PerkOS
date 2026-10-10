@@ -32,6 +32,7 @@ import {
   Rocket,
   ShoppingCart,
   Sparkles,
+  Store,
   Trash2,
   UtensilsCrossed,
   Users,
@@ -87,6 +88,7 @@ const ICONS: Record<string, LucideIcon> = {
   Palette,
   Rocket,
   ShoppingCart,
+  Store,
   Sparkles,
   UtensilsCrossed,
 };
