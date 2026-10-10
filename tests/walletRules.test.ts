@@ -37,6 +37,7 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)("wallet Firestore rule iso
       for (const address of [owner, variant, evm]) {
         await setDoc(doc(db, `wallets/${address}/profile/main`), { name: "Private fixture" });
         await setDoc(doc(db, `allowlist/${address}`), { status: "active" });
+        await setDoc(doc(db, `wallets/${address}/agents/rules-agent`), { name: "Fixture", walletAddress: address, runtime: "Hermes", status: "ready" });
       }
       await setDoc(doc(db, project), { orgId: "rules-org", name: "Fixture project" });
       await setDoc(doc(db, org), { name: "Fixture org" });
@@ -154,6 +155,26 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)("wallet Firestore rule iso
     await assertSucceeds(getDoc(doc(db, "provision_jobs/rules-job/log/event")));
     await assertFails(getDoc(doc(env.authenticatedContext(variant).firestore(), "provision_jobs/rules-job")));
     await assertFails(updateDoc(doc(db, "provision_jobs/rules-job"), { status: "ready" }));
+  });
+
+  it.each([owner, variant, evm])("keeps the entire agent subtree server-owned (%s)", async address => {
+    const db = env.authenticatedContext(address).firestore();
+    const path = `wallets/${address}/agents/rules-agent`;
+    await assertSucceeds(getDoc(doc(db, path)));
+    await assertSucceeds(getDocs(collection(db, `wallets/${address}/agents`)));
+    await assertFails(setDoc(doc(db, `wallets/${address}/agents/forged`), { name: "OtherTenant" }));
+    for (const patch of [
+      { name: "OtherTenant", walletAddress: variant },
+      { runtime: "OpenClaw", ecs: { serviceArn: "synthetic", imageUri: "untrusted" } },
+      { modelKeyProvided: false, llmBaseUrl: "https://example.invalid", knowledgeWallet: variant },
+      { hostAgent: "other", deployMode: "perkos-managed", enabledFeatures: ["voice"] },
+      { displayName: "Presentation changes also go through the API" },
+    ]) await assertFails(updateDoc(doc(db, path), patch));
+    await assertFails(deleteDoc(doc(db, path)));
+    await assertFails(setDoc(doc(db, `${path}/runtime/forged`), { relayApiKey: "synthetic" }));
+    const other = address === owner ? variant : owner;
+    await assertFails(getDoc(doc(db, `wallets/${other}/agents/rules-agent`)));
+    await assertFails(updateDoc(doc(db, `wallets/${other}/agents/rules-agent`), { name: "forged" }));
   });
 
   it("uses exact wallet ownership for handles and prevents registry enumeration", async () => {
