@@ -31,7 +31,7 @@
  *   - re-provision raises → state unchanged at desiredCount=0; user
  *     can retry or wake on the old task def.
  *
- * Wallet/agent ownership is validated by the calling route, not here.
+ * Ownership is checked here as well as by the calling route.
  */
 import "server-only";
 
@@ -42,6 +42,7 @@ import {
 import { FieldValue } from "firebase-admin/firestore";
 
 import { adminDb } from "./firebaseAdmin";
+import { loadLegacyAgentOperation } from "./agentOwnership";
 import { hibernateAgent, serviceNameFor } from "./hibernation";
 import {
   provisionEcsAgent,
@@ -228,6 +229,8 @@ export async function upgradeAgent(
     throw err;
   }
 
+  const owned = await loadLegacyAgentOperation(input);
+  input = { ...input, walletAddress: owned.wallet, agentId: owned.id };
   const serviceName = serviceNameFor(input.walletAddress, input.agentName);
   const drainTimeoutMs = input.drainTimeoutMs ?? 5 * 60 * 1000;
   const drainPollIntervalMs = input.drainPollIntervalMs ?? 5_000;
@@ -285,17 +288,9 @@ export async function upgradeAgent(
   //    is on) survives the upgrade. Without this, an upgrade would
   //    drop the sidecar from the task def and the agent would lose
   //    chat reachability on the new image.
-  let relayApiKey: string | undefined;
-  try {
-    const snap = await adminDb()
-      .collection("agents")
-      .doc(input.agentName)
-      .get();
-    const data = snap.data() as { relayApiKey?: string } | undefined;
-    relayApiKey = data?.relayApiKey;
-  } catch {
-    /* swallow — upgrade proceeds without bridge if lookup fails */
-  }
+  const current = await loadLegacyAgentOperation(input);
+  const relayApiKey = typeof current.registry.relayApiKey === "string"
+    ? current.registry.relayApiKey : undefined;
 
   const provision = await provisionEcsAgent({
     walletAddress: input.walletAddress,

@@ -26,9 +26,8 @@
  *     a separate intent handled by `ecsDeprovision.ts`.
  *
  * Tenant isolation:
- *   - The wallet/agent pair is derived from the caller's Firebase uid
- *     in the API route, not from request bodies. This module trusts
- *     its inputs (callers must already have validated ownership).
+ *   - The global owner/ID binding and owner mirror are validated here
+ *     before AWS or state writes. These retired primitives are EVM-only.
  *   - The S3 key prefix is wallet-scoped — `prefix(wallet, name)`.
  *     The IAM policy attached to the task role allows R/W on the whole
  *     bucket; per-wallet isolation is enforced at the application
@@ -45,6 +44,7 @@ import {
 import type { FieldValue } from "firebase-admin/firestore";
 
 import { adminDb } from "./firebaseAdmin";
+import { loadLegacyAgentOperation } from "./agentOwnership";
 import { getMetrics } from "./metrics";
 
 const REGION = process.env.AWS_REGION ?? "us-east-1";
@@ -151,6 +151,8 @@ export type HibernationActionResult = {
 export async function hibernateAgent(
   input: HibernateInput,
 ): Promise<HibernationActionResult> {
+  const owned = await loadLegacyAgentOperation(input);
+  input = { ...input, walletAddress: owned.wallet, agentId: owned.id };
   const metrics = getMetrics();
   const service = serviceNameFor(input.walletAddress, input.agentName);
 
@@ -226,6 +228,8 @@ export type WakeInput = HibernateInput;
  * write state and return ok.
  */
 export async function wakeAgent(input: WakeInput): Promise<HibernationActionResult> {
+  const owned = await loadLegacyAgentOperation(input);
+  input = { ...input, walletAddress: owned.wallet, agentId: owned.id };
   const metrics = getMetrics();
   const service = serviceNameFor(input.walletAddress, input.agentName);
 
@@ -318,6 +322,8 @@ export async function getHibernationStatus(input: {
   agentId: string;
   agentName: string;
 }): Promise<HibernationStatus> {
+  const owned = await loadLegacyAgentOperation(input);
+  input = { ...input, walletAddress: owned.wallet, agentId: owned.id };
   const service = serviceNameFor(input.walletAddress, input.agentName);
   const described = await ecs().send(
     new DescribeServicesCommand({ cluster: CLUSTER, services: [service] }),

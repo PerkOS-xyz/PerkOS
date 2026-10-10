@@ -21,11 +21,12 @@ vi.mock("@aws-sdk/client-ecs", () => ({
 
 // Firestore admin stub — record writes so we can assert state transitions.
 const writes: Array<{ path: string; data: unknown }> = [];
+const docs = new Map<string, Record<string, unknown>>();
 const fakeDoc = (path: string) => ({
   set: vi.fn(async (data: unknown) => {
     writes.push({ path, data });
   }),
-  get: vi.fn(async () => ({ data: () => ({ hibernation: undefined }) })),
+  get: vi.fn(async () => ({ exists: docs.has(path), data: () => docs.get(path) })),
 });
 const adminDbMock = {
   collection: (c1: string) => ({
@@ -49,12 +50,15 @@ import {
   HibernationError,
 } from "../app/lib/hibernation";
 
-const WALLET = "0xABCDEF1234567890";
+const WALLET = "0xABCDEF1234567890ABCDEF1234567890ABCDEF12";
 const AGENT_ID = "agent-123";
 const AGENT_NAME = "MyBot";
 
 beforeEach(() => {
   writes.length = 0;
+  docs.clear();
+  docs.set(`wallets/${WALLET.toLowerCase()}/agents/${AGENT_ID}`, { name: AGENT_NAME, walletAddress: WALLET });
+  docs.set(`agents/${AGENT_NAME}`, { name: AGENT_NAME, walletAddress: WALLET, agentId: AGENT_ID });
   // mockClear keeps `.mockImplementation`/`.mockResolvedValue` chains
   // intact; mockReset would also wipe the ECSClient constructor's impl
   // since vi tracks all mocks together.
