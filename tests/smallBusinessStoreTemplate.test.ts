@@ -24,6 +24,11 @@ describe("Small Business Store team template", () => {
     expect(renderSoulMd("Store-Builder", builder.soul!)).toContain("--conv-id current");
   });
 
+  it("asks the builder to avoid long dashes in its replies", () => {
+    const builder = template!.roles.find((r) => r.role === "Store Builder")!;
+    expect(renderSoulMd("Store-Builder", builder.soul!)).toContain("never long dashes");
+  });
+
   it("keeps the copy plain", () => {
     const authored = template!.roles.filter((r) => r.soul);
     const copy = [template!.blurb, ...authored.map((r) => renderSoulMd(r.role, r.soul!))].join("\n");

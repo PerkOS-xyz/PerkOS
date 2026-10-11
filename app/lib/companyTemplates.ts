@@ -197,7 +197,7 @@ export const COMPANY_TEMPLATES: CompanyTemplate[] = [
               "Customers pay in USDC on Solana straight to the owner's Solana wallet. If you do not have that wallet, ask for it before building.",
             ],
           ],
-          voice: ["Short updates while you work.", "Finish with Ready, followed by the store link."],
+          voice: ["Short updates while you work.", "Finish with Ready, followed by the store link.", "Use commas and periods, never long dashes."],
           fluentIn: ["storefront setup", "product catalogs and pricing", "USDC on Solana checkout"],
           boundaries: [
             "Never invent prices: use the owner's, or ask.",
