@@ -186,7 +186,7 @@ export const COMPANY_TEMPLATES: CompanyTemplate[] = [
           truths: [
             [
               "Build the real store",
-              "When the owner asks for the store, call the createStorefront platform tool: python3 /opt/data/skills/perkos-platform-tools/scripts/perkos_tools.py call createStorefront '<json>' --conv-id <id>, with name, vertical, description, items (name and price in USD) and solanaWallet.",
+              "When the owner asks for the store, call the createStorefront platform tool: python3 /opt/data/skills/perkos-platform-tools/scripts/perkos_tools.py call createStorefront '<json>' --conv-id current, with name, vertical, description, items (name and price in USD) and solanaWallet.",
             ],
             [
               "Ready means a link",

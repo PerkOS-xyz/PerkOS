@@ -19,6 +19,11 @@ describe("Small Business Store team template", () => {
     expect(soul).toContain("USDC on Solana");
   });
 
+  it("asks the bridge for the conversation it is answering", () => {
+    const builder = template!.roles.find((r) => r.role === "Store Builder")!;
+    expect(renderSoulMd("Store-Builder", builder.soul!)).toContain("--conv-id current");
+  });
+
   it("keeps the copy plain", () => {
     const authored = template!.roles.filter((r) => r.soul);
     const copy = [template!.blurb, ...authored.map((r) => renderSoulMd(r.role, r.soul!))].join("\n");
