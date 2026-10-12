@@ -8,6 +8,7 @@ import {
   type ProjectTemplate,
   templateText,
   templateAnswerText,
+  templateQuestionLabel,
 } from "../lib/projectTemplateTypes";
 import { ProjectTeamPreview } from "./ProjectTeamPreview";
 
@@ -74,7 +75,7 @@ export function ProjectTemplateConfiguration({
             .map((q) => (
               <div key={q.id}>
                 <dt className="text-sm text-muted-foreground">
-                  {templateText(q.label, i18n.language)}
+                  {templateQuestionLabel(q, i18n.language)}
                 </dt>
                 <dd className="whitespace-pre-wrap break-words">
                   {templateAnswerText(q, result.answers[q.id], i18n.language)}

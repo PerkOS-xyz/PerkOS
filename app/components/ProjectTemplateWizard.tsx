@@ -13,8 +13,10 @@ import {
   type LocalizedText,
   templateText,
   templateAnswerText,
+  templateQuestionLabel,
 } from "../lib/projectTemplateTypes";
 import { ProjectTeamPreview } from "./ProjectTeamPreview";
+import { creatorTemplatePathId, creatorTemplateStorageId } from "../lib/creatorsPresentation";
 
 const text = (es: boolean) =>
   es
@@ -110,7 +112,7 @@ export function ProjectTemplateGallery() {
             </p>
             <Link
               className="text-primary underline"
-              href={`/projects/templates/${item.id}`}
+              href={`/projects/templates/${creatorTemplatePathId(item.id)}`}
             >
               {copy.choose}
             </Link>
@@ -122,8 +124,9 @@ export function ProjectTemplateGallery() {
 }
 export function ProjectTemplateWizard({ templateId }: { templateId: string }) {
   const { address } = useAppAccount();
+  const storageId = creatorTemplateStorageId(templateId);
   return address ? (
-    <Wizard key={`${address}:${templateId}`} templateId={templateId} />
+    <Wizard key={`${address}:${storageId}`} templateId={storageId} />
   ) : null;
 }
 function Wizard({ templateId }: { templateId: string }) {
@@ -273,7 +276,7 @@ function Wizard({ templateId }: { templateId: string }) {
                     };
                     return (
                       <label className="flex flex-col gap-2" key={q.id}>
-                        {templateText(q.label, locale)}
+                        {templateQuestionLabel(q, locale)}
                         {!q.required && (
                           <span className="text-xs">{copy.optional}</span>
                         )}
@@ -317,7 +320,7 @@ function Wizard({ templateId }: { templateId: string }) {
                       .map((q) => (
                         <div key={q.id}>
                           <dt className="text-sm text-muted-foreground">
-                            {templateText(q.label, locale)}
+                            {templateQuestionLabel(q, locale)}
                           </dt>
                           <dd className="whitespace-pre-wrap break-words">
                             {templateAnswerText(q, answers[q.id], locale)}

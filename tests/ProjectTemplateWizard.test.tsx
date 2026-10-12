@@ -110,13 +110,23 @@ async function review() {
   fireEvent.change(await screen.findByLabelText("Nombre"), {
     target: { value: "My project" },
   });
-  fireEvent.change(screen.getByLabelText("URL Artizen"), {
+  fireEvent.change(screen.getByLabelText("URL del proyecto"), {
     target: { value: "https://artizen.fund/index/p/example" },
   });
   fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
   await screen.findByText("Revisar configuración");
 }
 describe("project template wizard", () => {
+  it("uses the Creators route alias while preserving the legacy template and answer keys in requests", async () => {
+    render(<ProjectTemplateWizard templateId="creators-update" />);
+    await review();
+    expect(mock.fetch.mock.calls[0][0]).toBe("/project-templates/artizen-creator-update");
+    expect(screen.getByText("Actualizaciones Creators")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Crear proyecto configurado" }));
+    await screen.findByText("Configuración guardada");
+    expect(mock.fetch.mock.calls[1][0]).toBe("/project-templates/artizen-creator-update/projects");
+    expect(JSON.parse(mock.fetch.mock.calls[1][1].body).answers["artizen-url"]).toBe("https://artizen.fund/index/p/example");
+  });
   it("localizes reviewed options while preserving canonical answers across form languages", async () => {
     render(<ProjectTemplateWizard templateId="artizen" />);
     await screen.findByLabelText("Nombre");

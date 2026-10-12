@@ -42,6 +42,7 @@ import { isAllowedAgentHosting } from "@/app/lib/agentHostingPolicy";
 
 import { firebaseDb } from "./firebase";
 import { taskConverter } from "./projectTaskConverter";
+import { creatorAgentLabel } from "./creatorsPresentation";
 import { formatAddress } from "./format";
 import { logActivity } from "./activityEvents";
 import { entityKey, writeEdge } from "./edges";
@@ -568,7 +569,7 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
     return {
       id: snap.id,
       name: (data.name as string) ?? "",
-      displayName: (data.displayName as string | undefined) ?? undefined,
+      displayName: data.executionMode === "artizen-on-demand" ? creatorAgentLabel(data.displayName) : (data.displayName as string | undefined) ?? undefined,
       executionMode: data.executionMode === "artizen-on-demand" ? "artizen-on-demand" : undefined,
       executionProjectId: typeof data.executionProjectId === "string" ? data.executionProjectId : undefined,
       executionState: typeof data.executionState === "string" ? data.executionState : undefined,

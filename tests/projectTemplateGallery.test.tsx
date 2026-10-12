@@ -10,7 +10,7 @@ vi.mock("../app/lib/apiClient", () => ({
     ok: true,
     json: async () => ({
       templates: [
-        { id: "artizen-update", name: { en: "Artizen Creator Update" }, description: { en: "One project, one Hermes agent." }, kind: "artizen" },
+        { id: "artizen-creator-update", name: { en: "Artizen Creator Update" }, description: { en: "One project, one Hermes agent." }, kind: "artizen" },
         { id: "floor-desk", name: { en: "PerkOS Floor Desk" }, description: { en: "Scout, Risk, Trader and Auditor on Base." }, kind: "fleet" },
       ],
     }),
@@ -27,7 +27,8 @@ describe("ProjectTemplateGallery", () => {
   it("hides desk templates from a Solana account", async () => {
     account.address = "EsXvSde4oFup8d2QdbEMrA2YWjCod52SbECQ9dgJ6SLA";
     render(<ProjectTemplateGallery />);
-    await waitFor(() => expect(screen.getByText("Artizen Creator Update")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Creators Update")).toBeInTheDocument());
+    expect(screen.getByRole("link", { name: "Configure project" })).toHaveAttribute("href", "/projects/templates/creators-update");
     expect(screen.queryByText("PerkOS Floor Desk")).not.toBeInTheDocument();
   });
 

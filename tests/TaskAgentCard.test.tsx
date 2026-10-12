@@ -4,6 +4,10 @@ import { TaskAgentCard, taskAgentName } from "../app/components/TaskAgentCard";
 const mock = vi.hoisted(() => ({ language: "en" }));
 vi.mock("react-i18next", () => ({ useTranslation: () => ({ i18n: { language: mock.language } }) }));
 afterEach(cleanup);
+it("rebrands managed creator labels without changing ordinary agent names", () => {
+  expect(taskAgentName("stable-id", true, { name: "stable-id", displayName: "Artizen Creator Update" })).toBe("Creators Update");
+  expect(taskAgentName("Artizen Helper", false)).toBe("Artizen Helper");
+});
 it.each([
   ["en", "resting", "Resting"], ["es", "resting", "En reposo"],
   ["en", "executing", "Working"], ["es", "executing", "Trabajando"],

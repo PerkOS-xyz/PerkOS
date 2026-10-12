@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { firebaseDb } from "./firebase";
 import { externalRuntimeAvailability } from "./agentHostingPolicy";
 import {useAgentPresence} from "./useAgentPresence";
+import { creatorAgentLabel } from "./creatorsPresentation";
 
 export type AgentLiveStatus = {
   executionMode?: "artizen-on-demand";
@@ -87,7 +88,7 @@ export function useWalletAgents(
           byName[name] = {
             id: d.id,
             name,
-            displayName: typeof data.displayName === "string" ? data.displayName : undefined,
+            displayName: data.executionMode === "artizen-on-demand" ? creatorAgentLabel(data.displayName) : typeof data.displayName === "string" ? data.displayName : undefined,
             executionMode: data.executionMode === "artizen-on-demand" ? "artizen-on-demand" : undefined,
             executionState: typeof data.executionState === "string" ? data.executionState : undefined,
             status: (data.status as string) ?? "unknown",

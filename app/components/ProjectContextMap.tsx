@@ -17,6 +17,7 @@ import { projectLearnings } from "../lib/projectLearnings";
 import type { ExecutionEventV1 } from "@perkos/shared-types";
 import { taskSignal } from "./TaskSignal";
 import { useAgentLabel } from "./ProjectAgentIdentity";
+import { creatorAgentLabel } from "../lib/creatorsPresentation";
 
 const W = 920;
 const H = 520;
@@ -136,7 +137,7 @@ export function ProjectKnowledgeGraph({
     orderedAgents.forEach((name, index) => {
       const angle = -Math.PI / 2 + (index / Math.max(orderedAgents.length, 1)) * 2 * Math.PI;
       const key = `agent:${name}`;
-      nodes.push({ key, kind: "agent", label: agentLabel(name), x: CX + agentR * Math.cos(angle), y: CY + agentR * Math.sin(angle), isPM: name === pmAgent, live: liveAgents[name] });
+      nodes.push({ key, kind: "agent", label: liveAgents[name]?.executionMode === "artizen-on-demand" ? creatorAgentLabel(liveAgents[name].displayName) : agentLabel(name), x: CX + agentR * Math.cos(angle), y: CY + agentR * Math.sin(angle), isPM: name === pmAgent, live: liveAgents[name] });
       edges.push({ from: "project", to: key, color: agentColor(name, 0.42) });
     });
 
@@ -277,7 +278,7 @@ export function ProjectExecutionGraph({
       const centeredIndex = index - (workerNames.length - 1) / 2;
       const y = 65 + (index / Math.max(workerNames.length - 1, 1)) * (H - 130);
       const workerKey = `agent:${name}`;
-      nodes.push({ key: workerKey, kind: name === "unassigned" ? "gate" : "agent", label: name === "unassigned" ? t("components.executionGraph.unassignedWorker") : agentLabel(name), isPM: name === pmAgent, x: 485, y, live: name === "unassigned" ? undefined : liveAgents[name], shape: name === "unassigned" ? "sphere" : "agent-block", fx: 70, fy: centeredIndex * 78, fz: index % 2 === 0 ? -28 : 28 });
+      nodes.push({ key: workerKey, kind: name === "unassigned" ? "gate" : "agent", label: name === "unassigned" ? t("components.executionGraph.unassignedWorker") : liveAgents[name]?.executionMode === "artizen-on-demand" ? creatorAgentLabel(liveAgents[name].displayName) : agentLabel(name), isPM: name === pmAgent, x: 485, y, live: name === "unassigned" ? undefined : liveAgents[name], shape: name === "unassigned" ? "sphere" : "agent-block", fx: 70, fy: centeredIndex * 78, fz: index % 2 === 0 ? -28 : 28 });
       edges.push({
         from: coordinatorKey,
         to: workerKey,
@@ -433,6 +434,7 @@ export function OrganizationKnowledgeGraph({
   ownerWallet,
   projects,
   agents,
+  liveAgents = {},
   externalSystems = [],
   compact = false,
 }: {
@@ -440,6 +442,7 @@ export function OrganizationKnowledgeGraph({
   ownerWallet?: string | null;
   projects: Project[];
   agents: { name: string }[];
+  liveAgents?: Record<string, AgentLiveStatus>;
   externalSystems?: string[];
   compact?: boolean;
 }) {
@@ -467,7 +470,7 @@ export function OrganizationKnowledgeGraph({
       const project = visibleProjects.find((candidate) => candidate.agentIds?.includes(agent.name));
       const angle = -Math.PI / 2 + (index / Math.max(Math.min(agents.length, 10), 1)) * Math.PI * 2 + 0.2;
       const key = `agent:${agent.name}:${index}`;
-      nodes.push({ key, kind: "agent", label: agent.name, x: CX + 245 * Math.cos(angle), y: CY + 245 * Math.sin(angle) });
+      nodes.push({ key, kind: "agent", label: liveAgents[agent.name]?.executionMode === "artizen-on-demand" ? creatorAgentLabel(liveAgents[agent.name].displayName) : agent.name, x: CX + 245 * Math.cos(angle), y: CY + 245 * Math.sin(angle) });
       edges.push({ from: project ? `project:${project.id || project.name}` : "org", to: key, color: agentColor(agent.name, 0.36), dashed: !project });
     });
     if (ownerWallet) {
@@ -480,7 +483,7 @@ export function OrganizationKnowledgeGraph({
       edges.push({ from: key, to: "org", color: "rgba(56,189,248,.42)", dashed: true });
     });
     return { nodes, edges };
-  }, [agents, externalSystems, organizationName, ownerWallet, projects]);
+  }, [agents, externalSystems, liveAgents, organizationName, ownerWallet, projects]);
 
   return (
     <GraphSurface
