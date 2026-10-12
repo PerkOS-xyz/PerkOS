@@ -73,6 +73,7 @@ import { agentStarting, ProjectTeamStage } from "../../../components/ProjectTeam
 import { TeamLaunchStatus } from "../../../components/TeamLaunchStatus";
 import { ProjectTemplateConfiguration } from "../../../components/ProjectTemplateConfiguration";
 import { ArtizenProjectBoard, ArtizenWorkLink } from "../../../components/ArtizenProjectBoard";
+import { creatorAgentLabel } from "../../../lib/creatorsPresentation";
 import { SearchInput, matchesQuery } from "../../../components/SearchInput";
 import { useActiveOrg } from "../../../lib/useActiveOrg";
 import { useProjectExecutionEvents } from "../../../lib/useProjectExecutionEvents";
@@ -1663,7 +1664,7 @@ function AgentsTab({
                   />
                 </span>
                 <div className="flex min-w-0 flex-col">
-                  <Link href={`/agents/${encodeURIComponent(agentStatus[name]?.id ?? name)}`} className="truncate text-sm text-[#ececff] underline">{agentStatus[name]?.displayName ?? name}</Link>
+                  <Link href={`/agents/${encodeURIComponent(agentStatus[name]?.id ?? name)}`} className="truncate text-sm text-[#ececff] underline">{detail.project.executionMode === "artizen-on-demand" ? creatorAgentLabel(agentStatus[name]?.displayName) : agentStatus[name]?.displayName ?? name}</Link>
                   <span className="text-xs text-[#7975a8]">
                     {agentStatus[name]?.runtime
                       ? `${agentStatus[name]?.runtime} · `

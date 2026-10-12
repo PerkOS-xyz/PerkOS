@@ -9,6 +9,7 @@ import { realtimeAgentStatus, STATUS_AVAILABLE } from "../lib/useWalletAgents";
 import { AgentOrb } from "./AgentOrb";
 import { ChatbotPanel } from "./ChatbotPanel";
 import { OrganizationKnowledgeGraph } from "./ProjectContextMap";
+import { creatorAgentLabel } from "../lib/creatorsPresentation";
 
 const copy = (es: boolean) =>
   es
@@ -57,9 +58,10 @@ export function SparkyDashboardWorkspace({
             <ul className="flex gap-3 overflow-x-auto pb-1">
               {agents.slice(0, 10).map((agent) => {
                 const live = realtimeAgentStatus(liveAgents[agent.name]);
+                const label = liveAgents[agent.name]?.executionMode === "artizen-on-demand" ? creatorAgentLabel(liveAgents[agent.name].displayName) : agent.name;
                 return (
                   <li key={agent.id} className="flex min-w-[70px] flex-col items-center gap-1 text-center">
-                    <Link href={`/agents/${encodeURIComponent(agent.id)}`} aria-label={`${agent.name}: ${live.label}`}>
+                    <Link href={`/agents/${encodeURIComponent(agent.id)}`} aria-label={`${label}: ${live.label}`}>
                       <AgentOrb
                         name={agent.name}
                         role={agent.name}
@@ -68,7 +70,7 @@ export function SparkyDashboardWorkspace({
                         status={live.label === STATUS_AVAILABLE ? "available" : "resting"}
                       />
                     </Link>
-                    <span className="max-w-[78px] truncate text-[10px] font-medium text-foreground">{agent.name}</span>
+                    <span className="max-w-[78px] truncate text-[10px] font-medium text-foreground">{label}</span>
                     <span className="text-[9px] text-muted-foreground">{live.label}</span>
                   </li>
                 );
@@ -87,6 +89,7 @@ export function SparkyDashboardWorkspace({
             ownerWallet={ownerWallet}
             projects={projects}
             agents={agents}
+            liveAgents={liveAgents}
             compact
           />
         </div>

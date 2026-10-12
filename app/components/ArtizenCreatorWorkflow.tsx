@@ -53,7 +53,7 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
   const [webhookAction, setWebhookAction] = useState<"rotate" | "disable" | null>(null);
   const [webhookCredential, setWebhookCredential] = useState<WebhookCredential | null>(null);
   const retry = useRef<{ fingerprint: string; requestId: string } | null>(null);
-  const base = `/artizen-projects/${encodeURIComponent(projectId)}`;
+  const base = `/creators-projects/${encodeURIComponent(projectId)}`;
   const money = (micros: number) => new Intl.NumberFormat(i18n.language, { style: "currency", currency: "USD", maximumFractionDigits: 4 }).format(micros / 1_000_000);
   const load = useCallback(async (signal?: AbortSignal) => {
     try {
@@ -213,7 +213,8 @@ export function ArtizenCreatorWorkflow({ projectId }: { projectId: string }) {
     settled: isArtizenUnsuccessful(current) ? (es ? "Intento sin resultado · Hermes en reposo" : "Unsuccessful attempt · Hermes is resting") : (es ? "Hermes en reposo" : "Hermes is resting"),
     cancelled: es ? "Cancelado sin iniciar" : "Cancelled before start",
   })[current.phase] : state?.agentName ? (es ? "Hermes en reposo" : "Hermes is resting") : (es ? "Falta asociar Hermes" : "Link Hermes to continue");
-  return <section id="artizen-workflow" className="mt-5 min-w-0 scroll-mt-20 space-y-4 break-words border-t border-border pt-5" aria-label={es ? "Borradores Artizen" : "Artizen drafts"}>
+  return <section id="creators-workflow" className="mt-5 min-w-0 scroll-mt-20 space-y-4 break-words border-t border-border pt-5" aria-label={es ? "Borradores Creators" : "Creators drafts"}>
+    <span id="artizen-workflow" aria-hidden="true" />
     <div className="flex flex-wrap items-center justify-between gap-3">
       <h3 className="font-semibold">{es ? "Tu actualización para la comunidad" : "Your supporter update"}</h3>
       <Button variant="outline" size="sm" onClick={() => { void load(); }} disabled={pending}>{es ? "Actualizar estado" : "Refresh status"}</Button>

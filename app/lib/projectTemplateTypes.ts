@@ -1,3 +1,5 @@
+import { creatorDisplayText } from "./creatorsPresentation";
+
 export type LocalizedText = {
   en: string;
   es: string;
@@ -10,7 +12,7 @@ export type TemplateQuestion = {
   type: "text" | "textarea" | "url" | "select";
   required: boolean;
   maxLength: number;
-  validation: "none" | "artizen-url";
+  validation: "none" | "artizen-url" | "project-url";
   options: { value: string; label: LocalizedText }[];
 };
 
@@ -82,7 +84,14 @@ export type PublishedTemplate = {
   activation: "configuration-only";
 };
 export function templateText(text: LocalizedText, language: string) {
-  return text[language.split("-")[0]] ?? text.en;
+  return creatorDisplayText(text[language.split("-")[0]] ?? text.en);
+}
+
+export function templateQuestionLabel(question: TemplateQuestion, language: string) {
+  if (question.id === "artizen-url") {
+    return language.split("-")[0] === "es" ? "URL del proyecto" : "Project URL";
+  }
+  return templateText(question.label, language);
 }
 
 /** Display an answer without changing its canonical stored value. */

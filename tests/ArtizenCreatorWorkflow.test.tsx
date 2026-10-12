@@ -16,6 +16,15 @@ beforeEach(() => { mock.language = "es"; mock.fetch.mockReset().mockImplementati
 afterEach(() => { cleanup(); vi.useRealTimers(); });
 const scheduling = { enabled: true, minDelayMs: 60_000, maxDelayMs: 86_400_000 };
 const localDate = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}T${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+it.each(["es", "en"])("shows Creators copy and compatible anchors without executing work in %s", async language => {
+  mock.language = language;
+  const { container } = render(<ArtizenCreatorWorkflow projectId="template-example" />);
+  await screen.findByLabelText(language === "es" ? "¿Qué avances puedes confirmar?" : "What progress can you confirm?");
+  expect(screen.getByRole("region", { name: language === "es" ? "Borradores Creators" : "Creators drafts" })).toHaveAttribute("id", "creators-workflow");
+  expect(container.querySelector("#artizen-workflow")).toHaveAttribute("aria-hidden", "true");
+  expect(container.textContent).not.toMatch(/Artizen/i);
+  expect(mock.fetch.mock.calls.every(([path, init]) => path.startsWith("/creators-projects/") && !init?.method)).toBe(true);
+});
 it("hides webhook controls when the API does not advertise the capability", async () => {
   render(<ArtizenCreatorWorkflow projectId="template-example" />); await screen.findByLabelText("¿Qué avances puedes confirmar?");
   expect(screen.queryByRole("region", { name: "Webhook de una ejecución" })).not.toBeInTheDocument();
@@ -190,7 +199,7 @@ it.each(["es", "en"])("links a legacy project explicitly without starting infere
   fireEvent.click(screen.getByRole("button", { name: language === "es" ? "Asociar sin iniciar" : "Link without starting" }));
   await screen.findByRole("link", { name: language === "es" ? "Ver agente Hermes" : "View Hermes agent" });
   const writes = mock.fetch.mock.calls.filter(c => c[1]?.method === "POST");
-  expect(writes).toHaveLength(1); expect(writes[0][0]).toBe("/artizen-projects/template-example/agent");
+  expect(writes).toHaveLength(1); expect(writes[0][0]).toBe("/creators-projects/template-example/agent");
   expect(JSON.parse(writes[0][1].body)).toEqual({ confirmed: true });
 });
 it("blank notes never wake Hermes; confirmation is a web dialog", async () => {
@@ -207,7 +216,7 @@ it("requires explicit start and sends no budget, model or owner chosen in the br
   fireEvent.click(screen.getByRole("button", { name: "Iniciar trabajo" }));
   await waitFor(() => expect(mock.fetch.mock.calls.some(c => c[1]?.method === "POST")).toBe(true));
   const call = mock.fetch.mock.calls.find(c => c[1]?.method === "POST")!;
-  expect(call[0]).toBe("/artizen-projects/template-example/runs");
+  expect(call[0]).toBe("/creators-projects/template-example/runs");
   expect(JSON.parse(call[1].body)).toEqual({ requestId: expect.any(String), action: "prepare-update", notes: "Lanzamos una demo.", confirmed: true });
 });
 it("an uncertain response reuses the same idempotency key", async () => {

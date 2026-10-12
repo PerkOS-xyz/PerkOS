@@ -32,6 +32,7 @@ import { formatRelativeShort } from "../../lib/format";
 import { agentMatchesOrgFilter, type AgentOrgFilter } from "../../lib/agentOrgFilter";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArtizenAgentStatus } from "@/app/components/ArtizenProjectBoard";
+import { creatorAgentLabel } from "@/app/lib/creatorsPresentation";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -491,14 +492,14 @@ function AgentCard({
                 // owned by someone else is not selectable: a member must not be
                 // able to destroy infrastructure another wallet pays for.
                 disabled={agent.shared === true || agent.executionMode === "artizen-on-demand"}
-                aria-label={t("agents.card.selectAria", { name: agent.name })}
+                aria-label={t("agents.card.selectAria", { name: agent.executionMode === "artizen-on-demand" ? creatorAgentLabel(agent.displayName) : agent.name })}
               />
             </span>
             <span className="grid h-9 w-9 place-items-center rounded-full bg-[#ec1b69]/20 text-xs font-medium text-[#ec1b69]">
               {initials(agent.name)}
             </span>
             <div className="flex flex-col">
-              <span className="text-sm text-[#ececff]">{agent.displayName ?? agent.name}</span>
+              <span className="text-sm text-[#ececff]">{agent.executionMode === "artizen-on-demand" ? creatorAgentLabel(agent.displayName) : agent.displayName ?? agent.name}</span>
               <span className="text-xs text-[#7975a8]">{agent.runtime}</span>
             </div>
           </div>

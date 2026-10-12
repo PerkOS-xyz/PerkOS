@@ -7,7 +7,7 @@ it("shows canonical tasks, human review and read-only task links", () => {
   render(<ArtizenProjectBoard projectId="template-fixture" tasks={[{ id: "artizen-run", name: "Prepare supporter update", status: "Review", priority: "Medium", agent: "Hermes", result: "Draft", executionMode: "artizen-on-demand" }]} />);
   expect(screen.getByText("Revisión humana · 1")).toBeInTheDocument();
   expect(screen.getByText("Preparar actualización").closest("a")).toHaveAttribute("href", "/projects/template-fixture/tasks/artizen-run");
-  expect(screen.getByRole("link", { name: "Trabajar con Hermes" })).toHaveAttribute("href", "/projects/template-fixture#artizen-workflow");
+  expect(screen.getByRole("link", { name: "Trabajar con Hermes" })).toHaveAttribute("href", "/projects/template-fixture#creators-workflow");
   expect(screen.queryByRole("button")).not.toBeInTheDocument();
   expect(screen.getAllByText("No hay tareas en esta fase.")).toHaveLength(3);
 });

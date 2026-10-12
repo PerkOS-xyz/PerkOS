@@ -2,10 +2,12 @@
 
 import { useTranslation } from "react-i18next";
 import type { TaskAgentView } from "../lib/perkosApi";
+import { creatorDisplayText } from "../lib/creatorsPresentation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function taskAgentName(name: string, onDemand: boolean, agent?: TaskAgentView) {
-  return agent?.displayName?.trim() || (onDemand ? "Hermes" : name);
+  const label = agent?.displayName?.trim() || (onDemand ? "Hermes" : name);
+  return onDemand ? creatorDisplayText(label) : label;
 }
 
 /** Last-read metadata, NOT live presence and NOT the historical task's phase. */
