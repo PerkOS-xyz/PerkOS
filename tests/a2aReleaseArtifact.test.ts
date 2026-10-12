@@ -15,6 +15,11 @@ describe("published A2A release artifacts", () => {
       sha256: "69a38789fc89075aa377d49b9b33408a3af82d3187f950d70f8c84261ddfd982",
       integrity: "sha512-UO97da+F6fg3yIDRU5Bg2VbEoYPKXsF6rUW/g85UVC4IQYv5Sdomn5wnbt/GHgEVxfX8/flPHHCLdws93KKHKA==",
     },
+    {
+      version: "0.12.72",
+      sha256: "8ca6552cc3f03ce2e57958159900ffd7f0298f04a9e58d356188137a94941647",
+      integrity: "sha512-QUWM9LKArJSoe5w5NfcovzZQ20HMRwNgABlOB6xr0J4O5s+KFdc39txjRhOna2GgVu7FN/I3O/Y7hBS6AwiZhA==",
+    },
   ])("serves the exact published npm $version archive", ({ version, sha256, integrity }) => {
     const directory = resolve(process.cwd(), "public/artifacts");
     const filename = `perkos-a2a-${version}.tgz`;
