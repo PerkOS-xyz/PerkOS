@@ -82,6 +82,16 @@ export type Project = {
   budget: string;
   /** The organization this project belongs to (wallets/{w}/organizations/{id}). */
   orgId?: string;
+  /** AgentWired site attached to this exact project. */
+  site?: {
+    externalId: string;
+    tenantId: string;
+    status: "draft" | "published";
+    storeUrl: string;
+    adminUrl: string;
+    previewUrl: string;
+    updatedAt?: string;
+  };
   /**
    * Wallet whose subtree holds this project. Differs from the signed-in wallet
    * for a project reached through an organization, and every WRITE has to
@@ -442,6 +452,26 @@ const projectConverter: FirestoreDataConverter<Project> = {
       };
     }
     const workflow = parseProjectWorkflow(data.workflow);
+    const rawSite = data.site && typeof data.site === "object"
+      ? data.site as Record<string, unknown>
+      : null;
+    const site: Project["site"] = rawSite
+      && typeof rawSite.externalId === "string"
+      && typeof rawSite.tenantId === "string"
+      && (rawSite.status === "draft" || rawSite.status === "published")
+      && typeof rawSite.storeUrl === "string"
+      && typeof rawSite.adminUrl === "string"
+      && typeof rawSite.previewUrl === "string"
+      ? {
+          externalId: rawSite.externalId,
+          tenantId: rawSite.tenantId,
+          status: rawSite.status as "draft" | "published",
+          storeUrl: rawSite.storeUrl,
+          adminUrl: rawSite.adminUrl,
+          previewUrl: rawSite.previewUrl,
+          updatedAt: typeof rawSite.updatedAt === "string" ? rawSite.updatedAt : undefined,
+        }
+      : undefined;
     return {
       id: snap.id,
       name: (data.name as string) ?? "",
@@ -452,6 +482,7 @@ const projectConverter: FirestoreDataConverter<Project> = {
       tasks: (data.tasks as number) ?? 0,
       budget: (data.budget as string) ?? "0 USDC",
       orgId: (data.orgId as string | undefined) ?? undefined,
+      site,
       agentIds: (data.agentIds as string[] | undefined) ?? [],
       swarm,
       pmAgent: (data.pmAgent as string | null | undefined) ?? null,

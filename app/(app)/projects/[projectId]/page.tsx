@@ -78,13 +78,14 @@ import { SearchInput, matchesQuery } from "../../../components/SearchInput";
 import { useActiveOrg } from "../../../lib/useActiveOrg";
 import { useProjectExecutionEvents } from "../../../lib/useProjectExecutionEvents";
 import { ProjectAgentIdentityProvider } from "../../../components/ProjectAgentIdentity";
+import { ProjectSitePanel } from "../../../components/ProjectSitePanel";
 
 const ProjectMeetingsTab = dynamic(() => import("../../../components/ProjectMeetingsTab"), {
   ssr: false,
   loading: () => <div className="h-64 animate-pulse rounded-xl border border-border bg-card" />,
 });
 
-type Tab = "tasks" | "docs" | "agents" | "map" | "chat" | "meetings" | "members";
+type Tab = "tasks" | "docs" | "agents" | "map" | "chat" | "meetings" | "members" | "site";
 
 type PageProps = {
   params: Promise<{ projectId: string }>;
@@ -114,7 +115,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
     ownerWallet && normalizeWalletAddress(ownerWallet) !== normalizeWalletAddress((address ?? "")),
   );
   const initialTab = (searchParams.get("tab") as Tab) || "tasks";
-  const TABS: Tab[] = ["tasks", "docs", "agents", "map", "chat", "meetings", "members"];
+  const TABS: Tab[] = ["tasks", "docs", "agents", "map", "chat", "meetings", "members", "site"];
   const [tab, setTab] = useState<Tab>(
     TABS.includes(initialTab) && initialTab !== "chat" && initialTab !== "map" ? initialTab : "tasks"
   );
@@ -248,6 +249,13 @@ export default function ProjectDetailPage({ params }: PageProps) {
                 canManage={!isShared}
               />
             </div>
+          ) : null}
+          {tab === "site" && ownerWallet ? (
+            <ProjectSitePanel
+              projectId={projectId}
+              project={liveDetail.project}
+              ownerWallet={ownerWallet}
+            />
           ) : null}
     </>
   ) : null;
@@ -1050,6 +1058,7 @@ function Tabs({
   const items: { id: Tab; label: string }[] = compact
     ? [
         { id: "agents", label: "Team" },
+        { id: "site", label: "Site" },
         { id: "members", label: t("projectRoom.tabs.members") },
       ]
     : [
@@ -1058,6 +1067,7 @@ function Tabs({
         { id: "agents", label: t("projectRoom.tabs.agents") },
         { id: "map", label: t("projectRoom.tabs.execution") },
         { id: "chat", label: t("projectRoom.tabs.chat") },
+        { id: "site", label: "Site" },
         ...(isVoiceEnabled() ? [{ id: "meetings" as const, label: "Meetings" }] : []),
         { id: "members", label: t("projectRoom.tabs.members") },
       ];
