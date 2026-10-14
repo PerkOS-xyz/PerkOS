@@ -32,6 +32,10 @@ services:
       # preserves the browser context attached by the trusted App proxy and
       # avoids an unnecessary round trip through the public API reverse proxy.
       PERKOS_API_URL: ${PERKOS_API_URL:-http://perkos-api:8080}
+      # Project-site orchestration. The browser only calls the same-origin BFF;
+      # this shared bearer is server-to-server and never enters the bundle.
+      AGENTWIRED_URL: ${AGENTWIRED_URL:-https://agentwired.ai}
+      PERKOS_SERVICE_TOKEN: ${PERKOS_SERVICE_TOKEN:-}
       # Server-only secrets (Firebase Admin + LLM keys) read at runtime
       FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
       FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
