@@ -1,9 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ mint: vi.fn(), activity: vi.fn(), signOut: vi.fn(), auth: { currentUser: null as { uid: string } | null } }));
+const mocks = vi.hoisted(() => ({
+  mint: vi.fn(),
+  activity: vi.fn(),
+  signOut: vi.fn(),
+  welcome: vi.fn(),
+  auth: { currentUser: null as { uid: string } | null },
+}));
 vi.mock("firebase/auth", () => ({ signInWithCustomToken: mocks.mint, signOut: mocks.signOut }));
 vi.mock("../app/lib/firebase", () => ({ firebaseAuth: () => mocks.auth }));
 vi.mock("../app/lib/activityTelemetry", () => ({ recordActivity: mocks.activity }));
+vi.mock("../app/lib/apiClient", () => ({ authedFetch: mocks.welcome }));
 import { signInWithWallet } from "../app/lib/walletAuth";
 
 // Public test fixture, not a user's account.
@@ -21,6 +28,7 @@ beforeEach(() => {
   signer.mockResolvedValue("signature");
   mocks.auth.currentUser = null;
   mocks.signOut.mockResolvedValue(undefined);
+  mocks.welcome.mockResolvedValue({ ok: true });
   mocks.mint.mockResolvedValue({ user: { uid: solana } });
 });
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
@@ -34,6 +42,10 @@ describe("wallet authentication routing", () => {
     expect(JSON.parse(request.body)).toEqual({ address: solana, nonce: "challenge", signature: "signature", chain: "solana" });
     expect(signer).toHaveBeenCalledWith("Sign this challenge");
     expect(mocks.mint).toHaveBeenCalledWith(mocks.auth, "test-custom-token");
+    expect(mocks.welcome).toHaveBeenCalledWith("/api/billing/welcome", {
+      method: "POST",
+      signal: undefined,
+    });
   });
   it("preserves the existing EVM endpoint and lowercase identity without adding a chain field", async () => {
     mocks.mint.mockResolvedValueOnce({ user: { uid: evm.toLowerCase() } });
@@ -64,6 +76,12 @@ describe("wallet authentication routing", () => {
     fetchMock.mockResolvedValueOnce({ ok: false, json: async () => ({ error: { message: "Nonce expired" } }) });
     await expect(signInWithWallet({ address: solana, signMessage: signer })).rejects.toThrow("Nonce expired");
     expect(mocks.mint).not.toHaveBeenCalled();
+    expect(mocks.welcome).not.toHaveBeenCalled();
+  });
+  it("keeps a successful authorized sign-in usable when billing is unavailable", async () => {
+    mocks.welcome.mockRejectedValueOnce(new Error("billing unavailable"));
+    await expect(signInWithWallet({ address: solana, signMessage: signer })).resolves.toMatchObject({ uid: solana });
+    expect(mocks.welcome).toHaveBeenCalledOnce();
   });
 });
 
@@ -124,6 +142,24 @@ describe("account-bound sign-in cancellation", () => {
     await vi.waitFor(() => expect(mocks.mint).toHaveBeenCalledOnce());
     controller.abort();
     commit.resolve({ user: { uid: solana } });
+    await rejection;
+    expect(mocks.signOut).toHaveBeenCalledWith(mocks.auth);
+    expect(mocks.activity).not.toHaveBeenCalled();
+  });
+
+  it("clears the authenticated identity if the wallet changes while the allowance activates", async () => {
+    const welcome = deferred<{ ok: boolean }>();
+    mocks.welcome.mockReturnValueOnce(welcome.promise);
+    const controller = new AbortController();
+    const attempt = signInWithWallet({
+      address: solana,
+      signMessage: signer,
+      signal: controller.signal,
+    });
+    const rejection = expect(attempt).rejects.toHaveProperty("name", "AbortError");
+    await vi.waitFor(() => expect(mocks.welcome).toHaveBeenCalledOnce());
+    controller.abort();
+    welcome.resolve({ ok: true });
     await rejection;
     expect(mocks.signOut).toHaveBeenCalledWith(mocks.auth);
     expect(mocks.activity).not.toHaveBeenCalled();
