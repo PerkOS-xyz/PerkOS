@@ -7,6 +7,18 @@ import { recordActivity } from "./activityTelemetry";
 import { normalizeWalletAddress, walletChain } from "@perkos/shared-types";
 import { solanaLoginEnabled } from "./solanaLogin";
 import { abortableWalletPrompt } from "./walletSignInCoordinator";
+import { authedFetch } from "./apiClient";
+
+async function activateWelcomeAllowance(signal?: AbortSignal): Promise<void> {
+  try {
+    // This endpoint is idempotent and repeats the live access-policy check.
+    // Authentication must remain usable if billing is temporarily unavailable.
+    await authedFetch("/api/billing/welcome", { method: "POST", signal });
+  } catch {
+    // The allowance can be retried on a later authorized sign-in. Never turn a
+    // billing outage into a wallet authentication failure.
+  }
+}
 
 /**
  * Full wallet → Firebase sign-in dance.
@@ -83,6 +95,13 @@ export async function signInWithWallet(input: {
     await signOut(auth);
     assertCurrent();
     throw new Error("The sign-in identity did not match the connected wallet.");
+  }
+  // Wait for the idempotent claim so the dashboard's first billing read cannot
+  // race it and incorrectly show $0 for the next query refresh interval.
+  await activateWelcomeAllowance(input.signal);
+  if (input.signal?.aborted) {
+    await signOut(auth);
+    assertCurrent();
   }
   void recordActivity(credential.user, "login", "app", address);
   return credential.user;
