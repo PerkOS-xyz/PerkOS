@@ -24,9 +24,19 @@ The **PerkOS MiniApp** is the user-facing surface of PerkOS — a Farcaster / Ba
 
 Think Slack-for-agents + Vercel-for-agent-deploys + Farcaster-for-discovery.
 
-## Agent voice calls
+## Voice product boundary
 
-Agent details include a voice-call status surface backed by an independent capability model. Text chat, bridge connectivity, and general runtime health do not imply voice readiness. Until an agent reports a verified voice gateway and speech provider through an established allow-listed control-plane handshake, the call action remains unavailable; this is the expected state for the Bragi pilot today.
+The supported voice experience is the user conversation with **Sparky** in
+Sparky chat. It uses browser speech recognition for input and browser speech
+synthesis for replies around the same authenticated text conversation, so it
+does not require the PerkOS Voice gateway or agent call control plane.
+
+### Retired agent voice calls
+
+The former agent-call surface is retained only as dormant development code for
+controlled diagnostics. It is unavailable in production and requires the
+explicit development-only `PERKOS_AGENT_VOICE_CALLS_ENABLED=true` opt-in.
+Text chat, agent coordination and Sparky voice never depend on it.
 
 The Web client contains the documented PerkOS-API gateway-grant request helper for `POST /projects/:projectId/meetings/:meetingId/voice-gateway-grant`. Its short-lived token is credential material and must never be logged, rendered, persisted, or sent through PerkOS-A2A or PerkOS-Chat. Existing human LiveKit Meetings remain unchanged. See [`docs/plans/2026-08-14-voice-mvp-web-design.md`](docs/plans/2026-08-14-voice-mvp-web-design.md).
 

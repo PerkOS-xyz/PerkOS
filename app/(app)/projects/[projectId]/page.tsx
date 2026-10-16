@@ -1,7 +1,7 @@
 "use client";
 
 import { normalizeWalletAddress } from "@perkos/shared-types";
-import { isVoiceEnabled } from "@/app/lib/voiceFeature";
+import { areAgentVoiceCallsEnabled } from "@/app/lib/voiceFeature";
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -229,7 +229,7 @@ export default function ProjectDetailPage({ params }: PageProps) {
               onDesignatePm={() => setTab("agents")}
             />
           ) : null}
-          {isVoiceEnabled() && tab === "meetings" && liveDetail.project.executionMode !== "artizen-on-demand" ? (
+          {areAgentVoiceCallsEnabled() && tab === "meetings" && liveDetail.project.executionMode !== "artizen-on-demand" ? (
             <ProjectMeetingsTab
               projectId={projectId}
               projectName={liveDetail.project.name}
@@ -1068,7 +1068,7 @@ function Tabs({
         { id: "map", label: t("projectRoom.tabs.execution") },
         { id: "chat", label: t("projectRoom.tabs.chat") },
         { id: "site", label: "Site" },
-        ...(isVoiceEnabled() ? [{ id: "meetings" as const, label: "Meetings" }] : []),
+        ...(areAgentVoiceCallsEnabled() ? [{ id: "meetings" as const, label: "Meetings" }] : []),
         { id: "members", label: t("projectRoom.tabs.members") },
       ];
 

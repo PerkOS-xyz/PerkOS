@@ -1,4 +1,7 @@
-/** Build-time opt-in; next.config only permits this for the Dev environment. */
-export function isVoiceEnabled(): boolean {
-  return process.env.NEXT_PUBLIC_PERKOS_VOICE_ENABLED === "true";
+/**
+ * Legacy agent-call surface. This is unrelated to Sparky's browser-native
+ * speech input/output and remains disabled in production.
+ */
+export function areAgentVoiceCallsEnabled(): boolean {
+  return process.env.NEXT_PUBLIC_PERKOS_AGENT_VOICE_CALLS_ENABLED === "true";
 }
