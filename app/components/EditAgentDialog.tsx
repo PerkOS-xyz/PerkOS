@@ -1,5 +1,5 @@
 "use client";
-import { isVoiceEnabled } from "../lib/voiceFeature";
+import { areAgentVoiceCallsEnabled } from "../lib/voiceFeature";
 
 import { useEffect, useMemo, useState, type KeyboardEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -86,7 +86,7 @@ export function EditAgentDialog({
         patch: {
           displayName: displayName.trim(),
           plugins,
-          ...(isVoiceEnabled() ? { speechVoice } : {}),
+          ...(areAgentVoiceCallsEnabled() ? { speechVoice } : {}),
           ...(showTools && toolsChanged ? { disabledTools } : {}),
           ...(showFeatures && featuresChanged ? { enabledFeatures } : {}),
         },
@@ -161,7 +161,7 @@ export function EditAgentDialog({
             ) : null}
           </div>
 
-          {isVoiceEnabled() ? <div className="flex flex-col gap-2">
+          {areAgentVoiceCallsEnabled() ? <div className="flex flex-col gap-2">
             <Label htmlFor="edit-agent-speech-voice">Spoken audio voice</Label>
             <select
               id="edit-agent-speech-voice"

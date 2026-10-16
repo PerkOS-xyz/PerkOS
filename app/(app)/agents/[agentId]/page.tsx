@@ -76,7 +76,7 @@ import { AgentChatPanel } from "./AgentChatPanel";
 import { AgentVoiceCallController } from "./AgentVoiceCallController";
 import { VoiceCredentialDeliveryPanel } from "./VoiceCredentialDeliveryPanel";
 import { VoiceHealthPanel } from "./VoiceHealthPanel";
-import { isVoiceEnabled } from "@/app/lib/voiceFeature";
+import { areAgentVoiceCallsEnabled } from "@/app/lib/voiceFeature";
 import { ArtizenAgentDetail } from "@/app/components/ArtizenProjectBoard";
 
 type PageProps = {
@@ -327,7 +327,7 @@ export default function AgentDetailPage({ params }: PageProps) {
           : undefined}
       />
 
-      {isVoiceEnabled() ? <details className="group rounded-lg border border-border bg-card/40">
+      {areAgentVoiceCallsEnabled() ? <details className="group rounded-lg border border-border bg-card/40">
         <summary className="cursor-pointer select-none px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
           {t("agentDetail.voiceCall.title")} <span className="ml-1 text-xs font-normal text-muted-foreground">{t("agentDetail.voiceCall.optional")}</span>
         </summary>
@@ -358,7 +358,7 @@ export default function AgentDetailPage({ params }: PageProps) {
 
       {agent.invited ? <InvitedCredentialPanel agent={agent} /> : null}
 
-      {isVoiceEnabled() && agent.invited ? (
+      {areAgentVoiceCallsEnabled() && agent.invited ? (
         <VoiceCredentialDeliveryPanel
           agentId={agent.id}
           agentName={agent.name}
@@ -366,7 +366,7 @@ export default function AgentDetailPage({ params }: PageProps) {
         />
       ) : null}
 
-      {isVoiceEnabled() ? <VoiceHealthPanel
+      {areAgentVoiceCallsEnabled() ? <VoiceHealthPanel
         agentId={agent.id}
         agentName={agent.name}
         owner={Boolean(address) && normalizeWalletAddress(address!) === normalizeWalletAddress(agent.walletAddress)}

@@ -3,8 +3,10 @@ import path from "node:path";
 
 const nextConfig: NextConfig = {
   env: {
-    NEXT_PUBLIC_PERKOS_VOICE_ENABLED:
-      process.env.PERKOS_ENVIRONMENT === "development" && process.env.PERKOS_VOICE_ENABLED === "true"
+    // Legacy agent-call UI only. Sparky voice is browser-native and does not
+    // depend on this flag or the PerkOS Voice control plane.
+    NEXT_PUBLIC_PERKOS_AGENT_VOICE_CALLS_ENABLED:
+      process.env.PERKOS_ENVIRONMENT === "development" && process.env.PERKOS_AGENT_VOICE_CALLS_ENABLED === "true"
         ? "true" : "false",
   },
   turbopack: {
