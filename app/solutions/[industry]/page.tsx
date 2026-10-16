@@ -7,11 +7,21 @@ const SOLUTIONS = {
   restaurants: {
     label: "Restaurants",
     title: "An AI team for restaurants that keeps tables full and owners off the screen.",
-    intro: "Plan promotions, draft weekly content, answer common customer questions and research local demand without adding another late-night shift.",
+    intro: "Answer WhatsApp questions from your menu and hours, draft promos for approval, and hand off when a table or allergy needs a human — never invent availability.",
     outcomes: [
-      { title: "Local marketing", body: "Draft promotions for quiet days, seasonal menus and neighborhood events." },
-      { title: "Customer replies", body: "Prepare accurate, on-brand responses to reviews and common questions." },
-      { title: "Menu research", body: "Compare local pricing, trends and competitor positioning before making changes." },
+      { title: "WhatsApp FAQ", body: "Reply on menu, hours and allergies from your knowledge — escalate when unsure." },
+      { title: "Reservations with guardrails", body: "Offer only real slots; never confirm a table that was not actually free." },
+      { title: "Owner drafts", body: "Promotions and review replies stay as drafts until you approve." },
+    ],
+  },
+  barbershops: {
+    label: "Barbershops",
+    title: "An AI team for barbershops and stylists that books real chairs, not imaginary ones.",
+    intro: "Take WhatsApp booking requests, offer only open stylist slots, and pass the chat to the front desk when confidence is low.",
+    outcomes: [
+      { title: "WhatsApp booking", body: "Offer concrete stylist slots and confirm only numbers the customer picks from that list." },
+      { title: "Services and pricing", body: "Answer from your real price list — never invent a cut or a fee." },
+      { title: "Human handoff", body: "Angry clients, VIP requests and unclear cases go straight to a person." },
     ],
   },
   "real-estate": {

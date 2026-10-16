@@ -15,7 +15,12 @@ const SOLUTIONS = [
   {
     href: "/solutions/restaurants",
     title: "Restaurants",
-    body: "Plan local promotions, draft weekly content, prepare customer replies and research neighborhood demand.",
+    body: "WhatsApp FAQ, reservation guardrails and draft promos — with human handoff when the kitchen must decide.",
+  },
+  {
+    href: "/solutions/barbershops",
+    title: "Barbershops",
+    body: "WhatsApp booking for stylists with real slots only, price-list answers and front-desk handoff.",
   },
   {
     href: "/solutions/real-estate",

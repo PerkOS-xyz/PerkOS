@@ -18,6 +18,7 @@ import {
   PanelLeftOpen,
   Search,
   Settings,
+  Store,
   Wallet,
   type LucideIcon,
 } from "lucide-react";
@@ -65,6 +66,7 @@ const NAV_ITEMS: { href: string; key: string; Icon: LucideIcon }[] = [
   { href: "/tasks", key: "nav.tasks", Icon: ListTodo },
   { href: "/agents", key: "nav.agents", Icon: Bot },
   { href: "/chat", key: "nav.chat", Icon: MessageCircle },
+  { href: "/local", key: "nav.local", Icon: Store },
   { href: "/organizations", key: "nav.organization", Icon: Building2 },
   { href: "/wallet", key: "nav.wallet", Icon: Wallet },
   { href: "/settings", key: "nav.settings", Icon: Settings },
