@@ -72,6 +72,33 @@ const CONTINUOUS_VOICE_KEY = "perkos:sparky:continuous-voice";
 
 type SparkyVoiceState = "idle" | "listening" | "thinking" | "speaking";
 
+export function sparkySpeechErrorMessage(error: string, language: string) {
+  const es = language.startsWith("es");
+  switch (error) {
+    case "not-allowed":
+    case "service-not-allowed":
+      return es
+        ? "El micrófono está bloqueado. Permite el acceso al micrófono para perkos.xyz en Chrome y vuelve a intentarlo."
+        : "Microphone access is blocked. Allow microphone access for perkos.xyz in Chrome, then try again.";
+    case "audio-capture":
+      return es
+        ? "No se detectó un micrófono. Revisa el dispositivo de entrada de Chrome y vuelve a intentarlo."
+        : "No microphone was detected. Check Chrome's input device, then try again.";
+    case "no-speech":
+      return es
+        ? "No escuché ninguna voz. Acércate al micrófono y vuelve a intentarlo."
+        : "I didn't hear any speech. Move closer to the microphone and try again.";
+    case "network":
+      return es
+        ? "El reconocimiento de voz no está disponible en este momento. Puedes escribir el mensaje o intentarlo de nuevo."
+        : "Speech recognition is unavailable right now. Type your message or try again.";
+    default:
+      return es
+        ? "No pude iniciar el micrófono. Revisa los permisos de Chrome y vuelve a intentarlo."
+        : "I couldn't start the microphone. Check Chrome's permissions and try again.";
+  }
+}
+
 export function ChatbotPanel({ embedded = false }: { embedded?: boolean }) {
   const { t, i18n } = useTranslation();
   const {
@@ -108,6 +135,7 @@ export function ChatbotPanel({ embedded = false }: { embedded?: boolean }) {
 
   // Dictation (Web Speech API). Appends transcribed phrases to the draft.
   const speech = useSpeechToText({
+    lang: i18n.language,
     onFinal: (chunk) => {
       const cleaned = chunk.trim();
       if (!cleaned) return;
@@ -677,9 +705,11 @@ function EmbeddedSparkyConversation({
         </div>
       </div>
 
-      <form onSubmit={onSubmit} className="relative z-20 mx-auto mb-4 w-[calc(100%-2rem)] max-w-3xl">
+      <form onSubmit={onSubmit} className="relative z-20 mx-auto mb-[calc(5rem+env(safe-area-inset-bottom))] w-[calc(100%-2rem)] max-w-3xl md:mb-4">
         {speech.error ? (
-          <p className="mb-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">{speech.error}</p>
+          <p role="alert" className="mb-2 rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs leading-relaxed text-destructive">
+            {sparkySpeechErrorMessage(speech.error, i18n.language)}
+          </p>
         ) : null}
         <div className="flex items-end gap-2 rounded-2xl border border-primary/35 bg-background/90 p-2 pl-4 shadow-[0_12px_40px_rgba(0,0,0,.35)] backdrop-blur-xl focus-within:border-primary">
           <textarea

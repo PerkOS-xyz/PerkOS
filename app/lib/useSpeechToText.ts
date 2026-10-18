@@ -65,6 +65,8 @@ export function useSpeechToText(opts: {
   useEffect(() => {
     const ctor = getRecognitionCtor();
     ctorRef.current = ctor;
+    // Browser capability is only knowable after hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSupported(!!ctor);
   }, []);
 
@@ -94,7 +96,9 @@ export function useSpeechToText(opts: {
       }
     };
     rec.onerror = (event) => {
-      setError(event.error);
+      // Chrome emits `aborted` when we intentionally stop/interrupt the
+      // recognizer. That is a lifecycle event, not a user-facing failure.
+      setError(event.error === "aborted" ? null : event.error);
       setListening(false);
     };
     rec.onend = () => {
