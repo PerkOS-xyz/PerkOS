@@ -1,6 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ChatbotPanel } from "../app/components/ChatbotPanel";
+import {
+  ChatbotPanel,
+  sparkySpeechErrorMessage,
+} from "../app/components/ChatbotPanel";
 
 const mocks = vi.hoisted(() => ({
   pathname: "/dashboard",
@@ -82,6 +85,15 @@ describe("Sparky voice dashboard", () => {
     fireEvent.click(screen.getByRole("button", { name: "Turn on continuous conversation" }));
     expect(window.localStorage.getItem("perkos:sparky:continuous-voice")).toBe("true");
     expect(mocks.speechStart).toHaveBeenCalled();
+  });
+
+  it("turns microphone permission codes into actionable copy", () => {
+    expect(sparkySpeechErrorMessage("not-allowed", "en")).toBe(
+      "Microphone access is blocked. Allow microphone access for perkos.xyz in Chrome, then try again.",
+    );
+    expect(sparkySpeechErrorMessage("not-allowed", "es")).toContain(
+      "Permite el acceso al micrófono para perkos.xyz",
+    );
   });
 
   it("suppresses the floating panel on the dashboard", () => {
