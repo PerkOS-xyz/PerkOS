@@ -68,7 +68,6 @@ ENV PERKOS_ENVIRONMENT=$PERKOS_ENVIRONMENT
 # `standalone` output includes a self-contained server.js + node_modules slice.
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
-COPY --from=build /app/public ./public
 
 # Worker sidecars — separate processes that don't run as part of the
 # Next.js server. The live provisioner was retired (it now runs in
@@ -100,9 +99,21 @@ COPY --from=build /app/app/worker ./app/worker
 COPY --from=build /app/app/lib ./app/lib
 COPY --from=build /app/tsconfig.json ./tsconfig.json
 
+# Keep public assets after the worker dependency layer so a branding-only
+# change does not invalidate the expensive runtime install. The explicit
+# checks also prevent a release assembled while rsync is still replacing
+# files from producing a healthy-looking image with an empty /public tree.
+COPY --from=build /app/public ./public
+RUN test -s /app/public/perkos-landing-logo.png \
+ && test -s /app/public/perkos-header.png \
+ && test -s /app/public/brand/icon-mail.svg \
+ && test -s /app/public/brand/icon-wallet.svg
+
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-  CMD wget -qO- http://127.0.0.1:3000/ >/dev/null || exit 1
+  CMD wget -qO- http://127.0.0.1:3000/ >/dev/null \
+   && wget -qO- http://127.0.0.1:3000/perkos-landing-logo.png >/dev/null \
+   || exit 1
 
 CMD ["node", "server.js"]
