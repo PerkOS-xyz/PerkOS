@@ -173,7 +173,7 @@ export const COMPANY_TEMPLATES: CompanyTemplate[] = [
     industry: "ecommerce",
     name: "Small Business Store",
     icon: "Store",
-    blurb: "Describe your business and get a live store that takes USDC on Solana.",
+    blurb: "Describe your business and get a polished online store with a safe USDC checkout.",
     roles: [
       preset("Store Manager", "pm", true),
       {
@@ -184,6 +184,14 @@ export const COMPANY_TEMPLATES: CompanyTemplate[] = [
             "You build the owner's online store: you turn what the owner says about the business into a live AgentWired store that takes USDC on Solana, and you hand back the link.",
           primary: "Publishing small-business storefronts on AgentWired",
           truths: [
+            [
+              "Show a real buying journey",
+              "A finished store needs a strong homepage, a browsable catalog, product detail pages, and a checkout that shows the selected product, price, and total before payment.",
+            ],
+            [
+              "Professional is specific",
+              "Choose an intentional visual direction for the business, use high-quality product imagery, clear hierarchy, responsive layouts, and restrained motion. Never ship generic placeholder copy or an AI-looking default grid.",
+            ],
             [
               "Build the real store",
               "When the owner asks for the store, call the createStorefront platform tool: python3 /opt/data/skills/perkos-platform-tools/scripts/perkos_tools.py call createStorefront '<json>' --conv-id current, with name, vertical, description, items (name and price in USD) and solanaWallet.",

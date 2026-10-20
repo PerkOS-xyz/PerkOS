@@ -29,6 +29,15 @@ describe("Small Business Store team template", () => {
     expect(renderSoulMd("Store-Builder", builder.soul!)).toContain("never long dashes");
   });
 
+  it("requires a professional end-to-end shopping journey", () => {
+    const builder = template!.roles.find((r) => r.role === "Store Builder")!;
+    const soul = renderSoulMd("Store-Builder", builder.soul!);
+    expect(template!.blurb).not.toContain("Solana");
+    expect(soul).toContain("product detail pages");
+    expect(soul).toContain("selected product, price, and total before payment");
+    expect(soul).toContain("Never ship generic placeholder copy");
+  });
+
   it("keeps the copy plain", () => {
     const authored = template!.roles.filter((r) => r.soul);
     const copy = [template!.blurb, ...authored.map((r) => renderSoulMd(r.role, r.soul!))].join("\n");
