@@ -6,8 +6,13 @@ import { getCompanyTemplate } from "../app/lib/companyTemplates";
 describe("Small Business Store team template", () => {
   const template = getCompanyTemplate("small-business-store");
 
-  it("has a store manager leading a builder and a copywriter", () => {
-    expect(template?.roles.map((r) => r.role)).toEqual(["Store Manager", "Store Builder", "Product Copywriter"]);
+  it("has a store manager leading a visual designer, builder and copywriter", () => {
+    expect(template?.roles.map((r) => r.role)).toEqual([
+      "Store Manager",
+      "Brand & Image Designer",
+      "Store Builder",
+      "Product Copywriter",
+    ]);
     expect(template!.roles.filter((r) => r.isPM).map((r) => r.role)).toEqual(["Store Manager"]);
   });
 
@@ -17,6 +22,8 @@ describe("Small Business Store team template", () => {
     expect(soul).toContain("createStorefront");
     expect(soul).toContain("Ready");
     expect(soul).toContain("USDC on Solana");
+    expect(soul).toContain("checkoutMode test");
+    expect(soul).toContain("required only when the owner later activates live payments");
   });
 
   it("asks the bridge for the conversation it is answering", () => {
@@ -36,6 +43,14 @@ describe("Small Business Store team template", () => {
     expect(soul).toContain("product detail pages");
     expect(soul).toContain("selected product, price, and total before payment");
     expect(soul).toContain("Never ship generic placeholder copy");
+  });
+
+  it("assigns original storefront imagery to a specialist agent", () => {
+    const designer = template!.roles.find((r) => r.role === "Brand & Image Designer")!;
+    const soul = renderSoulMd("Brand-Image-Designer", designer.soul!);
+    expect(soul).toContain("image_generate");
+    expect(soul).toContain("hero plus distinct product or category assets");
+    expect(soul).toContain("owner approves the direction");
   });
 
   it("keeps the copy plain", () => {
