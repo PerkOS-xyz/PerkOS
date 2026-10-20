@@ -22,6 +22,8 @@ describe("Small Business Store team template", () => {
     expect(soul).toContain("createStorefront");
     expect(soul).toContain("Ready");
     expect(soul).toContain("USDC on Solana");
+    expect(soul).toContain("checkoutMode test");
+    expect(soul).toContain("required only when the owner later activates live payments");
   });
 
   it("asks the bridge for the conversation it is answering", () => {
