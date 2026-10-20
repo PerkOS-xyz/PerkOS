@@ -23,6 +23,9 @@ describe("Small Business Store team template", () => {
     expect(soul).toContain("Ready");
     expect(soul).toContain("USDC on Solana");
     expect(soul).toContain("checkoutMode test");
+    expect(soul).toContain("projectId, taskId, and claimToken");
+    expect(soul).toContain("taskContext");
+    expect(soul).toContain("Never expose the claimToken");
     expect(soul).toContain("required only when the owner later activates live payments");
   });
 
