@@ -48,7 +48,7 @@ describe("loadConfigFromEnv", () => {
     expect(cfg.idleMinutes).toBe(60);
     expect(cfg.dryRun).toBe(true);
     expect(cfg.maxHibernationsPerTick).toBe(10);
-    expect(cfg.skipNames.has("perkos-assistant")).toBe(true);
+    expect(cfg.skipNames.size).toBe(0);
     expect(cfg.minAgeMinutes).toBe(15);
   });
 
@@ -77,12 +77,12 @@ describe("loadConfigFromEnv", () => {
 
   it("parses skipNames as comma-separated lowercase set", () => {
     const cfg = loadConfigFromEnv({
-      PERKOS_CURATOR_SKIP_NAMES: "MyBot, Helper ,perkos-assistant",
+      PERKOS_CURATOR_SKIP_NAMES: "MyBot, Helper ,always-on-agent",
     } as never);
     expect(Array.from(cfg.skipNames).sort()).toEqual([
+      "always-on-agent",
       "helper",
       "mybot",
-      "perkos-assistant",
     ]);
   });
 });
@@ -110,13 +110,13 @@ describe("decide", () => {
   });
 
   it("skips agents on the allowlist", () => {
-    const cfg = { ...DEFAULT_CONFIG, skipNames: new Set(["perkos-assistant"]) };
+    const cfg = { ...DEFAULT_CONFIG, skipNames: new Set(["always-on-agent"]) };
     const decisions = decide({
       config: cfg,
       now: NOW,
       agents: [
         {
-          name: "PerkOS-Assistant",
+          name: "Always-On-Agent",
           walletAddress: "0xabc",
           updatedAt: minsAgo(999),
           createdAt: minsAgo(999),
