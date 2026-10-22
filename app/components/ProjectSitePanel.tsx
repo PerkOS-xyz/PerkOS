@@ -47,6 +47,7 @@ export function ProjectSitePanel({
   const [vertical, setVertical] = useState("other");
   const [description, setDescription] = useState(project.goal ?? "");
   const [itemName, setItemName] = useState("Featured service");
+  const [itemDescription, setItemDescription] = useState(`A featured product or service from ${project.name}.`);
   const [itemPrice, setItemPrice] = useState("25");
 
   useEffect(() => {
@@ -61,8 +62,8 @@ export function ProjectSitePanel({
 
   async function createDraft() {
     const price = Number(itemPrice);
-    if (!itemName.trim() || !Number.isFinite(price) || price < 0) {
-      toast.error("Add a valid first item and price.");
+    if (!itemName.trim() || itemDescription.trim().length < 20 || !Number.isFinite(price) || price < 0) {
+      toast.error("Add a name, a useful description, and a valid price for the first item.");
       return;
     }
     setSaving(true);
@@ -75,7 +76,7 @@ export function ProjectSitePanel({
           name,
           vertical,
           description,
-          items: [{ name: itemName, price, description: "" }],
+          items: [{ name: itemName, price, description: itemDescription.trim() }],
         }),
       });
       setSite(result.site);
@@ -142,6 +143,7 @@ export function ProjectSitePanel({
       <div className="rounded-lg border border-border/70 p-3">
         <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">First catalog item</p>
         <div className="grid gap-3 sm:grid-cols-[1fr_9rem]"><input aria-label="Item name" value={itemName} onChange={(e) => setItemName(e.target.value)} className="h-10 rounded-lg border border-border bg-background px-3" /><input aria-label="Price in USD" type="number" min="0" step="0.01" value={itemPrice} onChange={(e) => setItemPrice(e.target.value)} className="h-10 rounded-lg border border-border bg-background px-3" /></div>
+        <textarea aria-label="Item description" value={itemDescription} onChange={(e) => setItemDescription(e.target.value)} rows={2} minLength={20} className="mt-3 w-full rounded-lg border border-border bg-background p-3" />
       </div>
       <Button onClick={createDraft} disabled={saving || !name.trim()} className="w-full sm:w-auto">{saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Globe2 className="mr-2 h-4 w-4" />}{saving ? "Creating draft…" : "Create private draft"}</Button>
     </section>
