@@ -71,7 +71,7 @@ export const DEFAULT_CONFIG: CuratorConfig = {
   idleMinutes: 60,
   dryRun: true,
   maxHibernationsPerTick: 10,
-  skipNames: new Set(["perkos-assistant"]),
+  skipNames: new Set(),
   minAgeMinutes: 15,
 };
 
@@ -86,7 +86,7 @@ export function loadConfigFromEnv(env: NodeJS.ProcessEnv = process.env): Curator
   const dryRunRaw = (env.PERKOS_CURATOR_DRY_RUN ?? "true").trim().toLowerCase();
   const dryRun = dryRunRaw !== "false";
   const skipNames = new Set(
-    (env.PERKOS_CURATOR_SKIP_NAMES ?? "perkos-assistant")
+    (env.PERKOS_CURATOR_SKIP_NAMES ?? "")
       .split(",")
       .map((s) => s.trim().toLowerCase())
       .filter(Boolean),

@@ -26,7 +26,7 @@
  *                                    fleet)
  *   PERKOS_CURATOR_SKIP_NAMES       comma-separated names that the
  *                                    curator must never hibernate
- *                                    (default "perkos-assistant")
+ *                                    (default empty)
  *   PERKOS_CURATOR_MIN_AGE_MINUTES  floor on agent age (default 15)
  *   WORKER_INSTANCE_ID              optional, defaults to hostname
  */
