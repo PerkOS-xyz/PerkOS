@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { normalizeWalletAddress, walletChain } from "@perkos/shared-types";
 
 import { adminAuth, adminDb } from "@/app/lib/firebaseAdmin";
 
@@ -23,15 +24,17 @@ async function identity(request: Request): Promise<string | null> {
   const header = request.headers.get("authorization") ?? "";
   if (!header.toLowerCase().startsWith("bearer ")) return null;
   try {
-    return (await adminAuth().verifyIdToken(header.slice(7).trim())).uid.toLowerCase();
+    const uid = (await adminAuth().verifyIdToken(header.slice(7).trim())).uid;
+    return walletChain(uid) ? normalizeWalletAddress(uid) : null;
   } catch {
     return null;
   }
 }
 
 async function projectFor(wallet: string, projectId: string, requestedOwner: string | null) {
-  const owner = (requestedOwner || wallet).toLowerCase();
-  if (!/^0x[a-f0-9]{40}$/.test(owner)) return null;
+  const candidate = requestedOwner || wallet;
+  if (!walletChain(candidate)) return null;
+  const owner = normalizeWalletAddress(candidate);
   const ref = adminDb().collection("wallets").doc(owner).collection("projects").doc(projectId);
   const snapshot = await ref.get();
   if (!snapshot.exists) return null;
