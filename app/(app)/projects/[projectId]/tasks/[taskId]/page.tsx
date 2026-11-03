@@ -67,7 +67,7 @@ export default function TaskDetailPage({ params }: PageProps) {
     // the deliverable on its own; no manual refresh.
     refetchInterval: (q) => {
       const current = q.state.data?.tasks.find((t) => t.id === taskId);
-      return current && current.status !== "Done" && !current.result ? 10_000 : false;
+      return current && current.status !== "Done" ? 10_000 : false;
     },
   });
 
@@ -172,9 +172,10 @@ export default function TaskDetailPage({ params }: PageProps) {
         <div className="flex min-w-0 flex-col gap-6">
           {task.result ? (
             <DeliverableSheet result={task.result} title={task.name} agentLabel={people.agentLabel} />
-          ) : onDemand ? (
+          ) : null}
+          {!task.result && onDemand ? (
             <ArtizenRunFailure run={{ ...task, phase: task.executionPhase }} />
-          ) : (
+          ) : !onDemand && (!task.result || task.dispatchStuck || task.dispatchState === "retrying") ? (
             <PendingDeliverable
               status={task.status}
               progress={task}
@@ -189,7 +190,7 @@ export default function TaskDetailPage({ params }: PageProps) {
                 />
               }
             />
-          )}
+          ) : null}
 
           {onDemand && task.agent ? (
             <TaskAgentCard name={task.agent} onDemand agent={assignedAgent} />

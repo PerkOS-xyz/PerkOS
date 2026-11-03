@@ -3,6 +3,7 @@
 import { normalizeWalletAddress } from "@perkos/shared-types";
 
 import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAppAccount } from "../lib/useAppAccount";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -288,6 +289,7 @@ export function DocsTab({
           ownerWallet={ownerWallet}
           tasks={detail.tasks}
           docId={selectedId}
+          actionablePlanId={detail.project.workflow?.phase === "awaiting_approval" ? detail.project.workflow.planId : undefined}
           me={address ? `user:${normalizeWalletAddress(address)}` : null}
           meWallet={address ?? undefined}
           participants={participants}
@@ -405,6 +407,7 @@ function DocEditor({
   ownerWallet,
   tasks,
   docId,
+  actionablePlanId,
   me,
   meWallet,
   participants,
@@ -415,6 +418,7 @@ function DocEditor({
   ownerWallet?: string;
   tasks: ProjectDetail["tasks"];
   docId: string;
+  actionablePlanId?: string;
   me: string | null;
   meWallet?: string;
   participants: MentionParticipant[];
@@ -500,20 +504,24 @@ function DocEditor({
   };
 
   const [approving, setApproving] = useState(false);
+  const queryClient = useQueryClient();
   // planTask blocks not yet turned into board tasks.
   const unmaterializedTasks = blocks.filter(
     (b) => b.type === "planTask" && !b.materializedTaskId,
   ).length;
   const canApprove =
     isPlan &&
+    actionablePlanId === docId &&
     unmaterializedTasks > 0 &&
-    (status === "plan_proposed" || status === "approved");
+    status === "plan_proposed";
 
   const approve = async () => {
-    if (!wallet) return;
+    if (!wallet || !canApprove || approving) return;
     setApproving(true);
     try {
       const res = await approvePlan({ projectId, docId, owner: wallet });
+      void queryClient.invalidateQueries({ queryKey: ["wallet-project", wallet, projectId] });
+      void queryClient.invalidateQueries({ queryKey: ["dash-org-projects"] });
       toast.success(
         res.created > 0
           ? t("chat.docs.editor.tasksCreatedOnBoard", { count: res.created })

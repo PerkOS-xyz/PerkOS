@@ -1781,6 +1781,8 @@
       "chooseLeadAria": "Choose the lead"
     },
     "tasksTab": {
+      "attention": "Needs attention",
+      "attentionState": { "review": "In review", "blocked": "Blocked", "retrying": "Retrying" },
       "createTask": "Create task",
       "emptyMessage": "Drag a task here or create one.",
       "bulk": {
