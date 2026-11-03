@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import {
   getWalletAgents,
   getWalletProjects,
-  type Agent,
+  type AgentRow,
   type Project,
 } from "../../lib/perkosApi";
 import { AgentOrb } from "../../components/AgentOrb";
@@ -29,15 +29,6 @@ import {
   SearchInput,
   matchesQuery,
 } from "../../components/SearchInput";
-
-function initials(name: string): string {
-  return name
-    .split(/\s+|-/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase())
-    .join("");
-}
 
 export default function ChatHubPage() {
   const { address } = useAppAccount();
@@ -244,7 +235,7 @@ function AgentChatRow({
   agent,
   live,
 }: {
-  agent: Agent;
+  agent: AgentRow;
   live?: AgentLiveStatus;
 }) {
   const { color: presence, label: presenceLabel } = realtimeAgentStatus(live);
@@ -256,9 +247,7 @@ function AgentChatRow({
         className="flex items-center gap-3 rounded-md border border-border bg-card px-4 py-3 transition-colors hover:border-primary/40"
       >
         <div className="relative">
-          <div className="grid h-10 w-10 place-items-center rounded-full bg-primary/15 text-xs font-medium text-primary">
-            {initials(agent.name)}
-          </div>
+          <AgentOrb name={agent.name} agent={agent} size={40} />
           <span
             className={cn(
               "absolute -bottom-0.5 -right-0.5 grid h-2.5 w-2.5 place-items-center rounded-full ring-2 ring-card",
@@ -268,7 +257,7 @@ function AgentChatRow({
           />
         </div>
         <div className="flex min-w-0 flex-1 flex-col">
-          <span className="truncate text-sm text-foreground">{agent.name}</span>
+          <span className="truncate text-sm text-foreground">{agent.displayName ?? agent.name}</span>
           <span className="text-xs text-muted-foreground">
             {agent.runtime}
             <span className="px-1.5">·</span>

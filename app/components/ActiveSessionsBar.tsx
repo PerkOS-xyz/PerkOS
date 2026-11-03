@@ -65,12 +65,13 @@ export function ActiveSessionsBar() {
           >
             <AgentOrb
               name={a.name}
+              agent={a}
               presetId={a.presetId}
               role={a.role}
               size={20}
               status={st.label === STATUS_AVAILABLE ? "available" : null}
             />
-            <span className="max-w-[84px] truncate">{a.name}</span>
+            <span className="max-w-[84px] truncate">{a.displayName || a.name}</span>
             <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${st.color}`} />
           </Link>
         ))}

@@ -9,11 +9,13 @@ import { firebaseDb } from "./firebase";
 import { externalRuntimeAvailability } from "./agentHostingPolicy";
 import {useAgentPresence} from "./useAgentPresence";
 import { creatorAgentLabel } from "./creatorsPresentation";
+import { isAgentAppearance, type AgentAppearance } from "./agentAvatarIdentity";
 
 export type AgentLiveStatus = {
   executionMode?: "artizen-on-demand";
   executionState?: string;
   displayName?: string;
+  avatarAppearance?: AgentAppearance;
   shared?:boolean;
   presenceExpiresAt?:number;
   presenceUnavailable?:boolean;
@@ -36,6 +38,8 @@ type State = {
   byName: Record<string, AgentLiveStatus>;
   loaded: boolean;
 };
+type ScopedState = State & { wallet: string | null };
+const emptyState: State = { byName: {}, loaded: false };
 
 /** Coerce a Firestore Timestamp | ISO string | epoch number → epoch ms. */
 function toMs(value: unknown): number {
@@ -63,18 +67,18 @@ function toMs(value: unknown): number {
 export function useWalletAgents(
   walletAddress: string | null | undefined
 ): State {
-  const [state, setState] = useState<State>({ byName: {}, loaded: false });
-  const presence=useAgentPresence(walletAddress,Object.values(state.byName).filter(a=>!a.shared && a.executionMode !== "artizen-on-demand").map(a=>a.id));
+  const wallet = walletAddress ? normalizeWalletAddress(walletAddress) : null;
+  const [state, setState] = useState<ScopedState>({ ...emptyState, wallet: null });
+  // No previous account's labels or user-uploaded images while reconnecting.
+  const scoped = state.wallet === wallet ? state : emptyState;
+  const presence=useAgentPresence(walletAddress,Object.values(scoped.byName).filter(a=>!a.shared && a.executionMode !== "artizen-on-demand").map(a=>a.id));
 
   useEffect(() => {
-    if (!walletAddress) {
-      setState({ byName: {}, loaded: false });
-      return;
-    }
+    if (!wallet) return;
     const ref = collection(
       firebaseDb(),
       "wallets",
-      normalizeWalletAddress(walletAddress),
+      wallet,
       "agents"
     );
     const unsubscribe = onSnapshot(
@@ -88,6 +92,7 @@ export function useWalletAgents(
           byName[name] = {
             id: d.id,
             name,
+            avatarAppearance: isAgentAppearance(data.avatarAppearance) ? data.avatarAppearance : undefined,
             displayName: data.executionMode === "artizen-on-demand" ? creatorAgentLabel(data.displayName) : typeof data.displayName === "string" ? data.displayName : undefined,
             executionMode: data.executionMode === "artizen-on-demand" ? "artizen-on-demand" : undefined,
             executionState: typeof data.executionState === "string" ? data.executionState : undefined,
@@ -117,11 +122,15 @@ export function useWalletAgents(
         setState((prev) => ({
           // Keep whatever shared agents were merged in below; the snapshot only
           // ever describes the caller's own subtree.
-          byName: { ...prev.byName, ...byName },
+          wallet,
+          byName: {
+            ...Object.fromEntries(Object.entries(prev.wallet === wallet ? prev.byName : {}).filter(([, a]) => a.shared)),
+            ...byName,
+          },
           loaded: true,
         }));
       },
-      () => setState((prev) => ({ ...prev, loaded: true }))
+      () => setState((prev) => ({ ...(prev.wallet === wallet ? prev : emptyState), wallet, loaded: true }))
     );
 
     // Agents shared in through an organization live under their owner's wallet,
@@ -144,7 +153,7 @@ export function useWalletAgents(
         hasShared=shared.length>0;
         if (cancelled) return;
         setState((prev) => {
-          const byName = Object.fromEntries(Object.entries(prev.byName).filter(([,a])=>!a.shared));
+          const byName = Object.fromEntries(Object.entries(prev.wallet === wallet ? prev.byName : {}).filter(([,a])=>!a.shared));
           for (const a of shared) {
             const name = (a.name as string) ?? "";
             if (!name || (byName[name]&&!byName[name].shared)) continue;
@@ -154,6 +163,8 @@ export function useWalletAgents(
               presenceExpiresAt:typeof a.presenceExpiresAt==="number"?a.presenceExpiresAt:undefined,
               presenceUnavailable:a.presenceUnavailable===true,
               name,
+              displayName: typeof a.displayName === "string" ? a.displayName : undefined,
+              avatarAppearance: isAgentAppearance(a.avatarAppearance) ? a.avatarAppearance : undefined,
               status: (a.status as string) ?? "unknown",
               runtime: (a.runtime as string | undefined) ?? undefined,
               hibernationState: undefined,
@@ -175,7 +186,7 @@ export function useWalletAgents(
                   : null,
             };
           }
-          return { byName, loaded: true };
+          return { byName, loaded: true, wallet };
         });
       } catch {
         // A failure here leaves the caller's own agents intact.
@@ -192,9 +203,9 @@ export function useWalletAgents(
       window.clearInterval(sharedTimer);
       unsubscribe();
     };
-  }, [walletAddress]);
+  }, [wallet]);
 
-  return {...state,byName:Object.fromEntries(Object.entries(state.byName).map(([name,a])=>{
+  return {loaded:scoped.loaded,byName:Object.fromEntries(Object.entries(scoped.byName).map(([name,a])=>{
     const live=presence[a.id];
     return [name,live?{...a,...live,lastBridgeSeenMs:toMs(live.lastBridgeSeenAt)}:a];
   }))};

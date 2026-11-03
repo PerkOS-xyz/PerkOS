@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import type { TaskAgentView } from "../lib/perkosApi";
 import { creatorDisplayText } from "../lib/creatorsPresentation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AgentOrb } from "./AgentOrb";
 
 export function taskAgentName(name: string, onDemand: boolean, agent?: TaskAgentView) {
   const label = agent?.displayName?.trim() || (onDemand ? "Hermes" : name);
@@ -21,7 +22,7 @@ export function TaskAgentCard({ name, onDemand, agent }: { name: string; onDeman
   return <Card>
     <CardHeader><CardTitle className="text-base">{es ? "Agente asignado a esta tarea" : "Agent on this task"}</CardTitle></CardHeader>
     <CardContent className="flex min-w-0 items-center gap-3">
-      <div aria-hidden="true" className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-primary/15 text-sm font-medium text-primary">{onDemand ? "H" : label.slice(0, 2).toUpperCase()}</div>
+      <AgentOrb name={name} agent={agent?.id ? { ...agent, id: agent.id } : undefined} size={48} />
       <div className="min-w-0 space-y-1">
         <p className="break-words text-sm font-medium">{label}</p>
         <p className="text-xs text-muted-foreground">{onDemand ? (es ? "Hermes bajo demanda" : "On-demand Hermes") : (agent?.runtime || (es ? "Runtime sin confirmar" : "Runtime unverified"))}</p>

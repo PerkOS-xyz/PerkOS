@@ -13,6 +13,8 @@ import type { CoordinationMessage } from "../lib/useCoordinationLog";
 import { CoordinationRow } from "./CoordinationRow";
 import { Markdown } from "./Markdown";
 import { ToolPill } from "./ToolPill";
+import { AgentOrb } from "./AgentOrb";
+import { useRegisteredAgent } from "./ProjectAgentIdentity";
 
 export type OptimisticMessage = ChatMessage & {
   /** Local-only marker for messages this client just sent. */
@@ -251,6 +253,7 @@ function MessageRow({
     : fromService
       ? "Sparky"
       : message.from.replace(/^(?:user|agent):/, "");
+  const agent = useRegisteredAgent(fromAgent ? label : "");
   const proposal =
     message.event?.domain === "project_workflow" &&
     message.event.type === "plan_proposed" &&
@@ -266,11 +269,13 @@ function MessageRow({
       )}
       data-agent={fromAgent ? label : undefined}
     >
-      <span className="px-1 text-[10px] uppercase tracking-wider text-muted-foreground">
-        {label}
+      <span className="flex min-w-0 items-center gap-1.5 px-1 text-[10px] uppercase tracking-wider text-muted-foreground [overflow-wrap:anywhere]">
+        {fromAgent && <AgentOrb name={label} agent={agent} size={20} />}
+        <span>{agent?.displayName || label}
         {fromAgent ? " · agent" : ""}
         {message.pending ? " · sending…" : ""}
         {!message.pending && message.queued ? " · delivered when the agent wakes" : ""}
+        </span>
       </span>
       <div
         className={cn(

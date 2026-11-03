@@ -92,7 +92,7 @@ export function TaskRetryButton({
           description: result.waitingOnDependency
             ? t("components.taskRetry.toast.afterDependencies")
             : undefined,
-          icon: who ? <AgentOrb name={who} size={18} /> : undefined,
+          icon: who ? <AgentOrb name={result.agent || assignee || who} size={18} /> : undefined,
         },
       );
     },
@@ -150,7 +150,7 @@ export function TaskRetryButton({
         className,
       )}
     >
-      {assignee ? <AgentOrb name={label} size={30} /> : null}
+      {assignee ? <AgentOrb name={assignee} size={30} /> : null}
       {icon}
       <span className="min-w-0 truncate">
         {pending

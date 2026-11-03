@@ -27,6 +27,7 @@ import {
 import { SearchInput, matchesQuery } from "../../components/SearchInput";
 import { EmptyState } from "../../components/EmptyState";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
+import { AgentSignature } from "../../components/AgentSignature";
 import { ProvisionPipeline } from "../../components/ProvisionPipeline";
 import { formatRelativeShort } from "../../lib/format";
 import { agentMatchesOrgFilter, type AgentOrgFilter } from "../../lib/agentOrgFilter";
@@ -479,8 +480,8 @@ function AgentCard({
           checked ? "border-primary/60" : "border-[#1b1833] hover:border-[#530922]"
         }`}
       >
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-3">
             <span
               onClick={(event) => event.stopPropagation()}
               onPointerDown={(event) => event.stopPropagation()}
@@ -495,15 +496,10 @@ function AgentCard({
                 aria-label={t("agents.card.selectAria", { name: agent.executionMode === "artizen-on-demand" ? creatorAgentLabel(agent.displayName) : agent.name })}
               />
             </span>
-            <span className="grid h-9 w-9 place-items-center rounded-full bg-[#ec1b69]/20 text-xs font-medium text-[#ec1b69]">
-              {initials(agent.name)}
-            </span>
-            <div className="flex flex-col">
-              <span className="text-sm text-[#ececff]">{agent.executionMode === "artizen-on-demand" ? creatorAgentLabel(agent.displayName) : agent.displayName ?? agent.name}</span>
-              <span className="text-xs text-[#7975a8]">{agent.runtime}</span>
-            </div>
+            <AgentSignature agent={agent.executionMode === "artizen-on-demand"
+              ? { ...agent, displayName: creatorAgentLabel(agent.displayName) } : agent} origin />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {agent.executionMode !== "artizen-on-demand" && <AgentPowerToggle agent={agent} hibState={hibState} />}
             {agent.shared ? (
               <span
@@ -515,14 +511,6 @@ function AgentCard({
                 {agent.sharedVia
                   ? t("agents.card.sharedVia", { org: agent.sharedVia })
                   : t("agents.card.shared")}
-              </span>
-            ) : null}
-            {agent.external ? (
-              <span
-                className="rounded border border-[#1b1833] px-1.5 py-0.5 text-[10px] uppercase tracking-wide text-[#7975a8]"
-                title={t("agents.card.externalTitle")}
-              >
-                {t("agents.card.external")}
               </span>
             ) : null}
             {agent.executionMode === "artizen-on-demand" ? <ArtizenAgentStatus state={agent.executionState} /> : <StatusBadge
@@ -811,15 +799,6 @@ function ErrorBanner({ message }: { message: string }) {
       {message}
     </div>
   );
-}
-
-function initials(name: string): string {
-  return name
-    .split(/\s+|-/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase())
-    .join("");
 }
 
 function PlusIcon() {

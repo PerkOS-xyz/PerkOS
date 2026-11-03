@@ -3,19 +3,15 @@
 /**
  * AgentOrb — the agent's visual identity everywhere in the product.
  *
- * A role-tinted gradient circle + role glyph + initials: a colleague badge,
- * not a robot (user testing: robot portraits scared non-technical users).
- * Replaces /avatars/*.png, /avatar.png and /agent.svg across all surfaces.
- *
- * Size behavior: <24px solid circle only · ≥24px glyph · ≥40px initials with
- * a glyph sub-badge top-right · big sizes are meant to sit inside the "ID
- * card" layout (see the agent wizard hero).
+ * Registered agents resolve from an immutable ID and owner appearance.
+ * Explicit snapshots still work for templates; name/role is a legacy fallback
+ * for historical actors without an accessible registry record.
  */
 
-import type { AgentAvatarIdentity } from "../lib/agentAvatarIdentity";
-import { deriveAgentAvatarIdentity } from "../lib/agentAvatarIdentity";
+import type { AgentAvatarIdentity, RegisteredAgentAppearance } from "../lib/agentAvatarIdentity";
+import { deriveAgentAvatarIdentity, registeredAgentAvatar } from "../lib/agentAvatarIdentity";
 import { AgentIdentityAvatar, type AgentIdentityState } from "./AgentIdentityAvatar";
-import { useProjectAgentIdentity } from "./ProjectAgentIdentity";
+import { useProjectAgentIdentity, useRegisteredAgent } from "./ProjectAgentIdentity";
 
 export function AgentOrb({
   name,
@@ -25,9 +21,10 @@ export function AgentOrb({
   status,
   identity,
   identitySeed,
+  agent,
   className = "",
 }: {
-  /** Display name — drives initials + fallback hue. */
+  /** Canonical roster name when available; otherwise the legacy seed label. */
   name: string;
   /** Preset id (agentPresets.ts) — fixed hue + glyph when known. */
   presetId?: string | null;
@@ -41,11 +38,16 @@ export function AgentOrb({
   identity?: AgentAvatarIdentity | null;
   /** Stable preview seed used before a project snapshot exists. */
   identitySeed?: string | null;
+  agent?: RegisteredAgentAppearance;
   className?: string;
 }) {
   const projectIdentity = useProjectAgentIdentity(name);
+  const rosterAgent = useRegisteredAgent(name);
+  const registered = agent ?? rosterAgent;
+  const appearance = registered ? registeredAgentAvatar(registered) : undefined;
   const resolved =
     identity ??
+    appearance?.identity ??
     projectIdentity ??
     deriveAgentAvatarIdentity(
       identitySeed || [presetId, role, name].filter(Boolean).join(":") || name,
@@ -54,6 +56,7 @@ export function AgentOrb({
   return (
     <AgentIdentityAvatar
       identity={resolved}
+      photo={identity ? undefined : appearance?.photo}
       size={size}
       state={status as AgentIdentityState | null}
       className={className}

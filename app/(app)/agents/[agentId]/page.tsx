@@ -52,6 +52,7 @@ import {
   getWalletProject,
   getWalletProjects,
   hibernateAgentApi,
+  saveAgentAppearance,
   type Agent,
   type AgentGatewayView,
   type AgentRow,
@@ -66,6 +67,8 @@ import { ProvisionPipeline } from "../../../components/ProvisionPipeline";
 import { entityKey } from "../../../lib/edges";
 import { useActivityFeed, verbPhrase } from "../../../lib/activityEvents";
 import { EditAgentDialog } from "../../../components/EditAgentDialog";
+import { AgentOrb } from "../../../components/AgentOrb";
+import { AgentAppearanceDialog } from "../../../components/AgentAppearanceDialog";
 import { HibernationPanel } from "./HibernationPanel";
 import { InvitedCredentialPanel } from "./InvitedCredentialPanel";
 import { WebhookPanel } from "./WebhookPanel";
@@ -105,15 +108,6 @@ export const agentDetailResponsiveLayout = {
     "flex h-[calc(100svh-18rem)] overflow-hidden md:h-[calc(100dvh-13rem)] xl:h-auto xl:overflow-visible",
   settingsBase: "flex-col gap-6 xl:flex",
 } as const;
-
-function initials(name: string): string {
-  return name
-    .split(/\s+|-/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase())
-    .join("");
-}
 
 function formatDate(value?: string): string {
   if (!value) return "—";
@@ -318,6 +312,7 @@ export default function AgentDetailPage({ params }: PageProps) {
       <AgentChatPanel
         agentId={agent.id}
         agentName={agent.name}
+        appearanceAgent={agent}
         chatEnabled={agent.status === "ready"}
         hibernationEnabled={agent.status === "ready" && !isExternalAgent(agent)}
         externalAgent={isExternalAgent(agent)}
@@ -458,6 +453,7 @@ function AgentHeader({
 }) {
   const { t } = useTranslation();
   const [editOpen, setEditOpen] = useState(false);
+  const [appearanceOpen, setAppearanceOpen] = useState(false);
   const queryClient = useQueryClient();
   const isExternal = isExternalAgent(agent);
   const externalAvailability = isExternal
@@ -518,11 +514,9 @@ function AgentHeader({
 
   return (
     <div className="flex flex-wrap items-start justify-between gap-4">
-      <div className="flex items-start gap-4">
+      <div className="flex min-w-0 items-start gap-4">
         <div className="relative">
-          <div className="grid h-14 w-14 place-items-center rounded-full bg-primary/15 text-base font-medium text-primary">
-            {initials(displayName)}
-          </div>
+          <AgentOrb name={agent.name} agent={agent} size={64} />
           <span
             className={cn(
               "absolute -bottom-0.5 -right-0.5 grid h-3 w-3 place-items-center rounded-full ring-2 ring-background",
@@ -537,10 +531,11 @@ function AgentHeader({
             aria-hidden
           />
         </div>
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-medium leading-tight text-foreground">
+        <div className="flex min-w-0 flex-col gap-1">
+          <h1 className="text-3xl font-medium leading-tight text-foreground [overflow-wrap:anywhere]">
             {displayName}
           </h1>
+          {agent.role && <p className="text-sm text-muted-foreground [overflow-wrap:anywhere]">{agent.role}</p>}
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="outline" className={isExternal ? "border-sky-400/40 text-sky-200" : "border-violet-400/40 text-violet-200"}>
               {isExternal ? t("agentDetail.header.externalAgent") : t("agentDetail.header.perkosInfrastructure")}
@@ -573,7 +568,10 @@ function AgentHeader({
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
+        {walletAddress && !agent.shared && <Button variant="outline" size="sm" onClick={() => setAppearanceOpen(true)}>
+          {t("agentAppearance.edit")}
+        </Button>}
         {isRunning ? (
           <Button
             variant="outline"
@@ -622,6 +620,18 @@ function AgentHeader({
           walletAddress={walletAddress}
         />
       ) : null}
+      {appearanceOpen && walletAddress && !agent.shared && <AgentAppearanceDialog
+        agent={agent}
+        open={appearanceOpen}
+        onOpenChange={setAppearanceOpen}
+        onSave={async (appearance) => {
+          await saveAgentAppearance(agent.id, appearance);
+          queryClient.setQueryData<AgentRow[]>(["wallet-agents", walletAddress], (rows) =>
+            rows?.map((row) => row.id === agent.id ? { ...row, avatarAppearance: appearance } : row));
+          void queryClient.invalidateQueries({ queryKey: ["wallet-agents", walletAddress] });
+          void queryClient.invalidateQueries({ queryKey: ["wallet-project", walletAddress] });
+        }}
+      />}
     </div>
   );
 }

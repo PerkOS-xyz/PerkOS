@@ -35,6 +35,7 @@ export function readingStats(text: string): { words: number; minutes: number } {
 }
 
 export type TaskPeople = {
+  appearanceAgent?: import("../lib/agentAvatarIdentity").RegisteredAgentAppearance;
   agentName: string | null;
   agentLabel: string | null;
   runtime: string | null;
@@ -190,7 +191,7 @@ export function TaskRail({ people, prompt }: { people: TaskPeople; prompt: strin
         <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">Assigned to</p>
         {people.agentName ? (
           <div className="mt-3 flex items-center gap-3">
-            <AgentOrb name={people.agentLabel ?? people.agentName} size={44} />
+            <AgentOrb name={people.agentName} agent={people.appearanceAgent} size={44} />
             <div className="min-w-0">
               <p className="truncate text-sm font-medium text-foreground">{people.agentLabel ?? people.agentName}</p>
               <p className="truncate text-xs text-muted-foreground">{people.runtime ?? "Runtime unverified"}</p>
@@ -250,7 +251,7 @@ export function TaskMobileSummary({
       <div className="-mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
         {people.agentName ? (
           <span className={chip}>
-            <AgentOrb name={people.agentLabel ?? people.agentName} size={22} />
+            <AgentOrb name={people.agentName} agent={people.appearanceAgent} size={22} />
             <span className="max-w-[12rem] truncate">{people.agentLabel ?? people.agentName}</span>
           </span>
         ) : null}

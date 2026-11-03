@@ -715,7 +715,8 @@ export function ProjectTeamPanel({
               <div className="relative shrink-0">
                 {participant.kind === "agent" ? (
                   <AgentOrb
-                    name={participant.label}
+                    name={agentName ?? participant.label}
+                    agent={live}
                     presetId={live?.presetId}
                     role={live?.role}
                     size={40}

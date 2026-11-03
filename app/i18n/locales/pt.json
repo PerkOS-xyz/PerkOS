@@ -1,4 +1,21 @@
 {
+  "agentAppearance": {
+    "perkos": "PerkOS",
+    "edit": "Editar aparência",
+    "viewProfile": "Ver perfil do agente",
+    "title": "Aparência do agente",
+    "description": "Dê a este agente uma aparência reconhecível na equipe, no chat e nas tarefas.",
+    "style": "Estilo do avatar",
+    "default": "Automático · próprio deste agente",
+    "photo": "Sua imagem",
+    "upload": "Escolher uma imagem",
+    "uploadHelp": "PNG, JPEG ou WebP, até 5 MB. Escolha uma imagem que você tenha permissão para usar.",
+    "invalidPhoto": "Não foi possível ler a imagem. Tente outro arquivo PNG, JPEG ou WebP.",
+    "saveError": "Não foi possível salvar a aparência. Tente novamente.",
+    "cancel": "Cancelar",
+    "working": "Processando…",
+    "save": "Salvar aparência"
+  },
   "documentView": {
     "copy": "Copiar",
     "copied": "Copiado",

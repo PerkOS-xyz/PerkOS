@@ -58,14 +58,13 @@ export function SparkyDashboardWorkspace({
             <ul className="flex gap-3 overflow-x-auto pb-1">
               {agents.slice(0, 10).map((agent) => {
                 const live = realtimeAgentStatus(liveAgents[agent.name]);
-                const label = liveAgents[agent.name]?.executionMode === "artizen-on-demand" ? creatorAgentLabel(liveAgents[agent.name].displayName) : agent.name;
+                const label = liveAgents[agent.name]?.executionMode === "artizen-on-demand" ? creatorAgentLabel(liveAgents[agent.name].displayName) : liveAgents[agent.name]?.displayName || agent.name;
                 return (
                   <li key={agent.id} className="flex min-w-[70px] flex-col items-center gap-1 text-center">
                     <Link href={`/agents/${encodeURIComponent(agent.id)}`} aria-label={`${label}: ${live.label}`}>
                       <AgentOrb
                         name={agent.name}
-                        role={agent.name}
-                        identitySeed={`agent:${agent.id || agent.name}`}
+                        agent={liveAgents[agent.name] ?? agent}
                         size={50}
                         status={live.label === STATUS_AVAILABLE ? "available" : "resting"}
                       />
