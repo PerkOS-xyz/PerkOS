@@ -63,6 +63,43 @@ function buildIdentity(seed:string, role?:string|null, salt=0):AgentAvatarIdenti
 }
 
 export function deriveAgentAvatarIdentity(seed:string,role?:string|null):AgentAvatarIdentity{return buildIdentity(seed,role)}
+
+// A compact presentation-only override: a catalog ID or a small local photo.
+// Never render arbitrary remote URLs supplied by an agent or an import.
+export type AgentAppearance = number | string | null;
+export const MAX_AGENT_AVATAR_LENGTH = 24_000;
+export function isAgentAppearance(value: unknown): value is AgentAppearance {
+  return value === null ||
+    (typeof value === "number" && AGENT_AVATAR_ARCHETYPES.some((item) => item.id === value)) ||
+    (typeof value === "string" && value.length <= MAX_AGENT_AVATAR_LENGTH &&
+      /^data:image\/jpeg;base64,\/9j\/[A-Za-z0-9+/]*={0,2}$/.test(value));
+}
+
+export type RegisteredAgentAppearance = {
+  id: string;
+  name: string;
+  displayName?: string;
+  avatarAppearance?: AgentAppearance;
+};
+
+export function registeredAgentAvatar(agent: RegisteredAgentAppearance) {
+  // Only the immutable record ID drives the look. Names, project roles and
+  // connection state can change without changing the teammate's face.
+  const identity = deriveAgentAvatarIdentity(`agent:${agent.id}`, "generalist");
+  const choice = isAgentAppearance(agent.avatarAppearance) ? agent.avatarAppearance : null;
+  const archetype = AGENT_AVATAR_ARCHETYPES.find((item) => item.id === choice);
+  return {
+    identity: archetype ? {
+      ...identity,
+      archetypeId: archetype.id,
+      archetypeSlug: archetype.slug,
+      assetPath: archetype.assetPath,
+      baseHue: archetype.baseHue,
+      visualSignature: [archetype.id, identity.paletteIndex, identity.expressionIndex].join(":"),
+    } : identity,
+    photo: typeof choice === "string" ? choice : undefined,
+  };
+}
 export function allocateAgentAvatarIdentity(input:{seed:string;role?:string|null;existing:readonly Pick<AgentAvatarIdentity,"visualSignature">[]}):AgentAvatarIdentity{
   const occupied=new Set(input.existing.map(x=>x.visualSignature)); for(let salt=0;salt<720;salt+=1){const candidate=buildIdentity(input.seed,input.role,salt);if(!occupied.has(candidate.visualSignature))return{...candidate,seed:input.seed}} return{...buildIdentity(input.seed,input.role,720),seed:input.seed};
 }

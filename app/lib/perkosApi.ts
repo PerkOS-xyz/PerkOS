@@ -40,7 +40,8 @@ import {
 } from "firebase/firestore";
 import { isAllowedAgentHosting } from "@/app/lib/agentHostingPolicy";
 
-import { firebaseDb } from "./firebase";
+import { firebaseAuth, firebaseDb } from "./firebase";
+import { isAgentAppearance, type AgentAppearance } from "./agentAvatarIdentity";
 import { taskConverter } from "./projectTaskConverter";
 import { creatorAgentLabel } from "./creatorsPresentation";
 import { formatAddress } from "./format";
@@ -327,6 +328,8 @@ export type ProjectDetail = {
 };
 
 export type TaskAgentView = {
+  id?: string;
+  avatarAppearance?: AgentAppearance;
   name: string;
   displayName?: string;
   runtime?: string;
@@ -527,6 +530,8 @@ export function isSpeechVoice(value: unknown): value is SpeechVoice {
 }
 
 export type AgentRow = Agent & {
+  avatarAppearance?: AgentAppearance;
+  role?: string;
   executionMode?: "artizen-on-demand";
   executionProjectId?: string;
   executionState?: string;
@@ -600,6 +605,8 @@ const agentConverter: FirestoreDataConverter<AgentRow> = {
     return {
       id: snap.id,
       name: (data.name as string) ?? "",
+      avatarAppearance: isAgentAppearance(data.avatarAppearance) ? data.avatarAppearance : undefined,
+      role: typeof data.role === "string" ? data.role : undefined,
       displayName: data.executionMode === "artizen-on-demand" ? creatorAgentLabel(data.displayName) : (data.displayName as string | undefined) ?? undefined,
       executionMode: data.executionMode === "artizen-on-demand" ? "artizen-on-demand" : undefined,
       executionProjectId: typeof data.executionProjectId === "string" ? data.executionProjectId : undefined,
@@ -1240,6 +1247,8 @@ export async function getWalletProject(input: {
       .filter(isAllowedAgentRow)
       .filter((agent) => assignedNames.has(agent.name))
       .map((agent) => ({
+        id: agent.id,
+        avatarAppearance: agent.avatarAppearance,
         name: agent.name,
         displayName: agent.displayName,
         runtime: agent.runtime,
@@ -2088,6 +2097,17 @@ export async function getWalletAgents(
     shared = [];
   }
   return [...own.map(a=>({...a,...liveOwn[a.id]})), ...shared];
+}
+
+export async function saveAgentAppearance(agentId: string, appearance: AgentAppearance) {
+  const user = firebaseAuth().currentUser;
+  if (!user) throw new Error("Not signed in.");
+  const result = await fetch(`/api/agent-appearance/${encodeURIComponent(agentId)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${await user.getIdToken()}` },
+    body: JSON.stringify({ appearance }),
+  });
+  if (!result.ok) throw new Error("Couldn't update agent appearance.");
 }
 
 export async function updateAgent(input: {

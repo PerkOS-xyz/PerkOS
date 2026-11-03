@@ -262,7 +262,10 @@ export default function ProjectDetailPage({ params }: PageProps) {
   ) : null;
 
   return (
-    <ProjectAgentIdentityProvider names={liveDetail ? uniqueAgents(liveDetail.tasks, liveDetail.project.agentIds ?? []) : []}>
+    <ProjectAgentIdentityProvider
+      names={liveDetail ? uniqueAgents(liveDetail.tasks, liveDetail.project.agentIds ?? []) : []}
+      agents={isShared ? myAgents : ownerAgents}
+    >
     <div className={cn(
       "flex min-w-0 max-w-full flex-col overflow-x-clip",
       tab === "chat" ? "gap-3" : "gap-6",
@@ -1904,7 +1907,7 @@ function AddAgentToProjectDialog({
                   checked={selected.has(a.name)}
                   onCheckedChange={(on) => toggle(a.name, on === true)}
                 />
-                <AgentOrb name={a.name} size={32} />
+                <AgentOrb name={a.name} agent={a} size={32} />
                 <div className="flex flex-col">
                   <span className="text-sm text-[#ececff]">{a.name}</span>
                   <span className="text-xs text-[#7975a8]">

@@ -19,6 +19,8 @@ import { cn } from "@/lib/utils";
 import { updateConversation, type Conversation } from "../lib/conversationsApi";
 import { useChatClientStatus } from "../lib/useChatClient";
 import { ReceiptDialog } from "./ReceiptDialog";
+import { AgentOrb } from "./AgentOrb";
+import type { RegisteredAgentAppearance } from "../lib/agentAvatarIdentity";
 import {
   chatAgentStateLabel,
   type ChatAgentOperationalState,
@@ -28,9 +30,10 @@ type Props = {
   conversation: Conversation;
   walletAddress: string;
   agentState?: ChatAgentOperationalState;
+  agent?: RegisteredAgentAppearance;
 };
 
-export function ConversationHeader({ conversation, walletAddress, agentState }: Props) {
+export function ConversationHeader({ conversation, walletAddress, agentState, agent }: Props) {
   const [renameOpen, setRenameOpen] = useState(false);
   const [receiptOpen, setReceiptOpen] = useState(false);
   const KindIcon = conversation.kind === "channel" ? Hash : MessageSquare;
@@ -43,7 +46,7 @@ export function ConversationHeader({ conversation, walletAddress, agentState }: 
   return (
     <header className="flex items-center justify-between gap-3 border-b border-border bg-background/60 px-4 py-3 backdrop-blur">
       <div className="flex min-w-0 items-center gap-3">
-        <KindIcon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+        {agent ? <AgentOrb name={agent.name} agent={agent} size={32} /> : <KindIcon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />}
         <div className="flex min-w-0 flex-col leading-tight">
           <h1 className="truncate text-sm font-medium text-foreground">
             {conversation.title || "Untitled conversation"}
@@ -54,7 +57,7 @@ export function ConversationHeader({ conversation, walletAddress, agentState }: 
             ) : (
               <span className="inline-flex items-center gap-1">
                 <Bot className="h-3 w-3" />
-                {agents.join(", ")}
+                {agents.map((name) => name === agent?.name ? agent.displayName || name : name).join(", ")}
               </span>
             )}
           </p>

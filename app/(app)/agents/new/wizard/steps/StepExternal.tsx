@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Check, Copy } from "lucide-react";
+import Link from "next/link";
+import { AgentOrb } from "@/app/components/AgentOrb";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -116,6 +118,15 @@ function InviteResult({ result }: { result: InviteAgentResult }) {
   const { t } = useTranslation();
   return (
     <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card px-4 py-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <AgentOrb name={result.agentName} agent={{ id: result.agentId, name: result.agentName }} size={48} />
+          <span className="break-all text-sm font-medium text-foreground">{result.agentName}</span>
+        </div>
+        <Link href={`/agents/${encodeURIComponent(result.agentId)}`} className="text-sm text-primary underline">
+          {t("agentAppearance.viewProfile")}
+        </Link>
+      </div>
       <div className="flex items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
         <Check className="h-4 w-4 text-emerald-300" />
         <span>

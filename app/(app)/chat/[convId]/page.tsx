@@ -16,6 +16,7 @@ import {
   useConversationLiveMessages,
 } from "../../../lib/useChatClient";
 import { ConversationHeader } from "../../../components/ConversationHeader";
+import { RegisteredAgentIdentityProvider } from "../../../components/ProjectAgentIdentity";
 import {
   ConversationMessages,
   type OptimisticMessage,
@@ -164,11 +165,12 @@ export default function ConversationPage() {
   const historyTyped: OptimisticMessage[] = history;
 
   return (
-    <>
+    <RegisteredAgentIdentityProvider agents={liveAgents}>
       <ConversationHeader
         conversation={conversation}
         walletAddress={address}
         agentState={agentState}
+        agent={conversationAgent}
       />
       {agentState !== "online" && (agentState !== "checking" || hostOffline) ? (
         <OfflineBanner
@@ -208,6 +210,6 @@ export default function ConversationPage() {
             : undefined
         }
       />
-    </>
+    </RegisteredAgentIdentityProvider>
   );
 }

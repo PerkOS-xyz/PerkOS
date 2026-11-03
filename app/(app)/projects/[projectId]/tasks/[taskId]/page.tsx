@@ -36,6 +36,7 @@ import {
 } from "../../../../../components/TaskDetailLayout";
 import { TaskAttachmentList } from "../../../../../components/TaskAttachments";
 import { TaskRetryButton } from "../../../../../components/TaskRetryButton";
+import { useWalletAgents } from "../../../../../lib/useWalletAgents";
 
 type PageProps = {
   params: Promise<{ projectId: string; taskId: string }>;
@@ -72,7 +73,9 @@ export default function TaskDetailPage({ params }: PageProps) {
   });
 
   const task = data?.tasks.find((t) => t.id === taskId);
-  const assignedAgent = data?.taskAgents?.find(a => a.name === task?.agent);
+  const { byName } = useWalletAgents(address);
+  const assignedAgent = (task?.agent && Object.hasOwn(byName, task.agent) ? byName[task.agent] : undefined)
+    ?? data?.taskAgents?.find(a => a.name === task?.agent);
   const projectName = data?.project.name;
 
   const deleteMutation = useMutation({
@@ -121,6 +124,7 @@ export default function TaskDetailPage({ params }: PageProps) {
 
   const onDemand = task.executionMode === "artizen-on-demand";
   const people: TaskPeople = {
+    appearanceAgent: assignedAgent?.id ? { ...assignedAgent, id: assignedAgent.id } : undefined,
     agentName: task.agent || null,
     agentLabel: task.agent ? taskAgentName(task.agent, onDemand, assignedAgent) : null,
     runtime: onDemand ? "On-demand Hermes" : assignedAgent?.runtime ?? null,

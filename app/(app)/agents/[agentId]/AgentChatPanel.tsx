@@ -28,11 +28,14 @@ import {
 import { useChatPerkosClient } from "../../../lib/useChatPerkosClient";
 import { getHibernationStatusApi } from "../../../lib/perkosApi";
 import { ConfirmDialog } from "../../../components/ConfirmDialog";
+import { AgentOrb } from "../../../components/AgentOrb";
+import type { RegisteredAgentAppearance } from "../../../lib/agentAvatarIdentity";
 import type { ExternalRuntimeAvailability } from "../../../lib/agentHostingPolicy";
 
 type Props = {
   agentId: string;
   agentName: string;
+  appearanceAgent?: RegisteredAgentAppearance;
   /** Whether this agent is ready for a direct WebSocket conversation. */
   chatEnabled: boolean;
   /** PerkOS-managed ECS agents can hibernate. External agents cannot. */
@@ -93,6 +96,7 @@ export function agentResponseTimeoutMessage(input: {
 export function AgentChatPanel({
   agentId,
   agentName,
+  appearanceAgent,
   chatEnabled,
   hibernationEnabled,
   externalAgent = false,
@@ -353,8 +357,8 @@ export function AgentChatPanel({
         <div className="flex items-start justify-between gap-3">
           <div>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <MessageSquare className="h-4 w-4 text-primary" />
-              {t("agentDetail.chat.withAgent", { name: agentName })}
+              <AgentOrb name={agentName} agent={appearanceAgent} size={28} />
+              {t("agentDetail.chat.withAgent", { name: appearanceAgent?.displayName ?? agentName })}
             </CardTitle>
             <CardDescription>{t("agentDetail.chat.description")}</CardDescription>
           </div>
@@ -392,12 +396,13 @@ export function AgentChatPanel({
                 key={m.id}
                 className={cn(
                   "flex",
-                  m.role === "user" ? "justify-end" : "justify-start",
+                  m.role === "user" ? "justify-end" : "justify-start gap-2",
                 )}
               >
+                {m.role === "agent" && <AgentOrb name={agentName} agent={appearanceAgent} size={24} />}
                 <div
                   className={cn(
-                    "max-w-[92%] rounded-2xl px-4 py-3 text-base leading-7 sm:max-w-[78%]",
+                    "min-w-0 max-w-[85%] rounded-2xl px-4 py-3 text-base leading-7 sm:max-w-[78%]",
                     m.role === "user"
                       ? "bg-primary/15 text-foreground"
                       : "border border-border bg-card text-foreground",

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { AgentIdentityAvatar } from "../app/components/AgentIdentityAvatar";
 import { AgentOrb } from "../app/components/AgentOrb";
+import { ProjectAgentIdentityProvider } from "../app/components/ProjectAgentIdentity";
 import { deriveAgentAvatarIdentity } from "../app/lib/agentAvatarIdentity";
 
 describe("AgentIdentityAvatar", () => {
@@ -35,5 +36,27 @@ describe("AgentIdentityAvatar", () => {
     );
     rerender(<AgentOrb name="Legacy agent" presetId="researcher" size={48} />);
     expect(container.querySelector("[data-avatar-seed]")).toBeInTheDocument();
+  });
+
+  it("keeps the registered ID's look across name, role, status and project changes", () => {
+    const agent = { id: "imported-89", name: "original", avatarAppearance: 8 };
+    const { container, rerender } = render(<AgentOrb name={agent.name} agent={agent} size={48} />);
+    const signature = container.querySelector("[data-avatar-seed]")?.getAttribute("data-avatar-signature");
+    expect(container.querySelector("img")).toHaveAttribute("src", "/agents/avatar-v3/08-operations-specialist.webp");
+    const renamed = { ...agent, name: "renamed", displayName: "Renamed Agent" };
+    rerender(<ProjectAgentIdentityProvider names={[renamed.name, "another"]} agents={{ renamed }}>
+      <AgentOrb name={renamed.name} role="engineer" status="available" size={20} />
+    </ProjectAgentIdentityProvider>);
+    expect(container.querySelector("[data-avatar-seed]")).toHaveAttribute("data-avatar-signature", signature);
+  });
+
+  it("keeps a selected inline photo but falls back if it cannot decode", () => {
+    const photo = "data:image/jpeg;base64,/9j/AA==";
+    const agent = { id: "external-photo", name: "external", avatarAppearance: photo };
+    const { container } = render(<AgentOrb name={agent.name} agent={agent} />);
+    const image = container.querySelector("img")!;
+    expect(image).toHaveAttribute("src", photo);
+    fireEvent.error(image);
+    expect(image.getAttribute("src")).toMatch(/^\/agents\/avatar-v3\//);
   });
 });
