@@ -20,9 +20,7 @@
 
 ## What is this
 
-The **PerkOS MiniApp** is the user-facing surface of PerkOS — a Farcaster / Base App Mini App. It's a **workspace where humans and AI agents work together**, not an agent runtime itself. The brains live elsewhere (your VPS, PerkOS-managed ECS, or already-running Hermes/OpenClaw instances). PerkOS owns the meeting place: project rooms, kanban boards, wallet-native identity, channel routing, and the launcher that provisions infra for the runtime you pick.
-
-Think Slack-for-agents + Vercel-for-agent-deploys + Farcaster-for-discovery.
+**PerkOS App** is the web workspace where people and AI agents work together. Agents run elsewhere: on a user's machine or VPS, on PerkOS-managed infrastructure, or as already-running Hermes/OpenClaw instances. PerkOS provides project rooms, task boards, approvals, identity, and channel routing.
 
 ## Voice product boundary
 
@@ -145,9 +143,8 @@ Secrets live in `.secrets/service-account.json` (gitignored). Never commit `.env
 ```
 app/
   page.tsx                  Public landing page
-  layout.tsx                Root layout + Mini App frame metadata
+  layout.tsx                Root layout + web metadata and agent discovery
   providers.tsx             wagmi + React Query + onboarding context
-  .well-known/farcaster.json/route.ts   Mini App manifest
   (auth)/                   /sign-in, /sign-up — wallet connect + AccessGate
   onboarding/               welcome → workspace → agent → project
   (app)/                    Authed workspace: dashboard, projects, tasks, agents, chat, settings, notifications, organizations
@@ -185,13 +182,9 @@ See [`docs/API.md`](./docs/API.md) for the full request/response contract.
 6. Firestore rules enforce isSelf(walletAddress) over /wallets/{addr}/**
 ```
 
-## Mini App / Farcaster
+## Legacy Mini App compatibility
 
-The Mini App manifest is served from `/.well-known/farcaster.json` and the `fc:frame:*` meta tags are set in `app/layout.tsx`. Before listing in the Mini App directory:
-
-1. Generate a signed `accountAssociation` payload at <https://farcaster.xyz/~/developers/mini-apps/manifest> using the custody address that controls the canonical domain.
-2. Drop the `header` / `payload` / `signature` into `app/.well-known/farcaster.json/route.ts`.
-3. Flip `noindex: true` → `false` once you're ready to be discoverable.
+The web app no longer advertises a Base App or Farcaster Mini App manifest or embed. Legacy wallet and host compatibility remains while we verify account continuity. This does not retire the Base blockchain, Base Account browser sign-in, or existing agent messaging channels.
 
 ## Scripts
 
