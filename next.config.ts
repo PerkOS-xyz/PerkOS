@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 import path from "node:path";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    agentUpgrade: "security",
+  },
   env: {
     // Legacy agent-call UI only. Sparky voice is browser-native and does not
     // depend on this flag or the PerkOS Voice control plane.

@@ -8,7 +8,7 @@ const lock = JSON.parse(readFileSync(new URL("../package-lock.json", import.meta
 };
 const manifest = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 const minimums: Record<string, Record<number, string>> = {
-  next: { 16: "16.4.0" },
+  next: { 16: "16.4.4" },
   "websocket-driver": { 0: "0.7.5" },
   "proxy-addr": { 2: "2.0.8" },
   sharp: { 0: "0.35.5" },
@@ -37,7 +37,7 @@ describe("production dependency security floors", () => {
   });
 
   it("checks every production copy, including nested pins", () => {
-    expect(lock.packages["node_modules/next"].version).toBe("16.4.0");
+    expect(lock.packages["node_modules/next"].version).toBe("16.4.4");
     for (const [path, entry] of Object.entries(lock.packages)) {
       if (entry.dev || !entry.version) continue;
       const name = path.split("node_modules/").at(-1)!;
