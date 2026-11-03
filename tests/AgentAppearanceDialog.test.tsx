@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import userEvent from "@testing-library/user-event";
 import { AgentAppearanceDialog } from "../app/components/AgentAppearanceDialog";
 
 vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
@@ -17,7 +18,9 @@ describe("agent appearance editor", () => {
     const onSave = vi.fn().mockRejectedValue(new Error("offline"));
     const onOpenChange = vi.fn();
     const { baseElement } = render(<AgentAppearanceDialog agent={agent} open onOpenChange={onOpenChange} onSave={onSave} />);
-    fireEvent.change(screen.getByLabelText("agentAppearance.style"), { target: { value: "8" } });
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("combobox", { name: "agentAppearance.style" }));
+    await user.click(screen.getByRole("option", { name: "Operations Specialist" }));
     expect(baseElement.querySelector("[data-avatar-archetype]")).toHaveAttribute("data-avatar-archetype", "8");
     fireEvent.click(screen.getByRole("button", { name: "agentAppearance.save" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("agentAppearance.saveError");
