@@ -105,18 +105,12 @@ export async function POST(request: Request, { params }: RouteContext) {
   const existing = project.data.site as SiteRecord | undefined;
 
   if (action === "publish") {
-    if (!existing?.externalId) return NextResponse.json({ error: "Create a draft before publishing." }, { status: 409 });
-    const response = await serviceFetch(`/api/integrations/perkos/stores/${encodeURIComponent(existing.externalId)}`, {
-      method: "POST",
-      body: JSON.stringify({ action: "publish" }),
-    });
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok) return NextResponse.json({ error: errorMessage(result, "Could not publish site.") }, { status: response.status });
-    const site = { ...(result.store as SiteRecord), updatedAt: new Date().toISOString() };
-    await project.ref.set({ site, updatedAt: new Date().toISOString() }, { merge: true });
-    return NextResponse.json({ site });
+    // The store-owner flow enforces publication eligibility and billing.
+    // A project editor must never publish using the integration credential.
+    return NextResponse.json({ error: "Review and publish this site in AgentWired." }, { status: 409 });
   }
 
+  if (action !== "create") return NextResponse.json({ error: "Unsupported site action." }, { status: 400 });
   if (existing?.externalId) return NextResponse.json({ error: "This project already has a site." }, { status: 409 });
   const name = String(body.name ?? project.data.name ?? "Untitled site").trim().slice(0, 200);
   const rawItems = Array.isArray(body.items) ? body.items : [];
@@ -137,6 +131,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       styleId: typeof body.styleId === "string" ? body.styleId : undefined,
       items: rawItems,
       paymentMethods: [],
+      checkoutMode: "test",
       publish: false,
     }),
   });

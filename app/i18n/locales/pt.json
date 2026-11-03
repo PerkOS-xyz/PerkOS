@@ -1907,6 +1907,8 @@
       "chooseLeadAria": "Escolher o lead"
     },
     "tasksTab": {
+      "attention": "Requer atenção",
+      "attentionState": { "review": "Em revisão", "blocked": "Bloqueada", "retrying": "Tentando novamente" },
       "createTask": "Criar tarefa",
       "emptyMessage": "Arraste uma tarefa aqui ou crie uma.",
       "bulk": {

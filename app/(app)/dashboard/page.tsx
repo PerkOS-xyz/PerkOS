@@ -40,7 +40,8 @@ import { useOnboarding } from "../../lib/onboardingState";
 import { useActiveOrg } from "../../lib/useActiveOrg";
 import { orgDisplayName } from "../../lib/orgDisplayName";
 import { formatRelativeShort } from "../../lib/format";
-import { pendingPlanProposals, useActivityFeed } from "../../lib/activityEvents";
+import { useActivityFeed } from "../../lib/activityEvents";
+import { pendingProjectPlans, taskDetailHref } from "../../lib/projectActionItems";
 import {
   realtimeAgentStatus,
   useWalletAgents,
@@ -106,6 +107,7 @@ export default function DashboardPage() {
       }),
     enabled: Boolean(address) && Boolean(activeOrg),
     staleTime: 30_000,
+    refetchInterval: 30_000,
   });
   const orgProjects = orgProjectsQuery.data ?? [];
 
@@ -127,7 +129,10 @@ export default function DashboardPage() {
   const failedAgents = allAgents.filter((a) =>
     ["failed", "provision-failed", "error"].includes(String(a.status)),
   );
-  const reviewTasks = allTasks.filter((task) => task.status === "Review");
+  const orgProjectIds = new Set(activeOrg?.shared ? [] : orgProjects.map((project) => project.id));
+  const reviewTasks = allTasks.filter((task) =>
+    task.id && task.status === "Review" && orgProjectIds.has(task.projectId),
+  );
   // Anchor "now" to the latest event so the derivation stays pure in render;
   // event timestamps are server-stamped, so the newest one ≈ now.
   const newestTs = events.length > 0 ? events[0].tsMs : 0;
@@ -137,36 +142,28 @@ export default function DashboardPage() {
       (e.verb === "completed_task" || e.verb === "goal_done") && e.tsMs >= weekAgo,
   ).length;
 
-  // Plans proposed recently and not yet approved (resolved via later events).
-  const proposedPlans = pendingPlanProposals(events, weekAgo);
-  const planProjects = [...new Set(proposedPlans.map((e) => e.projectId))].filter(
-    (pid): pid is string => Boolean(pid),
-  );
+  const proposedPlans = pendingProjectPlans(orgProjects, activeOrg?.role !== "viewer");
 
   const waitingItems: WaitingItem[] = [
-    ...planProjects.map((pid): WaitingItem => {
-      const ev = proposedPlans.find((e) => e.projectId === pid);
+    ...proposedPlans.map((project): WaitingItem => {
+      const owner = project.ownerWallet ? `&owner=${encodeURIComponent(project.ownerWallet)}` : "";
       return {
-        key: `plan-${pid}`,
+        key: `plan-${project.id}`,
         kind: "plan",
-        label: ev?.object
-          ? t("dashboard.waiting.planLabelWithObject", { object: ev.object })
-          : t("dashboard.waiting.planLabel"),
-        hint: ev?.actor
-          ? t("dashboard.waiting.proposedBy", { actor: ev.actor.replace(/^agent:/, "") })
-          : undefined,
-        href: `/projects/${encodeURIComponent(pid)}?tab=docs`,
+        label: t("dashboard.waiting.planLabelWithObject", { object: project.name }),
+        hint: project.pmAgent ? t("dashboard.waiting.proposedBy", { actor: project.pmAgent }) : undefined,
+        href: `/projects/${encodeURIComponent(project.id!)}?tab=docs${owner}`,
       };
     }),
     ...reviewTasks.slice(0, 4).map(
       (task): WaitingItem => ({
-        key: `review-${task.id}`,
+        key: `review-${task.projectId}-${task.id}`,
         kind: "review",
         label: task.name,
         hint: t("dashboard.waiting.inReview", {
           agent: task.agent || t("dashboard.waiting.unassigned"),
         }),
-        href: "/tasks?status=active",
+        href: taskDetailHref(task.projectId, task.id!, address),
       }),
     ),
     ...failedAgents.map(

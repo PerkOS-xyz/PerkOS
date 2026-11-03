@@ -163,8 +163,9 @@ export function ProjectChatTab({
   const approve = useMutation({
     mutationFn: (planId: string) => approvePlan({ projectId, docId: planId, owner }),
     onSuccess: ({ created }) => {
-      toast.success(`Plan approved · ${created} task${created === 1 ? "" : "s"} started`);
+      toast.success(`Plan approved · ${created} task${created === 1 ? "" : "s"} created`);
       void queryClient.invalidateQueries({ queryKey: ["wallet-project", ownerWallet ?? address, projectId] });
+      void queryClient.invalidateQueries({ queryKey: ["dash-org-projects"] });
     },
     onError: (error: Error) => toast.error("Couldn't approve the plan", { description: error.message }),
   });

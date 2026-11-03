@@ -786,7 +786,7 @@ export type OverviewStats = {
 export type Overview = {
   stats: OverviewStats;
   projects: Project[];
-  tasks: Task[];
+  tasks: (Task & { projectId: string })[];
   agents: Agent[];
 };
 
@@ -816,7 +816,7 @@ export async function getWalletOverview(
       .filter((p): p is Project & { id: string } => Boolean(p.id))
       .map(async (p) => {
         const snap = await getDocs(tasksCol(walletAddress, p.id));
-        return snap.docs.map((d) => d.data());
+        return snap.docs.map((d) => ({ ...d.data(), projectId: p.id }));
       })
   );
   const tasks = taskBundles.flat();

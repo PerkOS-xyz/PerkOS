@@ -79,6 +79,7 @@ import { useActiveOrg } from "../../../lib/useActiveOrg";
 import { useProjectExecutionEvents } from "../../../lib/useProjectExecutionEvents";
 import { ProjectAgentIdentityProvider } from "../../../components/ProjectAgentIdentity";
 import { ProjectSitePanel } from "../../../components/ProjectSitePanel";
+import { projectTaskAttention, taskDetailHref } from "../../../lib/projectActionItems";
 
 const ProjectMeetingsTab = dynamic(() => import("../../../components/ProjectMeetingsTab"), {
   ssr: false,
@@ -1149,6 +1150,7 @@ function TasksTab({
 
   const visibleIds = kanbanItems.map((i) => i.id);
   const selectedIds = visibleIds.filter((id) => selected.has(id));
+  const attention = projectTaskAttention(tasks);
 
   const toggle = (id: string, on: boolean) =>
     setSelected((prev) => {
@@ -1255,6 +1257,22 @@ function TasksTab({
 
   return (
     <div className="flex flex-col gap-3">
+      {attention.length > 0 && (
+        <section aria-label={t("projectRoom.tasksTab.attention")} className="overflow-hidden rounded-xl border border-amber-500/30 bg-card">
+          <h3 className="border-b border-border px-3 py-2 text-sm font-semibold">{t("projectRoom.tasksTab.attention")} · {attention.length}</h3>
+          <ul className="max-h-44 divide-y divide-border overflow-y-auto">
+            {attention.map(({ task, kind }) => (
+              <li key={task.id}>
+                <Link href={taskDetailHref(projectId, task.id!, ownerWallet)} className="flex min-h-11 min-w-0 items-center gap-2 px-3 py-2 text-sm hover:bg-muted">
+                  <span className="min-w-0 flex-1 truncate">{task.name}</span>
+                  <span className="text-xs text-amber-300">{t(`projectRoom.tasksTab.attentionState.${kind}`)}</span>
+                  <ArrowRight aria-hidden="true" className="h-4 w-4 shrink-0" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       {selectedIds.length > 0 ? (
         <div className="flex flex-wrap items-center gap-2 rounded-md border border-primary/30 bg-card/60 px-3 py-2">
           <span className="text-xs font-medium text-foreground">
