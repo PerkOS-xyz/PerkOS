@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
@@ -22,21 +22,25 @@ describe("discovery documents", () => {
   });
 
   it("never changes routing, with .well-known excluded", () => {
-    // Farcaster and Base App fetch /.well-known/farcaster.json to verify the
-    // Mini App; altering its routing would break embedding. Markdown
-    // negotiation answers inline for exactly this reason rather than
-    // rewriting to a mirror path.
+    // Well-known agent discovery routes must remain independently reachable.
     expect(middlewareSource).toContain(".well-known");
     expect(middlewareSource).not.toContain("NextResponse.redirect");
     expect(middlewareSource).not.toContain("NextResponse.rewrite");
   });
 
   it("serves markdown only when it is actually asked for", () => {
-    // A browser and a Farcaster client never send this Accept, so neither can
-    // be handed markdown by accident.
+    // A normal browser request must never be handed markdown by accident.
     expect(middlewareSource).toContain("text/markdown");
     expect(middlewareSource).toContain("accept");
     // `Vary` so a cache cannot serve the markdown to an HTML request.
     expect(middlewareSource).toContain("vary");
+  });
+
+  it("does not advertise a Mini App and keeps ordinary web sharing and agent discovery", () => {
+    const layout = readFileSync(join(process.cwd(), "app/layout.tsx"), "utf8");
+    expect(layout).not.toMatch(/["'](?:fc:(?:frame|miniapp)|base:app_id)["']/);
+    expect(layout).toContain("openGraph:");
+    expect(layout).toContain("/.well-known/ai-catalog.json");
+    expect(existsSync(join(process.cwd(), "app/.well-known/farcaster.json/route.ts"))).toBe(false);
   });
 });
