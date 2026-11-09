@@ -2,8 +2,12 @@
 
 import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { motion, useReducedMotion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AGENT_AVATAR_ARCHETYPES, isAgentAppearance, type AgentAppearance, type RegisteredAgentAppearance } from "../lib/agentAvatarIdentity";
 import { AgentOrb } from "./AgentOrb";
 
@@ -36,6 +40,7 @@ export function AgentAppearanceDialog({ agent, open, onOpenChange, onSave }: {
   onSave: (appearance: AgentAppearance) => Promise<void>;
 }) {
   const { t } = useTranslation();
+  const reduceMotion = useReducedMotion();
   const id = useId();
   const [draft, setDraft] = useState<AgentAppearance>(agent.avatarAppearance ?? null);
   const [busy, setBusy] = useState(false);
@@ -49,32 +54,51 @@ export function AgentAppearanceDialog({ agent, open, onOpenChange, onSave }: {
           <DialogDescription>{t("agentAppearance.description")}</DialogDescription>
         </DialogHeader>
         <div className="flex items-center gap-4 rounded-xl border border-border bg-muted/30 p-3">
-          <AgentOrb name={agent.name} agent={{ ...agent, avatarAppearance: draft }} size={64} />
+          <motion.div
+            key={draft ?? "automatic"}
+            className="shrink-0"
+            initial={reduceMotion ? false : { opacity: 0.65, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: reduceMotion ? 0 : 0.18, ease: "easeOut" }}
+          >
+            <AgentOrb name={agent.name} agent={{ ...agent, avatarAppearance: draft }} size={64} />
+          </motion.div>
           <p className="min-w-0 break-words font-medium [overflow-wrap:anywhere]">{agent.displayName || agent.name}</p>
         </div>
         <div className="space-y-2">
-          <label htmlFor={id} className="text-sm font-medium">{t("agentAppearance.style")}</label>
-          <select
-            id={id}
-            className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-ring"
+          <Label htmlFor={id}>{t("agentAppearance.style")}</Label>
+          <Select
             disabled={busy}
-            value={typeof draft === "string" ? "photo" : String(draft ?? "")}
-            onChange={(event) => { setDraft(event.target.value ? Number(event.target.value) : null); setError(""); }}
+            value={typeof draft === "string" ? "photo" : String(draft ?? "automatic")}
+            onValueChange={(value) => {
+              if (!value || value === "photo") return;
+              setDraft(value === "automatic" ? null : Number(value));
+              setError("");
+            }}
           >
-            <option value="">{t("agentAppearance.default")}</option>
-            {typeof draft === "string" && <option value="photo">{t("agentAppearance.photo")}</option>}
-            {AGENT_AVATAR_ARCHETYPES.map((item) => <option key={item.id} value={item.id}>#{item.id} · {item.label}</option>)}
-          </select>
+            <SelectTrigger id={id} className="h-10 w-full">
+              <SelectValue>
+                {typeof draft === "string" ? t("agentAppearance.photo") : draft === null
+                  ? t("agentAppearance.default")
+                  : AGENT_AVATAR_ARCHETYPES.find((item) => item.id === draft)?.label}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent alignItemWithTrigger={false} className="max-h-56 motion-reduce:animate-none">
+              <SelectItem value="automatic">{t("agentAppearance.default")}</SelectItem>
+              {typeof draft === "string" && <SelectItem value="photo">{t("agentAppearance.photo")}</SelectItem>}
+              {AGENT_AVATAR_ARCHETYPES.map((item) => <SelectItem key={item.id} value={String(item.id)}>{item.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-1.5">
-          <label htmlFor={`${id}-upload`} className="text-sm font-medium">{t("agentAppearance.upload")}</label>
-          <input
+          <Label htmlFor={`${id}-upload`}>{t("agentAppearance.upload")}</Label>
+          <Input
             id={`${id}-upload`}
             type="file"
             accept={RASTER_TYPES.join(",")}
             aria-describedby={`${id}-help`}
             disabled={busy}
-            className="block w-full min-w-0 text-xs text-muted-foreground file:mr-2 file:rounded-md file:border file:border-border file:bg-muted file:px-2 file:py-2 file:text-foreground"
+            className="block h-auto min-h-10 text-xs text-muted-foreground file:mr-2 file:cursor-pointer file:rounded-md file:bg-muted file:px-2"
             onChange={async (event) => {
               const file = event.target.files?.[0];
               event.target.value = "";
