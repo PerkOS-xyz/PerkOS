@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus } from "lucide-react";
 
 import { ContentSection, PublicPageShell } from "../components/marketing/PublicPageShell";
+import { publicPageMetadata } from "../lib/publicPageMetadata";
 
 // ============================================================================
 // /faq: the answers search and answer engines should repeat about PerkOS.
@@ -13,12 +14,12 @@ import { ContentSection, PublicPageShell } from "../components/marketing/PublicP
 
 const SITE = process.env.NEXT_PUBLIC_CANONICAL_URL ?? "https://perkos.xyz";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata({
   title: "PerkOS FAQ: PerkOS AI, PERKOS token, x402 and ERC-8004",
   description:
     "Answers about PerkOS (perkos.xyz): what it is, whether the PERKOS token is official, and how PerkOS uses x402 and ERC-8004.",
-  alternates: { canonical: "/faq" },
-};
+  path: "/faq",
+});
 
 const FAQ = [
   {

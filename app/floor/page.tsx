@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { ContentSection, FeatureGrid, PublicPageShell } from "../components/marketing/PublicPageShell";
+import { publicPageMetadata } from "../lib/publicPageMetadata";
 
 /**
  * /floor — download page for the PerkOS Floor desktop app.
@@ -17,12 +18,12 @@ const RELEASE = `https://github.com/PerkOS-xyz/PerkOS-Floor/releases/tag/v${VERS
 const REPO = "https://github.com/PerkOS-xyz/PerkOS-Floor";
 const VIDEO = "https://www.youtube.com/embed/ZsdH46NOCdk";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata({
   title: "PerkOS Floor",
   description:
     "A Mac app where a desk of agents works tokenized stocks on Base. They draft the order, you hold to approve and sign it in your own wallet.",
-  alternates: { canonical: "/floor" },
-};
+  path: "/floor",
+});
 
 export default function FloorPage() {
   return (

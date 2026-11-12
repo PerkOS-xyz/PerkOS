@@ -3,13 +3,14 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import { ContentSection, FeatureGrid, PublicPageShell } from "../components/marketing/PublicPageShell";
+import { publicPageMetadata } from "../lib/publicPageMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata({
   title: "AI Solutions for Small Business",
   description:
     "Explore PerkOS AI teams for restaurants, real estate, ecommerce and agencies. Start with a practical workflow and keep every result under your approval.",
-  alternates: { canonical: "/solutions" },
-};
+  path: "/solutions",
+});
 
 const SOLUTIONS = [
   {

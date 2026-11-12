@@ -8,6 +8,7 @@ import {
   PERKOS_CONTRACTS,
   PERKOS_TOKEN_SUMMARY,
 } from "../lib/perkosToken";
+import { publicPageMetadata } from "../lib/publicPageMetadata";
 
 // ============================================================================
 // /token: the one page that says which PERKOS contracts are ours.
@@ -22,12 +23,12 @@ import {
 
 const SITE = process.env.NEXT_PUBLIC_CANONICAL_URL ?? "https://perkos.xyz";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata({
   title: "PERKOS token: official contracts",
   description:
     "The official PERKOS token contracts on Base, Robinhood Chain, Solana and Celo, how to verify them, and what PERKOS is for in PerkOS.",
-  alternates: { canonical: "/token" },
-};
+  path: "/token",
+});
 
 export default function TokenPage() {
   const jsonLd = {

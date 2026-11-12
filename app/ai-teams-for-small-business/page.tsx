@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 
 import { ContentSection, FeatureGrid, PublicPageShell } from "../components/marketing/PublicPageShell";
+import { publicPageMetadata } from "../lib/publicPageMetadata";
 
 const SITE = "https://perkos.xyz";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata({
   title: "AI Teams for Small Business",
-  description: "See how an AI team can help a small business with marketing, research, customer support and operations while you approve every action.",
-  alternates: { canonical: "/ai-teams-for-small-business" },
-};
+  description:
+    "See how an AI team can help a small business with marketing, research, customer support and operations while you approve every action.",
+  path: "/ai-teams-for-small-business",
+});
 
 const FAQ = [
   { q: "What is an AI team for a small business?", a: "It is a coordinated group of specialized AI assistants. One plans the work while others draft marketing, research, customer replies or operational documents." },

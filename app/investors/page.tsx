@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { PERKOS_TOKEN_SUMMARY } from "../lib/perkosToken";
+import { publicPageMetadata } from "../lib/publicPageMetadata";
 
 // ============================================================================
 // /investors: the market PerkOS serves, and the PERKOS token for the people who
@@ -24,11 +25,12 @@ import { PERKOS_TOKEN_SUMMARY } from "../lib/perkosToken";
 // which is true only for Base).
 // ============================================================================
 
-export const metadata: Metadata = {
-  title: "Investors and the PERKOS token | PerkOS",
+export const metadata: Metadata = publicPageMetadata({
+  title: "Investors and the PERKOS token",
   description:
     "The small-business market PerkOS serves, and the PERKOS community token: where it was launched and why PerkOS does not require it.",
-};
+  path: "/investors",
+});
 
 // Planned utility is labelled as planned. None of the token mechanics below
 // are built yet: the credits contract has no operators wired and the claim
