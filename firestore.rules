@@ -61,10 +61,14 @@ service cloud.firestore {
     function projectOrgId(w, pid) {
       return get(/databases/$(database)/documents/wallets/$(w)/projects/$(pid)).data.orgId;
     }
-    // Editors/owners (by project role OR org role) may write the project subtree.
+    // Editors, co-owners and owners (by project role OR org role) may write
+    // the project subtree. A co-owner ('coowner') is an invited wallet with
+    // more than an editor; what it adds (managing people, settings) goes
+    // through the server, so here it writes exactly what an editor writes.
+    // Any other role, known or not, reads and does not write.
     function canWriteProject(w, pid) {
-      return (isProjectMember(w, pid) && projectMemberRole(w, pid) in ['owner', 'editor'])
-        || (isOrgMember(w, projectOrgId(w, pid)) && orgMemberRole(w, projectOrgId(w, pid)) in ['owner', 'editor']);
+      return (isProjectMember(w, pid) && projectMemberRole(w, pid) in ['owner', 'coowner', 'editor'])
+        || (isOrgMember(w, projectOrgId(w, pid)) && orgMemberRole(w, projectOrgId(w, pid)) in ['owner', 'coowner', 'editor']);
     }
 
     // Alpha-access allowlist --------------------------------------------

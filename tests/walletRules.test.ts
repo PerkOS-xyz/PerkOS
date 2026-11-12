@@ -145,6 +145,39 @@ describe.skipIf(!process.env.FIRESTORE_EMULATOR_HOST)("wallet Firestore rule iso
     await assertFails(getDoc(doc(viewer, `${project}/tasks/task`)));
   });
 
+  it("lets a co-owner write what an editor writes, from the project or its organization, and nothing more", async () => {
+    const member = `${project}/members/${evm}`;
+    const orgMember = `${org}/members/${evm}`;
+    const db = env.authenticatedContext(evm).firestore();
+    await env.withSecurityRulesDisabled(context => setDoc(doc(context.firestore(), member), { role: "coowner", status: "active" }));
+    await assertSucceeds(updateDoc(doc(db, project), { name: "Co-owner fixture" }));
+    await assertSucceeds(updateDoc(doc(db, `${project}/tasks/task`), { value: "co-owner task" }));
+    await assertSucceeds(updateDoc(doc(db, `${project}/docs/note/blocks/block`), { value: "co-owner note" }));
+    // The roster, the organization and the owner's own data stay out of a client's reach.
+    await assertFails(updateDoc(doc(db, project), { orgId: "other-org" }));
+    await assertFails(setDoc(doc(db, `${project}/members/${variant}`), { role: "coowner", status: "active" }));
+    await assertFails(updateDoc(doc(db, member), { role: "owner" }));
+    await assertFails(updateDoc(doc(db, org), { name: "Renamed by a co-owner" }));
+    await assertFails(updateDoc(doc(db, `${project}/agentMembers/fixture`), { value: "edited" }));
+    await assertFails(getDoc(doc(db, `wallets/${owner}/profile/main`)));
+    // A co-owner who was taken out writes nothing.
+    await env.withSecurityRulesDisabled(context => setDoc(doc(context.firestore(), member), { role: "coowner", status: "removed" }));
+    await assertFails(updateDoc(doc(db, `${project}/tasks/task`), { value: "removed co-owner" }));
+    await env.withSecurityRulesDisabled(context => deleteDoc(doc(context.firestore(), member)));
+
+    // The role of the organization reaches its projects.
+    await env.withSecurityRulesDisabled(context => setDoc(doc(context.firestore(), orgMember), { role: "coowner", status: "active" }));
+    await assertSucceeds(updateDoc(doc(db, `${project}/tasks/task`), { value: "organization co-owner task" }));
+    await assertFails(updateDoc(doc(db, org), { name: "Renamed by a co-owner" }));
+    await env.withSecurityRulesDisabled(context => deleteDoc(doc(context.firestore(), orgMember)));
+
+    // A role the rules do not know reads and does not write.
+    await env.withSecurityRulesDisabled(context => setDoc(doc(context.firestore(), member), { role: "admin", status: "active" }));
+    await assertSucceeds(getDoc(doc(db, `${project}/tasks/task`)));
+    await assertFails(updateDoc(doc(db, `${project}/tasks/task`), { value: "unknown role" }));
+    await env.withSecurityRulesDisabled(context => deleteDoc(doc(context.firestore(), member)));
+  });
+
   it("keeps allowlist, global agents and provisioning state server-owned", async () => {
     const db = env.authenticatedContext(owner).firestore();
     await assertSucceeds(getDoc(doc(db, `allowlist/${owner}`)));
