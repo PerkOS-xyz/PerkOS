@@ -85,6 +85,9 @@ export type AckListener = (ack: {
   timestamp: string;
 }) => void;
 
+/** The server did not accept a message: nobody received it. */
+export type RefusalListener = (refusal: { id: string; code: string; message: string }) => void;
+
 const DEFAULT_URL = "wss://chat.perkos.xyz/chat";
 const MIN_RECONNECT_MS = 1_000;
 const MAX_RECONNECT_MS = 30_000;
@@ -124,6 +127,8 @@ export class ChatClient {
   private messageListeners = new Map<string, Set<MessageListener>>();
   /** sender-side ack listener for a specific outbound message id. */
   private ackListeners = new Map<string, AckListener>();
+  /** sender-side listener for the server refusing a specific outbound message id. */
+  private refusalListeners = new Map<string, RefusalListener>();
   private pendingHistory = new Map<string, PendingHistory>();
   private pendingReceipts = new Map<string, PendingReceipt>();
   private reconnectMs = MIN_RECONNECT_MS;
@@ -182,6 +187,7 @@ export class ChatClient {
     }
     this.pendingReceipts.clear();
     this.ackListeners.clear();
+    this.refusalListeners.clear();
   }
 
   /** Subscribe to status changes; returns an unsubscriber. */
@@ -211,6 +217,8 @@ export class ChatClient {
    * back as a `chat_message` event with the same id.
    *
    * Optional `onAck` is invoked once when the server confirms routing.
+   * Optional `onRefused` is invoked once if the server refuses the message
+   * instead (for example a Read only member writing in a project chat).
    */
   send(input: {
     convId: string;
@@ -218,9 +226,11 @@ export class ChatClient {
     targets?: ChatIdentity[];
     event?: ChatDomainEvent;
     onAck?: AckListener;
+    onRefused?: RefusalListener;
   }): string {
     const id = makeId();
     if (input.onAck) this.ackListeners.set(id, input.onAck);
+    if (input.onRefused) this.refusalListeners.set(id, input.onRefused);
     this.sendFrame({
       type: "send",
       id,
@@ -370,6 +380,7 @@ export class ChatClient {
     if (type === "ack") {
       const id = String(frame.id);
       const fn = this.ackListeners.get(id);
+      this.refusalListeners.delete(id);
       if (fn) {
         this.ackListeners.delete(id);
         fn({
@@ -436,6 +447,13 @@ export class ChatClient {
         this.pendingReceipts.delete(id);
         clearTimeout(pending.timer);
         pending.reject(new Error(`${code}: ${message}`));
+      }
+      // A refused message: tell its sender, who is still showing it as sent.
+      const refused = id ? this.refusalListeners.get(id) : undefined;
+      if (refused) {
+        this.refusalListeners.delete(id);
+        this.ackListeners.delete(id);
+        refused({ id, code, message });
       }
       if (code === "HOST_OFFLINE" || code === "NOT_FOUND") {
         this.setStatus(this.status, `${code}: ${message}`);

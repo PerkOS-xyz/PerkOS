@@ -246,6 +246,44 @@ describe("ChatClient message routing", () => {
     client.stop();
   });
 
+  it("tells the sender when the server refuses a message, and only once", async () => {
+    const client = new ChatClient({
+      url: "ws://test/chat",
+      getToken: async () => "token-xyz",
+    });
+    client.start();
+    await new Promise((r) => setTimeout(r, 0));
+    activeFake!.push({ type: "auth_ok", session: { walletAddress: "0xabc" } });
+
+    const refusals: Array<{ id: string; code: string; message: string }> = [];
+    const acks: string[] = [];
+    const refusedId = client.send({
+      convId: "project-1",
+      text: "Please start",
+      onAck: (ack) => acks.push(ack.id),
+      onRefused: (refusal) => refusals.push(refusal),
+    });
+    // An error that names no message is not about this one.
+    activeFake!.push({ type: "error", code: "RATE_LIMIT", message: "slow down" });
+    expect(refusals).toEqual([]);
+
+    const refusal = { type: "error", id: refusedId, code: "READ_ONLY", message: "You have read-only access here." };
+    activeFake!.push(refusal);
+    activeFake!.push(refusal);
+    // A late ack for a refused message is not a delivery.
+    activeFake!.push({ type: "ack", id: refusedId, convId: "project-1", delivered: 1, queued: 0, timestamp: "2026-11-12T12:00:00Z" });
+    expect(refusals).toEqual([{ id: refusedId, code: "READ_ONLY", message: "You have read-only access here." }]);
+    expect(acks).toEqual([]);
+
+    // A message that was accepted is never reported as refused afterwards.
+    const acceptedId = client.send({ convId: "project-1", text: "Thanks", onAck: (ack) => acks.push(ack.id), onRefused: (r) => refusals.push(r) });
+    activeFake!.push({ type: "ack", id: acceptedId, convId: "project-1", delivered: 1, queued: 0, timestamp: "2026-11-12T12:00:01Z" });
+    activeFake!.push({ type: "error", id: acceptedId, code: "READ_ONLY", message: "late" });
+    expect(acks).toEqual([acceptedId]);
+    expect(refusals).toHaveLength(1);
+    client.stop();
+  });
+
   it("delivers chat_message frames to the registered conv listener", async () => {
     const client = new ChatClient({
       url: "ws://test/chat",

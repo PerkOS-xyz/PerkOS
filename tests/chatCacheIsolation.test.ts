@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { IDBFactory, IDBKeyRange } from "fake-indexeddb";
-import { clearConv, getMessages, putMessages, type CachedMessage } from "../app/lib/chatCache";
+import { clearConv, getMessages, putMessages, removeMessage, type CachedMessage } from "../app/lib/chatCache";
 
 const A = "So11111111111111111111111111111111111111112";
 const B = "so11111111111111111111111111111111111111112";
@@ -51,6 +51,17 @@ describe("scoped IndexedDB chat cache", () => {
     await putMessages(A, "conv", [message("id", "confirmed")]);
     expect((await getMessages(A, "conv")).messages.map(m => m.text)).toEqual(["confirmed"]);
     expect((await getMessages(B, "conv")).messages.map(m => m.text)).toEqual(["untouched"]);
+  });
+
+  it("takes back one refused message and nothing else", async () => {
+    await putMessages(A, "conv", [message("kept", "delivered"), message("refused", "never sent", "2026-01-01T00:00:01.000Z")]);
+    await putMessages(B, "conv", [message("refused", "another wallet")]);
+    await putMessages(A, "other-conv", [message("refused", "another conversation")]);
+    await removeMessage(A, "conv", "refused");
+    await removeMessage(A, "conv", "never-there");
+    expect((await getMessages(A, "conv")).messages.map(m => m.text)).toEqual(["delivered"]);
+    expect((await getMessages(B, "conv")).messages.map(m => m.text)).toEqual(["another wallet"]);
+    expect((await getMessages(A, "other-conv")).messages.map(m => m.text)).toEqual(["another conversation"]);
   });
 
   it("continues to canonicalize EVM identities", async () => {

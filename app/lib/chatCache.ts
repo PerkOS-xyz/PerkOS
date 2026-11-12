@@ -175,6 +175,26 @@ export async function getMessages(
   };
 }
 
+/**
+ * Take one message back out. A message the server refused was never sent, so
+ * it must not come back as sent the next time the conversation is opened.
+ */
+export async function removeMessage(
+  walletAddress: string,
+  convId: string,
+  id: string,
+): Promise<void> {
+  const db = await openDb();
+  if (!db) return;
+  try {
+    const store = tx(db, "readwrite");
+    store.delete([normalizeWalletAddress(walletAddress), convId, id]);
+    await txDone(store.transaction);
+  } finally {
+    db.close();
+  }
+}
+
 /** Wipe all cached messages for one conversation. */
 export async function clearConv(
   walletAddress: string,
