@@ -50,11 +50,18 @@ const JSON_LD = {
       slogan: "AI teams for small businesses. They draft, you approve.",
       description:
         "PerkOS gives small businesses a team of AI teammates that handle the busywork: content, customer replies, research, the books. They draft, you approve.",
+      // Tells search and answer engines which PerkOS this is: other
+      // businesses use the name on other domains for unrelated products.
+      disambiguatingDescription:
+        "PerkOS at perkos.xyz: AI teams for small businesses, online since December 2025. Not a point-of-sale or loyalty-card product.",
+      foundingDate: "2025-12",
       sameAs: [
         "https://x.com/perk_os",
         "https://www.instagram.com/perkos.xyz/",
         "https://farcaster.xyz/perkos",
         "https://www.linkedin.com/company/perkos/",
+        "https://github.com/PerkOS-xyz",
+        "https://www.karmahq.xyz/project/perkos",
       ],
     },
     {
