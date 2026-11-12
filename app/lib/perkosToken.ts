@@ -44,7 +44,9 @@ export const PERKOS_CONTRACTS: PerkosContract[] = [
     chain: "Solana",
     address: "GvZ9UXZm8U14uZNi7hBN5cY2iUta7stArZE486yHe2nA",
     decimals: 6,
-    supply: "925,075,444",
+    // Burns lower this supply over time (925,075,444 on 2026-10-09,
+    // 925,070,570 on 2026-11-12), so a fixed figure goes stale.
+    supply: "About 925 million",
     kind: "native",
     origin: "Launched by PerkOS through ClawPump on Pump.fun, September 2026.",
     explorer: "https://solscan.io/token/GvZ9UXZm8U14uZNi7hBN5cY2iUta7stArZE486yHe2nA",
