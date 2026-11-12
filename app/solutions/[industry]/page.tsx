@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ContentSection, FeatureGrid, PublicPageShell } from "../../components/marketing/PublicPageShell";
+import { publicPageMetadata } from "../../lib/publicPageMetadata";
 
 const SOLUTIONS = {
   restaurants: {
@@ -57,11 +58,11 @@ export async function generateMetadata({ params }: { params: Promise<{ industry:
   const solution = SOLUTIONS[industry as Industry];
   if (!solution) return {};
 
-  return {
+  return publicPageMetadata({
     title: `AI Team for ${solution.label}`,
     description: solution.intro,
-    alternates: { canonical: `/solutions/${industry}` },
-  };
+    path: `/solutions/${industry}`,
+  });
 }
 
 export default async function IndustryPage({ params }: { params: Promise<{ industry: string }> }) {

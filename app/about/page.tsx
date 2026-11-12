@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 
 import { ContentSection, FeatureGrid, PublicPageShell } from "../components/marketing/PublicPageShell";
+import { publicPageMetadata } from "../lib/publicPageMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata({
   title: "About",
-  description: "Learn how PerkOS AI helps small businesses use practical AI teams while keeping people in control of every action.",
-  alternates: { canonical: "/about" },
-};
+  description:
+    "Learn how PerkOS AI helps small businesses use practical AI teams while keeping people in control of every action.",
+  path: "/about",
+});
 
 export default function AboutPage() {
   return (

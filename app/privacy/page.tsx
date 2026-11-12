@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 
 import { ContentSection, PublicPageShell } from "../components/marketing/PublicPageShell";
+import { publicPageMetadata } from "../lib/publicPageMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata({
   title: "Privacy",
-  description: "How PerkOS AI uses website analytics and contact information.",
-  alternates: { canonical: "/privacy" },
-};
+  description:
+    "How PerkOS AI uses website analytics and contact information.",
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (

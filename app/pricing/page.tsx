@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import { Check } from "lucide-react";
 
 import { ContentSection, PublicPageShell } from "../components/marketing/PublicPageShell";
+import { publicPageMetadata } from "../lib/publicPageMetadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = publicPageMetadata({
   title: "Pricing",
   description:
     "Compare PerkOS AI plans with included PerkOS Infra hours, optional prepaid Managed AI, BYOK support, and no surprise bills.",
-  alternates: { canonical: "/pricing" },
-};
+  path: "/pricing",
+});
 
 const PLANS = [
   { name: "Free", price: "$0", detail: "7 days with the AI agents you already run" },
