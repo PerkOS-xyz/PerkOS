@@ -8,6 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Crown,
+  Eye,
   Loader2,
   MessageSquarePlus,
   PanelRightClose,
@@ -58,7 +59,8 @@ import { formatRelativeShort } from "../lib/format";
 import { entityKey, writeEdge } from "../lib/edges";
 import { uploadAttachment } from "../lib/uploadAttachment";
 import { projectChatAvailableHeight } from "../lib/projectChatLayout";
-import { putMessages as cacheMessages } from "../lib/chatCache";
+import { putMessages as cacheMessages, removeMessage as uncacheMessage } from "../lib/chatCache";
+import { getProjectStanding } from "../lib/projectAccess";
 import { ChatComposer } from "./ChatComposer";
 import {
   ConversationMessages,
@@ -121,6 +123,17 @@ export function ProjectChatTab({
     queryFn: () => listProjectChatThreads({ projectId, owner }),
     enabled: Boolean(address),
   });
+  // In someone else's project, a Read only member follows the chat and does
+  // not write: a message here puts the owner's agents to work. The chat server
+  // refuses it too; asking first keeps the screen from offering a box that
+  // would not work.
+  const standingQuery = useQuery({
+    queryKey: ["project-standing", projectId, owner, address],
+    queryFn: () => getProjectStanding({ me: address ?? "", owner: owner ?? "", projectId, orgId: detail.project.orgId }),
+    enabled: shared && Boolean(address),
+    staleTime: 60_000,
+  });
+  const readOnly = shared && standingQuery.data === "read";
   const convId = activeConvId ?? conversationQuery.data?.convId ?? null;
   const live = useConversationLiveMessages(convId);
   // Live-message count when the owner last asked Sparky; Sparky is replying
@@ -190,7 +203,7 @@ export function ProjectChatTab({
   });
 
   function send(text: string) {
-    if (!client || !convId || !address || status !== "connected") return;
+    if (!client || !convId || !address || status !== "connected" || readOnly) return;
     if (changeRequestPlanId) {
       requestChanges.mutate({ planId: changeRequestPlanId, text });
       setDraft("");
@@ -205,6 +218,14 @@ export function ProjectChatTab({
       convId,
       text,
       targets,
+      onRefused: (refusal) => {
+        // Nobody received it: take it off the screen and out of the local copy.
+        setOptimistic((prev) => prev.filter((message) => message.id !== refusal.id));
+        void uncacheMessage(address, convId, refusal.id).catch(() => {});
+        setSendError(refusal.message || "That message could not be sent.");
+        setDraft((current) => current || text);
+        if (refusal.code === "READ_ONLY") void standingQuery.refetch();
+      },
       onAck: (ack) => {
         setOptimistic((prev) =>
           prev.map((message) =>
@@ -289,7 +310,7 @@ export function ProjectChatTab({
     }
   }
 
-  const disabled = !isConnected || !convId || status !== "connected";
+  const disabled = !isConnected || !convId || status !== "connected" || (shared && standingQuery.isLoading);
   const disabledReason = conversationQuery.isLoading
     ? "Opening project chat…"
     : status !== "connected"
@@ -553,6 +574,15 @@ export function ProjectChatTab({
           </p>
         ) : null}
         {sendError ? <p className="shrink-0 px-4 py-2 text-xs text-destructive">{sendError}</p> : null}
+        {readOnly ? (
+          <p
+            role="note"
+            className="relative z-10 flex shrink-0 items-center gap-2 border-t border-border bg-background/95 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] text-sm text-muted-foreground shadow-[0_-8px_24px_rgba(0,0,0,0.16)] backdrop-blur"
+          >
+            <Eye aria-hidden className="h-4 w-4 shrink-0" />
+            You have read-only access to this project. Ask its owner for editor access to write here.
+          </p>
+        ) : (
         <ChatComposer
           value={draft}
           onChange={setDraft}
@@ -566,6 +596,7 @@ export function ProjectChatTab({
           }
           className="relative z-10 shrink-0 border-t border-border bg-background/95 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-8px_24px_rgba(0,0,0,0.16)] backdrop-blur"
         />
+        )}
       </section>
 
       {!teamCollapsed && !panel ? (
