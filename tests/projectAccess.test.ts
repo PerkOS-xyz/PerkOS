@@ -18,6 +18,12 @@ describe("what a person may do in someone else's project", () => {
     expect(projectStanding({ me: ME, owner: OWNER, organization: { role: "editor" } })).toBe("write");
   });
 
+  it("lets a co-owner write, from the project or from its organization", () => {
+    expect(projectStanding({ me: ME, owner: OWNER, project: { role: "coowner", status: "active" } })).toBe("write");
+    expect(projectStanding({ me: ME, owner: OWNER, project: { role: "viewer" }, organization: { role: "coowner" } })).toBe("write");
+    expect(projectStanding({ me: ME, owner: OWNER, project: { role: "coowner", status: "removed" } })).toBe("read");
+  });
+
   it("takes the higher of the two roles", () => {
     expect(projectStanding({ me: ME, owner: OWNER, project: { role: "viewer" }, organization: { role: "editor" } })).toBe("write");
     expect(projectStanding({ me: ME, owner: OWNER, project: { role: "editor" }, organization: { role: "viewer" } })).toBe("write");

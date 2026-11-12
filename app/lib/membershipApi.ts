@@ -7,7 +7,8 @@
  */
 import { authedFetch } from "./apiClient";
 
-export type MemberRole = "owner" | "editor" | "viewer";
+/** "coowner" is an invited wallet with more than an editor; "viewer" is Read only. */
+export type MemberRole = "owner" | "coowner" | "editor" | "viewer";
 
 export type Member = {
   wallet: string;

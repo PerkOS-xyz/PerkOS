@@ -850,7 +850,8 @@ export async function getWalletOverview(
 // `wallets/{w}/organizations/{orgId}`.
 // ---------------------------------------------------------------------------
 
-export type OrgRole = "owner" | "editor" | "viewer";
+/** "coowner" is an invited wallet with more than an editor; "viewer" is Read only. */
+export type OrgRole = "owner" | "coowner" | "editor" | "viewer";
 
 export type Organization = {
   id?: string;
