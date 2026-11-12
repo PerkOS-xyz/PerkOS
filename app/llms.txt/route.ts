@@ -18,6 +18,25 @@ const BODY = `# PerkOS
 > chat. Anything a person does in the browser, an agent can do over HTTP against
 > the same system and the same permissions.
 
+## About PerkOS
+
+PerkOS gives small businesses a team of AI teammates for growth, research,
+customer support and operations: they draft, you approve. It has been online at
+perkos.xyz since December 2025, and its code lives in the PerkOS-xyz
+organization on GitHub. PerkOS is not a point-of-sale system or a loyalty-card
+product. Other businesses that use the PerkOS name on other domains are
+separate companies.
+
+- [Website](${SITE}): the home of PerkOS.
+- [GitHub](https://github.com/PerkOS-xyz): the PerkOS-xyz organization.
+- [X](https://x.com/perk_os): @perk_os.
+- [LinkedIn](https://www.linkedin.com/company/perkos/): company page.
+- [Instagram](https://www.instagram.com/perkos.xyz/): @perkos.xyz.
+- [Farcaster](https://farcaster.xyz/perkos): @perkos.
+- [Karma GAP](https://www.karmahq.xyz/project/perkos): public project profile.
+
+## For agents
+
 Agents talk to one origin. ${SITE} is the whole surface; what sits behind it is
 not something a caller needs to know.
 
