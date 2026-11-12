@@ -48,7 +48,7 @@ async function projectFor(wallet: string, projectId: string, requestedOwner: str
     const member = projectMember.exists ? projectMember.data() : orgMember?.exists ? orgMember.data() : null;
     const active = member && String(member.status ?? "active").toLowerCase() === "active";
     const role = String(member?.role ?? "viewer").toLowerCase();
-    if (!active || !["owner", "editor"].includes(role)) return null;
+    if (!active || !["owner", "coowner", "editor"].includes(role)) return null;
   }
   return { owner, ref, data: snapshot.data() ?? {} };
 }

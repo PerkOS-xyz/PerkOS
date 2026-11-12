@@ -7,7 +7,8 @@ import { isActiveMembershipStatus } from "./perkosApi";
 /**
  * What the signed-in person may do in a project that belongs to someone else.
  *
- * "write": the owner, or an editor. They can talk to the project's agents.
+ * "write": the owner, a co-owner or an editor. They can talk to the
+ * project's agents.
  * "read": a Read only member. They follow the project and its chat, and do
  * not write: a message there puts the owner's agents to work.
  *
@@ -20,7 +21,9 @@ export type ProjectStanding = "write" | "read";
 
 type Membership = { role?: unknown; status?: unknown } | null | undefined;
 
-const WRITERS = ["owner", "editor"];
+// The same roles the database rules and the chat server let write. A
+// co-owner ("coowner") is an invited wallet with more than an editor.
+const WRITERS = ["owner", "coowner", "editor"];
 
 function writes(member: Membership): boolean {
   return Boolean(member) && isActiveMembershipStatus(member?.status) && WRITERS.includes(String(member?.role ?? ""));
