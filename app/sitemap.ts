@@ -15,6 +15,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/ai-teams-for-small-business", priority: 0.9, changeFrequency: "monthly" as const },
     { path: "/solutions", priority: 0.9, changeFrequency: "monthly" as const },
     { path: "/pricing", priority: 0.9, changeFrequency: "monthly" as const },
+    { path: "/faq", priority: 0.7, changeFrequency: "monthly" as const },
+    { path: "/token", priority: 0.6, changeFrequency: "monthly" as const },
     { path: "/privacy", priority: 0.4, changeFrequency: "yearly" as const },
     { path: "/solutions/restaurants", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/solutions/real-estate", priority: 0.8, changeFrequency: "monthly" as const },

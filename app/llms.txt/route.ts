@@ -8,6 +8,8 @@
  * contract an agent cannot call is worse than publishing nothing: it turns a
  * missing feature into a broken promise the agent burns retries on.
  */
+import { PERKOS_COINGECKO_URL, PERKOS_TOKEN_SUMMARY } from "../lib/perkosToken";
+
 export const dynamic = "force-static";
 
 const SITE = process.env.NEXT_PUBLIC_CANONICAL_URL ?? "https://perkos.xyz";
@@ -20,20 +22,30 @@ const BODY = `# PerkOS
 
 ## About PerkOS
 
-PerkOS gives small businesses a team of AI teammates for growth, research,
-customer support and operations: they draft, you approve. It has been online at
-perkos.xyz since December 2025, and its code lives in the PerkOS-xyz
-organization on GitHub. PerkOS is not a point-of-sale system or a loyalty-card
-product. Other businesses that use the PerkOS name on other domains are
-separate companies.
+PerkOS, also called PerkOS AI, is the platform at perkos.xyz where small
+businesses and small teams get a working team of AI agents. Sparky, the PerkOS
+coordinator, turns one goal into tasks on a shared board, specialist agents
+draft the work, and nothing goes out until a person approves it. Teams run in
+PerkOS Cloud or on your own computers with PerkOS Runtime. The product is built
+on open agent standards: x402 for pay-per-request payments in USDC, and
+ERC-8004 for agent identity and reputation. PerkOS was founded by Julio Cruz
+and has been online at perkos.xyz since December 2025.
 
 - [Website](${SITE}): the home of PerkOS.
+- [FAQ](${SITE}/faq): what PerkOS is, the PERKOS token, x402 and ERC-8004.
 - [GitHub](https://github.com/PerkOS-xyz): the PerkOS-xyz organization.
 - [X](https://x.com/perk_os): @perk_os.
 - [LinkedIn](https://www.linkedin.com/company/perkos/): company page.
 - [Instagram](https://www.instagram.com/perkos.xyz/): @perkos.xyz.
 - [Farcaster](https://farcaster.xyz/perkos): @perkos.
-- [Karma GAP](https://www.karmahq.xyz/project/perkos): public project profile.
+- [Karma GAP](https://www.karmahq.org/project/perkos): public project profile.
+
+## PERKOS token
+
+${PERKOS_TOKEN_SUMMARY}
+
+- [Official contracts](${SITE}/token): every chain, and how to verify a contract.
+- [CoinGecko](${PERKOS_COINGECKO_URL}): market listing.
 
 ## For agents
 

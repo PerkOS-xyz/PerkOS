@@ -253,6 +253,9 @@ function FooterV2() {
             <Link href="/ai-teams-for-small-business" className="transition-colors hover:text-foreground">
               AI teams
             </Link>
+            <Link href="/faq" className="transition-colors hover:text-foreground">
+              FAQ
+            </Link>
             <Link href="/privacy" className="transition-colors hover:text-foreground">
               Privacy
             </Link>
