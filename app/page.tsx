@@ -6,7 +6,7 @@ import { LandingContentV2 } from "./components/landing/v2/LandingContentV2";
 export const metadata: Metadata = {
   title: "PerkOS AI: AI Teams for Small Businesses",
   description:
-    "PerkOS AI gives small businesses a ready-to-work AI team for growth, research, customer support and operations. Start free, no technical skills required.",
+    "PerkOS (PerkOS AI) gives small businesses a ready-to-work AI team for growth, research, customer support and operations. Start free, no technical skills required.",
 };
 
 // ============================================================================
@@ -43,26 +43,38 @@ const JSON_LD = {
     {
       "@type": "Organization",
       "@id": `${SITE}/#org`,
-      name: "PerkOS AI",
-      alternateName: ["PerkOS", "Perk OS"],
+      name: "PerkOS",
+      alternateName: ["PerkOS AI", "Perk OS"],
       url: SITE,
       logo: `${SITE}/logo.png`,
       slogan: "AI teams for small businesses. They draft, you approve.",
+      // The canonical ~50-word description: the same words go on GitHub,
+      // Karma, CoinGecko and the social profiles, so every source agrees.
       description:
-        "PerkOS gives small businesses a team of AI teammates that handle the busywork: content, customer replies, research, the books. They draft, you approve.",
-      // Tells search and answer engines which PerkOS this is: other
-      // businesses use the name on other domains for unrelated products.
+        "PerkOS, also called PerkOS AI, is the platform at perkos.xyz where a small business gets a team of AI agents. Sparky plans the work on a shared board, specialist agents draft it, and the owner approves. It is built on open standards: x402 for payments in USDC and ERC-8004 for checking agent identity and reputation. PERKOS is the community token.",
+      // Says which PerkOS this is in positive terms only. Naming what we are
+      // not would put those words next to our name in a model's memory.
       disambiguatingDescription:
-        "PerkOS at perkos.xyz: AI teams for small businesses, online since December 2025. Not a point-of-sale or loyalty-card product.",
+        "PerkOS at perkos.xyz: AI teams for small businesses, built on x402 and ERC-8004, online since December 2025.",
       foundingDate: "2025-12",
+      founder: {
+        "@type": "Person",
+        "@id": `${SITE}/#founder`,
+        name: "Julio Cruz",
+        sameAs: ["https://github.com/JulioMCruz"],
+      },
+      knowsAbout: ["AI agents", "x402", "ERC-8004", "Small business automation"],
+      // Profiles of the organization only. The token's listing and explorers
+      // describe the token, not the company, so they live on /token.
       sameAs: [
         "https://x.com/perk_os",
+        "https://github.com/PerkOS-xyz",
+        "https://www.linkedin.com/company/perkos/",
         "https://www.instagram.com/perkos.xyz/",
         "https://farcaster.xyz/perkos",
-        "https://www.linkedin.com/company/perkos/",
-        "https://github.com/PerkOS-xyz",
-        "https://www.karmahq.xyz/project/perkos",
+        "https://www.karmahq.org/project/perkos",
       ],
+      subjectOf: { "@id": `${SITE}/token#page` },
     },
     {
       "@type": "WebSite",
@@ -74,11 +86,21 @@ const JSON_LD = {
     },
     {
       "@type": "SoftwareApplication",
+      "@id": `${SITE}/#app`,
       name: "PerkOS AI",
       alternateName: "PerkOS",
       applicationCategory: "BusinessApplication",
-      operatingSystem: "Web",
+      operatingSystem: "Web, macOS, Windows, Linux",
       url: SITE,
+      publisher: { "@id": `${SITE}/#org` },
+      isAccessibleForFree: true,
+      featureList: [
+        "Sparky coordinates a team of AI agents on a shared board",
+        "Every result waits for human approval",
+        "PerkOS Cloud, or PerkOS Runtime on your own computers",
+        "x402 pay-per-request payments in USDC",
+        "ERC-8004 agent identity and reputation checks",
+      ],
       offers: {
         "@type": "AggregateOffer",
         lowPrice: "0",
