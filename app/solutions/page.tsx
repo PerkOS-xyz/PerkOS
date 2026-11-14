@@ -21,7 +21,7 @@ const SOLUTIONS = [
   {
     href: "/solutions/real-estate",
     title: "Real estate",
-    body: "Turn listing details into marketing, prepare follow-ups and summarize useful market research.",
+    body: "Turn listing details into listings and posts, prepare follow-ups and summarize useful market research.",
   },
   {
     href: "/solutions/ecommerce",

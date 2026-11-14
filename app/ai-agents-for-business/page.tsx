@@ -175,6 +175,23 @@ export default function AiAgentsForBusinessPage() {
         />
       </ContentSection>
 
+      <ContentSection title="Getting good results from AI agents">
+        <p>
+          AI agents do their best work with the same things a new employee needs: a clear goal,
+          the right details and quick feedback.
+        </p>
+        <FeatureGrid
+          items={[
+            { title: "Give the result, not the steps", body: "Say what you want to see at the end, like \"ten posts for next week\". The team works out the steps." },
+            { title: "Share your details once", body: "Your hours, prices, tone and policies make every draft more accurate from the first round." },
+            { title: "Start with recurring work", body: "Weekly posts, review replies and follow-ups show results fast and repeat every week." },
+            { title: "Review early drafts closely", body: "Specific feedback on the first rounds, like \"shorter\" or \"warmer\", shapes the drafts that follow." },
+            { title: "Keep decisions with you", body: "Let agents prepare the options and the research. Prices, promises and anything sensitive stay your call." },
+            { title: "Grow one goal at a time", body: "Add a new goal once the last one runs smoothly, and the team grows with your business." },
+          ]}
+        />
+      </ContentSection>
+
       <ContentSection title="Start with AI agents in one afternoon">
         <Steps
           items={[
