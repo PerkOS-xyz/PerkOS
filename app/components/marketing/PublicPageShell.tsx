@@ -117,7 +117,9 @@ export function PublicPageShell({ eyebrow, title, intro, children, ctaId, breadc
           <p>© {new Date().getFullYear()} PerkOS AI. AI teams for small businesses.</p>
           <div className="flex flex-wrap gap-5">
             <Link href="/">Home</Link>
+            <Link href="/ai-agents-for-business">AI agents for business</Link>
             <Link href="/ai-teams-for-small-business">AI teams</Link>
+            <Link href="/agentic-business">Agentic business</Link>
             <Link href="/solutions">Solutions</Link>
             <Link href="/pricing">Pricing</Link>
             <Link href="/about">About</Link>
