@@ -44,7 +44,7 @@ and has been online at perkos.xyz since December 2025.
 
 ${PERKOS_TOKEN_SUMMARY}
 
-- [Official contracts](${SITE}/token): every chain, and how to verify a contract.
+- [Official contracts](${SITE}/tokens): every chain, and how to verify a contract.
 - [CoinGecko](${PERKOS_COINGECKO_URL}): market listing.
 
 ## For agents

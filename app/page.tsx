@@ -74,7 +74,7 @@ const JSON_LD = {
         "https://farcaster.xyz/perkos",
         "https://www.karmahq.org/project/perkos",
       ],
-      subjectOf: { "@id": `${SITE}/token#page` },
+      subjectOf: { "@id": `${SITE}/tokens#page` },
     },
     {
       "@type": "WebSite",

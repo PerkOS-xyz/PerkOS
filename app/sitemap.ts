@@ -9,7 +9,7 @@ const SITE =
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   // `updated` is the date the page's content last changed. One date for every
-  // page told crawlers that /faq and /token, published on 2026-11-12, were
+  // page told crawlers that /faq and /token (now /tokens), published on 2026-11-12, were
   // three months old, so they had no reason to fetch them first. Update the
   // date when a page's content changes.
   const pages = [
@@ -19,7 +19,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/solutions", updated: "2026-08-10", priority: 0.9, changeFrequency: "monthly" as const },
     { path: "/pricing", updated: "2026-08-11", priority: 0.9, changeFrequency: "monthly" as const },
     { path: "/faq", updated: "2026-11-12", priority: 0.7, changeFrequency: "monthly" as const },
-    { path: "/token", updated: "2026-11-12", priority: 0.6, changeFrequency: "monthly" as const },
+    { path: "/tokens", updated: "2026-11-14", priority: 0.6, changeFrequency: "monthly" as const },
     { path: "/runtime", updated: "2026-09-27", priority: 0.7, changeFrequency: "monthly" as const },
     { path: "/floor", updated: "2026-09-27", priority: 0.6, changeFrequency: "monthly" as const },
     { path: "/investors", updated: "2026-11-12", priority: 0.5, changeFrequency: "monthly" as const },
