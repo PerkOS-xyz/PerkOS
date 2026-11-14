@@ -23,7 +23,7 @@ const display = Bricolage_Grotesque({ subsets: ["latin"], variable: "--rt-displa
 const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--rt-mono" });
 
 const DESCRIPTION =
-  "Download PerkOS Runtime for macOS, Ubuntu and Windows. Sparky answers your questions and opens the right desk, each desk brings its own team of agents, and your wallet signs.";
+  "Download PerkOS Runtime for macOS, Ubuntu and Windows. Sparky opens the right desk, each desk brings its own team of AI agents, and your wallet signs.";
 
 export const metadata: Metadata = {
   title: "PerkOS Runtime",

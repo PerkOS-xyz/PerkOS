@@ -33,12 +33,17 @@ and has been online at perkos.xyz since December 2025.
 
 - [Website](${SITE}): the home of PerkOS.
 - [FAQ](${SITE}/faq): what PerkOS is, the PERKOS token, x402 and ERC-8004.
+- [AI agents for business](${SITE}/ai-agents-for-business): what AI agents can do for a small business and how a PerkOS team works.
+- [AI teams for small business](${SITE}/ai-teams-for-small-business): how a coordinated AI team turns one goal into finished work.
+- [Agentic business](${SITE}/agentic-business): what an agentic business is, in plain words.
 - [GitHub](https://github.com/PerkOS-xyz): the PerkOS-xyz organization.
 - [X](https://x.com/perk_os): @perk_os.
 - [LinkedIn](https://www.linkedin.com/company/perkos/): company page.
 - [Instagram](https://www.instagram.com/perkos.xyz/): @perkos.xyz.
 - [Farcaster](https://farcaster.xyz/perkos): @perkos.
 - [Karma GAP](https://www.karmahq.org/project/perkos): public project profile.
+- [YouTube](https://www.youtube.com/@PerkOS-xyz): @PerkOS-xyz.
+- [Telegram](https://t.me/perk_os): the PerkOS community group.
 
 ## PERKOS token
 

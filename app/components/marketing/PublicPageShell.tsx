@@ -117,7 +117,9 @@ export function PublicPageShell({ eyebrow, title, intro, children, ctaId, breadc
           <p>© {new Date().getFullYear()} PerkOS AI. AI teams for small businesses.</p>
           <div className="flex flex-wrap gap-5">
             <Link href="/">Home</Link>
+            <Link href="/ai-agents-for-business">AI agents for business</Link>
             <Link href="/ai-teams-for-small-business">AI teams</Link>
+            <Link href="/agentic-business">Agentic business</Link>
             <Link href="/solutions">Solutions</Link>
             <Link href="/pricing">Pricing</Link>
             <Link href="/about">About</Link>
@@ -129,6 +131,7 @@ export function PublicPageShell({ eyebrow, title, intro, children, ctaId, breadc
             <Link href="/runtime">Runtime</Link>
             <Link href="/faq">FAQ</Link>
             <Link href="/tokens">Tokens</Link>
+            <Link href="/investors">Investors</Link>
             <Link href="/privacy">Privacy</Link>
             <a href="https://www.instagram.com/perkos.xyz/" target="_blank" rel="noopener noreferrer">Instagram</a>
           </div>
@@ -157,11 +160,13 @@ export function ContentSection({
 
 export function FeatureGrid({
   items,
+  columns = 3,
 }: {
   items: Array<{ title: string; body: string }>;
+  columns?: 2 | 3;
 }) {
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className={columns === 2 ? "grid gap-4 md:grid-cols-2" : "grid gap-4 md:grid-cols-3"}>
       {items.map((item) => (
         <article key={item.title} className="rounded-2xl border border-border bg-card p-6">
           <h3 className="font-semibold text-foreground">{item.title}</h3>

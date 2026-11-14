@@ -6,7 +6,7 @@ import { LandingContentV2 } from "./components/landing/v2/LandingContentV2";
 export const metadata: Metadata = {
   title: "PerkOS AI: AI Teams for Small Businesses",
   description:
-    "PerkOS (PerkOS AI) gives small businesses a ready-to-work AI team for growth, research, customer support and operations. Start free, no technical skills required.",
+    "PerkOS (PerkOS AI) gives small businesses a ready-to-work AI team for growth, research, customer support and operations. Start free, no technical skills needed.",
 };
 
 // ============================================================================
@@ -73,6 +73,8 @@ const JSON_LD = {
         "https://www.instagram.com/perkos.xyz/",
         "https://farcaster.xyz/perkos",
         "https://www.karmahq.org/project/perkos",
+        "https://www.youtube.com/@PerkOS-xyz",
+        "https://t.me/perk_os",
       ],
       subjectOf: { "@id": `${SITE}/tokens#page` },
     },
