@@ -26,10 +26,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/floor", updated: "2026-09-27", priority: 0.6, changeFrequency: "monthly" as const },
     { path: "/investors", updated: "2026-11-12", priority: 0.5, changeFrequency: "monthly" as const },
     { path: "/privacy", updated: "2026-08-10", priority: 0.4, changeFrequency: "yearly" as const },
-    { path: "/solutions/restaurants", updated: "2026-08-10", priority: 0.8, changeFrequency: "monthly" as const },
-    { path: "/solutions/real-estate", updated: "2026-08-10", priority: 0.8, changeFrequency: "monthly" as const },
-    { path: "/solutions/ecommerce", updated: "2026-08-10", priority: 0.8, changeFrequency: "monthly" as const },
-    { path: "/solutions/agencies", updated: "2026-08-10", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/solutions/restaurants", updated: "2026-11-14", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/solutions/real-estate", updated: "2026-11-14", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/solutions/ecommerce", updated: "2026-11-14", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/solutions/agencies", updated: "2026-11-14", priority: 0.8, changeFrequency: "monthly" as const },
   ];
 
   return pages.map(({ path, updated, priority, changeFrequency }) => ({
