@@ -1,5 +1,5 @@
 /**
- * The official PERKOS contracts, one source for /token, /investors, the
+ * The official PERKOS contracts, one source for /tokens, /investors, the
  * JSON-LD and llms.txt.
  *
  * Three are native launches with no bridge between them. The Celo address is
@@ -19,27 +19,22 @@ export type PerkosContract = {
   kind: "native" | "bridged";
   origin: string;
   explorer: string;
+  /** Explorer name for the link text, e.g. "View on Basescan". */
+  explorerName: string;
+  /**
+   * The chain's official logo, served from /public/chains and never edited.
+   * Sources: Base brand kit (github.com/base/brand-kit, TheSquare blue),
+   * Robinhood Chain brand assets v1 (docs.robinhood.com/chain/brand-guidelines,
+   * feather symbol, black on Robin Neon), solana.com/branding (logomark) and
+   * celo.org/brand-kit (Symbol, Onyx, shown on Prosperity Yellow).
+   */
+  logo: { src: string; tile?: string };
+  /** One extra verifiable fact, shown under the contract. */
+  note?: string;
 };
 
+// The page shows the contracts in this order, Solana first.
 export const PERKOS_CONTRACTS: PerkosContract[] = [
-  {
-    chain: "Base",
-    address: "0xF714E60f85497D70508F7E356b5DB80e64539BA3",
-    decimals: 18,
-    supply: "100,000,000,000",
-    kind: "native",
-    origin: "Launched by the community through Bankr, February 2026.",
-    explorer: "https://basescan.org/token/0xF714E60f85497D70508F7E356b5DB80e64539BA3",
-  },
-  {
-    chain: "Robinhood Chain",
-    address: "0x56663EcFbe0547B493d348D5fc30De521864Eba3",
-    decimals: 18,
-    supply: "100,000,000,000",
-    kind: "native",
-    origin: "Launched by PerkOS through Bankr, July 2026.",
-    explorer: "https://robinhoodchain.blockscout.com/token/0x56663EcFbe0547B493d348D5fc30De521864Eba3",
-  },
   {
     chain: "Solana",
     address: "GvZ9UXZm8U14uZNi7hBN5cY2iUta7stArZE486yHe2nA",
@@ -50,6 +45,32 @@ export const PERKOS_CONTRACTS: PerkosContract[] = [
     kind: "native",
     origin: "Launched by PerkOS through ClawPump on Pump.fun, September 2026.",
     explorer: "https://solscan.io/token/GvZ9UXZm8U14uZNi7hBN5cY2iUta7stArZE486yHe2nA",
+    explorerName: "Solscan",
+    logo: { src: "/chains/solana.svg" },
+    // Checked on chain 2026-11-14: mintAuthority and freezeAuthority are null.
+    note: "Mint and freeze authority: disabled.",
+  },
+  {
+    chain: "Base",
+    address: "0xF714E60f85497D70508F7E356b5DB80e64539BA3",
+    decimals: 18,
+    supply: "100,000,000,000",
+    kind: "native",
+    origin: "Launched by the community through Bankr, February 2026.",
+    explorer: "https://basescan.org/token/0xF714E60f85497D70508F7E356b5DB80e64539BA3",
+    explorerName: "Basescan",
+    logo: { src: "/chains/base.svg" },
+  },
+  {
+    chain: "Robinhood Chain",
+    address: "0x56663EcFbe0547B493d348D5fc30De521864Eba3",
+    decimals: 18,
+    supply: "100,000,000,000",
+    kind: "native",
+    origin: "Launched by PerkOS through Bankr, July 2026.",
+    explorer: "https://robinhoodchain.blockscout.com/token/0x56663EcFbe0547B493d348D5fc30De521864Eba3",
+    explorerName: "Blockscout",
+    logo: { src: "/chains/robinhood-chain.png" },
   },
   {
     chain: "Celo",
@@ -58,6 +79,9 @@ export const PERKOS_CONTRACTS: PerkosContract[] = [
     kind: "bridged",
     origin: "The Base token, bridged to Celo through the Wormhole token bridge in February 2026. Same token, not a separate launch.",
     explorer: "https://celoscan.io/token/0xb7Ba43fBD4F2E85FCE929f7d4DFE3905Ae846A46",
+    explorerName: "Celoscan",
+    // Celo approves its Onyx symbol on Prosperity Yellow (#FCFF52).
+    logo: { src: "/chains/celo.svg", tile: "#FCFF52" },
   },
 ];
 

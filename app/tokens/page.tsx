@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, ShieldCheck } from "lucide-react";
 
@@ -9,9 +10,11 @@ import {
   PERKOS_TOKEN_SUMMARY,
 } from "../lib/perkosToken";
 import { publicPageMetadata } from "../lib/publicPageMetadata";
+import { CopyAddress } from "./CopyAddress";
 
 // ============================================================================
-// /token: the one page that says which PERKOS contracts are ours.
+// /tokens: the one page that says which PERKOS contracts are ours. /token
+// redirects here (next.config.ts) so links already shared keep working.
 //
 // Written for people checking a contract and for search and answer engines
 // that need to tie the token to perkos.xyz. Facts only: provenance per chain,
@@ -26,8 +29,8 @@ const SITE = process.env.NEXT_PUBLIC_CANONICAL_URL ?? "https://perkos.xyz";
 export const metadata: Metadata = publicPageMetadata({
   title: "PERKOS token: official contracts",
   description:
-    "The official PERKOS token contracts on Base, Robinhood Chain, Solana and Celo, how to verify them, and what PERKOS is for in PerkOS.",
-  path: "/token",
+    "The official PERKOS token contracts on Solana, Base, Robinhood Chain and Celo, how to verify them, and what PERKOS is for in PerkOS.",
+  path: "/tokens",
 });
 
 export default function TokenPage() {
@@ -36,15 +39,15 @@ export default function TokenPage() {
     "@graph": [
       {
         "@type": "WebPage",
-        "@id": `${SITE}/token#page`,
-        url: `${SITE}/token`,
+        "@id": `${SITE}/tokens#page`,
+        url: `${SITE}/tokens`,
         name: "PERKOS token: official contracts",
-        about: { "@id": `${SITE}/token#perkos` },
+        about: { "@id": `${SITE}/tokens#perkos` },
         publisher: { "@id": `${SITE}/#org` },
       },
       {
         "@type": "Thing",
-        "@id": `${SITE}/token#perkos`,
+        "@id": `${SITE}/tokens#perkos`,
         name: "PERKOS",
         alternateName: ["$PERKOS", "PerkOS token"],
         description: PERKOS_TOKEN_SUMMARY,
@@ -63,9 +66,9 @@ export default function TokenPage() {
     <PublicPageShell
       eyebrow="PERKOS token"
       title="The official PERKOS contracts."
-      intro="PERKOS is the community token of PerkOS (perkos.xyz). Only the contracts on this page are official."
+      intro="PERKOS is the community token of PerkOS (perkos.xyz), the platform where small businesses get a team of AI agents that works with them. These are the only official PERKOS contracts. Check any address against this page before you use it."
       ctaId="token"
-      breadcrumbs={[{ name: "Home", path: "/" }, { name: "Token", path: "/token" }]}
+      breadcrumbs={[{ name: "Home", path: "/" }, { name: "Tokens", path: "/tokens" }]}
     >
       <script
         type="application/ld+json"
@@ -74,15 +77,29 @@ export default function TokenPage() {
 
       <ContentSection title="Contracts">
         <p>
-          PERKOS was launched on three chains as separate tokens, with no bridge between them: each
-          has its own contract, market and price. The Base token is also bridged to Celo, where it
-          is the same token under a different address.
+          Three launches and one bridge. PERKOS was launched on Solana, Base and Robinhood Chain as
+          separate tokens, each with its own contract, market and price. The Base token also lives on
+          Celo through the Wormhole token bridge: same token, different address.
         </p>
         <ul className="grid gap-4 md:grid-cols-2">
           {PERKOS_CONTRACTS.map((c) => (
             <li key={c.chain} className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-6">
               <div className="flex items-center justify-between gap-3">
-                <h3 className="text-lg font-semibold text-foreground">{c.chain}</h3>
+                <div className="flex items-center gap-3">
+                  <span
+                    className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg"
+                    style={c.logo.tile ? { backgroundColor: c.logo.tile } : undefined}
+                  >
+                    <Image
+                      src={c.logo.src}
+                      alt={`${c.chain} logo`}
+                      width={32}
+                      height={32}
+                      className={c.logo.tile ? "h-5 w-5 object-contain" : "h-8 w-8 object-contain"}
+                    />
+                  </span>
+                  <h3 className="text-lg font-semibold text-foreground">{c.chain}</h3>
+                </div>
                 <span
                   className={
                     c.kind === "native"
@@ -93,18 +110,21 @@ export default function TokenPage() {
                   {c.kind === "native" ? "Native" : "Bridged from Base"}
                 </span>
               </div>
-              <a
-                href={c.explorer}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group rounded-xl border border-border/70 bg-background/60 px-4 py-3 transition-colors hover:border-primary/40"
-              >
+              <div className="rounded-xl border border-border/70 bg-background/60 px-4 py-3">
                 <span className="block font-mono text-[10px] uppercase tracking-[0.2em] text-primary">Contract</span>
-                <span className="mt-1 block break-all font-mono text-sm text-foreground">{c.address}</span>
-                <span className="mt-2 inline-flex items-center gap-1 text-xs text-muted-foreground group-hover:text-foreground">
-                  View on explorer <ArrowUpRight className="h-3 w-3" />
-                </span>
-              </a>
+                <span className="mt-1 block select-all break-all font-mono text-sm text-foreground">{c.address}</span>
+                <div className="mt-2 flex flex-wrap items-center gap-3">
+                  <CopyAddress address={c.address} chain={c.chain} />
+                  <a
+                    href={c.explorer}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    View on {c.explorerName} <ArrowUpRight className="h-3 w-3" />
+                  </a>
+                </div>
+              </div>
               <dl className="grid grid-cols-2 gap-3 text-sm">
                 <div>
                   <dt className="text-xs text-muted-foreground">Decimals</dt>
@@ -117,6 +137,7 @@ export default function TokenPage() {
                   </div>
                 ) : null}
               </dl>
+              {c.note ? <p className="text-sm text-foreground">{c.note}</p> : null}
               <p className="text-sm leading-relaxed text-muted-foreground">{c.origin}</p>
             </li>
           ))}
@@ -125,8 +146,8 @@ export default function TokenPage() {
 
       <ContentSection title="What PERKOS is for">
         <p>
-          PerkOS plans to make PERKOS useful through access and benefits inside its products. None
-          of that is live yet.
+          PERKOS is the community token around PerkOS. Access and benefits inside PerkOS products
+          are on the way.
         </p>
         <p>
           <strong className="text-foreground">You do not need PERKOS to use PerkOS.</strong> PerkOS is

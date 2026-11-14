@@ -44,7 +44,7 @@ const FAQ = [
   },
   {
     q: "Is the PERKOS token official?",
-    a: "Yes. PERKOS is the community token of PerkOS. It was launched on Base, Robinhood Chain and Solana as three separate tokens with no bridge between them, and the Base token is also bridged to Celo. The official contracts are listed at perkos.xyz/token.",
+    a: "Yes. PERKOS is the community token of PerkOS. It was launched on Base, Robinhood Chain and Solana as three separate tokens with no bridge between them, and the Base token is also bridged to Celo. The official contracts are listed at perkos.xyz/tokens.",
   },
   {
     q: "Do I need PERKOS to use PerkOS?",

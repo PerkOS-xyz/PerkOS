@@ -25,6 +25,14 @@ const nextConfig: NextConfig = {
         destination: "/projects/new",
         permanent: false,
       },
+      // The contracts page moved to /tokens on 2026-11-14. /token stays as a
+      // permanent redirect: Jupiter, DexScreener, CoinGecko and posts already
+      // link to it.
+      {
+        source: "/token",
+        destination: "/tokens",
+        permanent: true,
+      },
     ];
   },
   // perkos.xyz/Runtime, with a capital R, serves the Runtime download page too.

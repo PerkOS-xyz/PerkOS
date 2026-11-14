@@ -138,7 +138,7 @@ const NETWORKS: NetworkOption[] = [
   {
     id: robinhoodChain.id,
     name: "Robinhood Chain",
-    logo: "/robinhood-chain.svg",
+    logo: "/chains/robinhood-chain.png",
   },
 ];
 
@@ -453,7 +453,7 @@ function SolanaNetworkPill({ address }: { address: string }) {
   return (
     <PillShell static aria-label={ariaLabel}>
       <Image
-        src="/solana.svg"
+        src="/chains/solana.svg"
         alt=""
         width={16}
         height={16}

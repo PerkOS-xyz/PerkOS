@@ -105,7 +105,7 @@ export default function InvestorsPage() {
 
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link
-                href="/token"
+                href="/tokens"
                 className="inline-flex items-center justify-center gap-2 rounded-md border border-border bg-card px-6 py-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40"
               >
                 Official contracts and how to verify them <ArrowRight className="h-4 w-4" />
