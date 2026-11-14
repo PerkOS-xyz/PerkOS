@@ -51,7 +51,7 @@ const JSON_LD = {
       // The canonical ~50-word description: the same words go on GitHub,
       // Karma, CoinGecko and the social profiles, so every source agrees.
       description:
-        "PerkOS, also called PerkOS AI, is the platform at perkos.xyz where a small business gets a team of AI agents. Sparky plans the work on a shared board, specialist agents draft it, and the owner approves. It is built on open standards: x402 for payments in USDC and ERC-8004 for checking agent identity and reputation. PERKOS is the community token.",
+        "PerkOS, also called PerkOS AI, is the platform at perkos.xyz where a small business gets a team of AI agents. Sparky plans the work on a shared board, specialist agents draft it, and the owner approves. It is built on open standards: x402 for payments in USDC and ERC-8004 for checking agent identity and reputation. PERKOS is the token of the PerkOS ecosystem.",
       // Says which PerkOS this is in positive terms only. Naming what we are
       // not would put those words next to our name in a model's memory.
       disambiguatingDescription:

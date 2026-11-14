@@ -20,7 +20,7 @@ import { publicPageMetadata } from "../lib/publicPageMetadata";
 //
 // The token is described by what it is and where it stands, never as a way to
 // own or share in PerkOS: no stake, rewards, revenue, earn or yield. The
-// contracts and their provenance live on /token, the one source, so this page
+// contracts and their provenance live on /tokens, the one source, so this page
 // cannot drift from it again (it once said the community launched every chain,
 // which is true only for Base).
 // ============================================================================
@@ -28,7 +28,7 @@ import { publicPageMetadata } from "../lib/publicPageMetadata";
 export const metadata: Metadata = publicPageMetadata({
   title: "Investors and the PERKOS token",
   description:
-    "The small-business market PerkOS serves, and the PERKOS community token: where it was launched and why PerkOS does not require it.",
+    "The small-business market PerkOS serves, and the PERKOS token: where it was launched and why PerkOS does not require it.",
   path: "/investors",
 });
 
@@ -83,7 +83,7 @@ export default function InvestorsPage() {
             </div>
 
             <div className="mb-6 flex flex-col items-center gap-3 text-center">
-              <h2 className="text-xl font-semibold text-foreground">PERKOS, a community token</h2>
+              <h2 className="text-xl font-semibold text-foreground">PERKOS, the PerkOS ecosystem token</h2>
               <p className="max-w-2xl text-sm text-muted-foreground">{PERKOS_TOKEN_SUMMARY}</p>
               <p className="max-w-2xl text-sm text-muted-foreground">
                 What follows is how we intend to make the token useful to the people who

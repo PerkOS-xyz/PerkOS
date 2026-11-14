@@ -21,7 +21,7 @@ import { CopyAddress } from "./CopyAddress";
 // how to verify, and that the product does not need the token. No price, no
 // market cap, no buy link, and none of the words stake, rewards, revenue,
 // earn or yield: describing utility that is not live as if it were is how a
-// community token starts reading like a promise of return.
+// token starts reading like a promise of return.
 // ============================================================================
 
 const SITE = process.env.NEXT_PUBLIC_CANONICAL_URL ?? "https://perkos.xyz";
@@ -66,7 +66,7 @@ export default function TokenPage() {
     <PublicPageShell
       eyebrow="PERKOS token"
       title="The official PERKOS contracts."
-      intro="PERKOS is the community token of PerkOS (perkos.xyz), the platform where small businesses get a team of AI agents that works with them. These are the only official PERKOS contracts. Check any address against this page before you use it."
+      intro="$PERKOS is the token of the PerkOS ecosystem. PerkOS is the platform where small businesses get a team of AI agents. Only the contracts on this page are official, so check any address here before you use it."
       ctaId="token"
       breadcrumbs={[{ name: "Home", path: "/" }, { name: "Tokens", path: "/tokens" }]}
     >
@@ -146,7 +146,7 @@ export default function TokenPage() {
 
       <ContentSection title="What PERKOS is for">
         <p>
-          PERKOS is the community token around PerkOS. Access and benefits inside PerkOS products
+          PERKOS is the token of the PerkOS ecosystem. Access and benefits inside PerkOS products
           are on the way.
         </p>
         <p>
