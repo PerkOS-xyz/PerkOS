@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
 import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
@@ -11,6 +12,7 @@ import { AutoConnect } from "./components/AutoConnect";
 import { useIsInMiniApp } from "./lib/useIsInMiniApp";
 import { dynamicBrowserEnabled } from "./lib/dynamicBrowser";
 import { prepareFirestore } from "./lib/firebase";
+import { isPublicPagePath } from "./lib/publicRoutes";
 
 // Code-split: the Dynamic SDK ships only to the browser host, never to Farcaster
 // or Base App. ssr:false keeps the browser-only SDK out of the plain tree
@@ -39,7 +41,12 @@ export function Providers({ children }: { children: ReactNode }) {
   // plain tree, so the Mini App path is stable.
   const isInMiniApp = useIsInMiniApp();
 
-  if (dynamicBrowserEnabled(isInMiniApp)) {
+  // Public pages skip Dynamic. Swapping to the Dynamic tree remounts the whole
+  // page behind a blank placeholder until the SDK downloads, which on a phone
+  // hid the landing for seconds. Nothing on these pages reads the wallet.
+  const publicPage = isPublicPagePath(usePathname());
+
+  if (!publicPage && dynamicBrowserEnabled(isInMiniApp)) {
     return (
       <DynamicProviders queryClient={queryClient}>{children}</DynamicProviders>
     );

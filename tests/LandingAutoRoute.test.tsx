@@ -2,7 +2,7 @@ import { render, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 let pathname = "/";
-let sessionStatus = "signed-in";
+let signedIn = true;
 const replace = vi.fn();
 
 vi.mock("next/navigation", () => ({
@@ -14,8 +14,8 @@ vi.mock("next/image", () => ({
   default: (props: Record<string, unknown>) => <span data-image={props.alt} />,
 }));
 
-vi.mock("../app/lib/useWalletSession", () => ({
-  useWalletSession: () => ({ status: sessionStatus }),
+vi.mock("../app/lib/useFirebaseUser", () => ({
+  useFirebaseUser: () => ({ user: signedIn ? { uid: "user-1" } : null, loading: false }),
 }));
 
 import { LandingAutoRoute } from "../app/components/LandingAutoRoute";
@@ -23,7 +23,7 @@ import { LandingAutoRoute } from "../app/components/LandingAutoRoute";
 describe("LandingAutoRoute", () => {
   beforeEach(() => {
     pathname = "/";
-    sessionStatus = "signed-in";
+    signedIn = true;
     replace.mockReset();
     window.history.replaceState({}, "", "/");
   });
@@ -32,6 +32,14 @@ describe("LandingAutoRoute", () => {
     render(<LandingAutoRoute />);
 
     await waitFor(() => expect(replace).toHaveBeenCalledWith("/dashboard"));
+  });
+
+  it("stays on the landing for a visitor without a session", async () => {
+    signedIn = false;
+
+    render(<LandingAutoRoute />);
+
+    await waitFor(() => expect(replace).not.toHaveBeenCalled());
   });
 
   it.each([
