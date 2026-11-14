@@ -8,6 +8,12 @@ vi.mock("next/navigation", () => ({
   usePathname: () => pathname,
 }));
 
+const dynamicProvidersLoaded = vi.fn();
+vi.mock("../app/components/DynamicProviders", () => {
+  dynamicProvidersLoaded();
+  return { default: () => null };
+});
+
 vi.mock("next/dynamic", () => ({
   default: () =>
     function DynamicTree({ children }: { children: ReactNode }) {
@@ -51,5 +57,22 @@ describe("Providers on public pages", () => {
     render(<Providers><span>page</span></Providers>);
 
     expect(screen.getByTestId("dynamic-tree")).toHaveTextContent("page");
+  });
+
+  it("starts loading the wallet SDK when a visitor points at a sign-in link", async () => {
+    pathname = "/";
+    render(
+      <Providers>
+        <a href="/sign-in">Start free</a>
+        <a href="/pricing">Pricing</a>
+      </Providers>,
+    );
+
+    screen.getByText("Pricing").dispatchEvent(new Event("pointerover", { bubbles: true }));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(dynamicProvidersLoaded).not.toHaveBeenCalled();
+
+    screen.getByText("Start free").dispatchEvent(new Event("pointerover", { bubbles: true }));
+    await vi.waitFor(() => expect(dynamicProvidersLoaded).toHaveBeenCalled());
   });
 });

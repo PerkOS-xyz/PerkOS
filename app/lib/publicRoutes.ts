@@ -22,6 +22,9 @@ const PUBLIC_PATHS = new Set([
 
 export function isPublicPagePath(pathname: string | null | undefined): boolean {
   if (!pathname) return false;
-  const path = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
+  // Lowercase: /Runtime is rewritten to /runtime, and routes are matched
+  // without regard to case.
+  const lower = pathname.toLowerCase();
+  const path = lower.length > 1 ? lower.replace(/\/+$/, "") : lower;
   return PUBLIC_PATHS.has(path) || path.startsWith("/solutions/");
 }

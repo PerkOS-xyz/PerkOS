@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { WagmiProvider } from "wagmi";
@@ -45,8 +45,29 @@ export function Providers({ children }: { children: ReactNode }) {
   // page behind a blank placeholder until the SDK downloads, which on a phone
   // hid the landing for seconds. Nothing on these pages reads the wallet.
   const publicPage = isPublicPagePath(usePathname());
+  const walletHost = dynamicBrowserEnabled(isInMiniApp);
 
-  if (!publicPage && dynamicBrowserEnabled(isInMiniApp)) {
+  // On a public page, start downloading the wallet SDK as soon as the visitor
+  // points at, touches or focuses a link into the app, so sign-in does not
+  // wait for it after the click.
+  const preloadWallet = publicPage && walletHost;
+  useEffect(() => {
+    if (!preloadWallet) return;
+    const onIntent = (event: Event) => {
+      const link = event.target instanceof Element ? event.target.closest("a[href]") : null;
+      const href = link?.getAttribute("href") ?? "";
+      if (!href.startsWith("/") || href.startsWith("//")) return;
+      if (isPublicPagePath(href.split(/[?#]/)[0])) return;
+      void import("./components/DynamicProviders");
+    };
+    const events = ["pointerover", "touchstart", "focusin"] as const;
+    for (const type of events) document.addEventListener(type, onIntent, { passive: true });
+    return () => {
+      for (const type of events) document.removeEventListener(type, onIntent);
+    };
+  }, [preloadWallet]);
+
+  if (!publicPage && walletHost) {
     return (
       <DynamicProviders queryClient={queryClient}>{children}</DynamicProviders>
     );
