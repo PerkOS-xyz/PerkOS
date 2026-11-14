@@ -73,6 +73,8 @@ const JSON_LD = {
         "https://www.instagram.com/perkos.xyz/",
         "https://farcaster.xyz/perkos",
         "https://www.karmahq.org/project/perkos",
+        "https://www.youtube.com/@PerkOS-xyz",
+        "https://t.me/perk_os",
       ],
       subjectOf: { "@id": `${SITE}/tokens#page` },
     },

@@ -259,6 +259,12 @@ function FooterV2() {
             <Link href="/privacy" className="transition-colors hover:text-foreground">
               Privacy
             </Link>
+            <Link href="/tokens" className="transition-colors hover:text-foreground">
+              Tokens
+            </Link>
+            <Link href="/investors" className="transition-colors hover:text-foreground">
+              Investors
+            </Link>
             <Link href="/solutions/restaurants" className="transition-colors hover:text-foreground">
               Restaurants
             </Link>
