@@ -28,10 +28,12 @@
  */
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useAccount, useConnect, useConnectors, type Connector } from "wagmi";
 
 import { useIsInMiniApp } from "../lib/useIsInMiniApp";
 import { useWalletSession } from "../lib/useWalletSession";
+import { isPublicPagePath } from "../lib/publicRoutes";
 
 const COINBASE_WALLET_RDNS = "com.coinbase.wallet";
 const STORAGE_KEY = "perkos:dev-auth-indicator:minimized";
@@ -51,7 +53,15 @@ function shortId(connector: Connector): string {
   return id.length > 20 ? id.slice(0, 18) + "…" : id;
 }
 
+// Public pages render without the wallet SDK, and the session hook signs
+// Firebase out when it sees no wallet, so the indicator stays off there.
 export function DevAuthIndicator() {
+  const publicPage = isPublicPagePath(usePathname());
+  if (publicPage) return null;
+  return <DevAuthIndicatorPanel />;
+}
+
+function DevAuthIndicatorPanel() {
   const isInMiniApp = useIsInMiniApp();
   const { isConnected } = useAccount();
   const session = useWalletSession();
