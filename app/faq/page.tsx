@@ -15,7 +15,7 @@ import { publicPageMetadata } from "../lib/publicPageMetadata";
 const SITE = process.env.NEXT_PUBLIC_CANONICAL_URL ?? "https://perkos.xyz";
 
 export const metadata: Metadata = publicPageMetadata({
-  title: "PerkOS FAQ: PerkOS AI, PERKOS token, x402 and ERC-8004",
+  title: "PerkOS FAQ: AI teams, PERKOS, x402, ERC-8004",
   description:
     "Answers about PerkOS (perkos.xyz): what it is, whether the PERKOS token is official, and how PerkOS uses x402 and ERC-8004.",
   path: "/faq",

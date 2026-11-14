@@ -85,9 +85,9 @@ export function FearKillersV2() {
               <span className="grid h-12 w-12 place-items-center rounded-xl bg-primary/15 text-primary">
                 <Icon className="h-6 w-6" />
               </span>
-              <h3 className="text-base font-semibold text-foreground">
+              <h2 className="text-base font-semibold text-foreground">
                 {t(`landing.fearKillers.items.${key}.title`)}
-              </h3>
+              </h2>
               <p className="text-sm leading-relaxed text-muted-foreground">
                 {t(`landing.fearKillers.items.${key}.body`)}
               </p>

@@ -45,9 +45,11 @@ const BODY = [
   "Allow: /openapi.json",
   "Allow: /.well-known/",
   "",
-  // Points agents at the capability manifest, the same way Sitemap points
-  // crawlers at the page index.
-  `Agentmap: ${SITE}/.well-known/ai-catalog.json`,
+  // Points agents at the capability manifest. Written as a comment because
+  // robots.txt validators (Lighthouse among them) reject directives they do
+  // not know and mark the whole file invalid. Agents also find the manifest
+  // through <link rel="ai-catalog"> and /.well-known/ai-catalog.json.
+  `# Agentmap: ${SITE}/.well-known/ai-catalog.json`,
   `Sitemap: ${SITE}/sitemap.xml`,
   `Host: ${SITE}`,
   "",

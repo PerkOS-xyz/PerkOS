@@ -6,7 +6,7 @@ import { publicPageMetadata } from "../lib/publicPageMetadata";
 export const metadata: Metadata = publicPageMetadata({
   title: "Privacy",
   description:
-    "How PerkOS AI uses website analytics and contact information.",
+    "How PerkOS AI uses website analytics and the contact details you share with us, and where to send privacy questions.",
   path: "/privacy",
 });
 
