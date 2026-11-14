@@ -87,6 +87,10 @@ export const PERKOS_CONTRACTS: PerkosContract[] = [
 
 export const PERKOS_COINGECKO_URL = "https://www.coingecko.com/en/coins/perkos";
 
-/** One line that every surface can repeat word for word. */
+/**
+ * One line that every surface can repeat word for word. Not "community
+ * token": the community launched only the Base token (and so the Celo copy);
+ * PerkOS launched the Solana and Robinhood Chain tokens.
+ */
 export const PERKOS_TOKEN_SUMMARY =
-  "PERKOS is the community token of PerkOS. It was launched on Base, Robinhood Chain and Solana as three separate tokens with no bridge between them, and the Base token is also bridged to Celo. PerkOS is priced in USDC and does not require PERKOS.";
+  "PERKOS is the token of the PerkOS ecosystem. It was launched on Base, Robinhood Chain and Solana as three separate tokens with no bridge between them, and the Base token is also bridged to Celo. PerkOS is priced in USDC and does not require PERKOS.";
