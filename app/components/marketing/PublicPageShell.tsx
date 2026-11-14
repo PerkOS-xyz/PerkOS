@@ -160,11 +160,13 @@ export function ContentSection({
 
 export function FeatureGrid({
   items,
+  columns = 3,
 }: {
   items: Array<{ title: string; body: string }>;
+  columns?: 2 | 3;
 }) {
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className={columns === 2 ? "grid gap-4 md:grid-cols-2" : "grid gap-4 md:grid-cols-3"}>
       {items.map((item) => (
         <article key={item.title} className="rounded-2xl border border-border bg-card p-6">
           <h3 className="font-semibold text-foreground">{item.title}</h3>
