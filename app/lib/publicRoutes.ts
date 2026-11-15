@@ -8,6 +8,8 @@ const PUBLIC_PATHS = new Set([
   "/",
   "/about",
   "/ai-agents-for-business",
+  "/ai-for-small-business",
+  "/ai-employees",
   "/ai-teams-for-small-business",
   "/agentic-business",
   "/pricing",
