@@ -16,6 +16,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "", updated: "2026-11-14", priority: 1, changeFrequency: "weekly" as const },
     { path: "/about", updated: "2026-08-10", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/ai-agents-for-business", updated: "2026-11-14", priority: 0.9, changeFrequency: "monthly" as const },
+    { path: "/ai-for-small-business", updated: "2026-11-15", priority: 0.9, changeFrequency: "monthly" as const },
+    { path: "/ai-employees", updated: "2026-11-15", priority: 0.9, changeFrequency: "monthly" as const },
     { path: "/ai-teams-for-small-business", updated: "2026-11-14", priority: 0.9, changeFrequency: "monthly" as const },
     { path: "/agentic-business", updated: "2026-11-14", priority: 0.8, changeFrequency: "monthly" as const },
     { path: "/solutions", updated: "2026-08-10", priority: 0.9, changeFrequency: "monthly" as const },

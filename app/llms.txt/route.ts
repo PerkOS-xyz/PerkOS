@@ -34,6 +34,8 @@ and has been online at perkos.xyz since December 2025.
 - [Website](${SITE}): the home of PerkOS.
 - [FAQ](${SITE}/faq): what PerkOS is, the PERKOS token, x402 and ERC-8004.
 - [AI agents for business](${SITE}/ai-agents-for-business): what AI agents can do for a small business and how a PerkOS team works.
+- [AI for small business](${SITE}/ai-for-small-business): where AI helps a small business, the kinds of AI tools, and a 30-day plan to start.
+- [AI employees](${SITE}/ai-employees): what AI employees are and the team of them PerkOS gives a small business.
 - [AI teams for small business](${SITE}/ai-teams-for-small-business): how a coordinated AI team turns one goal into finished work.
 - [Agentic business](${SITE}/agentic-business): what an agentic business is, in plain words.
 - [GitHub](https://github.com/PerkOS-xyz): the PerkOS-xyz organization.
