@@ -94,46 +94,55 @@ export function SparkyVideo({ desktop, mobile }: { desktop: Take; mobile: Take }
     // effect must run again once the element actually exists.
   }, [take.src, mounted, mdUp]);
 
-  if (!mounted) {
-    // Server and first client render, before JS can pick a breakpoint. It has
-    // to be <picture>: handing the portrait poster to a wide viewport makes
-    // object-cover blow it up, and Sparky flashes in enormous on every reload.
-    // <picture> lets the browser choose by media query and fetch only one.
-    return (
-      <picture>
-        <source media="(min-width: 768px)" srcSet={desktop.poster} />
-        <img
-          src={mobile.poster}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover object-center md:object-right"
-        />
-      </picture>
-    );
-  }
+  // The poster is always in the page, and the video sits on top of it once
+  // the page is interactive. Swapping the poster out for the <video> made the
+  // browser treat the video as a new full-screen paint after hydration, which
+  // pushed the largest-paint time on phones to ~8 s. Keeping the same <img>
+  // means the largest paint is the one that arrives with the HTML.
+  //
+  // It has to be <picture>: handing the portrait poster to a wide viewport
+  // makes object-cover blow it up, and Sparky flashes in enormous on every
+  // reload. <picture> lets the browser choose by media query and fetch only one.
+  const poster = (
+    <picture>
+      <source media="(min-width: 768px)" srcSet={desktop.poster} />
+      <img
+        src={mobile.poster}
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover object-center md:object-right"
+      />
+    </picture>
+  );
 
+  // Same shape before and after mount, so React keeps the poster's <img>
+  // node instead of remounting it.
   return (
     <>
-      <video
-        ref={ref}
-        key={take.src}
-        className={
-          mdUp
-            ? "absolute inset-0 h-full w-full object-cover object-right"
-            : // Beat 2 has the stage to himself, so the portrait take's own
-              // centring is exactly right — no nudging needed.
-              "absolute inset-0 h-full w-full object-cover object-center"
-        }
-        src={take.src}
-        poster={take.poster}
-        muted
-        playsInline
-        preload="auto"
-        disablePictureInPicture
-      />
-      <div
-        ref={hudRef}
-        className="pointer-events-none absolute left-2 top-2 z-50 font-mono text-[11px] text-emerald-400"
-      />
+      {poster}
+      {mounted ? (
+        <video
+          ref={ref}
+          key={take.src}
+          className={
+            mdUp
+              ? "absolute inset-0 h-full w-full object-cover object-right"
+              : // Beat 2 has the stage to himself, so the portrait take's own
+                // centring is exactly right — no nudging needed.
+                "absolute inset-0 h-full w-full object-cover object-center"
+          }
+          src={take.src}
+          muted
+          playsInline
+          preload="auto"
+          disablePictureInPicture
+        />
+      ) : null}
+      {mounted ? (
+        <div
+          ref={hudRef}
+          className="pointer-events-none absolute left-2 top-2 z-50 font-mono text-[11px] text-emerald-400"
+        />
+      ) : null}
     </>
   );
 }
