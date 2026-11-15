@@ -30,7 +30,7 @@ const SOLUTIONS = {
   "real-estate": {
     label: "Real Estate",
     title: "An AI team for real estate professionals who would rather meet clients than chase drafts.",
-    intro: "Turn listing details into polished listings and posts, prepare follow-ups and summarize neighborhood research while you stay focused on showings and relationships.",
+    intro: "Turn listing details into listings and posts, prepare follow-ups and summarize neighborhood research while you stay focused on showings and relationships.",
     outcomes: [
       { title: "Listing content", body: "Draft descriptions, social posts and email announcements from property details." },
       { title: "Follow-up", body: "Prepare timely buyer and seller messages for your approval." },

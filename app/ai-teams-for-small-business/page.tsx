@@ -10,7 +10,7 @@ const PATH = "/ai-teams-for-small-business";
 export const metadata: Metadata = publicPageMetadata({
   title: "AI Teams for Small Business",
   description:
-    "An AI team is a coordinator and specialist AI agents that turn one business goal into finished drafts. See how AI teams work in PerkOS, with you approving every result.",
+    "An AI team is a coordinator plus specialist AI agents that turn one business goal into finished drafts. See how AI teams work in PerkOS, and you approve it all.",
   path: PATH,
 });
 
