@@ -21,7 +21,6 @@ import {
 } from "motion/react";
 
 import { SmartCTA } from "../../SmartCTA";
-import { Reveal, RevealItem } from "./Reveal";
 import { Particles } from "./Particles";
 import { SparkyVideo } from "./SparkyVideo";
 import { useMdUp, useMounted } from "./useMounted";
@@ -163,8 +162,11 @@ export function HeroV2() {
           }
           className="w-full"
         >
-          <Reveal stagger className="flex max-w-3xl flex-col items-start gap-7 pb-24 text-left">
-            <RevealItem index={0}>
+          {/* The hero enters with a CSS animation, not <Reveal>. Reveal waits for
+              React to hydrate before showing anything, and on a phone that kept
+              the headline (the page's largest paint) invisible for seconds. */}
+          <div className="flex max-w-3xl flex-col items-start gap-7 pb-24 text-left">
+            <div className="pk-hero-enter" style={{ animationDelay: "0s" }}>
               <HeroExit index={0} mdUp={mdUp} scrollY={scrollY}>
               <h1
                 className="font-semibold text-foreground [text-shadow:0_2px_40px_rgba(0,0,0,0.5)]"
@@ -181,17 +183,17 @@ export function HeroV2() {
                 {t("landing.hero.titleAfter")}
               </h1>
               </HeroExit>
-            </RevealItem>
+            </div>
 
-            <RevealItem index={1}>
+            <div className="pk-hero-enter" style={{ animationDelay: "0.07s" }}>
               <HeroExit index={1} mdUp={mdUp} scrollY={scrollY}>
                 <p className="max-w-lg text-base leading-relaxed text-foreground/70 md:text-lg">
                   {t("landing.hero.subtitle")}
                 </p>
               </HeroExit>
-            </RevealItem>
+            </div>
 
-            <RevealItem index={2}>
+            <div className="pk-hero-enter" style={{ animationDelay: "0.14s" }}>
               <HeroExit index={2} mdUp={mdUp} scrollY={scrollY}>
               <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
                 <SmartCTA
@@ -210,9 +212,9 @@ export function HeroV2() {
                 </a>
               </div>
               </HeroExit>
-            </RevealItem>
+            </div>
 
-            <RevealItem index={3}>
+            <div className="pk-hero-enter" style={{ animationDelay: "0.21s" }}>
               <HeroExit index={3} mdUp={mdUp} scrollY={scrollY}>
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-3 text-xs text-foreground/60">
                   <TrustChip label={t("landing.hero.trust.approve")} />
@@ -221,8 +223,8 @@ export function HeroV2() {
                   <TrustChip label={t("landing.hero.trust.cancel")} />
                 </div>
               </HeroExit>
-            </RevealItem>
-          </Reveal>
+            </div>
+          </div>
         </motion.div>
       </div>
     </section>
